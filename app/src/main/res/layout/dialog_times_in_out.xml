@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ JoozdLog Pilot's Logbook
+  ~ Copyright (C) 2020 Joost Welle
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Affero General Public License as
+  ~     published by the Free Software Foundation, either version 3 of the
+  ~     License, or (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Affero General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Affero General Public License
+  ~     along with this program.  If not, see https://www.gnu.org/licenses
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/timesDialogBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#60000000">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/timesDialogLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="64dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="64dp"
+            android:background="@drawable/rounded_corners"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/timesDialogTopHalf"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:background="@drawable/top_corners"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/flightTimes"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                    android:id="@+id/totalTimeView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="1:20"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toEndOf="@+id/textView"
+                    app:layout_constraintTop_toTopOf="@+id/textView" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+                android:id="@+id/tOutText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/timeOut"
+                android:textColor="?attr/android:textColorSecondary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/timesDialogTopHalf" />
+
+        <TextView
+                android:id="@+id/tInText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/timeIn"
+                android:textColor="?attr/android:textColorSecondary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tOutText" />
+
+        <NumberPicker
+                android:id="@+id/hoursOutPicker"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/rounded_corners_white"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tOutText" />
+
+        <NumberPicker
+                android:id="@+id/minutesOutPicker"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/rounded_corners_white"
+                app:layout_constraintStart_toEndOf="@+id/textView4"
+                app:layout_constraintTop_toBottomOf="@+id/tOutText" />
+
+        <NumberPicker
+                android:id="@+id/hoursInPicker"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:layout_marginStart="16dp"
+                android:background="@drawable/rounded_corners_white"
+                app:layout_constraintStart_toEndOf="@+id/minutesOutPicker"
+                app:layout_constraintTop_toTopOf="@+id/minutesOutPicker" />
+
+        <NumberPicker
+                android:id="@+id/minutesInPicker"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/rounded_corners_white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/textView11"
+                app:layout_constraintTop_toTopOf="@+id/minutesOutPicker" />
+
+        <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/nightTimeLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_corners_white"
+                app:layout_constraintEnd_toEndOf="@+id/minutesOutPicker"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/hoursOutPicker">
+
+            <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/nightTimeText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/nightTime"
+                    android:importantForAutofill="no"
+                    android:includeFontPadding="false"
+                    android:inputType="time"
+                    android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ifrTimeLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_corners_white"
+                app:layout_constraintEnd_toEndOf="@+id/nightTimeLayout"
+                app:layout_constraintStart_toStartOf="@+id/nightTimeLayout"
+                app:layout_constraintTop_toBottomOf="@+id/nightTimeLayout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ifrTimeText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:hint="@string/ifrTime"
+                    android:importantForAutofill="no"
+                    android:inputType="time"
+                    android:singleLine="true" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <CheckBox
+                android:id="@+id/augmentedCrewCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:checked="false"
+                android:clickable="false"
+                android:editable="false"
+                android:text="@string/augmentedCrew"
+                app:layout_constraintBottom_toBottomOf="@+id/nightTimeLayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/nightTimeLayout" />
+
+        <CheckBox
+                android:id="@+id/autoValuesCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/autovalue"
+                app:layout_constraintBottom_toBottomOf="@+id/ifrTimeLayout"
+                app:layout_constraintStart_toStartOf="@+id/augmentedCrewCheckbox"
+                app:layout_constraintTop_toTopOf="@+id/ifrTimeLayout" />
+
+        <TextView
+                android:id="@+id/saveTimeDialog"
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="16dp"
+                android:gravity="center"
+                android:text="@android:string/ok"
+                android:textAllCaps="true"
+                android:textColor="?attr/colorAccent"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/cancelTimeDialog" />
+
+        <TextView
+                android:id="@+id/cancelTimeDialog"
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="@android:string/cancel"
+                android:textAllCaps="true"
+                android:textColor="?attr/colorAccent"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ifrTimeLayout" />
+
+        <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=":"
+                app:layout_constraintBottom_toBottomOf="@+id/hoursOutPicker"
+                app:layout_constraintStart_toEndOf="@+id/hoursOutPicker"
+                app:layout_constraintTop_toTopOf="@+id/hoursOutPicker" />
+
+        <TextView
+                android:id="@+id/textView11"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=":"
+                app:layout_constraintBottom_toBottomOf="@+id/hoursInPicker"
+                app:layout_constraintStart_toEndOf="@+id/hoursInPicker"
+                app:layout_constraintTop_toTopOf="@+id/hoursInPicker" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

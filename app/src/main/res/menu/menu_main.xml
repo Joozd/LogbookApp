@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ JoozdLog Pilot's Logbook
+  ~ Copyright (C) 2020 Joost Welle
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Affero General Public License as
+  ~     published by the Free Software Foundation, either version 3 of the
+  ~     License, or (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Affero General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Affero General Public License
+  ~     along with this program.  If not, see https://www.gnu.org/licenses
+  -->
+
+<menu xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--item android:title="Rebuild from server" android:id="@+id/menu_rebuild"/-->
+    <item
+            android:id="@+id/app_bar_search"
+            android:icon="@drawable/ic_search_white_24dp"
+            android:iconTint="@color/white"
+            android:title="@string/search"
+            app:showAsAction="ifRoom" />
+    <item
+            android:id="@+id/menu_add_flight"
+            android:icon="@drawable/ic_add_white_48dp"
+            android:title="@string/newFlight"
+            app:showAsAction="ifRoom" />
+    <item
+            android:id="@+id/menu_export_pdf"
+            android:icon="@android:drawable/ic_menu_save"
+            android:title="@string/savePdf"
+            app:showAsAction="ifRoom" />
+    <item android:id="@+id/menu_total_times" android:title="@string/totalTimes"/>
+    <item android:title="@string/balanceForward" android:id="@+id/menu_balance_forward"/>
+    <item
+            android:id="@+id/menu_rebuild"
+            android:title="Rebuild" />
+    <item
+            android:id="@+id/menu_edit_aircraft"
+            android:title="@string/editAircraft" />
+    <item
+            android:id="@+id/menu_do_something"
+            android:title="DO SOMETHING" />
+    <item
+        android:id="@+id/menu_login"
+        android:title="@string/title_activity_login" />
+</menu>

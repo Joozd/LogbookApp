@@ -1,21 +1,24 @@
-package nl.joozd.logbookapp.ui.dialogs.popups
+package nl.joozd.logbookapp.ui.dialogs
 
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.dialog_names.*
+import kotlinx.android.synthetic.main.dialog_names.view.*
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.dataclasses.Flight
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.adapters.NamesPickerAdapter
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.longToast
 
+//TODO if only one name selected in recyclerView, set that as active name if OK pressed
 class NamesDialog(): JoozdlogFragment() {
     // If this is true, we are editing PIC name so only one name allowed
     // if null or false, will return false (null check on different places)
@@ -23,7 +26,7 @@ class NamesDialog(): JoozdlogFragment() {
         get() = viewModel.namePickerWorkingOnName1 == true
 
     var names: String
-        get() = if (workingOnName1) flight.name else flight.name2
+        get() = if (workingOnName1) flight.name.trim() else flight.name2.trim()
         set(it) {
             flight = when(viewModel.namePickerWorkingOnName1){
                 true -> flight.copy(name = it)
@@ -32,15 +35,19 @@ class NamesDialog(): JoozdlogFragment() {
             }
         }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        unchangedFlight = flight
+    private val currentNames: List<String>
+        get() = if (workingOnName1) listOf(flight.name) else flight.name2.split(',').map{it.trim()}
 
-        //
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var selectedName = ""
 
         return inflater.inflate(R.layout.dialog_names, container, false).apply{
             //set color of top part
-            (editAircraftDialogTopHalf.background as GradientDrawable).colorFilter = PorterDuffColorFilter(requireActivity().getColorFromAttr(android.R.attr.colorPrimary), PorterDuff.Mode.SRC_IN)
+            (namesDialogTopHalf.background as GradientDrawable).colorFilter =
+                PorterDuffColorFilter(
+                    requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
+                    PorterDuff.Mode.SRC_IN
+                )
 
             // Set correct button texts if only 1 name can be selected (ie. working on PIC)
             if (workingOnName1){
@@ -50,10 +57,10 @@ class NamesDialog(): JoozdlogFragment() {
             }
 
             // set initial list of selected names
-            selectedNames.text = names.replace(", ", "\n")
+            setViews(this)
 
             //initialize RecyclerView
-            val namesPickerAdapter = NamesPickerAdapter(viewModel.allNames) { name -> selectedName = name }  // yes this will crash if no namesworker inserted
+            val namesPickerAdapter = NamesPickerAdapter(viewModel.allNames.filter{it !in currentNames}) { name -> selectedName = name }
             namesPickerList.layoutManager = LinearLayoutManager(context)
             namesPickerList.adapter = namesPickerAdapter
 
@@ -64,38 +71,42 @@ class NamesDialog(): JoozdlogFragment() {
 
             //Buttons OnClickListeners:
             removeLastButon.setOnClickListener {
-                if ("\n" in selectedNames.text.toString()){
-                    selectedNames.text = selectedNames.text.toString().split("\n").dropLast(1).joinToString(separator="\n")
-                }
-                else selectedNames.text = ""
+                names = currentNames.dropLast(1).joinToString(",")
+                namesPickerAdapter.updateAllNames(viewModel.allNames.filter{it !in currentNames})
             }
 
             //add name in search field to list, or replace if working on name1
             addSearchFieldNameButton.setOnClickListener {
-                selectedNames.text = if (workingOnName1) namesSearchField.text.toString() else listOf(selectedNames.text.toString(), namesSearchField.text.toString()).filter{ x -> x.isNotEmpty()}.joinToString(separator="\n")
-                namesSearchField.setText("")
+                names =
+                    if (workingOnName1) namesSearchField.text.toString()
+                    else (currentNames + listOf(namesSearchField.text.toString())).filter{it.isNotEmpty()}.distinct().joinToString(","){it.trim()}
+                namesPickerAdapter.updateAllNames(viewModel.allNames.filter{it !in currentNames})
             }
 
             //add selected name to list, or replace if working on name1
             addSelectedNameButton.setOnClickListener {
-                selectedNames.text = if (workingOnName1) selectedName else listOf(selectedNames.text.toString(), selectedName).filter{ x -> x.isNotEmpty()}.joinToString(separator="\n")
+                if (selectedName.isNotEmpty())
+                    names =
+                        if (workingOnName1) selectedName
+                        else (currentNames + listOf(selectedName)).filter{it.isNotEmpty()}.distinct().joinToString(","){it.trim()}
+                namesPickerAdapter.updateAllNames(viewModel.allNames.filter{it !in currentNames})
+                Log.d("NamesDialog", "adapter has ${namesPickerAdapter.allNames.size} names")
+
             }
 
             // Save/Cancel onClickListeners:
             saveTextView.setOnClickListener{
-                names = selectedNames.text.toString().replace("\n",", ")
-                activity?.currentFocus?.clearFocus()
+                Log.d(this::class.simpleName, "current names: $names")
+                viewModel.namePickerWorkingOnName1 = null
                 supportFragmentManager.popBackStack()
             }
 
+            //on cancel, revert to previous flight, set viewModel.namePickerWorkingOnName1 to null and close
             cancelTextView.setOnClickListener {
                 unchangedFlight?.let { flight = it }
                 viewModel.namePickerWorkingOnName1 = null
                 supportFragmentManager.popBackStack()
             }
-
-
-            //on cancel, revert to previous flight, set viewModel.namePickerWorkingOnName1 to null and close
             editAircraftLayout.setOnClickListener {
                 unchangedFlight?.let { flight = it }
                 viewModel.namePickerWorkingOnName1 = null
@@ -113,5 +124,11 @@ class NamesDialog(): JoozdlogFragment() {
             longToast("Namepicker starting without viewModel.namePickerWorkingOnName1 being set")
             supportFragmentManager.popBackStack()
         }
+    }
+
+    override fun setViews(v: View?) {
+        v?.selectedNames?.text = names.split(',').joinToString("\n") { it.trim() }
+        //DEBUG
+        Log.d("NamesDialog", "currentNames = $currentNames")
     }
 }

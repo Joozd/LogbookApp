@@ -30,7 +30,13 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Flight
 import android.widget.TextView
 import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.miscClasses.Crew
+import nl.joozd.logbookapp.data.room.Repository
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.utils.flightAirportsToIata
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.extensions.noColon
@@ -39,10 +45,17 @@ import nl.joozd.logbookapp.ui.App
 
 
 class FlightsAdapter(var allFlights: List<Flight>, private val deleteListener: (Flight) -> Unit, private val itemClick: (Flight) -> Unit) : RecyclerView.Adapter<FlightsAdapter.ViewHolder>(),
-    RecyclerViewFastScroller.OnPopupTextUpdate {
+    RecyclerViewFastScroller.OnPopupTextUpdate, CoroutineScope by MainScope() {
     companion object {
         private var normalColor: Int = App.instance.ctx.getColorFromAttr(android.R.attr.textColorSecondary)
         private var plannedColor: Int = App.instance.ctx.getColorFromAttr(android.R.attr.textColorHighlight)
+        private var icaoToIataMap = emptyMap<String, String>()
+    }
+    init{
+        launch (){
+            icaoToIataMap = Repository.getInstance().getIcaoToIataMap()
+            notifyDataSetChanged()
+        }
     }
     private var mRecyclerView: RecyclerView? = null
 
@@ -110,7 +123,7 @@ class FlightsAdapter(var allFlights: List<Flight>, private val deleteListener: (
                 remarksText.text = remarks
                 if (sim) {
                     flightNumberText.visibility = View.INVISIBLE
-                    registrationText.visibility = View.INVISIBLE
+                    airportPickerTitle.visibility = View.INVISIBLE
                     arrow1.visibility = View.INVISIBLE
                     arrow2.visibility = View.INVISIBLE
                     timeOutText.visibility = View.INVISIBLE
@@ -123,7 +136,7 @@ class FlightsAdapter(var allFlights: List<Flight>, private val deleteListener: (
                     totalTimeText.text = simTimeString
                 } else {
                     flightNumberText.visibility = View.VISIBLE
-                    registrationText.visibility = View.VISIBLE
+                    airportPickerTitle.visibility = View.VISIBLE
                     arrow1.visibility = View.VISIBLE
                     arrow2.visibility = View.VISIBLE
                     timeOutText.visibility = View.VISIBLE
@@ -135,12 +148,14 @@ class FlightsAdapter(var allFlights: List<Flight>, private val deleteListener: (
                     takeoffLandingText.visibility = View.VISIBLE
 
                     flightNumberText.text = flightNumber
-                    origText.text = orig
-                    destText.text = dest
+                    origText.text = if (Preferences.useIataAirports) icaoToIataMap[orig]?.nullIfEmpty()
+                        ?: orig else orig
+                    destText.text = if (Preferences.useIataAirports) icaoToIataMap[dest]?.nullIfEmpty()
+                        ?: dest else dest
                     timeOutText.text = tOut.noColon()
                     totalTimeText.text = correctedTotalTimeString
                     timeInText.text = tIn.noColon()
-                    registrationText.text = registration
+                    airportPickerTitle.text = registration
                     takeoffLandingText.text = takeoffLanding
                 }
 

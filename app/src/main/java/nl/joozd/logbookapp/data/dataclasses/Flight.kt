@@ -148,8 +148,8 @@ data class Flight(
         autoFill,
         augmentedCrew,
         DELETEFLAG,
-        // signed,
-        timeStamp
+        timeStamp,
+        signature
     )
     fun toModel() = FlightData(
         flightID,
@@ -184,8 +184,8 @@ data class Flight(
         autoFill,
         augmentedCrew,
         DELETEFLAG,
-        // signed,
-        timeStamp
+        timeStamp,
+        signature
     )
 
     var actualAircraft: Aircraft? = null

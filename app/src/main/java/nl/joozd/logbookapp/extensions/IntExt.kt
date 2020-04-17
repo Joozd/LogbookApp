@@ -59,3 +59,11 @@ fun Int.pow(n: Int): Int{
  */
 fun Int.toBoolean() = this > 0
 
+
+/**
+ * Subtracts one, or sets a minimum value.
+ * eg. 3.minusOneWithFloor(0) == 2, 3.minusOneWithFloor(5) = 5
+ * @param floor: Minimum value
+ */
+fun Int.minusOneWithFloor(floor: Int) = if (this-1 > floor) this-1 else floor
+

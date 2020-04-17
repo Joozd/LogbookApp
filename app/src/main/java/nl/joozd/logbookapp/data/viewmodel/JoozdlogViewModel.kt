@@ -52,10 +52,12 @@ class JoozdlogViewModel: ViewModel() {
     val distinctWorkingFlight = distinctUntilChanged(workingFlight)
 
     //shorter term undoFlight to be able to cancel subdialogs such as TimePicker or NamePicker
-    var unchangedFlightForUseInDialogs: Flight? = null
 
     //if true, NamePicker is working on name1, if false it is working on name2. If null, it is not set.
     var namePickerWorkingOnName1: Boolean? = null
+
+    //if true, AirportPicker works on [orig], if false on [dest]
+    var workingOnOrig: Boolean? = null
 
 
     /**
@@ -67,23 +69,16 @@ class JoozdlogViewModel: ViewModel() {
      * - [namePickerWorkingOnName1] to null
      */
     suspend fun setWorkingFlight(flight: Flight?){
-        Log.d("setWorkingFlight", "started")
-
-        Log.d("setWorkingFlight", "0")
         workingFlight.value = flight ?: reverseFlight(mostRecentCompleteFlight(repository.requestValidFlights()), 1 /*highestFlightId ?: getHighestFlightIdAsync().await() */)
-        Log.d("setWorkingFlight", "1")
         undoFlight = flight
-        Log.d("setWorkingFlight", "2")
         namePickerWorkingOnName1 = null
-        Log.d("setWorkingFlight", "3")
     }
 
     /**
      * highestFlightIdea is the highest used flightID in local storage.
      */
     private fun getHighestFlightIdAsync() = viewModelScope.async {
-        Log.d("getHighestFlightIdAsync", "started")
-        withContext(Dispatchers.IO) { repository.highestFlightId() ?: 0 } }.also { Log.d("getHighestFlightIdAsync", "completed with $it") }
+        withContext(Dispatchers.IO) { repository.highestFlightId() ?: 0 } }
 
     //Deferred<Int>
 
@@ -94,38 +89,6 @@ class JoozdlogViewModel: ViewModel() {
             repository.liveFlights.observeForever { launch(Dispatchers.Main) { highestFlightId = getHighestFlightIdAsync().await() } }
         }
     }
-
-    /**
-     * customAirports are those airports that are used in logbook but not in airport Database
-     * eg. Wickenburg (E25)
-     */
-    private fun getCustomAirportsAsync(flights: List<Flight>? = null) = viewModelScope.async(Dispatchers.IO) {
-        val fff = flights ?: repository.requestValidFlights()
-        ((fff.map { it.orig } + fff.map { it.dest })
-            .distinct()
-            .filter { it !in (repository.requestAllIdents()) })
-            .map { name ->
-                Airport(
-                    ident = name,
-                    name = "User airport"
-                )
-            }
-    }
-    //Deferred<List<Airport>>
-    var customAirports = getCustomAirportsAsync()
-    val liveCustomAirports = MutableLiveData<List<Airport>>()
-    val distinctLiveCustomAirports = distinctUntilChanged(liveCustomAirports)
-
-    init{
-        viewModelScope.launch{
-            liveCustomAirports.value = customAirports.await()
-        }
-        repository.liveFlights.observeForever {
-            viewModelScope.launch { liveCustomAirports.value = getCustomAirportsAsync(it).await() }
-        }
-    }
-
-
 
     /**
      * allNames is a list of all names used in logbook
@@ -140,7 +103,7 @@ class JoozdlogViewModel: ViewModel() {
                 if (name !in foundNames) foundNames.add(name)
             }
         }
-        foundNames
+        foundNames.filter {it.isNotEmpty()}
     }
     //Deferred<List<String>>
     var allNamesDeferred = buildNameListAsync()

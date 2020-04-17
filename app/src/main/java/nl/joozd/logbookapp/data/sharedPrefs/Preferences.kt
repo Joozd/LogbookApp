@@ -38,7 +38,7 @@ object Preferences {
     private const val SERVER_TIME_OFFSET = "serverTimeOffset"
     private const val AIRPORT_DB_VERSION = "airportDbVersion"
 
-    private const val USE_IATA_AIRPORTS = "useIataAirports"
+    // private const val USE_IATA_AIRPORTS = "useIataAirports"
     private const val STANDARD_TAKEOFF_LANDING_TIMES = "standardTakeoffLandingTimes"
 
 
@@ -129,12 +129,12 @@ object Preferences {
      * Use ICAO or Iata? True = IATA, false ICAO
      */
 
-    var useIataAirports: Boolean
-        get() = sharedPref.getBoolean(USE_IATA_AIRPORTS,false)
-        set(v) = with(sharedPref.edit()) {
-            putBoolean(USE_IATA_AIRPORTS, v)
-            apply()
-        }
+    var useIataAirports: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+//        get() = sharedPref.getBoolean(USE_IATA_AIRPORTS,false)
+//        set(v) = with(sharedPref.edit()) {
+//            putBoolean(USE_IATA_AIRPORTS, v)
+//            apply()
+//        }
 
     /*************************
      * Other settings

@@ -44,7 +44,7 @@ import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.adapters.AirportPickerAdapter
 import kotlin.math.abs
 
-
+/*
 @Deprecated ("use new AirportPicker")
 class AirportPickerOld: androidx.fragment.app.Fragment() {
     private val viewModel: JoozdlogViewModel by viewModels()
@@ -62,7 +62,7 @@ class AirportPickerOld: androidx.fragment.app.Fragment() {
     var selectedAirportIdent = ""            // holds Airport.ident if filled properly
     private var selectedAirport: Airport? = null
     var airportsList: List<Airport> = emptyList()
-    private val airportPickerAdapter = AirportPickerAdapter(airportsList) { airport ->
+    private val airportPickerAdapter = AirportPickerAdapter{ airport ->
         selectedAirport = airport
         setPickedFlight(thisView, airport)
     }
@@ -193,3 +193,5 @@ class AirportPickerOld: androidx.fragment.app.Fragment() {
         }
     }
 }
+
+ */

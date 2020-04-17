@@ -11,7 +11,7 @@ import nl.joozd.logbookapp.data.room.dao.*
 import nl.joozd.logbookapp.data.room.model.AircraftTypeData
 import nl.joozd.logbookapp.data.room.model.FlightData
 
-@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithType::class, AircraftTypeConsensus::class], version = 3)
+@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithType::class, AircraftTypeConsensus::class], version = 4)
 abstract class JoozdlogDatabase: RoomDatabase() {
     abstract fun flightDao(): FlightDao
     abstract fun airportDao(): AirportDao

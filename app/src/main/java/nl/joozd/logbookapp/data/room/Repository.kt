@@ -61,10 +61,21 @@ class Repository(
 
     // cached data
     private val _cachedFlights = MutableLiveData<List<Flight>>()
-    private var _cachedAirports: List<Airport>? = null
+    init {
+        // May be some delay in filling stuff listening to this
+        launch {
+            _cachedFlights.value = flightDao.requestValidFlights().map {it.toFlight() }
+        }
+        requestValidLiveFlightData().observeForever { _cachedFlights.value = it }
+    }
+
+    private var _cachedAirports = MutableLiveData<List<Airport>>()
     init{
+        launch{
+            _cachedAirports.value=requestAllAirports(true)
+        }
         requestLiveAirports().observeForever {
-            _cachedAirports = it
+            _cachedAirports.value = it
         }
     }
     private var _cachedAircraftTypes: List<AircraftType>? = null
@@ -74,24 +85,13 @@ class Repository(
         }
     }
     val liveFlights: LiveData<List<Flight>> = distinctUntilChanged(_cachedFlights)
+    val liveAirports: LiveData<List<Airport>> = distinctUntilChanged(_cachedAirports)
 
-    init {
-
-        // May be some delay in filling stuff listening to this
-        launch {
-            _cachedFlights.value = flightDao.requestValidFlights().map {it.toFlight() }
-        }
-        launch(Dispatchers.Main) {
-            requestValidLiveFlightData().observeForever {
-                _cachedFlights.value = it
-            }
-        }
-    }
 
     /**
      * update cached data and save to disk
      */
-    suspend fun saveFlights(flights: List<Flight>) = withContext(dispatcher) {
+    suspend fun saveFlights(flights: List<Flight>) = withContext(NonCancellable) {
         //update cached flights
         launch(Dispatchers.Main) {
             _cachedFlights.value = ((_cachedFlights.value
@@ -105,13 +105,12 @@ class Repository(
     /**
      * update cached data and save to disk
      */
-    suspend fun saveFlight(flight: Flight) = withContext(dispatcher) {
+    suspend fun saveFlight(flight: Flight) = withContext(NonCancellable) {
         //update cached flights
         launch(Dispatchers.Main) {
             _cachedFlights.value = ((_cachedFlights.value
                 ?: emptyList()).filter { it.flightID != flight.flightID } + listOf(flight).filter { it.DELETEFLAG == 0 }).sortedByDescending { it.timeOut }
         }
-
         //Save flight to disk
         flightDao.insertFlights(flight.toModel())
     }
@@ -119,7 +118,7 @@ class Repository(
     /**
      * update cached data and delete from disk
      */
-    suspend fun deleteFlightHard(flight: Flight) = withContext(dispatcher) {
+    suspend fun deleteFlightHard(flight: Flight) = withContext(NonCancellable) {
         launch(Dispatchers.Main) {
             _cachedFlights.value = ((_cachedFlights.value
                 ?: emptyList()).filter { it.flightID != flight.flightID }).sortedByDescending { it.timeOut }
@@ -130,7 +129,7 @@ class Repository(
     /**
      * update cached data and delete multiple flights from disk
      */
-    suspend fun deleteFlightsHard(flights: List<Flight>) = withContext(dispatcher) {
+    suspend fun deleteFlightsHard(flights: List<Flight>) = withContext(NonCancellable) {
         launch(Dispatchers.Main) {
             _cachedFlights.value = ((_cachedFlights.value
                 ?: emptyList()).filter { it.flightID !in flights.map { f -> f.flightID } }).sortedByDescending { it.timeOut }
@@ -204,11 +203,9 @@ class Repository(
     /*********************************************************************************************
      * Airport DB Functions
      ********************************************************************************************/
-    suspend fun requestAllAirports(): List<Airport> = withContext(dispatcher) {
-        _cachedAirports ?: airportDao.requestAllAirports().also {
-            _cachedAirports = it
-        }
-
+    suspend fun requestAllAirports(forceReload: Boolean = false): List<Airport> = withContext(dispatcher) {
+        if (forceReload) airportDao.requestAllAirports()
+        else _cachedAirports.value ?: airportDao.requestAllAirports()
     }
 
     suspend fun requestAllIdents() = withContext(dispatcher) {
@@ -218,20 +215,12 @@ class Repository(
     fun requestLiveAirports() =
         airportDao.requestLiveAirports()
 
-    suspend fun saveAirports(airports: List<Airport>) = withContext(dispatcher) {
-        launch(Dispatchers.Main) {
-            //does this need sorting?
-            _cachedAirports =
-                (_cachedAirports?.filter { oa -> oa.ident !in airports.map { na -> na.ident } }
-                    ?: emptyList()) + airports
-        }
+    suspend fun saveAirports(airports: List<Airport>) = withContext(NonCancellable) {
         airportDao.insertAirports(*airports.toTypedArray())
-
     }
 
     suspend fun clearAirportsDB() = withContext(dispatcher) {
         launch {
-            _cachedAirports = emptyList()
             airportDao.clearDb()
         }
     }
@@ -249,11 +238,48 @@ class Repository(
     }
 
     suspend fun searchAirports(query: String): List<Airport> = withContext(dispatcher) {
-        airportDao.searchAirports(query)
+        airportDao.searchAirports("%${query.toUpperCase()}%")
     }
 
     suspend fun getIcaoToIataMap(): Map<String, String> =
         requestAllAirports().map { a -> a.ident to a.iata_code }.toMap()
+
+    /**
+     * customAirports are those airports that are used in logbook but not in airport Database
+     * eg. Wickenburg (E25)
+     */
+    private fun getCustomAirportsAsync(flights: List<Flight>? = null) = async(Dispatchers.IO) {
+        val fff = flights ?: requestValidFlights()
+        ((fff.map { it.orig } + fff.map { it.dest })
+            .distinct()
+            .filter { it !in (requestAllIdents()) })
+            .map { name ->
+                Airport(
+                    ident = name,
+                    name = "User airport"
+                )
+            }
+    }
+    //Deferred<List<Airport>>
+    var customAirports = getCustomAirportsAsync()
+    val liveCustomAirports = MutableLiveData<List<Airport>>()
+    val distinctLiveCustomAirports = distinctUntilChanged(liveCustomAirports)
+
+    init{
+        launch{
+            liveCustomAirports.value = customAirports.await()
+        }
+        liveFlights.observeForever {
+            launch { liveCustomAirports.value = getCustomAirportsAsync(it).await() }
+        }
+    }
+
+    val completeLiveAirports = MutableLiveData<List<Airport>>()
+    init{
+        completeLiveAirports.value = (distinctLiveCustomAirports.value ?: emptyList()) + (liveAirports.value?: emptyList())
+        distinctLiveCustomAirports.observeForever { completeLiveAirports.value = (it ?: emptyList()) + (liveAirports.value?: emptyList()) }
+        liveAirports.observeForever { completeLiveAirports.value = (distinctLiveCustomAirports.value ?: emptyList()) + (it ?: emptyList()) }
+    }
 
     /********************************************************************************************
      * Aircraft Functions

@@ -40,7 +40,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/editAircraftDialogTopHalf"
+                android:id="@+id/namesDialogTopHalf"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:background="@drawable/top_corners"
@@ -49,7 +49,7 @@
                 app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                    android:id="@+id/registrationText"
+                    android:id="@+id/airportPickerTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -73,7 +73,7 @@
                 android:background="@drawable/rounded_corners_white"
                 app:layout_constraintEnd_toStartOf="@+id/addSearchFieldNameButton"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editAircraftDialogTopHalf">
+                app:layout_constraintTop_toBottomOf="@+id/namesDialogTopHalf">
 
             <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/namesSearchField"

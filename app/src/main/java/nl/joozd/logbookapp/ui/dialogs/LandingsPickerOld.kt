@@ -33,7 +33,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.extensions.toInt
 
 @Deprecated ("needs new")
-class LandingsPicker: Fragment() {
+class LandingsPickerOld: Fragment() {
     /*
     var currentLandingData: LandingsCounter? = null
 

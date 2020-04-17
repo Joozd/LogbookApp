@@ -41,7 +41,7 @@ interface AirportDao {
     @Query("SELECT * FROM Airport WHERE :query LIKE name LIMIT 1")
     suspend fun searchAirportByName(query: String): List<Airport>
 
-    @Query("SELECT * FROM Airport WHERE :query LIKE ident OR :query LIKE iata_code OR :query LIKE municipality OR :query LIKE name")
+    @Query("SELECT DISTINCT * FROM Airport WHERE UPPER(ident) LIKE :query OR UPPER(iata_code) LIKE :query OR UPPER(municipality) LIKE :query OR UPPER(name) LIKE :query")
     suspend fun searchAirports(query: String): List<Airport>
 
 }

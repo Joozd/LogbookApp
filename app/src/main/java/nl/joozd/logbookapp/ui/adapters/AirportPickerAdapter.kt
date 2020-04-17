@@ -19,31 +19,40 @@
 package nl.joozd.logbookapp.ui.adapters
 
 import android.annotation.SuppressLint
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_airport_picker.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.getActivity
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
-class AirportPickerAdapter(private var airports: List<Airport>, private val itemClick: (Airport) -> Unit): RecyclerView.Adapter<AirportPickerAdapter.ViewHolder>() {
+class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerView.Adapter<AirportPickerAdapter.APViewHolder>(), CoroutineScope by MainScope() {
+    var airports =emptyList<Airport>()
+
+
+
     private var pickedAirport = ""
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AirportPickerAdapter.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): APViewHolder {
         val view = LayoutInflater.from(parent.ctx).inflate(R.layout.item_airport_picker, parent, false)
-        return ViewHolder(view, itemClick)
+        return APViewHolder(view, this, itemClick)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindAirports(airports[position])
+    override fun onBindViewHolder(holder: APViewHolder, position: Int) {
+        val airport = getItem(position)
+        holder.bindAirport(airport)
         val activity = holder.backgroundLayout.getActivity()
         activity?.let {
-            if (airports[position].ident == pickedAirport) {
+            if (airport.ident == pickedAirport) {
                 holder.backgroundLayout.setBackgroundColor(it.getColorFromAttr(android.R.attr.colorPrimaryDark))
                 holder.identifier.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
                 holder.cityName.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
@@ -59,21 +68,17 @@ class AirportPickerAdapter(private var airports: List<Airport>, private val item
 
     override fun getItemCount(): Int = airports.size
 
-    fun updateData(newAirports: List<Airport>) {
-        airports = newAirports
-        this.notifyDataSetChanged()
-    }
-
-    class ViewHolder(override val containerView: View, private val itemClick: (Airport) -> Unit) :
+    class APViewHolder(override val containerView: View, private val adapter: AirportPickerAdapter, private val itemClick: (Airport) -> Unit) :
         RecyclerView.ViewHolder(containerView),
         LayoutContainer {
 
         @SuppressLint("SetTextI18n")
-        fun bindAirports(airport: Airport) {
+        fun bindAirport(airport: Airport) {
             with(airport) {
                 identifier.text = "$ident - $iata_code"
                 cityName.text = "$municipality  - $name"
                 itemView.setOnClickListener {
+                    adapter.pickAirport(this)
                     itemClick(this)
                 }
             }
@@ -81,7 +86,15 @@ class AirportPickerAdapter(private var airports: List<Airport>, private val item
         }
     }
 
+    fun submitList(l: List<Airport>) {
+        airports = l
+        notifyDataSetChanged()
+    }
+
+    fun getItem(index: Int): Airport = airports[index]
+
     fun pickAirport(airport: Airport){
         pickedAirport = airport.ident
+        notifyDataSetChanged()
     }
 }

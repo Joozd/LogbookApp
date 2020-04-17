@@ -50,12 +50,12 @@ class AircraftPickerAdapter(allAircraft: List<Aircraft>, private val itemClick: 
             if (allAircraft[position].registration == pickedAircraft) {
                 holder.backgroundLayout.setBackgroundColor(it.getColorFromAttr(android.R.attr.colorPrimaryDark))
                 holder.makeModelText.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
-                holder.registrationText.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
+                holder.airportPickerTitle.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
             }
             else {
                 holder.backgroundLayout.setBackgroundColor(0x00000000)
                 holder.makeModelText.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondary))
-                holder.registrationText.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondary))
+                holder.airportPickerTitle.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondary))
             }
         }
     }
@@ -68,7 +68,7 @@ class AircraftPickerAdapter(allAircraft: List<Aircraft>, private val itemClick: 
 
         fun bindAircraft(aircraft: Aircraft) {
             with(aircraft) {
-                registrationText.text = registration
+                airportPickerTitle.text = registration
                 makeModelText.text = "$manufacturer $model"
                 itemView.setOnClickListener {
                     itemClick(this)

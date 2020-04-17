@@ -12,8 +12,9 @@ import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
 class NamesPickerAdapter(var allNames: List<String>, private val itemClick: (String) -> Unit): RecyclerView.Adapter<NamesPickerAdapter.ViewHolder>() {
-    private var currentNames: List<String>  = emptyList() // namesWorker.nameList
+    private var currentNames: List<String>  = allNames // namesWorker.nameList
     private var selectedName: String? = null
+    private var currentQuery: String = ""
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindName(currentNames[position])
@@ -26,11 +27,6 @@ class NamesPickerAdapter(var allNames: List<String>, private val itemClick: (Str
     }
 
     override fun getItemCount(): Int = currentNames.size
-
-    fun getNames(query: String){
-        currentNames = queryNames(query)
-        this.notifyDataSetChanged()
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NamesPickerAdapter.ViewHolder {
         val view = LayoutInflater.from(parent.ctx).inflate(R.layout.item_names_dialog, parent, false)
@@ -45,12 +41,25 @@ class NamesPickerAdapter(var allNames: List<String>, private val itemClick: (Str
             nameTextView.text = name
         }
     }
+    fun getNames(query: String){
+        currentNames = queryNames(query)
+        this.notifyDataSetChanged()
+    }
+
+    fun updateAllNames(names: List<String>){
+        allNames = names
+        currentNames = queryNames(currentQuery)
+        this.notifyDataSetChanged()
+    }
+
 
     /**
      * searches for hits in a list.
+     * Saves query to [currentQuery] in case [allNames] changes, it will keep it's query on the new dataset
      * @return list containing all [query] hits, starting with hits at beginning, then the rest.
      */
     private fun queryNames(query: String): List<String> {
+        currentQuery = query
         val startHits = allNames.filter {it.anyWordstartsWith(query)}
         return startHits + allNames.filter {it !in startHits}.filter{query in it}
     }

@@ -176,16 +176,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             true
         }
         R.id.menu_do_something -> {
-            launch { MenuFunctions.sendAllFlightsAndToastResult() }
-            /*
-            doAsync{
-                when(Cloud.justSendFlights(allFlights)){
-                    0 -> runOnUiThread { longToast("Flights sent ok!") }
-                    1 -> runOnUiThread { longToast("login error") }
-                    2 -> runOnUiThread { longToast("sending error") }
-                }
-            }*/
-
+//            launch { MenuFunctions.sendAllFlightsAndToastResult() }
+            Preferences.useIataAirports = !Preferences.useIataAirports
+            this.flightsList?.adapter?.notifyDataSetChanged()
             true
         }
         R.id.menu_login -> {
@@ -391,120 +384,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         cancel()
     }
 
-    /*
-
-    This function is no longer the way to go. Use new EditFlightFragment.
-    private fun showFlight(flight: Flight?, newFlight: Boolean = false) { // new flight gets (null, true)
-        if (!alreadyEditingFlight) {
-            alreadyEditingFlight = true
-            //hide snackbar if showing:
-            snackbarShowing?.dismiss()
-
-            //hide toolbar:
-            my_toolbar.visibility = View.GONE
-            launch {
-                val flightEditor = EditFlightNew()
-
-                Log.d("DEBUG", "1")
-
-                //set actions when closing dialog with SAVE:
-                flightEditor.onSave =
-                    EditFlightNew.OnSave { flightToSave, oldFlight ->
-                        alreadyEditingFlight = false
-                        launch { repository.saveFlight(flightToSave.copy (timeStamp = Instant.now().epochSecond + Preferences.serverTimeOffset)) }
-                        flightSearcher.addFlight(flightToSave)
-                        namesWorker.addFlight(flightToSave)
-                        Log.d("DEBUG", "2")
-                        // flightDb.updateCachedFlights(allFlights)
-                        Log.d("DEBUG", "3")
-
-                        //define snackbar to be displayed when dialog is closed with SAVE
-                        val snackBar = CustomSnackbar.make(mainActivityLayout).apply{
-                            setMessage("Saved Flight")
-                            if (newFlight)
-                                setOnAction {
-                                    Log.d("onAction", "ding 1")
-                                    // flightDb.deleteFlight(flightToSave)
-                                    viewModel.deleteFlight(flightToSave)
-                                    dismiss()
-                                }
-                            else
-                                setOnAction {//onAction = UNDO
-                                    Log.d("onAction", "ding 2")
-                                    viewModel.saveFlight(oldFlight)
-                                    dismiss()
-                                }
-                            setOnActionBarShown { addButton.hide() }
-                            setOnActionBarGone {
-                                snackbarShowing = null
-                                if (!alreadyEditingFlight) addButton.show()
-                            }
-                        }
-                        snackbarShowing = snackBar
-                        snackBar.show()
-
-                        my_toolbar.showAnimated()
-
-                        //make sure search field is closed and emptied
-                        if (searchField.visibility != View.GONE) {
-                            pilotNameSearch.text = pilotNameSearch.text
-                            airportSearch.setText("")
-                            aircraftSearch.setText("")
-                        }
-                    }
-                Log.d("DEBUG", "4")
-
-                flightEditor.onCancel = EditFlightNew.OnCancel { canceledFlight, _ ->
-                    alreadyEditingFlight = false
-
-                    val snackBar = CustomSnackbar.make(mainActivityLayout).apply {
-                        setMessage("Cancelled")
-                        setActionText("Continue")
-                        setOnAction {
-                            showFlight(canceledFlight)
-                            dismiss()
-                        }
-                        setOnActionBarShown { addButton.hide() }
-                        setOnActionBarGone {
-                            snackbarShowing = null
-                            if (!alreadyEditingFlight) addButton.show()
-                        }
-                    }
-                    snackbarShowing = snackBar
-                    snackBar.show()
-
-                    my_toolbar.showAnimated()
-
-
-                }
-                Log.d("DEBUG", "5")
-
-                //set flight if not null, otherwise it will stay at default in fragment constructor
-                flightEditor.flight = flight
-                    ?: reverseFlight(mostRecentCompleteFlight(viewModel.liveFlights.value ?: emptyList()), viewModel.highestFlightId() + 1)
-
-                if (namesWorker.isInitialized) flightEditor.namesWorker = namesWorker
-                else {
-                    namesWorker.initializationListener = NamesWorker.InitializationListener {
-                        flightEditor.namesWorker = namesWorker
-                    } // if (or when) namesWorker is done making its names, put it into  EditFlight fragment
-                }
-                Log.d("DEBUG", "6")
-
-
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.mainActivityLayout, flightEditor)
-                    .addToBackStack(null)
-                    .commit()
-                Log.d("DEBUG", "7")
-                addButton.fadeOut()
-                Log.d("DEBUG", "8")
-            }
-        }
-
-    }
-    */
-
     /**
      * Shows a flight in EditFlightFragment.
      * If Flight is entered, that will be loaded, if left blank or null, a new flight will be made.
@@ -525,6 +404,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             my_toolbar.visibility = View.GONE
 
             val flightEditor = EditFlightFragment().apply {
+                //TODO make flight not planned if not in planning phase
                 setOnSaveListener {
                     launch {
                         // 1. save flight
@@ -533,7 +413,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                         repository.saveFlight(flightToSave)
 
                         // 2. Show UNDO SnackBar
-                        snackbarShowing = CustomSnackbar.make(mainActivityLayout).apply {
+                        snackbarShowing = CustomSnackbar.make(this@MainActivity.mainActivityLayout).apply {
                             setMessage("Saved Flight")
                             setOnAction {//onAction = UNDO
                                 launch {
@@ -542,27 +422,21 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                                 }
                                 dismiss()
                             }
-                            setOnActionBarShown { addButton.hide() }
+                            setOnActionBarShown { this@MainActivity.addButton.hide() }
                             setOnActionBarGone {
                                 snackbarShowing = null
-                                addButton.show()
+                                this@MainActivity.addButton.show()
                             }
                             show()
                         }
-
+                    }
+                }
+                setOnCloseListener {
                         // 3. Show Toolbar
-                        my_toolbar.showAnimated()
+                        this@MainActivity.my_toolbar.showAnimated()
 
                         // 4. Make searchField visible.
                         // TODO searchField should be improved (and doesnt work atm)
-                        if (searchField.visibility != View.GONE) {
-                            pilotNameSearch.text = pilotNameSearch.text
-                            airportSearch.setText("")
-                            aircraftSearch.setText("")
-                        }
-
-
-                    }
                 }
 
             }

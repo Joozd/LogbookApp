@@ -34,7 +34,7 @@ import nl.joozd.logbookapp.data.dataclasses.Flight
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.ui.dialogs.*
-import nl.joozd.logbookapp.ui.dialogs.popups.NamesDialog
+import nl.joozd.logbookapp.ui.dialogs.NamesDialog
 import nl.joozd.logbookapp.ui.utils.CustomAutoComplete
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
@@ -53,19 +53,20 @@ class EditFlightFragment: JoozdlogFragment(){
      * Listener class and setting s
      */
     class Listener (private val f: () ->Unit){ // oldFlight =  flight before changes, to undo if needed
-        fun save(){
+        fun run(){
             f()
         }
     }
-    var onSaveListener: Listener? = null
-    var onCancelListener: Listener? = null
+    private var onSaveListener: Listener? = null
+    private var onCloseListener: Listener? = null
 
     fun setOnSaveListener(f: () -> Unit){
         onSaveListener = Listener(f)
     }
-    fun setOnCancelListener(f: () -> Unit){
-        onCancelListener = Listener(f)
+    fun setOnCloseListener(f: () -> Unit){
+        onCloseListener = Listener(f)
     }
+
 
     /************************************************************************
      *  OnCreateView and other overrides below here                         *
@@ -76,19 +77,14 @@ class EditFlightFragment: JoozdlogFragment(){
      * Will define all listeners etc, and set initial
      */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        Log.d(TAG, "workingFlight: ${ viewModel.workingFlight} = ${viewModel.workingFlight.value}")
-        val view = inflater.inflate(R.layout.edit_flight, container, false).apply {
-
+        return inflater.inflate(R.layout.edit_flight, container, false).apply {
             (flightInfoText.background as GradientDrawable).colorFilter = PorterDuffColorFilter(
                 requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
                 PorterDuff.Mode.SRC_IN
-            ) // set background color to bakground with rounded corners
-
-
-            val flightToInitiallySet = flight // Set flight before starting this fragment.
+            ) // set background color to background with rounded corners
 
             // Initially set Views' contents
-            setFields(this, flightToInitiallySet)
+            setViews(this, flight)
 
             //Initialize autoCompleters for names fields
             val flightNameFieldAutoComplete = CustomAutoComplete(defaultItems = viewModel.allNames)
@@ -101,9 +97,9 @@ class EditFlightFragment: JoozdlogFragment(){
             }
 
 
-            /**
+            /************************************************************************************
              * Toggle switches onClickListeners
-             */
+             ************************************************************************************/
             pfSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
                 flight =
@@ -141,27 +137,21 @@ class EditFlightFragment: JoozdlogFragment(){
                     simTime = if (flight.sim) 0 else 210
                 )
             }
+            //TODO this won't work on rotation
             signSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                val signatureDialog = SignatureDialog().apply {
-                    setOnSignedListener {
-                        Log.d(TAG, it)
-                        flight = flight.copy(signature = it)
-                    }
-                    if (flight.signature.isNotEmpty()) signature = flight.signature
+                supportFragmentManager.commit {
+                    add(R.id.mainActivityLayout, SignatureDialog())
+                    addToBackStack(null)
                 }
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.mainActivityLayout, signatureDialog)
-                    .addToBackStack(null)
-                    .commit()
             }
             autoFillCheckBox.setOnCheckedChangeListener { _, isChecked ->
                 flight = flight.copy(autoFill = isChecked.toInt())
             }
 
-            /**
+            /*************************************************************************************
              * define reused listeners
-             */
+             ************************************************************************************/
 
             /**
              * Get dateDialog, update flight when a date is picked
@@ -180,6 +170,10 @@ class EditFlightFragment: JoozdlogFragment(){
                 }
                 datePickerFragment.show(requireActivity().supportFragmentManager, "datePicker")
             }
+
+            /**
+             * get a [TimePicker] dialog which will update through viewModel
+             */
             val timeOnClickListener = View.OnClickListener {
                 // Get timePicker dialog, update flight in that dialog.
                 supportFragmentManager.commit {
@@ -188,9 +182,9 @@ class EditFlightFragment: JoozdlogFragment(){
                 }
             }
 
-            /**
+            /**************************************************************************************
              * onClickListeners for selectors (the triangle thingies on side of this dialog)
-             */
+             *************************************************************************************/
             flightDateSelector.setOnClickListener(dateOnClickListener)
 
             flightFlightNumberSelector.setOnClickListener {
@@ -198,22 +192,19 @@ class EditFlightFragment: JoozdlogFragment(){
             }
 
             //TODO set current orig as initial selection in dialog
+            //also: this might not work after rotation etc
             flightOrigSelector.setOnClickListener {
-                val airportPicker = AirportPicker().apply{
-                    setOnSaveListener { flight = flight.copy(orig = it.ident) }
-                }
+                viewModel.workingOnOrig = true
                 supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout, airportPicker)
+                    add(R.id.mainActivityLayout, AirportPicker())
                     addToBackStack(null)
                 }
             }
             //TODO set current dest as initial selection in dialog
             flightDestSelector.setOnClickListener {
-                val airportPicker = AirportPicker().apply{
-                    setOnSaveListener { flight = flight.copy(dest = it.ident) }
-                }
+                viewModel.workingOnOrig = false
                 supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout, airportPicker)
+                    add(R.id.mainActivityLayout, AirportPicker())
                     addToBackStack(null)
                 }
             }
@@ -226,44 +217,59 @@ class EditFlightFragment: JoozdlogFragment(){
                 toast("Not implemented yet!")
             }
             flightTakeoffLandingSelector.setOnClickListener {
-                //TODO remake this as takeoffs are not logged
-                toast("Not implemented yet!")
+                supportFragmentManager.commit {
+                    add(R.id.mainActivityLayout, LandingsDialog())
+                    addToBackStack(null)
+                }
             }
 
-            //TODO working on this
             flightNameSelector.setOnClickListener {
                 viewModel.namePickerWorkingOnName1 = true
                 supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout, NamesDialog())
+                    add(R.id.mainActivityLayout,
+                        NamesDialog()
+                    )
                     addToBackStack(null)
                 }
             }
             flightName2Selector.setOnClickListener {
                 viewModel.namePickerWorkingOnName1 = false
                 supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout, NamesDialog())
+                    add(R.id.mainActivityLayout,
+                        NamesDialog()
+                    )
                     addToBackStack(null)
                 }
             }
 
-            //ignore clicks on empty box
+            //ignore clicks on empty parts of dialog
             flightBox.setOnClickListener {  }
 
+            /**
+             * Functions that handle closing fragments.
+             * Always call onCloseListener?.run()
+             */
+            //click on empty part == cancel
             flightInfoLayout.setOnClickListener {
                 //TODO fire some "undo cancel" SnackBar?
+                onCloseListener?.run()
+                closeFragment()
+            }
+
+            //on cancel, close without calling onSaveListener
+            flightCancelButton2.setOnClickListener {
+                //TODO fire some "undo cancel" SnackBar?
+                onCloseListener?.run()
                 closeFragment()
             }
 
             flightSaveButton.setOnClickListener {
-                onSaveListener?.save()
+                onSaveListener?.run()
+                onCloseListener?.run()
                 closeFragment()
             }
 
-
-
         } // end of layoutInflater.apply()
-
-        return view
     } // end of onCreateView
 
 
@@ -272,39 +278,47 @@ class EditFlightFragment: JoozdlogFragment(){
      **************************************************************************/
 
     /**
-     * setFields will set fields according to Flight
-     * @param v: View to set values on
+     * setViews will set fields according to Flight
+     * @param v: View to set values on (can be null)
      * @param f: Flight containing the values to set
+     * @see JoozdlogFragment for how this triggers
      */
+    override fun setViews(v: View?, f: Flight){
+        v?.let { notNullView -> // don't do anything if view == null
+            settingFields = true
 
-    private fun setFields(v: View, f: Flight){
-        settingFields = true
+            // Set editText fields
+            notNullView.flightDateField.setText(f.date)
+            notNullView.flightFlightNumberField.setText(f.flightNumber)
+            notNullView.flightOrigField.setText(
+                if (Preferences.useIataAirports) viewModel.icaoToIataMap[f.orig]?.nullIfEmpty()
+                    ?: f.orig else f.orig
+            )
+            notNullView.flightDestField.setText(
+                if (Preferences.useIataAirports) viewModel.icaoToIataMap[f.dest]?.nullIfEmpty()
+                    ?: f.dest else f.dest
+            )
+            notNullView.flighttOutStringField.setText(if (f.sim) "${f.simTime / 60}:${f.simTime % 60}" else f.timeOutString)
+            notNullView.flighttInStringField.setText(f.timeInString)
+            notNullView.flightAircraftField.setText(if (!f.sim) ("${f.registration}(${f.aircraft})") else f.aircraft)
+            notNullView.flightTakeoffLandingField.setText((f.landingDay + f.landingNight).toString())
+            notNullView.flightNameField.setText(f.name)
+            notNullView.flightName2Field.setText(f.name2)
+            notNullView.flightRemarksField.setText(f.remarks)
 
-        // Set editText fields
-        v.flightDateField.setText(f.date)
-        v.flightFlightNumberField.setText(f.flightNumber)
-        v.flightOrigField.setText(if (Preferences.useIataAirports) viewModel.icaoToIataMap[f.orig]?.nullIfEmpty() ?: f.orig else f.orig)
-        v.flightDestField.setText(if (Preferences.useIataAirports) viewModel.icaoToIataMap[f.dest]?.nullIfEmpty() ?: f.dest else f.dest)
-        v.flighttOutStringField.setText(if (f.sim) "${f.simTime / 60}:${f.simTime % 60}" else f.timeOutString)
-        v.flighttInStringField.setText(f.timeInString)
-        v.flightAircraftField.setText(if (!f.sim) ("${f.registration}(${f.aircraft})") else f.aircraft)
-        v.flightTakeoffLandingField.setText((f.landingDay + f.landingNight).toString())
-        v.flightNameField.setText(f.name)
-        v.flightName2Field.setText(f.name2)
-        v.flightRemarksField.setText(f.remarks)
+            //set toggle buttons
+            if (f.sim) notNullView.simSelector.showAsActive() else notNullView.simSelector.showAsInactive()
+            if (f.dual) notNullView.dualSelector.showAsActive() else notNullView.dualSelector.showAsInactive()
+            if (f.instructor) notNullView.instructorSelector.showAsActive() else notNullView.instructorSelector.showAsInactive()
+            if (f.picus) notNullView.picusSelector.showAsActive() else notNullView.picusSelector.showAsInactive()
+            if (f.pic) notNullView.picSelector.showAsActive() else notNullView.picSelector.showAsInactive()
+            if (f.pf) notNullView.pfSelector.showAsActive() else notNullView.pfSelector.showAsInactive()
+            if (f.signature.isNotEmpty()) notNullView.signSelector.showAsActive() else notNullView.signSelector.showAsInactive()
 
-        //set toggle buttons
-        if (f.sim) v.simSelector.showAsActive() else v.simSelector.showAsInactive()
-        if (f.dual) v.dualSelector.showAsActive() else v.dualSelector.showAsInactive()
-        if (f.instructor) v.instructorSelector.showAsActive() else v.instructorSelector.showAsInactive()
-        if (f.picus) v.picusSelector.showAsActive() else v.picusSelector.showAsInactive()
-        if (f.pic) v.picSelector.showAsActive() else v.picSelector.showAsInactive()
-        if (f.pf) v.pfSelector.showAsActive() else v.pfSelector.showAsInactive()
-        if (f.signature.isNotEmpty()) v.signSelector.showAsActive() else v.signSelector.showAsInactive()
+            notNullView.autoFillCheckBox.isChecked = f.autoFill > 0
 
-        v.autoFillCheckBox.isChecked = f.autoFill > 0
-
-        settingFields = false
+            settingFields = false
+        } ?: Log.w(this::class.simpleName, "Trying to set fields on null view. (warning 1)")
     }
 
     /**

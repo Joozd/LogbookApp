@@ -75,7 +75,7 @@ class NamesDialogOld: Fragment() {
         }
 
         //set color of top part
-        val namesDialogTopHalf: ConstraintLayout = view.findViewById(R.id.editAircraftDialogTopHalf)
+        val namesDialogTopHalf: ConstraintLayout = view.findViewById(R.id.namesDialogTopHalf)
         (namesDialogTopHalf.background as GradientDrawable).colorFilter = PorterDuffColorFilter(requireActivity().getColorFromAttr(android.R.attr.colorPrimary), PorterDuff.Mode.SRC_IN)
 
         val namesPickerAdapter = NamesPickeradapterOld { name -> selectedName = name }  // yes this will crash if no namesworker inserted

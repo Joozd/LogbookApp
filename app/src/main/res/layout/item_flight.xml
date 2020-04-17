@@ -66,7 +66,7 @@
                 app:layout_constraintStart_toStartOf="@+id/flightNumberText" />
 
         <TextView
-                android:id="@+id/registrationText"
+                android:id="@+id/airportPickerTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -262,10 +262,10 @@
                 android:textAlignment="textEnd"
                 android:textColor="#CC000000"
                 android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="@+id/registrationText"
+                app:layout_constraintBottom_toBottomOf="@+id/airportPickerTitle"
                 app:layout_constraintEnd_toEndOf="@+id/takeoffLandingText"
-                app:layout_constraintStart_toEndOf="@+id/registrationText"
-                app:layout_constraintTop_toTopOf="@+id/registrationText"
+                app:layout_constraintStart_toEndOf="@+id/airportPickerTitle"
+                app:layout_constraintTop_toTopOf="@+id/airportPickerTitle"
                 tools:text="Joost welle, Henk de Vries, ed en willem bever, je moeder" />
 
         <TextView
@@ -296,9 +296,9 @@
                 android:text="PA28R-Arrow"
                 android:textColor="#CC000000"
                 android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="@+id/registrationText"
+                app:layout_constraintBottom_toBottomOf="@+id/airportPickerTitle"
                 app:layout_constraintStart_toStartOf="@+id/origText"
-                app:layout_constraintTop_toTopOf="@+id/registrationText" />
+                app:layout_constraintTop_toTopOf="@+id/airportPickerTitle" />
 
         <TextView
                 android:id="@+id/origText"

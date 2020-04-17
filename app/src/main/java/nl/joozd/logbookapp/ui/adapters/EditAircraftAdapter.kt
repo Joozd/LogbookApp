@@ -74,7 +74,7 @@ class EditAircraftAdapter(allAircraft: List<Aircraft>, private var missingAircra
 
                 Log.d("!!!!!!!!!!!!!!!!", "adding $registration")
                 Log.d("!!!!!!!!!!!!!!!!", "$this")
-                registrationText.text=registration
+                airportPickerTitle.text=registration
                 makeModelText.text="$manufacturer $model"
                 ifrText.visibility = if (isIfr > 0) View.VISIBLE else View.GONE
                 engineTypeText.text=engine_type

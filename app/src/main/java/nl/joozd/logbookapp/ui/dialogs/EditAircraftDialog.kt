@@ -99,7 +99,7 @@ class EditAircraftDialog: Fragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         thisView = inflater.inflate(R.layout.dialog_edit_aircraft, container, false)
         thisView?.let { thisView ->
-            (thisView.editAircraftDialogTopHalf?.background as GradientDrawable).colorFilter = PorterDuffColorFilter(activity!!.getColorFromAttr(android.R.attr.colorPrimary), PorterDuff.Mode.SRC_IN) // set background color to bakground with rounded corners
+            (thisView.namesDialogTopHalf?.background as GradientDrawable).colorFilter = PorterDuffColorFilter(activity!!.getColorFromAttr(android.R.attr.colorPrimary), PorterDuff.Mode.SRC_IN) // set background color to bakground with rounded corners
 
             val models: MutableMap<String, List<String>> = allAircraft.getModelsMap().toMutableMap()
             var manufacturers = models.keys.toList()
@@ -209,7 +209,7 @@ class EditAircraftDialog: Fragment(){
             }
 
             // insert all values from flight:
-            thisView.registrationText.text = aircraft.registration
+            thisView.airportPickerTitle.text = aircraft.registration
             thisView.registrationField.setText(aircraft.registration)
 
             //toggle multipilot on clicking its textView

@@ -19,15 +19,17 @@
 package nl.joozd.logbookapp.ui.dialogs
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import com.caverock.androidsvg.SVG
 import kotlinx.android.synthetic.main.dialog_signature.view.*
 import com.github.gcacace.signaturepad.views.SignaturePad
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
+import nl.joozd.logbookapp.model.viewmodels.dialogs.SignatureDialogViewModel
+import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
 
 /**
@@ -41,57 +43,57 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 
 class SignatureDialog: JoozdlogFragment() {
-    var signature: String
-        get() = flight.signature
-        set(sign) {
-            flight = flight.copy(signature = sign)
-        }
+    val signatureDialogViewModel: SignatureDialogViewModel by viewModels()
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.dialog_signature, container, false).apply {
 
-
-            //If a signature is set, hide the actual signing pad and display the current signature as SVGImageView
-            if (signature.isNotEmpty()) {
-                signature_pad.visibility = View.INVISIBLE
-                signatureImageView.setSVG(SVG.getFromString(signature))
-                signatureImageView.visibility = View.VISIBLE
-            }
-
             signature_pad.setOnSignedListener(object : SignaturePad.OnSignedListener {
-                override fun onStartSigning() {
-                    //Event triggered when the pad is touched
-                }
-
+                override fun onStartSigning() {/* Event triggered when the pad is touched */}
                 override fun onSigned() {
                     //Event triggered when the pad is signed
-                    signature = signature_pad.signatureSvg
+                    signatureDialogViewModel.updateSignature(signature_pad.signatureSvg)
                 }
-
-                override fun onClear() {
-                    //Event triggered when the pad is cleared
-                }
+                override fun onClear() {/*Event triggered when the pad is cleared*/}
             })
 
             clearTextView.setOnClickListener {
-                // Hide possible imageView with old signature, show new one, set empty and changesMade to true
-                signatureImageView.visibility = View.INVISIBLE
-                signature_pad.visibility = View.VISIBLE
-                signature = ""
-                activity?.currentFocus?.clearFocus()
-                signature_pad.clear()
+                signatureDialogViewModel.updateSignature("")
             }
+
+            /**
+             * Observers:
+             */
+
+            //If a signature is set, hide the actual signing pad and display the current signature as SVGImageView
+            signatureDialogViewModel.signature.observe(viewLifecycleOwner, Observer{signature ->
+                if (signature.isNotEmpty()) {
+                    signature_pad.visibility = View.INVISIBLE
+                    signatureImageView.setSVG(SVG.getFromString(signature))
+                    signatureImageView.visibility = View.VISIBLE
+                }
+                else {
+                    signatureImageView.visibility = View.INVISIBLE
+                    signature_pad.visibility = View.VISIBLE
+                    signature_pad.clear()
+                }
+            })
+
+            /**
+             * UI related butons:
+             */
+
             cancelTextView.setOnClickListener {
-                activity?.currentFocus?.clearFocus()
-                undoAndClose()
+                signatureDialogViewModel.undo()
+                closeFragment()
             }
             backgroundLayout.setOnClickListener {
-                activity?.currentFocus?.clearFocus()
-                undoAndClose()
+                signatureDialogViewModel.undo()
+                closeFragment()
             }
             saveTextView.setOnClickListener {
-                Log.d(this::class.simpleName, signature_pad.signatureSvg)
-                saveAndClose()
+                closeFragment()
             }
             signLayout.setOnClickListener { }
         }

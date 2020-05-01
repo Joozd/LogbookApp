@@ -118,7 +118,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <Spinner
-                android:id="@+id/manufacturerSpinner"
+                android:id="@+id/aircraftTypeSpinner"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -133,7 +133,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:text="@string/newText"
-                app:layout_constraintBottom_toBottomOf="@+id/manufacturerSpinner"
+                app:layout_constraintBottom_toBottomOf="@+id/aircraftTypeSpinner"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/textView15" />
 
@@ -155,7 +155,7 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/model"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/manufacturerSpinner" />
+                app:layout_constraintTop_toBottomOf="@+id/aircraftTypeSpinner" />
 
         <Spinner
                 android:id="@+id/modelSpinner"

@@ -18,21 +18,9 @@
 
 package nl.joozd.logbookapp.ui.fragments
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ExpandableListView
-import kotlinx.android.synthetic.main.total_times.view.*
-import nl.joozd.logbookapp.R
-import nl.joozd.joozdlogcommon.BalanceForward
-import nl.joozd.logbookapp.data.dataclasses.Flight
-
-import nl.joozd.logbookapp.data.miscClasses.TotalsListGroup
-import nl.joozd.logbookapp.data.miscClasses.TotalsListItem
-import nl.joozd.logbookapp.ui.adapters.TotalTimesExpandableListAdapter
-
+@Deprecated("Rebuild this. Only here for reference")
 class TotalTimes : androidx.fragment.app.Fragment() {
+    /*
     class OnStartListener(private val f: () -> Unit){
         fun starting(){
             f()
@@ -135,5 +123,6 @@ class TotalTimes : androidx.fragment.app.Fragment() {
         initialized=true
         totalsData = totalsListGroupList
     }
+     */
 }
 

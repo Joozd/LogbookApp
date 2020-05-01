@@ -18,18 +18,18 @@
         <activity android:name=".ui.activities.LoginActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="nl.joozd.logbookapp.ui.activities.mainactivity.MainActivity" />
+                android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
         </activity>
         <activity android:name=".ui.activities.ExportPdfActivity" />
         <activity android:name=".ui.activities.TotalTimesActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="nl.joozd.logbookapp.ui.activities.mainactivity.MainActivity" />
+                android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
         </activity>
         <activity android:name=".ui.activities.BalanceForwardActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="nl.joozd.logbookapp.ui.activities.mainactivity.MainActivity" />
+                android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
         </activity>
         <activity
             android:name=".ui.activities.PdfParserActivity"
@@ -42,13 +42,8 @@
                 <data android:mimeType="application/pdf" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activities.EditAircraftActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="nl.joozd.logbookapp.ui.activities.mainactivity.MainActivity" />
-        </activity>
         <activity
-            android:name=".ui.activities.mainactivity.MainActivity"
+            android:name=".ui.activities.MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.Launcher">
             <intent-filter>

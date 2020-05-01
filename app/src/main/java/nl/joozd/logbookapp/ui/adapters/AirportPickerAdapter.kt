@@ -22,23 +22,17 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_airport_picker.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.getActivity
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
-class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerView.Adapter<AirportPickerAdapter.APViewHolder>(), CoroutineScope by MainScope() {
+class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerView.Adapter<AirportPickerAdapter.APViewHolder>() {
     var airports =emptyList<Airport>()
-
-
 
     private var pickedAirport = ""
 
@@ -48,7 +42,7 @@ class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerVi
     }
 
     override fun onBindViewHolder(holder: APViewHolder, position: Int) {
-        val airport = getItem(position)
+        val airport = airports[position]
         holder.bindAirport(airport)
         val activity = holder.backgroundLayout.getActivity()
         activity?.let {
@@ -78,7 +72,6 @@ class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerVi
                 identifier.text = "$ident - $iata_code"
                 cityName.text = "$municipality  - $name"
                 itemView.setOnClickListener {
-                    adapter.pickAirport(this)
                     itemClick(this)
                 }
             }
@@ -90,8 +83,6 @@ class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerVi
         airports = l
         notifyDataSetChanged()
     }
-
-    fun getItem(index: Int): Airport = airports[index]
 
     fun pickAirport(airport: Airport){
         pickedAirport = airport.ident

@@ -28,21 +28,8 @@ import java.time.LocalDate
 import java.util.*
 
 
-class DatePickerFragment : androidx.fragment.app.DialogFragment(), DatePickerDialog.OnDateSetListener {
-    class OnDatePicked (private val f: (date: LocalDate) -> Unit) {
-        fun datePicked(date: LocalDate){
-            f(date)
-        }
-    }
+class DatePickerFragment(private val onDatePicked: (date: LocalDate) -> Unit) : androidx.fragment.app.DialogFragment(), DatePickerDialog.OnDateSetListener {
 
-    var onDatePicked: OnDatePicked? = null
-
-    fun setOnDatePickedListener(f: (LocalDate) -> Unit){
-        onDatePicked = OnDatePicked(f)
-    }
-
-
-    var viewToUpdate: EditText? = null
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // Use the current date as the default date in the picker
         val c = Calendar.getInstance()
@@ -55,7 +42,7 @@ class DatePickerFragment : androidx.fragment.app.DialogFragment(), DatePickerDia
     }
 
     override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-        onDatePicked?.datePicked(LocalDate.of(year, month+1, day))
+        onDatePicked(LocalDate.of(year, month+1, day))
         // Do something with the date chosen by the user
     }
 }

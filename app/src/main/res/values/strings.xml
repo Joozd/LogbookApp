@@ -143,6 +143,9 @@
     <string name="hidden_password">"••••••••"</string>
     <string name="newUser">New User</string>
     <string name="landings">Landings</string>
+    <string name="arrowRight">➔</string>
+
+    <string name="instructor">INSTRUCTOR</string>
 
 
 </resources>

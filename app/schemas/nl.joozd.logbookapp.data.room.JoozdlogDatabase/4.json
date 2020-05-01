@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "5caf66311e9691b1fd5d0a4f66f9997f",
+    "identityHash": "1704654a983e01b1da5f08be57253a00",
     "entities": [
       {
         "tableName": "FlightData",
@@ -329,7 +329,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "AircraftRegistrationWithType",
+        "tableName": "AircraftRegistrationWithTypeData",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`registration` TEXT NOT NULL, `type` TEXT NOT NULL, `knownToServer` INTEGER NOT NULL, `previousType` TEXT NOT NULL, PRIMARY KEY(`registration`))",
         "fields": [
           {
@@ -367,7 +367,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "AircraftTypeConsensus",
+        "tableName": "AircraftTypeConsensusData",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`registration` TEXT NOT NULL, `serializedType` BLOB NOT NULL, PRIMARY KEY(`registration`))",
         "fields": [
           {
@@ -396,7 +396,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5caf66311e9691b1fd5d0a4f66f9997f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1704654a983e01b1da5f08be57253a00')"
     ]
   }
 }

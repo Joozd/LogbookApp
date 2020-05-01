@@ -22,82 +22,64 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.dialog_augmented_crew.view.*
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.dataclasses.Flight
-import nl.joozd.logbookapp.data.miscClasses.Crew
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.data.viewmodel.JoozdlogViewModel
-import nl.joozd.logbookapp.extensions.onTextChanged
+import nl.joozd.logbookapp.extensions.toInt
+import nl.joozd.logbookapp.model.viewmodels.dialogs.AugmentedCrewDialogViewModel
+import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
-class AugmentedCrewDialog: Fragment(){
-    private val supportFragmentManager: FragmentManager by lazy { requireActivity().supportFragmentManager }
-    private val viewModel: JoozdlogViewModel by viewModels()
-
-    private val crewValue = MutableLiveData<Crew>()
-    private var cv: Crew
-        get() = crewValue.value ?: Crew() // shouldn't fall back to default
-        set(crew: Crew) { crewValue.value = crew }
-    private var flight
-        get() = viewModel.workingFlight.value!!
-        set(f: Flight) { viewModel.workingFlight.value = f }
+//TODO doesn't work yet, just skeleton
+class AugmentedCrewDialog: JoozdlogFragment(){
+    private val augmentedCrewDialogViewModel: AugmentedCrewDialogViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val unchangedFlight = flight
 
-        val view = inflater.inflate(R.layout.dialog_augmented_crew, container, false).apply {
+        return inflater.inflate(R.layout.dialog_augmented_crew, container, false).apply {
             crewDownButton.setOnClickListener {
-                if (cv.crewSize > 0) cv = cv.copy(crewSize = cv.crewSize - 1)
+                augmentedCrewDialogViewModel.crewDown()
             }
             crewUpButton.setOnClickListener {
-                if (cv.crewSize < 9) cv = cv.copy(crewSize = cv.crewSize + 1)
+                augmentedCrewDialogViewModel.crewUp()
             }
             didTakeoffCheckbox.setOnCheckedChangeListener { _, b ->
-                cv = cv.copy(didTakeoff = b)
+                augmentedCrewDialogViewModel.setTakeoff(b)
             }
             didLandingCheckbox.setOnCheckedChangeListener { _, b ->
-                cv = cv.copy(didLanding = b)
+                augmentedCrewDialogViewModel.setLanding(b)
             }
 
-            timeForTakeoffLandingEditText.onTextChanged { time ->
-                if (time.isNotEmpty()) cv = cv.copy(takeoffLandingTimes = time.toInt())
-                else cv = cv.copy(takeoffLandingTimes = Preferences.standardTakeoffLandingTimes)
+            timeForTakeoffLandingEditText.setOnFocusChangeListener { v, hasFocus ->
+                if (!hasFocus){
+                    augmentedCrewDialogViewModel.setTakeoffLandingTime(timeForTakeoffLandingEditText.text.toInt())
+                }
             }
+
+            /**
+             * observers:
+             */
+
+
+            augmentedCrewDialogViewModel.augmentedCrewData.observe(viewLifecycleOwner, Observer{
+                crewSizeEditText.setText(it.crewSize.toString())
+                didTakeoffCheckbox.isChecked = it.didTakeoff
+                didLandingCheckbox.isChecked = it.didLanding
+                timeForTakeoffLandingEditText.setText(it.takeoffLandingTimes.toString())
+            })
+
 
             cancelCrewDialogButton.setOnClickListener {
-                flight = unchangedFlight
-                supportFragmentManager.popBackStack()
+                // TODO
             }
             augmentedCrewDialogBackground.setOnClickListener {
-                flight = unchangedFlight
-                supportFragmentManager.popBackStack()
+                // TODO
             }
             saveCrewDialogButon.setOnClickListener {
-                supportFragmentManager.popBackStack()
+                augmentedCrewDialogViewModel.undo()
+                closeFragment()
             }
         }
-
-        crewValue.observe (viewLifecycleOwner, Observer{
-            flight = flight.copy(augmentedCrew = it.toInt())
-        })
-        viewModel.workingFlight.observe (viewLifecycleOwner, Observer{
-            updateView(view)
-        })
-        cv = Crew.of(flight.augmentedCrew)
-
-        return view
-    }
-
-    private fun updateView(view: View){
-        if (view.crewSizeEditText.text.toString() != cv.crewSize.toString()) view.crewSizeEditText.setText(cv.crewSize.toString())
-        if (view.didLandingCheckbox.isChecked != cv.didLanding) view.didLandingCheckbox.isChecked = cv.didLanding
-        if (view.didTakeoffCheckbox.isChecked != cv.didTakeoff) view.didTakeoffCheckbox.isChecked = cv.didTakeoff
-        if (view.timeForTakeoffLandingEditText.text.toString() != cv.takeoffLandingTimes.toString()) view.timeForTakeoffLandingEditText.setText(cv.takeoffLandingTimes.toString())
     }
 }
 

@@ -36,6 +36,7 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.toInt
 import nl.joozd.logbookapp.ui.activities.BalanceForwardActivity.Companion.TAG
 
+@Deprecated ("Make new")
 class AddBalanceForwardDialog: Fragment() {
     companion object{
         private val onlyDigitsRegex = """\d+""".toRegex()
@@ -110,7 +111,7 @@ class AddBalanceForwardDialog: Fragment() {
 
             (thisView.flightInfoText.background as GradientDrawable).colorFilter =
                 PorterDuffColorFilter(
-                    activity!!.getColorFromAttr(android.R.attr.colorPrimary),
+                    requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
                     PorterDuff.Mode.SRC_IN
                 ) // set background color to bakground with rounded corners
 

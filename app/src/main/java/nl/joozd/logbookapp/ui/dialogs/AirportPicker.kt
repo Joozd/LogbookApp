@@ -23,10 +23,10 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,57 +34,38 @@ import kotlinx.android.synthetic.main.dialog_airports.view.*
 import kotlinx.coroutines.*
 
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.viewmodel.AirportPickerViewModel
+import nl.joozd.logbookapp.model.viewmodels.dialogs.AirportPickerViewModel
+import nl.joozd.logbookapp.model.viewmodels.MainViewModel
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.adapters.AirportPickerAdapter
-import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
-import java.util.*
+import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.longToast
+import nl.joozd.logbookapp.model.helpers.FeedbackEvents.AirportPickerEvents.NOT_IMPLEMENTED
+import nl.joozd.logbookapp.model.helpers.FeedbackEvents.AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED
 import kotlin.math.abs
 
 //TODO: Fix this. Should update though viewModel
 class AirportPicker: JoozdlogFragment() {
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val apViewModel: AirportPickerViewModel by viewModels()
-    private val workingOnOrig: Boolean
-        get() = viewModel.workingOnOrig == true
-    private val airports: List<Airport>
-        get() = apViewModel.airports
 
-    private var currentSearchJob: Job? = null
-    private var selectedAirport: Airport? = null
-    private var airportString: String
-        get() = if (workingOnOrig) flight.orig else flight.dest
-        set(newAirportString) {
-            flight = when (viewModel.workingOnOrig) {
-                true -> flight.copy(orig = newAirportString)
-                false -> flight.copy(dest = newAirportString)
-                null -> error("AirportPicker trying to save airport but viewModel.workingOnOrig == null")
-            }
-        }
-
-    private val allAirports: List<Airport>
-        get() = apViewModel.airports
-
-
+    @ExperimentalCoroutinesApi
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.dialog_airports, container, false).apply {
             //Set background color for title bar
             (airportsDialogTopHalf.background as GradientDrawable).colorFilter =
-                PorterDuffColorFilter(
-                    requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
-                    PorterDuff.Mode.SRC_IN
-                )
+                PorterDuffColorFilter(requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
+                PorterDuff.Mode.SRC_IN)
 
             /**
              * Initialize recyclerView and it's stuff
              */
             val airportPickerAdapter = AirportPickerAdapter { airport ->
-                airportString = airport.ident
-                selectedAirport = airport
+                apViewModel.pickAirport(airport)
             }
-            airportsPickerList.layoutManager = LinearLayoutManager(this@AirportPicker.context)
+            airportsPickerList.layoutManager = LinearLayoutManager(context)
             airportsPickerList.adapter = airportPickerAdapter
 
 
@@ -94,16 +75,7 @@ class AirportPicker: JoozdlogFragment() {
 
             // Update recyclerView while typing
             airportsSearchField.onTextChanged { t ->
-                Log.d("${this::class.simpleName}", "starting to search for $t")
-                currentSearchJob?.cancel()
-                currentSearchJob = launch(Dispatchers.Default) {
-                    val result = queryAirportsAsync(t)
-                    launch(Dispatchers.Main) {
-                        result.await().let {
-                            apViewModel.filteredAirports.value = it
-                        }
-                    }
-                }
+                apViewModel.updateSearch(t)
             }
 
 
@@ -112,13 +84,7 @@ class AirportPicker: JoozdlogFragment() {
              */
             setCurrentTextButton.setOnClickListener {
                 airportsSearchField.text.toString().nullIfEmpty()?.let {
-                    selectedAirport = Airport(
-                        ident = it,
-                        name = "Custom airport"
-                    ).also { a ->
-                        airportString = a.ident
-                        airportPickerAdapter.pickAirport(a)
-                    }
+                    apViewModel.setCustomAirport(it)
                 }
             }
 
@@ -129,37 +95,84 @@ class AirportPicker: JoozdlogFragment() {
             airportPickerDialogLayout.setOnClickListener { }
 
             airportPickerLayout.setOnClickListener {
-                viewModel.workingOnOrig = null
-                undoAndClose()
+                mainViewModel.workingOnOrig = null
+                apViewModel.undo()
+                closeFragment()
             }
             cancelAirportDialog.setOnClickListener {
-                viewModel.workingOnOrig = null
-                undoAndClose()
+                mainViewModel.workingOnOrig = null
+                apViewModel.undo()
+                closeFragment()
             }
 
             saveAirportDialog.setOnClickListener{
-                viewModel.workingOnOrig = null
-                saveAndClose()
+                mainViewModel.workingOnOrig = null
+                closeFragment()
             }
 
 
             /**
              * observers:
              */
-            //Update [apViewModel] when data gets loaded
-            repository.completeLiveAirports.observe(
-                viewLifecycleOwner,
-                Observer {apViewModel.airports = it})
+            //observer events
+            apViewModel.feedbackEvent.observe(viewLifecycleOwner, Observer{
+                //if event already consumed, it.getEvent() == null
+                when(it.getEvent()){
+                    ORIG_OR_DEST_NOT_SELECTED -> {
+                        longToast("AirportPicker error")
+                        closeFragment()
+                    }
+                    NOT_IMPLEMENTED -> longToast("Not Implemented in viewModel")
+                }
+            })
 
-            //fill adapter wil complete airports list
-            repository.completeLiveAirports.value?.let {airportPickerAdapter.submitList(it)} ?: launch{
-                airportPickerAdapter.submitList(apViewModel.filteredAirports.value ?: repository.customAirports.await() + repository.requestAllAirports())
-            }
+            //observe airportList for recyclerview
+            apViewModel.airportsList.observe(viewLifecycleOwner, Observer{
+                airportPickerAdapter.submitList(it)
+            })
 
-            apViewModel.filteredAirports.observe(viewLifecycleOwner, Observer{airportPickerAdapter.submitList(it)})
+            //set picked airport in adapter:
+            //TODO should I do this in here or in viewModel?
+
+            apViewModel.pickedAirport.observe(viewLifecycleOwner, Observer{airport ->
+                airportPickerAdapter.pickAirport(airport)
+                @SuppressLint("SetTextI18n")
+                airportPickerTitle.text  = "${airport.ident} - ${airport.iata_code}"
+                @SuppressLint("SetTextI18n")
+                icaoIataField.text = "${airport.ident} - ${airport.iata_code}"
+                @SuppressLint("SetTextI18n")
+                cityAirportNameField.text = "${airport.municipality} - ${airport.name}"
+                val latString = latToString(airport.latitude_deg)
+                val lonString = lonToString(airport.longitude_deg)
+                @SuppressLint("SetTextI18n")
+                latLonField.text = "$latString - $lonString"
+                @SuppressLint("SetTextI18n")
+                altitudeField.text = "alt: ${airport.elevation_ft}\'"
+
+            })
+
         }
     }
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        apViewModel.setWorkingOnOrig(mainViewModel.workingOnOrig)  //this will close fragment through FeedbackEvent if null
+    }
+
+    private fun latToString(latitude: Double): String =
+        "${abs(latitude).toInt().toString()
+            .padStart(2,'0')}.${(latitude % 1).toString()
+            .drop(2)
+            .take(3)}${if (latitude > 0) "N" else "S"}"
+
+    private fun lonToString(longitude: Double): String =
+        "${abs(longitude).toInt().toString()
+            .padStart(3,'0')}.${(longitude % 1).toString()
+            .drop(2)
+            .take(3)}${if (longitude > 0) "E" else "W"}"
+
+
+    /*
     @SuppressLint("SetTextI18n")
     override fun setViews(v: View?) {
         v?.let {notNullView ->
@@ -234,5 +247,7 @@ class AirportPicker: JoozdlogFragment() {
 
         result.distinct()
     }
+
+     */
 }
 

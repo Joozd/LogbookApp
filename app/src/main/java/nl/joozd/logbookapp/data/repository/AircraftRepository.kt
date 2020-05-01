@@ -1,0 +1,219 @@
+package nl.joozd.logbookapp.data.repository
+
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import kotlinx.coroutines.*
+import nl.joozd.joozdlogcommon.AircraftType
+import nl.joozd.logbookapp.data.dataclasses.AircraftTypeConsensus
+import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.data.repository.helpers.Aircraft
+import nl.joozd.logbookapp.data.room.JoozdlogDatabase
+import nl.joozd.logbookapp.data.room.dao.AircraftTypeConsensusDao
+import nl.joozd.logbookapp.data.room.dao.AircraftTypeDao
+import nl.joozd.logbookapp.data.room.dao.RegistrationDao
+import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
+import nl.joozd.logbookapp.data.room.model.toAircraftType
+import nl.joozd.logbookapp.data.room.model.toAircraftTypeConsensus
+import nl.joozd.logbookapp.data.room.model.toModel
+import nl.joozd.logbookapp.ui.App
+
+/**
+ * Gets data for aircraft (types, specific aircraft (by registration) or consensus (reg + probable type)
+ */
+class AircraftRepository(
+    private val aircraftTypeDao: AircraftTypeDao,
+    private val registrationDao: RegistrationDao,
+    private val aircraftTypeConsensusDao: AircraftTypeConsensusDao,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+): CoroutineScope by MainScope() {
+
+    private val _cachedAircraftTypes = MutableLiveData<List<AircraftType>>()
+    init{
+        launch{
+            _cachedAircraftTypes.value = getAllAircraftTypesAsync(true).await()
+        }
+        aircraftTypeDao.requestLiveAircraftTypes().observeForever { _cachedAircraftTypes.value = it.map{it.toAircraftType()} }
+    }
+    private val _cachedConsensus= MutableLiveData<List<AircraftTypeConsensus>>()
+    init {
+        launch { _cachedConsensus.value = getConsensusData(true) }
+        aircraftTypeConsensusDao.getLiveConsensusData().observeForever { _cachedConsensus.value = it.map {model -> model.toAircraftTypeConsensus() }}
+    }
+    private val _cachedRegistrations = MutableLiveData<List<AircraftRegistrationWithTypeData>>()
+    init{
+        launch { _cachedRegistrations.value = getAircraftRegistrationsWithType(true) }
+        getLiveRegistrations().observeForever { _cachedRegistrations.value }
+    }
+
+    val liveAircraftTypes: LiveData<List<AircraftType>> =
+        Transformations.distinctUntilChanged((_cachedAircraftTypes))
+    val liveConsensus: LiveData<List<AircraftTypeConsensus>> =
+        Transformations.distinctUntilChanged(_cachedConsensus)
+    val liveRegistrationWithTypes: LiveData<List<AircraftRegistrationWithTypeData>> =
+        Transformations.distinctUntilChanged(_cachedRegistrations)
+
+
+    private val _activeAircraft = MutableLiveData<Aircraft>()
+    val activeAircraft: LiveData<Aircraft>
+        get() = _activeAircraft
+    /**
+     * if updateActiveAircraft() gets both a [reg] and a [type], it ends up with
+     * an aircraft with that reg and type and source = MANUAL.
+     * If it only gets a [reg], it will search for a type to go with that, using [flight] if provided.
+     * If it only gets a [type], it will set previous aircraft to that type, null stays null
+     */
+    fun updateActiveAircraft(reg: String? = null, type: AircraftType? = null, flight: Flight? = null){
+        val registration = if (reg == null && type == null) // if only flight entered, set reg from flight
+            flight?.registration
+        else reg
+        registration?.let{r ->
+            val oldAircraftType = activeAircraft.value?.type
+            launch(dispatcher) {
+                var newAircraft = findAircraftByRegistration(r, flight)
+                if (newAircraft.type == null && oldAircraftType != null) newAircraft = newAircraft.copy(type = oldAircraftType, source = Aircraft.PREVIOUS)
+                launch (Dispatchers.Main) { _activeAircraft.value =  newAircraft }
+            }
+        }
+        type?.let {t ->
+            _activeAircraft.value?.let{oldAircraft ->
+                _activeAircraft.value = oldAircraft.copy(type = t, source = Aircraft.MANUAL)
+            }
+        }
+
+    }
+
+
+    /********************************************************************************************
+     * Aircraft Types Functions
+     ********************************************************************************************/
+
+    fun getAllAircraftTypesAsync(forceReload: Boolean = false) = async(dispatcher) {
+        if (forceReload) aircraftTypeDao.requestAllAircraftTypes().map { it.toAircraftType() }
+        else _cachedAircraftTypes.value ?: aircraftTypeDao.requestAllAircraftTypes().map { it.toAircraftType() }
+    }
+
+    fun getCachedAircraftTypes() = _cachedAircraftTypes.value
+
+    suspend fun getAircraftType(name: String): AircraftType? = withContext(dispatcher) {
+        aircraftTypeDao.getAircraftType(name)?.toAircraftType()
+    }
+
+    suspend fun getAircraftTypeFromShortName(shortname: String): AircraftType? = withContext(dispatcher) {
+        aircraftTypeDao.getAircraftTypeFromShortName(shortname)?.toAircraftType()
+    }
+
+    /**
+     * searches for an aircrafttype. Needs exact name or shortName. If not specified which one, uses shortName.
+     * If both entered, looks for [name] first, if no hits there it tries [shortName]
+     */
+    fun getAircraftTypeIfBuffered(shortName: String? = null, name: String? = null): AircraftType? {
+        return name?.let { n ->
+            _cachedAircraftTypes.value?.firstOrNull{it.name == n}
+        } ?: shortName?.let { n ->
+            return _cachedAircraftTypes.value?.firstOrNull{it.shortName == n}
+        }
+    }
+
+    fun getAircraftTypeAsync(name: String): Deferred<AircraftType?> = async {
+        aircraftTypeDao.getAircraftType(name)?.toAircraftType()
+    }
+
+    suspend fun saveAircraftTypes(types: List<AircraftType>) = withContext(NonCancellable) {
+        Log.d(this::class.simpleName, "saving ${types.size} flights")
+        aircraftTypeDao.saveAircraftTypes(*(types.map{it.toModel()}.toTypedArray()))
+    }
+
+    suspend fun clearAircraftTypeDb() = withContext(NonCancellable) { aircraftTypeDao.clearDb() }
+
+
+    /********************************************************************************************
+     * Aircraft Type Consensus Functions
+     ********************************************************************************************/
+
+    fun getLiveConsensusData() = aircraftTypeConsensusDao.getLiveConsensusData()
+
+    suspend fun getConsensusData(forceReload: Boolean = false) = withContext(dispatcher){
+        if (forceReload)
+            aircraftTypeConsensusDao.getAllConsensusData().map{ it.toAircraftTypeConsensus() }
+        else _cachedConsensus.value ?: aircraftTypeConsensusDao.getAllConsensusData().map{ it.toAircraftTypeConsensus() }
+    }
+
+    suspend fun getConsensusType(registration: String?): AircraftType? = withContext(dispatcher) {
+        aircraftTypeConsensusDao.getConsensus(registration)?.serializedType?.let {
+            AircraftType.deserialize(it)
+        }
+    }
+
+
+    /********************************************************************************************
+     * Aircraft  Functions
+     ********************************************************************************************/
+
+    suspend fun getAircraftRegistrationsWithType(forceReload: Boolean = false) = withContext(Dispatchers.IO) {
+        if (forceReload) registrationDao.requestAllRegistrations()
+        else _cachedRegistrations.value ?: registrationDao.requestAllRegistrations()
+    }
+
+    fun getLiveRegistrations() = registrationDao.requestLiveRegistrations()
+
+    suspend fun saveAircraftRegistrationsWithType(acrwt: List<AircraftRegistrationWithTypeData>) = withContext(NonCancellable){
+        registrationDao.insertRegistrations(*acrwt.toTypedArray())
+    }
+    suspend fun saveAircraftRegistrationsWithType(acrwt: AircraftRegistrationWithTypeData) = withContext(NonCancellable){
+        registrationDao.insertRegistrations(acrwt)
+    }
+
+    /**
+     * Get an aircraft from it's registration
+     * @param registration
+     * @return AircraftRegistrationWithType object or null if none found
+     */
+
+    suspend fun getAircraftByRegistration(reg: String?): AircraftRegistrationWithTypeData? = withContext(Dispatchers.IO) {
+        getAircraftRegistrationsWithType().firstOrNull { it.registration == reg }
+    }
+
+    //non-suspend version which only works if data cached (which it should be)
+    fun getAircraftByRegistrationIfCached(reg: String?): AircraftRegistrationWithTypeData? =
+        liveRegistrationWithTypes.value?.firstOrNull { it.registration == reg }
+
+
+    companion object {
+        private var singletonInstance: AircraftRepository? = null
+        fun getInstance(): AircraftRepository = synchronized(this) {
+            singletonInstance
+                ?: run {
+                    val dataBase = JoozdlogDatabase.getDatabase(App.instance)
+                    val aircraftTypeDao = dataBase.aircraftTypeDao()
+                    val registrationDao = dataBase.registrationDao()
+                    val aircraftTypeConsensusDao = dataBase.aircraftTypeConsensusDao()
+                    singletonInstance = AircraftRepository(aircraftTypeDao, registrationDao, aircraftTypeConsensusDao)
+                    singletonInstance!!
+                }
+        }
+    }
+
+    private suspend fun findAircraftByRegistration(registration: String, flightData: Flight?): Aircraft {
+        var source = Aircraft.NONE
+        getAircraftByRegistration(registration)?.let{acwtd ->
+            getAircraftType(acwtd.type)?.let{foundType ->
+                return Aircraft(registration, foundType, Aircraft.KNOWN)
+            }?: Log.w("Aircraft", "saved type from acwtd \"${acwtd.type}\" not found in AircraftTypes DB")
+        }
+        //If we get here, no saved aircraft was found (or one was found but it's not in DB
+        flightData?.let{ flight ->
+            getAircraftTypeFromShortName(flight.aircraft)?.let{foundType ->
+                return Aircraft(registration, foundType, Aircraft.FLIGHT)
+            }?: Log.w("Aircraft", "saved type from flight \"${flight.aircraft}\" not found in AircraftTypes DB")
+        }
+        //If we get here, no AircraftType found in saved aircraft, nor in [flightData]
+        getConsensusType(registration)?.let{ foundType ->
+            return Aircraft(registration, foundType, Aircraft.CONSENSUS)
+        }
+        //If we get here, no type found
+        return Aircraft(registration, null, Aircraft.NONE)
+    }
+
+}

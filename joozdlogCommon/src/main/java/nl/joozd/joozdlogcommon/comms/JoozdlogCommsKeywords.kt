@@ -27,29 +27,41 @@ package nl.joozd.joozdlogcommon.comms
  */
 
 object JoozdlogCommsKeywords {
+    //protocol keywords
     const val HEADER = "JOOZDLOG"
     const val OK = "OK"
     const val USER_ALREADY_EXISTS = "EXISTING_USER"
     const val UNKNOWN_USER_OR_PASS = "UNKNOWN_USER_PASS_COMBO"
     const val NOT_LOGGED_IN = "NOT_LOGGED_IN"
     const val SERVER_ERROR = "SERVER_ERROR "
+    const val NEXT_IS_COMPRESSED = "NEXT_IS_COMPRESSED"
 
+    //general keywords
+    const val REQUEST_TIMESTAMP = "REQUEST_TIMESTAMP"
 
+    //account keywords
     const val LOGIN = "LOGIN"
     const val NEW_ACCOUNT = "NEW_ACCOUNT"
     const val CHANGE_PASSWORD = "CHANGE_PASSWORD" // will delete all saved files on server
     const val UPDATE_PASSWORD = "UPDATE_PASSWORD" // should be done after being logged in as it will recrypt all flights with new password
-    const val CHECK_NEW_ID_NUMBERS = "CHECK_IDS"
+
+    //flights keywords
     const val SENDING_FLIGHTS = "SENDING_FLIGHTS"
-    const val SENDING_AIRCRAFT = "SENDING_AIRCRAFT"
-    const val NEXT_IS_COMPRESSED = "NEXT_IS_COMPRESSED"
-    const val REQUEST_TIMESTAMP = "REQUEST_TIMESTAMP"
-    const val ADD_TIMESTAMP = "ADD_TIMESTAMP"
     const val REQUEST_FLIGHTS_SINCE_TIMESTAMP = "REQUEST_FLIGHTS_SINCE_TIMESTAMP" // can be used with timestamp -1 for all flights
+
+    //aircraft keywords
+    const val SENDING_AIRCRAFT_CONSENSUS = "SENDING_AIRCRAFT_CONSENSUS" // adds a packSerialized list of <AircraftConsensus>
+    const val REQUEST_AIRCRAFT_CONSENSUS = "REQUEST_AIRCRAFT_CONSENSUS"
+    const val REQUEST_AIRCRAFT_TYPES = "REQUEST_AIRCRAFT_TYPES"
+
+    //airport functions
     const val REQUEST_AIRPORT_DB_VERSION = "REQUEST_AIRPORT_DB_VERSION"
     const val REQUEST_AIRPORT_DB = "REQUEST_AIRPORT_DB"
-    const val REQUEST_AIRCRAFT_CONSENSUS = "REQUEST_CONSENSUS"
+
+    //control keywords
+    const val ADD_TIMESTAMP = "ADD_TIMESTAMP"
     const val END_OF_SESSION = "END_OF_SESSION"
     const val SAVE_CHANGES = "SAVE_CHANGES"
+
 
 }

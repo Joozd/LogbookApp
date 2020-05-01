@@ -1,9 +1,10 @@
 package nl.joozd.logbookapp.data.sharedPrefs
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import kotlin.reflect.KProperty
 
-class  JoozdLogSharedPrefs<T>(private val prefs: SharedPreferences, private val defaultValue: T){
+class  JoozdLogSharedPrefs<T>(private val sharedPrefs: SharedPreferences, private val defaultValue: T){
 
 
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
@@ -15,7 +16,7 @@ class  JoozdLogSharedPrefs<T>(private val prefs: SharedPreferences, private val 
     }
 
     private fun getPreference(key: String, defaultValue: T): T {
-        with(prefs) {
+        with(sharedPrefs) {
             @Suppress("UNCHECKED_CAST")
             return when (defaultValue) {
                 is Boolean -> getBoolean(key, defaultValue)
@@ -29,7 +30,7 @@ class  JoozdLogSharedPrefs<T>(private val prefs: SharedPreferences, private val 
     }
 
     private fun setPreference(key: String, value: T) {
-        with(prefs.edit()) {
+        sharedPrefs.edit {
             when (value) {
                 is Boolean -> putBoolean(key, value)
                 is Int -> putInt(key, value)
@@ -37,7 +38,7 @@ class  JoozdLogSharedPrefs<T>(private val prefs: SharedPreferences, private val 
                 is Float -> putFloat(key, value)
                 is String -> putString(key, value)
                 else -> throw IllegalArgumentException()
-            }.apply()
+            }
         }
     }
 }

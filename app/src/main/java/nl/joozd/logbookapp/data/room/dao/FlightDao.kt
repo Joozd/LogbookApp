@@ -38,7 +38,7 @@ package nl.joozd.logbookapp.data.room.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import nl.joozd.logbookapp.data.room.model.FlightData
+import nl.joozd.logbookapp.data.dataclasses.FlightData
 
 /**
  * Saves flights as ModelFlight, takes care of changing into Flight
@@ -59,7 +59,10 @@ interface FlightDao {
     fun requestNonDeletedLiveData(): LiveData<List<FlightData>>
 
     @Query("SELECT MAX(flightID) from FlightData")
-    fun highestId(): Int?
+    suspend fun highestId(): Int?
+
+    @Query("SELECT * FROM FlightData WHERE flightID = :id LIMIT 1")
+    suspend fun fetchFlightByID(id: Int): FlightData?
 
     @Insert (onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFlights(vararg flightData: FlightData)

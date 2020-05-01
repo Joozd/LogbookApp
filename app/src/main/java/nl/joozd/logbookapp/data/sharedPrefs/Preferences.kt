@@ -25,39 +25,26 @@ import nl.joozd.logbookapp.ui.App
 import java.security.MessageDigest
 
 object Preferences {
-    //key names:
-    const val CURRENTVERSION = 1 // version of this Preferences instance, only update if changing something in this companion object
-    /*
-    Version history: 1  -> First implementation, had USERNAME, PASSWORD and STOREDVERSION
-    */
-
-    private const val STOREDVERSION = "storedVersion"
     private const val USERNAME = "username"
     private const val PASSWORD = "password" // saved in plaintext, warn users about this
-    private const val LAST_UPDATE_TIMESTAMP = "lastUpdateTime"
-    private const val SERVER_TIME_OFFSET = "serverTimeOffset"
-    private const val AIRPORT_DB_VERSION = "airportDbVersion"
 
     // private const val USE_IATA_AIRPORTS = "useIataAirports"
     private const val STANDARD_TAKEOFF_LANDING_TIMES = "standardTakeoffLandingTimes"
 
-
     private val sharedPref by lazy{
-        val context = App.instance.ctx
-        context.getSharedPreferences(
-            context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        with (App.instance.ctx) {
+            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        }
+    }
+
+    fun getSharedPreferences() = with (App.instance.ctx) {
+        getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
     }
 
 
-    var version: Int
-        get() = sharedPref.getInt(STOREDVERSION, 0)
-        set(v) = with(sharedPref.edit()) {
-            putInt(STOREDVERSION, v)
-            apply()
-        }
-
     /**
      * username is the users' username.
+     * cannot delegate as that doesn't support null
      */
     var username: String?
         get() = sharedPref.getString(USERNAME,null)
@@ -100,26 +87,11 @@ object Preferences {
         return null
     }
 
-    var lastUpdateTime: Long
-        get() = sharedPref.getLong(LAST_UPDATE_TIMESTAMP,-1)
-        set(v) = with(sharedPref.edit()) {
-            putLong(LAST_UPDATE_TIMESTAMP, v)
-            apply()
-        }
+    var lastUpdateTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
 
-    var serverTimeOffset: Long
-        get() = sharedPref.getLong(SERVER_TIME_OFFSET,0)
-        set(v) = with(sharedPref.edit()) {
-            putLong(SERVER_TIME_OFFSET, v)
-            apply()
-        }
+    var serverTimeOffset: Long by JoozdLogSharedPrefs(sharedPref, 0)
 
-    var airportDbVersion: Int
-        get() = sharedPref.getInt(AIRPORT_DB_VERSION,0)
-        set(v) = with(sharedPref.edit()) {
-            putInt(AIRPORT_DB_VERSION, v)
-            apply()
-        }
+    var airportDbVersion: Int by JoozdLogSharedPrefs(sharedPref, 0)
 
     /***********************
      *   UI preferences:   *
@@ -130,20 +102,11 @@ object Preferences {
      */
 
     var useIataAirports: Boolean by JoozdLogSharedPrefs(sharedPref, false)
-//        get() = sharedPref.getBoolean(USE_IATA_AIRPORTS,false)
-//        set(v) = with(sharedPref.edit()) {
-//            putBoolean(USE_IATA_AIRPORTS, v)
-//            apply()
-//        }
+
 
     /*************************
      * Other settings
      *************************/
 
-    var standardTakeoffLandingTimes: Int
-        get() = sharedPref.getInt(STANDARD_TAKEOFF_LANDING_TIMES,30)
-        set(v) = with(sharedPref.edit()) {
-            putInt(STANDARD_TAKEOFF_LANDING_TIMES, v)
-            apply()
-        }
+    var standardTakeoffLandingTimes: Int by JoozdLogSharedPrefs(sharedPref, 30)
 }

@@ -31,14 +31,14 @@ import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 
 import nl.joozd.logbookapp.data.room.Repository
-import nl.joozd.logbookapp.data.viewmodel.JoozdlogViewModel
+import nl.joozd.logbookapp.model.viewmodels.MainViewModel
 
 @Deprecated ("use EditFlightFragment")
 class EditFlightNew : Fragment(), CoroutineScope by MainScope() {
     companion object{
         const val TAG = "EditFlightNew"
     }
-    private val viewModel: JoozdlogViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels()
     private val repository = Repository.getInstance()
     private val supportFragmentManager: FragmentManager by lazy { requireActivity().supportFragmentManager }
     private var autoUpdateJob: Job = Job()

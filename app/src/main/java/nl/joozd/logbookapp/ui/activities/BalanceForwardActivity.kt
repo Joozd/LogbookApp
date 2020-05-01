@@ -22,18 +22,13 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
-import android.view.MenuItem
-import android.widget.ExpandableListView
 import androidx.appcompat.widget.Toolbar
-import kotlinx.android.synthetic.main.activity_balance_forward.*
 import kotlinx.android.synthetic.main.activity_balance_forward.my_toolbar
 import nl.joozd.logbookapp.R
 import nl.joozd.joozdlogcommon.BalanceForward
 
 
 import nl.joozd.logbookapp.ui.adapters.BalanceForwardAdapter
-import nl.joozd.logbookapp.ui.dialogs.AddBalanceForwardDialog
-import nl.joozd.logbookapp.ui.utils.CustomSnackbar
 
 
 class BalanceForwardActivity : AppCompatActivity() {

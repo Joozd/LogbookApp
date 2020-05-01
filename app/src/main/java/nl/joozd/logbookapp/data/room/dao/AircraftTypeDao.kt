@@ -1,5 +1,6 @@
 package nl.joozd.logbookapp.data.room.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -10,6 +11,9 @@ import nl.joozd.logbookapp.data.room.model.AircraftTypeData
 interface AircraftTypeDao {
     @Query("SELECT * FROM AircraftTypeData")
     fun requestAllAircraftTypes(): List<AircraftTypeData>
+
+    @Query("SELECT * FROM AircraftTypeData")
+    fun requestLiveAircraftTypes(): LiveData<List<AircraftTypeData>>
 
     @Query("SELECT * FROM AircraftTypeData where name = :name LIMIT 1")
     fun getAircraftType(name: String): AircraftTypeData?

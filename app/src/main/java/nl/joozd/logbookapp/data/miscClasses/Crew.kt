@@ -20,6 +20,7 @@ package nl.joozd.logbookapp.data.miscClasses
 
 import nl.joozd.logbookapp.extensions.getBit
 import nl.joozd.logbookapp.extensions.setBit
+import nl.joozd.logbookapp.extensions.toInt
 
 /************************************************************************************
  * CrewValue will store info on augmented crews:                                    *
@@ -48,5 +49,9 @@ data class Crew(var crewSize: Int = 2,
         value = value.setBit(4, didTakeoff).setBit(5, didLanding)
         value += takeoffLandingTimes.shl(6)
         return value
+    }
+    fun getLogTime(totalTime: Int, pic: Boolean = false): Int{
+        if (pic) return totalTime
+        return ((totalTime-2*takeoffLandingTimes)/crewSize) * 2 + takeoffLandingTimes * (didTakeoff.toInt() + didLanding.toInt())
     }
 }

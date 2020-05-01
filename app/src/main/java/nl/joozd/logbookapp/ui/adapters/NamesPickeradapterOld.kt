@@ -23,7 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.item_names_dialog.*
+import kotlinx.android.synthetic.main.item_picker_dialog.*
 import nl.joozd.logbookapp.R
 
 import nl.joozd.logbookapp.extensions.ctx
@@ -37,7 +37,7 @@ class NamesPickeradapterOld(/* private val namesWorker: NamesWorker, */ private 
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NamesPickeradapterOld.ViewHolder {
-        val view = LayoutInflater.from(parent.ctx).inflate(R.layout.item_names_dialog, parent, false)
+        val view = LayoutInflater.from(parent.ctx).inflate(R.layout.item_picker_dialog, parent, false)
         return ViewHolder(view)
     }
 

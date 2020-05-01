@@ -68,7 +68,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout17"
+                android:id="@+id/registrationFieldLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -80,7 +80,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/aircraftPickerTopHalf">
 
             <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/aircraftSearchField"
+                    android:id="@+id/registrationField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/search"
@@ -93,9 +93,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:text="@string/setThis"
-                app:layout_constraintBottom_toBottomOf="@+id/textInputLayout17"
+                app:layout_constraintBottom_toBottomOf="@+id/registrationFieldLayout"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textInputLayout17" />
+                app:layout_constraintTop_toTopOf="@+id/registrationFieldLayout" />
 
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/aircraftPickerList"
@@ -107,7 +107,7 @@
                 android:background="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout17">
+                app:layout_constraintTop_toBottomOf="@+id/registrationFieldLayout">
 
         </androidx.recyclerview.widget.RecyclerView>
 
@@ -196,7 +196,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
-                android:id="@+id/aircraftPickerOk"
+                android:id="@+id/aircraftPickerSave"
                 android:layout_width="100dp"
                 android:layout_height="30dp"
                 android:layout_marginTop="16dp"
@@ -225,7 +225,7 @@
                 android:textColor="?attr/colorAccent"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/aircraftPickerOk"
+                app:layout_constraintEnd_toStartOf="@+id/aircraftPickerSave"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent" />
 

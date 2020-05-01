@@ -101,18 +101,6 @@ fun View.animateToZeroHeight() {
 
 }
 
-fun TextView.setLayoutToOff(){
-    val color= (this.textColor % 0x01000000)
-    this.textColor=(0x20000000 + color)
-    this.setTypeface(null, Typeface.NORMAL)
-}
-
-fun TextView.setLayoutToOn(){
-    val color= (this.textColor % 0x01000000)
-    this.textColor=(0xCC000000 + color)
-    this.setTypeface(null, Typeface.BOLD)
-}
-
 
 var TextView.textColor: Long
     get() {

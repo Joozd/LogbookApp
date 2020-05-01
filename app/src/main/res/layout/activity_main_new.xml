@@ -25,7 +25,7 @@
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
     android:background="#000000"
-    tools:context=".ui.activities.mainactivity.MainActivity">
+    tools:context=".ui.activities.MainActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/my_toolbar"

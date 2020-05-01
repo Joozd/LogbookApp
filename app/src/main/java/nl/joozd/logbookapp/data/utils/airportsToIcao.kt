@@ -18,7 +18,7 @@
 
 package nl.joozd.logbookapp.data.utils
 
-import nl.joozd.logbookapp.data.dataclasses.Flight
+import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 
 

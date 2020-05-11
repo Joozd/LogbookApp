@@ -20,7 +20,7 @@ package nl.joozd.logbookapp.ui.utils
 
 import android.content.Context
 import android.widget.Toast
-import nl.joozd.logbookapp.ui.App
+import nl.joozd.logbookapp.App
 
 fun toast(message: String) =
     Toast.makeText(App.instance.ctx, message, Toast.LENGTH_SHORT).run { show() }

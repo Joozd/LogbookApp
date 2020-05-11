@@ -22,17 +22,14 @@ import nl.joozd.joozdlogcommon.serializing.*
 import nl.joozd.joozdlogcommon.serializing.unwrap
 import nl.joozd.joozdlogcommon.serializing.wrap
 
+/**
+ * BasicAircraft is a communication format that describes the [registration] and [type] of an aircraft.
+ * [timestamp] is for syncing purposes.
+ */
 data class BasicAircraft(
-    val id: Int,
     val registration: String,
-    val manufacturer: String,
-    val model: String,
-    val engine_type: String,
-    val mtow: Int,
-    val se: Int,
-    val me: Int,
-    val multipilot: Int,
-    val isIfr: Int
+    val type: String, // AircraftType.name
+    val timestamp: Long
 ): JoozdlogSerializable {
     override fun serialize(): ByteArray {
         var serialized = ByteArray(0)
@@ -40,34 +37,17 @@ data class BasicAircraft(
         serialized += wrap(component1())
         serialized += wrap(component2())
         serialized += wrap(component3())
-        serialized += wrap(component4())
-        serialized += wrap(component5())
-        serialized += wrap(component6())
-        serialized += wrap(component7())
-        serialized += wrap(component8())
-        serialized += wrap(component9())
-        serialized += wrap(component10())
 
         return serialized
     }
     companion object: JoozdlogSerializable.Creator {
 
-        /**
-         * Unfortunately, I don't know how to do this with non-typed functions
-         */
         override fun deserialize(source: ByteArray): BasicAircraft {
             val wraps = serializedToWraps(source)
             return BasicAircraft(
                 unwrap(wraps[0]),
                 unwrap(wraps[1]),
-                unwrap(wraps[2]),
-                unwrap(wraps[3]),
-                unwrap(wraps[4]),
-                unwrap(wraps[5]),
-                unwrap(wraps[6]),
-                unwrap(wraps[7]),
-                unwrap(wraps[8]),
-                unwrap(wraps[9])
+                unwrap(wraps[2])
             )
         }
     }

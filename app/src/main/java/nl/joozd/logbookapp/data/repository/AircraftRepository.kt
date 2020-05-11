@@ -9,6 +9,7 @@ import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.AircraftTypeConsensus
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.repository.helpers.Aircraft
+import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.dao.AircraftTypeConsensusDao
 import nl.joozd.logbookapp.data.room.dao.AircraftTypeDao
@@ -17,7 +18,10 @@ import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
 import nl.joozd.logbookapp.data.room.model.toAircraftType
 import nl.joozd.logbookapp.data.room.model.toAircraftTypeConsensus
 import nl.joozd.logbookapp.data.room.model.toModel
-import nl.joozd.logbookapp.ui.App
+import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.utils.TimestampMaker
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
+import java.util.*
 
 /**
  * Gets data for aircraft (types, specific aircraft (by registration) or consensus (reg + probable type)
@@ -44,7 +48,7 @@ class AircraftRepository(
     private val _cachedRegistrations = MutableLiveData<List<AircraftRegistrationWithTypeData>>()
     init{
         launch { _cachedRegistrations.value = getAircraftRegistrationsWithType(true) }
-        getLiveRegistrations().observeForever { _cachedRegistrations.value }
+        getLiveRegistrations().observeForever { _cachedRegistrations.value = it }
     }
 
     val liveAircraftTypes: LiveData<List<AircraftType>> =
@@ -65,9 +69,10 @@ class AircraftRepository(
      * If it only gets a [type], it will set previous aircraft to that type, null stays null
      */
     fun updateActiveAircraft(reg: String? = null, type: AircraftType? = null, flight: Flight? = null){
-        val registration = if (reg == null && type == null) // if only flight entered, set reg from flight
-            flight?.registration
-        else reg
+        val registration =
+            if (reg == null && type == null) // if only flight entered, set reg from flight
+                flight?.registration
+            else reg
         registration?.let{r ->
             val oldAircraftType = activeAircraft.value?.type
             launch(dispatcher) {
@@ -81,8 +86,29 @@ class AircraftRepository(
                 _activeAircraft.value = oldAircraft.copy(type = t, source = Aircraft.MANUAL)
             }
         }
-
+        Log.d("AircraftRepository", "activeAircraft is now ${activeAircraft.value}")
     }
+
+    /**
+     * Finds an Aircraft in DB
+     * If not found, returns null
+     * Searches by exact match first, then end to start (so XZ will return PH-EXZ before PH-XZA)
+     */
+    suspend fun findAircraft(reg: String?): Aircraft? = reg?.let { r ->
+        Log.d("AircraftRepository", "searcing for registration: $reg")
+        val knownRegsInDb =
+            withContext(dispatcher) { getAircraftRegistrationsWithType().map { arwt -> arwt.registration } }
+        Log.d("AircraftRepository", "${knownRegsInDb.size} regs found: $knownRegsInDb")
+
+        withContext(Dispatchers.Default) { r.findBestHitForRegistration(knownRegsInDb) }?.let { foundRegs ->
+            withContext(dispatcher) { findAircraftByRegistration(foundRegs) }
+        }
+    }. also{
+        Log.d("AircraftRepository", "found: $it")
+    }
+
+
+
 
 
     /********************************************************************************************
@@ -127,6 +153,11 @@ class AircraftRepository(
 
     suspend fun clearAircraftTypeDb() = withContext(NonCancellable) { aircraftTypeDao.clearDb() }
 
+    suspend fun replaceAllTypesWith(types: List<AircraftType>){
+        clearAircraftTypeDb()
+        saveAircraftTypes(types)
+    }
+
 
     /********************************************************************************************
      * Aircraft Type Consensus Functions
@@ -146,23 +177,65 @@ class AircraftRepository(
         }
     }
 
+    /**
+     * Find registrations that match [registration] in consensus DB
+     * If [registration] has an exact match, return that registration
+     * If [registration] matches multiple registrations (ie. XZ in PH-EXZ and PH-XZA) return all of those
+     */
+    suspend fun getRegistrationsWithConsensus(registration: String): List<String>{
+        val allRegs = withContext(dispatcher) { getConsensusData().map { it.registration } }
+        allRegs.firstOrNull{it == registration}?.let { return listOf(registration) }
+        return allRegs.filter{registration in it}
+    }
+
 
     /********************************************************************************************
-     * Aircraft  Functions
+     * Aircraft Functions
      ********************************************************************************************/
 
-    suspend fun getAircraftRegistrationsWithType(forceReload: Boolean = false) = withContext(Dispatchers.IO) {
+    suspend fun getAircraftRegistrationsWithType(forceReload: Boolean = false): List<AircraftRegistrationWithTypeData> = withContext(Dispatchers.IO) {
         if (forceReload) registrationDao.requestAllRegistrations()
         else _cachedRegistrations.value ?: registrationDao.requestAllRegistrations()
     }
 
     fun getLiveRegistrations() = registrationDao.requestLiveRegistrations()
 
-    suspend fun saveAircraftRegistrationsWithType(acrwt: List<AircraftRegistrationWithTypeData>) = withContext(NonCancellable){
+    suspend fun saveAircraftRegistrationsWithType(acrwt: List<AircraftRegistrationWithTypeData>) = withContext(dispatcher + NonCancellable){
         registrationDao.insertRegistrations(*acrwt.toTypedArray())
     }
-    suspend fun saveAircraftRegistrationsWithType(acrwt: AircraftRegistrationWithTypeData) = withContext(NonCancellable){
+    suspend fun saveAircraftRegistrationsWithType(acrwt: AircraftRegistrationWithTypeData) = withContext(dispatcher + NonCancellable){
         registrationDao.insertRegistrations(acrwt)
+    }
+
+    fun updateAircraftRegistrationWithType(registration: String, type: AircraftType){
+        val reg = registration.toUpperCase(Locale.ROOT)
+        launch(NonCancellable) {
+            val currentAcrwt =
+                withContext(dispatcher) { getAircraftRegistrationsWithType() }.firstOrNull { it.registration == reg }
+            val newAcrwt = when {
+                currentAcrwt == null -> AircraftRegistrationWithTypeData(
+                    reg,
+                    type.name,
+                    false,
+                    timestamp = TimestampMaker.nowForSycPurposes
+                )
+                currentAcrwt.type == type.name -> currentAcrwt
+                currentAcrwt.knownToServer -> AircraftRegistrationWithTypeData(
+                    reg,
+                    type.name,
+                    false,
+                    currentAcrwt.type,
+                    TimestampMaker.nowForSycPurposes
+                )
+                else -> currentAcrwt.copy(
+                    type = type.name,
+                    timestamp = TimestampMaker.nowForSycPurposes
+                )
+            }
+            saveAircraftRegistrationsWithType(newAcrwt).also{
+                Log.d("AircraftRepository", "acrwt = $newAcrwt")
+            }
+        }
     }
 
     /**
@@ -195,7 +268,7 @@ class AircraftRepository(
         }
     }
 
-    private suspend fun findAircraftByRegistration(registration: String, flightData: Flight?): Aircraft {
+    private suspend fun findAircraftByRegistration(registration: String, flightData: Flight? = null): Aircraft {
         var source = Aircraft.NONE
         getAircraftByRegistration(registration)?.let{acwtd ->
             getAircraftType(acwtd.type)?.let{foundType ->
@@ -215,5 +288,14 @@ class AircraftRepository(
         //If we get here, no type found
         return Aircraft(registration, null, Aircraft.NONE)
     }
+
+    /********************************************************************************************
+     * Sync Functions
+     ********************************************************************************************/
+
+    fun checkIfAircraftTypesUpToDate(){
+        JoozdlogWorkersHub.synchronizeAircraftTypes()
+    }
+
 
 }

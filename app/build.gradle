@@ -11,8 +11,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 26
         targetSdkVersion 29
-        versionCode 1
-        versionName "0.0.1 work in progress"
+        versionCode 2
+        versionName "0.1.0 work in progress"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

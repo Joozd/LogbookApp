@@ -4,12 +4,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_flight.*
 import kotlinx.android.synthetic.main.item_sim.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
+import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.getDateStringFromEpochSeconds
 
 /**
  * Adapter for RecyclerView for displaying Flights in JoozdLog
@@ -18,7 +20,7 @@ import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
  */
 class FlightsAdapter(
     var list: List<DisplayFlight> = emptyList()
-): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+): RecyclerViewFastScroller.OnPopupTextUpdate, RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var onDelete: (Int) -> Unit = {}
     var itemClick: (Int) -> Unit = {}
@@ -33,6 +35,9 @@ class FlightsAdapter(
                 simAircraftTypeText.text = type
                 simRemarksText.text = remarks
                 simTotalTimeText.text = simTime
+                simTakeoffLandingsText.text = takeoffsAndLandings
+
+                simLayout.closeIfSwiped()
                 simLayout.setOnClickListener { onClick(flightID) }
                 simDeleteLayer.setOnClickListener { onDelete(flightID) }
             }
@@ -65,6 +70,7 @@ class FlightsAdapter(
                 isPFText.shouldBeVisible(pf)
                 remarksText.shouldBeVisible(remarks.isNotEmpty())
 
+                flightLayout.closeIfSwiped()
                 flightLayout.setOnClickListener { onClick(flightID) }
                 deleteLayer.setOnClickListener { onDelete(flightID) }
             }
@@ -98,5 +104,9 @@ class FlightsAdapter(
     companion object{
         const val FLIGHT = 1
         const val SIM = 2
+    }
+
+    override fun onChange(position: Int): CharSequence {
+        return with (list[position]) { "$dateDay $monthAndYear"}
     }
 }

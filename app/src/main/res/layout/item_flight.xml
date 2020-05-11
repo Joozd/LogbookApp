@@ -261,7 +261,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:gravity="bottom"
             android:includeFontPadding="false"
             tools:text="23"
             android:textAlignment="center"

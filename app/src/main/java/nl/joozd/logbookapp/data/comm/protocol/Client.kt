@@ -38,7 +38,7 @@ class Client: Closeable {
     companion object{
         const val SERVER_URL = "joozd.nl"
         const val SERVER_PORT = 1337
-        const val TAG = "comm.protocol.Client"
+        const val TAG = "data/comm.protocol.Client"
         const val MAX_MESSAGE_SIZE = Int.MAX_VALUE-1
     }
 
@@ -49,8 +49,8 @@ class Client: Closeable {
             SERVER_PORT
         )
     } catch (ioe: IOException){
-        Log.e(TAG, "Error creating SSLSocket:")
-        Log.e(TAG, ioe.stackTrace.toString())
+        Log.w(TAG, "Error creating SSLSocket:")
+        Log.w(TAG, ioe.stackTrace.toString())
         null
     }
 

@@ -20,6 +20,7 @@ package nl.joozd.logbookapp.data.comm
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.comm.protocol.Client
@@ -42,37 +43,17 @@ import java.time.Instant
  */
 
 object Cloud {
+    var syncingFlights = false
     const val TAG = "JoozdLogCloud object"
     //TODO make listeners for progress tracking+
 
-    suspend fun getTime(): Long = withContext(Dispatchers.IO) {
+    /**********************************************************************************************
+     * Utility functions
+     **********************************************************************************************/
+
+    suspend fun getTime(): Long? = withContext(Dispatchers.IO) {
         Client().use { client ->
             ServerFunctions.getTimestamp(client)
-        }
-    }
-
-    /**
-     * Just send all flights to server.
-     * @param f: List of flights
-     * @return: Error code, 0 if all OK
-     * Error codes:
-     *  1: Login failed
-     *  2: Sending flights failed
-     */
-    suspend fun justSendFlights(f: List<Flight>): Int = withContext(Dispatchers.IO) {
-        Client().use { client ->
-            val timeStamp = ServerFunctions.getTimestamp(client)
-            val loggedIn = ServerFunctions.login(client) == true
-            when {
-                !loggedIn -> 1
-                !ServerFunctions.sendFlights(client, f) -> 2
-                else -> {
-                    ServerFunctions.sendTimeStamp(client, timeStamp)
-                    ServerFunctions.save(client)
-                    ServerFunctions.finish(client)
-                    0
-                }
-            }
         }
     }
 
@@ -85,20 +66,55 @@ object Cloud {
         }
     }
 
-    suspend fun requestAllFlights(): List<Flight>? = withContext(Dispatchers.IO) {
-        Client().use {
-            if (ServerFunctions.login(it) != true) null
-            else
-                try {
-                    ServerFunctions.requestFlightsSince(it, -10L)
-                } catch (nae: NotAuthorizedException) {
-                    Log.e(TAG, nae.stackTrace.toString())
-                    null
-                }
+    /**********************************************************************************************
+     * Airport sync functions
+     **********************************************************************************************/
+
+    suspend fun getAirportDbVersion(): Int = withContext(Dispatchers.IO) {
+        Client().use { server ->
+            ServerFunctions.getAirportDbVersion(server) // no need to handle errors as negative values won't be higher than available ones
         }
     }
 
-    suspend fun requestAllFlights(f: (Int) -> Unit): List<Flight>? =
+    // returns List<BasicAirport>
+    suspend fun getAirports(listener: (Int) -> Unit = {}) = withContext(Dispatchers.IO) {
+        Client().use {
+            ServerFunctions.getAirports(it, listener)
+        }
+    }
+
+    /**********************************************************************************************
+     * Aircraft sync functions
+     **********************************************************************************************/
+
+    /**
+     * Gets AircraftTypeConsensus from server
+     */
+    suspend fun getAircraftConsensus(listener: (Int) -> Unit = {}): List<AircraftTypeConsensusData> {
+        TODO("Not Implemented")
+    }
+
+    suspend fun getAircraftTypes(listener: (Int) -> Unit = {}): List<AircraftType>? = withContext(Dispatchers.IO) {
+        Client().use{
+            ServerFunctions.getAircraftTypes(it, listener)
+        }
+    }
+
+    suspend fun getAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? = withContext(Dispatchers.IO) {
+        Client().use{
+            ServerFunctions.getAircraftTypesVersion(it, listener)
+        }
+    }
+
+    /**********************************************************************************************
+     * Flights sync functions
+     **********************************************************************************************/
+
+    /**
+     * Gets all flights from server
+     * @param f: Listener for progress
+     */
+    suspend fun requestAllFlights(f: (Int) -> Unit = {}): List<Flight>? =
         withContext(Dispatchers.IO) {
             Client().use {
                 if (ServerFunctions.login(it) != true) {
@@ -116,145 +132,136 @@ object Cloud {
             }
         }
 
-
-    suspend fun getAirportDbVersion(): Int = withContext(Dispatchers.IO) {
-        Client().use { server ->
-            ServerFunctions.getAirportDbVersion(server) // no need to handle errors as negative values won't be higher than available ones
-        }
-    }
-
-    // returns List<BasicAirport>
-    suspend fun getAirports(listener: (Int) -> Unit = {}) = withContext(Dispatchers.IO) {
-        Client().use {
-            ServerFunctions.getAirports(it, listener)
-        }
-    }
-
     /**
-     * Updates airports from server to DB
-     * @param listener: A listener function that will get a completion factor of 0-100
-     *      Listener assumes download and saving will both be 50% of work.
+     * Just send all flights to server.
+     * @param f: List of flights
+     * @return: Error code, 0 if all OK
+     * Error codes:
+     *  1: Login failed
+     *  2: Sending flights failed
+     *  3: time sync failed
      */
-    suspend fun updateAirportsDb(listener: (Int) -> Unit): Boolean = withContext(Dispatchers.IO) {
-        getAirports{ listener(it*99/ 100) }?.let {
-            val airportRepository = AirportRepository.getInstance()
-            airportRepository.clearDB()
-            listener(99)
-            airportRepository.save(it.map{ba ->
-                Airport(
-                    ba
-                )
-            })
-            listener(100)
-            true
-        } ?: false
-    }
-
-    /**
-     * Gets AircraftTypeConsensus from server
-     */
-    suspend fun getAircraftConsensus(listener: (Int) -> Unit = {}): List<AircraftTypeConsensusData> {
-        TODO("Not Implemented")
-    }
-
-    suspend fun getAircraftTypes(listener: (Int) -> Unit = {}): List<AircraftType>? = withContext(Dispatchers.IO) {
-        Client().use{
-            ServerFunctions.getAircraftTypes(it, listener)
-        }
-    }
-
-
-    /**
-     * @return true on success, false on critical fail (ie wrong credentials), null on server error (retry later)
-     * Listsner will give an estimated completion percentage
-     */
-    suspend fun runFullUpdate(listener: (Int) -> Unit = {}): Boolean? =
-        withContext(Dispatchers.IO) f@{
-            val flightRepository = FlightRepository.getInstance()
-            listener(0)
-            Client().use { server ->
-                listener(5) // Connection is made, it's something!
-                with(ServerFunctions) {
-
-                    val timeStamp: Long = getTimestamp(server)
-                    Log.d(TAG, "Got timestamp ${Instant.ofEpochSecond(timeStamp)}")
-                    listener(10)
-
-
-                    //update timeOffset for local flights
-                    Preferences.serverTimeOffset = timeStamp - Instant.now().epochSecond
-
-                    //Login and handle if that fails:
-                    when (login(server)) {
-                        false -> return@f false
-                        null -> return@f null
-                    }
-                    listener(15)
-
-                    //get new flights from server
-                    //listener from 15 to 40 (25 total)
-                    val newFlightsFromServer = try {
-                        requestFlightsSince(
-                            server,
-                            Preferences.lastUpdateTime
-                        ) { listener(15 + it / 4) }?.map { it.copy(timeStamp = timeStamp) }
-                            ?: return@f null
-                    } catch (e: NotAuthorizedException) {
-                        return@f false
-                    }
-                    listener(40)
-                    val allFlights = flightRepository.requestWholeDB()
-                    listener(45)
-
-                    //fix possible flightID conflicts
-                    val newLocalFlights = allFlights.filter { it.unknownToServer.toBoolean() }
-                    val fixedLocalFlights = mutableListOf<Flight>()
-
-                    val takenIDs = newFlightsFromServer.map { it.flightID }
-                    val lowestFixedID =
-                        (takenIDs.max()
-                            ?: -1) + 1 // null on empty list, but empty list means no fixes
-                    val newFlights = newLocalFlights.filter { it.flightID in takenIDs }.mapIndexed { index: Int, flight: Flight ->
-                         flight.copy(flightID = lowestFixedID + index) }
-                    flightRepository.delete(newLocalFlights.filter { it.flightID in takenIDs })
-                    flightRepository.saveFlights(newFlights)
-                    fixedLocalFlights.addAll(newFlights)
-
-                    listener(50)
-                    //previous block added all fixed flights to a list, now add the ones that didn't need fixing:
-                    fixedLocalFlights.addAll(newLocalFlights.filter { it.flightID !in takenIDs })
-
-                    //prepare list to send to Server:
-                    // -> add fixed and not-fixed flights together
-                    // -> change their timestamps to now
-                    // (this means that editing flights on two devices before syncing will stick to most recent sync, not most recent edit)
-                    val flightsToSend =
-                        (allFlights.filter { it.timeStamp > Preferences.lastUpdateTime && it.unknownToServer == 0 } + // Not including flightslist we just fixed
-                                fixedLocalFlights)
-                            .map { it.copy(timeStamp = timeStamp, unknownToServer = 0) }
-
-                    //send the flights to server, retry on fail as login worked earlier
-                    // Could make this incrementally increase progbar, but it would make things somewhat more inefficient. Lets see.
-                    if (!sendFlights(server, flightsToSend)) return@f null
-                    listener(75)
-                    //add timestamp to this transaction
-                    if (!sendTimeStamp(server, timeStamp)) return@f null
-                    listener(80)
-                    //save changes on server
-                    if (!save(server)) return@f null
-                    listener(85)
-
-                    //mark time of this successful sync
-                    Preferences.lastUpdateTime = timeStamp
-
-                    //Save flights with current timestamps and clear `changed` flags
-                    //listsner from 85 to 100
-                    flightRepository.saveFlights(flightsToSend.map { it.copy(unknownToServer = 0) } + newFlightsFromServer) // { listener(85 + it * 15 / 100) } // TODO Listsner not implemented
-
-                    // Profit!
-                    listener(100)
-                    true
+    suspend fun justSendFlights(f: List<Flight>): Int = withContext(Dispatchers.IO) {
+        Client().use { client ->
+            val timeStamp = ServerFunctions.getTimestamp(client) ?: return@withContext 3
+            val loggedIn = ServerFunctions.login(client) == true
+            when {
+                !loggedIn -> 1
+                !ServerFunctions.sendFlights(client, f) -> 2
+                else -> {
+                    ServerFunctions.sendTimeStamp(client, timeStamp)
+                    ServerFunctions.save(client)
+                    ServerFunctions.finish(client)
+                    0
                 }
             }
+        }
+    }
+
+
+    /**
+     * @return timestamp on success, -1 on critical fail (ie wrong credentials), null on server error (retry later)
+     * Listsner will give an estimated completion percentage
+     */
+
+    suspend fun syncAllFlights(flightRepository: FlightRepository, listener: (Int) -> Unit = {}): Long? =
+        try {
+            withContext(Dispatchers.IO) f@{
+                syncingFlights = true
+                listener(0)
+                Client().use { server ->
+                    listener(5) // Connection is made, it's something!
+                    with(ServerFunctions) {
+
+                        val timeStamp: Long = getTimestamp(server) ?: -1
+                        Log.d(TAG, "Got timestamp ${Instant.ofEpochSecond(timeStamp)}")
+                        listener(10)
+
+
+                        //update timeOffset for local flights
+                        Preferences.serverTimeOffset = timeStamp - Instant.now().epochSecond
+
+                        //Login and handle if that fails:
+                        when (login(server)) {
+                            false -> return@f -1L
+                            null -> return@f null.also{Log.d("Cloud", "Login returned null")}
+                        }
+                        listener(15)
+
+                        //get new flights from server
+                        //listener from 15 to 40 (25 total)
+                        val newFlightsFromServer = try {
+                            requestFlightsSince(
+                                server,
+                                Preferences.lastUpdateTime
+                            ) { listener(15 + it / 4) }?.map { it.copy(timeStamp = timeStamp) }
+                                ?: return@f null.also{Log.d("Cloud", "requestFlightsSince returned null")}
+                        } catch (e: NotAuthorizedException) {
+                            return@f -1L
+                        }
+                        listener(40)
+                        val completeFlightDB = flightRepository.requestWholeDB()
+                        listener(45)
+
+                        //fix possible flightID conflicts
+                        val newLocalFlights =
+                            completeFlightDB.filter { it.unknownToServer.toBoolean() }
+                        val fixedLocalFlights = mutableListOf<Flight>()
+
+                        val takenIDs = newFlightsFromServer.map { it.flightID }
+                        val lowestFixedID =
+                            (takenIDs.max()
+                                ?: -1) + 1 // null on empty list, but empty list means no fixes
+                        val newFlights = newLocalFlights.filter { it.flightID in takenIDs }
+                            .mapIndexed { index: Int, flight: Flight ->
+                                flight.copy(flightID = lowestFixedID + index)
+                            }
+                        launch(Dispatchers.Main) {
+                            flightRepository.delete(newLocalFlights.filter { it.flightID in takenIDs })
+                            flightRepository.saveFlights(newFlights)
+                        }
+                        fixedLocalFlights.addAll(newFlights)
+
+                        listener(50)
+                        //previous block added all fixed flights to a list, now add the ones that didn't need fixing:
+                        fixedLocalFlights.addAll(newLocalFlights.filter { it.flightID !in takenIDs })
+
+                        //prepare list to send to Server:
+                        // -> add fixed and not-fixed flights together
+                        // -> change their timestamps to now
+                        // (this means that editing flights on two devices before syncing will stick to most recent sync, not most recent edit)
+                        val flightsToSend =
+                            (completeFlightDB.filter { it.timeStamp > Preferences.lastUpdateTime && it.unknownToServer == 0 } + // Not including flightslist we just fixed
+                                    fixedLocalFlights)
+                                .map { it.copy(timeStamp = timeStamp, unknownToServer = 0) }
+
+                        //send the flights to server, retry on fail as login worked earlier
+                        // Could make this incrementally increase progbar, but it would make things somewhat more inefficient. Lets see.
+                        if (!sendFlights(server, flightsToSend)) return@f null.also{Log.d("Cloud", "sendFlights returned null")}
+                        listener(75)
+                        //add timestamp to this transaction
+                        if (!sendTimeStamp(server, timeStamp)) return@f null.also{Log.d("Cloud", "sendTimeStamp returned null")}
+                        listener(80)
+                        //save changes on server
+                        if (!save(server)) return@f null.also{Log.d("Cloud", "save returned null")}
+                        listener(85)
+
+                        //mark time of this successful sync
+                        Preferences.lastUpdateTime = timeStamp
+
+                        //Save flights with current timestamps and clear `changed` flags
+                        //listsner from 85 to 100
+                        launch(Dispatchers.Main) {
+                            flightRepository.saveFlights(flightsToSend.map { it.copy(unknownToServer = 0) } + newFlightsFromServer) // { listener(85 + it * 15 / 100) } // TODO Listsner not implemented
+                        }
+
+                        // Profit!
+                        listener(100)
+                        timeStamp
+                    }
+                }
+            }
+        } finally {
+            syncingFlights = false
         }
 }

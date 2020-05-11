@@ -21,30 +21,16 @@ class NamesDialog(): JoozdlogFragment() {
     // If this is true, we are editing PIC name so only one name allowed
     // if null or false, will return false (null check on different places)
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val namesDialogViewModel: NamesDialogViewModel by viewModels()
+    private val viewModel: NamesDialogViewModel by viewModels()
 
-    /*
-    var names: String
-        get() = if (workingOnName1) flight.name.trim() else flight.name2.trim()
-        set(it) {
-            flight = when(viewModel.namePickerWorkingOnName1){
-                true -> flight.copy(name = it)
-                false -> flight.copy(name2 = it)
-                null -> error ("Trying to save $it but which name is not specified (workingOnName1 == null")
-            }
-        }
-
-    private val currentNames: List<String>
-        get() = if (workingOnName1) listOf(flight.name) else flight.name2.split(',').map{it.trim()}
-    */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.dialog_names, container, false).apply{
             //set color of top part
             namesDialogTopHalf.joozdLogSetBackgroundColor()
 
             //initialize RecyclerView
-            val namesPickerAdapter = SelectableStringAdapter() { name ->
-                namesDialogViewModel.selectName(name)
+            val namesPickerAdapter = SelectableStringAdapter { name ->
+                viewModel.selectName(name)
             }.also {
                 namesPickerList.layoutManager = LinearLayoutManager(context)
                 namesPickerList.adapter = it
@@ -52,23 +38,23 @@ class NamesDialog(): JoozdlogFragment() {
 
             //Search field changed:
             namesSearchField.onTextChanged {
-                namesDialogViewModel.searchNames(it)
+                viewModel.searchNames(it)
             }
 
             //Buttons OnClickListeners:
             removeLastButon.setOnClickListener {
-                namesDialogViewModel.removeLastClicked()
+                viewModel.removeLastName()
 
             }
 
             //add name in search field to list, or replace if working on name1
             addSearchFieldNameButton.setOnClickListener {
-                namesDialogViewModel.addManualNameClicked()
+                viewModel.addManualNameClicked()
             }
 
             //add selected name to list, or replace if working on name1
             addSelectedNameButton.setOnClickListener {
-                namesDialogViewModel.addSelectedName()
+                viewModel.addSelectedName()
 
             }
 
@@ -81,12 +67,12 @@ class NamesDialog(): JoozdlogFragment() {
             //on cancel, revert to previous flight, set viewModel.namePickerWorkingOnName1 to null and close
             cancelTextView.setOnClickListener {
                 mainViewModel.namePickerWorkingOnName1 = null
-                namesDialogViewModel.undo()
+                viewModel.undo()
                 closeFragment()
             }
             editAircraftLayout.setOnClickListener {
                 mainViewModel.namePickerWorkingOnName1 = null
-                namesDialogViewModel.undo()
+                viewModel.undo()
                 closeFragment()
             }
 
@@ -97,14 +83,24 @@ class NamesDialog(): JoozdlogFragment() {
              * observers:
              */
 
-            namesDialogViewModel.addSearchFieldNameButtonTextResource.observe(viewLifecycleOwner, Observer{
+            viewModel.addSearchFieldNameButtonTextResource.observe(viewLifecycleOwner, Observer{
                 addSearchFieldNameButton.text = getString(it)
             })
-            namesDialogViewModel.addSelectedNameButtonTextResource.observe(viewLifecycleOwner, Observer{
+            viewModel.addSelectedNameButtonTextResource.observe(viewLifecycleOwner, Observer{
                 addSelectedNameButton.text = getString(it)
             })
-            namesDialogViewModel.removeLastButonTextResource.observe(viewLifecycleOwner, Observer{
+            viewModel.removeLastButonTextResource.observe(viewLifecycleOwner, Observer{
                 removeLastButon.text = getString(it)
+            })
+
+            viewModel.allNames.observe(viewLifecycleOwner, Observer {
+                namesPickerAdapter.updateList(it)
+            })
+            viewModel.selectedName.observe(viewLifecycleOwner, Observer {
+                namesPickerAdapter.selectActiveItem(it)
+            })
+            viewModel.currentNames.observe(viewLifecycleOwner, Observer{
+                selectedNames.text = it
             })
 
         }
@@ -112,6 +108,6 @@ class NamesDialog(): JoozdlogFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        namesDialogViewModel.workingOnName1 = mainViewModel.namePickerWorkingOnName1
+        viewModel.workingOnName1 = mainViewModel.namePickerWorkingOnName1
     }
 }

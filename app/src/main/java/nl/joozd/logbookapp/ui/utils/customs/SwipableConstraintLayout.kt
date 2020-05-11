@@ -160,6 +160,8 @@ class SwipableConstraintLayout(ctx: Context, attributes: AttributeSet): Constrai
             translationX < -openingWidth ->
                     parentView.setBackgroundColor(0xFFFF0000)
 
+            translationX == 0f -> parentView.setBackgroundColor(0x00000000)
+
             else ->  parentView.background.alpha = 0
 
 
@@ -167,17 +169,21 @@ class SwipableConstraintLayout(ctx: Context, attributes: AttributeSet): Constrai
         super.setTranslationX(translationX)
     }
 
-    private fun cancelSwipe(){
+    private fun cancelSwipe(animate: Boolean = true){
         parent.requestDisallowInterceptTouchEvent(false)
         closing = true
-        val animator = ValueAnimator.ofInt((translationX).toInt(), 0)
-        animator.addUpdateListener {
-            translationX = 1.0f * it.animatedValue as Int
+        if (animate) {
+            val animator = ValueAnimator.ofInt((translationX).toInt(), 0)
+            animator.addUpdateListener {
+                translationX = 1.0f * it.animatedValue as Int
+            }
+
+            animator.apply {
+                duration = 250
+                start()
+            }
         }
-        animator.apply{
-            duration=250
-            start()
-        }
+
         swiping = false
         opened = false
     }
@@ -190,5 +196,9 @@ class SwipableConstraintLayout(ctx: Context, attributes: AttributeSet): Constrai
 
     override fun performClick(): Boolean {
         return super.performClick()
+    }
+
+    fun closeIfSwiped(){
+        cancelSwipe(false)
     }
 }

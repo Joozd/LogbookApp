@@ -19,7 +19,8 @@ data class AircraftRegistrationWithTypeData(
     @PrimaryKey val registration: String,
     var type: String = UNKNOWN,
     var knownToServer: Boolean = false,
-    var previousType: String = UNKNOWN
+    var previousType: String = UNKNOWN,
+    var timestamp: Long = -1
 ){
     companion object {
         const val UNKNOWN = "UNKNOWN_TYPE"

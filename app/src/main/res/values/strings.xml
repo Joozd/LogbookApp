@@ -17,7 +17,7 @@
   -->
 
 <resources>
-    <string name="app_name">JoozdLog 0.1a WIP</string>
+    <string name="app_name">JoozdLog 0.1.0</string>
     <string name="preference_file_key">nl.joozd.logbookapp.PREFERENCE_FILE_KEY</string>
 
     <string name="flightNumberHint">FlightNumber</string>
@@ -70,10 +70,10 @@
     <string name="landing">Landing</string>
     <string name="autoland">Autoland</string>
     <string name="dayslashnight">day/night</string>
-    <string name="connectingToServer">Connecting to server...</string>
-    <string name="synchronizing">Synchronizing...</string>
-    <string name="sendingDataToServer">Sending data to server...</string>
-    <string name="receivingData">Receiving data from server...</string>
+    <string name="connectingToServer">Connecting to server…</string>
+    <string name="synchronizing">Synchronizing…</string>
+    <string name="sendingDataToServer">Sending data to server…</string>
+    <string name="receivingData">Receiving data from server…</string>
     <string name="totalTimes">Total Times</string>
     <string name="balanceForward">Balance Forward</string>
     <string name="editAircraft">Edit Aircraft</string>
@@ -128,9 +128,9 @@
     <string name="addModel">Add Model</string>
     <string name="searchAircraft">SearchAircraft</string>
     <string name="loadingAirports">Loading Airports</string>
-    <string name="readingFile">Receiving File...</string>
-    <string name="savingFlights">Saving Flights...</string>
-    <string name="startingJoozdlog">Starting Joozdlog...</string>
+    <string name="readingFile">Receiving File…</string>
+    <string name="savingFlights">Saving Flights…</string>
+    <string name="startingJoozdlog">Starting Joozdlog…</string>
     <string name="title_activity_login">Sign in</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
@@ -144,8 +144,18 @@
     <string name="newUser">New User</string>
     <string name="landings">Landings</string>
     <string name="arrowRight">➔</string>
+    <string name="SELF">SELF</string>string
 
     <string name="instructor">INSTRUCTOR</string>
 
 
+
+    <!--
+    Complete messages
+    -->
+    <string name="airportFound">Airport found in Database</string>
+    <string name="airportNotFound">Airport not found in Database</string>
+
+
 </resources>
+

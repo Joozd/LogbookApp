@@ -22,6 +22,7 @@ import android.app.Activity
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -39,10 +40,10 @@ import kotlin.NoSuchElementException
 
 /**
  * Constructor:
- * items: the list of values to be checked against entered data in the connected EditText
- * defaultItems: THe list of items to be shown when EditText is empty
- * boxLayout: Layout XML of the box view containing the list. Needs to be a LinearLayout.
- * itemLayout: Layout XML of the items in the list. Needs to be a LinearLayout.
+ * @param items: the list of values to be checked against entered data in the connected EditText
+ * @param defaultItems: The list of items to be shown when EditText is empty
+ * @param boxLayout: Layout XML of the box view containing the list. Needs to be a LinearLayout.
+ * @param itemLayout: Layout XML of the items in the list. Needs to be a LinearLayout.
  */
 
 open class CustomAutoComplete (var items: List<String> = emptyList(), var defaultItems: List<String> = emptyList(), var boxLayout: Int = R.layout.box_custom_autocomplete, var itemLayout: Int = R.layout.item_custom_autocomplete){
@@ -52,29 +53,29 @@ open class CustomAutoComplete (var items: List<String> = emptyList(), var defaul
 
     /**
      * maxItems is the maximum length of the popup list
-     * If there are more, an ellpise will show as maxItems +1 th item
+     * If there are more, an ellipse will show as item # [maxItems]+1
      * If set to / left at 0 it will make the list as long as it can find items
      */
     var maxItems = 0
 
     /**
-     * If set to false, will not show ellipsis after maxItems items
+     * If set to false, will not show ellipsis after [maxItems] items
      */
     var showEllipsis = true
 
     /**
-     * difference between left edge of EditText and left edge of list
+     * difference between left edge of [EditText] and left edge of list
      */
     var leftMargin = 50
 
     /**
-     * difference between right edge of EditText and left edge of list
-     * Negative value means list ends before edittext
+     * difference between right edge of [EditText] and left edge of list
+     * Negative value means list ends before [EditText]
      */
     var rightMargin = 50
 
     /**
-     * Vertical space between EditText and top of list
+     * Vertical space between [EditText] and top of list
      */
     var verticalMargin = 10
 
@@ -96,12 +97,12 @@ open class CustomAutoComplete (var items: List<String> = emptyList(), var defaul
 
 
     /**
-     * Connects the CustomAutoComplete to the editText
-     * Also looks for a constraintlayout to constrain the view.
-     * Maybe later I'll make it with an absolute position in case of not constraintlayout
+     * Connects the [CustomAutoComplete] to the [EditText]
+     * Also looks for a ConstraintLayout to constrain the view.
+     * Maybe later I'll make it with an absolute position in case of not ConstraintLayout
      * Maybe not. Who knows?
      */
-    fun connectToEditText(et: EditText) {
+    fun connectToEditText(et: EditText): CustomAutoComplete {
         require(!connected)
         connected = true
         Log.d(TAG, "Connecting to EditText $et")
@@ -145,9 +146,6 @@ open class CustomAutoComplete (var items: List<String> = emptyList(), var defaul
         box = activity.layoutInflater.inflate(boxLayout, parentLayout, false) as LinearLayout
         box?.id = View.generateViewId()
 
-
-
-        Log.d(TAG, "Rootlayout: $rootLayout")
         rootLayout?.let { rootLayout ->
             rootLayout.addView(box)
             viewToAlignTo?.let { viewToAlignTo ->
@@ -168,14 +166,20 @@ open class CustomAutoComplete (var items: List<String> = emptyList(), var defaul
                         val right =
                             topLeftPosition[1] + viewToAlignTo.width + rightMargin - rootTopLeftPosition[1]
 
-                        val layoutParams = box?.layoutParams
-                        if (layoutParams !is ViewGroup.MarginLayoutParams) return@onTextChanged // or throw an exception or whatever
+                        //val layoutParams = box?.layoutParams
+                        val layoutParams = ConstraintLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply{
+                            setMargins(left, top, 0,0)
+                        }
+                        //if (layoutParams !is ViewGroup.MarginLayoutParams) return@onTextChanged // or throw an exception or whatever
                         Log.d(TAG, "top: $top")
                         Log.d(TAG, "left: $left")
-                        layoutParams.leftMargin = left
+                        //layoutParams.leftMargin = left
+                        layoutParams.marginStart = left
                         layoutParams.topMargin = top
                         box?.layoutParams = layoutParams // TODO is this necessary? check!
-
+                        Log.d(TAG, "$layoutParams")
+//                        box?.translationX = left.toFloat()
+//                        box?.translationY = top.toFloat()
 
                         val foundItems = if (text.isNotEmpty()) filter(text) else defaultItems
 
@@ -243,11 +247,14 @@ open class CustomAutoComplete (var items: List<String> = emptyList(), var defaul
                         Log.d(TAG, "left: $left")
                         layoutParams.leftMargin = left
                         layoutParams.topMargin = top
+                        box?.translationX = left.toFloat()
+                        box?.translationY = top.toFloat() - 24.dpToPixels()
                         box?.layoutParams = layoutParams // TODO is this necessary? check!
                     }
                 }
             }
         }
+        return this
     }
 
     open fun filter(query: String): List<String> = items.filter {query.toUpperCase(Locale.ROOT) in it.toUpperCase(Locale.ROOT)}
@@ -271,6 +278,10 @@ open class CustomAutoComplete (var items: List<String> = emptyList(), var defaul
         insert(value, editText)
     }
 
+    fun removeList(){
+        box?.removeAllViews()
+    }
+
     private fun findTopViewGroup(v: View): ViewGroup?{
 
         var p = v.parent
@@ -278,7 +289,6 @@ open class CustomAutoComplete (var items: List<String> = emptyList(), var defaul
         return if (p is ViewGroup) p else null
     }
 
-    fun removeList(){
-        box?.removeAllViews()
-    }
+    private fun Int.dpToPixels() = this.toFloat() * (editText?.resources?.displayMetrics?.density?: 0.toFloat())
+
 }

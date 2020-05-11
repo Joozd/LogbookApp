@@ -2,6 +2,7 @@ package nl.joozd.logbookapp.model.helpers
 
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.miscClasses.Crew
+import nl.joozd.logbookapp.extensions.nullIfEmpty
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
@@ -34,14 +35,7 @@ object FlightDataPresentationFunctions {
     /**
      * Make a string like "1:23" into minutes (83 in this case). Also works for "1:23:45.678"
      */
-    fun hoursAndMinutesStringToInt(hoursAndMinutes: String): Int? {
-        val hoursAndMinutesSplits = hoursAndMinutes.split(*"+- :/.h".toCharArray())
-        //check if only digits left
-        if (hoursAndMinutesSplits.joinToString("").any{!it.isDigit()}) return null
-        val hoursAndMinutesInts = hoursAndMinutesSplits.map{it.toInt()}
-        if (hoursAndMinutesInts.size == 1) return hoursAndMinutesInts[0]
-        return hoursAndMinutesInts[0]*60 + hoursAndMinutesInts[1]
-    }
+
 
 
 

@@ -20,36 +20,38 @@ package nl.joozd.logbookapp.ui.fragments
 
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.edit_flight.view.*
+import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.viewmodels.MainViewModel
 import nl.joozd.logbookapp.extensions.*
+import nl.joozd.logbookapp.model.helpers.FeedbackEvents.EditFlightFragmentEvents
 import nl.joozd.logbookapp.ui.dialogs.*
 import nl.joozd.logbookapp.ui.dialogs.NamesDialog
 import nl.joozd.logbookapp.ui.utils.customs.CustomAutoComplete
 import nl.joozd.logbookapp.ui.utils.toast
-import nl.joozd.logbookapp.model.viewmodels.EditFlightFragmentViewModel
+import nl.joozd.logbookapp.model.viewmodels.fragments.EditFlightFragmentViewModel
 
 
 class EditFlightFragment: JoozdlogFragment(){
     companion object{
         const val TAG = "EditFlightFragment"
     }
-    val mainViewModel: MainViewModel by activityViewModels()
-    val fragmentViewModel: EditFlightFragmentViewModel by viewModels()
-
-    //This will be set to "true" when updating data in fields. When this is "true", onTextChanged etc should not trigger.
-    private var settingFields = false
+    private val mainViewModel: MainViewModel by activityViewModels()
+    private val viewModel: EditFlightFragmentViewModel by viewModels()
 
     /**
      * Listener class and setting s
@@ -84,8 +86,19 @@ class EditFlightFragment: JoozdlogFragment(){
 
 
             //Initialize autoCompleters for names fields
-            val flightNameFieldAutoComplete = CustomAutoComplete()
-            val flightName2FieldAutoComplete = CustomAutoComplete()
+            val flightNameFieldAutoComplete = object: CustomAutoComplete(defaultItems = listOf(getString(R.string.SELF))) {
+                override fun insert(value: String, view: EditText?) {
+                    view?.clearFocus()
+                    viewModel.setName(value)
+                }
+            }.apply{ maxItems = 5 }
+
+            val flightName2FieldAutoComplete = object: CustomAutoComplete(defaultItems = listOf(getString(R.string.SELF))) {
+                override fun insert(value: String, view: EditText?) {
+                    view?.clearFocus()
+                    viewModel.setName2(value)
+                }
+            }.apply{ maxItems = 5 }
 
             //TODO observe these from viewModel
             /*
@@ -99,47 +112,71 @@ class EditFlightFragment: JoozdlogFragment(){
              * observers to show data in editText fields
              ************************************************************************************/
 
-            fragmentViewModel.date.observe(viewLifecycleOwner, Observer{
+            viewModel.date.observe(viewLifecycleOwner, Observer{
                 flightDateField.setText(it)
             })
 
-            fragmentViewModel.flightNumber.observe(viewLifecycleOwner, Observer{
+            viewModel.flightNumber.observe(viewLifecycleOwner, Observer{
                 flightFlightNumberField.setText(it)
             })
 
-            fragmentViewModel.orig.observe(viewLifecycleOwner, Observer{
+            viewModel.orig.observe(viewLifecycleOwner, Observer{
                 flightOrigField.setText(it)
             })
+            viewModel.origChecked.observe(viewLifecycleOwner, Observer { checked ->
+                val drawable: Drawable? = when(checked){
+                    true -> ContextCompat.getDrawable(App.instance, R.drawable.ic_check_circle_outline_20px)
+                    false -> ContextCompat.getDrawable(App.instance, R.drawable.ic_error_outline_20px)
+                    null -> null
+                }
+                flightOrigField.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
+            })
 
-            fragmentViewModel.dest.observe(viewLifecycleOwner, Observer{
+            viewModel.dest.observe(viewLifecycleOwner, Observer{
                 flightDestField.setText(it)
             })
-
-            fragmentViewModel.timeOut.observe(viewLifecycleOwner, Observer{
-                flighttOutStringField.setText(it)
+            viewModel.destChecked.observe(viewLifecycleOwner, Observer { checked ->
+                val drawable: Drawable? = when(checked){
+                    true -> ContextCompat.getDrawable(App.instance, R.drawable.ic_check_circle_outline_20px)
+                    false -> ContextCompat.getDrawable(App.instance, R.drawable.ic_error_outline_20px)
+                    null -> null
+                }
+                flightDestField.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
             })
 
-            fragmentViewModel.timeIn.observe(viewLifecycleOwner, Observer{
+            viewModel.timeOut.observe(viewLifecycleOwner, Observer{
+                if (viewModel.checkSim == false) {
+                    flighttOutStringField.setText(it)
+                }
+            })
+
+            viewModel.timeIn.observe(viewLifecycleOwner, Observer{
                 flighttInStringField.setText(it)
             })
 
-            fragmentViewModel.regAndType.observe(viewLifecycleOwner, Observer{
+            viewModel.simTime.observe(viewLifecycleOwner, Observer {
+                if (viewModel.checkSim == true){
+                    flighttOutStringField.setText(it)
+                }
+            })
+
+            viewModel.regAndType.observe(viewLifecycleOwner, Observer{
                 flightAircraftField.setText(it)
             })
 
-            fragmentViewModel.takeoffLandings.observe(viewLifecycleOwner, Observer{
+            viewModel.takeoffLandings.observe(viewLifecycleOwner, Observer{
                 flightTakeoffLandingField.setText(it)
             })
 
-            fragmentViewModel.name.observe(viewLifecycleOwner, Observer{
+            viewModel.name.observe(viewLifecycleOwner, Observer{
                 flightNameField.setText(it)
             })
 
-            fragmentViewModel.name2.observe(viewLifecycleOwner, Observer{
+            viewModel.name2.observe(viewLifecycleOwner, Observer{
                 flightName2Field.setText(it)
             })
 
-            fragmentViewModel.remarks.observe(viewLifecycleOwner, Observer{
+            viewModel.remarks.observe(viewLifecycleOwner, Observer{
                 flightRemarksField.setText(it)
             })
 
@@ -147,10 +184,10 @@ class EditFlightFragment: JoozdlogFragment(){
              * observers to show data in toggle fields
              ************************************************************************************/
 
-            fragmentViewModel.sign.observe(viewLifecycleOwner, Observer {active -> signSelector.showIfActive(active) })
+            viewModel.sign.observe(viewLifecycleOwner, Observer { active -> signSelector.showIfActive(active) })
 
             //This one does a little bit more
-            fragmentViewModel.sim.observe(viewLifecycleOwner, Observer{active ->
+            viewModel.sim.observe(viewLifecycleOwner, Observer{ active ->
                 if (active)
                     makeSimLayout(this)
                 else
@@ -158,12 +195,38 @@ class EditFlightFragment: JoozdlogFragment(){
                 simSelector.showIfActive(active)
             })
 
-            fragmentViewModel.dual.observe(viewLifecycleOwner, Observer {active -> dualSelector.showIfActive(active) })
-            fragmentViewModel.instructor.observe(viewLifecycleOwner, Observer {active -> instructorSelector.showIfActive(active) })
-            fragmentViewModel.picus.observe(viewLifecycleOwner, Observer {active -> picusSelector.showIfActive(active) })
-            fragmentViewModel.pic.observe(viewLifecycleOwner, Observer {active -> picSelector.showIfActive(active) })
-            fragmentViewModel.pf.observe(viewLifecycleOwner, Observer {active -> pfSelector.showIfActive(active) })
-            fragmentViewModel.autoFill.observe(viewLifecycleOwner, Observer {active -> autoFillCheckBox.isChecked = active })
+            viewModel.dual.observe(viewLifecycleOwner, Observer { active -> dualSelector.showIfActive(active) })
+            viewModel.instructor.observe(viewLifecycleOwner, Observer { active -> instructorSelector.showIfActive(active) })
+            viewModel.picus.observe(viewLifecycleOwner, Observer { active -> picusSelector.showIfActive(active) })
+            viewModel.pic.observe(viewLifecycleOwner, Observer { active -> picSelector.showIfActive(active) })
+            viewModel.pf.observe(viewLifecycleOwner, Observer { active -> pfSelector.showIfActive(active) })
+            viewModel.autoFill.observe(viewLifecycleOwner, Observer { active -> autoFillCheckBox.isChecked = active })
+
+            /************************************************************************************
+             * miscellaneous observers
+             ************************************************************************************/
+
+            viewModel.allNames.observe(viewLifecycleOwner, Observer{
+                flightNameFieldAutoComplete.items = it
+                flightName2FieldAutoComplete.items = it
+            })
+
+            /************************************************************************************
+             * Event handler observer
+             ************************************************************************************/
+
+            viewModel.feedbackEvent.observe(viewLifecycleOwner, Observer {
+                when(it.getEvent()){
+                    EditFlightFragmentEvents.NOT_IMPLEMENTED -> toast("Not implemented!")
+                    EditFlightFragmentEvents.INVALID_REG_TYPE_STRING -> toast("Error in regType string")
+                    EditFlightFragmentEvents.AIRPORT_NOT_FOUND_FOR_LANDINGS -> toast("airport not found, all logged as day")
+                    EditFlightFragmentEvents.INVALID_TIME_STRING -> toast("Error in time string, no changes")
+                    EditFlightFragmentEvents.INVALID_SIM_TIME_STRING -> toast("Error in time string, simTime = 0")
+
+
+
+                }
+            })
 
             /************************************************************************************
              * Toggle switches onClickListeners
@@ -180,40 +243,40 @@ class EditFlightFragment: JoozdlogFragment(){
 
             simSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                fragmentViewModel.toggleSim()
+                viewModel.toggleSim()
             }
 
             dualSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                fragmentViewModel.toggleDual()
+                viewModel.toggleDual()
             }
 
             instructorSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                fragmentViewModel.toggleInstructor()
+                viewModel.toggleInstructor()
             }
 
             picusSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                fragmentViewModel.togglePicus()
+                viewModel.togglePicus()
             }
 
             picSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                fragmentViewModel.togglePic()
+                viewModel.togglePic()
             }
 
             pfSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                fragmentViewModel.togglePf()
+                viewModel.togglePf()
             }
 
             autoFillCheckBox.setOnCheckedChangeListener { _, isChecked ->
-                fragmentViewModel.setAutoFill(isChecked)
+                viewModel.setAutoFill(isChecked)
             }
 
             /*************************************************************************************
-             * define reused listeners
+             * define reused or reassigned listeners
              ************************************************************************************/
 
             /**
@@ -222,7 +285,7 @@ class EditFlightFragment: JoozdlogFragment(){
              */
             val dateOnClickListener = View.OnClickListener {
                 DatePickerFragment{pickedDate ->
-                    fragmentViewModel.setDate(pickedDate)
+                    viewModel.setDate(pickedDate)
                 }.show(supportFragmentManager, "datePicker")
             }
 
@@ -240,6 +303,7 @@ class EditFlightFragment: JoozdlogFragment(){
             /**************************************************************************************
              * onClickListeners for selectors (the triangle thingies on side of this dialog)
              *************************************************************************************/
+
             flightDateSelector.setOnClickListener(dateOnClickListener)
 
             flightFlightNumberSelector.setOnClickListener {
@@ -301,35 +365,57 @@ class EditFlightFragment: JoozdlogFragment(){
             }
 
             /**************************************************************************************
-             * onFocusChangedListsners for for fields to handle inputs in EditTexts
-             * These need to check [settingFields] to make sure they don't get stuck in a loop
+             * onFocusChangedListeners for for fields to handle inputs in EditTexts
              *************************************************************************************/
 
             // flightDateField has an onClickListener, not an onFocusChanged as it always uses dialog
             flightDateField.setOnClickListener(dateOnClickListener)
 
-            flightFlightNumberField.setOnFocusChangeListener { v, hasFocus -> toast("Not working yet!") }
+            flightFlightNumberField.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setFlightNumber(flightFlightNumberField.text.toString())
+            }
 
-            flightOrigField.setOnFocusChangeListener { v, hasFocus -> toast("Not working yet!") }
+            flightOrigField.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setOrig(flightOrigField.text.toString())
+            }
 
-            flightDestField.setOnFocusChangeListener { v, hasFocus -> toast("Not working yet!") }
+            flightDestField.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setDest(flightDestField.text.toString())
+            }
 
-            flighttOutStringField.setOnFocusChangeListener { v, hasFocus -> toast("Not working yet!") }
+            flighttOutStringField.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setTimeOut(flighttOutStringField.text.toString())
+            }
 
-            flighttInStringField.setOnFocusChangeListener { v, hasFocus -> toast("Not working yet!") }
+            flighttInStringField.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setTimeIn(flighttInStringField.text.toString())
+            }
+            flightAircraftField.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setRegAndType(flightAircraftField.text.toString())
+            }
 
-            flightAircraftField.setOnFocusChangeListener { v, hasFocus -> toast("Not working yet!") }
+            flightTakeoffLandingField.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setTakeoffLandings(flightAircraftField.text.toString())
+            }
 
-            flightTakeoffLandingField.setOnFocusChangeListener { v, hasFocus -> toast("Not working yet!") }
-
-            flightNameField.setOnFocusChangeListener { v, hasFocus -> toast("Not working yet!") }
-
-            flightName2Field.setOnFocusChangeListener { v, hasFocus -> toast("Not working yet!") }
-
+            flightNameField.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setName(flightNameField.text.toString())
+            }
+            flightName2Field.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setName2(flightName2Field.text.toString())
+            }
             flightRemarksField.setOnFocusChangeListener { _, hasFocus ->
-                toast("remarksField focus now $hasFocus")
-                if (!hasFocus && !settingFields)
-                    fragmentViewModel.setRemarks(flightRemarksField.text.toString())
+                if (!hasFocus)
+                    viewModel.setRemarks(flightRemarksField.text.toString())
             }
 
 
@@ -364,6 +450,11 @@ class EditFlightFragment: JoozdlogFragment(){
                 closeFragment()
             }
 
+            /**
+             * Do not change OnFocusChangedListeners for EditTexts with connected CustomAutoCompletes
+             */
+            flightNameFieldAutoComplete.connectToEditText(flightNameField)
+            flightName2FieldAutoComplete.connectToEditText(flightName2Field)
         } // end of layoutInflater.apply()
     } // end of onCreateView
 
@@ -392,8 +483,11 @@ class EditFlightFragment: JoozdlogFragment(){
         v.flightOrigWrapper.visibility=View.GONE
         v.flightDestWrapper.visibility=View.GONE
         v.flightDestSelector.visibility=View.GONE
-        v.flightTakeoffLandingWrapper.visibility=View.GONE
-        v.flightTakeoffLandingSelector.isEnabled=false
+        //v.flightTakeoffLandingWrapper.visibility=View.GONE
+        //v.flightTakeoffLandingSelector.isEnabled=false
+        viewModel.simTime.value?.let{
+            v.flighttOutStringField.setText(it)
+        }
     }
 
     /**
@@ -417,6 +511,9 @@ class EditFlightFragment: JoozdlogFragment(){
         v.flightDestSelector.visibility=View.VISIBLE
         v.flightTakeoffLandingWrapper.visibility=View.VISIBLE
         v.flightTakeoffLandingSelector.isEnabled=true
+        viewModel.timeOut.value?.let{
+            v.flighttOutStringField.setText(it)
+        }
     }
 
     private fun TextView.showIfActive(active: Boolean){

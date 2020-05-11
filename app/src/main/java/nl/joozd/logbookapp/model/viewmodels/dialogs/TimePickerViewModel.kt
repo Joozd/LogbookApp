@@ -10,7 +10,7 @@ import nl.joozd.logbookapp.data.miscClasses.Crew
 import nl.joozd.logbookapp.extensions.toBoolean
 import nl.joozd.logbookapp.extensions.toInt
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.TimePickerEvents
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.hoursAndMinutesStringToInt
+import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import nl.joozd.logbookapp.utils.TwilightCalculator

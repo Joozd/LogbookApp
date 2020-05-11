@@ -22,7 +22,7 @@ import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
 
 //TODO needs work
 class AircraftPicker: JoozdlogFragment(){
-    private val acViewModel: AircraftPickerViewModel by viewModels()
+    private val viewModel: AircraftPickerViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.dialog_pick_aircraft_type, container, false).apply{
@@ -31,7 +31,7 @@ class AircraftPicker: JoozdlogFragment(){
 
             val typesPickerAdapter = SelectableStringAdapter {
                 Log.d(this::class.simpleName, "clicked on $it")
-                acViewModel.selectAircraftByString(it)
+                viewModel.selectAircraftByString(it)
             }.also {
                 typesPickerRecyclerView.layoutManager = LinearLayoutManager(context)
                 typesPickerRecyclerView.adapter = it
@@ -47,11 +47,11 @@ class AircraftPicker: JoozdlogFragment(){
             }
             registrationField.onTextChanged {
                 if (regFieldActive)
-                    acViewModel.updateRegistration(it)
+                    viewModel.updateRegistration(it)
             }
 
             searchField.onTextChanged {
-                acViewModel.updateSearchString(it)
+                viewModel.updateSearchString(it)
             }
 
 
@@ -59,21 +59,26 @@ class AircraftPicker: JoozdlogFragment(){
              * Observers
              ******************************************************************************/
 
-            acViewModel.registration.observe(viewLifecycleOwner, Observer{
+            viewModel.registration.observe(viewLifecycleOwner, Observer{
                 pickedAircraftText.text = it
                 if (!regFieldActive)
                     registrationField.setText(it)
             })
 
-            acViewModel.selectedAircraftString.observe(viewLifecycleOwner, Observer{
+            viewModel.selectedAircraftString.observe(viewLifecycleOwner, Observer{
                 typesPickerAdapter.selectActiveItem(it)
                 typesPickerRecyclerView.scrollToPosition(typesPickerAdapter.list.indexOf(it))
             })
 
-            acViewModel.selectedAircraft.observe(viewLifecycleOwner, Observer{
+            viewModel.selectedAircraft.observe(viewLifecycleOwner, Observer{
                 it.type?.let{t ->
                     typeDescriptionTextView.text = t.shortName
                 }
+            })
+
+            viewModel.aircraftTypes.observe(viewLifecycleOwner, Observer {
+                Log.d(this::class.simpleName, "updating list with ${it.size} items")
+                typesPickerAdapter.updateList(it)
             })
 
             /******************************************************************************
@@ -81,7 +86,8 @@ class AircraftPicker: JoozdlogFragment(){
              ******************************************************************************/
 
             aircraftPickerCancel.setOnClickListener {
-                TODO("Not implemented")
+                viewModel.undo()
+                closeFragment()
             }
 
             /**
@@ -90,7 +96,8 @@ class AircraftPicker: JoozdlogFragment(){
              * - update flight
              */
             aircraftPickerSave.setOnClickListener {
-                TODO("Not implemented")
+                viewModel.saveAircraft()
+                closeFragment()
             }
             aircraftPickerDialogBox.setOnClickListener {
                 //Intentionally blank
@@ -102,7 +109,7 @@ class AircraftPicker: JoozdlogFragment(){
 
     override fun onStart() {
         super.onStart()
-        acViewModel.start() // initially set fields and get aircraft type data from repository
+        viewModel.start() // initially set fields and get aircraft type data from repository
     }
 
 }

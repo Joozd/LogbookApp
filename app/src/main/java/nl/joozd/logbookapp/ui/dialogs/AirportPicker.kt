@@ -49,7 +49,7 @@ import kotlin.math.abs
 //TODO: Fix this. Should update though viewModel
 class AirportPicker: JoozdlogFragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val apViewModel: AirportPickerViewModel by viewModels()
+    private val viewModel: AirportPickerViewModel by viewModels()
 
     @ExperimentalCoroutinesApi
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -63,7 +63,7 @@ class AirportPicker: JoozdlogFragment() {
              * Initialize recyclerView and it's stuff
              */
             val airportPickerAdapter = AirportPickerAdapter { airport ->
-                apViewModel.pickAirport(airport)
+                viewModel.pickAirport(airport)
             }
             airportsPickerList.layoutManager = LinearLayoutManager(context)
             airportsPickerList.adapter = airportPickerAdapter
@@ -75,7 +75,7 @@ class AirportPicker: JoozdlogFragment() {
 
             // Update recyclerView while typing
             airportsSearchField.onTextChanged { t ->
-                apViewModel.updateSearch(t)
+                viewModel.updateSearch(t)
             }
 
 
@@ -84,7 +84,7 @@ class AirportPicker: JoozdlogFragment() {
              */
             setCurrentTextButton.setOnClickListener {
                 airportsSearchField.text.toString().nullIfEmpty()?.let {
-                    apViewModel.setCustomAirport(it)
+                    viewModel.setCustomAirport(it)
                 }
             }
 
@@ -96,12 +96,12 @@ class AirportPicker: JoozdlogFragment() {
 
             airportPickerLayout.setOnClickListener {
                 mainViewModel.workingOnOrig = null
-                apViewModel.undo()
+                viewModel.undo()
                 closeFragment()
             }
             cancelAirportDialog.setOnClickListener {
                 mainViewModel.workingOnOrig = null
-                apViewModel.undo()
+                viewModel.undo()
                 closeFragment()
             }
 
@@ -115,7 +115,7 @@ class AirportPicker: JoozdlogFragment() {
              * observers:
              */
             //observer events
-            apViewModel.feedbackEvent.observe(viewLifecycleOwner, Observer{
+            viewModel.feedbackEvent.observe(viewLifecycleOwner, Observer{
                 //if event already consumed, it.getEvent() == null
                 when(it.getEvent()){
                     ORIG_OR_DEST_NOT_SELECTED -> {
@@ -127,14 +127,14 @@ class AirportPicker: JoozdlogFragment() {
             })
 
             //observe airportList for recyclerview
-            apViewModel.airportsList.observe(viewLifecycleOwner, Observer{
+            viewModel.airportsList.observe(viewLifecycleOwner, Observer{
                 airportPickerAdapter.submitList(it)
             })
 
             //set picked airport in adapter:
             //TODO should I do this in here or in viewModel?
 
-            apViewModel.pickedAirport.observe(viewLifecycleOwner, Observer{airport ->
+            viewModel.pickedAirport.observe(viewLifecycleOwner, Observer{ airport ->
                 airportPickerAdapter.pickAirport(airport)
                 @SuppressLint("SetTextI18n")
                 airportPickerTitle.text  = "${airport.ident} - ${airport.iata_code}"
@@ -156,7 +156,7 @@ class AirportPicker: JoozdlogFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        apViewModel.setWorkingOnOrig(mainViewModel.workingOnOrig)  //this will close fragment through FeedbackEvent if null
+        viewModel.setWorkingOnOrig(mainViewModel.workingOnOrig)  //this will close fragment through FeedbackEvent if null
     }
 
     private fun latToString(latitude: Double): String =

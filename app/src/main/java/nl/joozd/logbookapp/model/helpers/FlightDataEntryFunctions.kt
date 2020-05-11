@@ -3,6 +3,7 @@ package nl.joozd.logbookapp.model.helpers
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.extensions.atDate
+import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.utils.TwilightCalculator
 import java.time.*
 
@@ -42,4 +43,88 @@ object FlightDataEntryFunctions {
             landingDay = landingsDuringDay,
             landingNight = landings - landingsDuringDay)
     }
+
+    /**
+     * Return a flight with [timeOut] set, and [timeIn] perhaps adjusted to be within 0-1 days later than timeOut
+     */
+    fun Flight.withTimeOutStringToTime(timeOutString: String): Flight? {
+        timeOutString.filter{it.isDigit()}.padStart(4, '0').let{numbersOnlyString -> // numbersOnlyString should now have 4 characters
+            if(!validTimestring(numbersOnlyString)) return null
+            val hours = numbersOnlyString.take(2).toInt()
+            val mins = numbersOnlyString.takeLast(2).toInt()
+            //newTimeOut is in [epochSecond]: Long
+            val newTimeOut = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeOut), ZoneOffset.UTC)
+                .withHour(hours)
+                .withMinute(mins)
+                .toInstant(ZoneOffset.UTC)
+                .epochSecond
+            var newTimeIn = timeIn
+            //check if timeIn is between 0 seconds and 23:59:59 later than timeOut
+            val oneDay = 86400 //86400secs is one day
+            while (newTimeIn-newTimeOut < 0) newTimeIn += oneDay        // keep adding days until positive amount of seconds
+            while (newTimeIn- newTimeOut > oneDay) newTimeIn -= oneDay  // keep removing days until less than one left
+            return this.copy(timeOut = newTimeOut, timeIn = newTimeIn)
+        }
+    }
+    /**
+     * Return a flight with [timeIn] set, and perhaps adjusted to be within 0-1 days later than timeOut
+     */
+    fun Flight.withTimeInStringToTime(timeInString: String): Flight? {
+        timeInString.filter{it.isDigit()}.padStart(4, '0').let{ numbersOnlyString -> // numbersOnlyString should now have 4 characters
+            if(!validTimestring(numbersOnlyString)) return null
+            val hours = numbersOnlyString.take(2).toInt()
+            val mins = numbersOnlyString.takeLast(2).toInt()
+            //newTimeOut is in [epochSecond]: Long
+            var newTimeIn = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeIn), ZoneOffset.UTC)
+                .withHour(hours)
+                .withMinute(mins)
+                .toInstant(ZoneOffset.UTC)
+                .epochSecond
+            //check if timeIn is between 0 seconds and 23:59:59 later than timeOut
+            val oneDay = 86400 //86400secs is one day
+            while (newTimeIn-timeOut < 0) newTimeIn += oneDay        // keep adding days until positive amount of seconds
+            while (newTimeIn-timeOut > oneDay) newTimeIn -= oneDay  // keep removing days until less than one left
+            return this.copy(timeIn = newTimeIn)
+        }
+    }
+
+    /**
+     * Adds a name to name2
+     */
+    fun Flight.addName2(newName: String): Flight =
+        if (name2.isEmpty()) this.copy(name2 = newName)
+        else this.copy(name2 = "$name2|$newName")
+
+    fun Flight.removeLastName2(): Flight {
+        return if ("|" !in name2) this.copy(name2 = "")
+        else {
+            val oneNameLess = name2.split("|").dropLast(1).joinToString("|")
+            this.copy(name2= oneNameLess)
+        }
+
+    }
+
+
+
+    fun hoursAndMinutesStringToInt(hoursAndMinutes: String): Int? {
+        if (hoursAndMinutes.all{it.isDigit()}) {
+            return if (hoursAndMinutes.length <= 2)
+                (hoursAndMinutes.nullIfEmpty() ?: "0").toInt()
+            else hoursAndMinutes.takeLast(2).toInt() + hoursAndMinutes.dropLast(2).toInt()*60
+        }
+        val hoursAndMinutesSplits = hoursAndMinutes.split(*"+- :/.h".toCharArray())
+        //check if only digits left
+        if (hoursAndMinutesSplits.joinToString("").any{!it.isDigit()}) return null
+        val hoursAndMinutesInts = hoursAndMinutesSplits.map{it.toInt()}
+        if (hoursAndMinutesInts.size == 1) return hoursAndMinutesInts[0]
+        return hoursAndMinutesInts[0]*60 + hoursAndMinutesInts[1]
+    }
+
+    private fun validTimestring(ts: String) = when {
+        ts.length !=4 -> false
+        ts.takeLast(2).toInt() > 59 -> false
+        ts.take(2).toInt() > 23 -> false
+        else -> true
+    }
+
 }

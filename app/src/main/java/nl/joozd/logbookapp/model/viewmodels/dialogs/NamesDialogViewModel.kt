@@ -1,9 +1,13 @@
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents
+import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.addName2
+import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.removeLastName2
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
 class NamesDialogViewModel: JoozdlogDialogViewModel() {
@@ -32,31 +36,77 @@ class NamesDialogViewModel: JoozdlogDialogViewModel() {
     val removeLastButonTextResource: LiveData<Int>
         get() = _removeLastButonTextResource
 
+
+
     private val _selectedName = MutableLiveData<String>()
     val selectedName: LiveData<String>
         get() = _selectedName
     fun selectName(name: String){
         _selectedName.value = name
     }
-    fun addSelectedName(){
-        //TODO do the whole magic stuff
-        feedback(FeedbackEvents.NamesDialogEvents.NOT_IMPLEMENTED)
+    private val _manualName = MutableLiveData<String>()
+    private var manualName: String
+        get() = _manualName.value?: ""
+        set(n) { _manualName.value = n }
+
+    val takenNames: List<String>
+        get() = currentNames.value?.split("\n") ?: emptyList()
+
+    val currentNames = Transformations.map(flight) {
+        when(workingOnName1){
+            true -> it.name
+            false -> it.name2.split("|").joinToString("\n")
+            null -> "ERROR"
+        }
     }
 
-    var manualName: String = ""
-    fun searchNames(query: String){
-        manualName = query
-        //TODO build this
-        feedback(FeedbackEvents.NamesDialogEvents.NOT_IMPLEMENTED)
+    // all names
+    private val _allNames = MediatorLiveData<List<String>>()
+    val allNames: LiveData<List<String>>
+        get() = _allNames
+    init{
+        _allNames.addSource(flightRepository.allNames){
+            _allNames.value = filterNames(it)
+        }
+        _allNames.addSource(_manualName){
+            _allNames.value = filterNames((flightRepository.allNames.value ?: emptyList()))
+        }
+        _allNames.addSource(currentNames){
+            _allNames.value = filterNames((flightRepository.allNames.value ?: emptyList()))
+        }
     }
+
+
+
+    fun addSelectedName(){
+        selectedName.value?.let{ selName ->
+            workingFlight?.let { f ->
+                workingFlight = when (workingOnName1) {
+                    true -> f.copy(name = selName)
+                    false -> f.addName2(selName)
+                    null -> error ("ERROR woringOnName1 == null")
+                }
+            }
+        }
+    }
+
+    fun searchNames(query: String){
+        _manualName.value = query
+    }
+
     fun addManualNameClicked(){
         //TODO build this
         feedback(FeedbackEvents.NamesDialogEvents.NOT_IMPLEMENTED)
     }
 
-    fun removeLastClicked(){
-        //TODO build this
-        feedback(FeedbackEvents.NamesDialogEvents.NOT_IMPLEMENTED)
+    fun removeLastName(){
+        workingFlight?.let { f ->
+            workingFlight = when(workingOnName1){
+                true -> f.copy(name = "")
+                false -> f.removeLastName2()
+                null -> error ("ERROR woringOnName1 == null")
+            }
+        }
     }
 
     private fun layoutForName1(){
@@ -69,4 +119,6 @@ class NamesDialogViewModel: JoozdlogDialogViewModel() {
         _addSelectedNameButtonTextResource.value = R.string.addThis
         _removeLastButonTextResource.value = R.string.remove
     }
+
+    private fun filterNames(names: List<String>) = names.filter {manualName in it}.filter{it !in takenNames}
 }

@@ -6,14 +6,18 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
-import nl.joozd.logbookapp.data.repository.helpers.mostRecentCompleteFlight
+import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.dao.FlightDao
 import nl.joozd.logbookapp.data.room.model.toFlight
-import nl.joozd.logbookapp.ui.App
+import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfNamesAsync
+import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.reverseFlight
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 //TODO reorder this and make direct DB functions private
 //TODO make cloud functions originate from here and do their DB work here, not in [Cloud]
@@ -35,7 +39,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         _workingFlight.value = flight
         backupFlight = flight
     }
-    fun saveWorkingFlight() = _workingFlight.value?.let {save(it.copy(timeStamp = TimestampMaker.nowForSycPurposes)) }
+    fun saveWorkingFlight() = _workingFlight.value?.let {save(it.prepareForSave()) }
     fun undoSaveWorkingFlight() = backupFlight?.let {save(it) } ?: workingFlight.value?.let {delete(it)} // if backupFlight is not set, undo means deleting new flight
 
     /**
@@ -43,14 +47,14 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
     suspend fun createNewWorkingFlight() {
         coroutineScope {
-            val highestID = async(dispatcher) { flightDao.highestId() ?: 0 }
-            val mostRecentFlight = async(dispatcher) { mostRecentCompleteFlight(getAllFlights()) }
+            val highestID = getHighestId()
+            val mostRecentFlight = getMostRecentFlight()
             val done = async(Dispatchers.Main) {
                 _workingFlight.value =
-                    reverseFlight(mostRecentFlight.await(), highestID.await() + 1)
+                    reverseFlight(mostRecentFlight.await() ?: Flight.createEmpty(), highestID.await() + 1)
             }
             backupFlight = null
-            done.await ()
+            done.await()
         }
     }
 
@@ -96,6 +100,20 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         } ?: return null
         return workingFlight.also{
             withContext(Dispatchers.Main) { initialSetWorkingFlight(it) }
+        }
+    }
+
+    /**
+     * All names in those flights
+     */
+    private val _allNames = MutableLiveData<List<String>>()
+    val allNames: LiveData<List<String>>
+        get() = _allNames
+    init{
+        liveFlights.observeForever {
+            launch{
+                _allNames.value = makeListOfNamesAsync(it)
+            }
         }
     }
 
@@ -155,11 +173,24 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     }
 
     /********************************************************************************************
+     * Utility functions:
+     ********************************************************************************************/
+
+    suspend fun getMostRecentFlight() =
+        async(dispatcher){
+            flightDao.getMostRecentCompleted()?.toFlight()
+        }
+
+    suspend fun getHighestId() = async(dispatcher) { flightDao.highestId() ?: 0 }
+
+
+
+    /********************************************************************************************
      * Private functions:
      ********************************************************************************************/
 
     //gets all flights that are not marked DELETED
-    private suspend fun getAllFlights(): List<Flight> = cachedFlightsList ?: withContext(dispatcher) {
+    suspend fun getAllFlights(): List<Flight> = cachedFlightsList ?: withContext(dispatcher) {
         flightDao.requestValidFlights().map{it.toFlight()}
     }
 
@@ -179,6 +210,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         //Save flight to disk
         launch (dispatcher + NonCancellable) {
             flightDao.insertFlights(flight.toModel())
+            syncAfterChange()
         }
     }
 
@@ -193,6 +225,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         //Save flights to disk
         launch (dispatcher + NonCancellable) {
             flightDao.insertFlights(*(flights.map { it.toModel() }.toTypedArray()))
+            syncAfterChange()
         }
     }
 
@@ -218,6 +251,25 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         }
     }
 
+    /********************************************************************************************
+     * Sync functions:
+     ********************************************************************************************/
+
+    /**
+     * If no sync done within the last [MIN_SYNC_INTERVAL] minutes, this will schedule a sync
+     */
+    fun syncIfNeeded(){
+        if (TimestampMaker.nowForSycPurposes - Preferences.lastUpdateTime > MIN_SYNC_INTERVAL)
+            JoozdlogWorkersHub.synchronizeFlights(delay = false)
+    }
+
+    /**
+     * This will schedule a sync after a few minutes (to be used when a flight has been changed/saved
+     */
+    private fun syncAfterChange(){
+        if (!Cloud.syncingFlights)
+            JoozdlogWorkersHub.synchronizeFlights()
+    }
 
     /********************************************************************************************
      * Companion object:
@@ -234,5 +286,16 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                     singletonInstance!!
                 }
         }
+
+        const val MIN_SYNC_INTERVAL = 30*60 // seconds
+    }
+
+
+
+    //TODO remove when ready
+    suspend fun updateNamesDivider(): Boolean{
+        val allFlights = withContext(dispatcher) {getAllFlights() }.map{it.copy(name2 = it.name2.split(",").joinToString("|"))}
+        saveFlights(allFlights)
+        return true
     }
 }

@@ -60,6 +60,7 @@
             android:textColor="#CC000000"
             android:textSize="48sp"
             android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/simText"
             app:layout_constraintBottom_toTopOf="@+id/simDateMonthYearText"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -84,7 +85,7 @@
             android:id="@+id/simText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="80dp"
             android:layout_marginTop="4dp"
             android:includeFontPadding="false"
             android:text="@string/simluator"
@@ -92,7 +93,7 @@
             android:textColor="#CC000000"
             android:textSize="30sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@+id/simDateDayText"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView

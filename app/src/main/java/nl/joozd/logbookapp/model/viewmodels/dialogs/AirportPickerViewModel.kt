@@ -14,6 +14,8 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
 //TODO make sure list gets filled straight away?
 //TODO sort airportsList based on ICAO/IATA prefs?
+
+@ExperimentalCoroutinesApi
 class AirportPickerViewModel: JoozdlogDialogViewModel(){
     private var currentSearchJob: Job = Job()
 
@@ -25,10 +27,14 @@ class AirportPickerViewModel: JoozdlogDialogViewModel(){
     fun setWorkingOnOrig(orig: Boolean?){
         workingOnOrig = orig
         if (orig == null) feedback(ORIG_OR_DEST_NOT_SELECTED)
+        else updateSearch((if (orig) workingFlight?.orig else workingFlight?.dest) ?: "")
     }
 
     private val _airportsList = MutableLiveData<List<Airport>>()
     val airportsList: LiveData<List<Airport>> = distinctUntilChanged(_airportsList)
+    init{
+        _airportsList.value = airportRepository.liveAirports.value
+    }
 
     private val _pickedAirport = MutableLiveData<Airport>()
     val pickedAirport: LiveData<Airport>
@@ -44,7 +50,6 @@ class AirportPickerViewModel: JoozdlogDialogViewModel(){
         feedback(NOT_IMPLEMENTED)
     }
 
-    @ExperimentalCoroutinesApi
     fun updateSearch(query: String){
         currentSearchJob.cancel()
         currentSearchJob = viewModelScope.launch{
@@ -53,8 +58,7 @@ class AirportPickerViewModel: JoozdlogDialogViewModel(){
         //feedback(NOT_IMPLEMENTED)
     }
 
-    @ExperimentalCoroutinesApi
-    suspend fun collectAirports(flow: Flow<List<Airport>>){
+    private suspend fun collectAirports(flow: Flow<List<Airport>>){
         flow.conflate().collect {
             _airportsList.value = it
             delay(200)

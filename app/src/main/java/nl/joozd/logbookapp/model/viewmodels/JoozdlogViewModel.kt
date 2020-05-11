@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.model.viewmodels.dialogs
+package nl.joozd.logbookapp.model.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

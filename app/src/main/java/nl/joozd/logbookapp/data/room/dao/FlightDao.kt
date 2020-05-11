@@ -64,6 +64,9 @@ interface FlightDao {
     @Query("SELECT * FROM FlightData WHERE flightID = :id LIMIT 1")
     suspend fun fetchFlightByID(id: Int): FlightData?
 
+    @Query("SELECT * FROM FlightData WHERE isPlanned = 0 AND DELETEFLAG = 0 ORDER BY timeIn LIMIT 1")
+    suspend fun getMostRecentCompleted(): FlightData?
+
     @Insert (onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFlights(vararg flightData: FlightData)
 

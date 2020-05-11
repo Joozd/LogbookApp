@@ -24,6 +24,8 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import java.time.Instant
 
 
 /**
@@ -48,14 +50,13 @@ import nl.joozd.logbookapp.data.comm.Cloud
  * - Client marks flights as "known to server"
  * - Client saves timestamp as time of previous synch
  */
-class SyncWorker(appContext: Context, workerParams: WorkerParameters)
+class SyncTimeWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        when (Cloud.runFullUpdate()) {
-            true -> Result.success()
-            false -> Result.failure()
-            null -> Result.retry()
-        }
+        val serverTime = Cloud.getTime() ?: return@withContext Result.retry()
+        val now = Instant.now().epochSecond
+        Preferences.serverTimeOffset = serverTime - now
+        Result.success()
     }
 }
 

@@ -37,7 +37,6 @@
 package nl.joozd.logbookapp.ui.activities
 
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -177,8 +176,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                         setNegativeButton("Cancel", null)
                     }.create().show()
                 }
+                MainActivityEvents.DONE -> longToast(" Yay fixed!")
+                MainActivityEvents.ERROR -> longToast("An error occurred :(")
             }
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.notifyActivityResumed()
+
     }
 
     override fun onDestroy() {
@@ -192,6 +199,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
      * If Flight is entered, that will be loaded, if left blank or null, a new flight will be made.
      */
     private fun showFlight(){
+        snackbarShowing?.dismiss()
         addButton.fadeOut()
         my_toolbar.visibility = View.GONE
         val flightEditor = EditFlightFragment().apply {

@@ -2,19 +2,18 @@ package nl.joozd.logbookapp.model.viewmodels.activities
 
 
 
-import android.content.SharedPreferences
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.work.WorkManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.toBoolean
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
-import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.MainActivityEvents
-import nl.joozd.logbookapp.model.viewmodels.fragments.JoozdlogActivityViewModel
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 
 class MainActivityViewModel: JoozdlogActivityViewModel() {
     /**
@@ -54,28 +53,33 @@ else{
         feedback(MainActivityEvents.NOT_IMPLEMENTED)
     }
 
-    fun menuSelectedEditAircraft(){
-        feedback(MainActivityEvents.NOT_IMPLEMENTED)
-        /*
-        launch {
-            progressBarField?.let { pbf ->
-                val progBar = JoozdlogProgressBar(
-                    pbf
-                ).apply {
-                    backgroundColor = getColorFromAttr(android.R.attr.colorPrimary)
-                    text = getString(R.string.loadingAirports)
-                }.show()
-                Cloud.getAircraftTypes{progBar.progress = it}?.let { result ->
-                    launch(NonCancellable) {
-                        aircraftRepository.saveAircraftTypes(result)
-                        Log.d(this::class.simpleName,"repo now has ${aircraftRepository.liveAircraftTypes.value?.size} types")
-                    }
-                }
-                progBar.remove()
-            }
+    fun menuSelectedEditAircraft() {
+        viewModelScope.launch {
+            if (flightRepository.updateNamesDivider())
+                feedback(MainActivityEvents.DONE)
+            else feedback(MainActivityEvents.ERROR)
         }
-         */
     }
+
+            /*
+            launch {
+                progressBarField?.let { pbf ->
+                    val progBar = JoozdlogProgressBar(
+                        pbf
+                    ).apply {
+                        backgroundColor = getColorFromAttr(android.R.attr.colorPrimary)
+                        text = getString(R.string.loadingAirports)
+                    }.show()
+                    Cloud.getAircraftTypes{progBar.progress = it}?.let { result ->
+                        launch(NonCancellable) {
+                            aircraftRepository.saveAircraftTypes(result)
+                            Log.d(this::class.simpleName,"repo now has ${aircraftRepository.liveAircraftTypes.value?.size} types")
+                        }
+                    }
+                    progBar.remove()
+                }
+            }
+             */
 
     fun menuSelectedExportPDF(){
         feedback(MainActivityEvents.NOT_IMPLEMENTED)
@@ -121,7 +125,6 @@ else{
             flightRepository.createNewWorkingFlight()
             feedback(MainActivityEvents.SHOW_FLIGHT)
         }
-        feedback(MainActivityEvents.NOT_IMPLEMENTED)
     }
     fun saveWorkingFlight() {
         flightRepository.saveWorkingFlight()
@@ -156,6 +159,20 @@ else{
 
     fun deleteNotPlannedFlight(id: Int) = flightRepository.delete(id)
 
+
+    /*********************************************************************************************
+     * Functions related to synchronization:
+     *********************************************************************************************/
+
+    /**
+     * This will synch time with server and launch repository update functions (which can decide for themselves if it is necessary)
+     */
+    fun notifyActivityResumed(){
+        GeneralRepository.synchTimeWithServer()
+        flightRepository.syncIfNeeded()
+        airportRepository.getAirportsIfNeeded()
+        aircraftRepository.checkIfAircraftTypesUpToDate()
+    }
 
     /**
      * Internal functions:

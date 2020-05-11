@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
-import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -13,7 +12,9 @@ import nl.joozd.logbookapp.data.repository.helpers.FlowingAirportSearcher
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.dao.AirportDao
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.ui.App
+import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.utils.TimestampMaker
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.util.*
 
 class AirportRepository(private val airportDao: AirportDao, private val dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope by MainScope()  {
@@ -70,6 +71,13 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
             airportDao.clearDb()
     }
 
+    fun replaceDbWith(airports: List<Airport>){
+        launch(dispatcher + NonCancellable) {
+            clearDB().join()
+            save(airports)
+        }
+    }
+
     /**********************************************************************************************
      * Airport Search Functions
      **********************************************************************************************/
@@ -81,7 +89,6 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
      * eg. EHAM - AMS - Amsterdam - Schiphol
      */
     suspend fun searchAirportOnce(query: String): Airport? = withContext(dispatcher) {
-
             airportDao.searchAirportByIdent(query).firstOrNull()
                 ?: airportDao.searchAirportByIata(query).firstOrNull()
                 ?: airportDao.searchAirportByMunicipality(query).firstOrNull()
@@ -114,7 +121,7 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
      * customAirports are those airports that are used in logbook but not in airport Database
      * eg. Wickenburg (E25)
      */
-    /* TODO look at this. Decision: Make repositories speak toeach other (seems best now) or make separate class
+    /* TODO look at this. Decision: Make repositories speak to each other (seems best now) or make separate class
 
     private fun getCustomAirportsAsync(flights: List<FlightData>) = async(Dispatchers.IO) {
         ((flights.map { it.orig } + flights.map { it.dest })
@@ -143,9 +150,20 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
         distinctLiveCustomAirports.observeForever { completeLiveAirports.value = (it ?: emptyList()) + (liveAirports.value?: emptyList()) }
         liveAirports.observeForever { completeLiveAirports.value = (distinctLiveCustomAirports.value ?: emptyList()) + (it ?: emptyList()) }
     }
-
-
     */
+
+    /********************************************************************************************
+     * Sync functions:
+     ********************************************************************************************/
+
+    fun getAirportsIfNeeded(){
+        Log.d(this::class.simpleName, "getAirportsIfNeeded() started")
+        if (TimestampMaker.nowForSycPurposes - Preferences.airportUpdateTimestamp > MINIMUM_AIRPORT_CHECK_DELAY){
+            Log.d(this::class.simpleName, "getAirportsIfNeeded() does its thing")
+            JoozdlogWorkersHub.getAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
+            Log.d(this::class.simpleName, "getAirportsIfNeeded() did its thing")
+        }
+    }
 
     companion object{
         private var singletonInstance: AirportRepository? = null
@@ -158,5 +176,6 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
                     singletonInstance!!
                 }
         }
+        const val MINIMUM_AIRPORT_CHECK_DELAY: Int = 0 * 60 // seconds
     }
 }

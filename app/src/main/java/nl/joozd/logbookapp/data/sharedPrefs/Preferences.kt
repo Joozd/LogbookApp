@@ -19,17 +19,15 @@
 package nl.joozd.logbookapp.data.sharedPrefs
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Base64
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.ui.App
+import nl.joozd.logbookapp.App
 import java.security.MessageDigest
 
 object Preferences {
     private const val USERNAME = "username"
-    private const val PASSWORD = "password" // saved in plaintext, warn users about this
-
-    // private const val USE_IATA_AIRPORTS = "useIataAirports"
-    private const val STANDARD_TAKEOFF_LANDING_TIMES = "standardTakeoffLandingTimes"
+    private const val PASSWORD = "password" // saved as md5 hash, cannot retrieve password!
 
     private val sharedPref by lazy{
         with (App.instance.ctx) {
@@ -37,7 +35,7 @@ object Preferences {
         }
     }
 
-    fun getSharedPreferences() = with (App.instance.ctx) {
+    fun getSharedPreferences(): SharedPreferences = with (App.instance.ctx) {
         getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
     }
 
@@ -91,7 +89,13 @@ object Preferences {
 
     var serverTimeOffset: Long by JoozdLogSharedPrefs(sharedPref, 0)
 
+    var airportUpdateTimestamp: Long by JoozdLogSharedPrefs(sharedPref, -1)
+
     var airportDbVersion: Int by JoozdLogSharedPrefs(sharedPref, 0)
+
+    var aircraftTypesVersion: Int by JoozdLogSharedPrefs(sharedPref, 0)
+
+    var updateLargerFilesOverWifiOnly: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
     /***********************
      *   UI preferences:   *

@@ -56,7 +56,6 @@ class CustomSnackbarView @JvmOverloads constructor(
 
     override fun animateContentOut(delay: Int, duration: Int) {
         onBarGone?.actionOnBarGone()
-        Log.d("iets anders", "nog iets")
 
     }
 

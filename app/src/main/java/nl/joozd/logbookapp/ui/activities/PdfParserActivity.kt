@@ -21,22 +21,20 @@ package nl.joozd.logbookapp.ui.activities
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.viewModels
+import androidx.lifecycle.Observer
+import kotlinx.android.synthetic.main.activity_pdf_parser.*
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 
-import nl.joozd.logbookapp.data.room.Repository
 
-//deprecated
+import nl.joozd.logbookapp.model.helpers.FeedbackEvents.PdfParserActivityEvents
+import nl.joozd.logbookapp.model.viewmodels.activities.PdfParserActivityViewModel
+import nl.joozd.logbookapp.ui.utils.toast
+import nl.joozd.logbookapp.utils.startMainActivity
 
-
-import kotlin.coroutines.CoroutineContext
-
-class PdfParserActivity : AppCompatActivity(), CoroutineScope {
-    companion object {
-        const val TAG = "PdfParserActivity"
-    }
-    override val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
-    private val repository = Repository.getInstance()
+class PdfParserActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+    private val viewModel: PdfParserActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,124 +42,39 @@ class PdfParserActivity : AppCompatActivity(), CoroutineScope {
         Log.d("PdfParserActivity", "started")
         setContentView(R.layout.activity_pdf_parser)
 
-        /*
-        launch {
+        viewModel.runOnce(intent)
 
-            // val flightDb = FlightDb()
-            val allFlights = repository.requestValidFlights()
-            Log.d(TAG, "allFlights: ${allFlights.size}")
+        /**
+         * Observers:
+         */
+        viewModel.progress.observe(this, Observer {
+            pdfParserProgressBar.progress  = it
+        })
 
-            loadingFlightsText.visibility = View.VISIBLE
+        viewModel.progressText.observe(this, Observer {
+            pdfParserStatusTextView.text = it
+        })
 
-            //val airportDb = AirportDb()
-            //map[IATA] = ICAO
-            val airportsMap = airportDb.makeIcaoIataPairs().toMap().reversedMap()
-
-            loadingAirportsText.visibility = View.VISIBLE
-
-            //earliestTime is the on-blocks time of latest completed flight in DB. Used as cut-off moment for new flights.
-            val earliestTime = mostRecentCompleteFlight(
-                allFlights
-            ).timeIn
-            val alreadyPlannedFlights = allFlights.filter { it.planned }
-
-            readingFileText.visibility = View.VISIBLE
-
-            intent?.let {
-                Log.d(TAG, intent.action ?: "No intent.action")
-                Log.d(TAG, intent.type ?: "No intent.type")
-                (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {
-                    val inputStream = try {
-                        /*
-                     * Get the content resolver instance for this context, and use it
-                     * to get a ParcelFileDescriptor for the file.
-                     */
-                        contentResolver.openInputStream(it)
-                    } catch (e: FileNotFoundException) {
-                        e.printStackTrace()
-                        Log.e(TAG, "File not found.")
-                        return@launch
-                    }
-                    if (inputStream == null) {
-                        Log.e(TAG, "Inputstream is null")
-                        alert("Error: Inputstream is null \n(error $TAG 01").show()
-                        return@launch
-                    }
-
-                    //Now, we have an inputstream containing (hopefully) a roster
-
-                    val roster = withContext(Dispatchers.IO) { KlcRosterParser(inputStream) }
-                    if (!roster.seemsValid) {
-                        Log.w(TAG, "roster.seemsValid == false")
-                        runOnUiThread {
-                            alert("This doesn't seem to be a KLC Roster") { negativeButton("Close") { finish() } }.show()
-                        }
-                    }
-                    readingFileCheck.visibility = View.VISIBLE
-                    // flightsToPlan are all flights in roster after most recent completed flight on-blocks time
-                    val flightsToPlan = roster.days.map { it.events }.flatten()
-                        .filter { it.type == Activities.FLIGHT }
-                        .filter { it.startEpochSecond > earliestTime }
-                    Log.d(TAG, "flightsToPlan: ${flightsToPlan.size}")
-                    // simsToPlan are all actual sim times in roster after most recent completed flight on-blocks time
-                    val simsToPlan = roster.days.map { it.events }.flatten()
-                        .filter { it.type == Activities.ACTUALSIM }
-                        .filter { it.startEpochSecond > earliestTime }
-                    Log.d(TAG, "simsToPlan: ${simsToPlan.size}")
-                    //days is a list of pairs (start of day, end of day)
-                    val days =
-                        roster.days.map { it.startOfDayEpochSecond to it.endOfDayEpochSecond }
-                    Log.d(TAG, "days: ${roster.days.size}")
-
-                    //remove planned flights from DB that are on a date that new flights are inserted on
-                    //viewModel takes care of whether or not it is synced etc.
-                    Log.d(TAG, "alreadyPlannedFlights:  ${alreadyPlannedFlights.size}")
-                    repository.deleteFlights(alreadyPlannedFlights.filter { pf -> days.any { day -> pf.timeIn in (day.first..day.second) } }.also{
-                        Log.d(TAG, "Deleting ${it.size} flights")
-                    })
-
-
-                    val nextFlightId = repository.highestFlightId() + 1
-                    savingFlightsText.visibility = View.VISIBLE
-                    val newFlights: List<Flight> =
-                        flightsToPlan.mapIndexed { index: Int, rf: KlcRosterEvent ->
-                            val flightNumOrigArrowDest = rf.description.split(" ").map { it.trim() }
-                            val flightNumber = flightNumOrigArrowDest[0]
-                            val orig = flightNumOrigArrowDest[1]
-                            val dest = flightNumOrigArrowDest[3]
-
-                            Flight(
-                                nextFlightId + index,
-                                orig = airportsMap[orig] ?: "XXXX",
-                                dest = airportsMap[dest] ?: "XXXX",
-                                timeOut = rf.startEpochSecond,
-                                timeIn = rf.endEpochSecond,
-                                flightNumber = flightNumber,
-                                timeStamp = Instant.now().epochSecond + Preferences.serverTimeOffset,
-                                changed = 1
-                            )
-                        }
-                    // TODO add simsToPlan
-
-                    Log.d(TAG, "Saving ${newFlights.size} flights")
-                    repository.saveFlights(newFlights)
-
-                    savingFlightsCheck.visibility = View.VISIBLE
-                    startingMainActivityText.visibility = View.VISIBLE
-
-                    //start main activity
-                    startMainActivity(App.instance)
+        viewModel.feedbackEvent.observe(this, Observer {
+            when (it.getEvent()){
+                PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED -> {
+                    startMainActivity(this)
                     finish()
                 }
-            }
-        }
+                null -> {}
+                else -> toast("SOMETHING NOT IMPLEMENTED HAPPENED")
 
-         */
+            }
+        })
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        coroutineContext.cancel()
+        cancel()
+    }
+
+    companion object {
+        const val TAG = "PdfParserActivity"
     }
 }
 

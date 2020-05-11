@@ -16,7 +16,7 @@
  *     along with this program.  If not, see https://www.gnu.org/licenses
  */
 
-package nl.joozd.logbookapp.ui
+package nl.joozd.logbookapp
 
 import nl.joozd.logbookapp.utils.DelegatesExt
 import android.app.Application
@@ -32,6 +32,5 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-
     }
 }

@@ -39,13 +39,13 @@ object ServerFunctions {
      * Expects server to reply with a single Long (8 Bytes)
      * @return the Timestamp from server as a Long (epochseconds) or -1 if error
      */
-    fun getTimestamp(client: Client): Long{
+    fun getTimestamp(client: Client): Long?{
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_TIMESTAMP)
         client.readFromServer()?.let {
             return longFromBytes(it)
         }
         Log.e("getTimestamp", "readFromServer() returned null")
-        return -1
+        return null
     }
 
     /**
@@ -84,6 +84,13 @@ object ServerFunctions {
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_AIRCRAFT_TYPES)
         return client.readFromServer(listener)?.let{
             unpackSerialized(it).map {bytes -> AircraftType.deserialize (bytes)}
+        }
+    }
+
+    fun getAircraftTypesVersion(client: Client, listener: (Int) -> Unit): Int? {
+        client.sendRequest(JoozdlogCommsKeywords.REQUEST_AIRCRAFT_TYPES_VERSION)
+        return client.readFromServer(listener)?.let{
+            unwrap(it)
         }
     }
 
@@ -163,7 +170,9 @@ object ServerFunctions {
         client.sendRequest(JoozdlogCommsKeywords.ADD_TIMESTAMP,
             wrap(timeStamp)
         )
-        return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
+        val reply = client.readFromServer()
+        Log.d("ServerFunctions.sendTimeStamp()", "${reply?.toString(Charsets.UTF_8)}")
+        return reply?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
     }
 
     /**

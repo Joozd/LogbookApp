@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.data.room
 
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.data.room.dao.*
-import nl.joozd.logbookapp.ui.App
+import nl.joozd.logbookapp.App
 
 
 /**

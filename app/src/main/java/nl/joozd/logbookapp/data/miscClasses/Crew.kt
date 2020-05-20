@@ -1,23 +1,26 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
  */
 
 package nl.joozd.logbookapp.data.miscClasses
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import nl.joozd.logbookapp.extensions.getBit
 import nl.joozd.logbookapp.extensions.setBit
 import nl.joozd.logbookapp.extensions.toInt
@@ -29,20 +32,31 @@ import nl.joozd.logbookapp.extensions.toInt
  * bit 5: in seat on landing                                                        *
  * bit 6-31: amount of time reserved for takeoff/landing (standard in settings)     *
  ************************************************************************************/
-data class Crew(var crewSize: Int = 2,
-                val didTakeoff: Boolean = true,
-                val didLanding: Boolean = true,
-                val takeoffLandingTimes: Int = 0)
+class Crew(iCrewSize: Int = 2,
+           iDidTakeoff: Boolean = true,
+           iDidLanding: Boolean = true,
+           iTakeoffLandingTimes: Int = 0)
 {
-    companion object {
-        fun of(value: Int) = if (value == 0) Crew() else Crew(
-            crewSize = 15.and(value),
-            didTakeoff = value.getBit(4),
-            didLanding = value.getBit(5),
-            takeoffLandingTimes = value.ushr(6)
-        )
-        fun of(crewSize: Int, didTakeoff: Boolean, didLanding: Boolean, nonStandardTimes: Int) = Crew(crewSize,didTakeoff,didLanding,nonStandardTimes)
-    }
+    var crewSize: Int = iCrewSize
+        set(it){
+            field = it
+            _observable.value = this
+        }
+    var didTakeoff: Boolean = iDidTakeoff
+        set(it){
+            field = it
+            _observable.value = this
+        }
+    var didLanding: Boolean = iDidLanding
+        set(it){
+            field = it
+            _observable.value = this
+        }
+    var takeoffLandingTimes: Int = iTakeoffLandingTimes
+        set(it){
+            field = it
+            _observable.value = this
+        }
 
     fun toInt():Int {
         var value = if (crewSize > 15) 15 else crewSize
@@ -51,7 +65,61 @@ data class Crew(var crewSize: Int = 2,
         return value
     }
     fun getLogTime(totalTime: Int, pic: Boolean = false): Int{
-        if (pic) return totalTime
-        return ((totalTime-2*takeoffLandingTimes)/crewSize) * 2 + takeoffLandingTimes * (didTakeoff.toInt() + didLanding.toInt())
+        if (pic || crewSize <=2) return totalTime
+        return (((totalTime.toFloat()-2*takeoffLandingTimes)/crewSize) * 2 + takeoffLandingTimes * (didTakeoff.toInt() + didLanding.toInt()) + 0.5).toInt()
+    }
+
+    operator fun plus(extraCrewMembers: Int): Crew = Crew ((crewSize + extraCrewMembers).putInRange((1..15)), didTakeoff, didLanding, takeoffLandingTimes)
+    operator fun minus(extraCrewMembers: Int): Crew = Crew ((crewSize - extraCrewMembers).putInRange((1..15)), didTakeoff, didLanding, takeoffLandingTimes)
+
+
+    operator fun plusAssign(extraCrewMembers: Int){
+        crewSize += extraCrewMembers
+        crewSize = crewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
+    }
+
+    operator fun minusAssign(fewerCrewMebers: Int){
+        crewSize -= fewerCrewMebers
+        crewSize = crewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
+    }
+
+    operator fun inc(): Crew{
+        crewSize++
+        crewSize = crewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
+        return this
+    }
+
+    operator fun dec(): Crew{
+        crewSize--
+        crewSize = crewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
+        return this
+    }
+
+    private fun Int.putInRange(range: IntRange): Int {
+        require (!range.isEmpty()) { "cannot put an int in a range without elements"}
+        return when {
+            this in range -> this
+            this < range.min()!! -> range.min()!!
+            this > range.max()!! -> range.max()!!
+            else -> error ("Value $this neither in our outside of $range...")
+        }
+    }
+
+    private val _observable = MutableLiveData(this)
+    val observable: LiveData<Crew>
+        get() = _observable
+
+
+    companion object {
+        const val MIN_CREW_SIZE = 1
+        const val MAX_CREW_SIZE = 15
+
+        fun of(value: Int) = if (value == 0) Crew() else Crew(
+            iCrewSize = 15.and(value),
+            iDidTakeoff = value.getBit(4),
+            iDidLanding = value.getBit(5),
+            iTakeoffLandingTimes = value.ushr(6)
+        )
+        fun of(crewSize: Int, didTakeoff: Boolean, didLanding: Boolean, nonStandardTimes: Int) = Crew(crewSize,didTakeoff,didLanding,nonStandardTimes)
     }
 }

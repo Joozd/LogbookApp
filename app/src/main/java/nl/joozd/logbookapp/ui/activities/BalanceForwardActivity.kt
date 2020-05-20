@@ -1,19 +1,20 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
  */
 
 package nl.joozd.logbookapp.ui.activities
@@ -23,7 +24,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import androidx.appcompat.widget.Toolbar
-import kotlinx.android.synthetic.main.activity_balance_forward.my_toolbar
+import kotlinx.android.synthetic.main.activity_balance_forward.*
 import nl.joozd.logbookapp.R
 import nl.joozd.joozdlogcommon.BalanceForward
 
@@ -86,7 +87,7 @@ class BalanceForwardActivity : AppCompatActivity() {
 
         setTheme(R.style.AppTheme)
         setContentView(R.layout.activity_balance_forward)
-        setSupportActionBar(my_toolbar as Toolbar)
+        setSupportActionBar(balance_forward_toolbar as Toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = resources.getString(R.string.balanceForward)
 /*

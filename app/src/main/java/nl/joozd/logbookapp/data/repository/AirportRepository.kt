@@ -1,3 +1,22 @@
+/*
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
+ *
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
+ *
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
+ *
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
+ */
+
 package nl.joozd.logbookapp.data.repository
 
 import android.content.SharedPreferences
@@ -42,7 +61,7 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
 
     private val _useIataAirports = MutableLiveData<Boolean>()
     private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        Log.d("AirportRepository", "key = $key")
+        // Log.d("AirportRepository", "key = $key")
         if (key == Preferences::useIataAirports.name) _useIataAirports.value = Preferences.useIataAirports
     }
     init{
@@ -88,11 +107,13 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
      * Searches in order: ICA Ident - Iata - Municipality - Airport Name
      * eg. EHAM - AMS - Amsterdam - Schiphol
      */
-    suspend fun searchAirportOnce(query: String): Airport? = withContext(dispatcher) {
+    suspend fun searchAirportOnce(query: String?): Airport? = withContext(dispatcher) {
+        query?.let { query ->
             airportDao.searchAirportByIdent(query).firstOrNull()
                 ?: airportDao.searchAirportByIata(query).firstOrNull()
                 ?: airportDao.searchAirportByMunicipality(query).firstOrNull()
                 ?: airportDao.searchAirportByName(query).firstOrNull()
+        }
     }
 
     suspend fun getAirportOnce(query: String):Airport? = withContext(dispatcher){
@@ -157,13 +178,25 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
      ********************************************************************************************/
 
     fun getAirportsIfNeeded(){
-        Log.d(this::class.simpleName, "getAirportsIfNeeded() started")
         if (TimestampMaker.nowForSycPurposes - Preferences.airportUpdateTimestamp > MINIMUM_AIRPORT_CHECK_DELAY){
-            Log.d(this::class.simpleName, "getAirportsIfNeeded() does its thing")
             JoozdlogWorkersHub.getAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
-            Log.d(this::class.simpleName, "getAirportsIfNeeded() did its thing")
         }
     }
+
+    /**
+     * Observable for worker to send progress to
+     * progress is 0-100, to signal worker has stopped]
+     */
+    private val _airportSyncProgress = MutableLiveData<Int>(-1)
+    val airportSyncProgress: LiveData<Int>
+        get() = _airportSyncProgress
+    fun setAirportSyncProgress(progress: Int){
+        require (progress in (-1..100)) {"Progress reported to setAirportSyncProgress not in range -1..100"}
+        launch (Dispatchers.Main) {
+            _airportSyncProgress.value = progress
+        }
+    }
+
 
     companion object{
         private var singletonInstance: AirportRepository? = null

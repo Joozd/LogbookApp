@@ -1,19 +1,20 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
  */
 
 package nl.joozd.logbookapp.data.comm
@@ -23,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.joozdlogcommon.AircraftType
+import nl.joozd.joozdlogcommon.ForcedTypeData
 import nl.joozd.logbookapp.data.comm.protocol.Client
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
@@ -100,9 +102,24 @@ object Cloud {
         }
     }
 
+    suspend fun getForcedTypes(listener: (Int) -> Unit = {}): List<ForcedTypeData>? = withContext(Dispatchers.IO) {
+        Client().use{
+            ServerFunctions.getForcedTypes(it, listener)
+        }
+    }
+
+
+
+
     suspend fun getAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? = withContext(Dispatchers.IO) {
         Client().use{
             ServerFunctions.getAircraftTypesVersion(it, listener)
+        }
+    }
+
+    suspend fun getForcedAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? = withContext(Dispatchers.IO) {
+        Client().use{
+            ServerFunctions.getForcedAircraftTypesVersion(it, listener)
         }
     }
 
@@ -169,16 +186,18 @@ object Cloud {
             withContext(Dispatchers.IO) f@{
                 syncingFlights = true
                 listener(0)
+                Log.d("YOLO", "SWAGGGGGG11111")
                 Client().use { server ->
-                    listener(5) // Connection is made, it's something!
-                    with(ServerFunctions) {
+                    Log.d("YOLO", "SWAGGGGGG22222")
 
+                    listener(5) // Connection is made!
+                    with(ServerFunctions) {
+                        Log.d("YOLO", "SWAGGGGGG33333")
+
+                        //sync time with server
                         val timeStamp: Long = getTimestamp(server) ?: -1
                         Log.d(TAG, "Got timestamp ${Instant.ofEpochSecond(timeStamp)}")
                         listener(10)
-
-
-                        //update timeOffset for local flights
                         Preferences.serverTimeOffset = timeStamp - Instant.now().epochSecond
 
                         //Login and handle if that fails:
@@ -205,7 +224,7 @@ object Cloud {
 
                         //fix possible flightID conflicts
                         val newLocalFlights =
-                            completeFlightDB.filter { it.unknownToServer.toBoolean() }
+                            completeFlightDB.filter { it.unknownToServer }
                         val fixedLocalFlights = mutableListOf<Flight>()
 
                         val takenIDs = newFlightsFromServer.map { it.flightID }
@@ -217,8 +236,8 @@ object Cloud {
                                 flight.copy(flightID = lowestFixedID + index)
                             }
                         launch(Dispatchers.Main) {
-                            flightRepository.delete(newLocalFlights.filter { it.flightID in takenIDs })
-                            flightRepository.saveFlights(newFlights)
+                            flightRepository.delete(newLocalFlights.filter { it.flightID in takenIDs }, sync = false)
+                            flightRepository.save(newFlights, sync = false)
                         }
                         fixedLocalFlights.addAll(newFlights)
 
@@ -231,9 +250,9 @@ object Cloud {
                         // -> change their timestamps to now
                         // (this means that editing flights on two devices before syncing will stick to most recent sync, not most recent edit)
                         val flightsToSend =
-                            (completeFlightDB.filter { it.timeStamp > Preferences.lastUpdateTime && it.unknownToServer == 0 } + // Not including flightslist we just fixed
+                            (completeFlightDB.filter { it.timeStamp > Preferences.lastUpdateTime && !it.unknownToServer } + // Not including flightslist we just fixed
                                     fixedLocalFlights)
-                                .map { it.copy(timeStamp = timeStamp, unknownToServer = 0) }
+                                .map { it.copy(timeStamp = timeStamp, unknownToServer = false) }
 
                         //send the flights to server, retry on fail as login worked earlier
                         // Could make this incrementally increase progbar, but it would make things somewhat more inefficient. Lets see.
@@ -252,7 +271,7 @@ object Cloud {
                         //Save flights with current timestamps and clear `changed` flags
                         //listsner from 85 to 100
                         launch(Dispatchers.Main) {
-                            flightRepository.saveFlights(flightsToSend.map { it.copy(unknownToServer = 0) } + newFlightsFromServer) // { listener(85 + it * 15 / 100) } // TODO Listsner not implemented
+                            flightRepository.save(flightsToSend.map { it.copy(unknownToServer = false) } + newFlightsFromServer, sync = false) // { listener(85 + it * 15 / 100) } // TODO Listsner not implemented
                         }
 
                         // Profit!

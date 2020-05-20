@@ -1,19 +1,20 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
  */
 
 package nl.joozd.joozdlogcommon.comms
@@ -35,6 +36,7 @@ object JoozdlogCommsKeywords {
     const val NOT_LOGGED_IN = "NOT_LOGGED_IN"
     const val SERVER_ERROR = "SERVER_ERROR "
     const val NEXT_IS_COMPRESSED = "NEXT_IS_COMPRESSED"
+    const val HELLO = "HELLO" // to be done before any communications with PROTOCOL_VERSION. Do this right after creating SSL connection.
 
     //general keywords
     const val REQUEST_TIMESTAMP = "REQUEST_TIMESTAMP"
@@ -54,6 +56,8 @@ object JoozdlogCommsKeywords {
     const val REQUEST_AIRCRAFT_CONSENSUS = "REQUEST_AIRCRAFT_CONSENSUS"
     const val REQUEST_AIRCRAFT_TYPES = "REQUEST_AIRCRAFT_TYPES"
     const val REQUEST_AIRCRAFT_TYPES_VERSION = "REQUEST_AIRCRAFT_TYPES_VERSION"
+    const val REQUEST_FORCED_TYPES = "REQUEST_FORCED_TYPES"
+    const val REQUEST_FORCED_TYPES_VERSION = "REQUEST_FORCED_TYPES_VERSION"
 
     //airport functions
     const val REQUEST_AIRPORT_DB_VERSION = "REQUEST_AIRPORT_DB_VERSION"

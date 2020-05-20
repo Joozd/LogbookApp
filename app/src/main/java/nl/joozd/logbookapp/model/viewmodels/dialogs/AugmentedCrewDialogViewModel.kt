@@ -1,42 +1,61 @@
+/*
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
+ *
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
+ *
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
+ *
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
+ */
+
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
 import nl.joozd.logbookapp.data.miscClasses.Crew
-import nl.joozd.logbookapp.data.repository.FlightRepository
-import nl.joozd.logbookapp.utils.InitialSetFlight
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
-class AugmentedCrewDialogViewModel: ViewModel() {
-    private val flightRepository = FlightRepository.getInstance()
-
-    private val undoFlight = InitialSetFlight()
-
-    init{
-        undoFlight.flight = flightRepository.workingFlight.value
-    }
-    fun undo(){
-        undoFlight.flight?.let {flightRepository.updateWorkingFlight(it)}
-    }
-
-
-    val augmentedCrewData: LiveData<Crew> = Transformations.map(flightRepository.workingFlight) { Crew.of(it.augmentedCrew)}
+class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
+    val augmentedCrewData: LiveData<Crew> = Transformations.map(flight) { Crew.of(it.augmentedCrew)}
 
     fun crewDown(){
-        TODO("Not Implenmented")
+        workingFlightRepository.crew?.let{
+            workingFlightRepository.crew = it - 1
+        }
     }
     fun crewUp(){
-        TODO("Not Implenmented")
+        workingFlightRepository.crew?.let{
+            workingFlightRepository.crew = it + 1
+        }
     }
-    fun setTakeoff(takeoff: Boolean){
-        TODO("Not Implenmented")
+    fun setTakeoff(takeoff: Boolean) {
+        workingFlightRepository.crew?.let {
+            workingFlightRepository.crew = it.apply {
+                didTakeoff = takeoff
+            }
+        }
     }
     fun setLanding(landing: Boolean){
-        TODO("Not Implenmented")
+        workingFlightRepository.crew?.let {
+            workingFlightRepository.crew = it.apply {
+                didLanding = landing
+            }
+        }
     }
     fun setTakeoffLandingTime(time: Int){
-        TODO("Not Implenmented")
+        workingFlightRepository.crew?.let {
+            workingFlightRepository.crew = it.apply {
+                takeoffLandingTimes = time
+            }
+        }
     }
-
-
 }

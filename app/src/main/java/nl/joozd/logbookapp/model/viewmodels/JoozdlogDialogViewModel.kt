@@ -1,3 +1,22 @@
+/*
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
+ *
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
+ *
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
+ *
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
+ */
+
 package nl.joozd.logbookapp.model.viewmodels
 
 import androidx.lifecycle.Transformations
@@ -8,18 +27,18 @@ open class JoozdlogDialogViewModel: JoozdlogViewModel() {
     private val undoFlight = InitialSetFlight()
 
     init{
-        undoFlight.flight = flightRepository.workingFlight.value
+        undoFlight.flight = workingFlightRepository.workingFlight.value
     }
     fun undo(){
-        undoFlight.flight?.let {flightRepository.updateWorkingFlight(it)}
+        undoFlight.flight?.let {workingFlightRepository.updateWorkingFlight(it)}
     }
 
-    val flight = Transformations.distinctUntilChanged(flightRepository.workingFlight)
+    val flight = workingFlightRepository.workingFlight
     protected var workingFlight: Flight?
-        get() = flightRepository.workingFlight.value
+        get() = workingFlightRepository.workingFlight.value
         set(f){
             f?.let {
-                flightRepository.updateWorkingFlight(it)
+                workingFlightRepository.updateWorkingFlight(it)
             }
         }
 }

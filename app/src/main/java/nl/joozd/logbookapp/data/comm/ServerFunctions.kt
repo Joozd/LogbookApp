@@ -1,30 +1,29 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
  */
 
 package nl.joozd.logbookapp.data.comm
 
 import android.util.Log
-import nl.joozd.joozdlogcommon.AircraftType
+import nl.joozd.joozdlogcommon.*
 import nl.joozd.logbookapp.data.comm.protocol.Client
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.joozdlogcommon.BasicAirport
-import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.joozdlogcommon.exceptions.NotAuthorizedException
 import nl.joozd.joozdlogcommon.serializing.*
@@ -87,8 +86,23 @@ object ServerFunctions {
         }
     }
 
+    fun getForcedTypes(client: Client, listener: (Int) -> Unit): List<ForcedTypeData>?{
+        client.sendRequest(JoozdlogCommsKeywords.REQUEST_FORCED_TYPES)
+        return client.readFromServer(listener)?.let{
+            unpackSerialized(it).map {bytes -> ForcedTypeData.deserialize (bytes)}
+        }
+    }
+
+
     fun getAircraftTypesVersion(client: Client, listener: (Int) -> Unit): Int? {
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_AIRCRAFT_TYPES_VERSION)
+        return client.readFromServer(listener)?.let{
+            unwrap(it)
+        }
+    }
+
+    fun getForcedAircraftTypesVersion(client: Client, listener: (Int) -> Unit): Int? {
+        client.sendRequest((JoozdlogCommsKeywords.REQUEST_FORCED_TYPES_VERSION))
         return client.readFromServer(listener)?.let{
             unwrap(it)
         }
@@ -97,8 +111,8 @@ object ServerFunctions {
     fun login(client: Client): Boolean?{
         if (Preferences.username == null || Preferences.key == null)
             return false
-        //payLoad is username as wrap, last 16 bytes are encryption key
-        val payLoad = wrap(Preferences.username!!) + Preferences.key!!
+        //payLoad is LoginData.serialize()
+        val payLoad = LoginData(Preferences.username!!, Preferences.key!!, BasicFlight.VERSION.version).serialize()
 
         client.sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
         return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
@@ -171,7 +185,6 @@ object ServerFunctions {
             wrap(timeStamp)
         )
         val reply = client.readFromServer()
-        Log.d("ServerFunctions.sendTimeStamp()", "${reply?.toString(Charsets.UTF_8)}")
         return reply?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
     }
 

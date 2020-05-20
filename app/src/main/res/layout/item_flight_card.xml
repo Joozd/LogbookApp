@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~  JoozdLog Pilot's Logbook
+  ~  Copyright (c) 2020 Joost Welle
+  ~
+  ~      This program is free software: you can redistribute it and/or modify
+  ~      it under the terms of the GNU Affero General Public License as
+  ~      published by the Free Software Foundation, either version 3 of the
+  ~      License, or (at your option) any later version.
+  ~
+  ~      This program is distributed in the hope that it will be useful,
+  ~      but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~      GNU Affero General Public License for more details.
+  ~
+  ~      You should have received a copy of the GNU Affero General Public License
+  ~      along with this program.  If not, see https://www.gnu.org/licenses
+  ~
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/deleteLayer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#00000000">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_delete" />
+
+
+    <!--
+    <androidx.constraintlayout.widget.ConstraintLayout
+    -->
+    <nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout
+        android:id="@+id/flightLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
+        android:background="@drawable/rounded_corners_white"
+        android:clickable="true"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/remarksText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:singleLine="true"
+            android:textAlignment="textStart"
+            android:textColor="#CC000000"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/destText"
+            app:layout_constraintStart_toStartOf="@+id/flightNumberText"
+            tools:text="Remarks go here!" />
+
+        <TextView
+            android:id="@+id/registrationText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="#FFFFFF"
+            android:includeFontPadding="false"
+            android:textAlignment="textStart"
+            android:textColor="#CC000000"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toTopOf="@+id/remarksText"
+            app:layout_constraintStart_toEndOf="@+id/aircraftTypeText"
+            app:layout_constraintTop_toBottomOf="@+id/flightNumberText"
+            app:layout_goneMarginBottom="8dp"
+            tools:text="PH-EZE" />
+
+        <TextView
+            android:id="@+id/flightNumberText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="80dp"
+            android:layout_marginTop="4dp"
+            android:background="#FFFFFF"
+            android:gravity="center_vertical"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="#CC000000"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/timeOutText"
+            tools:text="WW3333" />
+
+        <TextView
+            android:id="@+id/dateMonthYearText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:textAlignment="center"
+            android:textColor="#CC000000"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/dateDayText"
+            app:layout_constraintStart_toStartOf="@+id/dateDayText"
+            app:layout_constraintTop_toBottomOf="@+id/dateDayText"
+            tools:text="AUG. 2019" />
+
+        <TextView
+            android:id="@+id/isDualText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:includeFontPadding="false"
+            android:text="@string/dual"
+            android:textAllCaps="true"
+            android:textColor="#CC000000"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/takeoffLandingText"
+            app:layout_constraintEnd_toStartOf="@+id/isInstructorText"
+            app:layout_constraintTop_toTopOf="@+id/takeoffLandingText" />
+
+        <TextView
+            android:id="@+id/isPicusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:includeFontPadding="false"
+            android:text="@string/picus"
+            android:textAllCaps="true"
+            android:textColor="#CC000000"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/takeoffLandingText"
+            app:layout_constraintEnd_toStartOf="@+id/isPicText"
+            app:layout_constraintTop_toTopOf="@+id/takeoffLandingText" />
+
+        <TextView
+            android:id="@+id/isAugmentedText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:includeFontPadding="false"
+            android:text="@string/augmented"
+            android:textAllCaps="true"
+            android:textColor="#CC000000"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/takeoffLandingText"
+            app:layout_constraintEnd_toStartOf="@+id/isIFRText"
+            app:layout_constraintTop_toTopOf="@+id/takeoffLandingText" />
+
+        <TextView
+            android:id="@+id/isIFRText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:includeFontPadding="false"
+            android:text="@string/ifrString"
+            android:textAllCaps="true"
+            android:textColor="#CC000000"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/takeoffLandingText"
+            app:layout_constraintEnd_toStartOf="@+id/isDualText"
+            app:layout_constraintTop_toTopOf="@+id/takeoffLandingText" />
+
+        <TextView
+            android:id="@+id/isInstructorText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:includeFontPadding="false"
+            android:text="@string/instructor"
+            android:textAllCaps="true"
+            android:textColor="#CC000000"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/takeoffLandingText"
+            app:layout_constraintEnd_toStartOf="@+id/isPicusText"
+            app:layout_constraintTop_toTopOf="@+id/takeoffLandingText" />
+
+        <TextView
+            android:id="@+id/isPicText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:includeFontPadding="false"
+            android:text="@string/pic"
+            android:textAllCaps="true"
+            android:textColor="#CC000000"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/takeoffLandingText"
+            app:layout_constraintEnd_toStartOf="@+id/isPFText"
+            app:layout_constraintTop_toTopOf="@+id/takeoffLandingText" />
+
+        <TextView
+            android:id="@+id/isPFText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:includeFontPadding="false"
+            android:text="@string/pf"
+            android:textAllCaps="true"
+            android:textColor="#CC000000"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/takeoffLandingText"
+            app:layout_constraintEnd_toStartOf="@+id/takeoffLandingText"
+            app:layout_constraintTop_toTopOf="@+id/takeoffLandingText" />
+
+        <TextView
+            android:id="@+id/takeoffLandingText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:includeFontPadding="false"
+            android:textAllCaps="true"
+            android:textColor="#CC000000"
+            android:textSize="10sp"
+            app:layout_constraintBottom_toBottomOf="@+id/flightNumberText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/flightNumberText"
+            tools:text="1/1" />
+
+        <TextView
+            android:id="@+id/namesText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:singleLine="true"
+            android:textAlignment="textEnd"
+            android:textColor="#CC000000"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@+id/registrationText"
+            app:layout_constraintEnd_toEndOf="@+id/takeoffLandingText"
+            app:layout_constraintStart_toEndOf="@+id/registrationText"
+            app:layout_constraintTop_toTopOf="@+id/registrationText"
+            tools:text="Joost welle, Henk de Vries, ed en willem bever, je moeder" />
+
+        <TextView
+            android:id="@+id/dateDayText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:includeFontPadding="false"
+            android:textAlignment="center"
+            android:textColor="#CC000000"
+            android:textSize="48sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/dateMonthYearText"
+            app:layout_constraintEnd_toStartOf="@+id/flightNumberText"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="23" />
+
+        <TextView
+            android:id="@+id/aircraftTypeText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:textColor="#CC000000"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@+id/registrationText"
+            app:layout_constraintStart_toStartOf="@+id/origText"
+            app:layout_constraintTop_toTopOf="@+id/registrationText"
+            tools:text="PA28R-Arrow" />
+
+        <TextView
+            android:id="@+id/origText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:textColor="#CC000000"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/flightNumberText"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="LOWW" />
+
+
+        <TextView
+            android:id="@+id/destText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:includeFontPadding="false"
+            android:textAlignment="textEnd"
+            android:textColor="#CC000000"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="EGBB" />
+
+        <TextView
+            android:id="@+id/timeInText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:includeFontPadding="false"
+            android:textColor="#CC000000"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/arrow2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/arrow2"
+            app:layout_constraintTop_toTopOf="@+id/arrow2"
+            tools:text="1328" />
+
+        <TextView
+            android:id="@+id/arrow1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:includeFontPadding="false"
+            android:text="@string/arrowRight"
+            android:textAlignment="center"
+            android:textColor="#CC000000"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/timeOutText"
+            app:layout_constraintEnd_toStartOf="@+id/totalTimeText"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/timeOutText"
+            app:layout_constraintTop_toTopOf="@+id/timeOutText" />
+
+        <TextView
+            android:id="@+id/arrow2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:includeFontPadding="false"
+            android:text="@string/arrowRight"
+            android:textAlignment="center"
+            android:textColor="#CC000000"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/totalTimeText"
+            app:layout_constraintEnd_toStartOf="@+id/timeInText"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/totalTimeText"
+            app:layout_constraintTop_toTopOf="@+id/totalTimeText" />
+
+        <TextView
+            android:id="@+id/timeOutText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:includeFontPadding="false"
+            android:textColor="#CC000000"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/arrow1"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/origText"
+            app:layout_constraintTop_toBottomOf="@+id/origText"
+            tools:text="1140" />
+
+        <TextView
+            android:id="@+id/totalTimeText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:includeFontPadding="false"
+            android:textAlignment="center"
+            android:textColor="#CC000000"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@+id/arrow1"
+            app:layout_constraintEnd_toStartOf="@+id/arrow2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/arrow1"
+            app:layout_constraintTop_toTopOf="@+id/arrow1"
+            tools:text="1:48 hrs" />
+
+
+    </nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout>
+    <!--
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    -->
+</androidx.constraintlayout.widget.ConstraintLayout>

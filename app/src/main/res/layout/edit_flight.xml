@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ JoozdLog Pilot's Logbook
-  ~ Copyright (C) 2020 Joost Welle
+  ~  JoozdLog Pilot's Logbook
+  ~  Copyright (c) 2020 Joost Welle
   ~
-  ~     This program is free software: you can redistribute it and/or modify
-  ~     it under the terms of the GNU Affero General Public License as
-  ~     published by the Free Software Foundation, either version 3 of the
-  ~     License, or (at your option) any later version.
+  ~      This program is free software: you can redistribute it and/or modify
+  ~      it under the terms of the GNU Affero General Public License as
+  ~      published by the Free Software Foundation, either version 3 of the
+  ~      License, or (at your option) any later version.
   ~
-  ~     This program is distributed in the hope that it will be useful,
-  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~     GNU Affero General Public License for more details.
+  ~      This program is distributed in the hope that it will be useful,
+  ~      but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~      GNU Affero General Public License for more details.
   ~
-  ~     You should have received a copy of the GNU Affero General Public License
-  ~     along with this program.  If not, see https://www.gnu.org/licenses
+  ~      You should have received a copy of the GNU Affero General Public License
+  ~      along with this program.  If not, see https://www.gnu.org/licenses
+  ~
   -->
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -154,7 +155,6 @@
                             android:includeFontPadding="false"
                             android:inputType="textVisiblePassword|textNoSuggestions|textCapCharacters"
                             android:nextFocusForward="@id/flightOrigField"
-                            android:selectAllOnFocus="true"
                             android:textAlignment="center" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -442,7 +442,7 @@
                         app:layout_constraintStart_toEndOf="@+id/flightNameSelector"
                         app:layout_constraintTop_toBottomOf="@+id/flightAircraftWrapper">
 
-                        <com.google.android.material.textfield.TextInputEditText
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
                             android:id="@+id/flightNameField"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -470,7 +470,7 @@
                         app:layout_constraintStart_toEndOf="@+id/flightNameWrapper"
                         app:layout_constraintTop_toTopOf="@+id/flightNameWrapper">
 
-                        <com.google.android.material.textfield.TextInputEditText
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
                             android:id="@+id/flightName2Field"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -562,9 +562,9 @@
                         android:paddingRight="4dp"
                         android:text="@string/sign"
                         android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintEnd_toStartOf="@+id/simSelector"
+                        app:layout_constraintEnd_toStartOf="@+id/dualSelector"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/simSelector"
                         app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
 
                     <TextView
@@ -576,9 +576,9 @@
                         android:paddingRight="4dp"
                         android:text="@string/sim"
                         android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintEnd_toStartOf="@+id/dualSelector"
+                        app:layout_constraintEnd_toStartOf="@+id/signSelector"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/signSelector"
+                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/signSelector" />
 
                     <TextView
@@ -606,7 +606,7 @@
                         android:textColor="?attr/android:textColorSecondary"
                         app:layout_constraintEnd_toStartOf="@+id/instructorSelector"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/simSelector"
+                        app:layout_constraintStart_toEndOf="@+id/signSelector"
                         app:layout_constraintTop_toTopOf="@+id/signSelector" />
 
                     <TextView

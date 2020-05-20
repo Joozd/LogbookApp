@@ -1,14 +1,28 @@
+/*
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
+ *
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
+ *
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
+ *
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
+ */
+
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import androidx.lifecycle.Transformations
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.Crew
-import nl.joozd.logbookapp.extensions.toBoolean
-import nl.joozd.logbookapp.extensions.toInt
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.TimePickerEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
@@ -24,18 +38,13 @@ class TimePickerViewModel: JoozdlogDialogViewModel(){
 
     private var twilightCalculator: TwilightCalculator? = null
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-    private var orig: Airport? = null
-    private var dest: Airport? = null
-    init{
-        flightRepository.workingFlight.value?.let {
-            viewModelScope.launch(Dispatchers.IO) {
-                orig = airportRepository.searchAirportOnce(it.orig)
-                dest = airportRepository.searchAirportOnce(it.dest)
-            }
-        }
-    }
+    private val orig: Airport?
+        get() = workingFlightRepository.orig.value
+    private val dest: Airport?
+        get() = workingFlightRepository.dest.value
 
-    val sim = Transformations.map(flight) { it.isSim.toBoolean() }
+
+    val sim = Transformations.map(flight) { it.isSim }
     private val showSimValues: Boolean
         get() = sim.value ?: false.also{
             feedback(TimePickerEvents.FLIGHT_IS_NULL)
@@ -48,7 +57,7 @@ class TimePickerViewModel: JoozdlogDialogViewModel(){
     val minuteIn = Transformations.map(flight){it.tIn().minute}
 
     val augmentedCrew = Transformations.map(flight){ Crew.of(it.augmentedCrew).crewSize > 2}
-    val autoValues = Transformations.map(flight){ it.autoFill.toBoolean() }
+    val autoValues = Transformations.map(flight){ it.autoFill }
 
     val tOutTextResource = Transformations.map(flight){if (showSimValues) R.string.simtTime else R.string.timeOut}
 
@@ -112,7 +121,7 @@ class TimePickerViewModel: JoozdlogDialogViewModel(){
 
     fun setAutoValues(autovalues: Boolean){
         workingFlight?.let{
-            workingFlight = it.copy(autoFill = autovalues.toInt())
+            workingFlight = it.copy(autoFill = autovalues)
         }
     }
 

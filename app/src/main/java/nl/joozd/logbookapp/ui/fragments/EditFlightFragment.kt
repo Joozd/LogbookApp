@@ -1,32 +1,35 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
  */
 
 package nl.joozd.logbookapp.ui.fragments
 
+import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
@@ -34,6 +37,7 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.edit_flight.view.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.viewmodels.MainViewModel
@@ -41,7 +45,6 @@ import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.EditFlightFragmentEvents
 import nl.joozd.logbookapp.ui.dialogs.*
 import nl.joozd.logbookapp.ui.dialogs.NamesDialog
-import nl.joozd.logbookapp.ui.utils.customs.CustomAutoComplete
 import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.model.viewmodels.fragments.EditFlightFragmentViewModel
 
@@ -61,20 +64,16 @@ class EditFlightFragment: JoozdlogFragment(){
             f()
         }
     }
-    private var onSaveListener: Listener? = null
-    private var onCloseListener: Listener? = null
 
-    fun setOnSaveListener(f: () -> Unit){
-        onSaveListener = Listener(f)
+    override fun onAttach(context: Context) {
+        viewModel.onStart()
+        super.onAttach(context)
     }
-    fun setOnCloseListener(f: () -> Unit){
-        onCloseListener = Listener(f)
-    }
-
 
     /**
      * Will define all listeners etc, and set initial
      */
+    @ExperimentalCoroutinesApi
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.edit_flight, container, false).apply {
             (flightInfoText.background as GradientDrawable).colorFilter = PorterDuffColorFilter(
@@ -82,31 +81,8 @@ class EditFlightFragment: JoozdlogFragment(){
                 PorterDuff.Mode.SRC_IN
             ) // set background color to background with rounded corners
 
-            // Initially set Views' contents
-
-
-            //Initialize autoCompleters for names fields
-            val flightNameFieldAutoComplete = object: CustomAutoComplete(defaultItems = listOf(getString(R.string.SELF))) {
-                override fun insert(value: String, view: EditText?) {
-                    view?.clearFocus()
-                    viewModel.setName(value)
-                }
-            }.apply{ maxItems = 5 }
-
-            val flightName2FieldAutoComplete = object: CustomAutoComplete(defaultItems = listOf(getString(R.string.SELF))) {
-                override fun insert(value: String, view: EditText?) {
-                    view?.clearFocus()
-                    viewModel.setName2(value)
-                }
-            }.apply{ maxItems = 5 }
-
-            //TODO observe these from viewModel
-            /*
-            launch {
-                flightNameFieldAutoComplete.items = viewModel.allNamesDeferred.await()
-                flightName2FieldAutoComplete.items = viewModel.allNamesDeferred.await()
-            }
-            */
+            flightNameField.setAdapter(ArrayAdapter<String>(this.ctx, R.layout.item_custom_autocomplete))
+            flightName2Field.setAdapter(ArrayAdapter<String>(this.ctx, R.layout.item_custom_autocomplete))
 
             /************************************************************************************
              * observers to show data in editText fields
@@ -117,6 +93,7 @@ class EditFlightFragment: JoozdlogFragment(){
             })
 
             viewModel.flightNumber.observe(viewLifecycleOwner, Observer{
+                Log.d("HALLOOO", "Ik ben Joozd!")
                 flightFlightNumberField.setText(it)
             })
 
@@ -206,9 +183,16 @@ class EditFlightFragment: JoozdlogFragment(){
              * miscellaneous observers
              ************************************************************************************/
 
+            @Suppress("UNCHECKED_CAST")
             viewModel.allNames.observe(viewLifecycleOwner, Observer{
-                flightNameFieldAutoComplete.items = it
-                flightName2FieldAutoComplete.items = it
+                (flightNameField.adapter as ArrayAdapter<String>).apply {
+                    clear()
+                    addAll(it)
+                }
+                (flightName2Field.adapter as ArrayAdapter<String>).apply {
+                    clear()
+                    addAll(it)
+                }
             })
 
             /************************************************************************************
@@ -222,9 +206,6 @@ class EditFlightFragment: JoozdlogFragment(){
                     EditFlightFragmentEvents.AIRPORT_NOT_FOUND_FOR_LANDINGS -> toast("airport not found, all logged as day")
                     EditFlightFragmentEvents.INVALID_TIME_STRING -> toast("Error in time string, no changes")
                     EditFlightFragmentEvents.INVALID_SIM_TIME_STRING -> toast("Error in time string, simTime = 0")
-
-
-
                 }
             })
 
@@ -334,7 +315,7 @@ class EditFlightFragment: JoozdlogFragment(){
             flightAcRegSelector.setOnClickListener {
                 //TODO remake this dialog as complete aircraft editor
                 supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout, AircraftPicker())
+                    add(R.id.mainActivityLayout, if (viewModel.checkSim) SimTypePicker() else AircraftPicker())
                     addToBackStack(null)
                 }
             }
@@ -374,6 +355,9 @@ class EditFlightFragment: JoozdlogFragment(){
             flightFlightNumberField.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
                     viewModel.setFlightNumber(flightFlightNumberField.text.toString())
+                else {
+                    flightFlightNumberField.removeTrailingDigits()
+                }
             }
 
             flightOrigField.setOnFocusChangeListener { _, hasFocus ->
@@ -402,7 +386,7 @@ class EditFlightFragment: JoozdlogFragment(){
 
             flightTakeoffLandingField.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
-                    viewModel.setTakeoffLandings(flightAircraftField.text.toString())
+                    viewModel.setTakeoffLandings(flightTakeoffLandingField.text.toString())
             }
 
             flightNameField.setOnFocusChangeListener { _, hasFocus ->
@@ -432,32 +416,28 @@ class EditFlightFragment: JoozdlogFragment(){
             //click on empty part == cancel
             flightInfoLayout.setOnClickListener {
                 //TODO fire some "undo cancel" SnackBar?
-                onCloseListener?.run()
                 closeFragment()
             }
 
             //on cancel, close without calling onSaveListener
             flightCancelButton2.setOnClickListener {
                 //TODO fire some "undo cancel" SnackBar?
-                onCloseListener?.run()
                 closeFragment()
             }
 
             flightSaveButton.setOnClickListener {
+                viewModel.save()
                 clearFocus()
-                onSaveListener?.run()
-                onCloseListener?.run()
                 closeFragment()
             }
-
-            /**
-             * Do not change OnFocusChangedListeners for EditTexts with connected CustomAutoCompletes
-             */
-            flightNameFieldAutoComplete.connectToEditText(flightNameField)
-            flightName2FieldAutoComplete.connectToEditText(flightName2Field)
         } // end of layoutInflater.apply()
     } // end of onCreateView
 
+
+    override fun onDetach() {
+        viewModel.onClosingFragment()
+        super.onDetach()
+    }
 
     /**************************************************************************
      * private worker functions:

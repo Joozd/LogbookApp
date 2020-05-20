@@ -1,5 +1,25 @@
+/*
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
+ *
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
+ *
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
+ *
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
+ */
+
 package nl.joozd.logbookapp.workmanager
 
+import android.util.Log
 import androidx.work.*
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.comm.Cloud
@@ -72,30 +92,33 @@ object JoozdlogWorkersHub {
             .build()
 
         with (WorkManager.getInstance(App.instance)){
-            enqueueUniqueWork(GET_AIRPORTS, ExistingWorkPolicy.KEEP, task)
+            enqueueUniqueWork(GET_AIRPORTS, ExistingWorkPolicy.REPLACE, task)
         }
     }
 
     fun synchronizeAircraftTypes(){
+        Log.d(this::class.simpleName, "BANAAAAAAAAAN XXXXXXXXXXXXXXXXXXXXXX 1")
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
-
+        Log.d(this::class.simpleName ,"BANAAAAAAAAAN XXXXXXXXXXXXXXXXXXXXXX 2")
         val task = OneTimeWorkRequestBuilder<SyncAircraftTypesWorker>()
             .setConstraints(constraints)
             .addTag(SYNC_AIRCRAFT_TYPES)
             .build()
 
+        Log.d(this::class.simpleName ,"BANAAAAAAAAAN XXXXXXXXXXXXXXXXXXXXXX 3")
         with (WorkManager.getInstance(App.instance)){
-            enqueueUniqueWork(SYNC_AIRCRAFT_TYPES, ExistingWorkPolicy.KEEP, task)
+            enqueueUniqueWork(SYNC_AIRCRAFT_TYPES, ExistingWorkPolicy.REPLACE, task)
         }
+        Log.d(this::class.simpleName ,"BANAAAAAAAAAN XXXXXXXXXXXXXXXXXXXXXX 4")
     }
 
     /**
      * Constants for use as tags
      */
-    private const val SYNC_TIME = "syncTime"
-    private const val SYNC_FLIGHTS = "syncFlights"
-    private const val GET_AIRPORTS = "getAirports"
-    private const val SYNC_AIRCRAFT_TYPES = "syncAircraftTypes"
+    const val SYNC_TIME = "syncTime"
+    const val SYNC_FLIGHTS = "syncFlights"
+    const val GET_AIRPORTS = "getAirports"
+    const val SYNC_AIRCRAFT_TYPES = "syncAircraftTypes"
 }

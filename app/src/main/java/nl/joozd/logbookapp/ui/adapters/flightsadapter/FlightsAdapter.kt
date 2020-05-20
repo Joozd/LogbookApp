@@ -1,3 +1,22 @@
+/*
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
+ *
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
+ *
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
+ *
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
+ */
+
 package nl.joozd.logbookapp.ui.adapters.flightsadapter
 
 import android.view.LayoutInflater
@@ -37,6 +56,7 @@ class FlightsAdapter(
                 simTotalTimeText.text = simTime
                 simTakeoffLandingsText.text = takeoffsAndLandings
 
+                simLayout.translationZ = 10f
                 simLayout.closeIfSwiped()
                 simLayout.setOnClickListener { onClick(flightID) }
                 simDeleteLayer.setOnClickListener { onDelete(flightID) }
@@ -71,6 +91,7 @@ class FlightsAdapter(
                 remarksText.shouldBeVisible(remarks.isNotEmpty())
 
                 flightLayout.closeIfSwiped()
+                flightLayout.translationZ = 10f
                 flightLayout.setOnClickListener { onClick(flightID) }
                 deleteLayer.setOnClickListener { onDelete(flightID) }
             }
@@ -91,7 +112,7 @@ class FlightsAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType){
             SIM -> SimViewHolder(LayoutInflater.from(parent.ctx).inflate(R.layout.item_sim, parent, false))
-            FLIGHT -> FlightViewHolder(LayoutInflater.from(parent.ctx).inflate(R.layout.item_flight, parent, false))
+            FLIGHT -> FlightViewHolder(LayoutInflater.from(parent.ctx).inflate(R.layout.item_flight_card, parent, false))
             else -> error("SelectableStringAdapter error 0001: Type not SIM or FLIGHT")
         }
     }

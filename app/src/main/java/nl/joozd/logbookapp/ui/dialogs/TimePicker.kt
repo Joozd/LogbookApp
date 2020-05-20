@@ -1,37 +1,20 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
- */
-
-/*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
- *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
- *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
  */
 
 package nl.joozd.logbookapp.ui.dialogs
@@ -61,7 +44,7 @@ class TimePicker: JoozdlogFragment() {
         private val paddedMinutes = IntArray(60) {it}.map{v -> v.toString().padStart(2,'0')}.toTypedArray()
         private val paddedHours = IntArray(24) {it}.map{v -> v.toString().padStart(2,'0')}.toTypedArray()
     }
-    private val timePickerViewModel: TimePickerViewModel by viewModels()
+    private val viewModel: TimePickerViewModel by viewModels()
 
     // variable to store previous text on any selected field
     private var previousText: String = ""
@@ -87,14 +70,14 @@ class TimePicker: JoozdlogFragment() {
              * Set pickers listeners
              */
             //Date of timeOut stays the same, if needed, adjust timeIn. Flights with length >24 hours are not supported.
-            hoursOutPicker.setOnValueChangedListener { _, _, newVal -> timePickerViewModel.timeOutPicked(hours = newVal) }
-            minutesOutPicker.setOnValueChangedListener { _, _, newVal -> timePickerViewModel.timeOutPicked(hours = newVal) }
+            hoursOutPicker.setOnValueChangedListener { _, _, newVal -> viewModel.timeOutPicked(hours = newVal) }
+            minutesOutPicker.setOnValueChangedListener { _, _, newVal -> viewModel.timeOutPicked(hours = newVal) }
 
-            hoursInPicker.setOnValueChangedListener { _, _, newVal -> timePickerViewModel.timeInPicked(hours = newVal) }
-            minutesInPicker.setOnValueChangedListener { _, _, newVal -> timePickerViewModel.timeInPicked(hours = newVal) }
+            hoursInPicker.setOnValueChangedListener { _, _, newVal -> viewModel.timeInPicked(hours = newVal) }
+            minutesInPicker.setOnValueChangedListener { _, _, newVal -> viewModel.timeInPicked(hours = newVal) }
 
             autoValuesCheckbox.setOnCheckedChangeListener { _, isChecked ->
-                timePickerViewModel.setAutoValues(isChecked)
+                viewModel.setAutoValues(isChecked)
             }
 
             augmentedCrewCheckbox.setOnClickListener {
@@ -107,13 +90,13 @@ class TimePicker: JoozdlogFragment() {
 
             nightTimeText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
-                    timePickerViewModel.setNightTime(nightTimeText.text.toString())
+                    viewModel.setNightTime(nightTimeText.text.toString())
                 }
             }
 
             ifrTimeText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
-                    timePickerViewModel.setIfrTime(ifrTimeText.text.toString())
+                    viewModel.setIfrTime(ifrTimeText.text.toString())
                 }
             }
 
@@ -135,11 +118,11 @@ class TimePicker: JoozdlogFragment() {
              * If cancelled or clicked outside dialog, undo changes and close Fragment
              */
             timesDialogBackground.setOnClickListener {
-                timePickerViewModel.undo()
+                viewModel.undo()
                 closeFragment()
             }
             cancelTimeDialog.setOnClickListener {
-                timePickerViewModel.undo()
+                viewModel.undo()
                 closeFragment()
             }
 
@@ -158,22 +141,22 @@ class TimePicker: JoozdlogFragment() {
              * observers:
              */
 
-            timePickerViewModel.sim.observe(viewLifecycleOwner, Observer {
+            viewModel.sim.observe(viewLifecycleOwner, Observer {
                 setSimLayoutIfNeeded(this, it)
             })
 
-            timePickerViewModel.feedbackEvent.observe(viewLifecycleOwner, Observer{
+            viewModel.feedbackEvent.observe(viewLifecycleOwner, Observer{
                 when(it.getEvent()){
                     TimePickerEvents.NOT_IMPLEMENTED -> toast("Not implemented")
                     //TODO handle other events
                 }
             })
-            timePickerViewModel.hourIn.observe(viewLifecycleOwner, Observer{ hoursInPicker.value = it })
-            timePickerViewModel.minuteIn.observe(viewLifecycleOwner, Observer{ minutesInPicker.value = it })
-            timePickerViewModel.hourOut.observe(viewLifecycleOwner, Observer{ hoursOutPicker.value = it })
-            timePickerViewModel.minuteOut.observe(viewLifecycleOwner, Observer{ minutesOutPicker.value = it })
+            viewModel.hourIn.observe(viewLifecycleOwner, Observer{ hoursInPicker.value = it })
+            viewModel.minuteIn.observe(viewLifecycleOwner, Observer{ minutesInPicker.value = it })
+            viewModel.hourOut.observe(viewLifecycleOwner, Observer{ hoursOutPicker.value = it })
+            viewModel.minuteOut.observe(viewLifecycleOwner, Observer{ minutesOutPicker.value = it })
 
-            timePickerViewModel.ifrTime.observe(viewLifecycleOwner, Observer{ ifrTimeText.setText(it) })
+            viewModel.ifrTime.observe(viewLifecycleOwner, Observer{ ifrTimeText.setText(it) })
 
         } // end of return
 

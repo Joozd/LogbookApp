@@ -1,37 +1,20 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
- */
-
-/*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
- *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
- *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
  */
 
 package nl.joozd.logbookapp.model.dataclasses
@@ -78,18 +61,18 @@ data class Flight(
     val autoLand: Int = 0,
     val flightNumber: String = "",
     val remarks: String = "",
-    val isPIC: Int = 0,
-    val isPICUS: Int = 0,
-    val isCoPilot: Int = 0,
-    val isDual: Int = 0,
-    val isInstructor: Int = 0,
-    val isSim: Int = 0,
-    val isPF: Int = 0,
-    val isPlanned: Int = 1,
-    val unknownToServer: Int = 1,                                   // Changed 1 means server doesn't know about this flight and it can be safely hard-deleted from DB.
-    val autoFill: Int = 1,
+    val isPIC: Boolean = false,
+    val isPICUS: Boolean = false,
+    val isCoPilot: Boolean = false,
+    val isDual: Boolean = false,
+    val isInstructor: Boolean = false,
+    val isSim: Boolean = false,
+    val isPF: Boolean = false,
+    val isPlanned: Boolean = true,
+    val unknownToServer: Boolean = true,                                   // Changed 1 means server doesn't know about this flight and it can be safely hard-deleted from DB.
+    val autoFill: Boolean = true,
     val augmentedCrew: Int = 0,
-    val DELETEFLAG: Int = 0,
+    val DELETEFLAG: Boolean = false,
     val timeStamp: Long = -1,                               // timestamp should be moment of creation / last change, or when incoming sync: timestamp of sync
     val signature: String = ""
     // val signed: Boolean = false
@@ -214,7 +197,10 @@ data class Flight(
  */
 
 
-    fun regAndType() = "$registration($aircraft)"
+    fun regAndType() =
+        if ((registration + aircraft).isEmpty()) ""
+        else registration + if (aircraft.isNotEmpty()) "($aircraft)" else "(???)"
+
     fun landings() = "${landingDay + landingNight}"
     fun takeoffs() = "${takeOffDay + takeOffNight}"
     fun tOut(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeOut), ZoneId.of("UTC"))

@@ -1,19 +1,20 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
  */
 
 package nl.joozd.logbookapp.ui.adapters
@@ -88,8 +89,8 @@ class BalanceForwardAdapter (private val context: Context, val initialBalancesFo
             convertView = layoutInflater.inflate(R.layout.totals_list_element, null)
         }
         convertView?.let {
-            val listElementNameView = it.findViewById<TextView>(R.id.listElementName)
-            val listElementValueView = it.findViewById<TextView>(R.id.listElementValue)
+            val listElementNameView = it.findViewById<TextView>(R.id.listElementNameTextView)
+            val listElementValueView = it.findViewById<TextView>(R.id.listElementValueTextView)
             val listElementLayout = it.findViewById<ConstraintLayout>(R.id.elementLayout)
 
             listElementNameView.text = expandedListData.valueName
@@ -128,7 +129,7 @@ class BalanceForwardAdapter (private val context: Context, val initialBalancesFo
             val layoutInflater = this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             convertView = layoutInflater.inflate(R.layout.totals_list_group, null)
         }
-        val listTitleTextView = convertView!!.findViewById<TextView>(R.id.listTitle)
+        val listTitleTextView = convertView!!.findViewById<TextView>(R.id.listTitleTextView)
         val actionImageView = convertView!!.findViewById<ImageView>(R.id.actionImageView)
 
         listTitleTextView.setTypeface(null, Typeface.BOLD)
@@ -157,10 +158,10 @@ class BalanceForwardAdapter (private val context: Context, val initialBalancesFo
     private fun BalanceForward.toTotalsListGroup() = TotalsListGroup(
         this.logbookName,
         listOf(
-            TotalsListItem("Total Time", this.grandTotal),
-            TotalsListItem("Aircraft Time", this.aircraftTime),
-            TotalsListItem("Simulator Time", this.simTime),
-            TotalsListItem("PIC Time", this.picTime)
+            TotalsListItem("Total Time", this.grandTotal.toLong()),
+            TotalsListItem("Aircraft Time", this.aircraftTime.toLong()),
+            TotalsListItem("Simulator Time", this.simTime.toLong()),
+            TotalsListItem("PIC Time", this.picTime.toLong())
         )
     )
 }

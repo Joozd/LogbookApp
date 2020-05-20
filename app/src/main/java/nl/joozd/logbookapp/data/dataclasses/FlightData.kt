@@ -1,19 +1,20 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
  */
 
 package nl.joozd.logbookapp.data.dataclasses
@@ -43,18 +44,18 @@ data class FlightData(
     val autoLand: Int,
     val flightNumber: String,
     val remarks: String,
-    val isPIC: Int,
-    val isPICUS: Int,
-    val isCoPilot: Int,
-    val isDual: Int,
-    val isInstructor: Int,
-    val isSim: Int,
-    val isPF: Int,
-    val isPlanned: Int,
-    val changed: Int,
-    val autoFill: Int,
+    val isPIC: Boolean,
+    val isPICUS: Boolean,
+    val isCoPilot: Boolean,
+    val isDual: Boolean,
+    val isInstructor: Boolean,
+    val isSim: Boolean,
+    val isPF: Boolean,
+    val isPlanned: Boolean,
+    val changed: Boolean,
+    val autoFill: Boolean,
     val augmentedCrew: Int,
-    val DELETEFLAG: Int,
+    val DELETEFLAG: Boolean,
 // val signed: Boolean,
     val timeStamp: Long, // timeStamp is time of synch with server for this flight
     val signature: String = ""

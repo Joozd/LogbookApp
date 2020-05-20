@@ -1,3 +1,22 @@
+/*
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
+ *
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
+ *
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
+ *
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
+ */
+
 package nl.joozd.joozdlogcommon
 
 import nl.joozd.joozdlogcommon.serializing.JoozdlogSerializable
@@ -27,15 +46,11 @@ data class ConsensusData(val registration: String,
 
         return serialized
     }
-    val aircraftType: AircraftType
-        get() = AircraftType.deserialize(serializedType)
+    val aircraftType: AircraftType                          // TODO This shouldn't be here
+        get() = AircraftType.deserialize(serializedType)    // TODO check if used on server
 
 
     companion object: JoozdlogSerializable.Creator {
-
-        /**
-         * Unfortunately, I don't know how to do this with non-typed functions
-         */
         override fun deserialize(source: ByteArray): ConsensusData {
             val wraps = ConsensusData.serializedToWraps(source)
             return ConsensusData(

@@ -1,19 +1,20 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
  */
 
 package nl.joozd.logbookapp.ui.dialogs
@@ -32,27 +33,27 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
 //TODO doesn't work yet, just skeleton
 class AugmentedCrewDialog: JoozdlogFragment(){
-    private val augmentedCrewDialogViewModel: AugmentedCrewDialogViewModel by viewModels()
+    private val viewModel: AugmentedCrewDialogViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         return inflater.inflate(R.layout.dialog_augmented_crew, container, false).apply {
             crewDownButton.setOnClickListener {
-                augmentedCrewDialogViewModel.crewDown()
+                viewModel.crewDown()
             }
             crewUpButton.setOnClickListener {
-                augmentedCrewDialogViewModel.crewUp()
+                viewModel.crewUp()
             }
             didTakeoffCheckbox.setOnCheckedChangeListener { _, b ->
-                augmentedCrewDialogViewModel.setTakeoff(b)
+                viewModel.setTakeoff(b)
             }
             didLandingCheckbox.setOnCheckedChangeListener { _, b ->
-                augmentedCrewDialogViewModel.setLanding(b)
+                viewModel.setLanding(b)
             }
 
             timeForTakeoffLandingEditText.setOnFocusChangeListener { v, hasFocus ->
                 if (!hasFocus){
-                    augmentedCrewDialogViewModel.setTakeoffLandingTime(timeForTakeoffLandingEditText.text.toInt())
+                    viewModel.setTakeoffLandingTime(timeForTakeoffLandingEditText.text.toInt())
                 }
             }
 
@@ -61,7 +62,7 @@ class AugmentedCrewDialog: JoozdlogFragment(){
              */
 
 
-            augmentedCrewDialogViewModel.augmentedCrewData.observe(viewLifecycleOwner, Observer{
+            viewModel.augmentedCrewData.observe(viewLifecycleOwner, Observer{
                 crewSizeEditText.setText(it.crewSize.toString())
                 didTakeoffCheckbox.isChecked = it.didTakeoff
                 didLandingCheckbox.isChecked = it.didLanding
@@ -70,13 +71,14 @@ class AugmentedCrewDialog: JoozdlogFragment(){
 
 
             cancelCrewDialogButton.setOnClickListener {
-                // TODO
+                viewModel.undo()
+                closeFragment()
             }
             augmentedCrewDialogBackground.setOnClickListener {
-                // TODO
+                viewModel.undo()
+                closeFragment()
             }
             saveCrewDialogButon.setOnClickListener {
-                augmentedCrewDialogViewModel.undo()
                 closeFragment()
             }
         }

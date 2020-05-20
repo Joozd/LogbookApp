@@ -1,19 +1,20 @@
 /*
- * JoozdLog Pilot's Logbook
- * Copyright (C) 2020 Joost Welle
+ *  JoozdLog Pilot's Logbook
+ *  Copyright (c) 2020 Joost Welle
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as
- *     published by the Free Software Foundation, either version 3 of the
- *     License, or (at your option) any later version.
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU Affero General Public License as
+ *      published by the Free Software Foundation, either version 3 of the
+ *      License, or (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU Affero General Public License for more details.
  *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see https://www.gnu.org/licenses
+ *      You should have received a copy of the GNU Affero General Public License
+ *      along with this program.  If not, see https://www.gnu.org/licenses
+ *
  */
 
 package nl.joozd.logbookapp.utils
@@ -23,27 +24,16 @@ import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.extensions.roundToMinutes
 import nl.joozd.logbookapp.extensions.toDegrees
 import nl.joozd.logbookapp.extensions.toRadians
-import java.time.Duration
-import java.time.LocalDateTime
-import java.time.LocalTime
+import java.time.*
 import kotlin.math.*
 
 
 class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the daylight an night data on calculateDate!
+    constructor (epochSecond: Long): this(LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSecond), ZoneOffset.UTC))
+
     private val day = Duration.between(solstice2000, calculateDate).toDays()
     private val date= calculateDate.toLocalDate()
 
-
-    companion object{
-        private val solstice2000 = LocalDateTime.of(2000, 12, 21, 12, 37) // future solsices are always n*365,25 days later
-        private const val j = Math.PI / 182.625
-        private const val axis = 23.439*Math.PI/180
-        private const val twilightAngle = 6.0*Math.PI/180
-        private val fiveDegrees = (-175..180 step 5).map{it.toDouble()}
-        private const val LEFT = 1
-        private const val RIGHT = 2
-
-    }
     fun dayTime(lat: Double, lon: Double): ClosedRange<LocalDateTime> {
         val n = 1- tan(lat.toRadians()) *tan(
             axis *cos(
@@ -68,6 +58,11 @@ class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the da
         return (dayTime(lat, lon).contains(LocalDateTime.of(date,time.toLocalTime())))
     }
 
+    fun minutesOfNight(orig: Airport?, dest: Airport?, departureTime: Long, arrivalTime: Long): Int {
+        val dep = LocalDateTime.ofInstant(Instant.ofEpochSecond(departureTime), ZoneOffset.UTC)
+        val arr = LocalDateTime.ofInstant(Instant.ofEpochSecond(arrivalTime), ZoneOffset.UTC)
+        return minutesOfNight(orig, dest, dep, arr)
+    }
     fun minutesOfNight(orig: Airport?, dest: Airport?, departureTime: LocalDateTime, arrivalTime: LocalDateTime): Int {
         /****************************************************************************************
          * Will return the number of minutes of nighttime given an origin, a destination        *
@@ -180,4 +175,14 @@ class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the da
 
     }
 
+    companion object{
+        private val solstice2000 = LocalDateTime.of(2000, 12, 21, 12, 37) // future solsices are always n*365,25 days later
+        private const val j = Math.PI / 182.625
+        private const val axis = 23.439*Math.PI/180
+        private const val twilightAngle = 6.0*Math.PI/180
+        private val fiveDegrees = (-175..180 step 5).map{it.toDouble()}
+        private const val LEFT = 1
+        private const val RIGHT = 2
+
+    }
 }

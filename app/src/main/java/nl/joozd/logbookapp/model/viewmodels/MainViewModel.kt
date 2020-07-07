@@ -34,23 +34,4 @@ class MainViewModel: ViewModel() {
     //if true, NamePicker is working on name1, if false it is working on name2. If null, it is not set.
     var namePickerWorkingOnName1: Boolean? = null
 
-    //if true, AirportPicker works on [orig], if false on [dest]
-    var workingOnOrig: Boolean? = null
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // Get this from repository
-    // val liveFlights: LiveData<List<Flight>> = repository.liveFlights
-
-
 }

@@ -41,7 +41,7 @@ class SwipableConstraintLayout(ctx: Context, attributes: AttributeSet): Constrai
 
     private var swiping = false
     private lateinit var parentViewHolder: RecyclerView
-    private lateinit var parentView: View
+    private var parentView: View? = null
     private var fingerDownPosX = 0f
     private var fingerDownPosY = 0f
     private var previousX = 0f
@@ -154,17 +154,17 @@ class SwipableConstraintLayout(ctx: Context, attributes: AttributeSet): Constrai
     override fun setTranslationX(translationX: Float) {
         when {
             translationX < 0 && translationX >= -openingWidth -> {
-                parentView.setBackgroundColor(0xFFFF0000)
+                parentView?.setBackgroundColor(0xFFFF0000)
                 val newAlpha = ((1 - (openingWidth + translationX) / openingWidth) * 255).toInt()
-                parentView.background.alpha = newAlpha
+                parentView?.background?.alpha = newAlpha
             }
 
             translationX < -openingWidth ->
-                    parentView.setBackgroundColor(0xFFFF0000)
+                    parentView?.setBackgroundColor(0xFFFF0000)
 
-            translationX == 0f -> parentView.setBackgroundColor(0x00000000)
+            translationX == 0f -> parentView?.setBackgroundColor(0x00000000)
 
-            else ->  parentView.background.alpha = 0
+            else ->  parentView?.background?.alpha = 0
 
 
         }
@@ -185,6 +185,7 @@ class SwipableConstraintLayout(ctx: Context, attributes: AttributeSet): Constrai
                 start()
             }
         }
+        translationX = 0f
 
         swiping = false
         opened = false

@@ -33,6 +33,38 @@ class CustomSnackbar(
     content: CustomSnackbarView
 ) : BaseTransientBottomBar<CustomSnackbar>(parent, content, content){
 
+    init {
+        getView().setBackgroundColor(ContextCompat.getColor(parent.context, android.R.color.transparent))
+        getView().setPadding(0, 0, 0, 0)
+        duration = 1000*5
+    }
+    fun setMessage(text: String): CustomSnackbar {
+        getView().message.text = text
+        return this
+    }
+
+    fun setMessage(resource: Int): CustomSnackbar {
+        getView().message.setText(resource)
+        return this
+    }
+
+    fun setActionText(text: String): Unit {
+        getView().undoTextView.text=text
+    }
+
+    fun setOnAction(f: (Any)->Unit ) {
+        getView().undoTextView.setOnClickListener(f)
+    }
+
+    fun setOnActionBarShown(f:() -> Unit){
+        mCustomSnackBarView?.onBarShown = CustomSnackbarView.OnBarShown(f)
+    }
+
+    fun setOnActionBarGone(f:() -> Unit){
+        mCustomSnackBarView?.onBarGone = CustomSnackbarView.OnBarGone(f)
+    }
+
+
     companion object {
         private var mCustomSnackBarView: CustomSnackbarView? = null
 
@@ -59,30 +91,5 @@ class CustomSnackbar(
         }
 
     }
-    init {
-        getView().setBackgroundColor(ContextCompat.getColor(parent.context, android.R.color.transparent))
-        getView().setPadding(0, 0, 0, 0)
-        duration = 1000*5
-    }
-    fun setMessage(text: String): Unit {
-        getView().message.text = text
-    }
-
-    fun setActionText(text: String): Unit {
-        getView().undoTextView.text=text
-    }
-
-    fun setOnAction(f: (Any)->Unit ) {
-        getView().undoTextView.setOnClickListener(f)
-    }
-
-    fun setOnActionBarShown(f:() -> Unit){
-        mCustomSnackBarView?.onBarShown = CustomSnackbarView.OnBarShown(f)
-    }
-
-    fun setOnActionBarGone(f:() -> Unit){
-        mCustomSnackBarView?.onBarGone = CustomSnackbarView.OnBarGone(f)
-    }
-
 
 }

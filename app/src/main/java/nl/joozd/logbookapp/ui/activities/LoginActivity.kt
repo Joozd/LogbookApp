@@ -19,128 +19,67 @@
 
 package nl.joozd.logbookapp.ui.activities
 
-import android.content.DialogInterface
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
-import kotlinx.android.synthetic.main.activity_login.*
-import kotlinx.coroutines.*
+import androidx.activity.viewModels
+import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.ui.utils.longToast
+import nl.joozd.logbookapp.databinding.ActivityLoginBinding
+import nl.joozd.logbookapp.model.helpers.FeedbackEvents.LoginActivityEvents
+import nl.joozd.logbookapp.model.viewmodels.activities.LoginActivityViewModel
+import nl.joozd.logbookapp.ui.utils.toast
 
-import java.security.MessageDigest
-import kotlin.coroutines.CoroutineContext
 
-class LoginActivity : AppCompatActivity(), CoroutineScope {
-    override val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
+class LoginActivity : JoozdlogActivity(){
+    val viewModel: LoginActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+        setTheme(R.style.AppTheme)
+        val binding = ActivityLoginBinding.inflate(layoutInflater)
 
-        Preferences.username?.let{
-            usernameEditText.setText(it)
-        }
-        Preferences.password?.let{
-            // passwordEditText.setText(getString(R.string.hidden_password))
-            passwordEditText.setText(it)
-        }
+        /**
+         * Every time this is recreated, check if server is online.
+         * If not, viewModel will send a feedbackEvent for NO_INTERNET or SERVER_ERROR
+         * In both cases, entering login/pass should still be possible, but it won't be checked
+         * until next time it gets online.
+         * TODO make a graphic feedback about this (ie. a message somewhere that server not reached)
+         *
+         * TODO MainActivity should get functionality to deal with server login errors,
+         * TODO giving people the option to go to this screen and fix things.
+         */
 
-        saveLoginDetailsButton.setOnClickListener {
-            //Save username
-            var goAhead = true
-            if (Preferences.username != null){
-                AlertDialog.Builder(this).apply {
-                    setMessage("TODO blabla change username")
+        viewModel.checkServerOnline()
 
-                    setNegativeButton("CANCEL", DialogInterface.OnClickListener {_, _ -> goAhead = false })
-                }.create().apply{
-                    setTitle("TIETEN")
-                    show()
-                }
+        /*******************************************************************************************
+         * OnClickedListeners
+         *******************************************************************************************/
+        with(binding) {
+            singInButton.setOnClickListener {
+                viewModel.signIn(usernameEditText.text.toString(), passwordEditText.text.toString())
 
-            }
-            val username = usernameEditText.text.toString()
-            if (goAhead && username.isNotEmpty()) Preferences.username = username
-
-
-            goAhead = true
-            if (Preferences.password != null){
-                AlertDialog.Builder(this).apply {
-                    setMessage("TODO blabla change paaswoord")
-
-                    setNegativeButton("CANCEL", DialogInterface.OnClickListener {_, _ -> goAhead = false })
-                }.create().apply{
-                    setTitle("TIETEN")
-                    show()
-                }
-            }
-            val password = passwordEditText.text.toString()
-            if (goAhead
-                && password.isNotEmpty()
-                && password != getString(R.string.hidden_password)
-                && password != Preferences.password)
-                Preferences.password = password
-        }
-
-        newAccountButton.setOnClickListener {
-            //Save username
-            var goAhead = true
-            if (Preferences.username != null){
-                AlertDialog.Builder(this).apply {
-                    setMessage("TODO blabla change new user")
-
-                    setNegativeButton("CANCEL", DialogInterface.OnClickListener {_, _ -> goAhead = false })
-                }.create().apply{
-                    setTitle("TIETEN")
-                    show()
-                }
-            }
-            val username = usernameEditText.text.toString()
-            if (username.isEmpty())
-                goAhead = false
-
-
-            var goAhead2 = true
-            if (Preferences.password != null){
-                AlertDialog.Builder(this).apply {
-                    setMessage("TODO blabla change paaswoord")
-
-                    setNegativeButton("CANCEL", DialogInterface.OnClickListener {_, _ -> goAhead = false })
-                }.create().apply{
-                    setTitle("TIETEN")
-                    show()
-                }
-            }
-            val password = passwordEditText.text.toString()
-            if (password.isEmpty()
-                || password == getString(R.string.hidden_password)
-                || password == Preferences.password)
-                goAhead2 = false
-
-
-
-            if (goAhead && goAhead2){
-                val encodedPassword = with (MessageDigest.getInstance("MD5")){
-                    update(password.toByteArray())
-                    digest()
-                }
-                launch{
-                    if (Cloud.createNewUser(username, encodedPassword)) {
-                        Preferences.password = password
-                        Preferences.username = username
-                        longToast("Yay updated, user is now ${Preferences.username}")
-                        this@LoginActivity.finish()
-                    }
-                }
             }
         }
-    }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        coroutineContext.cancel()
+
+
+        /*******************************************************************************************
+         * Observers:
+         *******************************************************************************************/
+
+
+
+        /**
+         * Feedback events:
+         */
+        viewModel.feedbackEvent.observe(this, Observer {
+            when (it.getEvent()){
+                LoginActivityEvents.NOT_IMPLEMENTED -> toast("Not implemented!")
+                //TODO
+            }
+        })
+
+        //
+
+        setContentView(binding.root)
     }
 }

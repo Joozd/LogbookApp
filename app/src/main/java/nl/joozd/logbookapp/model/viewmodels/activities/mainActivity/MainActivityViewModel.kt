@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.model.viewmodels.activities
+package nl.joozd.logbookapp.model.viewmodels.activities.mainActivity
 
 
 
@@ -26,12 +26,14 @@ import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.MainActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
+import java.time.Instant
 import java.util.*
 
 class MainActivityViewModel: JoozdlogActivityViewModel() {
@@ -73,7 +75,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         Log.d("useIataAirports", "before: ${Preferences.useIataAirports}")
         Preferences.useIataAirports = !Preferences.useIataAirports
         Log.d("useIataAirports", "after: ${Preferences.useIataAirports}")
-        Log.d("displayFlightsList.value", "after: ${displayFlightsList.value}")
+        Log.d("displayFlightsList.val", "after: ${displayFlightsList.value}")
     }
 
     fun menuSelectedRebuild(){
@@ -171,7 +173,10 @@ else{
      */
     fun showFlight(flightID: Int){
         viewModelScope.launch(Dispatchers.IO) {
-            workingFlightRepository.fetchFlightByIdToWorkingFlight(flightID)
+            workingFlightRepository.fetchFlightByIdToWorkingFlight(flightID)?.let{
+                if (it.isPlanned)
+                    workingFlightRepository.updateWorkingFlightWithMostRecentData()
+            }
             feedback(MainActivityEvents.SHOW_FLIGHT)
         }
 
@@ -203,11 +208,17 @@ else{
                 when(it?.isPlanned){
                     null -> feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
                     true -> {
-                        flightRepository.delete(it)
-                        feedback(MainActivityEvents.DELETED_FLIGHT)
+                        if (Preferences.getFlightsFromCalendar && it.timeOut > Preferences.calendarDisabledUntil && it.timeOut > Instant.now().epochSecond)
+                            feedback(MainActivityEvents.TRYING_TO_DELETE_CALENDAR_FLIGHT).apply{
+                                extraData.putInt(MainActivityFeedbackExtraData.FLIGHT_ID, id)
+                            }
+                        else {
+                            flightRepository.delete(it)
+                            feedback(MainActivityEvents.DELETED_FLIGHT)
+                        }
                     }
                     false -> feedback(MainActivityEvents.TRYING_TO_DELETE_COMPLETED_FLIGHT).apply{
-                        extraData.putInt("ID", id)
+                        extraData.putInt(MainActivityFeedbackExtraData.FLIGHT_ID, id)
                     }
                 }
             }
@@ -215,6 +226,10 @@ else{
     }
 
     fun deleteNotPlannedFlight(id: Int) = flightRepository.delete(id)
+
+    fun undoDeleteFlight(){
+        flightRepository.undeleteFlight()
+    }
 
 
     /*********************************************************************************************
@@ -229,6 +244,21 @@ else{
         flightRepository.syncIfNeeded()
         airportRepository.getAirportsIfNeeded()
         aircraftRepository.checkIfAircraftTypesUpToDate()
+    }
+
+    fun deleteAndDisableCalendarImportUntillAfterThisFlight(flightId: Int){
+        viewModelScope.launch {
+            flightRepository.fetchFlightByID(flightId)?.let {flight ->
+                Preferences.calendarDisabledUntil = flight.timeIn
+                feedback(MainActivityEvents.CALENDAR_SYNC_PAUSED)
+                flightRepository.delete(flight)
+                feedback(MainActivityEvents.DELETED_FLIGHT)
+            } ?: feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
+        }
+    }
+
+    fun disableCalendarImport(){
+        Preferences.getFlightsFromCalendar = false
     }
 
     /*********************************************************************************************
@@ -311,6 +341,9 @@ else{
     /*********************************************************************************************
      * Livedata related to synchronization:
      *********************************************************************************************/
+
+    val internetAvailable: LiveData<Boolean>
+        get() = InternetStatus.internetAvailable
 
     val airportSyncProgress: LiveData<Int>
         get() = airportRepository.airportSyncProgress

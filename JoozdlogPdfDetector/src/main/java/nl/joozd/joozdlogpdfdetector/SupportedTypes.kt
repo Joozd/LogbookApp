@@ -22,5 +22,7 @@ package nl.joozd.joozdlogpdfdetector
 enum class SupportedTypes {
     KLC_ROSTER,
     KLC_MONTHLY,
+    KLM_ICA_ROSTER,
+    KLM_ICA_MONTHLY,
     UNSUPPORTED
 }

@@ -556,21 +556,22 @@
                         android:id="@+id/signSelector"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
                         android:alpha="0.5"
                         android:paddingLeft="4dp"
                         android:paddingRight="4dp"
                         android:text="@string/sign"
                         android:textColor="?attr/android:textColorSecondary"
+                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
                         app:layout_constraintEnd_toStartOf="@+id/dualSelector"
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintStart_toEndOf="@+id/simSelector"
-                        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
                     <TextView
                         android:id="@+id/simSelector"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
                         android:alpha="0.5"
                         android:paddingLeft="4dp"
                         android:paddingRight="4dp"
@@ -579,7 +580,7 @@
                         app:layout_constraintEnd_toStartOf="@+id/signSelector"
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/signSelector" />
+                        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
 
                     <TextView
                         android:id="@+id/instructorSelector"
@@ -590,10 +591,11 @@
                         android:paddingRight="4dp"
                         android:text="@string/instructorString"
                         android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintEnd_toStartOf="@+id/picusSelector"
+                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
+                        app:layout_constraintEnd_toStartOf="@+id/ifrSelector"
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintStart_toEndOf="@+id/dualSelector"
-                        app:layout_constraintTop_toTopOf="@+id/signSelector" />
+                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
                     <TextView
                         android:id="@+id/dualSelector"
@@ -604,24 +606,11 @@
                         android:paddingRight="4dp"
                         android:text="@string/dualString"
                         android:textColor="?attr/android:textColorSecondary"
+                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
                         app:layout_constraintEnd_toStartOf="@+id/instructorSelector"
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintStart_toEndOf="@+id/signSelector"
-                        app:layout_constraintTop_toTopOf="@+id/signSelector" />
-
-                    <TextView
-                        android:id="@+id/picusSelector"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.5"
-                        android:paddingLeft="4dp"
-                        android:paddingRight="4dp"
-                        android:text="@string/picus"
-                        android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintEnd_toStartOf="@+id/picSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/instructorSelector"
-                        app:layout_constraintTop_toTopOf="@+id/signSelector" />
+                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
                     <TextView
                         android:id="@+id/picSelector"
@@ -632,10 +621,11 @@
                         android:paddingRight="4dp"
                         android:text="@string/pic"
                         android:textColor="?attr/android:textColorSecondary"
+                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
                         app:layout_constraintEnd_toStartOf="@+id/pfSelector"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/picusSelector"
-                        app:layout_constraintTop_toTopOf="@+id/signSelector" />
+                        app:layout_constraintStart_toEndOf="@+id/ifrSelector"
+                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
                     <TextView
                         android:id="@+id/pfSelector"
@@ -646,10 +636,11 @@
                         android:paddingRight="4dp"
                         android:text="@string/pf"
                         android:textColor="?attr/android:textColorSecondary"
+                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintStart_toEndOf="@+id/picSelector"
-                        app:layout_constraintTop_toTopOf="@+id/signSelector" />
+                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
                     <TextView
                         android:id="@+id/flightCancelButton2"
@@ -668,6 +659,20 @@
                         app:layout_constraintStart_toEndOf="@+id/autoFillCheckBox"
                         app:layout_constraintTop_toTopOf="@+id/autoFillCheckBox"
                         app:layout_constraintVertical_bias="1.0" />
+
+                    <TextView
+                        android:id="@+id/ifrSelector"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.5"
+                        android:text="ifr"
+                        android:textAllCaps="true"
+                        android:textColor="?attr/android:textColorSecondary"
+                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
+                        app:layout_constraintEnd_toStartOf="@+id/picSelector"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toEndOf="@+id/instructorSelector"
+                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </ScrollView>
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,149 +19,205 @@
 
 package nl.joozd.logbookapp.ui.adapters
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.Typeface
+import android.app.Service
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
-import android.widget.ExpandableListView
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
-import nl.joozd.logbookapp.R
+import kotlinx.android.synthetic.main.totals_list_group.view.*
 import nl.joozd.joozdlogcommon.BalanceForward
-import nl.joozd.logbookapp.data.miscClasses.TotalsListGroup
-import nl.joozd.logbookapp.data.miscClasses.TotalsListItem
+import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.TotalsListElementBinding
+import nl.joozd.logbookapp.databinding.TotalsListGroupBinding
+import nl.joozd.logbookapp.extensions.getColorFromAttr
+import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 
-class BalanceForwardAdapter (private val context: Context, val initialBalancesForward: List<BalanceForward>, val listView: ExpandableListView) : BaseExpandableListAdapter() {
+class BalanceForwardAdapter(private var list: List<BalanceForward> = emptyList()): BaseExpandableListAdapter() {
+    private val context = App.instance.ctx
+    private val layoutInflater = context.getSystemService(Service.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-    /**
-     * Constructor takes a list of BalanceForwards, but adapter needs a TotalsListGroup
-     * This takes care of that:
-     */
-    var dataList = initialBalancesForward.map { it.toTotalsListGroup() }
-    var balancesForward: List<BalanceForward> = initialBalancesForward
-    set(b) {
-        field = b
-        dataList = b.map { it.toTotalsListGroup() }
-        this.notifyDataSetChanged()
+    var onDeleteClicked: (balanceForward: BalanceForward) -> Unit = { }
+    var onListItemClicked: (balanceForward: BalanceForward, itemID: Int) -> Unit = { _, _ -> }
+
+    fun updateList(bff: List<BalanceForward>){
+        list = bff
+        notifyDataSetChanged()
     }
 
     /**
-     * Listeners for actions when items are clicked
-     * (can add more if long clicked etc if needed)
+     * Gets the data associated with the given group.
+     *
+     * @param groupPosition the position of the group
+     * @return the data child for the specified group
      */
-    class OnActionImageViewClicked(private val f: (balanceForward: BalanceForward) -> Unit){
-        fun actionImageViewClicked (balanceForward: BalanceForward) {
-            f(balanceForward)
-        }
-    }
-    var onActionImageViewClicked: OnActionImageViewClicked? = null
-    fun setOnActionImageViewClicked(f: (balanceForward: BalanceForward) -> Unit){
-        onActionImageViewClicked = OnActionImageViewClicked(f)
-    }
-    class OnItemClicked(private val f: (balanceForward: BalanceForward) -> Unit){
-        fun itemClicked (balanceForward: BalanceForward) {
-            f(balanceForward)
-        }
-    }
-    var onItemClicked: OnItemClicked? = null
-    fun setOnItemClicked(f: (balanceForward: BalanceForward) -> Unit){
-        onItemClicked = OnItemClicked(f)
-    }
+    override fun getGroup(groupPosition: Int) = list[groupPosition]
+
+    /**
+     * Whether the child at the specified position is selectable.
+     *
+     * @param groupPosition the position of the group that contains the child
+     * @param childPosition the position of the child within the group
+     * @return whether the child is selectable.
+     */
+    override fun isChildSelectable(groupPosition: Int, childPosition: Int) = true
+
+    /**
+     * Indicates whether the child and group IDs are stable across changes to the
+     * underlying data.
+     *
+     * @return whether or not the same ID always refers to the same object
+     * @see Adapter.hasStableIds
+     */
+    override fun hasStableIds(): Boolean = true
+
+    /**
+     * Gets a View that displays the given group. This View is only for the
+     * group--the Views for the group's children will be fetched using
+     * [.getChildView].
+     *
+     * @param groupPosition the position of the group for which the View is
+     * returned
+     * @param isExpanded whether the group is expanded or collapsed
+     * @param convertView the old view to reuse, if possible. You should check
+     * that this view is non-null and of an appropriate type before
+     * using. If it is not possible to convert this view to display
+     * the correct data, this method can create a new view. It is not
+     * guaranteed that the convertView will have been previously
+     * created by
+     * [.getGroupView].
+     * @param parent the parent that this view will eventually be attached to
+     * @return the View corresponding to the group at the specified position
+     */
+    override fun getGroupView(
+        groupPosition: Int,
+        isExpanded: Boolean,
+        convertView: View?,
+        parent: ViewGroup?
+    ): View = TotalsListGroupBinding.bind(convertView ?:
+        layoutInflater.inflate(R.layout.totals_list_group, parent, false)
+    ).apply{
+            getGroup(groupPosition).let{bf ->
+                // totalsListGroupLayout.setBackgroundColor(context.getColorFromAttr(R.attr.colorPrimaryDark))
+                listTitleTextView.text = bf.logbookName
+                actionImageView.setOnClickListener {
+                    onDeleteClicked(bf)
+                }
+            }
+        }.root
 
 
-    override fun getChild(listPosition: Int, expandedListPosition: Int): Any {
-        return this.dataList[listPosition].items[expandedListPosition]
-    }
+    /**
+     * Gets the number of children in a specified group.
+     *
+     * @param groupPosition the position of the group for which the children
+     * count should be returned
+     * @return the children count in the specified group
+     */
+    override fun getChildrenCount(groupPosition: Int): Int =
+        getGroup(groupPosition).timesToStringPairs().size
 
-    override fun getChildId(listPosition: Int, expandedListPosition: Int): Long {
-        return expandedListPosition.toLong()
-    }
-    @SuppressLint("SetTextI18n")
-    override fun getChildView(listPosition: Int, expandedListPosition: Int, isLastChild: Boolean, convertView: View?, parent: ViewGroup): View {
-        var convertView = convertView
-        val expandedListData = getChild(listPosition, expandedListPosition) as TotalsListItem
-        if (convertView == null) {
-            val layoutInflater = this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            convertView = layoutInflater.inflate(R.layout.totals_list_element, null)
-        }
-        convertView?.let {
-            val listElementNameView = it.findViewById<TextView>(R.id.listElementNameTextView)
-            val listElementValueView = it.findViewById<TextView>(R.id.listElementValueTextView)
-            val listElementLayout = it.findViewById<ConstraintLayout>(R.id.elementLayout)
+    /**
+     * Gets the data associated with the given child within the given group.
+     *
+     * @param groupPosition the position of the group that the child resides in
+     * @param childPosition the position of the child with respect to other
+     * children in the group
+     * @return the data of the child
+     */
+    override fun getChild(groupPosition: Int, childPosition: Int) =
+        getGroup(groupPosition).timesToStringPairs()[childPosition]
 
-            listElementNameView.text = expandedListData.valueName
-            listElementValueView.text =
-                "${expandedListData.totalTime / 60}:${(expandedListData.totalTime % 60).toString().padStart(
-                    2,
-                    '0'
-                )}"
-            listElementLayout.setOnClickListener {
-                onItemClicked?.itemClicked(balancesForward[listPosition])
+    /**
+     * Gets the ID for the group at the given position. This group ID must be
+     * unique across groups. The combined ID (see
+     * [.getCombinedGroupId]) must be unique across ALL items
+     * (groups and all children).
+     *
+     * @param groupPosition the position of the group for which the ID is wanted
+     * @return the ID associated with the group
+     */
+    override fun getGroupId(groupPosition: Int) = list[groupPosition].id.toLong()
+
+    /**
+     * Gets a View that displays the data for the given child within the given
+     * group.
+     *
+     * @param groupPosition the position of the group that contains the child
+     * @param childPosition the position of the child (for which the View is
+     * returned) within the group
+     * @param isLastChild Whether the child is the last child within the group
+     * @param convertView the old view to reuse, if possible. You should check
+     * that this view is non-null and of an appropriate type before
+     * using. If it is not possible to convert this view to display
+     * the correct data, this method can create a new view. It is not
+     * guaranteed that the convertView will have been previously
+     * created by
+     * [.getChildView].
+     * @param parent the parent that this view will eventually be attached to
+     * @return the View corresponding to the child at the specified position
+     */
+    override fun getChildView(
+        groupPosition: Int,
+        childPosition: Int,
+        isLastChild: Boolean,
+        convertView: View?,
+        parent: ViewGroup?
+    ): View = TotalsListElementBinding.bind(convertView ?: layoutInflater.inflate(R.layout.totals_list_element, parent, false)).apply{
+        getGroup(groupPosition).timesToStringPairs()[childPosition].let{
+            listElementNameTextView.text = it.first
+            listElementValueTextView.text = it.second
+            elementLayout.setOnClickListener {
+                onListItemClicked(getGroup(groupPosition), childPosition)
             }
         }
-        return convertView!!
-    }
+    }.root
 
-    override fun getChildrenCount(listPosition: Int): Int {
-        return this.dataList[listPosition].items.size
-    }
+    /**
+     * Gets the ID for the given child within the given group. This ID must be
+     * unique across all children within the group. The combined ID (see
+     * [.getCombinedChildId]) must be unique across ALL items
+     * (groups and all children).
+     *
+     * @param groupPosition the position of the group that contains the child
+     * @param childPosition the position of the child within the group for which
+     * the ID is wanted
+     * @return the ID associated with the child
+     */
+    override fun getChildId(groupPosition: Int, childPosition: Int): Long = childPosition.toLong()
 
-    override fun getGroup(listPosition: Int): Any {
-        return this.dataList[listPosition]
-    }
+    /**
+     * Gets the number of groups.
+     *
+     * @return the number of groups
+     */
+    override fun getGroupCount(): Int = list.size
 
-    override fun getGroupCount(): Int {
-        return this.dataList.size
-    }
-
-    override fun getGroupId(listPosition: Int): Long {
-        return listPosition.toLong()
-    }
-
-    override fun getGroupView(listPosition: Int, isExpanded: Boolean, convertView: View?, parent: ViewGroup): View {
-        var convertView = convertView
-        val listTitle = (getGroup(listPosition) as TotalsListGroup).title
-        if (convertView == null) {
-            val layoutInflater = this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            convertView = layoutInflater.inflate(R.layout.totals_list_group, null)
-        }
-        val listTitleTextView = convertView!!.findViewById<TextView>(R.id.listTitleTextView)
-        val actionImageView = convertView!!.findViewById<ImageView>(R.id.actionImageView)
-
-        listTitleTextView.setTypeface(null, Typeface.BOLD)
-        listTitleTextView.text = listTitle
-        actionImageView.setOnClickListener {
-            onActionImageViewClicked?.actionImageViewClicked(balancesForward[listPosition])
-        }
-        return convertView
-    }
-
-    override fun hasStableIds(): Boolean {
-        return false
-    }
-
-    override fun isChildSelectable(listPosition: Int, expandedListPosition: Int): Boolean {
-        return true
-    }
-
-    override fun notifyDataSetChanged() {
-        super.notifyDataSetChanged()
-        for (i in 0 until groupCount){
-            listView.expandGroup(i)
-        }
-    }
-
-    private fun BalanceForward.toTotalsListGroup() = TotalsListGroup(
-        this.logbookName,
-        listOf(
-            TotalsListItem("Total Time", this.grandTotal.toLong()),
-            TotalsListItem("Aircraft Time", this.aircraftTime.toLong()),
-            TotalsListItem("Simulator Time", this.simTime.toLong()),
-            TotalsListItem("PIC Time", this.picTime.toLong())
-        )
+    private fun BalanceForward.timesToStringPairs(): List<Pair<String, String>> = with (context) { listOf(
+        getString(R.string.multipilotTime) to minutesToHoursAndMinutesString(multiPilotTime),
+        getString(R.string.totalTimeOfFlight) to minutesToHoursAndMinutesString(aircraftTime),
+        getString(R.string.landingDay) to landingDay.toString(),
+        getString(R.string.landingNight) to landingNight.toString(),
+        getString(R.string.nightTime) to minutesToHoursAndMinutesString(nightTime),
+        getString(R.string.ifrTime) to minutesToHoursAndMinutesString(ifrTime),
+        getString(R.string.picIncludingPicus) to minutesToHoursAndMinutesString(picTime),
+        getString(R.string.copilot) to minutesToHoursAndMinutesString(copilotTime),
+        getString(R.string.dualTime) to minutesToHoursAndMinutesString(dualTime),
+        getString(R.string.instructorTime) to minutesToHoursAndMinutesString(instructortime),
+        getString(R.string.simtTime) to minutesToHoursAndMinutesString(simTime)
     )
+
+        /*val aircraftTime: Int,
+        val landingDay: Int,
+        val landingNight: Int,
+        val nightTime: Int,
+        val ifrTime: Int,
+        val picTime: Int,
+        val copilotTime: Int,
+        val dualTime: Int,
+        val instructortime: Int,
+        val simTime: Int
+
+         */
+    }
 }

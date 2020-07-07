@@ -17,10 +17,23 @@
  *
  */
 
-package nl.joozd.logbookapp.utils
+package nl.joozd.logbookapp.data.room.dao
 
-import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.room.*
+import nl.joozd.joozdlogcommon.BalanceForward
 
-fun startMainActivity(context: Context) = with (context) {
-    startActivity(packageManager.getLaunchIntentForPackage(packageName))
+@Dao
+interface BalanceForwardDao {
+    @Query("SELECT * FROM BalanceForward")
+    suspend fun requestAll(): List<BalanceForward>
+
+    @Query("SELECT * FROM BalanceForward")
+    fun requestLiveBalancesForward(): LiveData<List<BalanceForward>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun save(vararg balanceForwards: BalanceForward)
+
+    @Delete
+    suspend fun delete(bf: BalanceForward)
 }

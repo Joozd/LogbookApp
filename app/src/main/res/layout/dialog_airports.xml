@@ -101,18 +101,18 @@
                 app:layout_constraintTop_toBottomOf="@+id/textInputLayout16" />
 
         <TextView
-                android:id="@+id/cancelAirportDialog"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="32dp"
-                android:gravity="center"
-                android:text="@android:string/cancel"
-                android:textAllCaps="true"
-                android:textColor="?attr/colorAccent"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@+id/saveTextView"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/saveAirportDialog" />
+            android:id="@+id/cancelAirportDialog"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="32dp"
+            android:gravity="center"
+            android:text="@android:string/cancel"
+            android:textAllCaps="true"
+            android:textColor="?attr/colorAccent"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/saveAirportDialog"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/saveAirportDialog" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout"
@@ -133,7 +133,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="52.174N, 003.122E"
+                    tools:text="52.174N, 003.122E"
                     android:textColor="?android:attr/textColorTertiary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/cityAirportNameField"
@@ -143,7 +143,7 @@
                     android:id="@+id/cityAirportNameField"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Amsterdam, Schiphol Airport"
+                    tools:text="Amsterdam, Schiphol Airport"
                     android:textColor="?android:attr/textColorTertiary"
                     app:layout_constraintStart_toStartOf="@+id/icaoIataField"
                     app:layout_constraintTop_toBottomOf="@+id/icaoIataField" />
@@ -154,7 +154,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
-                    android:text="EHAM/AMS"
+                    tools:text="EHAM/AMS"
                     android:textColor="?android:attr/textColorTertiary"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -166,7 +166,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
-                    android:text="alt: -22'"
+                    tools:text="alt: -22'"
                     android:textColor="?android:attr/textColorTertiary"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/latLonField" />

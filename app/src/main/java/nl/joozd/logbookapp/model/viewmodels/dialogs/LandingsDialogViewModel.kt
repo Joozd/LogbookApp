@@ -20,13 +20,8 @@
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import androidx.lifecycle.Transformations
-import androidx.lifecycle.Transformations.distinctUntilChanged
-import androidx.lifecycle.ViewModel
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.data.repository.FlightRepository
 import nl.joozd.logbookapp.extensions.minusOneWithFloor
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
-import nl.joozd.logbookapp.utils.InitialSetFlight
 
 class LandingsDialogViewModel: JoozdlogDialogViewModel() {
     val toDay = Transformations.map(flight){ it.takeOffDay }

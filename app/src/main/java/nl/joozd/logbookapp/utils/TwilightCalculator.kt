@@ -63,13 +63,20 @@ class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the da
         val arr = LocalDateTime.ofInstant(Instant.ofEpochSecond(arrivalTime), ZoneOffset.UTC)
         return minutesOfNight(orig, dest, dep, arr)
     }
+
+
+    /****************************************************************************************
+     * Will return the number of minutes of nighttime given an origin, a destination
+     * and the times of departure / arrival. Will assume a rough great-circle track
+     * is followed by going in a constant track to the next 5 degree longitude intersection
+     * this assumes flights never go "the long way around" (ie max 180 degrees lat diff.
+     * @param orig: [Airport] of origin
+     * @param desr: [Airport] of destination
+     * @param departureTime: time of departure in UTC (as LocalDateTime)
+     * @param arrivalTime: time of arrival in UTC (as LocalDateTime)
+     ****************************************************************************************/
     fun minutesOfNight(orig: Airport?, dest: Airport?, departureTime: LocalDateTime, arrivalTime: LocalDateTime): Int {
-        /****************************************************************************************
-         * Will return the number of minutes of nighttime given an origin, a destination        *
-         * and the times of departure / arrival. Will assume a rough great-circle track         *
-         * is followed by going in a constant track to the next 5 degree longitude intersection *
-         * this assumes flights never go "the long way around" (ie max 180 degrees lat diff.    *
-         ****************************************************************************************/
+
 
         if (orig == null || dest == null) return 0
 
@@ -173,6 +180,15 @@ class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the da
 
         return darkMinutes
 
+    }
+
+    /**
+     * minutesOfNight but with times in [Instant]
+     */
+    fun minutesOfNight(orig: Airport?, dest: Airport?, departureTime: Instant, arrivalTime: Instant): Int {
+        val dt = LocalDateTime.ofInstant(departureTime, ZoneOffset.UTC)
+        val at = LocalDateTime.ofInstant(arrivalTime, ZoneOffset.UTC)
+        return minutesOfNight(orig, dest, dt, at)
     }
 
     companion object{

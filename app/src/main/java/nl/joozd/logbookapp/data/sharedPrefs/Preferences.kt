@@ -24,11 +24,13 @@ import android.content.SharedPreferences
 import android.util.Base64
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.data.calendar.dataclasses.SupportedCalendarTypes
 import java.security.MessageDigest
 
 object Preferences {
     private const val USERNAME = "username"
     private const val PASSWORD = "password" // saved as md5 hash, cannot retrieve password!
+    private const val NO_CALENDAR_SELECTED = ""
 
     private val sharedPref by lazy{
         with (App.instance.ctx) {
@@ -45,12 +47,9 @@ object Preferences {
      * username is the users' username.
      * cannot delegate as that doesn't support null
      */
-    var username: String?
-        get() = sharedPref.getString(USERNAME,null)
-        set(v) = with(sharedPref.edit()) {
-            putString(USERNAME, v)
-            apply()
-        }
+
+    const val USERNAME_NOT_SET = "USERNAME_NOT_SET"
+    var username: String by JoozdLogSharedPrefs(sharedPref, USERNAME_NOT_SET)
 
     /**
      * password is the users password, hashed to 128 bits
@@ -88,6 +87,10 @@ object Preferences {
 
     var lastUpdateTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
 
+    var lastCalendarCheckTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
+
+    var calendarDisabledUntil: Long by JoozdLogSharedPrefs(sharedPref, 0)
+
     var serverTimeOffset: Long by JoozdLogSharedPrefs(sharedPref, 0)
 
     var airportUpdateTimestamp: Long by JoozdLogSharedPrefs(sharedPref, -1)
@@ -111,6 +114,18 @@ object Preferences {
     var useIataAirports: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
     /**
+     * Get planned flights from calendar?
+     */
+    var getFlightsFromCalendar: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+
+    /**
+     * Type of calendar used
+     * @see SupportedCalendarTypes for supported types and their codes
+     */
+    var calendarType: Int by JoozdLogSharedPrefs(sharedPref, SupportedCalendarTypes.INVALID)
+
+
+    /**
      * Accept aircraft change from Monthly Overview without confirmation?
      */
     var updateAircraftWithoutAsking: Boolean by JoozdLogSharedPrefs(sharedPref, false)
@@ -119,5 +134,16 @@ object Preferences {
      * Other settings
      *************************/
 
+    //time to allocate to pilot if flying heavy crew and did takeoff or landing
     var standardTakeoffLandingTimes: Int by JoozdLogSharedPrefs(sharedPref, 30)
+
+    //Calendar on device that is used to import flights
+    var selectedCalendar: String by JoozdLogSharedPrefs(sharedPref, NO_CALENDAR_SELECTED)
+
+    // true if user wants new flights to be marked as IFR. Not sure if I want to use this.
+    // var normallyFliesIFR: Boolean by JoozdLogSharedPrefs(sharedPref, true)
+
+    // true if user doesn't want to use cloud -
+    var dontUseCloud: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+
 }

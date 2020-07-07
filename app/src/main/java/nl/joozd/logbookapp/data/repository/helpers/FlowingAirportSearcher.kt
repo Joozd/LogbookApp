@@ -48,17 +48,17 @@ object FlowingAirportSearcher{
             }
             //pass2
             fullList.forEach {
-                if (upperQuery in it.ident.toUpperCase(Locale.ROOT)) result += it
+                if (upperQuery in it.ident.toUpperCase(Locale.ROOT) && it !in result) result += it
                 emit(result)
             }
             //pass3
             fullList.forEach {
-                if (upperQuery in it.municipality.toUpperCase(Locale.ROOT)) result += it
+                if (upperQuery in it.municipality.toUpperCase(Locale.ROOT) && it !in result) result += it
                 emit(result)
             }
             //pass4
             fullList.forEach {
-                if (upperQuery in it.name.toUpperCase(Locale.ROOT)) result += it
+                if (upperQuery in it.name.toUpperCase(Locale.ROOT) && it !in result) result += it
                 emit(result)
             }
         }

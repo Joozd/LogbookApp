@@ -31,3 +31,11 @@ fun Flight.prepareForSave(): Flight{
     val now = Instant.now().epochSecond
     return this.copy(isPlanned = (timeIn > now + PLANNING_MARGIN), timeStamp = TimestampMaker.nowForSycPurposes)
 }
+
+fun Flight.isSamedPlannedFlightAs(f: Flight) =
+    isPlanned
+    && orig == f.orig
+    && dest == f.dest
+    && timeOut == f.timeOut
+    && timeIn == f.timeIn
+    && flightNumber == f.flightNumber

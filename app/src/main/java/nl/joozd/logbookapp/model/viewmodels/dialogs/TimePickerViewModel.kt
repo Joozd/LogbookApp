@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
+import android.util.Log
 import androidx.lifecycle.Transformations
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -39,35 +40,37 @@ class TimePickerViewModel: JoozdlogDialogViewModel(){
     private var twilightCalculator: TwilightCalculator? = null
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     private val orig: Airport?
-        get() = workingFlightRepository.orig.value
+        get() = workingFlightRepository.origin.value
     private val dest: Airport?
-        get() = workingFlightRepository.dest.value
+        get() = workingFlightRepository.destination.value
 
-
-    val sim = Transformations.map(flight) { it.isSim }
-    private val showSimValues: Boolean
-        get() = sim.value ?: false.also{
-            feedback(TimePickerEvents.FLIGHT_IS_NULL)
-        } // won't work if null anyway
-
-    val hourOut = Transformations.map(flight){if (showSimValues) it.simTime / 60 else it.tOut().hour}
-    val minuteOut = Transformations.map(flight){if (showSimValues) it.simTime % 60 else it.tOut().minute}
-
-    val hourIn = Transformations.map(flight){it.tIn().hour}
-    val minuteIn = Transformations.map(flight){it.tIn().minute}
 
     val augmentedCrew = Transformations.map(flight){ Crew.of(it.augmentedCrew).crewSize > 2}
-    val autoValues = Transformations.map(flight){ it.autoFill }
+    val pic = Transformations.map(flight) { it.isPIC || it.isPICUS}
+    val coPilot = Transformations.map(flight) { it.isCoPilot }
+    val dual = Transformations.map(flight) { it.isDual }
+    val instructor = Transformations.map(flight) { it.isInstructor }
 
-    val tOutTextResource = Transformations.map(flight){if (showSimValues) R.string.simtTime else R.string.timeOut}
+    val totalTime = Transformations.map(flight) {
+        minutesToHoursAndMinutesString(
+            if (it.correctedTotalTime != 0) it.correctedTotalTime
+            else it.duration()
+        )
+    }
+
 
     val ifrTime = Transformations.map(flight){minutesToHoursAndMinutesString(it.ifrTime)}
     fun setIfrTime(enteredTime: String){
+        Log.d("ifrTime", "setting to $enteredTime")
         hoursAndMinutesStringToInt(enteredTime).let{
+            Log.d("ifrTime", "int = $it")
             when{
                 it == null -> feedback(TimePickerEvents.INVALID_IFR_TIME) // previous time can be found in ifrTime.value
                 it > workingFlight?.duration() ?: 0 -> feedback(TimePickerEvents.IFR_TIME_GREATER_THAN_DURATION)
-                else -> workingFlight?.let { f -> workingFlight = f.copy(ifrTime = it) }
+                else -> workingFlight?.let { f ->
+                    if (f.ifrTime != it) workingFlight = f.copy(ifrTime = it, autoFill = false)
+                    //TODO this might need some tweaking. Tired now, cannot think.
+                }
             }
         }
 
@@ -77,53 +80,48 @@ class TimePickerViewModel: JoozdlogDialogViewModel(){
     fun setNightTime(enteredTime: String){
         hoursAndMinutesStringToInt(enteredTime).let{
             when{
+                workingFlight == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
                 it == null -> feedback(TimePickerEvents.INVALID_NIGHT_TIME) // previous time can be found in ifrTime.value
-                it > workingFlight?.duration() ?: 0 -> feedback(TimePickerEvents.NIGHT_TIME_GREATER_THAN_DURATION)
-                else -> workingFlight?.let { f -> workingFlight = f.copy(nightTime = it) }
+                it > workingFlight!!.duration() -> feedback(TimePickerEvents.NIGHT_TIME_GREATER_THAN_DURATION)
+                else -> workingFlight?.let { f -> if (f.nightTime != it) workingFlight = f.copy(nightTime = it, autoFill = false) }
+            }
+        }
+    }
+
+    /**
+     * set correctedTotalTime
+     * if autoValues is true: Set IFR and Night as same ratio
+     * set autoValues to false
+     *
+     */
+    fun setTotalTimeOfFlight(enteredTime: String){
+        hoursAndMinutesStringToInt(enteredTime).let{
+            when{
+                workingFlight == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
+                it == null -> feedback(TimePickerEvents.INVALID_TOTAL_TIME) // previous time can be found in ifrTime.value
+                it > workingFlight!!.duration() -> feedback(TimePickerEvents.TOTAL_TIME_GREATER_THAN_DURATION)
+                else -> workingFlight?.let { f -> workingFlight = f.copy(correctedTotalTime = it) }
             }
         }
     }
 
 
-    fun timeOutPicked(hours: Int = hourOut.value ?: 0, minutes: Int = minuteOut.value ?: 0){
+    fun togglePic(){
         feedback(TimePickerEvents.NOT_IMPLEMENTED)
-        /* val timeOut = LocalDateTime.of(
-            flight.tOut.toLocalDate(),
-            LocalTime.of(newVal, flight.tOut.minute)
-        )
-        val timeIn =
-            when {
-                flight.tIn.minusDays(1) > timeOut -> flight.tIn.minusDays(1)
-                flight.tIn > timeOut -> flight.tIn
-                else -> flight.tIn.plusDays(1)
-            }
-        flight = flight.copy(
-            timeOut = timeOut.toInstant(ZoneOffset.UTC).epochSecond,
-            timeIn = timeIn.toInstant(ZoneOffset.UTC).epochSecond
-        )*/
     }
 
-    fun timeInPicked(hours: Int = hourIn.value ?: 0, minutes: Int = minuteIn.value ?: 0){
+    fun toggleCopilot(){
         feedback(TimePickerEvents.NOT_IMPLEMENTED)
-        /*
-                        val timeToCheck = LocalDateTime.of(
-                    flight.tOut.toLocalDate(),
-                    LocalTime.of(newVal, flight.tIn.minute)
-                )
-                val timeIn = when {
-                    timeToCheck.minusDays(1) > flight.tOut -> timeToCheck.minusDays(1)
-                    timeToCheck > flight.tOut -> timeToCheck
-                    else -> timeToCheck.plusDays(1)
-                }
-                flight = flight.copy(timeIn = timeIn.toInstant(ZoneOffset.UTC).epochSecond)
-         */
     }
 
-    fun setAutoValues(autovalues: Boolean){
-        workingFlight?.let{
-            workingFlight = it.copy(autoFill = autovalues)
-        }
+    fun toggleDual(){
+        feedback(TimePickerEvents.NOT_IMPLEMENTED)
     }
+
+    fun toggleInstructor(){
+        feedback(TimePickerEvents.NOT_IMPLEMENTED)
+    }
+
 
 
 

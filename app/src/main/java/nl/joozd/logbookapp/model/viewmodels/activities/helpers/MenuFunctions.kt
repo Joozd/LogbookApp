@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.repository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.ui.activities.MainActivity
 import nl.joozd.logbookapp.ui.utils.longToast

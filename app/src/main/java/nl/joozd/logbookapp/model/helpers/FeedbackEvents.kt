@@ -22,24 +22,71 @@ package nl.joozd.logbookapp.model.helpers
 object FeedbackEvents {
     interface Event
 
-    enum class PdfParserActivityEvents: Event{
-        ROSTER_SUCCESSFULLY_ADDED,
-        FILE_NOT_FOUND,
-        NOT_A_KNOWN_ROSTER,
-        ERROR
-    }
-
     enum class MainActivityEvents: Event{
         NOT_IMPLEMENTED,
         SHOW_FLIGHT,
         FLIGHT_SAVED,
         FLIGHT_NOT_FOUND,
         TRYING_TO_DELETE_COMPLETED_FLIGHT,
+        TRYING_TO_DELETE_CALENDAR_FLIGHT,
         DELETED_FLIGHT,
         OPEN_SEARCH_FIELD,
         CLOSE_SEARCH_FIELD,
+        CALENDAR_SYNC_PAUSED,
         DONE,
         ERROR
+    }
+
+    enum class PdfParserActivityEvents: Event{
+        NOT_IMPLEMENTED,
+        ROSTER_SUCCESSFULLY_ADDED,
+        CALENDAR_SYNC_ENABLED,
+        CALENDAR_SYNC_PAUSED,
+        FILE_NOT_FOUND,
+        NOT_A_KNOWN_ROSTER,
+        ERROR
+    }
+
+    enum class SettingsActivityEvents: Event {
+        NO_CALENDAR_PERMISSION
+    }
+
+    enum class BalanceForwardActivityEvents: Event {
+        NOT_IMPLEMENTED,
+        DELETED,
+        UNDELETE_OK,
+        UNDELETE_FAILED
+    }
+
+    enum class LoginActivityEvents: Event{
+        NOT_IMPLEMENTED,
+        SHOW_NEW_USER_DIALOG,
+        NAME_EMPTY,
+        PASSWORD_EMPTY,
+        USERNAME_OR_PASSWORD_INCORRECT,
+        NO_INTERNET,
+        SERVER_NOT_FOUND,
+        SAVED_WITHOUT_CHECKING_BECAUSE_NO_SERVER,
+        FINISHED
+    }
+
+    enum class NewUserActivityEvents: Event {
+        NOT_IMPLEMENTED,
+        SHOW_SIGN_IN_DIALOG,
+        USER_EXISTS_PASSWORD_INCORRECT,
+        USER_EXISTS_PASSWORD_CORRECT,
+        PASSWORDS_DO_NOT_MATCH,
+        PASSWORD_DOES_NOT_MEET_STANDARDS,
+        PASSWORD_TOO_SHORT,
+        NO_INTERNET,
+        FINISHED
+    }
+
+
+    enum class BalanceForwardDialogEvents: Event {
+        UPDATE_FIELDS,
+        NUMBER_PARSE_ERROR,
+        CLOSE_DIALOG
     }
 
     enum class EditFlightFragmentEvents: Event{
@@ -69,8 +116,10 @@ object FeedbackEvents {
     enum class TimePickerEvents: Event{
         NOT_IMPLEMENTED,
         FLIGHT_IS_NULL,
+        INVALID_TOTAL_TIME,
         INVALID_NIGHT_TIME,
         NIGHT_TIME_GREATER_THAN_DURATION,
+        TOTAL_TIME_GREATER_THAN_DURATION,
         INVALID_IFR_TIME,
         IFR_TIME_GREATER_THAN_DURATION
     }

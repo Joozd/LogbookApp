@@ -80,6 +80,10 @@ class KlcRosterParser(inputStream: InputStream) {
 
         val timeOffRegex = dayOffString.toRegex()
 
+        private const val DAY_REGEX_STRING = """\d\d[A-Z][a-z]{2}\d\d"""
+
+        val dateRangeRegEx = "Period: ($DAY_REGEX_STRING) - ($DAY_REGEX_STRING) contract:".toRegex()
+
     }
 
     private val legend = mutableMapOf<String, String>()
@@ -96,7 +100,8 @@ class KlcRosterParser(inputStream: InputStream) {
                 firstPage.slice(0 until firstPage.indexOf(endOfHeaderMarker))
             else ""
     }
-    val seemsValid = header.isNotEmpty()
+    val dateRangeResult = dateRangeRegEx.find(header)
+    val seemsValid = header.isNotEmpty() && dateRangeResult != null
 
     val text: String by lazy{
         var completeString = ""
@@ -132,17 +137,26 @@ class KlcRosterParser(inputStream: InputStream) {
     }
     val startOfRoster: Instant?
     val endOfRoster: Instant?
+
     init{
         if (!seemsValid){
             startOfRoster = null
             endOfRoster = null
         } else {
-            val dateRangeString = header.slice(header.indexOf(dateRangeStartMarker)+ dateRangeStartMarker.length until header.indexOf(dateRangeEndMarker))
-            val startEnd = dateRangeString.split(" - ")
-            startOfRoster = LocalDateTime.of (LocalDate.parse(startEnd[0], DateTimeFormatter.ofPattern("ddMMMyy", Locale.US)), LocalTime.MIDNIGHT).atZone(ZoneOffset.UTC).toInstant()
-            endOfRoster = LocalDateTime.of (LocalDate.parse(startEnd[1], DateTimeFormatter.ofPattern("ddMMMyy", Locale.US)), LocalTime.MIDNIGHT).atZone(ZoneOffset.UTC).toInstant()
+            // val dateRangeString = header.slice(header.indexOf(dateRangeStartMarker)+ dateRangeStartMarker.length until header.indexOf(dateRangeEndMarker))
+            // val startEnd = dateRangeString.split(" - ")
+            val startEnd = dateRangeResult!!.groups[1]!!.value to dateRangeResult.groups[2]!!.value
+            startOfRoster = LocalDateTime.of (LocalDate.parse(startEnd.first, DateTimeFormatter.ofPattern("ddMMMyy", Locale.US)), LocalTime.MIDNIGHT).atZone(ZoneOffset.UTC).toInstant()
+            endOfRoster = LocalDateTime.of (LocalDate.parse(startEnd.second, DateTimeFormatter.ofPattern("ddMMMyy", Locale.US)), LocalTime.MIDNIGHT).atZone(ZoneOffset.UTC).toInstant()
         }
     }
+    val period: ClosedRange<Long>? = if (startOfRoster?.epochSecond == null || endOfRoster?.epochSecond == null) null
+        else {
+            //This needed to switch from threeTenBp to java.time
+            val start = startOfRoster.epochSecond
+            val end = endOfRoster.epochSecond
+            (start..end)
+        }
 
 
     val days: List<RosterDay> by lazy{
@@ -282,7 +296,7 @@ class KlcRosterParser(inputStream: InputStream) {
 
                         val orig = words[2]
                         val dest = words[5]
-                        val description = "${words[0]}${words[1]} $orig -> $dest" // KL1234 AMS -> BLQ
+                        val description = "${words[0]}${words[1]} $orig - $dest" // KL1234 AMS -> BLQ
                         val extraInfo = line.drop(flightRegex.find(line)!!.value.length) // anything after DEST is extra info, usually just a/c type
 
                         todaysEvents.add(KlcRosterEvent(Activities.FLIGHT, startTime, endTime, description, extraInfo))

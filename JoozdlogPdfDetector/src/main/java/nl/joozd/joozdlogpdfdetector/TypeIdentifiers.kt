@@ -26,5 +26,7 @@ package nl.joozd.joozdlogpdfdetector
 object TypeIdentifiers {
     val KLC_ROSTER = 1 to "Individual duty plan for"
     val KLC_MONTHLY = 0 to "MONTHLY OVERVIEW"
+    val KLM_ICA_ROSTER = 0 to "CREW ROSTER FROM "
+    val KLM_ICA_MONTHLY = 0 to "__NOT_IMPLEMENTED__"
 
 }

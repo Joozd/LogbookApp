@@ -82,7 +82,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
             _selectedAircraft.value = aircraftRepository.getAircraftFromRegistration(flight.registration)
                 ?: Aircraft(
                     flight.registration,
-                    aircraftRepository.getAircraftTypeByShortName(flight.aircraft),
+                    aircraftRepository.getAircraftTypeByShortName(flight.aircraftType),
                     Aircraft.FLIGHT
                 )
         }
@@ -130,7 +130,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
             Log.d(this::class.simpleName, "selectedAircraft = ${selectedAircraft.value}")
             workingFlight = it.copy(
                 registration = selectedAircraft.value?.registration ?: "".also{Log.d(this::class.simpleName, "selectedAircraft.value?.registration is null")},
-                aircraft = selectedAircraft.value?.type?.shortName ?: ""
+                aircraftType = selectedAircraft.value?.type?.shortName ?: ""
             ).also{Log.d(this@AircraftPickerViewModel::class.simpleName,"saved $it")}
             //TODO: Save reg+type to repo
         }
@@ -138,7 +138,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
 
     fun saveTypeOnly(){
         workingFlight?.let{
-            workingFlight = it.copy(aircraft = selectedAircraft.value?.type?.shortName ?: "")
+            workingFlight = it.copy(aircraftType = selectedAircraft.value?.type?.shortName ?: "")
         }
     }
 

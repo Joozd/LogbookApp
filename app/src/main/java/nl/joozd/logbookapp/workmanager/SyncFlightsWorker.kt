@@ -25,7 +25,7 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.repository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 
 class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)

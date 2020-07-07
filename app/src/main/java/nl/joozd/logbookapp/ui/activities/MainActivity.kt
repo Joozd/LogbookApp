@@ -22,15 +22,15 @@ package nl.joozd.logbookapp.ui.activities
 
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
@@ -38,13 +38,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main_new.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.SettingsActivity
-import nl.joozd.logbookapp.extensions.*
+import nl.joozd.logbookapp.extensions.fadeOut
+import nl.joozd.logbookapp.extensions.getColorFromAttr
+import nl.joozd.logbookapp.extensions.onTextChanged
+import nl.joozd.logbookapp.extensions.showAnimated
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.MainActivityEvents
-import nl.joozd.logbookapp.model.viewmodels.activities.MainActivityViewModel
+import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityFeedbackExtraData
+import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModel
 import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.fragments.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.customs.CustomSnackbar
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogProgressBar
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
@@ -72,12 +77,11 @@ class MainActivity : JoozdlogActivity() {
             true
         }
         R.id.menu_total_times -> {
-            val intent = Intent(this, TotalTimesActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, TotalTimesActivity::class.java))
             true
         }
         R.id.menu_balance_forward -> {
-            viewModel.menuSelectedBalanceForward()
+            startActivity(Intent(this, BalanceForwardActivity::class.java))
             true
         }
         R.id.app_bar_search -> {
@@ -120,11 +124,16 @@ class MainActivity : JoozdlogActivity() {
         //RecyclerView thingies
         val flightsAdapter = FlightsAdapter().apply {
             onDelete = { id -> viewModel.deleteFlight(id) }
+            onDelete = { id -> viewModel.deleteFlight(id) }
             itemClick = { id -> viewModel.showFlight(id) }
         }.also {
                 flightsList.layoutManager = LinearLayoutManager(this)
                 flightsList.adapter = it
             }
+
+        /**
+         * Fill spinner and set onSelected
+         */
 
         ArrayAdapter.createFromResource(
             this,
@@ -139,12 +148,10 @@ class MainActivity : JoozdlogActivity() {
         }
         searchTypeSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
             override fun onNothingSelected(parent: AdapterView<*>?) {}
-
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 //mainSearchField.text = mainSearchField.text
                 viewModel.setSpinnerSelection(position)
             }
-
         }
 
         /**
@@ -166,6 +173,12 @@ class MainActivity : JoozdlogActivity() {
          * Obesrvers below here
          */
 
+        //TODO tempo test function
+        viewModel.internetAvailable.observe(this, Observer {
+            Log.d("internet", "TEST123 $it")
+        })
+
+
         viewModel.displayFlightsList.observe(this, Observer { flightsAdapter.updateList(it) })
 
         viewModel.searchFieldHint.observe(this, Observer {
@@ -176,35 +189,28 @@ class MainActivity : JoozdlogActivity() {
             when(it.getEvent()){
                 MainActivityEvents.NOT_IMPLEMENTED -> toast("Not Implemented")
                 MainActivityEvents.SHOW_FLIGHT -> showFlight()
-                MainActivityEvents.OPEN_SEARCH_FIELD -> searchField.visibility = View.VISIBLE
+                MainActivityEvents.OPEN_SEARCH_FIELD -> {
+                    searchField.visibility = View.VISIBLE
+                    mainSearchField.requestFocus()
+                    showKeyboard()
+                }
                 MainActivityEvents.CLOSE_SEARCH_FIELD -> {
                     mainSearchField.setText("")
+                    mainSearchField.clearFocus()
+                    hideKeyboard(mainSearchField)
                     searchTypeSpinner.setSelection(0)
                     //reset search types spinner//
                     searchField.visibility = View.GONE
+
                 }
-                MainActivityEvents.FLIGHT_SAVED -> snackbarShowing = CustomSnackbar.make(this@MainActivity.mainActivityLayout).apply {
-                    setMessage("Saved Flight")
-                    setOnAction { //onAction = UNDO
-                        viewModel.undoSaveWorkingFlight()
-                        dismiss()
-                    }
-                    setOnActionBarShown { this@MainActivity.addButton.hide() }
-                    setOnActionBarGone {
-                        snackbarShowing = null
-                        this@MainActivity.addButton.show()
-                    }
-                    show()
-                }
+                MainActivityEvents.FLIGHT_SAVED -> showSaveSnackbar()
+                MainActivityEvents.DELETED_FLIGHT -> showDeleteSnackbar()
                 MainActivityEvents.FLIGHT_NOT_FOUND -> longToast("ERROR: Flight ID not found!")
-                MainActivityEvents.TRYING_TO_DELETE_COMPLETED_FLIGHT -> {
-                    AlertDialog.Builder(this).apply {
-                        setTitle("WARNING")
-                        setMessage("You are trying to delete a COMPLETED flight. This might be illegal. Delete anyway??")
-                        setPositiveButton("Continue") {_, _ -> viewModel.deleteNotPlannedFlight(it.extraData.getInt("ID"))}
-                        setNegativeButton("Cancel", null)
-                    }.create().show()
-                }
+                MainActivityEvents.TRYING_TO_DELETE_CALENDAR_FLIGHT ->
+                    showDeletePlannedCalendarFlightDialog(it.extraData.getInt(MainActivityFeedbackExtraData.FLIGHT_ID))
+                MainActivityEvents.TRYING_TO_DELETE_COMPLETED_FLIGHT ->
+                    showDeleteCompletedFlightDialog(it.extraData.getInt(MainActivityFeedbackExtraData.FLIGHT_ID))
+                MainActivityEvents.CALENDAR_SYNC_PAUSED -> showCalendarSyncRestartInfo()
                 MainActivityEvents.DONE -> longToast(" Yay fixed!")
                 MainActivityEvents.ERROR -> longToast("An error occurred :(")
             }
@@ -265,12 +271,81 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    /**
-     * snackbar:
-     *
+    private fun showDeletePlannedCalendarFlightDialog(id: Int){
+        JoozdlogAlertDialog(this).apply {
+            messageResource = R.string.delete_calendar_flight
+            setPositiveButton(android.R.string.yes){
+                viewModel.disableCalendarImport()
+                viewModel.deleteFlight(id)
+            }
+            setNegativeButton(R.string.delete_calendar_flight_until_end){
+                viewModel.deleteAndDisableCalendarImportUntillAfterThisFlight(id)
+            }
+            setNeutralButton(android.R.string.cancel)
+        }.show()
+    }
+
+    private fun showDeleteCompletedFlightDialog(id: Int){
+        JoozdlogAlertDialog(this).apply {
+            title = "WARNING"
+            messageResource = R.string.delete_completed_flight
+            setPositiveButton("Continue") {
+                viewModel.deleteNotPlannedFlight(id)}
+            setNegativeButton("Cancel")
+        }.show()
+
+    }
 
 
-     */
+    private fun showCalendarSyncRestartInfo(){
+        JoozdlogAlertDialog(this).apply{
+            messageResource = R.string.you_can_start_calendar_sync_again
+            setPositiveButton(android.R.string.ok)
+        }.show()
+    }
+
+    private fun showSaveSnackbar(){
+        snackbarShowing = CustomSnackbar.make(this@MainActivity.mainActivityLayout).apply {
+            setMessage(R.string.savedFlight)
+            setOnAction { //onAction = UNDO
+                viewModel.undoSaveWorkingFlight()
+                dismiss()
+            }
+            setOnActionBarShown { this@MainActivity.addButton.hide() }
+            setOnActionBarGone {
+                snackbarShowing = null
+                this@MainActivity.addButton.show()
+            }
+            show()
+        }
+    }
+
+    private fun showDeleteSnackbar(){
+        snackbarShowing = CustomSnackbar.make(this@MainActivity.mainActivityLayout).apply {
+            setMessage(R.string.deletedFlight)
+            setOnAction { //onAction = UNDO
+                viewModel.undoDeleteFlight()
+                dismiss()
+            }
+            setOnActionBarShown { this@MainActivity.addButton.hide() }
+            setOnActionBarGone {
+                snackbarShowing = null
+                this@MainActivity.addButton.show()
+            }
+            show()
+        }
+    }
+
+    private fun showKeyboard(){
+        val imm: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,InputMethodManager.HIDE_IMPLICIT_ONLY)
+    }
+
+    private fun hideKeyboard(view: View){
+        val imm: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
 
 
     companion object{

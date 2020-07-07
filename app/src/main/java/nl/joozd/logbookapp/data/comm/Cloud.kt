@@ -31,10 +31,7 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.joozdlogcommon.exceptions.NotAuthorizedException
 import nl.joozd.logbookapp.data.room.model.AircraftTypeConsensusData
-import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.repository.AirportRepository
-import nl.joozd.logbookapp.data.repository.FlightRepository
-import nl.joozd.logbookapp.extensions.toBoolean
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 
 import java.time.Instant
 

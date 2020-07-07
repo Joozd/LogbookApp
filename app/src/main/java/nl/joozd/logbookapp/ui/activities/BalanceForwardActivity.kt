@@ -19,79 +19,87 @@
 
 package nl.joozd.logbookapp.ui.activities
 
-import androidx.appcompat.app.AppCompatActivity
+
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
-import androidx.appcompat.widget.Toolbar
+import android.view.MenuItem
+import androidx.activity.viewModels
+import androidx.fragment.app.commit
+import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_balance_forward.*
 import nl.joozd.logbookapp.R
-import nl.joozd.joozdlogcommon.BalanceForward
-
-
+import nl.joozd.logbookapp.databinding.ActivityBalanceForwardBinding
+import nl.joozd.logbookapp.model.helpers.FeedbackEvents
+import nl.joozd.logbookapp.model.viewmodels.activities.BalanceForwardActivityViewmodel
 import nl.joozd.logbookapp.ui.adapters.BalanceForwardAdapter
 
+import nl.joozd.logbookapp.ui.dialogs.AddBalanceForwardDialog
+import nl.joozd.logbookapp.ui.utils.toast
 
-class BalanceForwardActivity : AppCompatActivity() {
-    companion object{
-        const val TAG = "BALANCE_FORWARD_ACTIVITY"
-    }
 
-    //private val balanceForwardDb = BalanceForwardDb()
-    private var allBalanceForwards: List<BalanceForward> = emptyList()
-    private lateinit var adapter: BalanceForwardAdapter
+class BalanceForwardActivity : JoozdlogActivity() {
+    private val viewModel: BalanceForwardActivityViewmodel by viewModels()
+    var binding: ActivityBalanceForwardBinding? = null
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_balance_forward, menu)
         return true
     }
-/*
+
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.addBalanceForwardMenu -> {
-            addBalanceButton.hide()
-            val addBalanceForwardDialog = AddBalanceForwardDialog()
-            addBalanceForwardDialog.balanceForwardId = balanceForwardDb.highestId+1
-            Log.d(TAG, "id = ${addBalanceForwardDialog.balanceForwardId}")
-            Log.d(TAG, "highestId = ${balanceForwardDb.highestId}")
-            addBalanceForwardDialog.setOnSave {
-                balanceForwardDb.saveBalanceForward(it)
-                allBalanceForwards += it
-                adapter.balancesForward = allBalanceForwards
-            }
-            addBalanceForwardDialog.setOnClose {
-                addBalanceButton.show()
-            }
-            supportFragmentManager.beginTransaction()
-                .add(R.id.balanceForwardLayoutBelowToolbar, addBalanceForwardDialog)
-                .addToBackStack(null)
-                .commit()
+            showAddBalanceForwardDialog()
             true
         }
         else -> false
     }
 
 
-*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
 //        TODO("get confirmation on delete and undo SnackBar")
 //        TODO("add these to totals")
-        //TODO also change Totals to activity instead of fragment
 
         super.onCreate(savedInstanceState)
 
-
-        // allBalanceForwards = balanceForwardDb.requestAllBalanceForwards()
-        Log.d(TAG, "${allBalanceForwards.size} records found")
-
-
         setTheme(R.style.AppTheme)
-        setContentView(R.layout.activity_balance_forward)
-        setSupportActionBar(balance_forward_toolbar as Toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = resources.getString(R.string.balanceForward)
+        binding = ActivityBalanceForwardBinding.inflate(layoutInflater).apply{
+            addBalanceButton.setOnClickListener {
+                showAddBalanceForwardDialog()
+            }
+
+            val adapter = BalanceForwardAdapter().apply{
+                onDeleteClicked = {bf -> viewModel.delete(bf)}
+                onListItemClicked = {bf, item -> viewModel.itemClicked(bf, item)}
+            }
+            balanceForwardExListView.setAdapter(adapter)
+            viewModel.balancesForward.observe(this@BalanceForwardActivity, Observer {
+                adapter.updateList(it)
+            })
+
+            setContentView(root)
+        }
+
+        setSupportActionBarWithReturn(balance_forward_toolbar)?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            title = resources.getString(R.string.balanceForward)
+        }
+
+
+        /**
+         * Feedback observers:
+         */
+
+        viewModel.feedbackEvent.observe(this, Observer {
+            when (it.getEvent()){
+                FeedbackEvents.BalanceForwardActivityEvents.NOT_IMPLEMENTED -> toast("Not implemented!")
+                FeedbackEvents.BalanceForwardActivityEvents.DELETED -> toast("Deleted! (needs a snackbar)") // TODO needs a snackbar
+                FeedbackEvents.BalanceForwardActivityEvents.UNDELETE_OK -> toast("Undeleted!")
+                FeedbackEvents.BalanceForwardActivityEvents.UNDELETE_FAILED -> toast("Unable to undelete!")
+            }
+        })
 /*
-        val expandableList: ExpandableListView = expandible_listview
+
         adapter = BalanceForwardAdapter(this, allBalanceForwards, expandible_listview)
         adapter.let {a->
             a.setOnActionImageViewClicked { bf ->
@@ -160,6 +168,12 @@ class BalanceForwardActivity : AppCompatActivity() {
 
     }
 
+    private fun showAddBalanceForwardDialog(): AddBalanceForwardDialog = AddBalanceForwardDialog().also{
+        supportFragmentManager.commit {
+            add(R.id.balanceForwardLayout, it)
+            addToBackStack(null)
+        }
+    }
 
 }
 

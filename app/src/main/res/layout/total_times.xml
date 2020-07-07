@@ -25,7 +25,7 @@
                                              android:layout_height="match_parent"
                                              android:background="@drawable/rounded_corners">
     <ExpandableListView
-            android:id="@+id/expandible_listview"
+            android:id="@+id/balanceForwardExListView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:groupIndicator="@null">

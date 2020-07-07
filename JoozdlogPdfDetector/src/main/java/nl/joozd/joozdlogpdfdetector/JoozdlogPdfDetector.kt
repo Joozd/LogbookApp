@@ -34,6 +34,14 @@ class JoozdlogPdfDetector(inputStream: InputStream) {
     val seemsValid = firstPage.isNotEmpty()
     val typeOfFile = getType(firstPage)
 
+    //for debugging
+    val firstPageText: String
+        get() = firstPage
+
+    val isRoster = typeOfFile in listOf(SupportedTypes.KLC_ROSTER, SupportedTypes.KLM_ICA_ROSTER)
+    val isMonthly = typeOfFile in listOf(SupportedTypes.KLC_MONTHLY, SupportedTypes.KLM_ICA_MONTHLY)
+
+
 
     /**
      * Returns the type of PDF found, or UNSUPPORTED
@@ -43,6 +51,7 @@ class JoozdlogPdfDetector(inputStream: InputStream) {
         return when {
             match(lines, TypeIdentifiers.KLC_ROSTER) -> SupportedTypes.KLC_ROSTER
             match(lines, TypeIdentifiers.KLC_MONTHLY) -> SupportedTypes.KLC_MONTHLY
+            match(lines, TypeIdentifiers.KLM_ICA_ROSTER) -> SupportedTypes.KLM_ICA_ROSTER // this can cascade further if other types also start wiith this
             else -> SupportedTypes.UNSUPPORTED
         }
     }

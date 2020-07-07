@@ -24,6 +24,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.Instant
 
+@Deprecated ("Can be deleted, only here for reference")
 object PdfRosterFunctions{
     fun makeFlightsList(events: List<KlcRosterEvent>, startingID: Int, airportsMap: Map<String, String>): List<Flight> =
         events.mapIndexed { index: Int, rf: KlcRosterEvent ->

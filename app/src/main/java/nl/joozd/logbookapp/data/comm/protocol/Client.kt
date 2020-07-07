@@ -41,7 +41,7 @@ class Client: Closeable {
     companion object{
         const val SERVER_URL = "joozd.nl"
         const val SERVER_PORT = 1337
-        const val TAG = "data/comm.protocol.Client"
+        const val TAG = "comm.protocol.Client"
         const val MAX_MESSAGE_SIZE = Int.MAX_VALUE-1
     }
 

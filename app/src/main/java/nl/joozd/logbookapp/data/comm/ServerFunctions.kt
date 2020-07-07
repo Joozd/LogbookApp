@@ -109,10 +109,10 @@ object ServerFunctions {
     }
 
     fun login(client: Client): Boolean?{
-        if (Preferences.username == null || Preferences.key == null)
+        if (Preferences.username == Preferences.USERNAME_NOT_SET || Preferences.key == null)
             return false
         //payLoad is LoginData.serialize()
-        val payLoad = LoginData(Preferences.username!!, Preferences.key!!, BasicFlight.VERSION.version).serialize()
+        val payLoad = LoginData(Preferences.username, Preferences.key!!, BasicFlight.VERSION.version).serialize()
 
         client.sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
         return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))

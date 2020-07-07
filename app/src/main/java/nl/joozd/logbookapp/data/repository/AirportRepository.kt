@@ -44,6 +44,9 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
         }
         getLive().observeForever {
             _cachedAirports.value = it
+            launch {
+                _icaoIataMap.value = getIcaoToIataMap(true)
+            }
         }
     }
     val liveAirports: LiveData<List<Airport>> =
@@ -52,6 +55,7 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
     private val _icaoIataMap = MutableLiveData<Map<String, String>>()
     init{
         launch(Dispatchers.Main) { _icaoIataMap.value = getIcaoToIataMap(true) }
+        Log.d("XOXOXOXOXOXOXOX", "icaoIataMap is now size ${icaoIataMap.value?.size}")
         liveAirports.observeForever {
             launch(Dispatchers.Main) {_icaoIataMap.value = getIcaoToIataMap() }
         }
@@ -136,6 +140,8 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
         else {
             _icaoIataMap.value ?: withContext (dispatcher){ getAll().map { a -> a.ident to a.iata_code }.toMap() }
     }
+
+    fun getIcaoIataMapAsync() = async { getIcaoToIataMap()}
 
 
     /**

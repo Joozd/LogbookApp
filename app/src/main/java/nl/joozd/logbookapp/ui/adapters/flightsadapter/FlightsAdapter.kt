@@ -59,7 +59,9 @@ class FlightsAdapter(
                 simLayout.translationZ = 10f
                 simLayout.closeIfSwiped()
                 simLayout.setOnClickListener { onClick(flightID) }
-                simDeleteLayer.setOnClickListener { onDelete(flightID) }
+                simDeleteLayer.setOnClickListener {
+                    simLayout.closeIfSwiped()
+                    onDelete(flightID) }
             }
         }
     }
@@ -93,9 +95,15 @@ class FlightsAdapter(
                 flightLayout.closeIfSwiped()
                 flightLayout.translationZ = 10f
                 flightLayout.setOnClickListener { onClick(flightID) }
-                deleteLayer.setOnClickListener { onDelete(flightID) }
+                deleteLayer.setOnClickListener {
+                    flightLayout.closeIfSwiped()
+                    onDelete(flightID) }
             }
         }
+    }
+
+    override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
+        super.onViewAttachedToWindow(holder)
     }
 
     override fun getItemViewType(position: Int): Int = if(list[position].sim) SIM else FLIGHT

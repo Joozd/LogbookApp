@@ -48,8 +48,8 @@ class TotalTimesActivity : JoozdlogActivity() {
             title = resources.getString(R.string.totalTimes)
         }
         val adapter = TotalTimesExpandableListAdapter(this, emptyList()) // maybe fill async and load while expanding items
-        expandible_listview.setAdapter(adapter)
-        expandible_listview.expandGroup(0)
+        balanceForwardExListView.setAdapter(adapter)
+        balanceForwardExListView.expandGroup(0)
 
         // activate horizontal zooming and scrolling
         with (totalTimesTestGraph) {

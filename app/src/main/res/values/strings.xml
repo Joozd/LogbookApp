@@ -51,17 +51,17 @@
     <string name="takeoff">Takeoff</string>
     <string name="day">day</string>
     <string name="night">night</string>
+
+    <string name="departure">departure</string>
+    <string name="arrival">arrival</string>
+
     <string name="landing">Landing</string>
     <string name="autoland">Autoland</string>
     <string name="totalTimes">Total Times</string>
-    <string name="balanceForward">Balance Forward</string>
+
     <string name="editAircraft">Edit Aircraft</string>
-    <string name="addBalanceForward">Add Balance Forward</string>
-    <string name="logbookName">Name of old logbook</string>
-    <string name="aircraftTime">Aircraft time</string>
-    <string name="nightTime">Night time</string>
-    <string name="ifrTime">IFR time</string>
-    <string name="picIncludingPicus">PIC (+ PICUS)</string>
+
+
     <string name="copilot">Co-pilot</string>
     <string name="paperLogbook">Paper Logbook</string>
     <string name="pickNames">Search Names</string>
@@ -71,7 +71,8 @@
     <string name="select">Select</string>
     <string name="pickAirports">Search Airports</string>
     <string name="setThis">Set This</string>
-    <string name="flightTimes">Times:</string>
+    <string name="flightTimes">Times</string>
+    <string name="timesFunctions">Times / Functions</string>
     <string name="augmentedCrew">Augmented crew</string>
     <string name="crewSize">Crew Size</string>
     <string name="landingInSeat">Landing in seat</string>
@@ -79,7 +80,8 @@
     <string name="timeForTakeoffLanding">Time for takeoff/landing</string>
     <string name="dual">DUAL</string>
     <string name="augmented">Augmented</string>
-    <string name="deletedFlight">Deleted Flight!</string>
+    <string name="savedFlight">Saved flight</string>
+    <string name="deletedFlight">Deleted flight</string>
     <string name="undo">Undo</string>
     <string name="newFlight">New Flight</string>
     <string name="registration">Registration</string>
@@ -102,13 +104,55 @@
     <string name="instructor">INSTRUCTOR</string>
     <string name="done">Done!</string>
 
+    <string name="newUserActivityHeader">Create cloud sync account</string>
 
 
     <!--
     Complete messages
     -->
+
+    <string name="delete_completed_flight">You are trying to delete a COMPLETED flight. This might be illegal. Delete anyway?</string>
+    <string name="delete_calendar_flight">You are deleting a a flight from your calendar. Do you want to disable calendar import?</string>
+    <string name="delete_calendar_flight_until_end">Until end of flight</string>
+    <string name="you_can_start_calendar_sync_again">You can start calendar synchronizing again by switching it off and on in settings</string>
+
+    <!--
+    - Strings for SettingsActivity
+    -->
+
     <string name="useIataAirports">Use IATA airports identifiers</string>
     <string name="useIcaoAirports">Use ICAO airports identifiers</string>
+    <string name="getPlannedflightsFromCalendar">Get planned flights from your device\'s calendar</string>
+    <string name="calendarSync">Calendar Sync</string>
+
+
+    <!--
+    - Strings for BalanceForward activity & dialog
+    -->
+
+    <string name="addBalanceForward">Add Balance Forward</string>
+    <string name="logbookName">Name of old logbook</string>
+    <string name="multipilotTime">Multipilot time</string>
+    <string name="totalTimeOfFlight">Total time of flight</string>
+    <string name="landingDay">Day ldg</string>
+    <string name="landingNight">Night ldg</string>
+    <string name="nightTime">Night time</string>
+    <string name="ifrTime">IFR time</string>
+    <string name="picIncludingPicus">PIC (+ PICUS)</string>
+    <string name="copilotTime">Co-pilot time</string>
+    <string name="dualTime">Dual time</string>
+    <string name="instructorTime">Instructor time</string>
+    <string name="balanceForward">Balance Forward</string>
+
+
+    <!--
+    - Strings for PdfParserActivity
+    -->
+
+    <string name="calendar_update_active">You are loading a roster file, but calendar sync is enabled. Do you want to disable calendar sync?</string>
+    <string name="calendar_update_pause_untill_end_of_roster">Until end of roster</string>
+
+
     <string name="receivedIntent">Receiving data</string>
     <string name="readingFile">Reading roster</string>
     <string name="readingRoster">getting flights from roster</string>
@@ -116,10 +160,13 @@
     <string name="insertNewFlights">Inserting new flights</string>
     <string name="writingToStorage">Writing data to storage</string>
     <string name="XXXXXXXXXXXXXXX">XXXXXXXXXXXXXXX</string>
-
-
-
+    <string name="repeatPassword">Repeat password</string>
+    <string name="alreadyHaveAnAccountQuestion">Already have an account?</string>
+    <string name="signIn">Sign in</string>
+    <string name="youCannotResetPassword">You cannot reset your password! Don\'t forget it!</string>
+    <string name="iDidForgetMyPassword">I did forget my password so I need to make a new account :(</string>
 
 
 </resources>
+
 

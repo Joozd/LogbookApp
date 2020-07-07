@@ -48,9 +48,9 @@ data class Flight(
     val timeIn: Long = Instant.now().epochSecond,           // timeOut and timeIn are seconds since epoch
     val correctedTotalTime: Int = 0,
     val nightTime: Int = 0,
-    val ifrTime:Int = 0,
+    val ifrTime:Int = 0, // 0 means 0 minutes, -1 means this is a VFR flight
     val simTime: Int = 0,
-    val aircraft: String = "",                              // overrides standard AircraftType that goes with registration
+    val aircraftType: String = "",                              // overrides standard AircraftType that goes with registration
     val registration: String = "",
     val name: String = "",
     val name2: String = "",
@@ -81,6 +81,8 @@ data class Flight(
 
 ){
     companion object{
+        /*
+        //TODO remove this if it doesnt cause problems
         private fun correctDuration(duration: Duration, crew: Crew): Duration{
             var flownMinutes: Long = 0
             if (crew.didLanding) flownMinutes += crew.takeoffLandingTimes
@@ -88,6 +90,7 @@ data class Flight(
             flownMinutes += ((duration.toMinutes()-2*crew.takeoffLandingTimes) / crew.crewSize) *2
             return Duration.ofMinutes(flownMinutes)
         }
+        */
 
         fun createEmpty() = Flight(-1)
     }
@@ -105,7 +108,7 @@ data class Flight(
         nightTime,
         ifrTime,
         simTime,
-        aircraft,
+        aircraftType,
         registration,
         name,
         name2,
@@ -141,7 +144,7 @@ data class Flight(
         nightTime,
         ifrTime,
         simTime,
-        aircraft,
+        aircraftType,
         registration,
         name,
         name2,
@@ -198,8 +201,8 @@ data class Flight(
 
 
     fun regAndType() =
-        if ((registration + aircraft).isEmpty()) ""
-        else registration + if (aircraft.isNotEmpty()) "($aircraft)" else "(???)"
+        if ((registration + aircraftType).isEmpty()) ""
+        else registration + if (aircraftType.isNotEmpty()) "($aircraftType)" else "(???)"
 
     fun landings() = "${landingDay + landingNight}"
     fun takeoffs() = "${takeOffDay + takeOffNight}"

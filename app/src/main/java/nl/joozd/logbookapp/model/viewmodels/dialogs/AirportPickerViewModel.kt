@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.conflate
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.AirportPickerEvents.NOT_IMPLEMENTED
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
@@ -40,13 +39,23 @@ class AirportPickerViewModel: JoozdlogDialogViewModel(){
 
     /**
      * this MUST be set in onActivityCreated in Fragment so feedback event will be observed
-     * also, feedbackEvent must be observed. If [workingOnOrig] == null, things won't work.
+     * also, feedbackEvent must be observed. If [_workingOnOrig] == null, things won't work.
      */
-    private var workingOnOrig: Boolean? = null
+    private var _workingOnOrig: Boolean? = null
+    val workingOnOrig: Boolean?
+        get() = _workingOnOrig
     fun setWorkingOnOrig(orig: Boolean?){
-        workingOnOrig = orig
+        _workingOnOrig = orig
         if (orig == null) feedback(ORIG_OR_DEST_NOT_SELECTED)
-        else updateSearch((if (orig) workingFlight?.orig else workingFlight?.dest) ?: "")
+        else {
+            workingFlight?.let {f ->
+                updateSearch((if (orig) f.orig else f.dest) ?: "")
+                viewModelScope.launch {
+                    _pickedAirport.value =
+                        airportRepository.getAirportOnce(if (_workingOnOrig == true) f.orig else f.dest)
+                }
+            }
+        }
     }
 
     private val _airportsList = MutableLiveData<List<Airport>>()
@@ -55,14 +64,32 @@ class AirportPickerViewModel: JoozdlogDialogViewModel(){
         _airportsList.value = airportRepository.liveAirports.value
     }
 
-    private val _pickedAirport = MutableLiveData<Airport>()
+    private val _pickedAirport = MediatorLiveData<Airport>()
+    init{
+        _pickedAirport.addSource(flight) {f ->
+            viewModelScope.launch {
+                _pickedAirport.value =
+                    airportRepository.getAirportOnce(if (_workingOnOrig == true) f.orig else f.dest)
+            }
+        }
+    }
+
     val pickedAirport: LiveData<Airport>
         get() = distinctUntilChanged(_pickedAirport)
 
-    fun pickAirport(airport: Airport){
-        //TODO
-        feedback(NOT_IMPLEMENTED)
+    fun pickAirport(airport: Airport) {
+        workingFlight?.let {
+            workingFlight = when (_workingOnOrig) {
+                null -> {
+                    feedback(ORIG_OR_DEST_NOT_SELECTED)
+                    return
+                }
+                true -> it.copy(orig = airport.ident)
+                false -> it.copy(dest = airport.ident)
+            }
+        }
     }
+
 
     fun setCustomAirport(airport: String){
         //TODO

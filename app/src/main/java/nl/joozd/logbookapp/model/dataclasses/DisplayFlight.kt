@@ -20,8 +20,10 @@
 package nl.joozd.logbookapp.model.dataclasses
 
 import nl.joozd.logbookapp.data.miscClasses.Crew
+import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.toMonthYear
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
+import java.util.*
 
 /**
  * CLass with only a flightID and strings and booleans for display in MainActivity RecyclerView
@@ -56,16 +58,16 @@ data class DisplayFlight(
     companion object{
         fun of(f: Flight, icaoIataMap: Map<String, String>, useIATA: Boolean) = DisplayFlight(
             flightID = f.flightID,
-            orig = if (useIATA) icaoIataMap[f.orig] ?: f.orig else f.orig,
-            dest = if (useIATA) icaoIataMap[f.dest] ?: f.dest else f.dest,
+            orig = if (useIATA) icaoIataMap[f.orig]?.nullIfEmpty() ?: f.orig else f.orig,
+            dest = if (useIATA) icaoIataMap[f.dest]?.nullIfEmpty() ?: f.dest else f.dest,
             timeOut = f.timeOutString(),
             timeIn = f.timeInString(),
             totalTime = f.durationString(),
             dateDay = f.tOut().dayOfMonth.toString(),
-            monthAndYear = f.tOut().toMonthYear().toUpperCase(),
+            monthAndYear = f.tOut().toMonthYear().toUpperCase(Locale.ROOT),
             simTime = minutesToHoursAndMinutesString(f.simTime),
             registration = f.registration,
-            type = f.aircraft,
+            type = f.aircraftType,
             names = listOf(f.name, f.name2).filter{it.isNotEmpty()}.joinToString(", "),
             takeoffsAndLandings = "${f.takeoffs()}/${f.landings()}",
             flightNumber = f.flightNumber,

@@ -66,7 +66,7 @@
 
 
     <ExpandableListView
-        android:id="@+id/expandible_listview"
+        android:id="@+id/balanceForwardExListView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:groupIndicator="@null"

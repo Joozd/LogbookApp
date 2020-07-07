@@ -22,28 +22,39 @@ package nl.joozd.logbookapp.ui.dialogs
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.widget.DatePicker
 import android.widget.EditText
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.model.viewmodels.fragments.EditFlightFragmentViewModel
 import java.time.LocalDate
 import java.util.*
 
 
-class DatePickerFragment(private val onDatePicked: (date: LocalDate) -> Unit) : androidx.fragment.app.DialogFragment(), DatePickerDialog.OnDateSetListener {
+class DatePickerFragment: DialogFragment(), DatePickerDialog.OnDateSetListener {
+    private val effViewModel: EditFlightFragmentViewModel by activityViewModels()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // Use the current date as the default date in the picker
+        effViewModel.getLocalDate()?.let{
+            Log.d("datethingy", "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX - $it - XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+        return DatePickerDialog(requireContext(), R.style.DatePicker, this, it.year, it.month.value, it.dayOfMonth)
+        }
+        //This is only reached if effViewMOdel.localDate.value == null
         val c = Calendar.getInstance()
         val year = c.get(Calendar.YEAR)
         val month = c.get(Calendar.MONTH)
         val day = c.get(Calendar.DAY_OF_MONTH)
+        return DatePickerDialog(requireContext(), R.style.DatePicker, this, year, month, day)
 
         // Create a new instance of DatePickerDialog and return it
-        return DatePickerDialog(requireContext(), R.style.DatePicker, this, year, month, day)
+
     }
 
     override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-        onDatePicked(LocalDate.of(year, month+1, day))
+        effViewModel.setDate(LocalDate.of(year, month+1, day))
         // Do something with the date chosen by the user
     }
 }

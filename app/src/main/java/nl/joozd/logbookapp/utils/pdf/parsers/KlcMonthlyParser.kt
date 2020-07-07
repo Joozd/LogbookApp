@@ -101,7 +101,7 @@ class KlcMonthlyParser(inputStream: InputStream) {
      *********************************************************************************************/
 
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-    private fun MatchResult.day() = (groups[DAY]?.value ?: error ("ERROR 0003 NO DAY")).toLong()
+    private fun MatchResult.day(): Long = (this.groups[DAY]?.value ?: error ("ERROR 0003 NO DAY")).toLong()
     private fun MatchResult.timeOut() = LocalTime.parse(groups[TIME_OUT]?.value ?: error ("ERROR 0001 NO TIME_OUT"), timeFormatter)
     private fun MatchResult.timeIn() = LocalTime.parse(groups[TIME_IN]?.value ?: error ("ERROR 0001 NO TIME_IN"), timeFormatter)
     private fun MatchResult.orig() = (groups[ORIG]?.value ?: error ("ERROR 0004 NO ORIG"))

@@ -42,10 +42,20 @@ object FlightDataEntryFunctions {
         require ("(" in regAndType && ")" in regAndType) { "Couldnt find \'(\' and \')\' in $regAndType"}
         val reg = regAndType.slice(0 until regAndType.indexOf('('))
         val type = regAndType.slice((regAndType.indexOf('(') +1) until regAndType.indexOf(')'))
-        return this.copy(registration = reg, aircraft = type)
+        return this.copy(registration = reg, aircraftType = type)
     }
 
-    fun Flight.withTakeoffLandings(landings: Int, orig: Airport?, dest: Airport?): Flight {
+    /**
+     * Updates a flight with takeoff and alndings.
+     * If orig and dest given, it calculates whether those are during  day or night.
+     * If disableAutoFill given, it disables autofill
+     * @param landings: Number of landings
+     * @param orig: [Airport] of origin
+     * @param dest: [Airport] of destination
+     * @param disableAutoFill: [this.autoFill] is set to false if true, kept the way it was if false (default)
+     * @return: updated [Flight]
+     */
+    fun Flight.withTakeoffLandings(landings: Int, orig: Airport?, dest: Airport?, disableAutoFill: Boolean = false): Flight {
         if (orig == null || dest == null){
             return this.copy(
                 takeOffDay = landings,
@@ -56,11 +66,13 @@ object FlightDataEntryFunctions {
         val twilightCalc = TwilightCalculator(timeOut)
         val takeoffsDuringDay = landings * (if (twilightCalc.itIsDayAt(orig, timeOut.toLocalTime())) 1 else 0)
         val landingsDuringDay = landings * (if (twilightCalc.itIsDayAt(dest, timeIn.toLocalTime())) 1 else 0)
+        val af = if (disableAutoFill) false else this.autoFill
         return this.copy(
             takeOffDay = takeoffsDuringDay,
             takeOffNight = landings - takeoffsDuringDay,
             landingDay = landingsDuringDay,
-            landingNight = landings - landingsDuringDay)
+            landingNight = landings - landingsDuringDay,
+            autoFill = af)
     }
 
     /**
@@ -125,7 +137,8 @@ object FlightDataEntryFunctions {
 
 
 
-    fun hoursAndMinutesStringToInt(hoursAndMinutes: String): Int? {
+    fun hoursAndMinutesStringToInt(hoursAndMinutes: String?): Int? {
+        if (hoursAndMinutes == null) return null
         if (hoursAndMinutes.all{it.isDigit()}) {
             return if (hoursAndMinutes.length <= 2)
                 (hoursAndMinutes.nullIfEmpty() ?: "0").toInt()

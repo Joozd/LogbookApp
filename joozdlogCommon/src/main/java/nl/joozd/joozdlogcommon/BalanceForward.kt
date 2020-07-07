@@ -19,7 +19,25 @@
 
 package nl.joozd.joozdlogcommon
 
-data class BalanceForward (val logbookName: String, val aircraftTime: Int, val simTime: Int, val takeOffDay: Int, val takeOffNight: Int, val landingDay: Int, val landingNight: Int,
-                           val nightTime: Int, val ifrTime: Int, val picTime: Int, val copilotTime: Int, val dualTime: Int, val instructortime: Int, val id: Int = -1){
-    val grandTotal = aircraftTime + simTime
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
+data class BalanceForward (
+    @PrimaryKey val id: Int = -1,
+    val logbookName: String,
+    val multiPilotTime: Int,
+    val aircraftTime: Int,
+    val landingDay: Int,
+    val landingNight: Int,
+    val nightTime: Int,
+    val ifrTime: Int,
+    val picTime: Int,
+    val copilotTime: Int,
+    val dualTime: Int,
+    val instructortime: Int,
+    val simTime: Int
+){
+    val grandTotal: Int
+        get() = aircraftTime + simTime
 }

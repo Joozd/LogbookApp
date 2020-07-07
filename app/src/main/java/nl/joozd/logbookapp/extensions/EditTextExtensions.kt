@@ -36,3 +36,11 @@ fun EditText.removeTrailingDigits(){
     setText(text.toString().dropLast(trailingDigits))
     //text.delete(text.length-trailingDigits, text.length)
 }
+
+fun EditText.setTextIfNotFocused(text: CharSequence?){
+    if(!isFocused) setText(text ?: "null")
+}
+
+fun EditText.setTextIfNotFocused(resource: Int){
+    if(!isFocused) setText(resource)
+}

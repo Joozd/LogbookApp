@@ -24,11 +24,8 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.InitialSetFlight
 
 open class JoozdlogDialogViewModel: JoozdlogViewModel() {
-    private val undoFlight = InitialSetFlight()
+    private val undoFlight = InitialSetFlight().apply{ flight = workingFlightRepository.workingFlight.value }
 
-    init{
-        undoFlight.flight = workingFlightRepository.workingFlight.value
-    }
     fun undo(){
         undoFlight.flight?.let {workingFlightRepository.updateWorkingFlight(it)}
     }

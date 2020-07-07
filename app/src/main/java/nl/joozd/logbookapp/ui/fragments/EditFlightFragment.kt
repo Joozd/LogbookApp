@@ -30,7 +30,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
@@ -54,7 +53,7 @@ class EditFlightFragment: JoozdlogFragment(){
         const val TAG = "EditFlightFragment"
     }
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val viewModel: EditFlightFragmentViewModel by viewModels()
+    private val viewModel: EditFlightFragmentViewModel by activityViewModels()
 
     /**
      * Listener class and setting s
@@ -89,16 +88,16 @@ class EditFlightFragment: JoozdlogFragment(){
              ************************************************************************************/
 
             viewModel.date.observe(viewLifecycleOwner, Observer{
-                flightDateField.setText(it)
+                flightDateField.setTextIfNotFocused(it)
             })
 
             viewModel.flightNumber.observe(viewLifecycleOwner, Observer{
                 Log.d("HALLOOO", "Ik ben Joozd!")
-                flightFlightNumberField.setText(it)
+                flightFlightNumberField.setTextIfNotFocused(it)
             })
 
             viewModel.orig.observe(viewLifecycleOwner, Observer{
-                flightOrigField.setText(it)
+                flightOrigField.setTextIfNotFocused(it)
             })
             viewModel.origChecked.observe(viewLifecycleOwner, Observer { checked ->
                 val drawable: Drawable? = when(checked){
@@ -110,7 +109,7 @@ class EditFlightFragment: JoozdlogFragment(){
             })
 
             viewModel.dest.observe(viewLifecycleOwner, Observer{
-                flightDestField.setText(it)
+                flightDestField.setTextIfNotFocused(it)
             })
             viewModel.destChecked.observe(viewLifecycleOwner, Observer { checked ->
                 val drawable: Drawable? = when(checked){
@@ -123,38 +122,38 @@ class EditFlightFragment: JoozdlogFragment(){
 
             viewModel.timeOut.observe(viewLifecycleOwner, Observer{
                 if (viewModel.checkSim == false) {
-                    flighttOutStringField.setText(it)
+                    flighttOutStringField.setTextIfNotFocused(it)
                 }
             })
 
             viewModel.timeIn.observe(viewLifecycleOwner, Observer{
-                flighttInStringField.setText(it)
+                flighttInStringField.setTextIfNotFocused(it)
             })
 
             viewModel.simTime.observe(viewLifecycleOwner, Observer {
                 if (viewModel.checkSim == true){
-                    flighttOutStringField.setText(it)
+                    flighttOutStringField.setTextIfNotFocused(it)
                 }
             })
 
             viewModel.regAndType.observe(viewLifecycleOwner, Observer{
-                flightAircraftField.setText(it)
+                flightAircraftField.setTextIfNotFocused(it)
             })
 
             viewModel.takeoffLandings.observe(viewLifecycleOwner, Observer{
-                flightTakeoffLandingField.setText(it)
+                flightTakeoffLandingField.setTextIfNotFocused(it)
             })
 
             viewModel.name.observe(viewLifecycleOwner, Observer{
-                flightNameField.setText(it)
+                flightNameField.setTextIfNotFocused(it)
             })
 
             viewModel.name2.observe(viewLifecycleOwner, Observer{
-                flightName2Field.setText(it)
+                flightName2Field.setTextIfNotFocused(it)
             })
 
             viewModel.remarks.observe(viewLifecycleOwner, Observer{
-                flightRemarksField.setText(it)
+                flightRemarksField.setTextIfNotFocused(it)
             })
 
             /************************************************************************************
@@ -174,7 +173,7 @@ class EditFlightFragment: JoozdlogFragment(){
 
             viewModel.dual.observe(viewLifecycleOwner, Observer { active -> dualSelector.showIfActive(active) })
             viewModel.instructor.observe(viewLifecycleOwner, Observer { active -> instructorSelector.showIfActive(active) })
-            viewModel.picus.observe(viewLifecycleOwner, Observer { active -> picusSelector.showIfActive(active) })
+            viewModel.ifr.observe(viewLifecycleOwner, Observer { active -> ifrSelector.showIfActive(active) })
             viewModel.pic.observe(viewLifecycleOwner, Observer { active -> picSelector.showIfActive(active) })
             viewModel.pf.observe(viewLifecycleOwner, Observer { active -> pfSelector.showIfActive(active) })
             viewModel.autoFill.observe(viewLifecycleOwner, Observer { active -> autoFillCheckBox.isChecked = active })
@@ -237,9 +236,9 @@ class EditFlightFragment: JoozdlogFragment(){
                 viewModel.toggleInstructor()
             }
 
-            picusSelector.setOnClickListener {
+            ifrSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                viewModel.togglePicus()
+                viewModel.toggleIFR()
             }
 
             picSelector.setOnClickListener {
@@ -265,9 +264,7 @@ class EditFlightFragment: JoozdlogFragment(){
              * As times are the same, just change dates in those times
              */
             val dateOnClickListener = View.OnClickListener {
-                DatePickerFragment{pickedDate ->
-                    viewModel.setDate(pickedDate)
-                }.show(supportFragmentManager, "datePicker")
+                DatePickerFragment().show(supportFragmentManager, "datePicker")
             }
 
             /**
@@ -294,17 +291,15 @@ class EditFlightFragment: JoozdlogFragment(){
             //TODO set current orig as initial selection in dialog
             //also: this might not work after rotation etc
             flightOrigSelector.setOnClickListener {
-                mainViewModel.workingOnOrig = true
                 supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout, AirportPicker())
+                    add(R.id.mainActivityLayout, AirportPicker(orig = true))
                     addToBackStack(null)
                 }
             }
             //TODO set current dest as initial selection in dialog
             flightDestSelector.setOnClickListener {
-                mainViewModel.workingOnOrig = false
                 supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout, AirportPicker())
+                    add(R.id.mainActivityLayout, AirportPicker(orig = false))
                     addToBackStack(null)
                 }
             }
@@ -427,6 +422,7 @@ class EditFlightFragment: JoozdlogFragment(){
 
             flightSaveButton.setOnClickListener {
                 viewModel.save()
+
                 clearFocus()
                 closeFragment()
             }
@@ -443,6 +439,8 @@ class EditFlightFragment: JoozdlogFragment(){
      * private worker functions:
      **************************************************************************/
 
+    private fun isSimLayout(v: View): Boolean = v.ifrSelector.visibility == View.GONE
+
     /**
      * Switch layout for edit_flight View to sim
      * @param v: View to change layout on
@@ -456,7 +454,7 @@ class EditFlightFragment: JoozdlogFragment(){
         v.flightFlightNumberWrapper.visibility=View.GONE
         v.dualSelector.visibility=View.GONE
         v.instructorSelector.visibility=View.GONE
-        v.picusSelector.visibility=View.GONE
+        v.ifrSelector.visibility=View.GONE
         v.picSelector.visibility=View.GONE
         v.pfSelector.visibility=View.GONE
         v.flightOrigSelector.visibility=View.GONE
@@ -482,23 +480,18 @@ class EditFlightFragment: JoozdlogFragment(){
         v.flightFlightNumberWrapper.visibility = View.VISIBLE
         v.dualSelector.visibility = View.VISIBLE
         v.instructorSelector.visibility = View.VISIBLE
-        v.picusSelector.visibility = View.VISIBLE
+        v.ifrSelector.visibility = View.VISIBLE
         v.picSelector.visibility = View.VISIBLE
         v.pfSelector.visibility = View.VISIBLE
-        v.flightOrigSelector.visibility=View.VISIBLE
-        v.flightOrigWrapper.visibility=View.VISIBLE
-        v.flightDestWrapper.visibility=View.VISIBLE
-        v.flightDestSelector.visibility=View.VISIBLE
-        v.flightTakeoffLandingWrapper.visibility=View.VISIBLE
-        v.flightTakeoffLandingSelector.isEnabled=true
-        viewModel.timeOut.value?.let{
+        v.flightOrigSelector.visibility = View.VISIBLE
+        v.flightOrigWrapper.visibility = View.VISIBLE
+        v.flightDestWrapper.visibility = View.VISIBLE
+        v.flightDestSelector.visibility = View.VISIBLE
+        v.flightTakeoffLandingWrapper.visibility = View.VISIBLE
+        v.flightTakeoffLandingSelector.isEnabled = true
+        viewModel.timeOut.value?.let {
             v.flighttOutStringField.setText(it)
         }
-    }
-
-    private fun TextView.showIfActive(active: Boolean){
-        if (active) this.showAsActive()
-        else this.showAsInactive()
     }
 
 }

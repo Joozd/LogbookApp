@@ -24,13 +24,13 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import kotlin.math.absoluteValue
 
 /**
- * @param allFlights: All flights in logbook
+ * @param allFlights: All flights in logbook. Should incluse those with DELETEFLAG if using [newFlightsWithIDs]
  * @param monthlyFlights: Flights from monthly overview to check [allFlights] against
  * @param tolerance: Amount of minutes that can be updated without notice
  */
 class MonthlyFlightsChecker(private val allFlights: List<Flight>, private val monthlyFlights: List<Flight>, private val tolerance: Int) {
     private val timeBracket = ((monthlyFlights.minBy{ it.timeOut }?.timeOut ?: 0) .. (monthlyFlights.maxBy{ it.timeIn }?.timeIn ?: 0))
-    private val originalFlights = allFlights.filter { it.timeIn in timeBracket || it.timeOut in timeBracket || (it.timeOut < timeBracket.min()!! && it.timeIn > timeBracket.max()!!)}
+    private val originalFlights = allFlights.filter { !it.DELETEFLAG && (it.timeIn in timeBracket || it.timeOut in timeBracket || (it.timeOut < timeBracket.min()!! && it.timeIn > timeBracket.max()!!))}
 
     /**
      * List of Pairs [monthlyFlights] to all matching [allFlights]
@@ -51,7 +51,7 @@ class MonthlyFlightsChecker(private val allFlights: List<Flight>, private val mo
             .filter {overlap ->
                 overlap.second.size == 1
                 && overlap.second.all{ it.matchesCloseEnough(overlap.first)} }
-            .map { it.second.first().copy (timeOut = it.first.timeOut, timeIn = it.first.timeIn, registration = it.first.registration, aircraft = it.first.aircraft) } // can add aircraft without checking because it is checked in [matchesCloseEnough()]
+            .map { it.second.first().copy (timeOut = it.first.timeOut, timeIn = it.first.timeIn, registration = it.first.registration, aircraftType = it.first.aircraftType) } // can add aircraft without checking because it is checked in [matchesCloseEnough()]
 
     /**
      * @return list of Flights that match exactly with
@@ -77,6 +77,16 @@ class MonthlyFlightsChecker(private val allFlights: List<Flight>, private val mo
     val newFlights: List<Flight>
         get() = overlapsList.filter{it.second.isEmpty()}.map { it.first }
 
+    /**
+     * @return all flights from [monthlyFlights] that do no overlap in any way with flights in [allFlights]
+     * It will update IDs to unused ones
+     */
+    val newFlightsWithIDs: List<Flight>
+        get() = run{
+            val highestID = (allFlights.maxBy { it.flightID }?.flightID ?: 0) + 1
+            newFlights.mapIndexed { index: Int, flight: Flight -> flight.copy (flightID = highestID + index)}
+        }
+
 
     /**
      * @param f: Flight that may or may not overlap partially or completely, (inclusing larger) with flights in [allFlights]
@@ -98,7 +108,7 @@ class MonthlyFlightsChecker(private val allFlights: List<Flight>, private val mo
         && flightNumber == f.flightNumber
         && if (Preferences.updateAircraftWithoutAsking) true else {
             registration == f.registration
-            && aircraft == f.aircraft
+            && aircraftType == f.aircraftType
         }
 
     private fun Flight.matchesCloseEnough(f: Flight) =
@@ -109,6 +119,6 @@ class MonthlyFlightsChecker(private val allFlights: List<Flight>, private val mo
         && flightNumber == f.flightNumber
         && if (Preferences.updateAircraftWithoutAsking) true else {
             registration == f.registration
-            && aircraft == f.aircraft
+            && aircraftType == f.aircraftType
         }
 }

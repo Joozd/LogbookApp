@@ -19,308 +19,201 @@
 
 package nl.joozd.logbookapp.ui.dialogs
 
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.text.Editable
-import android.util.Log
-import com.google.android.material.textfield.TextInputEditText
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.dialog_add_balance_forward.view.*
-import nl.joozd.logbookapp.R
+import android.view.inputmethod.EditorInfo
+import android.widget.TextView.OnEditorActionListener
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import nl.joozd.joozdlogcommon.BalanceForward
-import nl.joozd.logbookapp.extensions.getColorFromAttr
-import nl.joozd.logbookapp.extensions.toInt
-import nl.joozd.logbookapp.ui.activities.BalanceForwardActivity.Companion.TAG
-
-@Deprecated ("Make new")
-class AddBalanceForwardDialog: Fragment() {
-    companion object{
-        private val onlyDigitsRegex = """\d+""".toRegex()
-        private val digitsWithColonRegex = """\d+:\d{1,2}""".toRegex()
-    }
-    var balanceForwardId: Int = -1
-    class OnSave(private val f: (balanceForward: BalanceForward) -> Unit){
-        fun save (balanceForward: BalanceForward) {
-            f(balanceForward)
-        }
-    }
-    var onSave: OnSave? = null
-    fun setOnSave(f: (balanceForward: BalanceForward) -> Unit){
-        onSave = OnSave(f)
-    }
-    class OnClose(private val f: () -> Unit){
-        fun closing () {
-            f()
-        }
-    }
-    var onClose: OnClose? = null
-    fun setOnClose(f: () -> Unit){
-        onClose = OnClose(f)
-    }
+import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.DialogAddBalanceForwardBinding
+import nl.joozd.logbookapp.model.helpers.FeedbackEvents.BalanceForwardDialogEvents
+import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
+import nl.joozd.logbookapp.model.viewmodels.dialogs.AddBalanceForwardDialogViewmodel
+import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.toast
 
 
-    private var thisView: View? = null
-    var balanceForward= BalanceForward(
-        "",
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1
-    )
-    set(value){
-        field=value
-        thisView?.let{v ->
-            v.logbookNameText.setText(value.logbookName)
-            v.aircraftTimeText.setText(value.aircraftTime.minutesToTimeString())
-            v.simulatorTimeText.setText(value.simTime.minutesToTimeString())
-            v.takeoffDayText.setText(value.takeOffDay.toString())
-            v.takeoffNightText.setText(value.takeOffNight.toString())
-            v.landingDayText.setText(value.landingDay.toString())
-            v.landingNightText.setText(value.landingNight.toString())
-            v.nightTimeText.setText(value.nightTime.minutesToTimeString())
-            v.ifrTimeText.setText(value.ifrTime.minutesToTimeString())
-            v.picText.setText(value.picTime.minutesToTimeString())
-            v.copilotText.setText(value.copilotTime.minutesToTimeString())
-            v.dualText.setText(value.dualTime.minutesToTimeString())
-            v.instructorText.setText(value.instructortime.minutesToTimeString())
-        }
-    }
-
+class AddBalanceForwardDialog: JoozdlogFragment() {
+    val viewModel: AddBalanceForwardDialogViewmodel by viewModels()
+    val bf: BalanceForward
+        get() = viewModel.workingBalanceForward
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        thisView = inflater.inflate(R.layout.dialog_add_balance_forward, container, false)
-        thisView?.let {thisView ->
-            balanceForward = balanceForward.copy(id = balanceForwardId) // reset self to set all fields and correct ID
+        return DialogAddBalanceForwardBinding.bind(layoutInflater.inflate(R.layout.dialog_add_balance_forward, container, false)).apply{
 
+            flightInfoText.joozdLogSetBackgroundColor()
 
-            if (balanceForward.logbookName.isEmpty()) balanceForward =
-                balanceForward.copy(logbookName = resources.getString(R.string.paperLogbook))
-
-            (thisView.flightInfoText.background as GradientDrawable).colorFilter =
-                PorterDuffColorFilter(
-                    requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
-                    PorterDuff.Mode.SRC_IN
-                ) // set background color to bakground with rounded corners
-
-
-            thisView.logbookNameText.onFocusChangeListener =
-                View.OnFocusChangeListener { v, hasFocus ->
-                    if (hasFocus) {
-                        (v as TextInputEditText).selectAll()
-
-                    } else {
-                        balanceForward =
-                            balanceForward.copy(logbookName = thisView.logbookNameText.text.toString())
-                    }
+            /**
+             * FIll fields opon (re)-creation of Fragment:
+             */
+            fillFields()
+            logbookNameText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setName(logbookNameText.text)
+            }
+            multiPilotTimeEditText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setMultipilotTime(multiPilotTimeEditText.text)
+            }
+            totalTimeOfFlightEditText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setTotalTime(
+                        totalTimeOfFlightEditText.text)
+            }
+            landingDayText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setLandingsDay(landingDayText.text)
+            }
+            landingNightText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setLandingsNight(landingNightText.text)
+            }
+            nightTimeText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setNightTime(nightTimeText.text)
+            }
+            ifrTimeText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setIfrTime(ifrTimeText.text)
+            }
+            picText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setPicTime(picText.text)
+            }
+            copilotText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setCopilotTime(copilotText.text)
+            }
+            dualText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setDualTime(dualText.text)
+            }
+            instructorText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setInstructorTime(instructorText.text)
+            }
+            simulatorTimeEditText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setSimTime(simulatorTimeEditText.text)
+            }
+            simulatorTimeEditText.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    //Clear focus here from edittext
+                    viewModel.setSimTime(simulatorTimeEditText.text)
+                    root.clearFocus()
                 }
-
-            thisView.aircraftTimeText.onFocusChangeListener =
-                View.OnFocusChangeListener { vw, hasFocus ->
-                    val v = vw as TextInputEditText
-                    if (hasFocus) {
-                        v.selectAll()
-
-                    } else {
-                        val text = v.text?.addColonForTime() ?: "00:00"
-                        balanceForward = balanceForward.copy(aircraftTime = text.toMinutes())
-                    }
-                }
-
-            thisView.simulatorTimeText.onFocusChangeListener =
-                View.OnFocusChangeListener { vw, hasFocus ->
-                    val v = vw as TextInputEditText
-                    if (hasFocus) {
-                        v.selectAll()
-
-                    } else {
-                        val text = v.text?.addColonForTime() ?: "00:00"
-                        balanceForward = balanceForward.copy(simTime = text.toMinutes())
-                    }
-                }
-
-            thisView.nightTimeText.onFocusChangeListener =
-                View.OnFocusChangeListener { vw, hasFocus ->
-                    val v = vw as TextInputEditText
-                    if (hasFocus) {
-                        v.selectAll()
-
-                    } else {
-                        val text = v.text?.addColonForTime() ?: "00:00"
-                        balanceForward = balanceForward.copy(nightTime = text.toMinutes())
-                    }
-                }
-
-            thisView.ifrTimeText.onFocusChangeListener =
-                View.OnFocusChangeListener { vw, hasFocus ->
-                    val v = vw as TextInputEditText
-                    if (hasFocus) {
-                        v.selectAll()
-
-                    } else {
-                        val text = v.text?.addColonForTime() ?: "00:00"
-                        balanceForward = balanceForward.copy(ifrTime = text.toMinutes())
-                    }
-                }
-
-            thisView.picText.onFocusChangeListener = View.OnFocusChangeListener { vw, hasFocus ->
-                val v = vw as TextInputEditText
-                if (hasFocus) {
-                    v.selectAll()
-
-                } else {
-                    val text = v.text?.addColonForTime() ?: "00:00"
-                    balanceForward = balanceForward.copy(picTime = text.toMinutes())
-                }
+                false
             }
 
-            thisView.copilotText.onFocusChangeListener =
-                View.OnFocusChangeListener { vw, hasFocus ->
-                    val v = vw as TextInputEditText
-                    if (hasFocus) {
-                        v.selectAll()
-
-                    } else {
-                        val text = v.text?.addColonForTime() ?: "00:00"
-                        balanceForward = balanceForward.copy(copilotTime = text.toMinutes())
+            viewModel.feedbackEvent.observe(viewLifecycleOwner, Observer {
+                when (it.getEvent()){
+                    BalanceForwardDialogEvents.NUMBER_PARSE_ERROR -> toast ( "ERROR")
+                    BalanceForwardDialogEvents.UPDATE_FIELDS -> fillFields()
+                    BalanceForwardDialogEvents.CLOSE_DIALOG -> {
+                        toast("DEBUG 11")
+                        closeFragment()
                     }
                 }
+            })
 
-            thisView.dualText.onFocusChangeListener = View.OnFocusChangeListener { vw, hasFocus ->
-                val v = vw as TextInputEditText
-                if (hasFocus) {
-                    v.selectAll()
-
-                } else {
-                    val text = v.text?.addColonForTime() ?: "00:00"
-                    balanceForward = balanceForward.copy(dualTime = text.toMinutes())
-                }
+            cancelBalanceForwardDialogButton.setOnClickListener {
+                closeFragment()
             }
 
-            thisView.instructorText.onFocusChangeListener =
-                View.OnFocusChangeListener { vw, hasFocus ->
-                    val v = vw as TextInputEditText
-                    if (hasFocus) {
-                        v.selectAll()
-
-                    } else {
-                        val text = v.text?.addColonForTime() ?: "00:00"
-                        balanceForward = balanceForward.copy(instructortime = text.toMinutes())
-                    }
-                }
-
-            thisView.takeoffDayText.onFocusChangeListener =
-                View.OnFocusChangeListener { vw, hasFocus ->
-                    val v = vw as TextInputEditText
-                    if (hasFocus) {
-                        v.selectAll()
-
-                    } else {
-                        balanceForward = balanceForward.copy(takeOffDay = v.text.toInt())
-                    }
-                }
-
-            thisView.takeoffNightText.onFocusChangeListener =
-                View.OnFocusChangeListener { vw, hasFocus ->
-                    val v = vw as TextInputEditText
-                    if (hasFocus) {
-                        v.selectAll()
-
-                    } else {
-                        balanceForward = balanceForward.copy(takeOffNight = v.text.toInt())
-                    }
-                }
-
-            thisView.landingDayText.onFocusChangeListener =
-                View.OnFocusChangeListener { vw, hasFocus ->
-                    val v = vw as TextInputEditText
-                    if (hasFocus) {
-                        v.selectAll()
-
-                    } else {
-                        balanceForward = balanceForward.copy(landingDay = v.text.toInt())
-                    }
-                }
-
-            thisView.landingNightText.onFocusChangeListener =
-                View.OnFocusChangeListener { vw, hasFocus ->
-                    val v = vw as TextInputEditText
-                    if (hasFocus) {
-                        v.selectAll()
-
-                    } else {
-                        balanceForward = balanceForward.copy(landingNight = v.text.toInt())
-                    }
-                }
-
-
-            thisView.backgroundLayout.setOnClickListener { fragmentManager?.popBackStack() }
-            thisView.cancelButton.setOnClickListener { fragmentManager?.popBackStack() }
-
-            thisView.saveButton.setOnClickListener {
-                activity?.currentFocus?.clearFocus()
-                onSave?.save(balanceForward)
-                fragmentManager?.popBackStack()
+            saveBalanceForwardDialogButton.setOnClickListener {
+                viewModel.saveBalanceForward()
             }
-        }
-        return thisView
+
+            backgroundLayout.setOnClickListener {
+                // Do nothing
+            }
+
+            /*************************************************************************************
+             * Observers
+             *************************************************************************************/
+
+            viewModel.name.observe(viewLifecycleOwner, Observer {
+                logbookNameText.setText(it)
+            })
+
+            viewModel.multiPilot.observe(viewLifecycleOwner, Observer {
+                multiPilotTimeEditText.setText(it)
+            })
+
+            viewModel.totalTimeOfFlight.observe(viewLifecycleOwner, Observer {
+                totalTimeOfFlightEditText.setText(it)
+            })
+
+            viewModel.landingDay.observe(viewLifecycleOwner, Observer {
+                landingDayText.setText(it)
+            })
+
+            viewModel.landingNight.observe(viewLifecycleOwner, Observer {
+                landingNightText.setText(it)
+            })
+
+            viewModel.nightTime.observe(viewLifecycleOwner, Observer {
+                nightTimeText.setText(it)
+            })
+
+            viewModel.ifrTime.observe(viewLifecycleOwner, Observer {
+                ifrTimeText.setText(it)
+            })
+
+            viewModel.picTime.observe(viewLifecycleOwner, Observer {
+                picText.setText(it)
+            })
+
+            viewModel.copilotTime.observe(viewLifecycleOwner, Observer {
+                copilotText.setText(it)
+            })
+
+            viewModel.dualTime.observe(viewLifecycleOwner, Observer {
+                dualText.setText(it)
+            })
+
+            viewModel.instructorTime.observe(viewLifecycleOwner, Observer {
+                instructorText.setText(it)
+            })
+
+            viewModel.simTime.observe(viewLifecycleOwner, Observer {
+                simulatorTimeEditText.setText(it)
+            })
+
+
+
+
+
+
+        }.root
+
+
     }
 
-    override fun onDestroyView() {
-        onClose?.closing()
-        super.onDestroyView()
-    }
 
+    /*********************************************************************************************
+     * Private helper functions
+     *********************************************************************************************/
 
     /**
-     * This will change "1230 to 12:30 and 17 to 0:17 and 123456 to 1234:56
-     * It will leave all other things the way they were
-     *
+     * Sets EditText fields to value as in ViewModel
      */
-    private fun String.addColonForTime(): String{
-        // drop anything after and including a possible second ':'
-        var string = this
-        while (string.split(':').size > 2) {
-            string = string.slice(0 until string.lastIndexOf(":"))
-        }
-
-        if (":" in string)
-            string = string.removeRange(string.indexOf(":"), string.indexOf(":")+1)
-
-        string = string.padStart(3,'0')
-
-        //add a colon if none provided
-        if (string.matches(onlyDigitsRegex)){
-            Log.d(TAG, "string is $string")
-                // string is only digits
-                return  if (string.takeLast(2).toInt() < 60) "${string.dropLast(2)}:${string.takeLast(2)}"
-                        else "${(string.dropLast(2).toInt()+1)}:${(string.takeLast(2).toInt()-60).toString().padStart(2,'0')}"
-                }
-        return string
+    private fun DialogAddBalanceForwardBinding.fillFields(){
+        logbookNameText.setText(bf.logbookName)
+        multiPilotTimeEditText.setText(minutesToHoursAndMinutesString(bf.multiPilotTime))
+        totalTimeOfFlightEditText.setText(minutesToHoursAndMinutesString(bf.aircraftTime))
+        landingDayText.setText(bf.landingDay.toString())
+        landingNightText.setText(bf.landingNight.toString())
+        nightTimeText.setText(minutesToHoursAndMinutesString(bf.nightTime))
+        ifrTimeText.setText(minutesToHoursAndMinutesString(bf.ifrTime))
+        picText.setText(minutesToHoursAndMinutesString(bf.picTime))
+        copilotText.setText(minutesToHoursAndMinutesString(bf.copilotTime))
+        dualText.setText(minutesToHoursAndMinutesString(bf.dualTime))
+        instructorText.setText(minutesToHoursAndMinutesString(bf.instructortime))
+        simulatorTimeEditText.setText(minutesToHoursAndMinutesString(bf.simTime))
     }
-
-    private fun Editable.addColonForTime(): String = this.toString().addColonForTime()
-
-    private fun String.toMinutes(): Int =
-        if (!this.matches(digitsWithColonRegex)) 0
-        else (this.slice(0 until this.indexOf(":")).toInt()) * 60 + this.takeLast(2).toInt()
-
-    private fun Int.minutesToTimeString():String = "${this / 60}:${(this % 60).toString().padStart(
-        2,
-        '0'
-    )}"
-
 }

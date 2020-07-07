@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "7878736f09586d3a61e4c3f0f9964ae1",
+    "identityHash": "b8fae67048908cc0d374be4fea5694db",
     "entities": [
       {
         "tableName": "FlightData",
@@ -423,12 +423,104 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "BalanceForward",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `logbookName` TEXT NOT NULL, `multiPilotTime` INTEGER NOT NULL, `aircraftTime` INTEGER NOT NULL, `landingDay` INTEGER NOT NULL, `landingNight` INTEGER NOT NULL, `nightTime` INTEGER NOT NULL, `ifrTime` INTEGER NOT NULL, `picTime` INTEGER NOT NULL, `copilotTime` INTEGER NOT NULL, `dualTime` INTEGER NOT NULL, `instructortime` INTEGER NOT NULL, `simTime` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "logbookName",
+            "columnName": "logbookName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "multiPilotTime",
+            "columnName": "multiPilotTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aircraftTime",
+            "columnName": "aircraftTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "landingDay",
+            "columnName": "landingDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "landingNight",
+            "columnName": "landingNight",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nightTime",
+            "columnName": "nightTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ifrTime",
+            "columnName": "ifrTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "picTime",
+            "columnName": "picTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "copilotTime",
+            "columnName": "copilotTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dualTime",
+            "columnName": "dualTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "instructortime",
+            "columnName": "instructortime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "simTime",
+            "columnName": "simTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7878736f09586d3a61e4c3f0f9964ae1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b8fae67048908cc0d374be4fea5694db')"
     ]
   }
 }

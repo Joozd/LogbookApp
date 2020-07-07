@@ -30,11 +30,20 @@ import nl.joozd.logbookapp.R
 
 
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.PdfParserActivityEvents
-import nl.joozd.logbookapp.model.viewmodels.activities.PdfParserActivityViewModel
+import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast
-import nl.joozd.logbookapp.utils.startMainActivity
 
-class PdfParserActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+/**
+ * PdfParserActivity does the following:
+ * - Get an intent with a PDF file
+ * - read that PDF file
+ * - Decide what type it is (KLC Roster, Lufthansa Monthly Overview, etc)
+ * - parse that type
+ * - do whatever needs to be done with parsed data (insert roster from planned, check flights from monthlies etc)
+ * - launch MainActivity
+ */
+class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
     private val viewModel: PdfParserActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,9 +54,9 @@ class PdfParserActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
         viewModel.runOnce(intent)
 
-        /**
+        /****************************************************************************************
          * Observers:
-         */
+         ****************************************************************************************/
         viewModel.progress.observe(this, Observer {
             pdfParserProgressBar.progress  = it
         })
@@ -58,22 +67,52 @@ class PdfParserActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
         viewModel.feedbackEvent.observe(this, Observer {
             when (it.getEvent()){
+                PdfParserActivityEvents.NOT_IMPLEMENTED -> {
+                    toast ("Not supported yet")
+                    closeAndstartMainActivity()
+                }
+
                 PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED -> {
-                    startMainActivity(this)
-                    finish()
+                    closeAndstartMainActivity()
                 }
                 PdfParserActivityEvents.ERROR, PdfParserActivityEvents.FILE_NOT_FOUND -> {
                     toast("Error reading file")
-                    startMainActivity(this)
-                    finish()
+                    closeAndstartMainActivity()
                 }
                 PdfParserActivityEvents.NOT_A_KNOWN_ROSTER -> {
                     toast("Unsupported file")
+                    closeAndstartMainActivity()
+                }
+                PdfParserActivityEvents.CALENDAR_SYNC_ENABLED -> {
+                    JoozdlogAlertDialog(this).apply{
+                        messageResource = R.string.calendar_update_active
+                        setPositiveButton(android.R.string.yes){
+                            viewModel.disableCalendarImport()
+                            viewModel.saveFlights()
+                        }
+                        setNegativeButton(R.string.calendar_update_pause_untill_end_of_roster){
+                            viewModel.disableCalendarUntilAfterLastFlight()
+                            viewModel.saveFlights(finish = false)
+                        }
+                        setNeutralButton(android.R.string.cancel){
+                            startMainActivity(this@PdfParserActivity)
+                        }
+                    }.show()
+                }
+                PdfParserActivityEvents.CALENDAR_SYNC_PAUSED -> {
+                    JoozdlogAlertDialog(this).apply{
+                        messageResource = R.string.you_can_start_calendar_sync_again
+                        setPositiveButton(android.R.string.ok){
+                            closeAndstartMainActivity()
+                        }
+                    }.show()
+                }
+                null -> {}
+                else -> {
+                    toast("SOMETHING NOT IMPLEMENTED HAPPENED")
                     startMainActivity(this)
                     finish()
                 }
-                null -> {}
-                else -> toast("SOMETHING NOT IMPLEMENTED HAPPENED")
 
             }
         })

@@ -25,6 +25,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import nl.joozd.joozdlogcommon.BalanceForward
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
 import nl.joozd.logbookapp.data.room.model.AircraftTypeConsensusData
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -33,7 +34,7 @@ import nl.joozd.logbookapp.data.room.model.AircraftTypeData
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 
-@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, AircraftTypeConsensusData::class, PreloadedRegistration::class], version = 6)
+@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, AircraftTypeConsensusData::class, PreloadedRegistration::class, BalanceForward::class], version = 7)
 abstract class JoozdlogDatabase: RoomDatabase() {
     abstract fun flightDao(): FlightDao
     abstract fun airportDao(): AirportDao
@@ -41,6 +42,7 @@ abstract class JoozdlogDatabase: RoomDatabase() {
     abstract fun registrationDao(): RegistrationDao
     abstract fun aircraftTypeConsensusDao(): AircraftTypeConsensusDao
     abstract fun preloadedRegistrationsDao(): PreloadedRegistrationsDao
+    abstract fun balanceForwardDao(): BalanceForwardDao
 
     companion object {
         // Singleton prevents multiple instances of database opening at the

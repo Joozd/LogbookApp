@@ -20,14 +20,30 @@
 package nl.joozd.logbookapp.ui.activities
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
+
+    /**
+     * use  setSupportActionBarWithReturn(this_activities_toolbar)?.apply { title="HALLON AUB GRGR" }
+     */
     fun setSupportActionBarWithReturn(toolbar: Toolbar?): ActionBar? {
         super.setSupportActionBar(toolbar)
         return supportActionBar
     }
+
+    fun closeAndstartMainActivity(){
+        startMainActivity(this)
+        finish()
+    }
+
+    fun startMainActivity(context: Context) = with (context) {
+        startActivity(packageManager.getLaunchIntentForPackage(packageName))
+    }
+
+
 }

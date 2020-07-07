@@ -17,26 +17,28 @@
  *
  */
 
-package nl.joozd.logbookapp.data.repository
+package nl.joozd.logbookapp.data.repository.flightRepository
 
+import android.Manifest
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
-import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.dao.FlightDao
 import nl.joozd.logbookapp.data.room.model.toFlight
 import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfNamesAsync
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.data.calendar.CalendarFlightUpdater
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.utils.TimestampMaker
-import nl.joozd.logbookapp.utils.reverseFlight
+import nl.joozd.logbookapp.utils.checkPermission
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
+import java.time.Instant
 
 //TODO reorder this and make direct DB functions private
 //TODO make cloud functions originate from here and do their DB work here, not in [Cloud]
@@ -90,8 +92,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             }
         }
     }
-
-
 
     /**********************************************************************************************
      * Delete functions. Use delete(flight) or delete(flightsList)
@@ -150,12 +150,18 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * Utility functions:
      ********************************************************************************************/
 
-    suspend fun getMostRecentFlight() =
+    fun getMostRecentFlightAsync() =
         async(dispatcher){
-            flightDao.getMostRecentCompleted()?.toFlight()
+            cachedFlightsList?.let {
+                it.filter {f -> !f.isPlanned && !f.isSim }.maxBy {f -> f.timeOut }
+            } ?: flightDao.getMostRecentCompleted()?.toFlight()
         }
 
-    suspend fun getHighestId() = async(dispatcher) { flightDao.highestId() ?: 0 }
+    fun getHighestIdAsync() = async(dispatcher) { flightDao.highestId() ?: 0 }
+
+    fun iAmACaptainAsync() =  async(dispatcher) {
+        getMostRecentFlightAsync().await()?.isPIC == true
+    }
 
 
 
@@ -204,6 +210,23 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     }
 
     /**
+     * SaveFromRoster will remove flights on days that new planned flights are added (ignoring those that are the same)
+     * and fixed flightIDs for new flights
+     */
+    suspend fun saveFromRoster(rosteredFlights: List<Flight>, period: ClosedRange<Instant>? = null, sync: Boolean = true) = withContext(dispatcher) {
+        val highestID = getHighestIdAsync() // async, start looking for that while doing other stuff
+        val sameFlights = getFlightsMatchingPlannedFlights(getAllFlights(), rosteredFlights)
+        val flightsToRemove = getFlightsOnDays(getAllFlights(), dateRange = period, flightsOnDays = rosteredFlights).filter {it.isPlanned && it !in sameFlights && it.timeOut > Instant.now().epochSecond}
+        val flightsToSave = getNonMatchingPlannedFlights(getAllFlights(), rosteredFlights)
+        withContext(Dispatchers.Main){
+            delete(flightsToRemove)
+            val lowestNewID = highestID.await() + 1
+            save(flightsToSave.mapIndexed { index: Int, f: Flight ->
+                f.copy(flightID = lowestNewID + index)
+            }, sync)
+        }
+    }
+    /**
      * update cached data and delete from disk
      */
     private fun deleteFlightHard(flight: Flight) {
@@ -230,11 +253,27 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      ********************************************************************************************/
 
     /**
-     * If no sync done within the last [MIN_SYNC_INTERVAL] minutes, this will schedule a sync
+     * This does two things:
+     * first, it updates
      */
     fun syncIfNeeded(){
-        if (TimestampMaker.nowForSycPurposes - Preferences.lastUpdateTime > MIN_SYNC_INTERVAL)
-            JoozdlogWorkersHub.synchronizeFlights(delay = false)
+        launch {
+            val needsServerSync =
+                TimestampMaker.nowForSycPurposes - Preferences.lastUpdateTime > MIN_SYNC_INTERVAL
+            val needsCalendarSync =
+                TimestampMaker.nowForSycPurposes - Preferences.lastCalendarCheckTime > MIN_CALENDAR_CHECK_INTERVAL
+            if ((needsCalendarSync || needsServerSync) && Preferences.getFlightsFromCalendar) {
+                if (checkPermission(Manifest.permission.READ_CALENDAR)) {
+                    val calendar = CalendarFlightUpdater()
+                    calendar.getFlights()?.let {
+
+                        saveFromRoster(it, calendar.period)
+                    }
+                }
+            }
+            if (needsServerSync)
+                JoozdlogWorkersHub.synchronizeFlights(delay = false)
+        }
     }
 
     /**
@@ -266,12 +305,16 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                 ?: run {
                     val dataBase = JoozdlogDatabase.getDatabase(App.instance)
                     val flightsDao = dataBase.flightDao()
-                    singletonInstance = FlightRepository(flightsDao)
+                    singletonInstance =
+                        FlightRepository(
+                            flightsDao
+                        )
                     singletonInstance!!
                 }
         }
 
         const val MIN_SYNC_INTERVAL = 30*60 // seconds
+        const val MIN_CALENDAR_CHECK_INTERVAL = 30 // seconds
     }
 
 

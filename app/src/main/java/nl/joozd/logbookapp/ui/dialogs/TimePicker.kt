@@ -31,9 +31,11 @@ import android.widget.NumberPicker
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.dialog_times_in_out.view.*
 import nl.joozd.logbookapp.R
+
+import nl.joozd.logbookapp.databinding.DialogTimesInOutBinding
 import nl.joozd.logbookapp.extensions.ctx
+import nl.joozd.logbookapp.extensions.showIfActive
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.TimePickerEvents
 import nl.joozd.logbookapp.model.viewmodels.dialogs.TimePickerViewModel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
@@ -49,42 +51,22 @@ class TimePicker: JoozdlogFragment() {
     // variable to store previous text on any selected field
     private var previousText: String = ""
 
-    //used in changing an amount of time (ie. "1:15") to a LocalTime so I can easily take hours and minutes
-    //don't forget to padStart hours to HH in stead of H.
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-
-        return inflater.inflate(R.layout.dialog_times_in_out, container, false).apply {
-
+        val binding = DialogTimesInOutBinding.bind(inflater.inflate(R.layout.dialog_times_in_out, container, false))
+        with (binding) {
             //Set dialog title background color
             timesDialogTopHalf.joozdLogSetBackgroundColor()
 
-            // define values for pickers
-            hoursOutPicker.setSpinnervaluesForHours()
-            minutesOutPicker.setSpinnervaluesForMinutes()
 
-            hoursInPicker.setSpinnervaluesForHours()
-            minutesInPicker.setSpinnervaluesForMinutes()
 
-            /**
-             * Set pickers listeners
-             */
-            //Date of timeOut stays the same, if needed, adjust timeIn. Flights with length >24 hours are not supported.
-            hoursOutPicker.setOnValueChangedListener { _, _, newVal -> viewModel.timeOutPicked(hours = newVal) }
-            minutesOutPicker.setOnValueChangedListener { _, _, newVal -> viewModel.timeOutPicked(hours = newVal) }
 
-            hoursInPicker.setOnValueChangedListener { _, _, newVal -> viewModel.timeInPicked(hours = newVal) }
-            minutesInPicker.setOnValueChangedListener { _, _, newVal -> viewModel.timeInPicked(hours = newVal) }
+            /***************************************************************************************
+             * onFocusChangedListeners for EditTexts
+             ***************************************************************************************/
 
-            autoValuesCheckbox.setOnCheckedChangeListener { _, isChecked ->
-                viewModel.setAutoValues(isChecked)
-            }
-
-            augmentedCrewCheckbox.setOnClickListener {
-                Log.d("meh", "XOXO")
-                supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout, AugmentedCrewDialog())
-                    addToBackStack(null)
+            ttofText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    viewModel.setTotalTimeOfFlight(nightTimeText.text.toString())
                 }
             }
 
@@ -100,18 +82,47 @@ class TimePicker: JoozdlogFragment() {
                 }
             }
 
+            /***************************************************************************************
+             * onClicks for toggles
+             ***************************************************************************************/
+
+            augmentedTextView.setOnClickListener {
+                Log.d("meh", "XOXO")
+                supportFragmentManager.commit {
+                    add(R.id.mainActivityLayout, AugmentedCrewDialog())
+                    addToBackStack(null)
+                }
+            }
+
+            picTextView.setOnClickListener {
+                viewModel.togglePic()
+            }
+
+            coPilotTextView.setOnClickListener {
+                viewModel.toggleCopilot()
+            }
+
+            dualTextview.setOnClickListener {
+                viewModel.toggleDual()
+            }
+
+            instructorTextView.setOnClickListener {
+                viewModel.toggleInstructor()
+            }
+
+
             /**
              * Hide softKeyboard on pressing Enter
              */
             ifrTimeText.setOnEditorActionListener { thisview, actionId, _ ->
-                if (actionId == EditorInfo.IME_ACTION_DONE){
-                    val imm: InputMethodManager = thisview.ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    val imm: InputMethodManager =
+                        thisview.ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.hideSoftInputFromWindow(thisview.windowToken, 0)
                     thisview.clearFocus()
                 }
                 true
             }
-
 
 
             /**
@@ -134,31 +145,46 @@ class TimePicker: JoozdlogFragment() {
             }
 
             //empty onClickListener to block clicks on lower layers
-            timesDialogLayout.setOnClickListener {  }
+            timesDialogLayout.setOnClickListener { }
 
 
             /**
              * observers:
              */
 
-            viewModel.sim.observe(viewLifecycleOwner, Observer {
-                setSimLayoutIfNeeded(this, it)
-            })
-
-            viewModel.feedbackEvent.observe(viewLifecycleOwner, Observer{
-                when(it.getEvent()){
+            viewModel.feedbackEvent.observe(viewLifecycleOwner, Observer {
+                when (it.getEvent()) {
                     TimePickerEvents.NOT_IMPLEMENTED -> toast("Not implemented")
                     //TODO handle other events
                 }
             })
-            viewModel.hourIn.observe(viewLifecycleOwner, Observer{ hoursInPicker.value = it })
-            viewModel.minuteIn.observe(viewLifecycleOwner, Observer{ minutesInPicker.value = it })
-            viewModel.hourOut.observe(viewLifecycleOwner, Observer{ hoursOutPicker.value = it })
-            viewModel.minuteOut.observe(viewLifecycleOwner, Observer{ minutesOutPicker.value = it })
 
-            viewModel.ifrTime.observe(viewLifecycleOwner, Observer{ ifrTimeText.setText(it) })
+            viewModel.totalTime.observe(viewLifecycleOwner, Observer { ttofText.setText(it)})
 
-        } // end of return
+            viewModel.ifrTime.observe(viewLifecycleOwner, Observer { ifrTimeText.setText(it) })
+
+            viewModel.nightTime.observe(viewLifecycleOwner, Observer { nightTimeText.setText(it)})
+
+            viewModel.augmentedCrew.observe(viewLifecycleOwner, Observer {
+                augmentedTextView.showIfActive(it)
+            })
+
+            viewModel.pic.observe(viewLifecycleOwner, Observer {
+                picTextView.showIfActive(it)
+            })
+            viewModel.coPilot.observe(viewLifecycleOwner, Observer {
+                coPilotTextView.showIfActive(it)
+            })
+            viewModel.dual.observe(viewLifecycleOwner, Observer {
+                dualTextview.showIfActive(it)
+            })
+            viewModel.instructor.observe(viewLifecycleOwner, Observer {
+                instructorTextView.showIfActive(it)
+            })
+        }
+
+
+        return binding.root
 
 
     }
@@ -167,27 +193,6 @@ class TimePicker: JoozdlogFragment() {
     /**
      * Sets layout to sim
      */
-    private fun  setSimLayoutIfNeeded(view: View, sim: Boolean){
-        with(view) {
-            if(sim) {
-                tInText.visibility = View.INVISIBLE
-                hoursInPicker.visibility = View.INVISIBLE
-                minutesInPicker.visibility = View.INVISIBLE
-                nightTimeLayout.visibility = View.GONE
-                ifrTimeLayout.visibility = View.GONE
-                augmentedCrewCheckbox.visibility = View.GONE
-                autoValuesCheckbox.visibility = View.GONE
-            } else {
-                tInText.visibility = View.VISIBLE
-                hoursInPicker.visibility = View.VISIBLE
-                minutesInPicker.visibility = View.VISIBLE
-                nightTimeLayout.visibility = View.VISIBLE
-                ifrTimeLayout.visibility = View.VISIBLE
-                augmentedCrewCheckbox.visibility = View.VISIBLE
-                autoValuesCheckbox.visibility = View.VISIBLE
-            }
-        }
-    }
 
     private fun NumberPicker.setSpinnervaluesForMinutes(){
         minValue = 0

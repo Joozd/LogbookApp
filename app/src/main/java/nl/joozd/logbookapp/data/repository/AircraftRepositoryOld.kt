@@ -346,13 +346,13 @@ class AircraftRepositoryOld(
         }
         //If we get here, no saved aircraft was found (or one was found but it's not in DB
         flightData?.let{ flight ->
-            getAircraftTypeFromShortName(flight.aircraft)?.let{foundType ->
+            getAircraftTypeFromShortName(flight.aircraftType)?.let{ foundType ->
                 return Aircraft(
                     registration,
                     foundType,
                     Aircraft.FLIGHT
                 )
-            }?: Log.w("Aircraft", "saved type from flight \"${flight.aircraft}\" not found in AircraftTypes DB")
+            }?: Log.w("Aircraft", "saved type from flight \"${flight.aircraftType}\" not found in AircraftTypes DB")
         }
         //If we get here, no AircraftType found in saved aircraft, nor in [flightData]
 

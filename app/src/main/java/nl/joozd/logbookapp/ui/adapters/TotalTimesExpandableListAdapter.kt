@@ -26,7 +26,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
-import android.widget.TextView
 import kotlinx.android.synthetic.main.totals_list_element.view.*
 import kotlinx.android.synthetic.main.totals_list_group.view.*
 import nl.joozd.logbookapp.R

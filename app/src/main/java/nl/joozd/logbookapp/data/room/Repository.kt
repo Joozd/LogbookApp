@@ -34,6 +34,7 @@ import nl.joozd.logbookapp.App
  *
  * Get a singleton instance with Repository.getInstance()
  */
+@Deprecated ("Use separate repositories for separate data types")
 class Repository(
     private val flightDao: FlightDao,
     private val airportDao: AirportDao,
@@ -60,6 +61,7 @@ class Repository(
                     val aircraftTypeDao = dataBase.aircraftTypeDao()
                     val registrationDao = dataBase.registrationDao()
                     val aircraftTypeConsensusDao = dataBase.aircraftTypeConsensusDao()
+
                     singletonInstance = Repository(flightsDao, airportDao, aircraftTypeDao, registrationDao, aircraftTypeConsensusDao)
                     singletonInstance!!
                 }

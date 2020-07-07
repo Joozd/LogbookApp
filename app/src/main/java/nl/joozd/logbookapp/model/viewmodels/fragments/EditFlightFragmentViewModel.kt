@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
+import android.util.Log
 import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.Dispatchers
@@ -46,10 +47,11 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
      * Private parts
      *********************************************************************************************/
 
-    private val _date: LiveData<String> = Transformations.map(flight) { getDateStringFromEpochSeconds(it.timeOut) }
+
+
     private val _flightNumber: LiveData<String> = Transformations.map(flight) { it.flightNumber }
-    private val _orig: LiveData<String> = Transformations.map(workingFlightRepository.orig) { if (Preferences.useIataAirports) it.iata_code else it.ident }
-    private val _dest: LiveData<String> = Transformations.map(workingFlightRepository.dest) { if (Preferences.useIataAirports) it.iata_code else it.ident }
+    private val _orig: LiveData<String> = Transformations.map(workingFlightRepository.origin) { (if (Preferences.useIataAirports) it?.iata_code else it?.ident) }
+    private val _dest: LiveData<String> = Transformations.map(workingFlightRepository.destination) { if (Preferences.useIataAirports) it?.iata_code else it?.ident }
     private val _timeOut: LiveData<String> = Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeOut) }
     private val _timeIn: LiveData<String> = Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeIn) }
 
@@ -60,12 +62,12 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
      * - setters
      *********************************************************************************************/
 
-    val date: LiveData<String>
-            get() = _date
-    //This sets a LocalDate instead of a string, because that is what the picker returns. Field is not focusable.
+    val date: LiveData<String> = Transformations.map(flight) { getDateStringFromEpochSeconds(it.timeOut) }
     fun setDate(date: LocalDate){
         workingFlight?.let{ workingFlight = it.withDate(date)}
     }
+
+    fun getLocalDate(): LocalDate? = flight.value?.tOut()?.toLocalDate()
 
 
     val flightNumber: LiveData<String>
@@ -159,23 +161,23 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
     }
 
     val regAndType: LiveData<String>
-        get() = Transformations.map(flight) { if (it.isSim) it.aircraft else it.regAndType() }
+        get() = Transformations.map(flight) { if (it.isSim) it.aircraftType else it.regAndType() }
     fun setRegAndType(enteredData: String){
         workingFlight?.let{f ->
             if (checkSim){
                 workingFlight?.let{
-                    workingFlight = it.copy (aircraft = enteredData)
+                    workingFlight = it.copy (aircraftType = enteredData)
                 }
             }
             else {
                 when {
                     enteredData.isEmpty() -> workingFlight =
-                        f.copy(aircraft = "", registration = "")
+                        f.copy(aircraftType = "", registration = "")
 
                     "(" !in enteredData && ")" !in enteredData -> viewModelScope.launch {
                         aircraftRepository.getBestHitForPartialRegistration(enteredData)?.let {
                             workingFlight = f.copy(
-                                aircraft = it.type?.shortName ?: "UNKNWN",
+                                aircraftType = it.type?.shortName ?: "UNKNWN",
                                 registration = it.registration
                             )
                         }
@@ -202,7 +204,7 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
                 if (orig == null || dest == null) feedback(EditFlightFragmentEvents.AIRPORT_NOT_FOUND_FOR_LANDINGS)
                 // If airports are not found (because, for instance, custom airport was used)
                 // it will log day TO and landing
-                workingFlight = f.withTakeoffLandings(landings, orig, dest)
+                workingFlight = f.withTakeoffLandings(landings, orig, dest, disableAutoFill = true)
             }
         }
     }
@@ -240,7 +242,7 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
     //no setter for signature as this always goes through dialog
 
     val sim: LiveData<Boolean>
-        get() = Transformations.map(flight) { it.isSim }
+        get() = distinctUntilChanged(Transformations.map(flight) { it.isSim })
     fun toggleSim() = workingFlight?.let { workingFlight = it.copy(isSim = toggleTrueAndFalse(it.isSim)) }
 
     val dual: LiveData<Boolean>
@@ -251,9 +253,9 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
         get() = Transformations.map(flight) { it.isInstructor }
     fun toggleInstructor() = workingFlight?.let { workingFlight = it.copy(isInstructor = toggleTrueAndFalse(it.isInstructor)) }
 
-    val picus: LiveData<Boolean>
-        get() = Transformations.map(flight) { it.isPICUS }
-    fun togglePicus() = workingFlight?.let { workingFlight = it.copy(isPICUS = toggleTrueAndFalse(it.isPICUS)) }
+    val ifr: LiveData<Boolean>
+        get() = Transformations.map(flight) { it.ifrTime > 0 }
+    fun toggleIFR() = feedback(EditFlightFragmentEvents.NOT_IMPLEMENTED)
 
     val pic: LiveData<Boolean> = distinctUntilChanged(Transformations.map(flight) { it.isPIC })
     fun togglePic() = workingFlight?.let { workingFlight = it.copy(isPIC = toggleTrueAndFalse(it.isPIC)) }

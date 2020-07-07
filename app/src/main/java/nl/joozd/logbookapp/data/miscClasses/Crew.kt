@@ -38,25 +38,12 @@ class Crew(iCrewSize: Int = 2,
            iTakeoffLandingTimes: Int = 0)
 {
     var crewSize: Int = iCrewSize
-        set(it){
-            field = it
-            _observable.value = this
-        }
+
     var didTakeoff: Boolean = iDidTakeoff
-        set(it){
-            field = it
-            _observable.value = this
-        }
+
     var didLanding: Boolean = iDidLanding
-        set(it){
-            field = it
-            _observable.value = this
-        }
+
     var takeoffLandingTimes: Int = iTakeoffLandingTimes
-        set(it){
-            field = it
-            _observable.value = this
-        }
 
     fun toInt():Int {
         var value = if (crewSize > 15) 15 else crewSize
@@ -104,11 +91,6 @@ class Crew(iCrewSize: Int = 2,
             else -> error ("Value $this neither in our outside of $range...")
         }
     }
-
-    private val _observable = MutableLiveData(this)
-    val observable: LiveData<Crew>
-        get() = _observable
-
 
     companion object {
         const val MIN_CREW_SIZE = 1

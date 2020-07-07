@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.ui.dialogs
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
@@ -45,11 +46,23 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.AirportPickerEvents.NOT_IMPLEMENTED
 import nl.joozd.logbookapp.model.helpers.FeedbackEvents.AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED
+import java.util.*
 import kotlin.math.abs
 
-//TODO: Fix this. Should update though viewModel
+/**
+ * Use AirportPicker(orig = true/false)
+ * This will set correct value in ViewModel, recreation will call constructor without params
+ * but viewModel will persist.
+ */
 @ExperimentalCoroutinesApi
-class AirportPicker: JoozdlogFragment() {
+class AirportPicker(): JoozdlogFragment() {
+    private var workingOnOrig: Boolean? = null
+
+
+     // Constructor with parameter will not be called upon recreation
+    constructor(orig: Boolean): this(){
+         workingOnOrig = orig
+    }
     private val mainViewModel: MainViewModel by activityViewModels()
     private val viewModel: AirportPickerViewModel by viewModels()
 
@@ -57,9 +70,7 @@ class AirportPicker: JoozdlogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.dialog_airports, container, false).apply {
             //Set background color for title bar
-            (airportsDialogTopHalf.background as GradientDrawable).colorFilter =
-                PorterDuffColorFilter(requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
-                PorterDuff.Mode.SRC_IN)
+            airportsDialogTopHalf.joozdLogSetBackgroundColor()
 
             /**
              * Initialize recyclerView and it's stuff
@@ -97,18 +108,15 @@ class AirportPicker: JoozdlogFragment() {
             airportPickerDialogLayout.setOnClickListener { }
 
             airportPickerLayout.setOnClickListener {
-                mainViewModel.workingOnOrig = null
                 viewModel.undo()
                 closeFragment()
             }
             cancelAirportDialog.setOnClickListener {
-                mainViewModel.workingOnOrig = null
                 viewModel.undo()
                 closeFragment()
             }
 
             saveAirportDialog.setOnClickListener{
-                mainViewModel.workingOnOrig = null
                 closeFragment()
             }
 
@@ -138,8 +146,7 @@ class AirportPicker: JoozdlogFragment() {
 
             viewModel.pickedAirport.observe(viewLifecycleOwner, Observer{ airport ->
                 airportPickerAdapter.pickAirport(airport)
-                @SuppressLint("SetTextI18n")
-                airportPickerTitle.text  = "${airport.ident} - ${airport.iata_code}"
+                airportPickerTitle.text  = if (viewModel.workingOnOrig == true) getString(R.string.origin).toUpperCase(Locale.ROOT) else getString(R.string.destination).toUpperCase(Locale.ROOT)
                 @SuppressLint("SetTextI18n")
                 icaoIataField.text = "${airport.ident} - ${airport.iata_code}"
                 @SuppressLint("SetTextI18n")
@@ -156,9 +163,11 @@ class AirportPicker: JoozdlogFragment() {
         }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel.setWorkingOnOrig(mainViewModel.workingOnOrig)  //this will close fragment through FeedbackEvent if null
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        workingOnOrig?.let {
+            viewModel.setWorkingOnOrig(it)
+        }
     }
 
     private fun latToString(latitude: Double): String =

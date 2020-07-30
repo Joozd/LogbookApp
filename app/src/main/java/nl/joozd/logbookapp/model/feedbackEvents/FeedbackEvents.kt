@@ -17,12 +17,13 @@
  *
  */
 
-package nl.joozd.logbookapp.model.helpers
+package nl.joozd.logbookapp.model.feedbackEvents
 
 object FeedbackEvents {
     interface Event
 
-    enum class MainActivityEvents: Event{
+    enum class MainActivityEvents:
+        Event {
         NOT_IMPLEMENTED,
         SHOW_FLIGHT,
         FLIGHT_SAVED,
@@ -37,7 +38,8 @@ object FeedbackEvents {
         ERROR
     }
 
-    enum class PdfParserActivityEvents: Event{
+    enum class PdfParserActivityEvents:
+        Event {
         NOT_IMPLEMENTED,
         ROSTER_SUCCESSFULLY_ADDED,
         CALENDAR_SYNC_ENABLED,
@@ -47,49 +49,81 @@ object FeedbackEvents {
         ERROR
     }
 
-    enum class SettingsActivityEvents: Event {
-        NO_CALENDAR_PERMISSION
+    enum class MakePdfActivityEvents: Event{
+        NOT_IMPLEMENTED,
+        ERROR,
+        FILE_CREATED
     }
 
-    enum class BalanceForwardActivityEvents: Event {
+    enum class SettingsActivityEvents:
+        Event {
+        SHOW_LOGIN_ACTIVITY,
+        SIGNED_OUT
+    }
+
+    enum class BalanceForwardActivityEvents:
+        Event {
         NOT_IMPLEMENTED,
         DELETED,
         UNDELETE_OK,
         UNDELETE_FAILED
     }
 
-    enum class LoginActivityEvents: Event{
+    enum class LoginActivityEvents:
+        Event {
         NOT_IMPLEMENTED,
         SHOW_NEW_USER_DIALOG,
-        NAME_EMPTY,
+        USERNAME_EMPTY,
         PASSWORD_EMPTY,
         USERNAME_OR_PASSWORD_INCORRECT,
-        NO_INTERNET,
         SERVER_NOT_FOUND,
+        SAVED_WITHOUT_CHECKING_BECAUSE_NO_INTERNET,
         SAVED_WITHOUT_CHECKING_BECAUSE_NO_SERVER,
         FINISHED
     }
 
-    enum class NewUserActivityEvents: Event {
-        NOT_IMPLEMENTED,
-        SHOW_SIGN_IN_DIALOG,
+    enum class CreateNewUserActivityEvents: Event{
         USER_EXISTS_PASSWORD_INCORRECT,
         USER_EXISTS_PASSWORD_CORRECT,
         PASSWORDS_DO_NOT_MATCH,
         PASSWORD_DOES_NOT_MEET_STANDARDS,
-        PASSWORD_TOO_SHORT,
+        PASSWORD_TOO_SHORT, // ie. empty password provided
+        USERNAME_TOO_SHORT, // ie. empty username provided
         NO_INTERNET,
+        WAITING_FOR_SERVER,
+        SERVER_NOT_RESPONDING,
+        FINISHED
+    }
+
+    enum class NewUserActivityEvents:
+        Event {
+        NOT_IMPLEMENTED,
+        SHOW_SIGN_IN_DIALOG,
+        LOGGED_IN_AS, // as Preferences.username
+        USER_EXISTS_PASSWORD_INCORRECT,
+        USER_EXISTS_PASSWORD_CORRECT,
+        PASSWORDS_DO_NOT_MATCH,
+        PASSWORD_DOES_NOT_MEET_STANDARDS,
+        PASSWORD_TOO_SHORT, // ie. empty password provided
+        USERNAME_TOO_SHORT, // ie. empty username provided
+        NO_INTERNET,
+        WAITING_FOR_SERVER,
+        SERVER_NOT_RESPONDING,
+        CALENDAR_PICKED,
+        NEXT_PAGE,
         FINISHED
     }
 
 
-    enum class BalanceForwardDialogEvents: Event {
+    enum class BalanceForwardDialogEvents:
+        Event {
         UPDATE_FIELDS,
         NUMBER_PARSE_ERROR,
         CLOSE_DIALOG
     }
 
-    enum class EditFlightFragmentEvents: Event{
+    enum class EditFlightFragmentEvents:
+        Event {
         NOT_IMPLEMENTED,
         INVALID_REG_TYPE_STRING,
         AIRPORT_NOT_FOUND_FOR_LANDINGS,
@@ -103,17 +137,20 @@ object FeedbackEvents {
 
     }
 
-    enum class AirportPickerEvents: Event{
+    enum class AirportPickerEvents:
+        Event {
         NOT_IMPLEMENTED,
         ORIG_OR_DEST_NOT_SELECTED
     }
 
-    enum class NamesDialogEvents: Event{
+    enum class NamesDialogEvents:
+        Event {
         NOT_IMPLEMENTED,
         NAME1_OR_NAME2_NOT_SELECTED
     }
 
-    enum class TimePickerEvents: Event{
+    enum class TimePickerEvents:
+        Event {
         NOT_IMPLEMENTED,
         FLIGHT_IS_NULL,
         INVALID_TOTAL_TIME,
@@ -124,12 +161,14 @@ object FeedbackEvents {
         IFR_TIME_GREATER_THAN_DURATION
     }
 
-    enum class FlightEditorOpenOrClosed: Event{
+    enum class FlightEditorOpenOrClosed:
+        Event {
         OPENED,
         CLOSED
     }
 
-    enum class GenericEvents: Event{
+    enum class GenericEvents:
+        Event {
         EVENT_1,
         EVENT_2,
         EVENT_3

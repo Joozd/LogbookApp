@@ -16,7 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.activities.NewUserActivity"></activity>
+        <activity android:name=".ui.activities.MakePdfActivity"></activity>
+        <activity android:name=".ui.activities.CreateNewUserActivity" />
+        <activity android:name=".ui.activities.newUserActivity.NewUserActivity" />
         <activity android:name=".SettingsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -27,7 +29,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
         </activity>
-        <activity android:name=".ui.activities.ExportPdfActivity" />
+        <activity android:name=".ui.activities.ExportPdfActivityOld" />
         <activity android:name=".ui.activities.TotalTimesActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

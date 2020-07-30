@@ -23,16 +23,24 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 private val dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
+private val dateformatterforLogbook = DateTimeFormatter.ofPattern("dd-MM-yy")
+private val dateFormatterLocalized = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
 private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+private val timeFormatterLocalized = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
 private val monthYearFormatter = DateTimeFormatter.ofPattern(("MMM yyyy"))
 private val timeFormatterNoColon = DateTimeFormatter.ofPattern("HH:mm")
 private val dateAndTimeFormatter =  DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm")
 
 fun LocalDate.toDateString() = this.format(dateFormatter)
+fun LocalDate.toDateStringLocalized() = this.format(dateFormatterLocalized)
 fun LocalDateTime.toDateString() = this.format(dateFormatter)
+fun LocalDateTime.toLogbookDate() = this.format(dateformatterforLogbook)
+fun LocalDateTime.toDateStringLocalized() = this.format(dateFormatterLocalized)
 fun LocalDateTime.toTimeString() = this.format(timeFormatter)
+fun LocalDateTime.toTimeStringLocalized() = this.format(timeFormatterLocalized)
 fun LocalDateTime.toMonthYear() = this.format(monthYearFormatter)
 fun LocalDateTime.noColon() = this.format(timeFormatterNoColon)
 

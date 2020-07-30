@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.model.viewmodels.activities
 
 import android.Manifest
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -32,12 +31,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.calendar.CalendarFlightUpdater
 import nl.joozd.logbookapp.data.calendar.CalendarScraper
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
+import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.extensions.toDateString
+import nl.joozd.logbookapp.extensions.toDateStringLocalized
+import nl.joozd.logbookapp.extensions.toTimeString
+import nl.joozd.logbookapp.extensions.toTimeStringLocalized
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
@@ -49,6 +55,11 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     private val _useIataAirports = MutableLiveData<Boolean>(Preferences.useIataAirports)
     private val _getFlightsFromCalendar = MutableLiveData<Boolean>(Preferences.getFlightsFromCalendar)
+    private val _useCloudSync = MutableLiveData<Boolean>(Preferences.useIataAirports)
+
+    private val _username = MutableLiveData(Preferences.username) // <String?>
+    private val _calendarDisabledUntil = MutableLiveData(Preferences.calendarDisabledUntil) //  <Long>
+
     private val _settingsUseIataSelectorTextResource = MutableLiveData<Int>()
     private val _foundCalendars = MutableLiveData<List<JoozdCalendar>>()
     private val _pickedCalendar = MutableLiveData<JoozdCalendar>()
@@ -57,7 +68,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     // This is not used at the moment but it's there when we need it. Just set [settingsCalendarTypeSpinner] visibility to VISIBLE in SettingsActivity
     // search for tag #SETTHISIFNEEDED1
-    private val _calendarType = MutableLiveData<Int>()
+    // private val _calendarType = MutableLiveData<Int>()
 
 
     private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -67,14 +78,26 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
                     _settingsUseIataSelectorTextResource.value =
                         if (it) R.string.useIataAirports else R.string.useIcaoAirports
                 }
+
             Preferences::getFlightsFromCalendar.name ->
                 _getFlightsFromCalendar.value = Preferences.getFlightsFromCalendar
+
             Preferences::selectedCalendar.name ->
                 _pickedCalendar.value = _foundCalendars.value?.firstOrNull {c -> c.name == Preferences.selectedCalendar}
 
+            Preferences::useCloud.name ->
+                _useCloudSync.value = Preferences.useCloud
+
+            Preferences::username.name ->
+                _username.value = Preferences.username
+
+            Preferences::calendarDisabledUntil.name ->
+                _calendarDisabledUntil.value = Preferences.calendarDisabledUntil
+
+
             // This is not used at the moment but it's there when we need it. Just set [settingsCalendarTypeSpinner] visibility to VISIBLE in SettingsActivity
-            Preferences::calendarType.name ->
-                _calendarType.value = Preferences.calendarType
+            // Preferences::calendarType.name ->
+            //    _calendarType.value = Preferences.calendarType
         }
     }
     init{
@@ -91,17 +114,33 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val getFlightsFromCalendar = distinctUntilChanged(_getFlightsFromCalendar)
 
+    val useCloudSync: LiveData<Boolean>
+        get() = _useCloudSync
+
     val settingsUseIataSelectorTextResource: LiveData<Int>
         get() = _settingsUseIataSelectorTextResource
 
     val foundCalendars = Transformations.map(_foundCalendars) {it.map{c -> c.name} }
 
     // This is not used at the moment but it's there when we need it. Just set [settingsCalendarTypeSpinner] visibility to VISIBLE in SettingsActivity
-    val pickedCalendarType: MutableLiveData<Int>
-        get() = _calendarType
+    // val pickedCalendarType: MutableLiveData<Int>
+    //     get() = _calendarType
 
     val selectedCalendar: LiveData<JoozdCalendar>
         get() = _pickedCalendar
+
+    val username: LiveData<String?>
+        get() = _username
+
+    val calendarDisabled: LiveData<Boolean> = Transformations.map(_calendarDisabledUntil) {
+        it > Instant.now().epochSecond
+    }
+
+    val calendarDisabledUntilString: String
+        get(){
+            val time = LocalDateTime.ofInstant(Instant.ofEpochSecond(Preferences.calendarDisabledUntil), ZoneOffset.UTC)
+            return "${time.toDateStringLocalized()} ${time.toTimeStringLocalized()}Z"
+        }
 
 
 
@@ -117,7 +156,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         if (it && !Preferences.getFlightsFromCalendar) // if it is switched on from being off
             Preferences.calendarDisabledUntil = 0
         Preferences.getFlightsFromCalendar = it
+    }
 
+    fun useCloudSyncToggled(){
+        Preferences.useCloud = !Preferences.useCloud
     }
 
     fun calendarPicked(index: Int){
@@ -132,6 +174,23 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         Preferences.calendarType = index
     }
 
+    fun dontPostponeCalendarSync(){
+        Preferences.calendarDisabledUntil = 0
+        flightRepository.syncIfNeeded()
+    }
+
+    /**
+     * Signs out if signed in, shows login activity if signed out
+     */
+    fun signInOut(){
+        if (UserManagement.signedIn) {
+            UserManagement.signOut()
+            feedback(SettingsActivityEvents.SIGNED_OUT)
+        }
+        else
+            feedback(SettingsActivityEvents.SHOW_LOGIN_ACTIVITY)
+    }
+
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
     fun fillCalendarsList() {
         viewModelScope.launch {
@@ -141,16 +200,6 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         }
     }
 
-    @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    fun tempButtonClicked(){
-        Log.d(this::class.simpleName, "selectedCalendar is ${selectedCalendar.value}")
-        pickedCalendar?.let {
-            viewModelScope.launch {
-                val foundFlights = CalendarFlightUpdater().getFlights()
-                Log.d(this::class.simpleName, "Found flights: $foundFlights")
-            }
-        } ?: Log.d(this::class.simpleName, "pickedCalendar is null: $pickedCalendar")
-    }
 
 
     /*********************************************************************************************

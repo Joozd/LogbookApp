@@ -25,6 +25,7 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 
 object JoozdlogWorkersHub {
     /**
@@ -58,20 +59,22 @@ object JoozdlogWorkersHub {
      * If another Worker is already trying to do that, that one is canceled
      */
     fun synchronizeFlights(delay: Boolean = true){
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
+        if (Preferences.useCloud) {
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
 
-        val task = OneTimeWorkRequestBuilder<SyncFlightsWorker>().apply {
-            setConstraints(constraints)
-            if (delay)
-                setInitialDelay(Duration.ofMinutes(MIN_DELAY_FOR_OUTBOUND_SYNC))
-            addTag(SYNC_FLIGHTS)
-        }.build()
+            val task = OneTimeWorkRequestBuilder<SyncFlightsWorker>().apply {
+                setConstraints(constraints)
+                if (delay)
+                    setInitialDelay(MIN_DELAY_FOR_OUTBOUND_SYNC, TimeUnit.MINUTES)
+                addTag(SYNC_FLIGHTS)
+            }.build()
 
-        with (WorkManager.getInstance(App.instance)){
-            cancelAllWorkByTag(SYNC_FLIGHTS)
-            enqueue(task)
+            with(WorkManager.getInstance(App.instance)) {
+                cancelAllWorkByTag(SYNC_FLIGHTS)
+                enqueue(task)
+            }
         }
 
 
@@ -117,8 +120,8 @@ object JoozdlogWorkersHub {
     /**
      * Constants for use as tags
      */
-    const val SYNC_TIME = "syncTime"
-    const val SYNC_FLIGHTS = "syncFlights"
-    const val GET_AIRPORTS = "getAirports"
-    const val SYNC_AIRCRAFT_TYPES = "syncAircraftTypes"
+    private const val SYNC_TIME = "syncTime"
+    private const val SYNC_FLIGHTS = "syncFlights"
+    private const val GET_AIRPORTS = "getAirports"
+    private const val SYNC_AIRCRAFT_TYPES = "syncAircraftTypes"
 }

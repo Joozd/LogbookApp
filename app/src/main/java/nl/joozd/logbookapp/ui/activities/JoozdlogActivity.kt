@@ -19,11 +19,17 @@
 
 package nl.joozd.logbookapp.ui.activities
 
+import android.R
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.GradientDrawable
+import android.view.View
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import nl.joozd.logbookapp.extensions.getColorFromAttr
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
@@ -41,9 +47,23 @@ open class JoozdlogActivity: AppCompatActivity() {
         finish()
     }
 
+    protected fun View.joozdLogSetBackgroundColor(color: Int = getColorFromAttr(R.attr.colorPrimary)){
+        (this.background as GradientDrawable).colorFilter = PorterDuffColorFilter( color, PorterDuff.Mode.SRC_IN)
+    }
+
     fun startMainActivity(context: Context) = with (context) {
         startActivity(packageManager.getLaunchIntentForPackage(packageName))
     }
+
+    /**
+     * dp to pixels and reverse
+     */
+
+    protected fun Float.pixelsToDp() = this / resources.displayMetrics.density
+    protected fun Float.dpToPixels() = this * resources.displayMetrics.density
+    protected fun Int.pixelsToDp() = this.toFloat() / resources.displayMetrics.density
+    protected fun Int.dpToPixels() = this.toFloat() * resources.displayMetrics.density
+
 
 
 }

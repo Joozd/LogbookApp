@@ -26,7 +26,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_total_times.*
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.TotalTimesViewModel
 import nl.joozd.logbookapp.ui.activities.helpers.graphView.DateFormatter
 import nl.joozd.logbookapp.ui.adapters.TotalTimesExpandableListAdapter

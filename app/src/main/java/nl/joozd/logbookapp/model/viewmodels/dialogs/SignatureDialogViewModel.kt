@@ -19,16 +19,29 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
-import androidx.lifecycle.Transformations
-import nl.joozd.logbookapp.model.dataclasses.Flight
+import com.caverock.androidsvg.SVG
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
 class SignatureDialogViewModel: JoozdlogDialogViewModel() {
-    val signature = Transformations.map(workingFlightRepository.workingFlight) { it.signature }
+    private var _signature: String = workingFlight?.signature ?: ""
+    val signature: String
+        get() = _signature
+
+    val signatureSvg: SVG
+        get() = SVG.getFromString(signature)
+
 
     fun updateSignature(newSignature: String){
-        workingFlight?.let{flight ->
-            workingFlight = flight.copy(signature = newSignature)
+        _signature = newSignature
+    }
+
+    fun signatureCleared(){
+        _signature = ""
+    }
+
+    fun saveSignature(){
+        workingFlight?.let{
+            workingFlight = it.copy(signature = signature)
         }
     }
 }

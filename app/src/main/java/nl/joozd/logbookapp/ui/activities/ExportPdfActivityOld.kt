@@ -27,18 +27,14 @@ import android.util.Log
 import kotlinx.android.synthetic.main.activity_export_pdf.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.miscClasses.TotalsForward
 import nl.joozd.logbookapp.data.room.Repository
 import java.util.concurrent.CountDownLatch
 
-class ExportPdfActivity : AppCompatActivity(), CoroutineScope by MainScope() {
-    companion object{
-        private const val WRITE_REQUEST_CODE: Int = 1337
-        private const val PDF_MIME_TYPE = "application/pdf"
-        private const val FILENAME = "logbook.pdf"
-        const val TAG ="ExportPdfActivity"
-    }
+class ExportPdfActivityOld : AppCompatActivity(), CoroutineScope by MainScope() {
+/*
     private val repository = Repository.getInstance()
 
     private val pdDoc = PdfDocument()
@@ -75,8 +71,8 @@ class ExportPdfActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_export_pdf)
-        progressBar.setProgress(0, true)
-/*
+        progressBar.progress = 0
+
 
         launch{
             //get all aircraft:
@@ -184,7 +180,13 @@ class ExportPdfActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
 
 
-
- */
     }
+
+    companion object{
+        private const val WRITE_REQUEST_CODE: Int = 1337
+        private const val PDF_MIME_TYPE = "application/pdf"
+        private const val FILENAME = "logbook.pdf"
+        const val TAG ="ExportPdfActivity"
+    }
+*/
 }

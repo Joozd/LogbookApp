@@ -21,9 +21,6 @@ package nl.joozd.logbookapp.ui.dialogs
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -38,14 +35,13 @@ import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AirportPickerViewModel
 import nl.joozd.logbookapp.model.viewmodels.MainViewModel
-import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.adapters.AirportPickerAdapter
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.longToast
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.AirportPickerEvents.NOT_IMPLEMENTED
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.AirportPickerEvents.NOT_IMPLEMENTED
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED
 import java.util.*
 import kotlin.math.abs
 

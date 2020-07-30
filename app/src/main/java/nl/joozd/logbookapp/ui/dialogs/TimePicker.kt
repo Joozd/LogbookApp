@@ -36,7 +36,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogTimesInOutBinding
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.showIfActive
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.TimePickerEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.TimePickerEvents
 import nl.joozd.logbookapp.model.viewmodels.dialogs.TimePickerViewModel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast

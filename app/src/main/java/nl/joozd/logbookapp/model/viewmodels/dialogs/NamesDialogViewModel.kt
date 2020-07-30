@@ -24,7 +24,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.addName2
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.removeLastName2
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel

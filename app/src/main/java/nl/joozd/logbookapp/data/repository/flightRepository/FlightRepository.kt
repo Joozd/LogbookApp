@@ -205,6 +205,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         //Save flights to disk
         launch (dispatcher + NonCancellable) {
             flightDao.insertFlights(*(flights.map { it.toModel() }.toTypedArray()))
+            Log.d("Saved", "Saved ${flights.size} flights!")
             if (sync) syncAfterChange()
         }
     }
@@ -281,7 +282,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
     private fun syncAfterChange(){
         if (!Cloud.syncingFlights)
-            JoozdlogWorkersHub.synchronizeFlights()
+            JoozdlogWorkersHub.synchronizeFlights(delay = false)
     }
 
     private val _syncProgress = MutableLiveData<Int>(-1)

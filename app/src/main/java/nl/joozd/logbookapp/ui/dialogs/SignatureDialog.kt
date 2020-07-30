@@ -20,15 +20,16 @@
 package nl.joozd.logbookapp.ui.dialogs
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.caverock.androidsvg.SVG
-import kotlinx.android.synthetic.main.dialog_signature.view.*
 import com.github.gcacace.signaturepad.views.SignaturePad
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.DialogSignatureBinding
 import nl.joozd.logbookapp.model.viewmodels.dialogs.SignatureDialogViewModel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
@@ -44,59 +45,72 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
 
 class SignatureDialog: JoozdlogFragment() {
-    val signatureDialogViewModel: SignatureDialogViewModel by viewModels()
+    val viewModel: SignatureDialogViewModel by viewModels()
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.dialog_signature, container, false).apply {
+        with (DialogSignatureBinding.bind(inflater.inflate(R.layout.dialog_signature, container, false))) {
 
-            signature_pad.setOnSignedListener(object : SignaturePad.OnSignedListener {
+            signaturePad.setOnSignedListener(object : SignaturePad.OnSignedListener {
                 override fun onStartSigning() {/* Event triggered when the pad is touched */}
                 override fun onSigned() {
                     //Event triggered when the pad is signed
-                    signatureDialogViewModel.updateSignature(signature_pad.signatureSvg)
+                    viewModel.updateSignature(signaturePad.signatureSvg)
                 }
-                override fun onClear() {/*Event triggered when the pad is cleared*/}
+                override fun onClear() {
+                    // todo on cleared
+                }
             })
 
             clearTextView.setOnClickListener {
-                signatureDialogViewModel.updateSignature("")
+                viewModel.signatureCleared()
+                setBoxVisibility(this)
             }
+
+            setBoxVisibility(this)
+
+
+
 
             /**
              * Observers:
              */
 
             //If a signature is set, hide the actual signing pad and display the current signature as SVGImageView
-            signatureDialogViewModel.signature.observe(viewLifecycleOwner, Observer{signature ->
-                if (signature.isNotEmpty()) {
-                    signature_pad.visibility = View.INVISIBLE
-                    signatureImageView.setSVG(SVG.getFromString(signature))
-                    signatureImageView.visibility = View.VISIBLE
-                }
-                else {
-                    signatureImageView.visibility = View.INVISIBLE
-                    signature_pad.visibility = View.VISIBLE
-                    signature_pad.clear()
-                }
-            })
+
 
             /**
              * UI related butons:
              */
 
             cancelTextView.setOnClickListener {
-                signatureDialogViewModel.undo()
                 closeFragment()
             }
             backgroundLayout.setOnClickListener {
-                signatureDialogViewModel.undo()
                 closeFragment()
             }
             saveTextView.setOnClickListener {
+                viewModel.saveSignature()
                 closeFragment()
             }
             signLayout.setOnClickListener { }
+
+            return root
+        }
+    }
+
+    private fun setBoxVisibility(binding: DialogSignatureBinding) = with(binding){
+        if (viewModel.signature.isNotEmpty()) {
+            Log.d("AAP", "NIET EMPTY")
+            signaturePad.visibility = View.INVISIBLE
+            signatureImageView.setSVG(viewModel.signatureSvg)
+            signatureImageView.visibility = View.VISIBLE
+        }
+        else {
+            Log.d("AAP", "WEL EMPTY")
+            signatureImageView.visibility = View.INVISIBLE
+            signaturePad.visibility = View.VISIBLE
+            signaturePad.clear()
         }
     }
 }

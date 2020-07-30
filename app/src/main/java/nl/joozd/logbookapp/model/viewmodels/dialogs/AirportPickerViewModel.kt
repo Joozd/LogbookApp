@@ -26,8 +26,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.conflate
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.AirportPickerEvents.NOT_IMPLEMENTED
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.AirportPickerEvents.NOT_IMPLEMENTED
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
 //TODO make sure list gets filled straight away?

@@ -24,7 +24,6 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
@@ -38,7 +37,7 @@ import nl.joozd.logbookapp.App
  * Coroutines used to insert LiveData updating onto main thread.
  *
  * Observable variables:
- * [internetAvailable]: true if at least one network available with NET_CAPABILITY_INTERNET
+ * [internetAvailableLiveData]: true if at least one network available with NET_CAPABILITY_INTERNET
  */
 object InternetStatus: CoroutineScope by MainScope() {
     /*******************************************************************************************
@@ -89,11 +88,16 @@ object InternetStatus: CoroutineScope by MainScope() {
         })
     }
 
+
     /*******************************************************************************************
      * Observables
      *******************************************************************************************/
 
     // This is the one to watch. Immutable version of mutableInternetAvailable.
-    val internetAvailable: LiveData<Boolean>
+    val internetAvailableLiveData: LiveData<Boolean>
         get() = mutableInternetAvaibale
+
+    //If you need a snapshot
+    val internetAvailable: Boolean?
+        get() = mutableInternetAvaibale.value
 }

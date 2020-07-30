@@ -53,5 +53,15 @@ open class JoozdlogFragment: Fragment(),  CoroutineScope by MainScope() {
         (this.background as GradientDrawable).colorFilter = PorterDuffColorFilter( color, PorterDuff.Mode.SRC_IN)
     }
 
+    /**
+     * dp to pixels and reverse
+     */
+
+    protected fun Float.pixelsToDp() = this / resources.displayMetrics.density
+    protected fun Float.dpToPixels() = this * resources.displayMetrics.density
+    protected fun Int.pixelsToDp() = this.toFloat() / resources.displayMetrics.density
+    protected fun Int.dpToPixels() = this.toFloat() * resources.displayMetrics.density
+
+
     protected fun closeFragment() = supportFragmentManager.popBackStack()
 }

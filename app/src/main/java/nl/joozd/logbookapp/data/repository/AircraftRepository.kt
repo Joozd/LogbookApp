@@ -121,6 +121,7 @@ class AircraftRepository(
             aircraftMap = acl.map{it.registration to it}.reversed().toMap()     // reversed to higher priority registrations will overwrite lower ones
         }
     }
+
     /********************************************************************************************
      * Data loading functions from Dao (private)
      ********************************************************************************************/
@@ -201,8 +202,6 @@ class AircraftRepository(
         preloadedRegistrationsDao.clearDb()
         savePreloadedRegistrations(newPreloaded)
     }
-
-
 
     /********************************************************************************************
      * Functions to transform other types to [Aircraft] (private)
@@ -330,6 +329,8 @@ class AircraftRepository(
 
     val liveAircraftList: LiveData<List<Aircraft>>
         get() = _cachedAircraftList
+
+    suspend fun requestAircraftMap() = withContext(dispatcher) { getAircraftMap().await() }
 
     suspend fun getAircraftFromRegistration(reg: String): Aircraft? =
         // use [reg] if it contains at least one '-', if it doesn't try to match it to a knownRegistration minus the '-'

@@ -21,10 +21,9 @@ package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import android.util.Log
 import androidx.lifecycle.Transformations
-import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.Crew
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.TimePickerEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.TimePickerEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel

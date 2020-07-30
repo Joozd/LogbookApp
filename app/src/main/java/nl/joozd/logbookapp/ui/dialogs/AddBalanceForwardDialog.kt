@@ -24,13 +24,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.TextView.OnEditorActionListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import nl.joozd.joozdlogcommon.BalanceForward
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogAddBalanceForwardBinding
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.BalanceForwardDialogEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardDialogEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AddBalanceForwardDialogViewmodel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment

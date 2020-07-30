@@ -29,7 +29,7 @@ import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_balance_forward.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityBalanceForwardBinding
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.BalanceForwardActivityViewmodel
 import nl.joozd.logbookapp.ui.adapters.BalanceForwardAdapter
 

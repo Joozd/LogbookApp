@@ -32,7 +32,7 @@ import nl.joozd.logbookapp.utils.reversed
  * suggested use: KlmCrewCalendarFlightsParser(listOfEvents).getFlights(icaoIataMap)
  */
 
-class KlmKlcCalendarFlightsParser(private val events: List<JoozdCalendarEvent>): JoozdlogRosterParser {
+class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>): JoozdlogRosterParser {
     init{
         Log.d(this::class.simpleName, "Got ${events.size} events")
     }

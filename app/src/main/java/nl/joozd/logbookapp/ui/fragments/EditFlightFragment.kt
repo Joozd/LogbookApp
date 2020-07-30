@@ -33,7 +33,6 @@ import android.widget.ArrayAdapter
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.edit_flight.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,7 +40,7 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.viewmodels.MainViewModel
 import nl.joozd.logbookapp.extensions.*
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.EditFlightFragmentEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
 import nl.joozd.logbookapp.ui.dialogs.*
 import nl.joozd.logbookapp.ui.dialogs.NamesDialog
 import nl.joozd.logbookapp.ui.utils.toast
@@ -493,5 +492,4 @@ class EditFlightFragment: JoozdlogFragment(){
             v.flighttOutStringField.setText(it)
         }
     }
-
 }

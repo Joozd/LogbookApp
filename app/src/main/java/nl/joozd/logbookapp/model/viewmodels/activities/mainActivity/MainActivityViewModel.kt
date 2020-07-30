@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.model.viewmodels.activities.mainActivity
 
 
 
-import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,8 +30,11 @@ import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.MainActivityEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
+import nl.joozd.logbookapp.ui.activities.TotalTimesActivity
+import nl.joozd.logbookapp.utils.TimestampMaker
+import nl.joozd.logbookapp.utils.TwilightCalculator
 import java.time.Instant
 import java.util.*
 
@@ -72,10 +74,27 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
      * Menu functions
      */
     fun menuSelectedDoSomething(){
-        Log.d("useIataAirports", "before: ${Preferences.useIataAirports}")
-        Preferences.useIataAirports = !Preferences.useIataAirports
-        Log.d("useIataAirports", "after: ${Preferences.useIataAirports}")
-        Log.d("displayFlightsList.val", "after: ${displayFlightsList.value}")
+        // Preferences.newUserActivityFinished= false
+        viewModelScope.launch(Dispatchers.Default) {
+            val allFlights = flightRepository.getAllFlights().map{
+                if (it.isPF){
+                    val twilightCalculator = TwilightCalculator(it.timeOut)
+                    val orig = airportRepository.getAirportOnce(it.orig)
+                    val dest = airportRepository.getAirportOnce(it.dest)
+
+                    val toDay = if ( orig == null || twilightCalculator.itIsDayAt(orig, it.tOut().toLocalTime())) 1 else 0
+                    val toNight = 1-toDay
+
+                    val ldgDay = if (dest == null || twilightCalculator.itIsDayAt(dest, it.tOut().toLocalTime())) 1 else 0
+                    val ldgNight = 1 - ldgDay
+
+                    it.copy(autoFill = true, takeOffDay = toDay, takeOffNight = toNight, landingDay = ldgDay, landingNight = ldgNight, timeStamp = TimestampMaker.nowForSycPurposes)
+                }
+                else it
+            }
+            launch(Dispatchers.Main) { flightRepository.save(allFlights) }
+            feedback(MainActivityEvents.DONE)
+        }
     }
 
     fun menuSelectedRebuild(){
@@ -233,8 +252,30 @@ else{
 
 
     /*********************************************************************************************
+     * Functions related to saving/loading working flight
+     *********************************************************************************************/
+
+    fun checkFlightConflictingWithCalendarSync(): Boolean = workingFlightRepository.flightIsChanged && (workingFlightRepository.checkConflictingWithCalendarSync() != 0L)
+
+    fun getConflictTime(): Long? = with (workingFlightRepository.checkConflictingWithCalendarSync()){
+        if (this == 0L) null else this
+    }
+
+    // Fixes a calendar sync conflict with edited flight by disabling calendar sync until after
+    fun fixCalendarSyncConflict(){
+        disableCalendarImportUntil(workingFlightRepository.checkConflictingWithCalendarSync() + 1)
+    }
+
+
+    /*********************************************************************************************
      * Functions related to synchronization:
      *********************************************************************************************/
+
+    private fun disableCalendarImportUntil(time: Long){
+        Preferences.calendarDisabledUntil = time
+        feedback(MainActivityEvents.CALENDAR_SYNC_PAUSED)
+    }
+
 
     /**
      * This will synch time with server and launch repository update functions (which can decide for themselves if it is necessary)
@@ -249,8 +290,7 @@ else{
     fun deleteAndDisableCalendarImportUntillAfterThisFlight(flightId: Int){
         viewModelScope.launch {
             flightRepository.fetchFlightByID(flightId)?.let {flight ->
-                Preferences.calendarDisabledUntil = flight.timeIn
-                feedback(MainActivityEvents.CALENDAR_SYNC_PAUSED)
+                disableCalendarImportUntil(flight.timeIn)
                 flightRepository.delete(flight)
                 feedback(MainActivityEvents.DELETED_FLIGHT)
             } ?: feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
@@ -343,7 +383,7 @@ else{
      *********************************************************************************************/
 
     val internetAvailable: LiveData<Boolean>
-        get() = InternetStatus.internetAvailable
+        get() = InternetStatus.internetAvailableLiveData
 
     val airportSyncProgress: LiveData<Int>
         get() = airportRepository.airportSyncProgress

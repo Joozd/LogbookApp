@@ -25,13 +25,10 @@ import android.util.Base64
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.dataclasses.SupportedCalendarTypes
-import java.security.MessageDigest
+import nl.joozd.logbookapp.data.utils.Encryption
+import java.util.*
 
 object Preferences {
-    private const val USERNAME = "username"
-    private const val PASSWORD = "password" // saved as md5 hash, cannot retrieve password!
-    private const val NO_CALENDAR_SELECTED = ""
-
     private val sharedPref by lazy{
         with (App.instance.ctx) {
             getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
@@ -48,28 +45,30 @@ object Preferences {
      * cannot delegate as that doesn't support null
      */
 
-    const val USERNAME_NOT_SET = "USERNAME_NOT_SET"
-    var username: String by JoozdLogSharedPrefs(sharedPref, USERNAME_NOT_SET)
+    private const val USERNAME_NOT_SET = "USERNAME_NOT_SET"
+    var usernameResource: String by JoozdLogSharedPrefs(sharedPref, USERNAME_NOT_SET)
+    var username: String?
+        get() = if (usernameResource == USERNAME_NOT_SET) null else usernameResource
+        set(it) { usernameResource = it?.toLowerCase(Locale.ROOT) ?: USERNAME_NOT_SET }
+    //TODO NOTE THIS MAY BREAK MY ACCOUNT
 
     /**
      * password is the users password, hashed to 128 bits
      * @get will return a base64 encoded 128 bit hash, use _key_ for reading the key
      * @set will save an MD5 hash to sharedPrefs. This hash will be used to encrypt on server
      */
+    private const val PASSWORD_SHAREDPREF_KEY = "passwordSharedPrefKey" // saved as md5 hash, cannot retrieve password!
     var password: String?
-        get() = sharedPref.getString(PASSWORD,null)
+        get() = sharedPref.getString(PASSWORD_SHAREDPREF_KEY,null)
         set(v) = if (v==null) {
             with(sharedPref.edit()) {
-                putString(PASSWORD, v)
+                putString(PASSWORD_SHAREDPREF_KEY, v)
                 apply()
             }
         } else {
             with(sharedPref.edit()) {
-                val encodedPassword = with (MessageDigest.getInstance("MD5")){
-                    update(v.toByteArray())
-                    digest()
-                }
-                putString(PASSWORD, Base64.encodeToString(encodedPassword, Base64.DEFAULT))
+                val encodedPassword = Encryption.md5Hash(v)
+                putString(PASSWORD_SHAREDPREF_KEY, Base64.encodeToString(encodedPassword, Base64.DEFAULT))
                 apply()
             }
         }
@@ -103,6 +102,8 @@ object Preferences {
 
     var updateLargerFilesOverWifiOnly: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
+    var newUserActivityFinished: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+
 
     /***********************
      *   UI preferences:   *
@@ -117,6 +118,11 @@ object Preferences {
      * Get planned flights from calendar?
      */
     var getFlightsFromCalendar: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+
+    /**
+     * CalendarSync days into the future:
+     */
+    var calendarSyncAmountOfDays: Long by JoozdLogSharedPrefs(sharedPref, 30L)
 
     /**
      * Type of calendar used
@@ -138,12 +144,15 @@ object Preferences {
     var standardTakeoffLandingTimes: Int by JoozdLogSharedPrefs(sharedPref, 30)
 
     //Calendar on device that is used to import flights
+    const val NO_CALENDAR_SELECTED = ""
     var selectedCalendar: String by JoozdLogSharedPrefs(sharedPref, NO_CALENDAR_SELECTED)
 
     // true if user wants new flights to be marked as IFR. Not sure if I want to use this.
     // var normallyFliesIFR: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
     // true if user doesn't want to use cloud -
-    var dontUseCloud: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+    var useCloud: Boolean by JoozdLogSharedPrefs(sharedPref, true)
+
+    var acceptedCloudSyncTerms: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
 }

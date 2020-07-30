@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.ui.activities
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
@@ -29,7 +28,7 @@ import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 
 
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.PdfParserActivityEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast

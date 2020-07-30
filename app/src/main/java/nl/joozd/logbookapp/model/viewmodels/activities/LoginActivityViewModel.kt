@@ -19,42 +19,72 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities
 
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.LoginActivityEvents
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.comm.InternetStatus
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.LoginActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 
+/**
+ * ViewModel for login and create new user activity
+ */
 class LoginActivityViewModel: JoozdlogActivityViewModel(){
     /*******************************************************************************************
      * Private parts
      *******************************************************************************************/
 
-
     /*******************************************************************************************
      * Observables
      *******************************************************************************************/
 
+    val internetAvailable: LiveData<Boolean>
+        get() = InternetStatus.internetAvailableLiveData
+
+    /*******************************************************************************************
+     * Public variables
+     *******************************************************************************************/
 
     /*******************************************************************************************
      * Public functions
      *******************************************************************************************/
 
     fun signIn(username: String, password: String){
-        //check if username and password are not empty
-        if (username.isBlank()) {
-            feedback(LoginActivityEvents.NAME_EMPTY)
-            return
-        }
-        if (password.isBlank()) {
-            feedback(LoginActivityEvents.PASSWORD_EMPTY)
-            return
-        }
-        //TODO check user/pass with server
-    }
+        when {
+            //check if username and password are not empty
+            username.isBlank() -> feedback(LoginActivityEvents.USERNAME_EMPTY)
 
-    /**
-     * Checks if server is online. If not, it should set online status accordingly
-     */
-    fun checkServerOnline(){
-        feedback(LoginActivityEvents.NOT_IMPLEMENTED)
-        //TODO: Implement this
+            password.isBlank() -> feedback(LoginActivityEvents.PASSWORD_EMPTY)
+
+            // If offline, save username and pass but don't check, and feedback that
+            InternetStatus.internetAvailable == false -> {
+                Preferences.username = username
+                Preferences.password = password // Preferences will take care of password hashing
+                feedback(LoginActivityEvents.SAVED_WITHOUT_CHECKING_BECAUSE_NO_INTERNET)
+            }
+
+            // name and pass not empty, internet seems online, let's check it!
+            else -> {
+                viewModelScope.launch {
+                    when (Cloud.checkUser(username, password)){
+                        true -> {
+                            Preferences.username = username
+                            Preferences.password = password // Preferences will take care of password hashing
+                            feedback(LoginActivityEvents.FINISHED)
+                        }
+                        false -> {
+                            feedback(LoginActivityEvents.USERNAME_OR_PASSWORD_INCORRECT)
+                        }
+                        else -> {
+                            Preferences.username = username
+                            Preferences.password = password // Preferences will take care of password hashing
+                            feedback(LoginActivityEvents.SAVED_WITHOUT_CHECKING_BECAUSE_NO_SERVER)
+                        }
+                    }
+                }
+            }
+        }
     }
 }

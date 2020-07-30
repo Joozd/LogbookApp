@@ -43,7 +43,7 @@ class CalendarFlightUpdater {
     private val calendarScraper = CalendarScraper(context)
     private val startCutoff = maxOf(Instant.now(), Instant.ofEpochSecond(Preferences.calendarDisabledUntil))
 
-    val period = (startCutoff..Instant.now().plus(Duration.ofDays(30)))
+    val period = (startCutoff..Instant.now().plus(Duration.ofDays(Preferences.calendarSyncAmountOfDays)))
 
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
     suspend fun getFlights(): List<Flight>?{

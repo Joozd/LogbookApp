@@ -30,8 +30,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.dialog_pick_aircraft_type.view.*
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.DialogPickAircraftTypeBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
@@ -44,7 +44,7 @@ class AircraftPicker: JoozdlogFragment(){
     private val viewModel: AircraftPickerViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.dialog_pick_aircraft_type, container, false).apply{
+        val binding = DialogPickAircraftTypeBinding.bind(inflater.inflate(R.layout.dialog_pick_aircraft_type, container, false)).apply{
             //set color of dialog head
             (aircraftPickerTopHalf?.background as GradientDrawable).colorFilter = PorterDuffColorFilter(requireActivity().getColorFromAttr(android.R.attr.colorPrimary), PorterDuff.Mode.SRC_IN) // set background color to bakground with rounded corners
 
@@ -79,7 +79,7 @@ class AircraftPicker: JoozdlogFragment(){
              ******************************************************************************/
 
             viewModel.registration.observe(viewLifecycleOwner, Observer{
-                typeDescriptionTextView.text = it
+                pickedAircraftText.text = it
                 if (!regFieldActive)
                     registrationField.setText(it)
             })
@@ -91,7 +91,7 @@ class AircraftPicker: JoozdlogFragment(){
 
             viewModel.selectedAircraft.observe(viewLifecycleOwner, Observer{
                 it.type?.let{t ->
-                    typeDescriptionTextView.text = t.shortName
+                    typeDescriptionTextView.text = t.name
                 }
             })
 
@@ -123,6 +123,7 @@ class AircraftPicker: JoozdlogFragment(){
             }
 
         } // end of inflater.inflate(...).apply
+        return binding.root
 
     } // end of onCreateView()
 

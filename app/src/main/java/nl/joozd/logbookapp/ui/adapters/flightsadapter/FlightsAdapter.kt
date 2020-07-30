@@ -67,6 +67,7 @@ class FlightsAdapter(
     }
     class FlightViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
         fun bindItem(flight: DisplayFlight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
+
             with(flight) {
                 flightLayout.makePlannedColorIfNeeded(planned)
                 dateDayText.text = dateDay
@@ -92,6 +93,8 @@ class FlightsAdapter(
                 isPFText.shouldBeVisible(pf)
                 remarksText.shouldBeVisible(remarks.isNotEmpty())
 
+
+
                 flightLayout.closeIfSwiped()
                 flightLayout.translationZ = 10f
                 flightLayout.setOnClickListener { onClick(flightID) }
@@ -99,6 +102,8 @@ class FlightsAdapter(
                     flightLayout.closeIfSwiped()
                     onDelete(flightID) }
             }
+
+
         }
     }
 

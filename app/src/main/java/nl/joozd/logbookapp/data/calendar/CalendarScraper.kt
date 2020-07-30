@@ -147,11 +147,11 @@ class CalendarScraper(private val context: Context) {
                 ) {
                     foundEvents.add(
                         JoozdCalendarEvent(
-                            cur.getString(EVENT_TITLE_INDEX),
-                            cur.getString(EVENT_TITLE_INDEX),
+                            cur.getString(EVENT_TITLE_INDEX) ?: "",
+                            cur.getString(EVENT_TITLE_INDEX) ?: "",
                             Instant.ofEpochMilli(cur.getLong(EVENT_DTSTART_INDEX)),
                             Instant.ofEpochMilli(cur.getLong(EVENT_DTEND_INDEX)),
-                            cur.getString(EVENT_EVENT_LOCATION_INDEX),
+                            cur.getString(EVENT_EVENT_LOCATION_INDEX) ?: "",
                             "",
                             cur.getLong(EVENT_ID_INDEX)
                         )

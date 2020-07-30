@@ -33,7 +33,7 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.PdfParserActivityEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.utils.pdf.parsers.JoozdlogKlcRosterParser
 import java.io.FileNotFoundException

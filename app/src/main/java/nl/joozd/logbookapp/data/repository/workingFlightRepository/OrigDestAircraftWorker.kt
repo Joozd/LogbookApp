@@ -29,6 +29,13 @@ import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import kotlin.coroutines.CoroutineContext
 
+
+/**
+ * Worker class to do things pertaining Origin, Destination and Aircraft of a flight such as:
+ * - get an [Airport] from an ident
+ * - get an [Aircraft] from a registration
+ * and put those in observable values
+ */
 class OrigDestAircraftWorker: CoroutineScope {
     override val coroutineContext: CoroutineContext = Job() + Dispatchers.Main
     private val airportRepository = AirportRepository.getInstance()

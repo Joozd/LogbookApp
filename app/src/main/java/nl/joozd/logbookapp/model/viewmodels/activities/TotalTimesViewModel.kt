@@ -23,21 +23,16 @@ import android.graphics.Color
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.jjoe64.graphview.ValueDependentColor
 import com.jjoe64.graphview.series.BarGraphSeries
 import com.jjoe64.graphview.series.DataPoint
 import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.ui.utils.toast
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
-import kotlin.math.abs
 
 class TotalTimesViewModel: JoozdlogActivityViewModel() {
     /**

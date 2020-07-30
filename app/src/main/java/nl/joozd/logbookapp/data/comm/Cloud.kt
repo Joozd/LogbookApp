@@ -32,6 +32,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.joozdlogcommon.exceptions.NotAuthorizedException
 import nl.joozd.logbookapp.data.room.model.AircraftTypeConsensusData
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.utils.Encryption
 
 import java.time.Instant
 
@@ -58,10 +59,39 @@ object Cloud {
 
     /**
      * Creates a new user
+     * Calling function should consider storing username and pasword in [Preferences]
      */
-    suspend fun createNewUser(name: String, key: ByteArray): Boolean = withContext(Dispatchers.IO) {
+    suspend fun createNewUser(name: String, key: ByteArray): Boolean? = withContext(Dispatchers.IO) {
         Client().use {
             ServerFunctions.createNewAccount(it, name, key)
+        }
+    }
+
+    /**
+     * Creates a new user
+     * Calling function should consider storing username and pasword in [Preferences]
+     */
+    suspend fun createNewUser(name: String, password: String): Boolean? = withContext(Dispatchers.IO) {
+        Client().use {
+            ServerFunctions.createNewAccount(it, name, Encryption.md5Hash(password))
+        }
+    }
+
+    /**
+     * Check username / pass
+     * ServerFunctions.testLogin returns 1 if success, 2 if failed, negative value if connection failed
+     */
+    suspend fun checkUser(username: String, password: String): Boolean? =  withContext(Dispatchers.IO) {
+        when (Client().use{
+            ServerFunctions.testLogin(it, username, password)
+        }) {
+            1 -> true
+            2 -> false
+            -998 -> {
+                Log.w("Cloud", "Server gave unexpected response")
+                null
+            }
+            else -> null
         }
     }
 
@@ -183,14 +213,9 @@ object Cloud {
             withContext(Dispatchers.IO) f@{
                 syncingFlights = true
                 listener(0)
-                Log.d("YOLO", "SWAGGGGGG11111")
                 Client().use { server ->
-                    Log.d("YOLO", "SWAGGGGGG22222")
-
                     listener(5) // Connection is made!
                     with(ServerFunctions) {
-                        Log.d("YOLO", "SWAGGGGGG33333")
-
                         //sync time with server
                         val timeStamp: Long = getTimestamp(server) ?: -1
                         Log.d(TAG, "Got timestamp ${Instant.ofEpochSecond(timeStamp)}")
@@ -211,7 +236,7 @@ object Cloud {
                                 server,
                                 Preferences.lastUpdateTime
                             ) { listener(15 + it / 4) }?.map { it.copy(timeStamp = timeStamp) }
-                                ?: return@f null.also{Log.d("Cloud", "requestFlightsSince returned null")}
+                                ?: return@f null.also{Log.w("Cloud", "requestFlightsSince returned null")}
                         } catch (e: NotAuthorizedException) {
                             return@f -1L
                         }
@@ -228,15 +253,15 @@ object Cloud {
                         val lowestFixedID =
                             (takenIDs.max()
                                 ?: -1) + 1 // null on empty list, but empty list means no fixes
-                        val newFlights = newLocalFlights.filter { it.flightID in takenIDs }
+                        val fixedNewLocalFlights = newLocalFlights.filter { it.flightID in takenIDs }
                             .mapIndexed { index: Int, flight: Flight ->
                                 flight.copy(flightID = lowestFixedID + index)
                             }
                         launch(Dispatchers.Main) {
                             flightRepository.delete(newLocalFlights.filter { it.flightID in takenIDs }, sync = false)
-                            flightRepository.save(newFlights, sync = false)
+                            flightRepository.save(fixedNewLocalFlights, sync = false)
                         }
-                        fixedLocalFlights.addAll(newFlights)
+                        fixedLocalFlights.addAll(fixedNewLocalFlights)
 
                         listener(50)
                         //previous block added all fixed flights to a list, now add the ones that didn't need fixing:
@@ -249,6 +274,7 @@ object Cloud {
                         val flightsToSend =
                             (completeFlightDB.filter { it.timeStamp > Preferences.lastUpdateTime && !it.unknownToServer } + // Not including flightslist we just fixed
                                     fixedLocalFlights)
+                                .filter{ !it.isPlanned || !it.unknownToServer } // don't send planned flights unless server knows about them somehow
                                 .map { it.copy(timeStamp = timeStamp, unknownToServer = false) }
 
                         //send the flights to server, retry on fail as login worked earlier

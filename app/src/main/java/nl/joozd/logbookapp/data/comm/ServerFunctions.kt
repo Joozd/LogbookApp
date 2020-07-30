@@ -30,6 +30,7 @@ import nl.joozd.joozdlogcommon.serializing.*
 import nl.joozd.joozdlogcommon.serializing.longFromBytes
 import nl.joozd.joozdlogcommon.serializing.unwrapInt
 import nl.joozd.joozdlogcommon.serializing.wrap
+import java.security.MessageDigest
 
 object ServerFunctions {
     const val TAG = "ServerFunctions"
@@ -109,21 +110,43 @@ object ServerFunctions {
     }
 
     fun login(client: Client): Boolean?{
-        if (Preferences.username == Preferences.USERNAME_NOT_SET || Preferences.key == null)
+        if (Preferences.username == null || Preferences.key == null)
             return false
         //payLoad is LoginData.serialize()
-        val payLoad = LoginData(Preferences.username, Preferences.key!!, BasicFlight.VERSION.version).serialize()
+        val payLoad = LoginData(Preferences.username!!, Preferences.key!!, BasicFlight.VERSION.version).serialize()
 
         client.sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
         return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
     }
 
-    fun createNewAccount(client: Client, name: String, key: ByteArray): Boolean{
-        val payLoad = wrap(name) + key
+    /**
+     * check username and password with server
+     * @param client: [Client] to use for comms
+     * @param username: username to check
+     * @param password: password to check
+     * @return error code if send error, 1 if OK, 2 if server OK but login/pass incorrect, -999 if receive error
+     */
+    fun testLogin(client: Client, username: String, password: String): Int{
+        val payload = LoginData(username, makeKey(password),BasicFlight.VERSION.version).serialize()
+        val requestResult = client.sendRequest(JoozdlogCommsKeywords.LOGIN, payload)
+        if (requestResult < 0) return requestResult
+        return when (val x = client.readFromServer()?.toString(Charsets.UTF_8)){
+            JoozdlogCommsKeywords.OK -> 1
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> 2
+            null -> -999
+            else -> {
+                Log.w("testLogin", "Server responded unexpected \"$x\"")
+                -998
+            } // for debugging, server responded something unexpected
+        }
+    }
+
+    fun createNewAccount(client: Client, name: String, key: ByteArray): Boolean?{
+        val payLoad = LoginData(name, key, BasicFlight.VERSION.version).serialize()
         client.sendRequest(JoozdlogCommsKeywords.NEW_ACCOUNT, payLoad)
         val result = client.readFromServer()
         Log.d(TAG, "Result was ${result?.toString(Charsets.UTF_8)}")
-        return result?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
+        return result?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
     }
 
     fun requestFlightsSince(client: Client, timeStamp: Long): List<Flight>?{
@@ -198,6 +221,15 @@ object ServerFunctions {
     fun save(client: Client): Boolean {
         client.sendRequest(JoozdlogCommsKeywords.SAVE_CHANGES)
         return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
+    }
+
+
+    /**
+     * Make a key from password in the same way it is done in Preferences, for checking purposes
+     */
+    private fun makeKey(password: String): ByteArray = with (MessageDigest.getInstance("MD5")) {
+        update(password.toByteArray())
+        digest()
     }
 
 

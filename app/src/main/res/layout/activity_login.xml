@@ -25,16 +25,27 @@
     android:layout_height="match_parent"
     tools:context=".ui.activities.LoginActivity">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/loginActivityToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/MyActionBar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.ActionBar" />
+
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/login_usernameLayout"
+        android:id="@+id/usernameLayout"
         android:layout_width="379dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
+        app:errorEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView4">
+        app:layout_constraintTop_toBottomOf="@+id/loginActivityToolbar">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/usernameEditText"
@@ -46,15 +57,16 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/login_passwordLayout"
+        android:id="@+id/passwordLayout"
         android:layout_width="379dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
+        app:errorEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login_usernameLayout"
+        app:layout_constraintTop_toBottomOf="@+id/usernameLayout"
         app:passwordToggleEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -66,40 +78,35 @@
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <TextView
         android:id="@+id/singInButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1"
+        android:background="@drawable/rounded_corners"
+        android:gravity="center"
+        android:padding="6dp"
         android:text="@string/title_activity_login"
-        app:layout_constraintEnd_toEndOf="@+id/login_passwordLayout"
-        app:layout_constraintStart_toStartOf="@+id/login_passwordLayout"
-        app:layout_constraintTop_toBottomOf="@+id/login_passwordLayout" />
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
-        android:text="@string/title_activity_login"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textAllCaps="true"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/passwordLayout"
+        app:layout_constraintStart_toStartOf="@+id/passwordLayout"
+        app:layout_constraintTop_toBottomOf="@+id/passwordLayout" />
 
     <TextView
         android:id="@+id/dontForgetPAsswordTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
         android:gravity="center_horizontal"
         android:text="@string/youCannotResetPassword"
-        app:layout_constraintEnd_toEndOf="@+id/login_passwordLayout"
-        app:layout_constraintStart_toStartOf="@+id/login_passwordLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/singInButton" />
 
     <TextView
@@ -115,5 +122,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/dontForgetPAsswordTextView" />
+
+    <TextView
+        android:id="@+id/makeNewAccountTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:gravity="center_horizontal"
+        android:text="@string/make_new_account"
+        android:textColor="@color/design_default_color_primary_dark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/forgotPasswordTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -28,6 +28,9 @@
     <string name="name">Name</string>
     <string name="aircraft">Aircraft</string>
     <string name="search">Search</string>
+    <string name="_continue">Continue</string>
+    <string name="skip">Skip</string>
+    <string name="retry">Retry</string>
 
     <string name="clear">Clear</string>
     <string name="editFlight">Add Flight</string>
@@ -100,21 +103,40 @@
     <string name="landings">Landings</string>
     <string name="arrowRight">➔</string>
     <string name="settings">Settings</string>
+    <string name="error">Error</string>
 
     <string name="instructor">INSTRUCTOR</string>
     <string name="done">Done!</string>
 
     <string name="newUserActivityHeader">Create cloud sync account</string>
-
+    <string name="almost_done">Almost done!</string>
 
     <!--
     Complete messages
     -->
 
+
+    <string name="no_internet">Cannot connect to server</string>
+    <string name="no_internet_create_account">No internet connection available. You can create and account in the settings screen when you have one, or you can connect to the internet now and retry.</string>
+    <string name="no_server_create_account">Server seems to be unavailable. Please retry to create an account at a later time via the settings menu.</string>
+    <string name="no_internet_login">Cannot connect to server. Login data has been stored but not checked with server.</string>
+    <string name="password_cannot_be_empty">Password cannot be empty</string>
+    <string name="username_cannot_be_empty">Username cannot be empty</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="wrong_username_password">Wrong username or password</string>
+    <string name="pass_requirements">Password requirements</string>
+    <string name="password_does_not_meet_standards">Password does not meet standards. It needs a length of at least 6 and at least 2 different characters.</string>
+    <string name="password_does_not_meet_standards_short">Password does not meet standards.</string>
+    <string name="username_already_taken">This username is already taken.</string>
+    <string name="user_exists_password_correct">This username exists, and you have entered the correct password for it. If this is not you, please pick another username and a more secure password.</string>
+    <string name="use_this">Use this</string>
+
+    <string name="calendar_sync_conflict">Calendar Sync conflict</string>
+    <string name="calendar_sync_edited_flight">You are editing a planned flight while calendar sync is enabled. This means all changes will be gone by next sync. Do you want to disable calendar syncing until after this flight?</string>
     <string name="delete_completed_flight">You are trying to delete a COMPLETED flight. This might be illegal. Delete anyway?</string>
     <string name="delete_calendar_flight">You are deleting a a flight from your calendar. Do you want to disable calendar import?</string>
     <string name="delete_calendar_flight_until_end">Until end of flight</string>
-    <string name="you_can_start_calendar_sync_again">You can start calendar synchronizing again by switching it off and on in settings</string>
+    <string name="you_can_start_calendar_sync_again">You can start calendar synchronizing again by re-enabling it in the Settings menu</string>
 
     <!--
     - Strings for SettingsActivity
@@ -163,10 +185,34 @@
     <string name="repeatPassword">Repeat password</string>
     <string name="alreadyHaveAnAccountQuestion">Already have an account?</string>
     <string name="signIn">Sign in</string>
+    <string name="signOut">Sign out</string>
     <string name="youCannotResetPassword">You cannot reset your password! Don\'t forget it!</string>
-    <string name="iDidForgetMyPassword">I did forget my password so I need to make a new account :(</string>
+    <string name="iDidForgetMyPassword">I forgot my password anyway :(</string>
+    <string name="make_new_account">Make a new account</string>
+    <string name="skipThisStep">Skip this step</string>
+    <string name="dontWantCloudSync">Don\'t want to use cloud sync?</string>
+    <string name="create_account">Create new account</string>
+    <string name="you_are_signed_in_as">You are signed in as <![CDATA[<b>%1$s</b>]]>.</string>
+    <string name="you_are_not_signed_in">You are not signed in.</string>
+    <string name="i_accept_terms">I accept the terms and conditions</string>
+    <string name="must_accept_terms">You must accept the terms and conditions to use Cloud Sync</string>
+    <string name="cannot_restore_password">Don\'t lose your password. You cannot restore it.</string>
+    <string name="already_forgot">I already forgot :(</string>
+    <string name="cloud_sync_terms">Cloud Sync terms</string>
+    <string name="calendar_import">Calendar Import</string>
+    <string name="calendar_import_description_line1">You can import flights from your device\'s calendar.</string>
+    <string name="calendar_import_description_line2">This will look for entries like \"KL1234 AMS-LCY" in whatever calendar you pick.</string>
+    <string name="calendar_import_description_line3">Apart from these entries, none of your calendar contents are being saved or transmitted.</string>
+    <string name="do_you_want_to_enable_this">Do you want to enable this?</string>
+    <string name="use_calendar_import">Use Calendar Import</string>
+    <string name="dont_use_multiple_device">Using this on multiple devices might lead to performance problems, so don\'t do that</string>
+    <string name="use_cloud_sync">Use Cloud Sync</string>
+    <string name="sync_flights_across_devices">Synchronize flights across multiple devices or easily migrate to a new device</string>
+    <string name="disabled_until">Disabled until %1$s</string>
+    <string name="enable_now">Enable now</string>
 
 
 </resources>
+
 
 

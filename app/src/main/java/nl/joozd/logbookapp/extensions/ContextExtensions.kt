@@ -20,8 +20,9 @@
 package nl.joozd.logbookapp.extensions
 
 import android.content.Context
-import androidx.annotation.AttrRes
 import android.util.TypedValue
+import androidx.annotation.AttrRes
+import androidx.core.text.HtmlCompat
 
 fun Context.getColorFromAttr(
     @AttrRes attrColor: Int,
@@ -31,3 +32,5 @@ fun Context.getColorFromAttr(
     theme.resolveAttribute(attrColor, typedValue, resolveRefs)
     return typedValue.data
 }
+
+fun Context.getStringWithMakeup(res: Int, vararg args: Any?) = HtmlCompat.fromHtml(getString(res, *args), HtmlCompat.FROM_HTML_MODE_COMPACT)

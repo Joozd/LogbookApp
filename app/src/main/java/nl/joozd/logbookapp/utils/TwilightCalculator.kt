@@ -27,7 +27,11 @@ import nl.joozd.logbookapp.extensions.toRadians
 import java.time.*
 import kotlin.math.*
 
-
+/**
+ * Does day/night calculations.
+ * constructor:
+ * @param calculateDate: Date for which day/night is calculated
+ */
 class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the daylight an night data on calculateDate!
     constructor (epochSecond: Long): this(LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSecond), ZoneOffset.UTC))
 

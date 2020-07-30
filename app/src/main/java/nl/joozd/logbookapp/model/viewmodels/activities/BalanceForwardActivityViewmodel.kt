@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.model.viewmodels.activities
 
 import androidx.lifecycle.LiveData
 import nl.joozd.joozdlogcommon.BalanceForward
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.BalanceForwardActivityEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 
 class BalanceForwardActivityViewmodel: JoozdlogActivityViewModel() {

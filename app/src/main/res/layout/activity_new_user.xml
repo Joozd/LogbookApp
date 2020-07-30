@@ -21,110 +21,29 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/newUserActivityLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activities.NewUserActivity">
+    tools:context=".ui.activities.newUserActivity.NewUserActivity">
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="@string/newUserActivityHeader"
-        android:textSize="24sp"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/tabLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout5"
-        android:layout_width="0dp"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="32dp"
+        android:layout_gravity="bottom"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/userNameEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/username" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout15"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:passwordToggleEnabled="true"
-        app:layout_constraintEnd_toEndOf="@+id/textInputLayout5"
-        app:layout_constraintStart_toStartOf="@+id/textInputLayout5"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout5">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/passwordEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/prompt_password"
-            android:inputType="textPassword" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout17"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:passwordToggleEnabled="true"
-        app:layout_constraintEnd_toEndOf="@+id/textInputLayout15"
-        app:layout_constraintStart_toStartOf="@+id/textInputLayout15"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout15">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/repeatPasswordEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/repeatPassword"
-            android:inputType="textPassword" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <Button
-        android:id="@+id/signUpButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_weight="1"
-        android:backgroundTint="@attr/colorPrimary"
-        android:text="Button"
-        app:layout_constraintEnd_toEndOf="@+id/textInputLayout17"
-        app:layout_constraintStart_toStartOf="@+id/textInputLayout17"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout17" />
-
-    <TextView
-        android:id="@+id/alreadyHaveAnAccountFirstPartTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="@string/alreadyHaveAnAccountQuestion"
-        app:layout_constraintStart_toStartOf="@+id/textInputLayout17"
-        app:layout_constraintTop_toBottomOf="@+id/signUpButton" />
-
-    <TextView
-        android:id="@+id/signInTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingStart="6dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="18dp"
-        android:paddingBottom="6dp"
-        android:text="@string/signIn"
-        android:textColor="@color/design_default_color_primary_dark"
-        app:layout_constraintBottom_toBottomOf="@+id/alreadyHaveAnAccountFirstPartTextView"
-        app:layout_constraintStart_toEndOf="@+id/alreadyHaveAnAccountFirstPartTextView"
-        app:layout_constraintTop_toTopOf="@+id/alreadyHaveAnAccountFirstPartTextView" />
-
+        app:tabBackground="@drawable/tab_selector"
+        app:tabGravity="center"
+        app:tabIndicatorHeight="0dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
-import android.util.Log
 import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +32,7 @@ import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.withRegAndType
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.withTakeoffLandings
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.getDateStringFromEpochSeconds
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.getTimestringFromEpochSeconds
-import nl.joozd.logbookapp.model.helpers.FeedbackEvents.EditFlightFragmentEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.withTimeInStringToTime
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.withTimeOutStringToTime

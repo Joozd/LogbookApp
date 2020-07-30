@@ -63,7 +63,7 @@ class Client: Closeable {
     }
 
     fun sendToServer(packet: Packet): Int {
-        Log.d("SendToServer:", packet.message.take(40).toByteArray().toString(Charsets.UTF_8))
+        // Log.d("SendToServer:", packet.message.take(40).toByteArray().toString(Charsets.UTF_8))
         try {
             socket?.let {
                 val output = BufferedOutputStream(it.getOutputStream())
@@ -130,21 +130,22 @@ class Client: Closeable {
     /**
      * If this returns null, there is an error.
      */
-    fun readFromServer(): ByteArray? {
-        try {
-            socket?.let {
-                return try {
-                    getInput(BufferedInputStream(it.getInputStream()))
-                } catch (e: IOException) {
-                    Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
-                    null
-                }
+    fun readFromServer(): ByteArray? = try {
+        socket?.let {
+            try {
+                getInput(BufferedInputStream(it.getInputStream()))
+            } catch (e: IOException) {
+                Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
+                null
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
         }
-        return null
+    } catch (e: Exception) {
+        Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
+        null
     }
+
+
+
 
     /**
      * Runs listsner f with a 0-100 percentage completed value
@@ -264,27 +265,18 @@ class Client: Closeable {
      * @param request: A string as defined in nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
      * @param extraData: A bytearray with extra data to be sent as part of this request
      */
-    fun sendRequest(request: String, extraData: ByteArray? = null, compressed: Boolean = false){
-        if (compressed) {
-            this.sendRequest(JoozdlogCommsKeywords.NEXT_IS_COMPRESSED)
-            this.sendCompressed(
-                Packet(
-                    wrap(request) + (extraData ?: ByteArray(0))
-                )
-            )
-        }
-        else
-            this.sendToServer(
-                Packet(
-                    wrap(request) + (extraData ?: ByteArray(0))
-                )
-            )
+    fun sendRequest(request: String, extraData: ByteArray? = null, compressed: Boolean = false): Int{
+        return if (compressed) {
+            sendRequest(JoozdlogCommsKeywords.NEXT_IS_COMPRESSED)
+            this.sendCompressed(Packet(wrap(request) + (extraData ?: ByteArray(0))))
+        } else
+            this.sendToServer(Packet(wrap(request) + (extraData ?: ByteArray(0))))
     }
 
 
     override fun close(){
         socket.use {
-            Log.d(TAG, "sending EOS, closing socket")
+            //Log.d(TAG, "sending EOS, closing socket")
             this.sendRequest(JoozdlogCommsKeywords.END_OF_SESSION)
         }
     }

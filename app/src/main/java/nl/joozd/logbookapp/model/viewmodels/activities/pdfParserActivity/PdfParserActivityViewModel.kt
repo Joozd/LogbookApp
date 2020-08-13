@@ -35,7 +35,11 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.utils.pdf.parsers.JoozdlogKlcRosterParser
+import nl.joozd.logbookapp.data.pdfparser.JoozdlogKlcRosterParser
+import nl.joozd.logbookapp.data.pdfparser.KlcMonthlyParser
+import nl.joozd.logbookapp.data.pdfparser.helpers.KlcMonthlyFlightsCleaner
+import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
+import nl.joozd.logbookapp.extensions.toTimeString
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.time.Instant
@@ -43,6 +47,7 @@ import java.time.Instant
 
 
 class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
+    private var _parsedChronoData: ParsedChronoData? = null
     private val _progressTextResource = MutableLiveData<Int>()
     val progressTextResource: LiveData<Int>
         get() = _progressTextResource
@@ -71,7 +76,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     private var periodToSave: ClosedRange<Instant>? = null
 
     private fun run() {
-        //TODO Move this work to repository
+        //TODO Move this work to repository?
         intent?.let {
             updateProgress(0, R.string.receivedIntent)
             viewModelScope.launch {
@@ -83,20 +88,21 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                     //check if it was actually a supported file
 
 
-                    //TODO check if calendar sync is active
+
 
                     /**
                      * This starts the correct functions when a roster type is found
                      */
                     when (typeDetector.typeOfFile) {
-                        SupportedTypes.KLC_ROSTER -> uri?.getInputStream()?.let {
+                        SupportedTypes.KLC_ROSTER -> uri?.getInputStream()?.use {
+                            //TODO check if calendar sync is active
                             if (!parseKlcRoster(it))
                                 feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
                         } ?: feedback(PdfParserActivityEvents.ERROR)
 
-                        SupportedTypes.KLC_MONTHLY -> {
-                            feedback(PdfParserActivityEvents.NOT_IMPLEMENTED)
-                        }
+                        SupportedTypes.KLC_MONTHLY -> uri?.getInputStream()?.use {
+                            val result = parseKlcMonthly(it)
+                        } ?: feedback(PdfParserActivityEvents.ERROR)
                         else -> feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
                     }
                 }
@@ -141,7 +147,9 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      * Return true if work successfully launched, false if file not OK
      */
     private fun parseKlcRoster(inputStream: InputStream):  Boolean{
-        val roster = JoozdlogKlcRosterParser(inputStream)
+        val roster = JoozdlogKlcRosterParser(
+            inputStream
+        )
         if (!roster.isValid) return false
         viewModelScope.launch (Dispatchers.IO + NonCancellable){
             val mostRecentFlight = flightRepository.getMostRecentFlightAsync()
@@ -155,6 +163,46 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             saveFlightsFromRoster()
         }
         return true
+    }
+
+    private suspend fun parseKlcMonthly(inputStream: InputStream): Boolean{
+        //TODO: move Strings to resource file
+        with (KlcMonthlyParser(inputStream)){
+            if (!validMonthlyOverview){
+                feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
+                return false
+            }
+            val foundFlights = KlcMonthlyFlightsCleaner(flights).cleanFlights()
+            if (foundFlights == null){
+                Log.w("PdfParserActivity", "KlcMonthlyParser.flights == null")
+                feedback(PdfParserActivityEvents.ERROR)
+                return false
+            }
+            val exactMatches = flightRepository.findMatches(foundFlights, false)
+            val flightsToAdjust = flightRepository.findMatches(foundFlights, true).filter {match -> match.first !in exactMatches.map{it.first}}
+            val conflicts = flightRepository.findConflicts(foundFlights)
+            val newFlights = flightRepository.findNewFlights(foundFlights)
+
+            if (conflicts.isEmpty()) {
+                flightRepository.save(flightsToAdjust.map{match ->
+                    val oldRemarks = if (match.second.remarks.isBlank()) "" else " - " + match.second.remarks
+                    match.second.copy(timeOut = match.first.timeOut, timeIn = match.first.timeIn, timeStamp = match.first.timeStamp, remarks = "Times adjusted from Chrono. Old: ${match.second.tOut().toTimeString()}-${match.second.tIn().toTimeString()}$oldRemarks")
+                })
+                flightRepository.saveFromRoster(newFlights.map{it.copy (remarks = "From Chrono, some info may be missing")})
+                feedback(PdfParserActivityEvents.CHRONO_SUCCESSFULLY_ADDED).apply{
+                    extraData.putInt(ADJUSTED_FLIGHTS, flightsToAdjust.size)
+                    extraData.putInt(NEW_FLIGHTS, newFlights.size)
+                    extraData.putInt(TOTAL_FLIGHTS_IN_CHRONO, foundFlights.size)
+                }
+                return false
+            }
+            else{
+                //TODO WIP
+                _parsedChronoData = ParsedChronoData(exactMatches, flightsToAdjust, conflicts, newFlights)
+                feedback(PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND)
+                return false
+            }
+        }
     }
 
     /**
@@ -179,8 +227,11 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     }
 
     /*********************************************************************************************
-     * Public functions
+     * Public functions and variables
      *********************************************************************************************/
+
+    val parsedChronoData: ParsedChronoData?
+    get() = _parsedChronoData
 
     fun runOnce(newIntent: Intent){
         if (intent == null){
@@ -208,5 +259,10 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     }
 
 
+    companion object{
+        const val ADJUSTED_FLIGHTS = "ADJUSTED_FLIGHTS"
+        const val NEW_FLIGHTS = "NEW_FLIGHTS"
+        const val TOTAL_FLIGHTS_IN_CHRONO = "TOTAL_FLIGHTS_IN_CHRONO"
+    }
 
 }

@@ -42,6 +42,8 @@ object FeedbackEvents {
         Event {
         NOT_IMPLEMENTED,
         ROSTER_SUCCESSFULLY_ADDED,
+        CHRONO_SUCCESSFULLY_ADDED,
+        CHRONO_CONFLICTS_FOUND,
         CALENDAR_SYNC_ENABLED,
         CALENDAR_SYNC_PAUSED,
         FILE_NOT_FOUND,

@@ -41,7 +41,7 @@
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
         </activity>
         <activity
-            android:name=".ui.activities.PdfParserActivity"
+            android:name=".ui.activities.pdfParserActivity.PdfParserActivity"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

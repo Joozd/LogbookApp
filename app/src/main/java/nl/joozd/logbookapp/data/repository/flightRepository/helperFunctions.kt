@@ -26,22 +26,20 @@ import java.time.Instant
 
 /**
  * Gets all flight from [allFlights] that either :
- * - start between earliest in and latest out in [flightsOnDays]
- * - start between earliest in and latest out in dateRange
+ * - start between earliest out and latest in in [flightsOnDays]
+ * - start between earliest out and latest in in dateRange
  */
 fun getFlightsOnDays(allFlights: List<Flight>, flightsOnDays: List<Flight>? = null, dateRange: ClosedRange<Instant>? = null): List<Flight>{
     val period: ClosedRange<Long> = when {
         dateRange != null -> (dateRange.start.epochSecond .. dateRange.endInclusive.epochSecond)
         flightsOnDays != null -> {
-            if (flightsOnDays.isEmpty())
-                return emptyList()
-            val earliestIn = flightsOnDays.minBy { it.timeIn }?.timeOut ?: 0L
-            val latestOut = flightsOnDays.maxBy { it.timeOut }?.timeOut ?: 0L
+            val earliestIn = flightsOnDays.minBy { it.timeOut }?.timeOut ?: 0L
+            val latestOut = flightsOnDays.maxBy { it.timeIn }?.timeIn ?: 0L
             (earliestIn..latestOut)
         }
         else -> (0L..0L)
     }
-    return allFlights.filter { it.timeIn in period }
+    return allFlights.filter { it.timeOut in period }
 }
 
 /**
@@ -59,4 +57,32 @@ fun getFlightsMatchingPlannedFlights(allFlights: List<Flight>, plannedFlights: L
 fun getNonMatchingPlannedFlights(allFlights: List<Flight>, plannedFlights: List<Flight>): List<Flight>{
     val sameDayFlights = getFlightsOnDays(allFlights, plannedFlights)
     return plannedFlights.filter { pf -> sameDayFlights.none { af -> af.isSamedPlannedFlightAs(pf) } }
+}
+
+/**
+ * You can have back-to-back flights (ie. 01:00-01:30 and 01:30-02:00 don't overlap)
+ */
+fun getOverlappingFlights(allFlights: List<Flight>, flightsToCheck: List<Flight>): List<Flight> = flightsToCheck.filter {f ->
+        allFlights.any{
+            when{
+                it.timeOut < f.timeOut -> it.timeIn > f.timeOut        // if it leaves before and arrives after other flight departed
+                it.timeOut >= f.timeIn -> false                          // It leaves after other flight arrived
+                else -> true
+        }
+    }
+}
+
+fun getOverlappingFlightsAsPairs(allFlights: List<Flight>, flightsToCheck: List<Flight>): List<Pair<Flight, Flight>> {
+    val overlappingPairs = emptyList<Pair<Flight, Flight>>().toMutableList()
+    flightsToCheck.forEach{f ->
+        val overlaps = allFlights.filter {
+            when{
+                it.timeOut < f.timeOut -> it.timeIn > f.timeOut        // if it leaves before and arrives after other flight departed
+                it.timeOut >= f.timeIn -> false                          // It leaves after other flight arrived
+                else -> true
+            }
+        }
+        overlappingPairs.addAll(overlaps.map{f to it})
+    }
+    return overlappingPairs
 }

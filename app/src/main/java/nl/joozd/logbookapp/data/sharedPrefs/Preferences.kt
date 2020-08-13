@@ -136,6 +136,11 @@ object Preferences {
      */
     var updateAircraftWithoutAsking: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
+    /**
+     * Max time difference before montly/actual becomes a conflict (in minutes)
+     */
+    var maxChronoAdjustment: Int by JoozdLogSharedPrefs(sharedPref, 180)
+
     /*************************
      * Other settings
      *************************/

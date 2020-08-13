@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.utils.pdf.parsers
+package nl.joozd.logbookapp.data.pdfparser
 
 import nl.joozd.logbookapp.model.dataclasses.Flight
 

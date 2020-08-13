@@ -39,8 +39,9 @@ class FeedbackEvent(val type: FeedbackEvents.Event) {
     }
     val extraData = Bundle()
 
-    fun putInt(value: Int){
+    fun putInt(value: Int): FeedbackEvent{
         extraData.putInt(INTEGER, value)
+        return this
     }
     fun getInt(): Int = extraData.getInt(INTEGER)
 

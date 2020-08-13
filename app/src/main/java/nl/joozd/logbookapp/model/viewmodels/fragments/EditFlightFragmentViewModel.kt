@@ -61,6 +61,8 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
      * - setters
      *********************************************************************************************/
 
+    val flightID = Transformations.map(flight) { it.flightID }
+
     val date: LiveData<String> = Transformations.map(flight) { getDateStringFromEpochSeconds(it.timeOut) }
     fun setDate(date: LocalDate){
         workingFlight?.let{ workingFlight = it.withDate(date)}

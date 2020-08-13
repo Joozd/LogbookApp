@@ -17,22 +17,20 @@
  *
  */
 
-package nl.joozd.logbookapp.utils.pdf.parsers
+package nl.joozd.logbookapp.data.pdfparser
 
 import android.util.Log
-import android.util.Range
-import androidx.core.util.toRange
 import nl.joozd.klcrosterparser.Activities
 import nl.joozd.klcrosterparser.KlcRosterEvent
 import nl.joozd.klcrosterparser.KlcRosterParser
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.reversed
 import java.io.InputStream
 import java.time.Instant
 
-class JoozdlogKlcRosterParser(inputStream: InputStream): JoozdlogRosterParser {
+class JoozdlogKlcRosterParser(inputStream: InputStream):
+    JoozdlogRosterParser {
 
     /*********************************************************************************************
      * Private parts

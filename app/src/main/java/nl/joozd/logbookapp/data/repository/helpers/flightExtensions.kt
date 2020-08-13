@@ -33,9 +33,21 @@ fun Flight.prepareForSave(): Flight{
 }
 
 fun Flight.isSamedPlannedFlightAs(f: Flight) =
-    isPlanned
-    && orig == f.orig
-    && dest == f.dest
-    && timeOut == f.timeOut
-    && timeIn == f.timeIn
-    && flightNumber == f.flightNumber
+    isSameFlightAs(f) && isPlanned
+
+fun Flight.isSameFlightAs(f: Flight) =
+    orig == f.orig
+        && dest == f.dest
+        && timeOut == f.timeOut
+        && timeIn == f.timeIn
+        && flightNumber == f.flightNumber
+
+/**
+ * Checks if flights are the same, times may be off by max [margin] seconds
+ */
+    fun Flight.isSameFlightAsWithMargins(f: Flight, margin: Long) =
+    orig == f.orig
+            && dest == f.dest
+            && timeOut in (f.timeOut-margin .. f.timeOut+margin)
+            && timeIn in (f.timeIn-margin .. f.timeIn+margin)
+            && flightNumber == f.flightNumber

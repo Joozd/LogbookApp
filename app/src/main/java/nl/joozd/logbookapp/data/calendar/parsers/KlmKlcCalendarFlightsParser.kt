@@ -23,7 +23,7 @@ import android.util.Log
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
-import nl.joozd.logbookapp.utils.pdf.parsers.JoozdlogRosterParser
+import nl.joozd.logbookapp.data.pdfparser.JoozdlogRosterParser
 import nl.joozd.logbookapp.utils.reversed
 
 /**
@@ -32,7 +32,8 @@ import nl.joozd.logbookapp.utils.reversed
  * suggested use: KlmCrewCalendarFlightsParser(listOfEvents).getFlights(icaoIataMap)
  */
 
-class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>): JoozdlogRosterParser {
+class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>):
+    JoozdlogRosterParser {
     init{
         Log.d(this::class.simpleName, "Got ${events.size} events")
     }

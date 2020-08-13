@@ -25,6 +25,8 @@ package nl.joozd.joozdlogcommon.serializing
  */
 fun packSerialized(series: List<ByteArray>): ByteArray = series.map{it.size.toByteArray().toList() + it.toList()}.flatten().toByteArray()
 
+fun packSerializable(series: List<JoozdlogSerializable>): ByteArray = packSerialized(series.map{it.serialize()})
+
 fun unpackSerialized(packed: ByteArray): List<ByteArray>{
     val list = mutableListOf<ByteArray>()
     var index = 0

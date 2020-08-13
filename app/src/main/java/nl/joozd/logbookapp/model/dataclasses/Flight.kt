@@ -50,7 +50,7 @@ data class Flight(
     val nightTime: Int = 0,
     val ifrTime:Int = 0, // 0 means 0 minutes, -1 means this is a VFR flight
     val simTime: Int = 0,
-    val aircraftType: String = "",                              // overrides standard AircraftType that goes with registration
+    val aircraftType: String = "",                           // overrides standard AircraftType that goes with registration
     val registration: String = "",
     val name: String = "",
     val name2: String = "",
@@ -212,4 +212,6 @@ data class Flight(
     fun timeInString(): String = tIn().format(FlightDataPresentationFunctions.flightTimeFormatter)
     fun duration(): Int = if (correctedTotalTime != 0) correctedTotalTime else Crew.of(augmentedCrew).getLogTime(Duration.between(this.tOut(), this.tIn()).toMinutes().toInt())
     fun durationString() = FlightDataPresentationFunctions.minutesToHoursAndMinutesString(duration())
+
+    // override fun toString(): String = "Flight $flightID: orig: $orig, $dest: dest, $flightNumber out: ${tOut()}, in: ${tIn()} "
 }

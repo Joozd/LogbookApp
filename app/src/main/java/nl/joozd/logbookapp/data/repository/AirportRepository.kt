@@ -136,9 +136,9 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
 
     suspend fun getIcaoToIataMap(forceReload: Boolean = false): Map<String, String> =
         if (forceReload)
-            withContext (dispatcher) { getAll().map { a -> a.ident to a.iata_code }.toMap() }
+            withContext (dispatcher) { getAll().map { a -> a.ident.toUpperCase(Locale.ROOT) to a.iata_code.toUpperCase(Locale.ROOT) }.toMap() }
         else {
-            _icaoIataMap.value ?: withContext (dispatcher){ getAll().map { a -> a.ident to a.iata_code }.toMap() }
+            _icaoIataMap.value ?: withContext (dispatcher){ getAll().map { a -> a.ident.toUpperCase(Locale.ROOT) to a.iata_code.toUpperCase(Locale.ROOT) }.toMap() }
     }
 
     fun getIcaoIataMapAsync() = async { getIcaoToIataMap()}

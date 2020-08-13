@@ -176,7 +176,7 @@
 
 
     <string name="receivedIntent">Receiving data</string>
-    <string name="readingFile">Reading roster</string>
+    <string name="readingFile">Reading file</string>
     <string name="readingRoster">getting flights from roster</string>
     <string name="removingOldFlights">Removing old flights</string>
     <string name="insertNewFlights">Inserting new flights</string>

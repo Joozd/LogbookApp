@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.utils.pdf.parsers
+package nl.joozd.logbookapp.data.pdfparser
 
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
@@ -47,7 +47,9 @@ class KlcMonthlyParser(inputStream: InputStream) {
      */
 
     private val dateRegEx = """\d{2}-\d{2}-\d{4}""".toRegex()
-    private val flightRegEx = """(?<$DAY>\d{1,2}) (?<$FLIGHTNUMBER>[A-Z]{2}\d{3,4}) (?<$TIME_OUT>\d\d:\d\d) (?<$ORIG>[A-Z]{3}) (?<$DEST>[A-Z]{3}) (?<$REGISTRATION>[A-Z]{3}) (?<$TIME_IN>\d\d:\d\d) (?<$TOTAL_TIME>\d\d:\d\d)""".toRegex()
+    // commented out due no named regex support
+    // private val flightRegEx = """(?<$DAY>\d{1,2}) (?<$FLIGHTNUMBER>[A-Z]{2}\d{3,4}) (?<$TIME_OUT>\d\d:\d\d) (?<$ORIG>[A-Z]{3}) (?<$DEST>[A-Z]{3}) (?<$REGISTRATION>[A-Z]{3}) (?<$TIME_IN>\d\d:\d\d) (?<$TOTAL_TIME>\d\d:\d\d)""".toRegex()
+    private val flightRegEx = """(\d{1,2}) ([A-Z]{2}\d{3,4}) (\d\d:\d\d) ([A-Z]{3}) ([A-Z]{3}) ([A-Z]{3}) (\d\d:\d\d) (\d\d:\d\d)""".toRegex()
     //18 KL986 08:40 LCY AMS EXC 09:42 01:02
 
 
@@ -65,7 +67,7 @@ class KlcMonthlyParser(inputStream: InputStream) {
             PdfTextExtractor.getTextFromPage(reader, pageNumber, SimpleTextExtractionStrategy())
         }.split('\n').filter{it.isNotEmpty()}
     }
-    private val periodLine = (text.firstOrNull{ it.startsWith( PERIOD_LINE_IDENTIFIER )} ?: "!PERIOD_LINE_IDENTIFIER").also {
+    private val periodLine = (text.firstOrNull{ it.startsWith(PERIOD_LINE_IDENTIFIER)} ?: "!PERIOD_LINE_IDENTIFIER").also {
         if (dateRegEx.find(it) == null) _dataSeemsValid = false }
 
     //monthStartInstant = LocalDateTime at midnight at start of month
@@ -83,15 +85,15 @@ class KlcMonthlyParser(inputStream: InputStream) {
         val matches = text.mapNotNull { flightRegEx.find(it) }
         return matches.map{ flightLine ->
             val instantOut: Instant = flightLine.timeOut()
-                .atDate(monthStart.plusDays(flightLine.day()))
+                .atDate(monthStart.plusDays(flightLine.day() - 1)) // because month doesn't start at day 0
                 .toInstant(ZoneOffset.UTC)
             val instantIn: Instant = flightLine.timeIn()
-                .atDate(monthStart.plusDays(flightLine.day()))
+                .atDate(monthStart.plusDays(flightLine.day() - 1))
                 .toInstant(ZoneOffset.UTC).let {
                     if (it < instantOut) it.plusSeconds(ONE_DAY_IN_SECONDS) // in case arriving after midnight
                     else it
                 }
-            Flight(-1, orig = flightLine.orig(), dest = flightLine.dest(), timeOut = instantOut.epochSecond, timeIn = instantIn.epochSecond, registration = flightLine.reg())
+            Flight(-1, flightNumber = flightLine.flightNumber(), orig = flightLine.orig(), dest = flightLine.dest(), timeOut = instantOut.epochSecond, timeIn = instantIn.epochSecond, registration = flightLine.reg(), isPlanned = false)
         }
 
     }
@@ -102,6 +104,7 @@ class KlcMonthlyParser(inputStream: InputStream) {
 
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     private fun MatchResult.day(): Long = (this.groups[DAY]?.value ?: error ("ERROR 0003 NO DAY")).toLong()
+    private fun MatchResult.flightNumber(): String = (this.groups[FLIGHTNUMBER]?.value ?: error ("ERROR 0003 NO FLIGHT NUMBER"))
     private fun MatchResult.timeOut() = LocalTime.parse(groups[TIME_OUT]?.value ?: error ("ERROR 0001 NO TIME_OUT"), timeFormatter)
     private fun MatchResult.timeIn() = LocalTime.parse(groups[TIME_IN]?.value ?: error ("ERROR 0001 NO TIME_IN"), timeFormatter)
     private fun MatchResult.orig() = (groups[ORIG]?.value ?: error ("ERROR 0004 NO ORIG"))
@@ -131,7 +134,7 @@ class KlcMonthlyParser(inputStream: InputStream) {
 
     companion object{
         const val PERIOD_LINE_IDENTIFIER = "Period: From "
-
+/*
         const val DAY = "DAY"
         const val FLIGHTNUMBER = "FLIGHTNUMBER"
         const val TIME_OUT = "TIMEOUT"
@@ -140,6 +143,16 @@ class KlcMonthlyParser(inputStream: InputStream) {
         const val REGISTRATION = "REGISTRATION"
         const val TIME_IN = "TIMEIN"
         const val TOTAL_TIME = "TOTALTIME"
+
+ */
+        const val DAY = 1
+        const val FLIGHTNUMBER = 2
+        const val TIME_OUT = 3
+        const val ORIG = 4
+        const val DEST = 5
+        const val REGISTRATION = 6
+        const val TIME_IN = 7
+        const val TOTAL_TIME = 8
 
         const val ONE_DAY_IN_SECONDS = 86400L
 

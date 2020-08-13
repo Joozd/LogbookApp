@@ -126,9 +126,7 @@ else{
 
     fun menuSelectedEditAircraft() {
         viewModelScope.launch {
-            if (flightRepository.updateNamesDivider())
-                feedback(MainActivityEvents.DONE)
-            else feedback(MainActivityEvents.ERROR)
+            feedback(MainActivityEvents.NOT_IMPLEMENTED)
         }
     }
 

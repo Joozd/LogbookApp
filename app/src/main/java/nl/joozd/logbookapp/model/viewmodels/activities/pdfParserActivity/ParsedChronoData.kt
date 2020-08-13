@@ -17,17 +17,8 @@
  *
  */
 
-package nl.joozd.logbookapp.data.repository.helpers
+package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
-fun String.findBestHitForRegistration(registrations: Collection<String>): String?{
-    if (this in registrations) return this
-    var searchableRegs = registrations.filter{it.length > length}.filter{this in it}
+import nl.joozd.logbookapp.model.dataclasses.Flight
 
-    //we'll want to search from end to start. As soon as wel have one, we're good.
-    do {
-        searchableRegs.firstOrNull { it.endsWith(this) }?.let {return it}
-        if (searchableRegs.none { this in it }) return null
-        searchableRegs = searchableRegs.map { it.dropLast(1) }.filter { it.isNotEmpty() }
-    } while (searchableRegs.none{it.endsWith(this)})
-    return null
-}
+data class ParsedChronoData(val exactMatches: List<Pair<Flight, Flight>>, val flightsToAdjust: List<Pair<Flight, Flight>>, val conflicts: List<Pair<Flight, Flight>>, val newFlights: List<Flight>)

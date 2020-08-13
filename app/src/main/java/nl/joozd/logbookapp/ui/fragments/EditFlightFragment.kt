@@ -86,6 +86,10 @@ class EditFlightFragment: JoozdlogFragment(){
              * observers to show data in editText fields
              ************************************************************************************/
 
+            viewModel.flightID.observe(viewLifecycleOwner, Observer {
+                flightFlightID.text = it.toString()
+            })
+
             viewModel.date.observe(viewLifecycleOwner, Observer{
                 flightDateField.setTextIfNotFocused(it)
             })

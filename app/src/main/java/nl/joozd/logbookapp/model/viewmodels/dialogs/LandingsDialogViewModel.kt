@@ -32,15 +32,15 @@ class LandingsDialogViewModel: JoozdlogDialogViewModel() {
 
 
 
-    fun toDayUpButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffDay = it.takeOffDay + 1) }}
-    fun toNightUpButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffNight = it.takeOffNight + 1) }}
-    fun ldgDayUpButtonClick() { workingFlight?.let { workingFlight = it.copy(landingDay = it.landingDay + 1) }}
-    fun ldgNightUpButtonClick() { workingFlight?.let { workingFlight = it.copy(landingNight = it.landingNight + 1) }}
-    fun autolandUpButtonClick() { workingFlight?.let { workingFlight = it.copy(autoLand = it.autoLand + 1) }}
+    fun toDayUpButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffDay = it.takeOffDay + 1, autoFill = false) }}
+    fun toNightUpButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffNight = it.takeOffNight + 1, autoFill = false) }}
+    fun ldgDayUpButtonClick() { workingFlight?.let { workingFlight = it.copy(landingDay = it.landingDay + 1, autoFill = false) }}
+    fun ldgNightUpButtonClick() { workingFlight?.let { workingFlight = it.copy(landingNight = it.landingNight + 1, autoFill = false) }}
+    fun autolandUpButtonClick() { workingFlight?.let { workingFlight = it.copy(autoLand = it.autoLand + 1, autoFill = false) }}
 
-    fun toDayDownButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffDay = it.takeOffDay.minusOneWithFloor(0)) }}
-    fun toNightDownButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffNight = it.takeOffNight.minusOneWithFloor(0)) }}
-    fun ldgDayDownButtonClick() { workingFlight?.let { workingFlight = it.copy(landingDay = it.landingDay.minusOneWithFloor(0)) }}
-    fun ldgNightDownButtonClick() { workingFlight?.let { workingFlight = it.copy(landingNight = it.landingNight.minusOneWithFloor(0)) }}
-    fun autolandDownButtonClick() { workingFlight?.let { workingFlight = it.copy(autoLand = it.autoLand.minusOneWithFloor(0)) }}
+    fun toDayDownButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffDay = it.takeOffDay.minusOneWithFloor(0), autoFill = false) }}
+    fun toNightDownButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffNight = it.takeOffNight.minusOneWithFloor(0), autoFill = false) }}
+    fun ldgDayDownButtonClick() { workingFlight?.let { workingFlight = it.copy(landingDay = it.landingDay.minusOneWithFloor(0), autoFill = false) }}
+    fun ldgNightDownButtonClick() { workingFlight?.let { workingFlight = it.copy(landingNight = it.landingNight.minusOneWithFloor(0), autoFill = false) }}
+    fun autolandDownButtonClick() { workingFlight?.let { workingFlight = it.copy(autoLand = it.autoLand.minusOneWithFloor(0), autoFill = false) }}
 }

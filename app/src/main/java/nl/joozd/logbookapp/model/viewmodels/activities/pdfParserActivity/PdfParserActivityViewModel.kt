@@ -25,6 +25,7 @@ import android.os.Parcelable
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import nl.joozd.joozdlogpdfdetector.JoozdlogPdfDetector
@@ -39,7 +40,7 @@ import nl.joozd.logbookapp.data.pdfparser.JoozdlogKlcRosterParser
 import nl.joozd.logbookapp.data.pdfparser.KlcMonthlyParser
 import nl.joozd.logbookapp.data.pdfparser.helpers.KlcMonthlyFlightsCleaner
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
-import nl.joozd.logbookapp.extensions.toTimeString
+import nl.joozd.logbookapp.extensions.*
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.time.Instant
@@ -48,47 +49,21 @@ import java.time.Instant
 
 class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     private var _parsedChronoData: ParsedChronoData? = null
-    private val _progressTextResource = MutableLiveData<Int>()
-    val progressTextResource: LiveData<Int>
-        get() = _progressTextResource
-    //no public setter
-    private fun setProgressText(it: Int){
-        _progressTextResource.value = it
-    }
-
-    private val _progress = MutableLiveData<Int>()
-    val progress: LiveData<Int>
-        get() = _progress
-    //no public setter
-    private fun setProgress(progress: Int){
-        _progress.value = progress
-    }
-
-    private fun updateProgress(percentage: Int, textResource: Int){
-        setProgress(percentage)
-        setProgressText(textResource)
-    }
 
     private var intent: Intent? = null
 
-
     private var flightsToSave: List<Flight>? = null
     private var periodToSave: ClosedRange<Instant>? = null
+    private var foundFlights: List<Flight>? = null
 
     private fun run() {
-        //TODO Move this work to repository?
         intent?.let {
-            updateProgress(0, R.string.receivedIntent)
             viewModelScope.launch {
                 val uri = it.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri
                 getTypeDetector(uri)?.let { typeDetector ->
-                    updateProgress(20, R.string.readingFile)
                     Log.d("GOT PDF:", "\n\n${typeDetector.firstPageText}\n\n")
 
                     //check if it was actually a supported file
-
-
-
 
                     /**
                      * This starts the correct functions when a roster type is found
@@ -172,43 +147,23 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                 feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
                 return false
             }
-            val foundFlights = KlcMonthlyFlightsCleaner(flights).cleanFlights()
-            if (foundFlights == null){
-                Log.w("PdfParserActivity", "KlcMonthlyParser.flights == null")
-                feedback(PdfParserActivityEvents.ERROR)
-                return false
-            }
-            val exactMatches = flightRepository.findMatches(foundFlights, false)
-            val flightsToAdjust = flightRepository.findMatches(foundFlights, true).filter {match -> match.first !in exactMatches.map{it.first}}
-            val conflicts = flightRepository.findConflicts(foundFlights)
-            val newFlights = flightRepository.findNewFlights(foundFlights)
-
-            if (conflicts.isEmpty()) {
-                flightRepository.save(flightsToAdjust.map{match ->
-                    val oldRemarks = if (match.second.remarks.isBlank()) "" else " - " + match.second.remarks
-                    match.second.copy(timeOut = match.first.timeOut, timeIn = match.first.timeIn, timeStamp = match.first.timeStamp, remarks = "Times adjusted from Chrono. Old: ${match.second.tOut().toTimeString()}-${match.second.tIn().toTimeString()}$oldRemarks")
-                })
-                flightRepository.saveFromRoster(newFlights.map{it.copy (remarks = "From Chrono, some info may be missing")})
-                feedback(PdfParserActivityEvents.CHRONO_SUCCESSFULLY_ADDED).apply{
-                    extraData.putInt(ADJUSTED_FLIGHTS, flightsToAdjust.size)
-                    extraData.putInt(NEW_FLIGHTS, newFlights.size)
-                    extraData.putInt(TOTAL_FLIGHTS_IN_CHRONO, foundFlights.size)
+            var result = false
+            foundFlights = KlcMonthlyFlightsCleaner(flights).cleanFlights().also {
+                if (it == null) {
+                    Log.w("PdfParserActivity", "KlcMonthlyParser.flights == null")
+                    feedback(PdfParserActivityEvents.ERROR)
+                    return false
                 }
-                return false
+                result = processFlights(it)
             }
-            else{
-                //TODO WIP
-                _parsedChronoData = ParsedChronoData(exactMatches, flightsToAdjust, conflicts, newFlights)
-                feedback(PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND)
-                return false
-            }
+            return result
         }
     }
 
     /**
      * Saves flights from roster, does check if CalendarSync is enabled
      */
-    private suspend fun saveFlightsFromRoster(finish: Boolean = true){
+    private fun saveFlightsFromRoster(finish: Boolean = true){
         if (flightsToSave == null){
             feedback(PdfParserActivityEvents.ERROR)
             return
@@ -226,12 +181,69 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
+    private suspend fun processFlights(foundFlights: List<Flight>): Boolean {
+        var adjustments = 0
+        var newCount = 0
+        do{
+            val exactMatches = flightRepository.findMatches(foundFlights, false)
+            val conflicts = flightRepository.findConflicts(foundFlights)
+            val flightsToAdjust = flightRepository.findMatches(foundFlights, true).filter {match -> match.first !in exactMatches.map{it.first}}.filter {it.first !in conflicts.map{c -> c.first}}
+            val newFlights = flightRepository.findNewFlights(foundFlights)
+
+
+            /**
+             * Keep running this loop untill no more conflicts can be fixed by adjusting non-conflicting flights
+             * (ie. if all times are 3 hours off and flights overlap, first round the earliest flight on a day will be adjusted, then the next etc)
+             */
+            //Save flights to adjust that have no conflicts and clear that list
+            flightRepository.save(flightsToAdjust.map{match ->
+                val oldRemarks = match.second.remarks
+                adjustments++
+                match.second.copy(timeOut = match.first.timeOut, timeIn = match.first.timeIn, timeStamp = match.first.timeStamp, remarks = oldRemarks + " | ".emptyIfNotTrue(oldRemarks.isNotEmpty() && Preferences.showOldTimesOnChronoUpdate) + "Times adjusted from Chrono. Old: ${match.second.tOut().toTimeString()}-${match.second.tIn().toTimeString()}".emptyIfNotTrue(Preferences.showOldTimesOnChronoUpdate))
+            })
+            flightRepository.saveFromRoster(newFlights.map{it.copy (remarks = "From Chrono, some info may be missing")}.also{newCount += it.size})
+            _parsedChronoData = ParsedChronoData(exactMatches, flightsToAdjust, conflicts, newFlights)
+
+        } while (flightsToAdjust.isNotEmpty())
+        /*
+        if (conflicts.isEmpty()) {
+            flightRepository.save(flightsToAdjust.map{match ->
+                val oldRemarks = if (match.second.remarks.isBlank()) "" else " - ".emptyIfNotTrue(Preferences.showOldTimesOnChronoUpdate) + match.second.remarks
+                match.second.copy(timeOut = match.first.timeOut, timeIn = match.first.timeIn, timeStamp = match.first.timeStamp, remarks = "Times adjusted from Chrono. Old: ${match.second.tOut().toTimeString()}-${match.second.tIn().toTimeString()}".emptyIfNotTrue(Preferences.showOldTimesOnChronoUpdate) + oldRemarks)
+            })
+            flightRepository.saveFromRoster(newFlights.map{it.copy (remarks = "From Chrono, some info may be missing")})
+            feedback(PdfParserActivityEvents.CHRONO_SUCCESSFULLY_ADDED).apply{
+                extraData.putInt(ADJUSTED_FLIGHTS, flightsToAdjust.size)
+                extraData.putInt(NEW_FLIGHTS, newFlights.size)
+                extraData.putInt(TOTAL_FLIGHTS_IN_CHRONO, foundFlights.size)
+            }
+            return false
+        }
+        */
+        if (_parsedChronoData?.conflicts?.nullIfEmpty() != null){
+            //TODO WIP
+            feedback(PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND)
+            return false
+        }
+        feedback(PdfParserActivityEvents.CHRONO_SUCCESSFULLY_ADDED).apply{
+            extraData.putInt(ADJUSTED_FLIGHTS, adjustments)
+            extraData.putInt(NEW_FLIGHTS, newCount)
+            extraData.putInt(TOTAL_FLIGHTS_IN_CHRONO, foundFlights.size)
+        }
+        return true
+
+    }
+
+
+
     /*********************************************************************************************
      * Public functions and variables
      *********************************************************************************************/
 
+
     val parsedChronoData: ParsedChronoData?
-    get() = _parsedChronoData
+        get() = _parsedChronoData
+
 
     fun runOnce(newIntent: Intent){
         if (intent == null){
@@ -256,6 +268,25 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
 
     fun saveFlights(finish: Boolean = true){
         viewModelScope.launch(Dispatchers.IO + NonCancellable) {  saveFlightsFromRoster(finish) }
+    }
+
+    fun fixConflict(number: Int?){
+        if (number == null) return
+        parsedChronoData?.conflicts?.get(number)?.let {
+            val flightNumberChanged = it.first.flightNumber != it.second.flightNumber
+            val timesChanged = it.first.timeOut != it.second.timeOut || it.first.timeIn != it.second.timeIn
+            val airportsChanged = it.first.orig != it.second.orig || it.first.dest != it.second.dest
+            val newRemarks = listOf(
+                it.second.remarks.trim().nullIfEmpty(),
+                "Old flightnumber: ${it.second.flightNumber}".nullIfNotTrue(flightNumberChanged),
+                "Old orig/dest: ${it.second.orig}/${it.second.dest}".nullIfNotTrue(airportsChanged),
+                "Old times:  ${it.second.tOut().toTimeString()}-${it.second.tIn().toTimeString()}".nullIfNotTrue(timesChanged)
+            ).filterNotNull().joinToString(" | ")
+            flightRepository.save(it.second.copy(flightNumber = it.first.flightNumber, timeOut = it.first.timeOut, timeIn = it.first.timeIn, timeStamp = it.first.timeStamp, remarks = newRemarks.emptyIfNotTrue(Preferences.showOldTimesOnChronoUpdate)))
+        }
+        viewModelScope.launch {
+            processFlights(foundFlights!!)
+        }
     }
 
 

@@ -22,9 +22,7 @@ package nl.joozd.logbookapp.workmanager
 import android.util.Log
 import androidx.work.*
 import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 object JoozdlogWorkersHub {

@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.comm
 
+import android.util.Base64
 import android.util.Log
 import nl.joozd.joozdlogcommon.*
 import nl.joozd.logbookapp.data.comm.protocol.Client
@@ -140,6 +141,29 @@ object ServerFunctions {
             } // for debugging, server responded something unexpected
         }
     }
+
+    /**
+     * check username and password with server
+     * @param client: [Client] to use for comms
+     * @param username: username to check
+     * @param password: password to check
+     * @return error code if send error, 1 if OK, 2 if server OK but login/pass incorrect, -999 if receive error
+     */
+    fun testLoginFromLink(client: Client, username: String, password: String): Int{
+        val payload = LoginData(username, Base64.decode(password, Base64.DEFAULT) ,BasicFlight.VERSION.version).serialize()
+        val requestResult = client.sendRequest(JoozdlogCommsKeywords.LOGIN, payload)
+        if (requestResult < 0) return requestResult
+        return when (val x = client.readFromServer()?.toString(Charsets.UTF_8)){
+            JoozdlogCommsKeywords.OK -> 1
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> 2
+            null -> -999
+            else -> {
+                Log.w("testLogin", "Server responded unexpected \"$x\"")
+                -998
+            } // for debugging, server responded something unexpected
+        }
+    }
+
 
     fun createNewAccount(client: Client, name: String, key: ByteArray): Boolean?{
         val payLoad = LoginData(name, key, BasicFlight.VERSION.version).serialize()

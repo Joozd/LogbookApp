@@ -44,6 +44,8 @@ object UserManagement {
         }
     }
 
+
+
     /**
      * check username/password with server and store them if OK
      * @return true if success
@@ -55,7 +57,19 @@ object UserManagement {
             if(it == true){
                 Preferences.username = username
                 Preferences.password = password
+                Preferences.useCloud = true
                 Preferences.lastUpdateTime = -1
+            }
+        }
+    }
+
+    suspend fun loginFromLink(loginPassPair: Pair<String, String>): Boolean?{
+        return Cloud.checkUserFromLink(loginPassPair.first, loginPassPair.second).also{
+            if(it == true){
+                Preferences.username = loginPassPair.first
+                Preferences.forcePassword(loginPassPair.second)
+                Preferences.lastUpdateTime = -1
+                Preferences.useCloud = true
             }
         }
     }

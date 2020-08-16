@@ -23,15 +23,12 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.text.Html
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
-import androidx.core.text.HtmlCompat
-import androidx.core.text.HtmlCompat.FROM_HTML_MODE_COMPACT
 import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivitySettingsBinding
@@ -154,6 +151,10 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.setGetFlightsFromCalendar(isChecked)
             }
 
+            addRemarksToChronoUpdatesSwitch.setOnCheckedChangeListener { _, isChecked ->
+                viewModel.setShowOldTimesOnChronoUpdate(isChecked)
+            }
+
             useCloudSyncSwitch.setOnClickListener {
                 viewModel.useCloudSyncToggled()
             }
@@ -205,6 +206,10 @@ class SettingsActivity : JoozdlogActivity() {
             viewModel.useCloudSync.observe(activity, Observer {
                 useCloudSyncSwitch.isChecked = it
                 if (it) showLoggedInInfo() else hideLoggedInInfo()
+            })
+
+            viewModel.showOldTimesOnChronoUpdate.observe(activity, Observer {
+                addRemarksToChronoUpdatesSwitch.isChecked = it
             })
 
             viewModel.foundCalendars.observe(activity, Observer {

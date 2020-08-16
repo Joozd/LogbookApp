@@ -82,8 +82,26 @@ object Cloud {
      * ServerFunctions.testLogin returns 1 if success, 2 if failed, negative value if connection failed
      */
     suspend fun checkUser(username: String, password: String): Boolean? =  withContext(Dispatchers.IO) {
+            when (Client().use{
+                ServerFunctions.testLogin(it, username, password)
+            }) {
+                1 -> true
+                2 -> false
+                -998 -> {
+                    Log.w("Cloud", "Server gave unexpected response")
+                    null
+                }
+                else -> null
+            }
+        }
+
+    /**
+     * Check username / pass
+     * ServerFunctions.testLogin returns 1 if success, 2 if failed, negative value if connection failed
+     */
+    suspend fun checkUserFromLink(username: String, password: String): Boolean? =  withContext(Dispatchers.IO) {
         when (Client().use{
-            ServerFunctions.testLogin(it, username, password)
+            ServerFunctions.testLoginFromLink(it, username, password)
         }) {
             1 -> true
             2 -> false
@@ -234,7 +252,7 @@ object Cloud {
                         requestFlightsSince(
                             server,
                             Preferences.lastUpdateTime
-                        ) { listener(15 + it / 4) }?.map { it.copy(timeStamp = timeStamp) }
+                        ) { listener(15 + it / 4) }?.filter{ !it.isPlanned }?.map { it.copy(timeStamp = timeStamp) } // don't load planned flights
                             ?: return@f null.also {
                                 Log.w(
                                     "Cloud",
@@ -279,7 +297,7 @@ object Cloud {
                     // -> change their timestamps to now
                     // (this means that editing flights on two devices before syncing will stick to most recent sync, not most recent edit)
                     val flightsToSend =
-                        (completeFlightDB.filter { it.timeStamp > Preferences.lastUpdateTime && !it.unknownToServer } + // Not including flightslist we just fixed
+                        (completeFlightDB.filter { it.timeStamp > Preferences.lastUpdateTime && !it.unknownToServer && (!it.isPlanned) } + // Not including flightslist we just fixed. Don't sync planned flights.
                                 fixedLocalFlights)
                             .filter { !it.isPlanned || !it.unknownToServer } // don't send planned flights unless server knows about them somehow
                             .map { it.copy(timeStamp = timeStamp, unknownToServer = false) }

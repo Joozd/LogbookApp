@@ -25,17 +25,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityPdfParserViewpagerFragmentBinding
 import nl.joozd.logbookapp.extensions.toDateString
 import nl.joozd.logbookapp.extensions.toTimeString
 import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
+import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
 /**
  * don't forget tro assign a pagenumber.
  */
+
+//TODO make sure boxes get ticked as they were
 class ChronoConflictSolverFragment: JoozdlogFragment() {
     private var pageNumber: Int? = null
     private val viewModel: PdfParserActivityViewModel by activityViewModels()
@@ -49,6 +53,10 @@ class ChronoConflictSolverFragment: JoozdlogFragment() {
             pageNumber = pageNumber ?: savedInstanceState?.getInt(PAGE_NUMBER) ?: 0
             pageNumberText.text = (pageNumber ?: -1 + 1).toString()
             fillFlightData(this)
+
+            continueButton.setOnClickListener {
+                viewModel.fixConflict(pageNumber)
+            }
 
             return root
         }

@@ -23,6 +23,9 @@ import nl.joozd.logbookapp.extensions.toInt
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 const val PLANNING_MARGIN = 300 // seconds = 5 minutes. Flights saved with timeIn more than this
                                 // amount of time into the future will be marked isPlanned
@@ -40,7 +43,7 @@ fun Flight.isSameFlightAs(f: Flight) =
         && dest == f.dest
         && timeOut == f.timeOut
         && timeIn == f.timeIn
-        && flightNumber == f.flightNumber
+        && hasSameflightNumberAs(f)
 
 /**
  * Checks if flights are the same, times may be off by max [margin] seconds
@@ -50,4 +53,16 @@ fun Flight.isSameFlightAs(f: Flight) =
             && dest == f.dest
             && timeOut in (f.timeOut-margin .. f.timeOut+margin)
             && timeIn in (f.timeIn-margin .. f.timeIn+margin)
-            && flightNumber == f.flightNumber
+            && hasSameflightNumberAs(f)
+
+/**
+ * Checks if flights are the same
+ * Counts as the same as same orig/dest/flightnumber on same departure date (Z time)
+ */
+fun Flight.isSameFlightOnSameDay(f: Flight) =
+    orig == f.orig
+            && dest == f.dest
+            && tOut().toLocalDate() == f.tOut().toLocalDate()
+            && hasSameflightNumberAs(f)
+
+fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.toUpperCase(Locale.ROOT).trim() == other.flightNumber.toUpperCase(Locale.ROOT).trim()

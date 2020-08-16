@@ -23,6 +23,7 @@ import android.util.Range
 import nl.joozd.logbookapp.data.repository.helpers.isSamedPlannedFlightAs
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.Instant
+import java.time.ZoneOffset
 
 /**
  * Gets all flight from [allFlights] that either :
@@ -33,8 +34,8 @@ fun getFlightsOnDays(allFlights: List<Flight>, flightsOnDays: List<Flight>? = nu
     val period: ClosedRange<Long> = when {
         dateRange != null -> (dateRange.start.epochSecond .. dateRange.endInclusive.epochSecond)
         flightsOnDays != null -> {
-            val earliestIn = flightsOnDays.minBy { it.timeOut }?.timeOut ?: 0L
-            val latestOut = flightsOnDays.maxBy { it.timeIn }?.timeIn ?: 0L
+            val earliestIn = flightsOnDays.minBy { it.timeOut }?.tOut()?.toLocalDate()?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.epochSecond ?: 0L
+            val latestOut = flightsOnDays.maxBy { it.timeIn }?.tIn()?.toLocalDate()?.atStartOfDay()?.plusDays(1)?.toInstant(ZoneOffset.UTC)?.epochSecond ?: 0L ?: 0L
             (earliestIn..latestOut)
         }
         else -> (0L..0L)
@@ -72,6 +73,10 @@ fun getOverlappingFlights(allFlights: List<Flight>, flightsToCheck: List<Flight>
     }
 }
 
+
+/**
+ * Returns overlaps as list of newFlight to knownflight
+ */
 fun getOverlappingFlightsAsPairs(allFlights: List<Flight>, flightsToCheck: List<Flight>): List<Pair<Flight, Flight>> {
     val overlappingPairs = emptyList<Pair<Flight, Flight>>().toMutableList()
     flightsToCheck.forEach{f ->

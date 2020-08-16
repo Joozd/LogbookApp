@@ -73,6 +73,15 @@ object Preferences {
             }
         }
 
+    //TODO for etsting and debugging
+    //Base64 encoded pass
+    fun forcePassword(encodedPassword: String){
+        with(sharedPref.edit()) {
+            putString(PASSWORD_SHAREDPREF_KEY, encodedPassword)
+            apply()
+        }
+    }
+
     /**
      * will return bytearray from hashed password
      */
@@ -141,6 +150,8 @@ object Preferences {
      */
     var maxChronoAdjustment: Int by JoozdLogSharedPrefs(sharedPref, 180)
 
+    var showOldTimesOnChronoUpdate: Boolean by JoozdLogSharedPrefs(sharedPref, true)
+
     /*************************
      * Other settings
      *************************/
@@ -155,7 +166,7 @@ object Preferences {
     // true if user wants new flights to be marked as IFR. Not sure if I want to use this.
     // var normallyFliesIFR: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
-    // true if user doesn't want to use cloud -
+    // true if user wants to use cloud -
     var useCloud: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
     var acceptedCloudSyncTerms: Boolean by JoozdLogSharedPrefs(sharedPref, false)

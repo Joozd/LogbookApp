@@ -17,25 +17,13 @@
  *
  */
 
-package nl.joozd.logbookapp.model.viewmodels
+package nl.joozd.logbookapp.extensions
 
-import androidx.lifecycle.Transformations
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.InitialSetFlight
+fun <T> List<T>.nullIfEmpty() = if (isEmpty()) null else this
 
-open class JoozdlogDialogViewModel: JoozdlogViewModel() {
-    private val undoFlight = InitialSetFlight().apply{ flight = workingFlightRepository.workingFlight.value }
-
-    fun undo(){
-        undoFlight.flight?.let {workingFlightRepository.updateWorkingFlight(it)}
+fun <T> List<T>.replaceValueAt(index: Int, newValue: T): List<T> {
+    if (index !in indices) throw IndexOutOfBoundsException(index.toString())
+    return mapIndexed { i: Int, t: T ->
+        if (i == index) newValue else t
     }
-
-    val flight = workingFlightRepository.workingFlight
-    protected var workingFlight: Flight?
-        get() = workingFlightRepository.workingFlight.value
-        set(f) {
-            f?.let {
-                workingFlightRepository.updateWorkingFlight(it)
-            }
-        }
 }

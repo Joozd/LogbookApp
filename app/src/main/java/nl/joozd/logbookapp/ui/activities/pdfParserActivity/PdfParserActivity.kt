@@ -68,13 +68,6 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
             /****************************************************************************************
              * Observers:
              ****************************************************************************************/
-            viewModel.progress.observe(activity, Observer {
-                pdfParserProgressBar.progress = it
-            })
-
-            viewModel.progressTextResource.observe(activity, Observer {
-                pdfParserStatusTextView.text = getString(it)
-            })
 
             viewModel.feedbackEvent.observe(activity, Observer {
                 when (it.getEvent()) {
@@ -166,6 +159,8 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
     }
 
     private fun showChronoConflictFixer(binding: ActivityPdfParserBinding) = with (binding) {
+        pdfParserProgressBar.visibility = View.GONE
+        pdfParserStatusTextView.visibility = View.GONE
         tabLayout.visibility = View.VISIBLE
         viewPager.apply{
             visibility=View.VISIBLE
@@ -177,11 +172,14 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    private inner class ScreenSlidePagerAdapter(fa: FragmentActivity, private var availablePages: Int) : FragmentStateAdapter(fa) {
+    private fun hideChronoConflictfixer(binding: ActivityPdfParserBinding) = with (binding) {
+        pdfParserProgressBar.visibility = View.VISIBLE
+        pdfParserStatusTextView.visibility = View.VISIBLE
+        tabLayout.visibility = View.GONE
+        viewPager.visibility = View.GONE
+    }
 
-        fun openPages(newHighest: Int){
-            availablePages = maxOf(availablePages, newHighest)
-        }
+    private inner class ScreenSlidePagerAdapter(fa: FragmentActivity, private var availablePages: Int) : FragmentStateAdapter(fa) {
         override fun getItemCount(): Int = availablePages
 
         override fun createFragment(position: Int): Fragment = ChronoConflictSolverFragment().apply{

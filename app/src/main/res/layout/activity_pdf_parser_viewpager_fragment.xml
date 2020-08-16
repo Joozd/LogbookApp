@@ -181,26 +181,6 @@
         app:layout_constraintTop_toBottomOf="@+id/time_out_text"
         tools:layout_editor_absoluteX="32dp" />
 
-    <CheckBox
-        android:id="@+id/checkBox_use_original"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/use_this"
-        app:layout_constraintEnd_toStartOf="@+id/vertical_line"
-        app:layout_constraintStart_toStartOf="@+id/horizontal_line_6"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout3" />
-
-    <CheckBox
-        android:id="@+id/checkBox_use_imported"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/use_this"
-        app:layout_constraintEnd_toEndOf="@+id/constraintLayout3"
-        app:layout_constraintStart_toEndOf="@+id/vertical_line"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout3" />
-
     <TextView
         android:id="@+id/orig_date_text"
         android:layout_width="0dp"
@@ -329,9 +309,31 @@
         android:id="@+id/pageNumberText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="pagenumber"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/checkBox_use_original" />
+        app:layout_constraintTop_toBottomOf="@+id/continueButton"
+        tools:text="pagenumber" />
+
+    <Button
+        android:id="@+id/continueButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="fix this one"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView20" />
+
+    <TextView
+        android:id="@+id/textView20"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text='If these flights are actually the same flight (but, for instance, the flight number has a typo, click "fix". Otherwise, manually fix the conflicting (original) flight.'
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="316dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

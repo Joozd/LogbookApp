@@ -27,6 +27,10 @@ import java.util.*
  */
 fun String.nullIfEmpty() = if (this.isEmpty()) null else this
 
+fun String.emptyIfNotTrue(keep: Boolean) = if (keep) this else ""
+
+fun String.nullIfNotTrue(keep: Boolean?) = if (keep == true) this else null
+
 fun String.removeTrailingDigits(): String{
     var trailingDigits: Int = 0
     while (this.dropLast(trailingDigits).last().isDigit()) trailingDigits++

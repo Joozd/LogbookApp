@@ -37,6 +37,7 @@ import nl.joozd.logbookapp.data.calendar.CalendarFlightUpdater
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAsWithMargins
+import nl.joozd.logbookapp.data.repository.helpers.isSameFlightOnSameDay
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.checkPermission
@@ -346,6 +347,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         val allFlights = getFlightsOnDays(getAllFlights(), flightsToCheck) // other flights are no conflict anyway
         return flightsToCheck.filter {
             it !in getOverlappingFlights(allFlights, flightsToCheck)
+                    && it !in findMatches(flightsToCheck, true).map{it.first}
         }
     }
 
@@ -355,18 +357,18 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * @return list of pairs of flights that overlap with flights in DB and are the same
      * (newFlight to knownFlight)
      */
-    suspend fun findMatches(flightsToCheck: List<Flight>, allowMargins: Boolean = true): List<Pair<Flight, Flight>>{
+    suspend fun findMatches(flightsToCheck: List<Flight>, checkEntireDay: Boolean = true): List<Pair<Flight, Flight>>{
         val allFlights = getFlightsOnDays(getAllFlights(), flightsToCheck) // other flights are no match anyway
         val matches = flightsToCheck.filter { f ->
             allFlights.any {
-                if (allowMargins)
-                    it.isSameFlightAsWithMargins(f, Preferences.maxChronoAdjustment * 60L)
+                if (checkEntireDay)
+                    it.isSameFlightOnSameDay(f)
                 else it.isSameFlightAs(f)
             }
         }
         return matches.map{ f-> f to allFlights.first{
-            if (allowMargins)
-                it.isSameFlightAsWithMargins(f, Preferences.maxChronoAdjustment * 60L)
+            if (checkEntireDay)
+                it.isSameFlightOnSameDay(f)
             else it.isSameFlightAs(f)
         }}
     }

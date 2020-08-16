@@ -21,6 +21,9 @@
 package nl.joozd.logbookapp.ui.activities
 
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -102,7 +105,12 @@ class MainActivity : JoozdlogActivity() {
             true
         }
         R.id.menu_do_something -> {
-            viewModel.menuSelectedDoSomething()
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipboard.setPrimaryClip (ClipData.newPlainText("simple text", Preferences.password))
+            JoozdlogAlertDialog(activity).apply {
+                title = "Password:"
+                message = "copied key to clipboard"
+            }.show()
             true
 
         }
@@ -115,8 +123,15 @@ class MainActivity : JoozdlogActivity() {
         else -> false
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        viewModel.handleIntent(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
 
 
 
@@ -268,9 +283,10 @@ class MainActivity : JoozdlogActivity() {
             viewModel.flightSyncProgress.observe(activity, Observer { p ->
                 when {
                     p == -1 -> flightsSyncProgressBar?.remove()
+
                     flightsSyncProgressBar != null -> flightsSyncProgressBar?.progress = p
-                    else -> flightsSyncProgressBar =
-                        makeProgressBar(this, R.string.loadingFlights, p).show()
+
+                    else -> flightsSyncProgressBar = makeProgressBar(this, R.string.loadingFlights, p).show()
                 }
             })
 

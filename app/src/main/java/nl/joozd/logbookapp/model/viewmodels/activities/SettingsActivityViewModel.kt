@@ -35,9 +35,7 @@ import nl.joozd.logbookapp.data.calendar.CalendarScraper
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.toDateString
 import nl.joozd.logbookapp.extensions.toDateStringLocalized
-import nl.joozd.logbookapp.extensions.toTimeString
 import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
@@ -55,7 +53,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     private val _useIataAirports = MutableLiveData<Boolean>(Preferences.useIataAirports)
     private val _getFlightsFromCalendar = MutableLiveData<Boolean>(Preferences.getFlightsFromCalendar)
-    private val _useCloudSync = MutableLiveData<Boolean>(Preferences.useIataAirports)
+    private val _useCloudSync = MutableLiveData<Boolean>(Preferences.useCloud)
+    private val _showOldTimesOnChronoUpdate = MutableLiveData<Boolean>(Preferences.showOldTimesOnChronoUpdate)
 
     private val _username = MutableLiveData(Preferences.username) // <String?>
     private val _calendarDisabledUntil = MutableLiveData(Preferences.calendarDisabledUntil) //  <Long>
@@ -63,8 +62,6 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _settingsUseIataSelectorTextResource = MutableLiveData<Int>()
     private val _foundCalendars = MutableLiveData<List<JoozdCalendar>>()
     private val _pickedCalendar = MutableLiveData<JoozdCalendar>()
-    private val pickedCalendar: JoozdCalendar?
-        get() = _pickedCalendar.value
 
     // This is not used at the moment but it's there when we need it. Just set [settingsCalendarTypeSpinner] visibility to VISIBLE in SettingsActivity
     // search for tag #SETTHISIFNEEDED1
@@ -94,6 +91,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
             Preferences::calendarDisabledUntil.name ->
                 _calendarDisabledUntil.value = Preferences.calendarDisabledUntil
 
+            Preferences::showOldTimesOnChronoUpdate.name ->
+                _showOldTimesOnChronoUpdate.value = Preferences.showOldTimesOnChronoUpdate
+
+
 
             // This is not used at the moment but it's there when we need it. Just set [settingsCalendarTypeSpinner] visibility to VISIBLE in SettingsActivity
             // Preferences::calendarType.name ->
@@ -116,6 +117,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val useCloudSync: LiveData<Boolean>
         get() = _useCloudSync
+
+    val showOldTimesOnChronoUpdate: LiveData<Boolean>
+        get() = _showOldTimesOnChronoUpdate
 
     val settingsUseIataSelectorTextResource: LiveData<Int>
         get() = _settingsUseIataSelectorTextResource
@@ -156,6 +160,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         if (it && !Preferences.getFlightsFromCalendar) // if it is switched on from being off
             Preferences.calendarDisabledUntil = 0
         Preferences.getFlightsFromCalendar = it
+    }
+
+    fun setShowOldTimesOnChronoUpdate(it: Boolean) {
+        Preferences.showOldTimesOnChronoUpdate = it
     }
 
     fun useCloudSyncToggled(){

@@ -21,6 +21,8 @@
     <string name="app_name">JoozdLog 0.1.0</string>
     <string name="preference_file_key">nl.joozd.logbookapp.PREFERENCE_FILE_KEY</string>
 
+    <string name="app_link_intent_filter">App Link intent Filter</string>
+
     <string name="flightNumberHint">FlightNumber</string>
     <string name="dateHint">Date</string>
 
@@ -207,9 +209,12 @@
     <string name="use_calendar_import">Use Calendar Import</string>
     <string name="dont_use_multiple_device">Using this on multiple devices might lead to performance problems, so don\'t do that</string>
     <string name="use_cloud_sync">Use Cloud Sync</string>
+    <string name="add_chrono_update_remarks">Save old times as remarks</string>
     <string name="sync_flights_across_devices">Synchronize flights across multiple devices or easily migrate to a new device</string>
     <string name="disabled_until">Disabled until %1$s</string>
     <string name="enable_now">Enable now</string>
+    <string name="monthly_overviews">Monthly Overviews</string>
+    <string name="monthly_overview_explanation">Monthly Overviews import supported for selected carriers (currently only KLC) only. Just share your PDF with Joozdlog.</string>
 
 
 </resources>

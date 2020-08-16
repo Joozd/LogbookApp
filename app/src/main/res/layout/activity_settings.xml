@@ -144,15 +144,18 @@
                 app:layout_constraintStart_toStartOf="@+id/settingsUseIataSelector"
                 app:layout_constraintTop_toBottomOf="@+id/calendarSyncPostponedTextView" />
 
-            <TextView
-                android:id="@+id/youAreSignedInAsTextView"
+            <Switch
+                android:id="@+id/useCloudSyncSwitch"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                tools:text="@string/you_are_signed_in_as"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/use_cloud_sync"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView15" />
+                app:layout_constraintTop_toBottomOf="@+id/lineBetweenCalendarCloud" />
 
             <TextView
                 android:id="@+id/textView15"
@@ -166,6 +169,16 @@
                 app:layout_constraintTop_toBottomOf="@+id/useCloudSyncSwitch" />
 
             <TextView
+                android:id="@+id/youAreSignedInAsTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView15"
+                tools:text="@string/you_are_signed_in_as" />
+
+            <TextView
                 android:id="@+id/userSignInOutTextview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -175,19 +188,51 @@
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/youAreSignedInAsTextView" />
+            <View
+                android:id="@+id/lineBetweenCloudPdf"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="#c0c0c0"
+                app:layout_constraintEnd_toEndOf="@+id/settingsUseIataSelector"
+                app:layout_constraintStart_toStartOf="@+id/settingsUseIataSelector"
+                app:layout_constraintTop_toBottomOf="@+id/userSignInOutTextview" />
 
             <Switch
-                android:id="@+id/useCloudSyncSwitch"
+                android:id="@+id/addRemarksToChronoUpdatesSwitch"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/use_cloud_sync"
-                android:textSize="18sp"
+                android:text="@string/add_chrono_update_remarks"
+                android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lineBetweenCalendarCloud" />
+                app:layout_constraintTop_toBottomOf="@+id/textView18" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/monthly_overviews"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lineBetweenCloudPdf" />
+
+            <TextView
+                android:id="@+id/textView18"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/monthly_overview_explanation"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

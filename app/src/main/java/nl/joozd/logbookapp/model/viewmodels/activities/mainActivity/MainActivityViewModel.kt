@@ -21,11 +21,17 @@ package nl.joozd.logbookapp.model.viewmodels.activities.mainActivity
 
 
 
+import android.content.Intent
+import android.content.Intent.ACTION_VIEW
+import android.net.Uri
+import android.util.Base64
+import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.InternetStatus
+import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
@@ -69,11 +75,128 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
             searchSpinnerSelection.value = it
         }
 
+    private val _displayFlightsList2= MediatorLiveData<List<DisplayFlight>>()
+    init{
+        _displayFlightsList2.addSource(flightRepository.liveFlights) {
+            _displayFlightsList2.value = flightsList ?: _displayFlightsList2.value
+        }
+        _displayFlightsList2.addSource(airportRepository.icaoIataMap) {
+            _displayFlightsList2.value = flightsList
+        }
+        _displayFlightsList2.addSource(airportRepository.useIataAirports){
+            _displayFlightsList2.value = flightsList
+        }
+        _displayFlightsList2.addSource(searchStringLiveData){
+            _displayFlightsList2.value = flightsList
+        }
+        _displayFlightsList2.addSource(searchSpinnerSelection){
+            _displayFlightsList2.value = flightsList
+        }
+    }
 
     /**
-     * Menu functions
+     * Will search flights, return immediate results but if needed also update [_displayFlightsList2] async with more detailed data
      */
+    private fun searchFlights(fff: List<Flight>?): List<Flight> {
+        if (fff == null) return emptyList()
+        if (!searchFieldOpen) return fff
+        return when(searchType){
+            ALL -> searchAll(fff)
+            AIRPORTS -> searchAirports(fff)
+            AIRCRAFT -> searchAircraft(fff)
+            NAMES -> searchNames(fff)
+            else -> fff
+        }
+    }
+
+    private fun searchAll(fff: List<Flight>) = fff.filter{
+        query in it.name.toUpperCase(Locale.ROOT)
+                || query in it.name2.toUpperCase(Locale.ROOT)
+                || query in it.registration.toUpperCase(Locale.ROOT)
+                || query in it.orig.toUpperCase(Locale.ROOT)
+                || query in it.dest.toUpperCase(Locale.ROOT)
+                || query in icaoIataMap[it.orig]?.toUpperCase(Locale.ROOT) ?: ""
+                || query in icaoIataMap[it.dest]?.toUpperCase(Locale.ROOT) ?: ""}
+
+    private fun searchAirports(fff: List<Flight>) = fff.filter{
+        query in it.orig.toUpperCase(Locale.ROOT)
+                || query in it.dest.toUpperCase(Locale.ROOT)
+                || query in icaoIataMap[it.orig]?.toUpperCase(Locale.ROOT) ?: ""
+                || query in icaoIataMap[it.dest]?.toUpperCase(Locale.ROOT) ?: ""}.also{
+        viewModelScope.launch {
+            // TODO make with async update from [airportRepository]
+        }
+    }
+
+
+    private fun searchAircraft(fff: List<Flight>) = fff.filter{
+        query in it.registration.toUpperCase(Locale.ROOT) }.also{
+        viewModelScope.launch {
+            //TODO make with async update from [aircraftRepository]
+        }
+    }
+
+    private fun searchNames(fff: List<Flight>) = fff.filter{
+        query in it.name.toUpperCase(Locale.ROOT)
+                || query in it.name2.toUpperCase(Locale.ROOT)
+    }
+
+    private fun disableCalendarImportUntil(time: Long){
+        Preferences.calendarDisabledUntil = time
+        feedback(MainActivityEvents.CALENDAR_SYNC_PAUSED)
+    }
+
+    private fun toggleSearchField(){
+        if (searchFieldOpen)
+            closeSearchField()
+        else {
+            feedback(MainActivityEvents.OPEN_SEARCH_FIELD)
+            searchFieldOpen = true
+        }
+    }
+
+    private fun setSearchFieldHint(it: Int){
+        _searchFieldHint.value = if (it == rawFlights.size) null else "$it flights found"
+    }
+
+    /*********************************************************************************************
+     * Public parts
+     *********************************************************************************************/
+
+    /**
+     * Observable data:
+     */
+
+    val displayFlightsList: LiveData<List<DisplayFlight>>
+        get() = _displayFlightsList2
+
+    val searchFieldHint
+        get() = _searchFieldHint
+
+    /**
+     * Livedata related to synchronization:
+     */
+
+    val internetAvailable: LiveData<Boolean>
+        get() = InternetStatus.internetAvailableLiveData
+
+    val airportSyncProgress: LiveData<Int>
+        get() = airportRepository.airportSyncProgress
+
+    val flightSyncProgress: LiveData<Int>
+        get() = flightRepository.syncProgress
+
+    val flightOpenEvents = workingFlightRepository.flightOpenEvents
+
+
+
+
+    /*********************************************************************************************
+     * Menu functions
+    **********************************************************************************************/
+
     fun menuSelectedDoSomething(){
+        /*
         // Preferences.newUserActivityFinished= false
         viewModelScope.launch(Dispatchers.Default) {
             val allFlights = flightRepository.getAllFlights().map{
@@ -94,7 +217,11 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
             }
             launch(Dispatchers.Main) { flightRepository.save(allFlights) }
             feedback(MainActivityEvents.DONE)
+
+
         }
+
+         */
     }
 
     fun menuSelectedRebuild(){
@@ -130,60 +257,6 @@ else{
         }
     }
 
-            /*
-            launch {
-                progressBarField?.let { pbf ->
-                    val progBar = JoozdlogProgressBar(
-                        pbf
-                    ).apply {
-                        backgroundColor = getColorFromAttr(android.R.attr.colorPrimary)
-                        text = getString(R.string.loadingAirports)
-                    }.show()
-                    Cloud.getAircraftTypes{progBar.progress = it}?.let { result ->
-                        launch(NonCancellable) {
-                            aircraftRepository.saveAircraftTypes(result)
-                            Log.d(this::class.simpleName,"repo now has ${aircraftRepository.liveAircraftTypes.value?.size} types")
-                        }
-                    }
-                    progBar.remove()
-                }
-            }
-             */
-
-    fun menuSelectedExportPDF(){
-        feedback(MainActivityEvents.NOT_IMPLEMENTED)
-    }
-
-    /**
-     * Observable data:
-     */
-
-    private val _displayFlightsList2= MediatorLiveData<List<DisplayFlight>>()
-    init{
-        _displayFlightsList2.addSource(flightRepository.liveFlights) {
-            _displayFlightsList2.value = flightsList ?: _displayFlightsList2.value
-        }
-        _displayFlightsList2.addSource(airportRepository.icaoIataMap) {
-            _displayFlightsList2.value = flightsList
-        }
-        _displayFlightsList2.addSource(airportRepository.useIataAirports){
-            _displayFlightsList2.value = flightsList
-        }
-        _displayFlightsList2.addSource(searchStringLiveData){
-            _displayFlightsList2.value = flightsList
-        }
-        _displayFlightsList2.addSource(searchSpinnerSelection){
-            _displayFlightsList2.value = flightsList
-        }
-    }
-    val displayFlightsList: LiveData<List<DisplayFlight>>
-        get() = _displayFlightsList2
-
-    val searchFieldHint
-        get() = _searchFieldHint
-    private fun setSearchFieldHint(it: Int){
-        _searchFieldHint.value = if (it == rawFlights.size) null else "$it flights found"
-    }
 
     /**
      * Handler for clickety thingies
@@ -269,12 +342,6 @@ else{
      * Functions related to synchronization:
      *********************************************************************************************/
 
-    private fun disableCalendarImportUntil(time: Long){
-        Preferences.calendarDisabledUntil = time
-        feedback(MainActivityEvents.CALENDAR_SYNC_PAUSED)
-    }
-
-
     /**
      * This will synch time with server and launch repository update functions (which can decide for themselves if it is necessary)
      */
@@ -309,61 +376,7 @@ else{
         searchFieldOpen = false
     }
 
-    private fun toggleSearchField(){
-        if (searchFieldOpen)
-            closeSearchField()
-        else {
-            feedback(MainActivityEvents.OPEN_SEARCH_FIELD)
-            searchFieldOpen = true
-        }
-    }
 
-    /**
-     * Will search flights, return immediate results but if needed also update [_displayFlightsList2] async with more detailed data
-     */
-    private fun searchFlights(fff: List<Flight>?): List<Flight> {
-        if (fff == null) return emptyList()
-        if (!searchFieldOpen) return fff
-        return when(searchType){
-            ALL -> searchAll(fff)
-            AIRPORTS -> searchAirports(fff)
-            AIRCRAFT -> searchAircraft(fff)
-            NAMES -> searchNames(fff)
-            else -> fff
-        }
-    }
-
-    private fun searchAll(fff: List<Flight>) = fff.filter{
-        query in it.name.toUpperCase(Locale.ROOT)
-                || query in it.name2.toUpperCase(Locale.ROOT)
-                || query in it.registration.toUpperCase(Locale.ROOT)
-                || query in it.orig.toUpperCase(Locale.ROOT)
-                || query in it.dest.toUpperCase(Locale.ROOT)
-                || query in icaoIataMap[it.orig]?.toUpperCase(Locale.ROOT) ?: ""
-                || query in icaoIataMap[it.dest]?.toUpperCase(Locale.ROOT) ?: ""}
-
-    private fun searchAirports(fff: List<Flight>) = fff.filter{
-        query in it.orig.toUpperCase(Locale.ROOT)
-                || query in it.dest.toUpperCase(Locale.ROOT)
-                || query in icaoIataMap[it.orig]?.toUpperCase(Locale.ROOT) ?: ""
-                || query in icaoIataMap[it.dest]?.toUpperCase(Locale.ROOT) ?: ""}.also{
-        viewModelScope.launch {
-            // TODO make with async update from [airportRepository]
-        }
-    }
-
-
-    private fun searchAircraft(fff: List<Flight>) = fff.filter{
-        query in it.registration.toUpperCase(Locale.ROOT) }.also{
-        viewModelScope.launch {
-            //TODO make with async update from [aircraftRepository]
-        }
-    }
-
-    private fun searchNames(fff: List<Flight>) = fff.filter{
-        query in it.name.toUpperCase(Locale.ROOT)
-                || query in it.name2.toUpperCase(Locale.ROOT)
-    }
 
     fun setSearchString(it: String){
         query = it.toUpperCase(Locale.ROOT)
@@ -375,25 +388,36 @@ else{
     }
 
 
-
-    /*********************************************************************************************
-     * Livedata related to synchronization:
-     *********************************************************************************************/
-
-    val internetAvailable: LiveData<Boolean>
-        get() = InternetStatus.internetAvailableLiveData
-
-    val airportSyncProgress: LiveData<Int>
-        get() = airportRepository.airportSyncProgress
-
-    val flightSyncProgress: LiveData<Int>
-        get() = flightRepository.syncProgress
-
-    val flightOpenEvents = workingFlightRepository.flightOpenEvents
-
     /**
-     * Internal functions:
+     * Intent handling:
      */
+
+    fun handleIntent(intent: Intent?){
+        val action: String? = intent?.action
+        val data: Uri? = intent?.data
+
+        if (action == ACTION_VIEW){
+            data?.lastPathSegment?.let {
+                Log.d("Uri", "lastPathSegment: $it")
+
+                //TODO needs sanity check
+                val loginPass = it.split(":").let{lp ->
+                    lp.first() to lp.last()
+                }
+                viewModelScope.launch {
+                    val result = UserManagement.loginFromLink(loginPass)
+                    Log.d("LinkLogin", "result: $result")
+                    flightRepository.syncIfNeeded()
+                }
+
+
+            }
+
+        }
+    }
+
+
+
     companion object{
         const val ALL = 0
         const val AIRPORTS = 1

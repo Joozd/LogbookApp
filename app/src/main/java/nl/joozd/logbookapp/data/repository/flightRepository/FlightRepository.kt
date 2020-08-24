@@ -133,6 +133,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     private val _syncProgress = MutableLiveData<Int>(-1)
 
+    private val _notLoggedIn = MutableLiveData<Boolean>()
+
     /********************************************************************************************
      * Public parts:
      ********************************************************************************************/
@@ -146,6 +148,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     val syncProgress: LiveData<Int>
         get() = _syncProgress
+
+    val notLoggedIn: LiveData<Boolean>
+        get() = _notLoggedIn
 
     /********************************************************************************************
      * Vars and vals
@@ -302,6 +307,12 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         require (progress in (-1..100)) {"Progress reported to setAirportSyncProgress not in range -1..100"}
         launch (Dispatchers.Main) {
             _syncProgress.value = progress
+        }
+    }
+
+    fun setNotLoggedInFlag(loggedIn: Boolean = false){
+        launch {
+            _notLoggedIn.value = loggedIn
         }
     }
 

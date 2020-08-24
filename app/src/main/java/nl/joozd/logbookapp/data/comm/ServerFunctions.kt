@@ -110,6 +110,10 @@ object ServerFunctions {
         }
     }
 
+    /**
+     * Logs a user in. User will remain logged in until connection with [client] is lost.
+     * @return true is success, false if username/pass incorrect, null if connection problem
+     */
     fun login(client: Client): Boolean?{
         if (Preferences.username == null || Preferences.key == null)
             return false

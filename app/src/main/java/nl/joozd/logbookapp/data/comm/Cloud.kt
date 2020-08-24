@@ -241,7 +241,10 @@ object Cloud {
 
                     //Login and handle if that fails:
                     when (login(server)) {
-                        false -> return@f -1L
+                        false -> {
+                            flightRepository.setNotLoggedInFlag(true)
+                            return@f -1L
+                        }
                         null -> return@f null.also { Log.d("Cloud", "Login returned null") }
                     }
                     listener(15)

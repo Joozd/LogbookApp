@@ -52,6 +52,7 @@ import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivity
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModel
 import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivity
 import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
+import nl.joozd.logbookapp.ui.dialogs.LoginDialog
 import nl.joozd.logbookapp.ui.fragments.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.customs.CustomSnackbar
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
@@ -136,10 +137,8 @@ class MainActivity : JoozdlogActivity() {
 
 
         setTheme(R.style.AppTheme)
-        val binding = ActivityMainNewBinding.inflate(layoutInflater).apply {
-
-
-            setSupportActionBarWithReturn(mainToolbar as Toolbar)?.apply {
+        ActivityMainNewBinding.inflate(layoutInflater).apply {
+            setSupportActionBarWithReturn(mainToolbar)?.apply {
                 // can do stuff with toolbar here
             }
 
@@ -204,6 +203,11 @@ class MainActivity : JoozdlogActivity() {
                 Log.d("internet", "TEST123 $it")
             })
 
+            viewModel.notLoggedIn.observe(activity) {
+                if (it){
+                    showLoginDialog()
+                }
+            }
 
             viewModel.displayFlightsList.observe(activity, Observer { fff ->
                 Log.d("RANDOM DEBUG", "1")
@@ -327,12 +331,23 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
+    private fun showLoginDialog(){
+        supportFragmentManager.commit{
+            add(R.id.mainActivityLayout, LoginDialog())
+            addToBackStack(null)
+        }
+    }
+
     private fun makeProgressBar(binding: ActivityMainNewBinding, textResource: Int, initialProgress: Int = 0): JoozdlogProgressBar  = with (binding) {
         return JoozdlogProgressBar(progressBarField).apply{
             text = getString(textResource)
             backgroundColor = getColorFromAttr(android.R.attr.colorPrimary)
             progress = initialProgress
         }
+    }
+
+    private fun showNotLoggedInDialog(){
+
     }
 
     private fun showDeletePlannedCalendarFlightDialog(id: Int){

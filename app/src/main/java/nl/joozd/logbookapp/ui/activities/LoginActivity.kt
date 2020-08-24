@@ -45,8 +45,7 @@ class LoginActivity : JoozdlogActivity(){
         if (UserManagement.justCreatedNewUser) finish()
         UserManagement.justCreatedNewUser = false
         setTheme(R.style.AppTheme)
-        val binding = ActivityLoginBinding.inflate(layoutInflater).apply {
-
+        ActivityLoginBinding.inflate(layoutInflater).apply {
             singInButton.joozdLogSetBackgroundColor()
 
             /**
@@ -117,7 +116,7 @@ class LoginActivity : JoozdlogActivity(){
             /**
              * Feedback events:
              */
-            viewModel.feedbackEvent.observe(activity, Observer {
+            viewModel.feedbackEvent.observe(activity){
                 when (it.getEvent()) {
                     LoginActivityEvents.PASSWORD_EMPTY -> showPasswordCannotBeEmptyError()
                     LoginActivityEvents.USERNAME_EMPTY -> showUsernameCannotBeEmptyError()
@@ -127,7 +126,7 @@ class LoginActivity : JoozdlogActivity(){
                     LoginActivityEvents.FINISHED -> finish()
                     else -> toast("unhandled feedback: ${it.type}")
                 }
-            })
+            }
 
             //
             setContentView(root)

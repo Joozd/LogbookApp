@@ -180,6 +180,9 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     val internetAvailable: LiveData<Boolean>
         get() = InternetStatus.internetAvailableLiveData
 
+    val notLoggedIn: LiveData<Boolean>
+        get() = flightRepository.notLoggedIn
+
     val airportSyncProgress: LiveData<Int>
         get() = airportRepository.airportSyncProgress
 

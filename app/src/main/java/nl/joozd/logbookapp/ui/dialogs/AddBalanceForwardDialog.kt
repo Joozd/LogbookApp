@@ -38,7 +38,7 @@ import nl.joozd.logbookapp.ui.utils.toast
 
 class AddBalanceForwardDialog: JoozdlogFragment() {
     val viewModel: AddBalanceForwardDialogViewmodel by viewModels()
-    val bf: BalanceForward
+    private val bf: BalanceForward
         get() = viewModel.workingBalanceForward
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -120,10 +120,12 @@ class AddBalanceForwardDialog: JoozdlogFragment() {
             })
 
             cancelBalanceForwardDialogButton.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
                 closeFragment()
             }
 
             saveBalanceForwardDialogButton.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
                 viewModel.saveBalanceForward()
             }
 

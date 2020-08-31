@@ -38,6 +38,7 @@ import kotlinx.android.synthetic.main.edit_flight.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.EditFlightBinding
 import nl.joozd.logbookapp.model.viewmodels.MainViewModel
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
@@ -73,14 +74,14 @@ class EditFlightFragment: JoozdlogFragment(){
      */
     @ExperimentalCoroutinesApi
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.edit_flight, container, false).apply {
+        with (EditFlightBinding.bind(inflater.inflate(R.layout.edit_flight, container, false))) {
             (flightInfoText.background as GradientDrawable).colorFilter = PorterDuffColorFilter(
                 requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
                 PorterDuff.Mode.SRC_IN
             ) // set background color to background with rounded corners
 
-            flightNameField.setAdapter(ArrayAdapter<String>(this.ctx, R.layout.item_custom_autocomplete))
-            flightName2Field.setAdapter(ArrayAdapter<String>(this.ctx, R.layout.item_custom_autocomplete))
+            flightNameField.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))
+            flightName2Field.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))
 
             /************************************************************************************
              * observers to show data in editText fields
@@ -424,12 +425,14 @@ class EditFlightFragment: JoozdlogFragment(){
             }
 
             flightSaveButton.setOnClickListener {
+                it.requestFocus()
+                it.clearFocus()
                 viewModel.save()
-
-                clearFocus()
                 closeFragment()
             }
-        } // end of layoutInflater.apply()
+            return root
+        } // end of binding.apply()
+
     } // end of onCreateView
 
 
@@ -448,26 +451,26 @@ class EditFlightFragment: JoozdlogFragment(){
      * Switch layout for edit_flight View to sim
      * @param v: View to change layout on
      */
-    private fun makeSimLayout(v: View){
-        v.flighttOutStringWrapper.hint=getString(R.string.simtTime)
-        v.flighttOutStringField.hint=getString(R.string.simtTime)
-        v.autoFillCheckBox.isChecked = false
-        v.autoFillCheckBox.isEnabled = false
-        v.flighttInStringWrapper.visibility=View.GONE
-        v.flightFlightNumberWrapper.visibility=View.GONE
-        v.dualSelector.visibility=View.GONE
-        v.instructorSelector.visibility=View.GONE
-        v.ifrSelector.visibility=View.GONE
-        v.picSelector.visibility=View.GONE
-        v.pfSelector.visibility=View.GONE
-        v.flightOrigSelector.visibility=View.GONE
-        v.flightOrigWrapper.visibility=View.GONE
-        v.flightDestWrapper.visibility=View.GONE
-        v.flightDestSelector.visibility=View.GONE
+    private fun makeSimLayout(binding: EditFlightBinding) = with (binding){
+        flighttOutStringWrapper.hint=getString(R.string.simtTime)
+        flighttOutStringField.hint=getString(R.string.simtTime)
+        autoFillCheckBox.isChecked = false
+        autoFillCheckBox.isEnabled = false
+        flighttInStringWrapper.visibility=View.GONE
+        flightFlightNumberWrapper.visibility=View.GONE
+        dualSelector.visibility=View.GONE
+        instructorSelector.visibility=View.GONE
+        ifrSelector.visibility=View.GONE
+        picSelector.visibility=View.GONE
+        pfSelector.visibility=View.GONE
+        flightOrigSelector.visibility=View.GONE
+        flightOrigWrapper.visibility=View.GONE
+        flightDestWrapper.visibility=View.GONE
+        flightDestSelector.visibility=View.GONE
         //v.flightTakeoffLandingWrapper.visibility=View.GONE
         //v.flightTakeoffLandingSelector.isEnabled=false
         viewModel.simTime.value?.let{
-            v.flighttOutStringField.setText(it)
+            flighttOutStringField.setText(it)
         }
     }
 
@@ -475,25 +478,25 @@ class EditFlightFragment: JoozdlogFragment(){
      * Switch layout for edit_flight View to normal
      * @param v: View to change layout on
      */
-    private fun makeNormalLayout(v: View) {
+    private fun makeNormalLayout(binding: EditFlightBinding) = with (binding){
         // v.autoFillCheckBox.isEnabled = viewModel.workingFlight.value?.autoFill ?: 0 > 0
-        v.flighttOutStringWrapper.hint = getString(R.string.timeOut)
-        v.flighttOutStringField.hint = getString(R.string.timeOut)
-        v.flighttInStringWrapper.visibility = View.VISIBLE
-        v.flightFlightNumberWrapper.visibility = View.VISIBLE
-        v.dualSelector.visibility = View.VISIBLE
-        v.instructorSelector.visibility = View.VISIBLE
-        v.ifrSelector.visibility = View.VISIBLE
-        v.picSelector.visibility = View.VISIBLE
-        v.pfSelector.visibility = View.VISIBLE
-        v.flightOrigSelector.visibility = View.VISIBLE
-        v.flightOrigWrapper.visibility = View.VISIBLE
-        v.flightDestWrapper.visibility = View.VISIBLE
-        v.flightDestSelector.visibility = View.VISIBLE
-        v.flightTakeoffLandingWrapper.visibility = View.VISIBLE
-        v.flightTakeoffLandingSelector.isEnabled = true
+        flighttOutStringWrapper.hint = getString(R.string.timeOut)
+        flighttOutStringField.hint = getString(R.string.timeOut)
+        flighttInStringWrapper.visibility = View.VISIBLE
+        flightFlightNumberWrapper.visibility = View.VISIBLE
+        dualSelector.visibility = View.VISIBLE
+        instructorSelector.visibility = View.VISIBLE
+        ifrSelector.visibility = View.VISIBLE
+        picSelector.visibility = View.VISIBLE
+        pfSelector.visibility = View.VISIBLE
+        flightOrigSelector.visibility = View.VISIBLE
+        flightOrigWrapper.visibility = View.VISIBLE
+        flightDestWrapper.visibility = View.VISIBLE
+        flightDestSelector.visibility = View.VISIBLE
+        flightTakeoffLandingWrapper.visibility = View.VISIBLE
+        flightTakeoffLandingSelector.isEnabled = true
         viewModel.timeOut.value?.let {
-            v.flighttOutStringField.setText(it)
+            flighttOutStringField.setText(it)
         }
     }
 }

@@ -31,6 +31,18 @@ import nl.joozd.logbookapp.databinding.DialogWaitingForSomethingBinding
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
 
+/**
+ * Use this if you have to wait for something (ie. server re-encrypting)
+ * usage:
+ * supportFragmentManager.commit{
+ *  add(R.id.targetView, WaitingForSomethingDialog().apply{
+ *      description = "blabla" or setDescription(R.string.blabla)
+ *      setCancel (see [setCancel()]),
+ *  }, "YOUR_TAG_STRING"
+ * }
+ * remove by calling [done()]]
+ *
+ */
 class WaitingForSomethingDialog: JoozdlogFragment() {
 
     private val viewModel: MyViewModel by viewModels()
@@ -85,14 +97,13 @@ class WaitingForSomethingDialog: JoozdlogFragment() {
      * If set to not null it will show the button
      * @param action: Function to perform
      * @param text: Set the text of the Cancel dialog
+     * Can be used before attach to Activity
      */
     fun setCancel(text: String? = null, textResource: Int? = null, action: (() -> Unit)? = null){
         if (isAdded) {
-            Log.d("Test 2", "Plekje 1")
             viewModel.onCancel = action
         }
         else {
-            Log.d("Test 2", "Plekje 2")
             presetOnCancelAction = action
         }
         text?.let {
@@ -131,7 +142,6 @@ class WaitingForSomethingDialog: JoozdlogFragment() {
      * Close the dialog
      */
     fun done() {
-        Log.d("Test 3", "Done!")
         closeFragment()
     }
 }

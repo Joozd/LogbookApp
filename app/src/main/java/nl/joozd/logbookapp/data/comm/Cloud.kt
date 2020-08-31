@@ -78,6 +78,22 @@ object Cloud {
     }
 
     /**
+     * Changes a user's password
+     * Calling function should consider storing username and pasword in [Preferences]
+     */
+    suspend fun changePassword(newPassword: String): Boolean? = withContext(Dispatchers.IO) {
+        Client().use {client ->
+            ServerFunctions.login(client)?.let{
+                if (!it) return@withContext it
+            }
+            ServerFunctions.changePassword(client, Encryption.md5Hash(newPassword))
+        }
+    }
+
+
+
+
+    /**
      * Check username / pass
      * ServerFunctions.testLogin returns 1 if success, 2 if failed, negative value if connection failed
      */

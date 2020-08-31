@@ -27,6 +27,7 @@ import androidx.activity.viewModels
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityCreateNewUserBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
@@ -35,7 +36,6 @@ import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast
 
 class CreateNewUserActivity : JoozdlogActivity() {
-    private val activity = this
     private val viewModel: CreateNewUserActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,7 +88,7 @@ class CreateNewUserActivity : JoozdlogActivity() {
 
             tcCheckbox.setOnClickListener {
                 tcCheckbox.isChecked = false
-                if (nl.joozd.logbookapp.data.sharedPrefs.Preferences.acceptedCloudSyncTerms) nl.joozd.logbookapp.data.sharedPrefs.Preferences.acceptedCloudSyncTerms = false
+                if (Preferences.acceptedCloudSyncTerms) Preferences.acceptedCloudSyncTerms = false
                 else {
                     supportFragmentManager.commit {
                         add(R.id.createNewUserActivityLayout, nl.joozd.logbookapp.ui.dialogs.CloudSyncTermsDialog())
@@ -98,19 +98,19 @@ class CreateNewUserActivity : JoozdlogActivity() {
             }
 
             signUpButton.setOnClickListener {
-                if (nl.joozd.logbookapp.data.sharedPrefs.Preferences.acceptedCloudSyncTerms)
-                    nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog(activity).apply {
+                if (Preferences.acceptedCloudSyncTerms)
+                    JoozdlogAlertDialog(activity).show {
                         messageResource = nl.joozd.logbookapp.R.string.cannot_restore_password
                         setPositiveButton(android.R.string.ok){
                             viewModel.signUpClicked(userNameEditText.text.toString(), passwordEditText.text.toString(), repeatPasswordEditText.text.toString())
                         }
                         setNegativeButton(nl.joozd.logbookapp.R.string.already_forgot)
-                    }.show()
+                    }
                 else {
-                    nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog(activity).apply {
+                    JoozdlogAlertDialog(activity).show {
                         messageResource = nl.joozd.logbookapp.R.string.must_accept_terms
                         setPositiveButton(android.R.string.ok)
-                    }.show()
+                    }
                 }
             }
 
@@ -168,8 +168,12 @@ class CreateNewUserActivity : JoozdlogActivity() {
      * Functions showing AlertDialogs
      *******************************************************************************************/
 
-    private fun showPasswordRequirements() = JoozdlogAlertDialog(activity).apply {
+    /**
+     * Show password requirements. At this moment just a static string. TODO Maybe generate something from the function that checks it? Or is that just too much fuzz?
+     */
+    private fun showPasswordRequirements() = JoozdlogAlertDialog(activity).show {
         titleResource = R.string.pass_requirements
+        messageResource = R.string.password_requirements
         setPositiveButton(android.R.string.ok)
     }
 
@@ -185,7 +189,7 @@ class CreateNewUserActivity : JoozdlogActivity() {
         }.show()
 
     private fun showCreateAccountNoInternetError(binding: ActivityCreateNewUserBinding ) =
-        JoozdlogAlertDialog(activity).apply {
+        JoozdlogAlertDialog(activity).show {
             titleResource = R.string.no_internet
             messageResource = R.string.no_internet_create_account
             setPositiveButton(R.string.skip) {
@@ -198,7 +202,7 @@ class CreateNewUserActivity : JoozdlogActivity() {
                 }
             }
             setNeutralButton(android.R.string.cancel) {}
-        }.show()
+        }
 
     private fun showPasswordCannotBeEmptyError(binding: ActivityCreateNewUserBinding) {
         binding.passwordTextInputLayout.error = activity.getString(R.string.password_cannot_be_empty)

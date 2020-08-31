@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.comm
 
+import android.util.Log
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 
 object UserManagement {
@@ -41,6 +42,19 @@ object UserManagement {
                 Preferences.password = password
                 Preferences.lastUpdateTime = -1
             }
+        }
+    }
+
+    suspend fun changePassword(newPassword: String): Int{
+        val username = Preferences.username ?: return ReturnCodes.NO_USERNAME
+        val password = Preferences.password ?: return ReturnCodes.NO_PASSWORD
+        return when (Cloud.changePassword(newPassword).also{ Log.d("changePassword()", "returned $it")}){
+            true -> {
+                Preferences.password = newPassword
+                ReturnCodes.SUCCESS
+            }
+            false -> ReturnCodes.WRONG_CREDENTIALS
+            null -> ReturnCodes.CONNECTION_ERROR
         }
     }
 
@@ -78,5 +92,15 @@ object UserManagement {
         Preferences.username = null
         Preferences.password = null
         Preferences.lastUpdateTime = -1
+        Preferences.useCloud = false
     }
+
+    object ReturnCodes {
+        const val SUCCESS = 0
+        const val CONNECTION_ERROR = -999
+        const val WRONG_CREDENTIALS = 1
+        const val NO_USERNAME = 2
+        const val NO_PASSWORD = 3
+    }
+
 }

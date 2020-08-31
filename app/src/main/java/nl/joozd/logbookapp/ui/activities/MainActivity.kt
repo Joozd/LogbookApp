@@ -38,6 +38,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.android.synthetic.main.view_snackbar_custom.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.SettingsActivity
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -53,6 +54,7 @@ import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivity
 import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivity
 import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.dialogs.LoginDialog
+import nl.joozd.logbookapp.ui.dialogs.WaitingForSomethingDialog
 import nl.joozd.logbookapp.ui.fragments.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.customs.CustomSnackbar
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
@@ -63,7 +65,6 @@ import nl.joozd.logbookapp.ui.utils.toast
 
 class MainActivity : JoozdlogActivity() {
     private val viewModel: MainActivityViewModel by viewModels()
-    private val activity = this
 
     private var snackbarShowing: CustomSnackbar? = null
     private var airportSyncProgressBar: JoozdlogProgressBar? = null
@@ -106,21 +107,22 @@ class MainActivity : JoozdlogActivity() {
             true
         }
         R.id.menu_do_something -> {
-            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            clipboard.setPrimaryClip (ClipData.newPlainText("simple text", Preferences.password))
-            JoozdlogAlertDialog(activity).apply {
-                title = "Password:"
-                message = "copied key to clipboard"
-            }.show()
+            supportFragmentManager.commit {
+                add(R.id.mainActivityLayout, WaitingForSomethingDialog().apply{
+                    description = "test"
+                    setCancel("Is goed zo hoor"){
+                        done()
+                    }
+                })
+            }
+
             true
 
         }
-//        R.id.menu_login -> {
-//            //TODO decide if this becomes a new activity or a fragment
-//            toast("Moved to settings")dfr=]e\cvfXD(DXDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDV>_)
-//            true
-//        }
-
+        R.id.menu_login -> {
+            startActivity(Intent(this, ChangePasswordActivity::class.java))
+            true
+        }
         else -> false
     }
 
@@ -204,7 +206,7 @@ class MainActivity : JoozdlogActivity() {
             })
 
             viewModel.notLoggedIn.observe(activity) {
-                if (it){
+                if (it && Preferences.useCloud){
                     showLoginDialog()
                 }
             }

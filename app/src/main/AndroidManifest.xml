@@ -16,6 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".ui.activities.ChangePasswordActivity"/>
         <activity android:name=".ui.activities.MakePdfActivity" />
         <activity android:name=".ui.activities.CreateNewUserActivity" />
         <activity android:name=".ui.activities.newUserActivity.NewUserActivity" />
@@ -67,9 +68,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="https"
                     android:host="joozd.nl"
-                    android:pathPrefix="/inject-key" />
+                    android:pathPrefix="/inject-key"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
     </application>

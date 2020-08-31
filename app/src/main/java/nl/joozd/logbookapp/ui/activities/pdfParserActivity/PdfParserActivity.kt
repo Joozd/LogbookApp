@@ -53,7 +53,6 @@ import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
  * - launch MainActivity
  */
 class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
-    private val activity = this
     private val viewModel: PdfParserActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {

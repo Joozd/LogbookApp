@@ -34,7 +34,6 @@ import nl.joozd.logbookapp.model.viewmodels.activities.MakePdfActivityViewModel
 import nl.joozd.logbookapp.ui.utils.toast
 
 class MakePdfActivity : JoozdlogActivity() {
-    private val activity = this
 
     private val viewModel = MakePdfActivityViewModel()
 

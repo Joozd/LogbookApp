@@ -97,6 +97,20 @@ object FeedbackEvents {
         FINISHED
     }
 
+    enum class ChangePasswordEvents: Event {
+        FINISHED,
+        NOT_IMPLEMENTED,
+        PASSWORD_DOES_NOT_MEET_STANDARDS,
+        PASSWORD_TOO_SHORT, // ie. empty password provided
+        USERNAME_TOO_SHORT, // ie. empty username provided
+        NO_INTERNET,
+        PASSWORDS_DO_NOT_MATCH,
+        NOT_LOGGED_IN,
+        WAITING_FOR_SERVER,
+        SERVER_NOT_RESPONDING,
+        LOGIN_INCORRECT
+    }
+
     enum class NewUserActivityEvents:
         Event {
         NOT_IMPLEMENTED,

@@ -37,7 +37,6 @@ import nl.joozd.logbookapp.ui.utils.toast
 
 
 class LoginActivity : JoozdlogActivity(){
-    private val activity = this
     val viewModel: LoginActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {

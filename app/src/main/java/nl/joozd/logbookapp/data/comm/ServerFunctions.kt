@@ -177,6 +177,17 @@ object ServerFunctions {
         return result?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
     }
 
+    /**
+     * Change password on a logged-in account
+     * @return true on success, null on connection error, false on server error (other result than "OK")
+     */
+    fun changePassword(client: Client, newPassword: ByteArray): Boolean? {
+        if (client.sendRequest(JoozdlogCommsKeywords.UPDATE_PASSWORD, newPassword) < 0) return null
+        val result = client.readFromServer()
+        Log.d(TAG, "Result for changePassword() was ${result?.toString(Charsets.UTF_8)}")
+        return result.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
+    }
+
     fun requestFlightsSince(client: Client, timeStamp: Long): List<Flight>?{
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS_SINCE_TIMESTAMP,
             wrap(timeStamp)

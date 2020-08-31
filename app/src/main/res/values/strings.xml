@@ -107,6 +107,8 @@
     <string name="settings">Settings</string>
     <string name="error">Error</string>
 
+    <string name="login">Log In</string>
+
     <string name="instructor">INSTRUCTOR</string>
     <string name="done">Done!</string>
 
@@ -119,6 +121,14 @@
 
 
     <string name="no_internet">Cannot connect to server</string>
+    <string name="need_internet">You need an internet connection for this.</string>
+    <string name="server_problem">Cannot connect to server</string>
+    <string name="server_problem_message">The server cannot be reached. It may be down, or your internet may have problems. Please try again later.</string>
+    <string name="login_error">Login Error</string>
+    <string name="login_error_message">Saved username/password cannot log in to server. Please try to login first</string>
+    <string name="waiting_for_server">Waiting for server</string>
+
+
     <string name="no_internet_create_account">No internet connection available. You can create and account in the settings screen when you have one, or you can connect to the internet now and retry.</string>
     <string name="no_server_create_account">Server seems to be unavailable. Please retry to create an account at a later time via the settings menu.</string>
     <string name="no_internet_login">Cannot connect to server. Login data has been stored but not checked with server.</string>
@@ -127,6 +137,8 @@
     <string name="passwords_do_not_match">Passwords do not match</string>
     <string name="wrong_username_password">Wrong username or password</string>
     <string name="pass_requirements">Password requirements</string>
+    <string name="password_requirements">At least 6 characters, two of which are not the same.</string>
+
     <string name="password_does_not_meet_standards">Password does not meet standards. It needs a length of at least 6 and at least 2 different characters.</string>
     <string name="password_does_not_meet_standards_short">Password does not meet standards.</string>
     <string name="username_already_taken">This username is already taken.</string>
@@ -188,7 +200,7 @@
     <string name="alreadyHaveAnAccountQuestion">Already have an account?</string>
     <string name="signIn">Sign in</string>
     <string name="signOut">Sign out</string>
-    <string name="youCannotResetPassword">You cannot reset your password! Don\'t forget it!</string>
+    <string name="youCannotResetPassword">You cannot recover your password! Don\'t forget it!</string>
     <string name="iDidForgetMyPassword">I forgot my password anyway :(</string>
     <string name="make_new_account">Make a new account</string>
     <string name="skipThisStep">Skip this step</string>
@@ -196,6 +208,7 @@
     <string name="create_account">Create new account</string>
     <string name="you_are_signed_in_as">You are signed in as <![CDATA[<b>%1$s</b>]]>.</string>
     <string name="you_are_not_signed_in">You are not signed in.</string>
+    <string name="you_need_to_be_signed_in">You need to be signed in before you can perform this action.</string>
     <string name="i_accept_terms">I accept the terms and conditions</string>
     <string name="must_accept_terms">You must accept the terms and conditions to use Cloud Sync</string>
     <string name="cannot_restore_password">Don\'t lose your password. You cannot restore it.</string>
@@ -215,6 +228,9 @@
     <string name="enable_now">Enable now</string>
     <string name="monthly_overviews">Monthly Overviews</string>
     <string name="monthly_overview_explanation">Monthly Overviews import supported for selected carriers (currently only KLC) only. Just share your PDF with Joozdlog.</string>
+    <string name="change_password">Change Password</string>
+    <string name="change_password_explanation">You can use this screen to change your password when you are logged in. Just enter the new password twice and you are good to go.</string>
+    <string name="new_password">New Password</string>
 
 
 </resources>

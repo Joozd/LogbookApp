@@ -20,15 +20,19 @@
 package nl.joozd.logbookapp.ui.fragments
 
 import android.R
+import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
 import android.view.View
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.commit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
 /**
@@ -43,6 +47,10 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
 //TODO remove things and replace with viewModel per fragment
 open class JoozdlogFragment: Fragment(),  CoroutineScope by MainScope() {
     protected val supportFragmentManager: FragmentManager by lazy { requireActivity().supportFragmentManager }
+    protected val fragment: JoozdlogFragment
+        get() = this
+    protected val ctx: Context
+        get() = App.instance
 
     override fun onDestroy() {
         super.onDestroy()
@@ -63,5 +71,12 @@ open class JoozdlogFragment: Fragment(),  CoroutineScope by MainScope() {
     protected fun Int.dpToPixels() = this.toFloat() * resources.displayMetrics.density
 
 
-    protected fun closeFragment() = supportFragmentManager.popBackStack()
+    protected fun closeFragment() = supportFragmentManager.commit { remove(fragment) }
+
+    /**
+     * Disable the "back" button so you cannot close a fragment by pressing it
+     */
+    protected fun disableBackPressed() = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            // With blank your fragment BackPressed will be disabled.
+    }
 }

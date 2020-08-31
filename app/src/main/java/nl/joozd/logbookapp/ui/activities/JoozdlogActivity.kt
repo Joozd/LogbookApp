@@ -33,6 +33,13 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
+    }
+
+    protected val activity: JoozdlogActivity
+        get() = this
 
     /**
      * use  setSupportActionBarWithReturn(this_activities_toolbar)?.apply { title="HALLON AUB GRGR" }

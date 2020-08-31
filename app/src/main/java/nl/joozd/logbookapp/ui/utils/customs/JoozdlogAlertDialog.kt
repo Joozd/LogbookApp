@@ -27,6 +27,17 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 
+
+/**
+ * My own take on how to build an alert dialog.
+ * use: JoozdlogAlertDialog(activity).show{
+ *    // set buttons and texts here
+ * }
+ * [title] = title
+ * [titleResource] = title, from recource.
+ * Same goes for [message] / [messageResource]
+ * [setPositiveButton] / [setNegativeButton] / [setNeutralButton] for buttons
+ */
 class JoozdlogAlertDialog(private val ctx: FragmentActivity): DialogFragment() {
     private var builder = AlertDialog.Builder(ctx)
     private var attachedActivity: FragmentActivity? = null
@@ -59,6 +70,10 @@ class JoozdlogAlertDialog(private val ctx: FragmentActivity): DialogFragment() {
             builder.setMessage(msg)
         }
 
+    /**
+     * @param resource: String resource for text
+     * @param onClick: Onclick action
+     */
     fun setPositiveButton(resource: Int, onClick: ((dialog: DialogInterface) -> Unit)? = null){
         val listener: ((dialog: DialogInterface, id: Int) -> Unit)? = if (onClick == null) null else {dialog, _ ->
             onClick(dialog)
@@ -99,10 +114,10 @@ class JoozdlogAlertDialog(private val ctx: FragmentActivity): DialogFragment() {
         }
         builder.setNeutralButton(text, listener?.let{DialogInterface.OnClickListener(listener)})
     }
-
-
-    fun show(tag: String = "bla"){
+    fun show(tag: String = "bla", block: JoozdlogAlertDialog.() -> Unit = {}): JoozdlogAlertDialog {
+        block()
         show(ctx.supportFragmentManager, tag)
+        return this
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

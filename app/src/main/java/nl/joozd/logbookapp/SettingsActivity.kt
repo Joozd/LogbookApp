@@ -43,7 +43,6 @@ import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.utils.checkPermission
 
 class SettingsActivity : JoozdlogActivity() {
-    private val activity = this
     private lateinit var mBinding: ActivitySettingsBinding
     val viewModel: SettingsActivityViewModel by viewModels()
 
@@ -172,7 +171,7 @@ class SettingsActivity : JoozdlogActivity() {
              * Observers for feedback
              ****************************************************************************************/
 
-            viewModel.feedbackEvent.observe(activity, Observer {
+            viewModel.feedbackEvent.observe(activity) {
                 when (it.getEvent()){
                     SettingsActivityEvents.SHOW_LOGIN_ACTIVITY ->
                         startActivity(Intent(activity, LoginActivity::class.java))
@@ -180,20 +179,20 @@ class SettingsActivity : JoozdlogActivity() {
                     SettingsActivityEvents.SIGNED_OUT ->
                         setLoggedInInfo(Preferences.username)
                 }
-            })
+            }
 
             /****************************************************************************************
              * Other observers
              ****************************************************************************************/
 
-            viewModel.settingsUseIataSelectorTextResource.observe(activity, Observer {
+            viewModel.settingsUseIataSelectorTextResource.observe(activity) {
                 settingsUseIataSelector.text = getString(it)
-            })
-            viewModel.useIataAirports.observe(activity, Observer {
+            }
+            viewModel.useIataAirports.observe(activity) {
                 settingsUseIataSelector.isChecked = it
-            })
+            }
 
-            viewModel.getFlightsFromCalendar.observe(activity, Observer {
+            viewModel.getFlightsFromCalendar.observe(activity) {
                 settingsGetFlightsFromCalendarSelector.isChecked = it
                 if (it)
                     fillCalendarsList(this)
@@ -201,30 +200,30 @@ class SettingsActivity : JoozdlogActivity() {
                     settingsCalendarPickerSpinner.visibility = View.GONE
                     // settingsCalendarTypeSpinner.visibility = View.GONE
                 }
-            })
+            }
 
-            viewModel.useCloudSync.observe(activity, Observer {
+            viewModel.useCloudSync.observe(activity) {
                 useCloudSyncSwitch.isChecked = it
                 if (it) showLoggedInInfo() else hideLoggedInInfo()
-            })
+            }
 
-            viewModel.showOldTimesOnChronoUpdate.observe(activity, Observer {
+            viewModel.showOldTimesOnChronoUpdate.observe(activity) {
                 addRemarksToChronoUpdatesSwitch.isChecked = it
-            })
+            }
 
-            viewModel.foundCalendars.observe(activity, Observer {
+            viewModel.foundCalendars.observe(activity) {
                 @Suppress("UNCHECKED_CAST")
                 (settingsCalendarPickerSpinner.adapter as ArrayAdapter<String>).apply {
                     clear()
                     addAll(it)
                 }
                 settingsCalendarPickerSpinner.setSelection(it.indexOf(Preferences.selectedCalendar))
-            })
+            }
 
-            viewModel.selectedCalendar.observe(activity, Observer {
+            viewModel.selectedCalendar.observe(activity) {
                 if (it != null) settingsCalendarPickerSpinner.setSelectionWithArrayAdapter(it.name)
                 Log.d(this::class.simpleName, "triggered AAAA, $it")
-            })
+            }
 
             // viewModel.pickedCalendarType.observe(this, Observer {
             //     binding.settingsCalendarTypeSpinner.setSelection(it)
@@ -234,12 +233,12 @@ class SettingsActivity : JoozdlogActivity() {
                 setLoggedInInfo(it)
             })
 
-            viewModel.calendarDisabled.observe(activity, Observer {
+            viewModel.calendarDisabled.observe(activity) {
                 if (it)
                     showCalendarDisabled()
                 else
                     hideCalendarDisabled()
-            })
+            }
 
 
             // Set content view

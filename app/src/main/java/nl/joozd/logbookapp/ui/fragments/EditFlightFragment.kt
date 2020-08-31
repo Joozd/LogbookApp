@@ -34,7 +34,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.edit_flight.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
@@ -445,7 +444,7 @@ class EditFlightFragment: JoozdlogFragment(){
      * private worker functions:
      **************************************************************************/
 
-    private fun isSimLayout(v: View): Boolean = v.ifrSelector.visibility == View.GONE
+    // private fun EditFlightBinding.isSimLayout(): Boolean = ifrSelector.visibility == View.GONE
 
     /**
      * Switch layout for edit_flight View to sim

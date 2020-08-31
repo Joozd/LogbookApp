@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.data.pdfparser
+package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
 
 import android.util.Log
 import nl.joozd.klcrosterparser.Activities
@@ -37,7 +37,6 @@ class JoozdlogKlcRosterParser(inputStream: InputStream):
      *********************************************************************************************/
 
     private val roster = KlcRosterParser(inputStream)
-    val isValid = roster.seemsValid
 
     //flights with [orig] and [dest] in IATA format
     private val flightsToPlan: List<Flight> = eventsToFlights(roster.days.map { it.events }.flatten()
@@ -92,6 +91,8 @@ class JoozdlogKlcRosterParser(inputStream: InputStream):
      * Public parts
      *********************************************************************************************/
 
+    override val isValid = roster.seemsValid
+    
     /**
      * getFlights needs an icaoIataMap
      * @param icaoIataMap: map that holds icao names as keys and iata names as values

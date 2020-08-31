@@ -17,10 +17,11 @@
  *
  */
 
-package nl.joozd.logbookapp.data.pdfparser
+package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
 
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
 interface JoozdlogRosterParser {
-    abstract fun getFlights(icaoIataMap: Map<String, String>?): List<Flight>
+    val isValid: Boolean
+    fun getFlights(icaoIataMap: Map<String, String>?): List<Flight>
 }

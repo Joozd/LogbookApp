@@ -178,6 +178,10 @@ class ChangePasswordActivity : JoozdlogActivity() {
         }
     }
 
+    /**
+     * Show "waiting for server" dialog.
+     * TODO make this cancelable
+     */
     private fun showWaitingForServerLayout(){
         supportFragmentManager.commit {
             add(R.id.changePasswordBackgroundLayout, WaitingForSomethingDialog().apply{

@@ -17,13 +17,14 @@
  *
  */
 
-package nl.joozd.logbookapp.data.pdfparser
+package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
 
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
 import java.io.InputStream
 import nl.joozd.joozdlogpdfdetector.TypeIdentifiers.KLC_MONTHLY
+import nl.joozd.logbookapp.data.parseSharedFiles.MonthlyOverview
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -36,7 +37,7 @@ import java.time.format.DateTimeFormatter
  * NOTE: Registrations are currently not correct on Montly Overviews (just last 3 letters), it will return them like that.
  * NOTE: ID's are always -1
  */
-class KlcMonthlyParser(inputStream: InputStream) {
+class KlcMonthlyParser(inputStream: InputStream): MonthlyOverview {
 
     /*********************************************************************************************
      * Private parts: constructor and variables
@@ -121,10 +122,10 @@ class KlcMonthlyParser(inputStream: InputStream) {
     /*********************************************************************************************
      * Public values
      *********************************************************************************************/
-    val validMonthlyOverview: Boolean
+    override val validMonthlyOverview: Boolean
         get() = _dataSeemsValid
 
-    val flights: List<Flight>?
+    override val flights: List<Flight>?
     get() = if (!validMonthlyOverview) null
         else buildFlightsList()
 

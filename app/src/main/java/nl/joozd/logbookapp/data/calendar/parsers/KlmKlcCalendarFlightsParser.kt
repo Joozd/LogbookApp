@@ -23,7 +23,7 @@ import android.util.Log
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
-import nl.joozd.logbookapp.data.pdfparser.JoozdlogRosterParser
+import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.JoozdlogRosterParser
 import nl.joozd.logbookapp.utils.reversed
 
 /**

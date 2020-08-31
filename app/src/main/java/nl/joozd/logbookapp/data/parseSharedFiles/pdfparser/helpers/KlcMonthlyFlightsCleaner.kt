@@ -24,7 +24,7 @@
  * usage:
  * val cleaner =
  */
-package nl.joozd.logbookapp.data.pdfparser.helpers
+package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.helpers
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +37,6 @@ import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.reversed
-import kotlin.coroutines.CoroutineContext
 
 class KlcMonthlyFlightsCleaner(private val dirtyFlights: List<Flight>?): CoroutineScope by MainScope() {
     private val airportRepository = AirportRepository.getInstance()

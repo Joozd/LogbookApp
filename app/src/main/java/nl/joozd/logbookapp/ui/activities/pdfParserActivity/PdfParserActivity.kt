@@ -75,6 +75,10 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                         closeAndstartMainActivity()
                     }
 
+                    PdfParserActivityEvents.IMPORTING_LOGBOOK -> {
+                        pdfParserStatusTextView.text = getString(R.string.working_ellipsis)
+                    }
+
                     PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED -> {
                         longToast("YAAAAY it worked!")
                         closeAndstartMainActivity()
@@ -85,14 +89,20 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                     PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND -> {
                         showChronoConflictFixer(this)
                     }
+                    PdfParserActivityEvents.SOME_FLIGHTS_FAILED_TO_IMPORT ->{
+                        val failedFlights = it.extraData.getStringArrayList(PdfParserActivityViewModel.FAILED_IMPORTS_TAG)
+                        longToast("${failedFlights?.size} failed to import!!!!!!1")
+                        //TODO make this better
+                    }
+
 
 
 
                     PdfParserActivityEvents.ERROR, PdfParserActivityEvents.FILE_NOT_FOUND -> {
-                        toast("Error reading file")
+                        toast("Error reading file: ${it.getString()}")
                         closeAndstartMainActivity()
                     }
-                    PdfParserActivityEvents.NOT_A_KNOWN_ROSTER -> {
+                    PdfParserActivityEvents.NOT_A_KNOWN_ROSTER, PdfParserActivityEvents.NOT_A_KNOWN_LOGBOOK -> {
                         toast("Unsupported file")
                         closeAndstartMainActivity()
                     }

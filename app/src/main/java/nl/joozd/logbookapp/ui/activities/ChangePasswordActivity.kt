@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.ui.activities
 
-import android.app.ProgressDialog.show
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
@@ -28,11 +27,8 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityChangePasswordBinding
-import nl.joozd.logbookapp.databinding.ActivityCreateNewUserBinding
-import nl.joozd.logbookapp.databinding.ActivityLoginBinding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
 import nl.joozd.logbookapp.extensions.onTextChanged
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.ChangePasswordActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.LoginDialog

@@ -440,7 +440,7 @@ class MainActivity : JoozdlogActivity() {
 
     /**
      * Returns the amount of planned flights to show when opening app (constant now, might change for something dynamic depending on screen size or somwething.
-     * It's an interface dependant function, thats why this is here and not in ViewModel
+     * It's an nl.joozd.joozdlogpdfdetector.interface dependant function, thats why this is here and not in ViewModel
      */
     private fun findAmountOfPlannedFlightsToShow(): Int{
         return PLANNED_FLIGHTS_IN_SIGHT

@@ -98,21 +98,17 @@ object JoozdlogWorkersHub {
     }
 
     fun synchronizeAircraftTypes(){
-        Log.d(this::class.simpleName, "BANAAAAAAAAAN XXXXXXXXXXXXXXXXXXXXXX 1")
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
-        Log.d(this::class.simpleName ,"BANAAAAAAAAAN XXXXXXXXXXXXXXXXXXXXXX 2")
         val task = OneTimeWorkRequestBuilder<SyncAircraftTypesWorker>()
             .setConstraints(constraints)
             .addTag(SYNC_AIRCRAFT_TYPES)
             .build()
 
-        Log.d(this::class.simpleName ,"BANAAAAAAAAAN XXXXXXXXXXXXXXXXXXXXXX 3")
         with (WorkManager.getInstance(App.instance)){
             enqueueUniqueWork(SYNC_AIRCRAFT_TYPES, ExistingWorkPolicy.REPLACE, task)
         }
-        Log.d(this::class.simpleName ,"BANAAAAAAAAAN XXXXXXXXXXXXXXXXXXXXXX 4")
     }
 
     /**

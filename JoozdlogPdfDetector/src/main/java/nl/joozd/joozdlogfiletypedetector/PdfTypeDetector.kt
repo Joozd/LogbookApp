@@ -17,8 +17,9 @@
  *
  */
 
-package nl.joozd.joozdlogpdfdetector
+package nl.joozd.joozdlogfiletypedetector
 
+import nl.joozd.joozdlogfiletypedetector.interfaces.FileTypeDetector
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
@@ -27,15 +28,15 @@ import java.io.InputStream
 /**
  * WORK IN PROGRESS
  */
-class JoozdlogPdfDetector(inputStream: InputStream) {
+class PdfTypeDetector(inputStream: InputStream): FileTypeDetector {
     private val reader = PdfReader(inputStream)
     private val firstPage = PdfTextExtractor.getTextFromPage(reader, 1, SimpleTextExtractionStrategy())
 
-    val seemsValid = firstPage.isNotEmpty()
-    val typeOfFile = getType(firstPage)
+    override val seemsValid = firstPage.isNotEmpty()
+    override val typeOfFile = getType(firstPage)
 
     //for debugging
-    val firstPageText: String
+    override val debugData: String
         get() = firstPage
 
     val isRoster = typeOfFile in listOf(SupportedTypes.KLC_ROSTER, SupportedTypes.KLM_ICA_ROSTER)
@@ -52,9 +53,10 @@ class JoozdlogPdfDetector(inputStream: InputStream) {
             match(lines, TypeIdentifiers.KLC_ROSTER) -> SupportedTypes.KLC_ROSTER
             match(lines, TypeIdentifiers.KLC_MONTHLY) -> SupportedTypes.KLC_MONTHLY
             match(lines, TypeIdentifiers.KLM_ICA_ROSTER) -> SupportedTypes.KLM_ICA_ROSTER // this can cascade further if other types also start wiith this
-            else -> SupportedTypes.UNSUPPORTED
+            else -> SupportedTypes.UNSUPPORTED_PDF
         }
     }
 
     private fun match(lines: List<String>, identifier: Pair<Int, String>) = lines[identifier.first].startsWith(identifier.second)
+
 }

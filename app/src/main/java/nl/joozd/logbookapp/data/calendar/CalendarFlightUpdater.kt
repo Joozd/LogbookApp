@@ -52,7 +52,7 @@ class CalendarFlightUpdater {
         val foundEvents: List<JoozdCalendarEvent> = activeCalendar?.let{
             calendarScraper.getEventsBetween(it, period.start, period.endInclusive)
         } ?: return null
-        return KlmKlcCalendarFlightsParser(foundEvents).getFlights(icaoIataMapAsync.await())
+        return KlmKlcCalendarFlightsParser(foundEvents, icaoIataMapAsync.await()).flights
         /* This for when no longer one regex fits all
         when(Preferences.calendarType){
             SupportedCalendarTypes.KLM_CREWCALENDAR -> KlmKlcCalendarFlightsParser(foundEvents).getFlights(icaoIataMapAsync.await())

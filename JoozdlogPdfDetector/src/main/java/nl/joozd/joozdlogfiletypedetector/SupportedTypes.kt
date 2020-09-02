@@ -17,12 +17,14 @@
  *
  */
 
-package nl.joozd.joozdlogpdfdetector
+package nl.joozd.joozdlogfiletypedetector
 
 enum class SupportedTypes {
     KLC_ROSTER,
     KLC_MONTHLY,
     KLM_ICA_ROSTER,
     KLM_ICA_MONTHLY,
-    UNSUPPORTED
+    MCC_PILOT_LOG_LOGBOOK,
+    UNSUPPORTED_PDF,
+    UNSUPPORTED_CSV
 }

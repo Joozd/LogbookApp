@@ -19,22 +19,25 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
+import nl.joozd.joozdlogfiletypedetector.interfaces.FileTypeDetector
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
-import nl.joozd.joozdlogpdfdetector.JoozdlogPdfDetector
-import nl.joozd.joozdlogpdfdetector.SupportedTypes
+import nl.joozd.joozdlogfiletypedetector.CsvTypeDetector
+import nl.joozd.joozdlogfiletypedetector.PdfTypeDetector
+import nl.joozd.joozdlogfiletypedetector.SupportedTypes
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.MccPilotLogCsvParser
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.JoozdlogKlcRosterParser
+import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcRoster
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcMonthlyParser
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.helpers.KlcMonthlyFlightsCleaner
+import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.helpers.ImportedFlightsCleaner
 import nl.joozd.logbookapp.extensions.*
 import java.io.FileNotFoundException
 import java.io.InputStream
@@ -56,23 +59,32 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             viewModelScope.launch {
                 val uri = it.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri
                 getTypeDetector(uri)?.let { typeDetector ->
-                    Log.d("GOT PDF:", "\n\n${typeDetector.firstPageText}\n\n")
-
                     //check if it was actually a supported file
-
                     /**
                      * This starts the correct functions when a roster type is found
                      */
                     when (typeDetector.typeOfFile) {
                         SupportedTypes.KLC_ROSTER -> uri?.getInputStream()?.use {
                             //TODO check if calendar sync is active
-                            if (!parseKlcRoster(it))
+                            if (!parseKlcRoster(it, airportRepository.getIcaoToIataMap()))
                                 feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
-                        } ?: feedback(PdfParserActivityEvents.ERROR)
+                        } ?: feedback(PdfParserActivityEvents.ERROR).apply{
+                            putString("Error 1")
+                        }
 
                         SupportedTypes.KLC_MONTHLY -> uri?.getInputStream()?.use {
-                            val result = parseKlcMonthly(it)
+                            parseKlcMonthly(it)
                         } ?: feedback(PdfParserActivityEvents.ERROR)
+
+                        SupportedTypes.MCC_PILOT_LOG_LOGBOOK -> uri?.getInputStream()?.use {
+                            feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
+                            Log.d("BOTERHAM", "PUNT 1")
+                            parseMccPilotLogbook(it)
+                        }
+
+                        SupportedTypes.UNSUPPORTED_PDF, SupportedTypes.UNSUPPORTED_CSV -> {
+                            Log.d("GOT PDF:", "\n\n${typeDetector.debugData}\n\n")
+                        }
                         else -> feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
                     }
                 }
@@ -93,19 +105,25 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         null
     }
 
-    private fun getTypeDetector(uri: Uri?): JoozdlogPdfDetector? {
-        if (uri?.getInputStream() == null) {
-            feedback(PdfParserActivityEvents.ERROR)
-            return null
-        }
-        return uri.getInputStream()?.let {
-            JoozdlogPdfDetector(it).let{detector ->
-                if (!detector.seemsValid) null else detector
+    private fun getTypeDetector(uri: Uri?): FileTypeDetector? {
+        uri?.getInputStream()?.use { inputStream ->
+            val mimeType = App.instance.contentResolver.getType(uri) ?: "NONE"
+            val detector = when {
+                "application/pdf" in mimeType -> PdfTypeDetector(inputStream)
+                "text/csv" in mimeType -> CsvTypeDetector(inputStream)
+                else -> {
+                    feedback(PdfParserActivityEvents.ERROR).apply{
+                        putString("Error 2: ${App.instance.contentResolver.getType(uri)}")
+                    }
+                    null
+                }
             }
-        } ?: run {
-            feedback(PdfParserActivityEvents.ERROR)
-            null
+            return if (detector?.seemsValid != true) null else detector
         }
+        feedback(PdfParserActivityEvents.ERROR).apply{
+            putString("Error 3")
+        }
+        return null
     }
 
     /*********************************************************************************************
@@ -116,42 +134,70 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      * Parse KLC roster and do all the magic.
      * Return true if work successfully launched, false if file not OK
      */
-    private fun parseKlcRoster(inputStream: InputStream):  Boolean{
-        val roster = JoozdlogKlcRosterParser(
-            inputStream
-        )
+    private fun parseKlcRoster(inputStream: InputStream, icaoIataMap: Map<String, String>):  Boolean{
+        //TODO next line should probably be async? It does things with a file.
+        val roster = KlcRoster(inputStream, icaoIataMap)
         if (!roster.isValid) return false
+
         viewModelScope.launch (Dispatchers.IO + NonCancellable){
             val mostRecentFlight = flightRepository.getMostRecentFlightAsync()
-            val flightsFromRoster = roster.getFlights(airportRepository.getIcaoToIataMap())
 
             //Decision: Only flights newer than newest complete flight fill be saved
             val cutoffTime = mostRecentFlight.await()?.timeIn ?: 0L
-            flightsToSave = flightsFromRoster.filter {f -> f.timeOut > cutoffTime}
+            flightsToSave = roster.flights?.filter {f -> f.timeOut > cutoffTime} ?: emptyList()
             periodToSave = roster.period
-            Log.d("HHHHHHHHHHHHHHHHHHHHHHH", "period: $periodToSave")
             saveFlightsFromRoster()
         }
         return true
     }
 
-    private suspend fun parseKlcMonthly(inputStream: InputStream): Boolean{
+    private suspend fun parseKlcMonthly(inputStream: InputStream) {
         //TODO: move Strings to resource file
         with (KlcMonthlyParser(inputStream)){
             if (!validMonthlyOverview){
                 feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
-                return false
+                return
             }
-            var result = false
-            foundFlights = KlcMonthlyFlightsCleaner(flights).cleanFlights().also {
+            foundFlights = ImportedFlightsCleaner(flights).cleanFlights().also {
                 if (it == null) {
                     Log.w("PdfParserActivity", "KlcMonthlyParser.flights == null")
-                    feedback(PdfParserActivityEvents.ERROR)
-                    return false
+                    feedback(PdfParserActivityEvents.ERROR).apply{
+                        putString("Error 4")
+                    }
+                    return
                 }
-                result = processFlights(it)
+                processFlights(it)
             }
-            return result
+        }
+    }
+
+    private suspend fun parseMccPilotLogbook(inputStream: InputStream) = withContext(Dispatchers.Default){
+        with (MccPilotLogCsvParser.ofInputStream(inputStream)) {
+            if (!validImportedLogbook) {
+                feedback(PdfParserActivityEvents.NOT_A_KNOWN_LOGBOOK)
+                return@withContext
+            }
+            flights?.let {fff ->
+                if (fff.any { it == null }) { // Some flights failed to import
+                    feedback(PdfParserActivityEvents.SOME_FLIGHTS_FAILED_TO_IMPORT).apply {
+                        extraData.putStringArrayList(FAILED_IMPORTS_TAG, ArrayList(errorLines))
+                    }
+                }
+                foundFlights = ImportedFlightsCleaner(fff.filterNotNull()).cleanFlights().also {
+                    if (it == null) {
+                        Log.w("PdfParserActivity", "MccPilotLogCsvParser.flights null after it wasn't ????")
+                        feedback(PdfParserActivityEvents.ERROR).apply{
+                            putString("Error 5")
+                        }
+                        return@withContext
+                    }
+                    processFlights(it, false)
+                }
+
+
+
+            }
+
         }
     }
 
@@ -160,7 +206,9 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      */
     private fun saveFlightsFromRoster(finish: Boolean = true){
         if (flightsToSave == null){
-            feedback(PdfParserActivityEvents.ERROR)
+            feedback(PdfParserActivityEvents.ERROR).apply{
+                putString("Error 6")
+            }
             return
         }
         val checkedCalendarSync = Preferences.getFlightsFromCalendar && (Preferences.calendarDisabledUntil < periodToSave?.endInclusive?.epochSecond ?: -1)
@@ -176,7 +224,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
-    private suspend fun processFlights(foundFlights: List<Flight>): Boolean {
+    private suspend fun processFlights(foundFlights: List<Flight>, addChronoMessageIfWanted: Boolean = true): Boolean {
         var adjustments = 0
         var newCount = 0
         do{
@@ -196,7 +244,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                 adjustments++
                 match.second.copy(timeOut = match.first.timeOut, timeIn = match.first.timeIn, timeStamp = match.first.timeStamp, remarks = oldRemarks + " | ".emptyIfNotTrue(oldRemarks.isNotEmpty() && Preferences.showOldTimesOnChronoUpdate) + "Times adjusted from Chrono. Old: ${match.second.tOut().toTimeString()}-${match.second.tIn().toTimeString()}".emptyIfNotTrue(Preferences.showOldTimesOnChronoUpdate))
             })
-            flightRepository.saveFromRoster(newFlights.map{it.copy (remarks = "From Chrono, some info may be missing")}.also{newCount += it.size})
+            flightRepository.saveFromRoster(newFlights.map{f -> if (addChronoMessageIfWanted) f.copy (remarks = "From Chrono, some info may be missing") else f }.also{newCount += it.size})
             _parsedChronoData = ParsedChronoData(exactMatches, flightsToAdjust, conflicts, newFlights)
 
         } while (flightsToAdjust.isNotEmpty())
@@ -254,7 +302,9 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     fun disableCalendarUntilAfterLastFlight(){
         val maxIn = periodToSave?.endInclusive?.epochSecond
         if (maxIn == null) {
-            feedback(PdfParserActivityEvents.ERROR)
+            feedback(PdfParserActivityEvents.ERROR).apply{
+                putString("Error 7")
+            }
             return
         }
         Preferences.calendarDisabledUntil = maxIn
@@ -289,6 +339,8 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         const val ADJUSTED_FLIGHTS = "ADJUSTED_FLIGHTS"
         const val NEW_FLIGHTS = "NEW_FLIGHTS"
         const val TOTAL_FLIGHTS_IN_CHRONO = "TOTAL_FLIGHTS_IN_CHRONO"
+
+        const val FAILED_IMPORTS_TAG = "FAILED_IMPORTS_TAG"
     }
 
 }

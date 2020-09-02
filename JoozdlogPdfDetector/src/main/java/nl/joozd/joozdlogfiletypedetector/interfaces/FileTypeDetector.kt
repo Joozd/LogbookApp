@@ -17,11 +17,12 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
+package nl.joozd.joozdlogfiletypedetector.interfaces
 
-import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.joozdlogfiletypedetector.SupportedTypes
 
-interface JoozdlogRosterParser {
-    val isValid: Boolean
-    fun getFlights(icaoIataMap: Map<String, String>?): List<Flight>
+interface FileTypeDetector {
+    val seemsValid: Boolean
+    val typeOfFile: SupportedTypes
+    val debugData: String
 }

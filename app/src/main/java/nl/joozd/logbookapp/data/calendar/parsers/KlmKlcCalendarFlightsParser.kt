@@ -23,8 +23,10 @@ import android.util.Log
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.JoozdlogRosterParser
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.utils.reversed
+import java.time.Instant
+import java.time.ZoneOffset
 
 /**
  * Parses JoozdCalendarEvents and builds a list of Flights.
@@ -32,8 +34,8 @@ import nl.joozd.logbookapp.utils.reversed
  * suggested use: KlmCrewCalendarFlightsParser(listOfEvents).getFlights(icaoIataMap)
  */
 
-class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>):
-    JoozdlogRosterParser {
+class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, val icaoIataMap: Map<String, String>?):
+    Roster {
     init{
         Log.d(this::class.simpleName, "Got ${events.size} events")
     }
@@ -61,11 +63,25 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>):
     private fun MatchResult.dest() = (groups[DEST]?.value ?: error ("ERROR 0005 NO DEST"))
 
 
-    override fun getFlights(icaoIataMap: Map<String, String>?): List<Flight>{
+    private fun buildFlights(): List<Flight>{
         val iataIcaoMap = icaoIataMap?.reversed() ?: emptyMap<String, String>()
         return allFlightsWithIataAirportNames.map {it.copy (orig = iataIcaoMap[it.orig] ?: it.orig, dest = iataIcaoMap[it.dest] ?: it.dest )}
     }
 
+    override val flights: List<Flight>?
+        get() = buildFlights()
+
+    override val isValid: Boolean
+        get() = true
+
+    override val period: ClosedRange<Instant> // if no flights: (0..1)
+        get() {
+            val start = allFlightsWithIataAirportNames.minByOrNull { it.timeOut }?.tOut()?.toLocalDate()
+                ?.atStartOfDay()?.toInstant(ZoneOffset.UTC) ?: Instant.ofEpochSecond(0)
+            val end = allFlightsWithIataAirportNames.maxByOrNull { it.timeIn }?.tIn()?.toLocalDate()?.plusDays(1)
+                ?.atStartOfDay()?.toInstant(ZoneOffset.UTC) ?: start.plusSeconds(1)
+            return(start..end)
+        }
 
     companion object{
         const val FLIGHT_EVENT_IDENTIFIER = "FLIGHT"

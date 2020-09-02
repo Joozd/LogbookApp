@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.extensions
 
+import android.nfc.FormatException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -26,7 +27,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 private val dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
-private val dateformatterforLogbook = DateTimeFormatter.ofPattern("dd-MM-yy")
+private val dateFormatterFourDigitYear = DateTimeFormatter.ofPattern("dd-MM-yy")
+private val dateFormatterForImport = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 private val dateFormatterLocalized = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
 private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 private val timeFormatterLocalized = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
@@ -37,25 +39,27 @@ private val dateAndTimeFormatter =  DateTimeFormatter.ofPattern("dd MMM yyyy HH:
 fun LocalDate.toDateString() = this.format(dateFormatter)
 fun LocalDate.toDateStringLocalized() = this.format(dateFormatterLocalized)
 fun LocalDateTime.toDateString() = this.format(dateFormatter)
-fun LocalDateTime.toLogbookDate() = this.format(dateformatterforLogbook)
+fun LocalDateTime.toLogbookDate() = this.format(dateFormatterFourDigitYear)
 fun LocalDateTime.toDateStringLocalized() = this.format(dateFormatterLocalized)
 fun LocalDateTime.toTimeString() = this.format(timeFormatter)
 fun LocalDateTime.toTimeStringLocalized() = this.format(timeFormatterLocalized)
 fun LocalDateTime.toMonthYear() = this.format(monthYearFormatter)
 fun LocalDateTime.noColon() = this.format(timeFormatterNoColon)
 
-fun String.makeLocalDate(): LocalDate = LocalDate.parse(this,
-    dateFormatter
-)
-fun String.makeLocalDateTime(): LocalDateTime = LocalDateTime.parse(this,
-    dateAndTimeFormatter
-)
-fun String.makeLocalDateTimeTime(): LocalDateTime = LocalDateTime.parse(this,
-    timeFormatter
-)
-fun String.addColonToTime() = LocalDateTime.parse(this,
-    timeFormatterNoColon
-).toTimeString()
+fun String.makeLocalDate(): LocalDate = LocalDate.parse(this, dateFormatter)
+
+fun String.makeLocalDateSmart(): LocalDate{
+    val numbers = this.split('-', '/', ' ').map{it.toInt()}
+    if (numbers.size != 3) throw FormatException("Need a string with 3 separate numbers, divided by \'-\', \'/\' or \' \'. Got $this")
+    return LocalDate.of(numbers[2], numbers[1], numbers[0])
+}
+
+fun String.makeLocalDateTime(): LocalDateTime = LocalDateTime.parse(this, dateAndTimeFormatter)
+
+fun String.makeLocalDateTimeTime(): LocalDateTime = LocalDateTime.parse(this, timeFormatter)
+
+fun String.addColonToTime() = LocalDateTime.parse(this, timeFormatterNoColon).toTimeString()
+
 fun String.makeLocalTime() = LocalTime.parse(this, timeFormatter)
 
 fun LocalDateTime.roundToMinutes() =

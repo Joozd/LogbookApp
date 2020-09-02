@@ -17,11 +17,16 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles
+package nl.joozd.joozdlogfiletypedetector
 
-import nl.joozd.logbookapp.model.dataclasses.Flight
+/**
+ * Identify type of file by this:
+ * pair(# of line to look at, text to find there)
+ */
+object TypeIdentifiers {
+    val KLC_ROSTER = 1 to "Individual duty plan for"
+    val KLC_MONTHLY = 0 to "MONTHLY OVERVIEW"
+    val KLM_ICA_ROSTER = 0 to "CREW ROSTER FROM "
+    val KLM_ICA_MONTHLY = 0 to "__NOT_IMPLEMENTED__"
 
-interface MonthlyOverview {
-    val validMonthlyOverview: Boolean
-    val flights: List<Flight>?
 }

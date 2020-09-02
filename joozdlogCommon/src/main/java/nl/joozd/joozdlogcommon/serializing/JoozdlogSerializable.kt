@@ -26,7 +26,7 @@ package nl.joozd.joozdlogcommon.serializing
 interface JoozdlogSerializable{
     fun serialize(): ByteArray
 
-    // interface should be implemented if you want to de-serialize
+    // nl.joozd.joozdlogpdfdetector.interface should be implemented if you want to de-serialize
     interface Creator{
         /**
          * Create a new instance of the JoozdlogSerializable class, instantiating it

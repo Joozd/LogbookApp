@@ -38,7 +38,7 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.reversed
 
-class KlcMonthlyFlightsCleaner(private val dirtyFlights: List<Flight>?): CoroutineScope by MainScope() {
+class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private val carrier: String = "NONE"): CoroutineScope by MainScope() {
     private val airportRepository = AirportRepository.getInstance()
     private val aircraftRepository = AircraftRepository.getInstance()
     private val icaoIataMapAsync = async(Dispatchers.IO) {airportRepository.getIcaoToIataMap()}
@@ -51,22 +51,38 @@ class KlcMonthlyFlightsCleaner(private val dirtyFlights: List<Flight>?): Corouti
         return dirtyFlights?.map{cleanFlight(it, aircraftMap, iataToIcaoMap, now)}
     }
 
+    /**
+     * changes IATA to ICAO idents (leaves ICAO alone)
+     * changes aircraft type to the one from database
+     * completes registration if needed (eg. KLC monthlies state "EXY" which should be "PH-EXY"
+     * Sets timestamp to now
+     */
     private fun cleanFlight(f: Flight, acMap: Map<String, Aircraft>, iataIcaoMap: Map<String, String>, now: Long): Flight{
         with (f){
             val cleanOrig = iataIcaoMap[orig] ?: orig
             val cleanDest = iataIcaoMap[dest] ?: dest
             val bestHitRegistration = registration.findBestHitForRegistration(acMap.keys) // null if no hit found
-            val cleanRegistation = bestHitRegistration ?: KLC_REGISTRATION_PREFIX + registration + KLC_REGISTRATION_SUFFIX
+            val cleanRegistation = bestHitRegistration ?: completeRegistration(registration)
             val cleanType = bestHitRegistration?.let {acMap[it]?.type?.shortName} ?: UNKNOWN_TYPE
 
             return f.copy(orig = cleanOrig, dest = cleanDest, registration = cleanRegistation, aircraftType = cleanType, timeStamp = now)
         }
     }
 
+    private fun completeRegistration(partialReg: String): String = when (carrier){
+        Carriers.KLC ->  KLC_REGISTRATION_PREFIX + partialReg + KLC_REGISTRATION_SUFFIX
+        else -> partialReg
+    }
+
     companion object{
-        const val UNKNOWN_TYPE = "UNKNOWN"
-        const val KLC_REGISTRATION_PREFIX = "PH-"
-        const val KLC_REGISTRATION_SUFFIX = ""
+        object Carriers{
+            const val NONE = "NONE"
+            const val KLC = "KLC"
+        }
+
+        private const val UNKNOWN_TYPE = "UNKNOWN"
+        private const val KLC_REGISTRATION_PREFIX = "PH-"
+        private const val KLC_REGISTRATION_SUFFIX = ""
     }
 
 }

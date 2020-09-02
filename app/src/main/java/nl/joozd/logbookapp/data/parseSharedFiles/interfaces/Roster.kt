@@ -17,5 +17,14 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.csvParser
+package nl.joozd.logbookapp.data.parseSharedFiles.interfaces
 
+import nl.joozd.logbookapp.model.dataclasses.Flight
+import java.time.Instant
+
+interface Roster {
+    val isValid: Boolean
+    val flights: List<Flight>?
+    val period: ClosedRange<Instant>
+    //fun getFlights(icaoIataMap: Map<String, String>?): List<Flight>
+}

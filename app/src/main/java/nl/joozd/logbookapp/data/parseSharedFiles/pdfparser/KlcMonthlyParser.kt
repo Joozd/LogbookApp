@@ -23,8 +23,8 @@ import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
 import java.io.InputStream
-import nl.joozd.joozdlogpdfdetector.TypeIdentifiers.KLC_MONTHLY
-import nl.joozd.logbookapp.data.parseSharedFiles.MonthlyOverview
+import nl.joozd.joozdlogfiletypedetector.TypeIdentifiers.KLC_MONTHLY
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.MonthlyOverview
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -99,6 +99,18 @@ class KlcMonthlyParser(inputStream: InputStream): MonthlyOverview {
 
     }
 
+    /**
+     * Makes a period from midnight start of Overview to midnight after end of overview
+     */
+    private fun makePeriod(): ClosedRange<Instant>?{
+        if (!validMonthlyOverview) return null
+        val format = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+        return dateRegEx.findAll(periodLine).map{LocalDate.parse(it.value, format)}.let{
+            it.first().atStartOfDay().toInstant(ZoneOffset.UTC)..it.last().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+        }
+
+    }
+
     /*********************************************************************************************
      * Private parts: extension functions
      *********************************************************************************************/
@@ -128,6 +140,9 @@ class KlcMonthlyParser(inputStream: InputStream): MonthlyOverview {
     override val flights: List<Flight>?
     get() = if (!validMonthlyOverview) null
         else buildFlightsList()
+
+    override val period
+        get() = makePeriod()
 
     /*********************************************************************************************
      *Companion object

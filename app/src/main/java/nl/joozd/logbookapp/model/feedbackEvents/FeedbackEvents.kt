@@ -41,6 +41,7 @@ object FeedbackEvents {
     enum class PdfParserActivityEvents:
         Event {
         NOT_IMPLEMENTED,
+        IMPORTING_LOGBOOK,
         ROSTER_SUCCESSFULLY_ADDED,
         CHRONO_SUCCESSFULLY_ADDED,
         CHRONO_CONFLICTS_FOUND,
@@ -48,6 +49,8 @@ object FeedbackEvents {
         CALENDAR_SYNC_PAUSED,
         FILE_NOT_FOUND,
         NOT_A_KNOWN_ROSTER,
+        NOT_A_KNOWN_LOGBOOK,
+        SOME_FLIGHTS_FAILED_TO_IMPORT,
         ERROR
     }
 

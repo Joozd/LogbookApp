@@ -115,6 +115,9 @@
     <string name="newUserActivityHeader">Create cloud sync account</string>
     <string name="almost_done">Almost done!</string>
 
+    <string name="working_ellipsis">Working…</string>
+
+
     <!--
     Complete messages
     -->

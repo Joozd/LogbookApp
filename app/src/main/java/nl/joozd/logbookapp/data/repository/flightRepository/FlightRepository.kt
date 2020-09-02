@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.data.repository.flightRepository
 
 import android.Manifest
+import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -67,7 +68,11 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     private var cachedFlightsList: List<Flight>?
         get() = _cachedFlights.value
         set(fff){
-            _cachedFlights.value = fff
+            if (Looper.myLooper() == Looper.getMainLooper())
+                _cachedFlights.value = fff
+            else launch{
+                _cachedFlights.value = fff
+            }
         }
 
     private fun requestValidLiveFlightData() =

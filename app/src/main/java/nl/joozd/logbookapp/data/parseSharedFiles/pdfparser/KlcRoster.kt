@@ -23,14 +23,15 @@ import android.util.Log
 import nl.joozd.klcrosterparser.Activities
 import nl.joozd.klcrosterparser.KlcRosterEvent
 import nl.joozd.klcrosterparser.KlcRosterParser
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.reversed
 import java.io.InputStream
 import java.time.Instant
 
-class JoozdlogKlcRosterParser(inputStream: InputStream):
-    JoozdlogRosterParser {
+class KlcRoster(inputStream: InputStream, val icaoIataMap: Map<String, String>?):
+    Roster {
 
     /*********************************************************************************************
      * Private parts
@@ -92,20 +93,21 @@ class JoozdlogKlcRosterParser(inputStream: InputStream):
      *********************************************************************************************/
 
     override val isValid = roster.seemsValid
-    
+
     /**
      * getFlights needs an icaoIataMap
      * @param icaoIataMap: map that holds icao names as keys and iata names as values
      * @return list of flights (flightIDs are -1)
      */
-    override fun getFlights(icaoIataMap: Map<String, String>?): List<Flight>{
+    override val flights: List<Flight>?
+    get() {
         val iataIcaoMap = icaoIataMap?.reversed() ?: emptyMap<String, String>()
         Log.d("KLC Roster Parser", "found ${flightsToPlan.size} flights")
         return flightsToPlan.map{it.copy (orig = iataIcaoMap[it.orig] ?: it.orig, dest = iataIcaoMap[it.dest] ?: it.dest)} +
                 simsToPlan
     }
 
-    val period = (Instant.ofEpochSecond(roster.period!!.start)..Instant.ofEpochSecond(roster.period!!.endInclusive))
+    override val period = (Instant.ofEpochSecond(roster.period!!.start)..Instant.ofEpochSecond(roster.period!!.endInclusive))
 
 }
 

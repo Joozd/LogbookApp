@@ -435,9 +435,10 @@ class EditFlightFragment: JoozdlogFragment(){
     } // end of onCreateView
 
 
-    override fun onDetach() {
+    override fun onDestroy() {
+        Log.d("XXXXXXXXXXXXXXXXXXXXX", "Detaching Fragment QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ")
         viewModel.onClosingFragment()
-        super.onDetach()
+        super.onDestroy()
     }
 
     /**************************************************************************

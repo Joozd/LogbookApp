@@ -71,7 +71,9 @@ open class JoozdlogFragment: Fragment(),  CoroutineScope by MainScope() {
     protected fun Int.dpToPixels() = this.toFloat() * resources.displayMetrics.density
 
 
-    protected fun closeFragment() = supportFragmentManager.commit { remove(fragment) }
+    protected fun removeFragment() = supportFragmentManager.commit { remove(fragment) }
+
+    protected fun closeFragment() = supportFragmentManager.popBackStack()
 
     /**
      * Disable the "back" button so you cannot close a fragment by pressing it

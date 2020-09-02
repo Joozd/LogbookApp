@@ -142,7 +142,7 @@ class WaitingForSomethingDialog: JoozdlogFragment() {
      * Close the dialog
      */
     fun done() {
-        closeFragment()
+        removeFragment()
     }
 }
 

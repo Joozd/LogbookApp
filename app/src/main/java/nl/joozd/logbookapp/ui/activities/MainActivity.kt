@@ -268,7 +268,7 @@ class MainActivity : JoozdlogActivity() {
                 }
             })
 
-            viewModel.flightOpenEvents.observe(activity, Observer {
+            viewModel.flightOpenEvents.observe(activity) {
                 if (it.getEvent() == FeedbackEvents.FlightEditorOpenOrClosed.CLOSED) {
                     if (viewModel.checkFlightConflictingWithCalendarSync()){
                         showFlightConflictsWithCalendarSyncDialog()
@@ -276,7 +276,7 @@ class MainActivity : JoozdlogActivity() {
                     mainToolbar.showAnimated()
                     if (snackbarShowing == null) addButton.show()
                 }
-            })
+            }
 
             viewModel.airportSyncProgress.observe(activity, Observer { p ->
                 when {

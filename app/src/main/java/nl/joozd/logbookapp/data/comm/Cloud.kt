@@ -254,7 +254,7 @@ object Cloud {
                         Log.d(TAG, "Got timestamp ${Instant.ofEpochSecond(it)}")
                         listener(10)
                         Preferences.serverTimeOffset = it - Instant.now().epochSecond
-                    } ?: return@f null // if no timestamp received, server is not working so might as well quit here
+                    } ?: return@f null.also { Log.d("Cloud", "getTimeStamp() returned null") } // if no timestamp received, server is not working so might as well quit here
 
                     //Login and handle if that fails:
                     when (login(server)) {

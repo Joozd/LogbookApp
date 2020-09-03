@@ -250,10 +250,11 @@ object Cloud {
                 listener(5) // Connection is made!
                 with(ServerFunctions) {
                     //sync time with server
-                    val timeStamp: Long = getTimestamp(server) ?: -1
-                    Log.d(TAG, "Got timestamp ${Instant.ofEpochSecond(timeStamp)}")
-                    listener(10)
-                    Preferences.serverTimeOffset = timeStamp - Instant.now().epochSecond
+                    val timeStamp: Long = getTimestamp(server)?.also {
+                        Log.d(TAG, "Got timestamp ${Instant.ofEpochSecond(it)}")
+                        listener(10)
+                        Preferences.serverTimeOffset = it - Instant.now().epochSecond
+                    } ?: return@f null // if no timestamp received, server is not working so might as well quit here
 
                     //Login and handle if that fails:
                     when (login(server)) {

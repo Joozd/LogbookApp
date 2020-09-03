@@ -38,6 +38,7 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcRoster
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcMonthlyParser
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.helpers.ImportedFlightsCleaner
+import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.extensions.*
 import java.io.FileNotFoundException
 import java.io.InputStream
@@ -228,7 +229,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         var adjustments = 0
         var newCount = 0
         do{
-            val exactMatches = flightRepository.findMatches(foundFlights, false)
+            val exactMatches = flightRepository.findMatches(foundFlights, checkEntireDay = false, checkRegistrations = true)
             val conflicts = flightRepository.findConflicts(foundFlights)
             val flightsToAdjust = flightRepository.findMatches(foundFlights, true).filter {match -> match.first !in exactMatches.map{it.first}}.filter {it.first !in conflicts.map{c -> c.first}}
             val newFlights = flightRepository.findNewFlights(foundFlights)
@@ -241,8 +242,10 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             //Save flights to adjust that have no conflicts and clear that list
             flightRepository.save(flightsToAdjust.map{match ->
                 val oldRemarks = match.second.remarks
+                val changeRemarks = changeRemarksBuilder(match)
+                val newRemarks = oldRemarks + " | ".emptyIfNotTrue(oldRemarks.isNotEmpty() && Preferences.showOldTimesOnChronoUpdate) + changeRemarks.emptyIfNotTrue(Preferences.showOldTimesOnChronoUpdate)
                 adjustments++
-                match.second.copy(timeOut = match.first.timeOut, timeIn = match.first.timeIn, timeStamp = match.first.timeStamp, remarks = oldRemarks + " | ".emptyIfNotTrue(oldRemarks.isNotEmpty() && Preferences.showOldTimesOnChronoUpdate) + "Times adjusted from Chrono. Old: ${match.second.tOut().toTimeString()}-${match.second.tIn().toTimeString()}".emptyIfNotTrue(Preferences.showOldTimesOnChronoUpdate))
+                match.second.copy(timeOut = match.first.timeOut, timeIn = match.first.timeIn, timeStamp = match.first.timeStamp, registration = match.first.registration, aircraftType = match.first.aircraftType, remarks = newRemarks)
             })
             flightRepository.saveFromRoster(newFlights.map{f -> if (addChronoMessageIfWanted) f.copy (remarks = "From Chrono, some info may be missing") else f }.also{newCount += it.size})
             _parsedChronoData = ParsedChronoData(exactMatches, flightsToAdjust, conflicts, newFlights)
@@ -274,6 +277,21 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             extraData.putInt(TOTAL_FLIGHTS_IN_CHRONO, foundFlights.size)
         }
         return true
+
+    }
+
+    /**
+     * Builds a string with remarks for flights that are updated from monthly overviews.
+     * It assumes `orig`, `dest` and `flightNumber` stay the same.
+     * @param match: Pair<New Flight, Original Flight>
+     * // TODO change hardcoded string to resource
+     */
+    private fun changeRemarksBuilder(match: Pair<Flight, Flight>): String{
+        val timesChanged = !match.first.isSameFlightAs(match.second) // checks if same orig, dest, timeOut, timeIn and flightnumber
+        val regOrTypeChanged = match.first.regAndType() != match.second.regAndType()
+        return "Times adjusted from Chrono. Old: ${match.second.tOut().toTimeString()}-${match.second.tIn().toTimeString()}".emptyIfNotTrue(timesChanged) +
+                " | ".emptyIfNotTrue(timesChanged && regOrTypeChanged) +
+                "Aircraft adjusted from Chrono. Old: ${match.second.regAndType()}".emptyIfNotTrue(regOrTypeChanged)
 
     }
 

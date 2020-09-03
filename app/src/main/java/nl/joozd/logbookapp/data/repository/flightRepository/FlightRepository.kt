@@ -373,13 +373,16 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * @return list of pairs of flights that overlap with flights in DB and are the same
      * (newFlight to knownFlight)
      */
-    suspend fun findMatches(flightsToCheck: List<Flight>, checkEntireDay: Boolean = true): List<Pair<Flight, Flight>>{
+    suspend fun findMatches(flightsToCheck: List<Flight>, checkEntireDay: Boolean = true, checkRegistrations: Boolean = false): List<Pair<Flight, Flight>>{
         val allFlights = getFlightsOnDays(getAllFlights(), flightsToCheck) // other flights are no match anyway
         val matches = flightsToCheck.filter { f ->
             allFlights.any {
-                if (checkEntireDay)
+                (if (checkEntireDay)
                     it.isSameFlightOnSameDay(f)
-                else it.isSameFlightAs(f)
+                else it.isSameFlightAs(f))
+                        && if (checkRegistrations) (it.registration == f.registration).also{ m ->
+                    if (!m) Log.d("findMatches", "Mismatched registration: ${it.registration} != ${f.registration}")
+                } else true // if [checkRegistrations] registrations need to be the same as well
             }
         }
         return matches.map{ f-> f to allFlights.first{

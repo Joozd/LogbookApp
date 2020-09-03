@@ -51,7 +51,7 @@ class KlcRosterParser(inputStream: InputStream) {
         private const val standbyString = "RESH|RESK"
         private const val extraString = "TCRM|TCRMI|TCUG"
         private const val otherDutyString = "MMCS|TCBT|TGC|TFIE|TBEXI|OE"
-        private const val singleLineActivityString = standbyString + "|Pick"
+        private const val singleLineActivityString = "$standbyString|Pick"
         private const val defaultCheckoutTimeInSeconds = 30*60L
 
 
@@ -73,7 +73,7 @@ class KlcRosterParser(inputStream: InputStream) {
         val flightRegex = "($carrier)\\s\\d+\\sR?\\s?[A-Z]{3}\\s\\d{4}\\s\\d{4}\\s[A-Z]{3}".toRegex()
         //eg. KL 1582 BLQ 0400 0600 AMS E90 89113 RI -> KL 1582 BLQ 0400 0600 AMS / rest of line is extraMessage for that event
 
-        val simRegex = "$simString".toRegex()
+        val simRegex = simString.toRegex()
         // eg. TSACT
 
         val otherRegex = "($otherDutyString)\\s[A-Z]{3}\\s\\d{4}\\s\\d{4}".toRegex()
@@ -249,10 +249,10 @@ class KlcRosterParser(inputStream: InputStream) {
                             yesterday = workingList.firstOrNull { it.date == yesterday?.date?.minusDays(1) }
                             if (yesterday == null) break@innerWhile
                         }
-                        yesterday?.let {
-                            val yesterdaysUpdatedEvents = it.events.map {
-                                if (it.type == Activities.HOTEL) it.copy(end = startTime)
-                                else it.copy()
+                        yesterday?.let {day ->
+                            val yesterdaysUpdatedEvents = day.events.map {event ->
+                                if (event.type == Activities.HOTEL) event.copy(end = startTime)
+                                else event.copy()
                             }
                             workingList.remove(yesterday)
                             workingList.add(

@@ -100,7 +100,7 @@ class KlcRosterParser(inputStream: InputStream) {
                 firstPage.slice(0 until firstPage.indexOf(endOfHeaderMarker))
             else ""
     }
-    val dateRangeResult = dateRangeRegEx.find(header)
+    private val dateRangeResult = dateRangeRegEx.find(header)
     val seemsValid = header.isNotEmpty() && dateRangeResult != null
 
     val text: String by lazy{

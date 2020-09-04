@@ -171,6 +171,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
             android:text="@string/augmented"
             app:layout_constraintEnd_toStartOf="@+id/picTextView"
             app:layout_constraintHorizontal_bias="0.5"
@@ -178,29 +180,11 @@
             app:layout_constraintTop_toBottomOf="@+id/ttofTextInputLayout" />
 
         <TextView
-            android:id="@+id/dualTextview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/dualString"
-            app:layout_constraintEnd_toStartOf="@+id/instructorTextView"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/coPilotTextView"
-            app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
-
-        <TextView
-            android:id="@+id/instructorTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/instructorString"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/dualTextview"
-            app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
-
-        <TextView
             android:id="@+id/picTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
             android:text="@string/pic"
             app:layout_constraintEnd_toStartOf="@+id/coPilotTextView"
             app:layout_constraintHorizontal_bias="0.5"
@@ -211,10 +195,36 @@
             android:id="@+id/coPilotTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
             android:text="@string/copilot"
             app:layout_constraintEnd_toStartOf="@+id/dualTextview"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/picTextView"
+            app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
+
+        <TextView
+            android:id="@+id/dualTextview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
+            android:text="@string/dualString"
+            app:layout_constraintEnd_toStartOf="@+id/instructorTextView"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/coPilotTextView"
+            app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
+
+        <TextView
+            android:id="@+id/instructorTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
+            android:text="@string/instructorString"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/dualTextview"
             app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

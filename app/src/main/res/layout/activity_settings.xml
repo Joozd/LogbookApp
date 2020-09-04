@@ -58,9 +58,7 @@
                 android:id="@+id/settingsUseIataSelector"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:padding="16dp"
                 android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -72,7 +70,6 @@
                 android:id="@+id/lineBetweenIataCalendar"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
-                android:layout_marginTop="16dp"
                 android:background="#c0c0c0"
                 app:layout_constraintEnd_toEndOf="@+id/settingsUseIataSelector"
                 app:layout_constraintStart_toStartOf="@+id/settingsUseIataSelector"
@@ -97,9 +94,7 @@
                 android:id="@+id/settingsGetFlightsFromCalendarSelector"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:padding="16dp"
                 android:text="@string/calendarSync"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -124,9 +119,7 @@
                 android:id="@+id/settingsCalendarPickerSpinner"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                android:padding="16dp"
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -187,9 +180,7 @@
                 android:id="@+id/useCloudSyncSwitch"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:padding="16dp"
                 android:text="@string/use_cloud_sync"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -215,7 +206,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/useCloudSyncSwitch"
                 tools:text="@string/you_are_signed_in_as" />
@@ -272,9 +262,7 @@
                 android:id="@+id/addRemarksToChronoUpdatesSwitch"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:padding="16dp"
                 android:text="@string/add_chrono_update_remarks"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -285,7 +273,6 @@
                 android:id="@+id/linePdfLogging"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
-                android:layout_marginTop="16dp"
                 android:background="#c0c0c0"
                 app:layout_constraintEnd_toEndOf="@+id/settingsUseIataSelector"
                 app:layout_constraintStart_toStartOf="@+id/settingsUseIataSelector"
@@ -320,42 +307,32 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/logginsPreferencesTitleTextView" />
 
-            <TextView
-                android:id="@+id/startLandingTimeTextView"
+
+            <Button
+                android:id="@+id/augmentedCrewButton"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:elevation="0dp"
+                android:padding="16dp"
                 android:text="@string/standard_augmented_time"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@+id/augmentedTakeoffTimeHintButton"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/loggingPrefsDescriptionTextView" />
-
-            <TextView
-                android:id="@+id/startLandingTimeValueTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="4dp"
-                app:layout_constraintEnd_toEndOf="@+id/startLandingTimeTextView"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/startLandingTimeTextView"
-                tools:text="30 Minutes" />
-
 
             <ImageView
                 android:id="@+id/augmentedTakeoffTimeHintButton"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
-                android:layout_marginEnd="16dp"
+                android:gravity="center|center_horizontal|center_vertical"
                 android:padding="4dp"
-                android:paddingStart="12dp"
-                android:paddingEnd="0dp"
-                android:gravity="center"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:paddingStart="20dp"
+                android:paddingEnd="16dp"
+                app:layout_constraintBottom_toBottomOf="@+id/augmentedCrewButton"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/startLandingTimeTextView"
+                app:layout_constraintTop_toTopOf="@+id/augmentedCrewButton"
                 app:srcCompat="@drawable/ic_help_outline_20px" />
 
             <View
@@ -394,7 +371,8 @@
                     android:gravity="center_horizontal"
                     android:padding="8dp"
                     android:text="@string/augmented_crew_time_explanation"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    tools:visibility="gone" />
 
             </androidx.cardview.widget.CardView>
 

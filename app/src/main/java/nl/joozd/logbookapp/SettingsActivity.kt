@@ -27,6 +27,7 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.NumberPicker
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
@@ -35,9 +36,11 @@ import nl.joozd.logbookapp.databinding.ActivitySettingsBinding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
 import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
+import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
 import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
 import nl.joozd.logbookapp.ui.activities.LoginActivity
+import nl.joozd.logbookapp.ui.dialogs.NumberPickerDialog
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.utils.checkPermission
@@ -165,6 +168,8 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.signInOut()
             }
 
+            augmentedCrewButton.setOnClickListener { showAugmentedTimesNumberPicker() }
+
             augmentedTakeoffTimeHintButton.setOnClickListener {
                 showAugmentedStartLandingTimesHint()
             }
@@ -247,8 +252,9 @@ class SettingsActivity : JoozdlogActivity() {
                     hideCalendarDisabled()
             }
 
-            // TODO takeoff Landing time observer
-            startLandingTimeValueTextView.text = "69 minutes"
+            viewModel.standardTakeoffLandingTimes.observe(activity) {
+                augmentedCrewButton.text = getStringWithMakeup(R.string.standard_augmented_time, it.toString())
+            }
 
 
             // Set content view
@@ -326,6 +332,55 @@ class SettingsActivity : JoozdlogActivity() {
     private fun ActivitySettingsBinding.closeAllHintBoxes(){
         augmentedStartLandingTimesHintCardview.visibility = View.GONE
         popupTextboxesBackground.visibility = View.GONE
+    }
+
+    private fun ActivitySettingsBinding.showAugmentedTimesNumberPicker(){
+        AugmentedNumberPicker(viewModel).apply {
+            title="HALLON AUB GRGR"
+            wrapSelectorWheel = false
+            maxValue = AugmentedNumberPicker.EIGHT_HOURS
+            setValue(Preferences.standardTakeoffLandingTimes)
+        }.show(supportFragmentManager, null)
+    }
+
+    class AugmentedNumberPicker(private val viewModel: SettingsActivityViewModel): NumberPickerDialog() {
+        fun setValue(value: Int) {
+            selectedValue = when (value) {
+                in (0..THIRTY) -> value
+                in (THIRTY..NINETY) -> THIRTY + (value - 30) / 5
+                else -> maxOf(NINETY + (value - 90) / 15, 0)
+            }
+        }
+
+        /**
+         * Override this to actually do something with the picked number
+         */
+        override fun onNumberPicked(pickedNumber: Int) {
+            viewModel.pickedAugmentedStartLandingTime(unFormat(pickedNumber))
+        }
+
+        override val formatter = NumberPicker.Formatter{
+            format(it)
+        }
+
+        private fun format(value: Int): String = when (value) {
+            in (0..THIRTY) -> minutesToHoursAndMinutesString(value)
+            in (THIRTY..NINETY) -> minutesToHoursAndMinutesString(30 + (value-THIRTY)*5)
+            else -> minutesToHoursAndMinutesString(maxOf(90 + (value- NINETY)*15, 0))
+        }
+
+        private fun unFormat(value: Int) = when (value) {
+            in (0..THIRTY) -> value
+            in (THIRTY..NINETY) -> 30 + (value-THIRTY)*5
+            else -> 90 + (value-NINETY) * 15
+        }
+
+        companion object {
+            private const val THIRTY: Int = 30
+            private const val NINETY: Int = 30 + (90-30) / 5
+            const val EIGHT_HOURS = NINETY + (8*60 - 90) / 15
+        }
+
     }
 
     companion object{

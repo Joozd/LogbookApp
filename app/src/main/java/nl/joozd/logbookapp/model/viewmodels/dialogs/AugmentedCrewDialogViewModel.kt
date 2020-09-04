@@ -51,11 +51,12 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
             }
         }
     }
-    fun setTakeoffLandingTime(time: Int){
+    fun setTakeoffLandingTime(time: Int): Int {
         workingFlightRepository.crew?.let {
             workingFlightRepository.crew = it.apply {
                 takeoffLandingTimes = time
             }
         }
+        return time
     }
 }

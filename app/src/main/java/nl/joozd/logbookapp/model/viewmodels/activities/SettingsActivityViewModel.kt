@@ -51,10 +51,11 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     private val calendarScraper = CalendarScraper(context)
 
-    private val _useIataAirports = MutableLiveData<Boolean>(Preferences.useIataAirports)
-    private val _getFlightsFromCalendar = MutableLiveData<Boolean>(Preferences.getFlightsFromCalendar)
-    private val _useCloudSync = MutableLiveData<Boolean>(Preferences.useCloud)
-    private val _showOldTimesOnChronoUpdate = MutableLiveData<Boolean>(Preferences.showOldTimesOnChronoUpdate)
+    private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
+    private val _getFlightsFromCalendar = MutableLiveData(Preferences.getFlightsFromCalendar)
+    private val _useCloudSync = MutableLiveData(Preferences.useCloud)
+    private val _showOldTimesOnChronoUpdate = MutableLiveData(Preferences.showOldTimesOnChronoUpdate)
+    private val _standardTakeoffLandingTimes = MutableLiveData(Preferences.standardTakeoffLandingTimes)
 
     private val _username = MutableLiveData(Preferences.username) // <String?>
     private val _calendarDisabledUntil = MutableLiveData(Preferences.calendarDisabledUntil) //  <Long>
@@ -94,6 +95,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
             Preferences::showOldTimesOnChronoUpdate.name ->
                 _showOldTimesOnChronoUpdate.value = Preferences.showOldTimesOnChronoUpdate
 
+            Preferences::standardTakeoffLandingTimes.name ->
+                _standardTakeoffLandingTimes.value = Preferences.standardTakeoffLandingTimes
+
 
 
             // This is not used at the moment but it's there when we need it. Just set [settingsCalendarTypeSpinner] visibility to VISIBLE in SettingsActivity
@@ -120,6 +124,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val showOldTimesOnChronoUpdate: LiveData<Boolean>
         get() = _showOldTimesOnChronoUpdate
+
+    val standardTakeoffLandingTimes: LiveData<Int>
+        get() = _standardTakeoffLandingTimes
 
     val settingsUseIataSelectorTextResource: LiveData<Int>
         get() = _settingsUseIataSelectorTextResource
@@ -206,6 +213,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
                 withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }
             _pickedCalendar.value = _foundCalendars.value?.firstOrNull {c -> c.name == Preferences.selectedCalendar}
         }
+    }
+
+    fun pickedAugmentedStartLandingTime(pickedTime: Int){
+        Preferences.standardTakeoffLandingTimes = pickedTime
     }
 
 

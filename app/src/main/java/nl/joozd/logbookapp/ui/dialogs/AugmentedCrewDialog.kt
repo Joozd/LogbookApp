@@ -20,13 +20,15 @@
 package nl.joozd.logbookapp.ui.dialogs
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.dialog_augmented_crew.view.*
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.databinding.DialogAugmentedCrewBinding
 import nl.joozd.logbookapp.extensions.toInt
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AugmentedCrewDialogViewModel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
@@ -36,8 +38,7 @@ class AugmentedCrewDialog: JoozdlogFragment(){
     private val viewModel: AugmentedCrewDialogViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-
-        return inflater.inflate(R.layout.dialog_augmented_crew, container, false).apply {
+        with(DialogAugmentedCrewBinding.bind(inflater.inflate(R.layout.dialog_augmented_crew, container, false))){
             crewDownButton.setOnClickListener {
                 viewModel.crewDown()
             }
@@ -53,7 +54,9 @@ class AugmentedCrewDialog: JoozdlogFragment(){
 
             timeForTakeoffLandingEditText.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus){
-                    viewModel.setTakeoffLandingTime(timeForTakeoffLandingEditText.text.toInt())
+                    viewModel.setTakeoffLandingTime(timeForTakeoffLandingEditText.text.toInt()).also{
+                        Preferences.standardTakeoffLandingTimes = it
+                    }
                 }
             }
 
@@ -66,7 +69,17 @@ class AugmentedCrewDialog: JoozdlogFragment(){
                 crewSizeEditText.setText(it.crewSize.toString())
                 didTakeoffCheckbox.isChecked = it.didTakeoff
                 didLandingCheckbox.isChecked = it.didLanding
-                timeForTakeoffLandingEditText.setText(it.takeoffLandingTimes.toString())
+                it.takeoffLandingTimes.let {t ->
+                    timeForTakeoffLandingEditText.setText(
+                        if (t == 0)
+                            Preferences.standardTakeoffLandingTimes.also {newT ->
+                                viewModel.setTakeoffLandingTime(newT) // Can safely set this as Crew will always report full flight time for crew <= 2
+                            }.toString ()
+                        else t.toString()
+                    ).also{
+                        Log.d("YOLO", "swag 0001 $t")
+                    }
+                }
             })
 
 
@@ -81,6 +94,7 @@ class AugmentedCrewDialog: JoozdlogFragment(){
             saveCrewDialogButon.setOnClickListener {
                 closeFragment()
             }
+            return root
         }
     }
 }

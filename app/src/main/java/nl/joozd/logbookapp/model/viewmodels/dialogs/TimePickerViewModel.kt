@@ -106,19 +106,27 @@ class TimePickerViewModel: JoozdlogDialogViewModel(){
 
 
     fun togglePic(){
-        feedback(TimePickerEvents.NOT_IMPLEMENTED)
+        workingFlight?.let{ f ->
+            workingFlight = f.copy(isPIC = !f.isPIC)
+        }
     }
 
     fun toggleCopilot(){
-        feedback(TimePickerEvents.NOT_IMPLEMENTED)
+        workingFlight?.let{ f ->
+            workingFlight = f.copy(isCoPilot = !f.isCoPilot)
+        }
     }
 
     fun toggleDual(){
-        feedback(TimePickerEvents.NOT_IMPLEMENTED)
+        workingFlight?.let{ f ->
+            workingFlight = f.copy(isDual = !f.isDual)
+        }
     }
 
     fun toggleInstructor(){
-        feedback(TimePickerEvents.NOT_IMPLEMENTED)
+        workingFlight?.let{ f ->
+            workingFlight = f.copy(isInstructor = !f.isInstructor)
+        }
     }
 
 

@@ -28,7 +28,7 @@
         <attr name="metaButtonBarButtonStyle" format="reference"/>
     </declare-styleable>
 
-    <attr name="colorPrimaryLight" format="reference|color" />
+    <attr name="colorPrimaryBackground" format="reference|color" />
 
 
 </resources>

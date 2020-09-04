@@ -57,7 +57,7 @@ class NewUserActivityPage4: Fragment() {
 
         viewModel.useIataAirports.observe(viewLifecycleOwner, Observer { useIata ->
             icaoIataSwitch.isChecked = useIata
-            icaoIataSwitch.text = requireActivity().getString(if (useIata) R.string.useIataAirports else R.string.useIcaoAirports)
+            // icaoIataSwitch.text = requireActivity().getString(if (useIata) R.string.useIataAirports else R.string.useIcaoAirports)
         })
 
         return binding.root

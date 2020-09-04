@@ -142,13 +142,21 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     /**
      * Applies all automatically calculated values to a flight
      */
-    private fun Flight.autoValues(): Flight = if (!autoFill) this else {
+    private fun Flight.autoValues(): Flight = if (!autoFill) this.checkIfCopilot() else {
         this
             .withTakeoffLandings(if (isPF)1 else 0, origin.value, destination.value)
             .updateNightTime(_workingFlight.value)
             .updateIFRTime()
+            .checkIfCopilot()
         //TODO calculate IFR time if needed
     }
+
+    /**
+     * Run this after making sure aircraft type is updated
+     */
+    private fun Flight.checkIfCopilot(): Flight =
+         this.copy(isCoPilot = (aircraft.value?.type?.multiPilot == true && !isPIC))
+
 
     /**
      * this will return a new flight with updated nighttime, corrected for augmented crew (same ratio)

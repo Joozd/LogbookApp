@@ -162,7 +162,8 @@
     <string name="useIataAirports">Use IATA airports identifiers</string>
     <string name="useIcaoAirports">Use ICAO airports identifiers</string>
     <string name="getPlannedflightsFromCalendar">Get planned flights from your device\'s calendar</string>
-    <string name="calendarSync">Calendar Sync</string>
+    <string name="calendarSync">Use Calendar Sync</string>
+    <string name="calendar_sync_settings">Calendar Sync</string>
 
 
     <!--
@@ -225,15 +226,21 @@
     <string name="use_calendar_import">Use Calendar Import</string>
     <string name="dont_use_multiple_device">Using this on multiple devices might lead to performance problems, so don\'t do that</string>
     <string name="use_cloud_sync">Use Cloud Sync</string>
+    <string name="cloud_sync_title">Cloud Sync</string>
     <string name="add_chrono_update_remarks">Save old times as remarks</string>
     <string name="sync_flights_across_devices">Synchronize flights across multiple devices or easily migrate to a new device</string>
     <string name="disabled_until">Disabled until %1$s</string>
     <string name="enable_now">Enable now</string>
     <string name="monthly_overviews">Monthly Overviews</string>
     <string name="monthly_overview_explanation">Monthly Overviews import supported for selected carriers (currently only KLC) only. Just share your PDF with Joozdlog.</string>
+    <string name="loggings_prefs_description">General preferences pertaining to (automatic) logging and times.</string>
+    <string name="standard_augmented_time">Augmented Crew takeoff/landing time</string>
+    <string name="augmented_crew_time_explanation">In case of an augmented crew (3 or more pilots), Joozdlog calculates the time that can be logged for copilots by subtracting this amount of time for each takeoff and landing, allocating the remaining time evenly over the pilots, then adds this time again for every takeoff/landing performed in the pilot\'s seat.</string>
+
     <string name="change_password">Change Password</string>
     <string name="change_password_explanation">You can use this screen to change your password when you are logged in. Just enter the new password twice and you are good to go.</string>
     <string name="new_password">New Password</string>
+    <string name="loggings_preferences">Logging Preferences</string>
 
 
 </resources>

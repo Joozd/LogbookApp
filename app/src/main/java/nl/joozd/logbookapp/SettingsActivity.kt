@@ -80,7 +80,6 @@ class SettingsActivity : JoozdlogActivity() {
                 title = getString(R.string.settings)
             }
 
-
             /****************************************************************************************
              * Populate spinners
              ****************************************************************************************/
@@ -166,6 +165,14 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.signInOut()
             }
 
+            augmentedTakeoffTimeHintButton.setOnClickListener {
+                showAugmentedStartLandingTimesHint()
+            }
+
+            popupTextboxesBackground.setOnClickListener {
+                closeAllHintBoxes()
+            }
+
 
             /****************************************************************************************
              * Observers for feedback
@@ -240,6 +247,9 @@ class SettingsActivity : JoozdlogActivity() {
                     hideCalendarDisabled()
             }
 
+            // TODO takeoff Landing time observer
+            startLandingTimeValueTextView.text = "69 minutes"
+
 
             // Set content view
             setContentView(root)
@@ -306,6 +316,16 @@ class SettingsActivity : JoozdlogActivity() {
     private fun ActivitySettingsBinding.hideCalendarDisabled(){
         calendarSyncPostponedTextView.visibility = View.GONE
         dontPostponeTextView.visibility = View.GONE
+    }
+
+    private fun ActivitySettingsBinding.showAugmentedStartLandingTimesHint(){
+        augmentedStartLandingTimesHintCardview.visibility = View.VISIBLE
+        popupTextboxesBackground.visibility = View.VISIBLE
+    }
+
+    private fun ActivitySettingsBinding.closeAllHintBoxes(){
+        augmentedStartLandingTimesHintCardview.visibility = View.GONE
+        popupTextboxesBackground.visibility = View.GONE
     }
 
     companion object{

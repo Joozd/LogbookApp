@@ -182,7 +182,8 @@ internal fun View?.findSuitableParent(): ViewGroup? {
     return fallback
 }
 
-fun View.getActivity(): Activity? {
+val View.activity: Activity?
+    get() {
     var context: Context? = getContext()
     while (context is ContextWrapper) {
         if (context is Activity) {
@@ -200,3 +201,17 @@ fun View.setMargins(left: Int, top: Int, right: Int, bottom: Int) {
         requestLayout()
     }
 }
+
+val View.xPositionOnScreen: Int
+    get() = IntArray(2).also { getLocationOnScreen(it) }[0]
+
+val View.yPositionOnScreen: Int
+    get() = IntArray(2).also { getLocationOnScreen(it) }[1]
+/*
+fun View.setWidth(width: Int){
+    layoutParams.width = width
+    invalidate()
+    requestLayout()
+}
+
+ */

@@ -94,18 +94,20 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     //androidX
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.core:core-ktx:1.3.1'
+
+    //constraintlayout 2.0 makes my app skip up to 150 frames when opening editFlightFragment
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.annotation:annotation:1.1.0'
 
     //carefull with this one, 1.3.0-alpha02 makes recyclerview really slow
     // might be because it is depending on alpha/beta commits of constraintlayout and recyclerview
-    implementation 'com.google.android.material:material:1.2.0-rc01'
+    implementation 'com.google.android.material:material:1.2.1'
 
     //kotlin Coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.4"
 
     //Kotlin Extensions

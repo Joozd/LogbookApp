@@ -23,10 +23,10 @@ package nl.joozd.logbookapp.ui.utils.customs
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_progressbar.view.*
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.extensions.getActivity
+import nl.joozd.logbookapp.extensions.activity
 
 class JoozdlogProgressBar(private val target: ViewGroup) {
-    private val activity = target.getActivity()!!
+    private val activity = target.activity!!
     private val progBarParent = activity.layoutInflater.inflate(R.layout.item_progressbar, target, false)
     private val progressBar = progBarParent.progressBar
 

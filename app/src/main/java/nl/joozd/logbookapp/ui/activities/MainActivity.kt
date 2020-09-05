@@ -21,9 +21,6 @@
 package nl.joozd.logbookapp.ui.activities
 
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -34,11 +31,9 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.viewModels
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.view_snackbar_custom.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.SettingsActivity
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -52,6 +47,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvent
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityFeedbackExtraData
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModel
 import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivity
+import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesActivity
 import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.dialogs.LoginDialog
 import nl.joozd.logbookapp.ui.dialogs.WaitingForSomethingDialog

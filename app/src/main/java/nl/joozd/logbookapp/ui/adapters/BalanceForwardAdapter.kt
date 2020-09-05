@@ -24,13 +24,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
-import kotlinx.android.synthetic.main.totals_list_group.view.*
 import nl.joozd.joozdlogcommon.BalanceForward
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.databinding.TotalsListElementBinding
-import nl.joozd.logbookapp.databinding.TotalsListGroupBinding
-import nl.joozd.logbookapp.extensions.getColorFromAttr
+import nl.joozd.logbookapp.databinding.ListElementTotalsBinding
+import nl.joozd.logbookapp.databinding.ListGroupBalanceForwardBinding
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 
 class BalanceForwardAdapter(private var list: List<BalanceForward> = emptyList()): BaseExpandableListAdapter() {
@@ -94,8 +92,8 @@ class BalanceForwardAdapter(private var list: List<BalanceForward> = emptyList()
         isExpanded: Boolean,
         convertView: View?,
         parent: ViewGroup?
-    ): View = TotalsListGroupBinding.bind(convertView ?:
-        layoutInflater.inflate(R.layout.totals_list_group, parent, false)
+    ): View = ListGroupBalanceForwardBinding.bind(convertView ?:
+        layoutInflater.inflate(R.layout.list_group_balance_forward, parent, false)
     ).apply{
             getGroup(groupPosition).let{bf ->
                 // totalsListGroupLayout.setBackgroundColor(context.getColorFromAttr(R.attr.colorPrimaryDark))
@@ -163,7 +161,7 @@ class BalanceForwardAdapter(private var list: List<BalanceForward> = emptyList()
         isLastChild: Boolean,
         convertView: View?,
         parent: ViewGroup?
-    ): View = TotalsListElementBinding.bind(convertView ?: layoutInflater.inflate(R.layout.totals_list_element, parent, false)).apply{
+    ): View = ListElementTotalsBinding.bind(convertView ?: layoutInflater.inflate(R.layout.list_element_totals, parent, false)).apply{
         getGroup(groupPosition).timesToStringPairs()[childPosition].let{
             listElementNameTextView.text = it.first
             listElementValueTextView.text = it.second

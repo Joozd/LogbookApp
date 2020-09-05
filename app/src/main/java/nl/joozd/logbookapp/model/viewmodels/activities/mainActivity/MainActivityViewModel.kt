@@ -24,7 +24,6 @@ package nl.joozd.logbookapp.model.viewmodels.activities.mainActivity
 import android.content.Intent
 import android.content.Intent.ACTION_VIEW
 import android.net.Uri
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
@@ -38,9 +37,6 @@ import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.ui.activities.TotalTimesActivity
-import nl.joozd.logbookapp.utils.TimestampMaker
-import nl.joozd.logbookapp.utils.TwilightCalculator
 import java.time.Instant
 import java.util.*
 

@@ -33,5 +33,19 @@
         <item>KLC klc-rooster.nl</item>
         <item>KLM CrewCalendar</item>
     </string-array>
+    <string-array name="total_times_categories" type = "id">
+        <item>Total time</item>
+        <item>Flight time</item>
+        <item>Simulator time</item>
+        <item>Multipilot time</item>
+        <item>Night time</item>
+        <item>IFR time</item>
+        <item>PIC(including PICUS) time</item>
+        <item>Copilot time</item>
+        <item>Dual time</item>
+        <item>Instructor time</item>
+        <item>Day Landings</item>
+        <item>Night Landings</item>
+    </string-array>
 
 </resources>

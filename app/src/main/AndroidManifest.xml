@@ -31,7 +31,7 @@
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
         </activity>
         <activity android:name=".ui.activities.ExportPdfActivityOld" />
-        <activity android:name=".ui.activities.TotalTimesActivity">
+        <activity android:name=".ui.activities.totalTimesActivity.TotalTimesActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />

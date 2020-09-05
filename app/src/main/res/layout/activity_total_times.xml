@@ -34,36 +34,6 @@
             android:theme="@style/MyActionBar"
             app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/graphLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/totalTimesToolbar">
-
-        <com.jjoe64.graphview.GraphView
-            android:id="@+id/totalTimesTestGraph"
-            android:layout_width="match_parent"
-
-            android:layout_height="250dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/graphTextView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="TextView"
-            android:textAlignment="center"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/totalTimesTestGraph" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     <ExpandableListView
         android:id="@+id/balanceForwardExListView"
@@ -73,7 +43,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/graphLayout">
+        app:layout_constraintTop_toBottomOf="@+id/totalTimesToolbar">
 
 
     </ExpandableListView>

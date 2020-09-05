@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
+import android.util.Log
 import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.Dispatchers
@@ -49,10 +50,11 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
 
 
     private val _flightNumber: LiveData<String> = Transformations.map(flight) { it.flightNumber }
-    private val _orig: LiveData<String> = Transformations.map(workingFlightRepository.origin) { (if (Preferences.useIataAirports) it?.iata_code else it?.ident) }
-    private val _dest: LiveData<String> = Transformations.map(workingFlightRepository.destination) { if (Preferences.useIataAirports) it?.iata_code else it?.ident }
+    private val _orig: LiveData<String> = Transformations.map(workingFlightRepository.origin) { (if (Preferences.useIataAirports) it?.iata_code else it?.ident) ?: workingFlight?.orig }
+    private val _dest: LiveData<String> = Transformations.map(workingFlightRepository.destination) { (if (Preferences.useIataAirports) it?.iata_code else it?.ident) ?: workingFlight?.orig }
     private val _timeOut: LiveData<String> = Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeOut) }
     private val _timeIn: LiveData<String> = Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeIn) }
+
 
 
     /**********************************************************************************************
@@ -87,24 +89,24 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
         }
     }
 
-    //TODO IATA or ICAO display
-
     val orig: LiveData<String>
         get() = _orig
+    // TODO: This gives "null" if airport not found.
     fun setOrig(enteredData: String){
         workingFlight?.let {
+            // initially set entered data
+            workingFlight = it.copy(orig = enteredData)
+
+            // Check if entered data is a known airport, and if so, set that airport as [orig]
             viewModelScope.launch {
                 airportRepository.searchAirportOnce(enteredData)?.let{foundAirport ->
+                    //make sure we have most recent workingFlight in case search was taking a while
                     workingFlight?.let{f ->
                         workingFlight = f.copy(orig = foundAirport.ident)
                     }
                 } ?: feedback(EditFlightFragmentEvents.AIRPORT_NOT_FOUND).apply {
                     extraData.putString("enteredData", enteredData)
                     extraData.putBoolean("orig", true)
-                }.also{
-                    workingFlight?.let{f ->
-                        workingFlight = f.copy(orig = enteredData)
-                    }
                 }
             }
 
@@ -118,15 +120,19 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
 
     fun setDest(enteredData: String){
         workingFlight?.let {
+            // initially set entered data
+            workingFlight = it.copy(dest = enteredData)
+
+            // Check if entered data is a known airport, and if so, set that airport as [dest]
             viewModelScope.launch {
                 airportRepository.searchAirportOnce(enteredData)?.let{foundAirport ->
-                    workingFlight?.let{
-                        workingFlight = it.copy(dest = foundAirport.ident)
+                    //make sure we have most recent workingFlight in case search was taking a while
+                    workingFlight?.let{ f ->
+                        workingFlight = f.copy(dest = foundAirport.ident)
                     }
                 } ?: feedback(EditFlightFragmentEvents.AIRPORT_NOT_FOUND).apply {
                     extraData.putString("enteredData", enteredData)
                     extraData.putBoolean("orig", false)
-                    workingFlight = it.copy(dest = enteredData)
                 }
             }
         }
@@ -277,6 +283,11 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
 
     fun save(){
         workingFlightRepository.saveWorkingFlight()
+    }
+
+    fun saveOnClose(){
+        workingFlightRepository.notifyFinalSave()
+        save()
     }
 
     fun onStart(){

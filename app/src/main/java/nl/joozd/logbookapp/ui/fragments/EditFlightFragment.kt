@@ -54,15 +54,6 @@ class EditFlightFragment: JoozdlogFragment(){
     private val mainViewModel: MainViewModel by activityViewModels()
     private val viewModel: EditFlightFragmentViewModel by activityViewModels()
 
-    /**
-     * Listener class and setting s
-     */
-    class Listener (private val f: () ->Unit){ // oldFlight =  flight before changes, to undo if needed
-        fun run(){
-            f()
-        }
-    }
-
     override fun onAttach(context: Context) {
         viewModel.onStart()
         super.onAttach(context)
@@ -86,23 +77,24 @@ class EditFlightFragment: JoozdlogFragment(){
              * observers to show data in editText fields
              ************************************************************************************/
 
-            viewModel.flightID.observe(viewLifecycleOwner, Observer {
+            viewModel.flightID.observe(viewLifecycleOwner) {
                 flightFlightID.text = it.toString()
-            })
+            }
 
-            viewModel.date.observe(viewLifecycleOwner, Observer{
+            viewModel.date.observe(viewLifecycleOwner, {
                 flightDateField.setTextIfNotFocused(it)
             })
 
-            viewModel.flightNumber.observe(viewLifecycleOwner, Observer{
+            viewModel.flightNumber.observe(viewLifecycleOwner, {
                 Log.d("HALLOOO", "Ik ben Joozd!")
                 flightFlightNumberField.setTextIfNotFocused(it)
             })
 
-            viewModel.orig.observe(viewLifecycleOwner, Observer{
+            viewModel.orig.observe(viewLifecycleOwner) {
                 flightOrigField.setTextIfNotFocused(it)
-            })
-            viewModel.origChecked.observe(viewLifecycleOwner, Observer { checked ->
+            }
+
+            viewModel.origChecked.observe(viewLifecycleOwner, { checked ->
                 val drawable: Drawable? = when(checked){
                     true -> ContextCompat.getDrawable(App.instance, R.drawable.ic_check_circle_outline_20px)
                     false -> ContextCompat.getDrawable(App.instance, R.drawable.ic_error_outline_20px)
@@ -111,10 +103,10 @@ class EditFlightFragment: JoozdlogFragment(){
                 flightOrigField.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
             })
 
-            viewModel.dest.observe(viewLifecycleOwner, Observer{
+            viewModel.dest.observe(viewLifecycleOwner, {
                 flightDestField.setTextIfNotFocused(it)
             })
-            viewModel.destChecked.observe(viewLifecycleOwner, Observer { checked ->
+            viewModel.destChecked.observe(viewLifecycleOwner, { checked ->
                 val drawable: Drawable? = when(checked){
                     true -> ContextCompat.getDrawable(App.instance, R.drawable.ic_check_circle_outline_20px)
                     false -> ContextCompat.getDrawable(App.instance, R.drawable.ic_error_outline_20px)
@@ -123,39 +115,39 @@ class EditFlightFragment: JoozdlogFragment(){
                 flightDestField.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
             })
 
-            viewModel.timeOut.observe(viewLifecycleOwner, Observer{
+            viewModel.timeOut.observe(viewLifecycleOwner, {
                 if (viewModel.checkSim == false) {
                     flighttOutStringField.setTextIfNotFocused(it)
                 }
             })
 
-            viewModel.timeIn.observe(viewLifecycleOwner, Observer{
+            viewModel.timeIn.observe(viewLifecycleOwner, {
                 flighttInStringField.setTextIfNotFocused(it)
             })
 
-            viewModel.simTime.observe(viewLifecycleOwner, Observer {
+            viewModel.simTime.observe(viewLifecycleOwner, {
                 if (viewModel.checkSim == true){
                     flighttOutStringField.setTextIfNotFocused(it)
                 }
             })
 
-            viewModel.regAndType.observe(viewLifecycleOwner, Observer{
+            viewModel.regAndType.observe(viewLifecycleOwner, {
                 flightAircraftField.setTextIfNotFocused(it)
             })
 
-            viewModel.takeoffLandings.observe(viewLifecycleOwner, Observer{
+            viewModel.takeoffLandings.observe(viewLifecycleOwner, {
                 flightTakeoffLandingField.setTextIfNotFocused(it)
             })
 
-            viewModel.name.observe(viewLifecycleOwner, Observer{
+            viewModel.name.observe(viewLifecycleOwner, {
                 flightNameField.setTextIfNotFocused(it)
             })
 
-            viewModel.name2.observe(viewLifecycleOwner, Observer{
+            viewModel.name2.observe(viewLifecycleOwner, {
                 flightName2Field.setTextIfNotFocused(it)
             })
 
-            viewModel.remarks.observe(viewLifecycleOwner, Observer{
+            viewModel.remarks.observe(viewLifecycleOwner, {
                 flightRemarksField.setTextIfNotFocused(it)
             })
 
@@ -163,30 +155,30 @@ class EditFlightFragment: JoozdlogFragment(){
              * observers to show data in toggle fields
              ************************************************************************************/
 
-            viewModel.sign.observe(viewLifecycleOwner, Observer { active -> signSelector.showIfActive(active) })
+            viewModel.sign.observe(viewLifecycleOwner) { active -> signSelector.showIfActive(active) }
 
             //This one does a little bit more
-            viewModel.sim.observe(viewLifecycleOwner, Observer{ active ->
+            viewModel.sim.observe(viewLifecycleOwner) { active ->
                 if (active)
                     makeSimLayout(this)
                 else
                     makeNormalLayout(this)
                 simSelector.showIfActive(active)
-            })
+            }
 
-            viewModel.dual.observe(viewLifecycleOwner, Observer { active -> dualSelector.showIfActive(active) })
-            viewModel.instructor.observe(viewLifecycleOwner, Observer { active -> instructorSelector.showIfActive(active) })
-            viewModel.ifr.observe(viewLifecycleOwner, Observer { active -> ifrSelector.showIfActive(active) })
-            viewModel.pic.observe(viewLifecycleOwner, Observer { active -> picSelector.showIfActive(active) })
-            viewModel.pf.observe(viewLifecycleOwner, Observer { active -> pfSelector.showIfActive(active) })
-            viewModel.autoFill.observe(viewLifecycleOwner, Observer { active -> autoFillCheckBox.isChecked = active })
+            viewModel.dual.observe(viewLifecycleOwner, { active -> dualSelector.showIfActive(active) })
+            viewModel.instructor.observe(viewLifecycleOwner, { active -> instructorSelector.showIfActive(active) })
+            viewModel.ifr.observe(viewLifecycleOwner, { active -> ifrSelector.showIfActive(active) })
+            viewModel.pic.observe(viewLifecycleOwner, { active -> picSelector.showIfActive(active) })
+            viewModel.pf.observe(viewLifecycleOwner, { active -> pfSelector.showIfActive(active) })
+            viewModel.autoFill.observe(viewLifecycleOwner, { active -> autoFillCheckBox.isChecked = active })
 
             /************************************************************************************
              * miscellaneous observers
              ************************************************************************************/
 
             @Suppress("UNCHECKED_CAST")
-            viewModel.allNames.observe(viewLifecycleOwner, Observer{
+            viewModel.allNames.observe(viewLifecycleOwner, {
                 (flightNameField.adapter as ArrayAdapter<String>).apply {
                     clear()
                     addAll(it)
@@ -201,10 +193,12 @@ class EditFlightFragment: JoozdlogFragment(){
              * Event handler observer
              ************************************************************************************/
 
-            viewModel.feedbackEvent.observe(viewLifecycleOwner, Observer {
+            //TODO make this Resource strings
+            viewModel.feedbackEvent.observe(viewLifecycleOwner, {
                 when(it.getEvent()){
                     EditFlightFragmentEvents.NOT_IMPLEMENTED -> toast("Not implemented!")
                     EditFlightFragmentEvents.INVALID_REG_TYPE_STRING -> toast("Error in regType string")
+                    EditFlightFragmentEvents.AIRPORT_NOT_FOUND -> toast("Airport not found, no night time logged.")
                     EditFlightFragmentEvents.AIRPORT_NOT_FOUND_FOR_LANDINGS -> toast("airport not found, all logged as day")
                     EditFlightFragmentEvents.INVALID_TIME_STRING -> toast("Error in time string, no changes")
                     EditFlightFragmentEvents.INVALID_SIM_TIME_STRING -> toast("Error in time string, simTime = 0")
@@ -417,7 +411,6 @@ class EditFlightFragment: JoozdlogFragment(){
                 closeFragment()
             }
 
-            //on cancel, close without calling onSaveListener
             flightCancelButton2.setOnClickListener {
                 //TODO fire some "undo cancel" SnackBar?
                 closeFragment()
@@ -426,7 +419,7 @@ class EditFlightFragment: JoozdlogFragment(){
             flightSaveButton.setOnClickListener {
                 it.requestFocus()
                 it.clearFocus()
-                viewModel.save()
+                viewModel.saveOnClose()
                 closeFragment()
             }
             return root
@@ -449,7 +442,7 @@ class EditFlightFragment: JoozdlogFragment(){
 
     /**
      * Switch layout for edit_flight View to sim
-     * @param v: View to change layout on
+     * @param binding: EditFlightBinding to change layout on
      */
     private fun makeSimLayout(binding: EditFlightBinding) = with (binding){
         flighttOutStringWrapper.hint=getString(R.string.simtTime)
@@ -476,7 +469,7 @@ class EditFlightFragment: JoozdlogFragment(){
 
     /**
      * Switch layout for edit_flight View to normal
-     * @param v: View to change layout on
+     * @param binding: EditFlightBinding to change layout on
      */
     private fun makeNormalLayout(binding: EditFlightBinding) = with (binding){
         // v.autoFillCheckBox.isEnabled = viewModel.workingFlight.value?.autoFill ?: 0 > 0

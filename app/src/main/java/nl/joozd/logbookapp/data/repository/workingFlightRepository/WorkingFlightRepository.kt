@@ -63,6 +63,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     private val _feedbackEvent = MutableLiveData<FeedbackEvent>()
 
     private var saving: Boolean = false
+    private var savedAndClosed: Boolean = false
 
     /**
      * _workingFlight with it's sources:
@@ -131,6 +132,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
 
     private fun initialSetWorkingFlight(flight: Flight) {
         saving = false
+        savedAndClosed = false
         updateWorkingFlight(flight)
         backupFlight = flight
     }
@@ -303,8 +305,9 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
         flightRepository.save(it) }
         ?: workingFlight.value?.let { flightRepository.delete(it) } // if backupFlight is not set, undo means deleting new flight
 
-    fun notifyFlightSaved(){
 
+    fun notifyFinalSave(){
+        savedAndClosed = true
     }
 
     /**
@@ -367,7 +370,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     }
 
     val flightIsChanged: Boolean
-        get() = flight != backupFlight
+        get() = (flight != backupFlight) && savedAndClosed
 
     /*********************************************************************************************
      * Companion object

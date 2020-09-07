@@ -40,7 +40,7 @@ class DatePickerFragment: DialogFragment(), DatePickerDialog.OnDateSetListener {
         // Use the current date as the default date in the picker
         effViewModel.getLocalDate()?.let{
             Log.d("datethingy", "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX - $it - XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-        return DatePickerDialog(requireContext(), R.style.DatePicker, this, it.year, it.month.value, it.dayOfMonth)
+        return DatePickerDialog(requireContext(), R.style.DatePicker, this, it.year, it.month.value-1, it.dayOfMonth)
         }
         //This is only reached if effViewMOdel.localDate.value == null
         val c = Calendar.getInstance()

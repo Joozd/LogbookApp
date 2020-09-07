@@ -22,6 +22,8 @@ package nl.joozd.logbookapp.model.viewmodels.activities
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -54,6 +56,8 @@ class LoginActivityViewModel: JoozdlogActivityViewModel(){
     fun signIn(username: String, password: String){
         when {
             //check if username and password are not empty
+            password == App.instance.ctx.getString(R.string.fake_hidden_password) && username == Preferences.username -> feedback(LoginActivityEvents.FINISHED) // if nothing changed, do nothing
+
             username.isBlank() -> feedback(LoginActivityEvents.USERNAME_EMPTY)
 
             password.isBlank() -> feedback(LoginActivityEvents.PASSWORD_EMPTY)

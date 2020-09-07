@@ -28,12 +28,15 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import androidx.work.impl.model.Preference
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.Crew
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.isSamedPlannedFlightAs
+import nl.joozd.logbookapp.data.repository.helpers.mostRecentCompleteFlight
 import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfEmpty
@@ -65,9 +68,12 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     private var saving: Boolean = false
     private var savedAndClosed: Boolean = false
 
+    private var thisFlightIsIFR: Boolean? = null
+
     /**
      * _workingFlight with it's sources:
      */
+    private val updateWorkingFlightLock = Mutex()
     private val _workingFlight = MediatorLiveData<Flight>()
     init{
         _workingFlight.addSource(origin) {
@@ -80,6 +86,9 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
                 _workingFlight.value = flight?.autoValues()
         }
 
+
+
+        /*
         /**
          * Updates IFR time if aircraft type changed
          * IF new type is IFR, it sets ifrTime to 0 and calls autovalues
@@ -117,7 +126,11 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
                 }
             }
         }
+
+         */
     }
+
+
     private var backupFlight: Flight? = null
 
 
@@ -131,10 +144,19 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     }
 
     private fun initialSetWorkingFlight(flight: Flight) {
+        thisFlightIsIFR = null
         saving = false
         savedAndClosed = false
         updateWorkingFlight(flight)
         backupFlight = flight
+        launch{
+            checkIfFlightShouldBeIfr()
+            updateWorkingFlightLock.withLock {
+                workingFlight.value?.let {
+
+                }
+            }
+        }
     }
 
     /*************************
@@ -174,10 +196,18 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     }
 
     private fun Flight.updateIFRTime(): Flight {
-        val ifrTimeToSet: Int = if (ifrTime == -1) -1 else duration()
+        val ifrTimeToSet: Int = if (thisFlightIsIFR == true) duration() else 0
         return copy(ifrTime = ifrTimeToSet)
     }
 
+    private fun checkIfFlightShouldBeIfr(){
+        val mostRecentFlight = flightRepository.getMostRecentFlightAsync()
+        launch{
+            thisFlightIsIFR = mostRecentFlight.await()?.ifrTime ?: 0 > 0
+        }
+    }
+
+    /*
     /**
      * Checks if this aircraft always or never flies IFR
      * @return: true if always IFR
@@ -193,6 +223,8 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
             else -> null
         }
     }
+
+     */
 
 
     /*************************
@@ -271,6 +303,19 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
             updateWorkingFlight(flight!!.copy(augmentedCrew = crew.toInt()))
     }
 
+    var isIfr: Boolean
+        get() = thisFlightIsIFR ?: (flight?.ifrTime ?: -1 > 0)
+        set(isIfr){
+            thisFlightIsIFR = isIfr
+            launch {
+                updateWorkingFlightLock.withLock {
+                    _workingFlight.value?.let {
+                        _workingFlight.value = it.updateIFRTime()
+                    }
+                }
+            }
+        }
+
 
 
     /*********************************************************************************************
@@ -282,8 +327,12 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      */
     fun updateWorkingFlight(flight: Flight) {
         origDestAircraftWorker.flight = flight
-        _workingFlight.value = flight.autoValues()
-        if (saving) saveWorkingFlight()
+        launch{
+            updateWorkingFlightLock.withLock {
+                _workingFlight.value = flight.autoValues()
+            }
+            if (saving) saveWorkingFlight()
+        }
     }
 
     /**
@@ -344,14 +393,22 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     fun updateWorkingFlightWithMostRecentData(){
         launch(dispatcher) {
             flightRepository.getMostRecentFlightAsync().await()?.let { f ->
-                _workingFlight.value?.let {
-                    val aircraft = it.aircraftType.nullIfEmpty() ?: f.aircraftType
-                    val registration = it.registration.nullIfEmpty() ?: f.registration
-                    val name = it.name.nullIfEmpty() ?: f.name
-                    val name2 = it.name2.nullIfEmpty() ?: f.name2
-                    val isPIC = f.isPIC
-                    launch(Dispatchers.Main) {
-                        _workingFlight.value = it.copy(aircraftType = aircraft, registration = registration, name = name, name2 = name2, isPIC = isPIC)
+                updateWorkingFlightLock.withLock {
+                    _workingFlight.value?.let {
+                        val aircraft = it.aircraftType.nullIfEmpty() ?: f.aircraftType
+                        val registration = it.registration.nullIfEmpty() ?: f.registration
+                        val name = it.name.nullIfEmpty() ?: f.name
+                        val name2 = it.name2.nullIfEmpty() ?: f.name2
+                        val isPIC = f.isPIC
+                        launch(Dispatchers.Main) {
+                            _workingFlight.value = it.copy(
+                                aircraftType = aircraft,
+                                registration = registration,
+                                name = name,
+                                name2 = name2,
+                                isPIC = isPIC
+                            )
+                        }
                     }
                 }
             }

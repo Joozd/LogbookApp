@@ -174,7 +174,9 @@ object Cloud {
 
     suspend fun getAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? = withContext(Dispatchers.IO) {
         Client().use{
-            ServerFunctions.getAircraftTypesVersion(it, listener)
+            ServerFunctions.getAircraftTypesVersion(it, listener).also{
+                Log.d("aircraftTypes", "version: $it")
+            }
         }
     }
 

@@ -30,7 +30,7 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 2
+        versionCode 3
         versionName "0.1.0 work in progress"
 
         vectorDrawables.useSupportLibrary = true

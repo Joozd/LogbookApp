@@ -67,7 +67,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="joozd.nl"
+                    android:host="joozdlog.joozd.nl"
                     android:pathPrefix="/inject-key"
                     android:scheme="https" />
             </intent-filter>

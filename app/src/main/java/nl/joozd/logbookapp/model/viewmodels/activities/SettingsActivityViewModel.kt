@@ -20,6 +20,9 @@
 package nl.joozd.logbookapp.model.viewmodels.activities
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.LiveData
@@ -30,6 +33,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.CalendarScraper
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
@@ -56,6 +60,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _useCloudSync = MutableLiveData(Preferences.useCloud)
     private val _showOldTimesOnChronoUpdate = MutableLiveData(Preferences.showOldTimesOnChronoUpdate)
     private val _standardTakeoffLandingTimes = MutableLiveData(Preferences.standardTakeoffLandingTimes)
+    private val _lastUpdateTime = MutableLiveData(makeTimeString(Preferences.lastUpdateTime))
+    private val _backupInterval = MutableLiveData(Preferences.backupInterval)
 
     private val _username = MutableLiveData(Preferences.username) // <String?>
     private val _calendarDisabledUntil = MutableLiveData(Preferences.calendarDisabledUntil) //  <Long>
@@ -98,6 +104,11 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
             Preferences::standardTakeoffLandingTimes.name ->
                 _standardTakeoffLandingTimes.value = Preferences.standardTakeoffLandingTimes
 
+            Preferences::lastUpdateTime.name -> _lastUpdateTime.value = makeTimeString(Preferences.lastUpdateTime)
+
+            Preferences::backupInterval.name -> _backupInterval.value = Preferences.backupInterval
+
+
 
 
             // This is not used at the moment but it's there when we need it. Just set [settingsCalendarTypeSpinner] visibility to VISIBLE in SettingsActivity
@@ -127,6 +138,12 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val standardTakeoffLandingTimes: LiveData<Int>
         get() = _standardTakeoffLandingTimes
+
+    val lastUpdateTime: LiveData<String>
+        get() = _lastUpdateTime
+
+    val backupInterval: LiveData<Int>
+        get() = _backupInterval
 
     val settingsUseIataSelectorTextResource: LiveData<Int>
         get() = _settingsUseIataSelectorTextResource
@@ -177,6 +194,17 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         Preferences.useCloud = !Preferences.useCloud
     }
 
+    fun copyLoginLinkToClipboard(){
+        UserManagement.gerenateLoginLink()?.let { loginLink ->
+            with (App.instance) {
+                (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
+                    ClipData.newPlainText(getString(R.string.login_link), loginLink)
+                )
+            }
+            feedback(SettingsActivityEvents.LOGIN_LINK_COPIED)
+        } ?: feedback(SettingsActivityEvents.NOT_LOGGED_IN)
+    }
+
     fun calendarPicked(index: Int){
         _foundCalendars.value?.get(index)?.let{
             Preferences.selectedCalendar = it.name
@@ -194,18 +222,6 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         flightRepository.syncIfNeeded()
     }
 
-    /**
-     * Signs out if signed in, shows login activity if signed out
-     */
-    fun signInOut(){
-        if (UserManagement.signedIn) {
-            UserManagement.signOut()
-            feedback(SettingsActivityEvents.SIGNED_OUT)
-        }
-        else
-            feedback(SettingsActivityEvents.SHOW_LOGIN_ACTIVITY)
-    }
-
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
     fun fillCalendarsList() {
         viewModelScope.launch {
@@ -215,9 +231,12 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         }
     }
 
-    fun pickedAugmentedStartLandingTime(pickedTime: Int){
-        Preferences.standardTakeoffLandingTimes = pickedTime
-    }
+    private fun makeTimeString(instant: Long): String =
+        if (instant < 0) "Never"
+        else  LocalDateTime.ofInstant(Instant.ofEpochSecond(instant), ZoneOffset.UTC).let{
+            "${it.toDateStringLocalized()} ${it.toTimeStringLocalized()}Z"
+        }
+
 
 
 

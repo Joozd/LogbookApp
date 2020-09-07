@@ -34,8 +34,12 @@ fun Context.toast(message: CharSequence): Toast = Toast
         show()
     }
 
+fun Context.toast(messageId: Int): Toast = toast(getString(messageId))
+
 fun Context.longToast(message: CharSequence): Toast = Toast
     .makeText(this, message, Toast.LENGTH_SHORT)
     .apply {
         show()
     }
+
+fun Context.longToast(messageId: Int): Toast = longToast(getString(messageId))

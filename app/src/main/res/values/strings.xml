@@ -106,6 +106,7 @@
     <string name="arrowRight">➔</string>
     <string name="settings">Settings</string>
     <string name="error">Error</string>
+    <string name="never">Never</string>
 
     <string name="login">Log In</string>
 
@@ -146,6 +147,7 @@
     <string name="password_does_not_meet_standards_short">Password does not meet standards.</string>
     <string name="username_already_taken">This username is already taken.</string>
     <string name="user_exists_password_correct">This username exists, and you have entered the correct password for it. If this is not you, please pick another username and a more secure password.</string>
+    <string name ="what_to_do_forgot_password">If your login is still working on this device, you can change it to something you catually can remember via the settings screen, or you can generate a login link.</string>
     <string name="use_this">Use this</string>
 
     <string name="calendar_sync_conflict">Calendar Sync conflict</string>
@@ -229,22 +231,35 @@
     <string name="cloud_sync_title">Cloud Sync</string>
     <string name="add_chrono_update_remarks">Save old times as remarks</string>
     <string name="sync_flights_across_devices">Synchronize flights across multiple devices or easily migrate to a new device</string>
+    <string name="last_synched_at">Last synchronized at: %1$s</string>
     <string name="disabled_until">Disabled until %1$s</string>
+    <string name="n_days">%1$s days</string>
     <string name="enable_now">Enable now</string>
     <string name="monthly_overviews">Monthly Overviews</string>
     <string name="monthly_overview_explanation">Monthly Overviews import supported for selected carriers (currently only KLC) only. Just share your PDF with Joozdlog.</string>
     <string name="loggings_prefs_description">General preferences pertaining to (automatic) logging and times.</string>
+    <string name="signed_in_as"><![CDATA[<b>Signed in as</b><br><small>%1$s</small>&nbsp;]]></string>
+    <string name="not_signed_in">Not signed in</string>
     <string name="standard_augmented_time"><![CDATA[<b>Augmented Crew takeoff/landing time</b><br><small>%1$s minutes</small>&nbsp;]]></string>
+    <string name="backup_interval_time"><![CDATA[<b>Remind me to make a backup every</b><br><small>%1$s</small>&nbsp;]]></string>
+    <string name="pick_backup_interval">Pick backup interval</string>
     <string name="augmented_crew_time_explanation">In case of an augmented crew (3 or more pilots), Joozdlog calculates the time that can be logged for copilots by subtracting this amount of time for each takeoff and landing, allocating the remaining time evenly over the pilots, then adds this time again for every takeoff/landing performed in the pilot\'s seat.</string>
 
     <string name="change_password">Change Password</string>
+    <string name="create_login_link">Create a login link</string>
+    <string name="login_link_created">Login link copied to clipboard!</string>
+    <string name="login_link">Joozdlog Login Link</string>
+    <string name="create_login_link_explanation">This will create a login link that you can paste in your favorite app (email, sms, notepad, anywhere). If you click that link, it will try to log you in with the username/password currently set on this device.</string>
     <string name="change_password_explanation">You can use this screen to change your password when you are logged in. Just enter the new password twice and you are good to go.</string>
     <string name="new_password">New Password</string>
     <string name="loggings_preferences">Logging Preferences</string>
 
+    <string name = "fake_hidden_password">••••••••••</string>
+
 
 
 </resources>
+
 
 
 

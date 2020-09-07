@@ -38,6 +38,7 @@ import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
+import nl.joozd.logbookapp.ui.activities.ChangePasswordActivity
 import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
 import nl.joozd.logbookapp.ui.activities.LoginActivity
 import nl.joozd.logbookapp.ui.dialogs.NumberPickerDialog
@@ -152,23 +153,37 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.setGetFlightsFromCalendar(isChecked)
             }
 
-            addRemarksToChronoUpdatesSwitch.setOnCheckedChangeListener { _, isChecked ->
-                viewModel.setShowOldTimesOnChronoUpdate(isChecked)
+            dontPostponeTextView.setOnClickListener {
+                viewModel.dontPostponeCalendarSync()
             }
 
             useCloudSyncSwitch.setOnClickListener {
                 viewModel.useCloudSyncToggled()
             }
 
-            dontPostponeTextView.setOnClickListener {
-                viewModel.dontPostponeCalendarSync()
+            youAreSignedInAsButton.setOnClickListener {
+                startActivity(Intent(activity, LoginActivity::class.java))
             }
 
-            userSignInOutTextview.setOnClickListener {
-                viewModel.signInOut()
+            changePasswordButton.setOnClickListener {
+                startActivity(Intent(activity, ChangePasswordActivity::class.java))
+            }
+
+            loginLinkButton.setOnClickListener {
+                viewModel.copyLoginLinkToClipboard()
+            }
+
+            loginLinkExplanationImageView.setOnClickListener {
+                showLoginLinkHint()
+            }
+
+            addRemarksToChronoUpdatesSwitch.setOnCheckedChangeListener { _, isChecked ->
+                viewModel.setShowOldTimesOnChronoUpdate(isChecked)
             }
 
             augmentedCrewButton.setOnClickListener { showAugmentedTimesNumberPicker() }
+
+            backupIntervalButton.setOnClickListener { showBackupIntervalNumberPicker() }
 
             augmentedTakeoffTimeHintButton.setOnClickListener {
                 showAugmentedStartLandingTimesHint()
@@ -185,11 +200,12 @@ class SettingsActivity : JoozdlogActivity() {
 
             viewModel.feedbackEvent.observe(activity) {
                 when (it.getEvent()){
-                    SettingsActivityEvents.SHOW_LOGIN_ACTIVITY ->
-                        startActivity(Intent(activity, LoginActivity::class.java))
-
                     SettingsActivityEvents.SIGNED_OUT ->
                         setLoggedInInfo(Preferences.username)
+                    SettingsActivityEvents.LOGIN_LINK_COPIED ->
+                        toast(R.string.login_link_created)
+                    SettingsActivityEvents.NOT_LOGGED_IN ->
+                        toast(R.string.error)
                 }
             }
 
@@ -216,7 +232,11 @@ class SettingsActivity : JoozdlogActivity() {
 
             viewModel.useCloudSync.observe(activity) {
                 useCloudSyncSwitch.isChecked = it
-                if (it) showLoggedInInfo() else hideLoggedInInfo()
+                if (it) showLoggedInButton() else hideLoggedInButton()
+            }
+
+            viewModel.lastUpdateTime.observe(activity){
+                lastSynchedTimeTextView.text = getStringWithMakeup(R.string.last_synched_at, it)
             }
 
             viewModel.showOldTimesOnChronoUpdate.observe(activity) {
@@ -254,6 +274,10 @@ class SettingsActivity : JoozdlogActivity() {
 
             viewModel.standardTakeoffLandingTimes.observe(activity) {
                 augmentedCrewButton.text = getStringWithMakeup(R.string.standard_augmented_time, it.toString())
+            }
+
+            viewModel.backupInterval.observe(activity){
+                backupIntervalButton.text = getStringWithMakeup(R.string.backup_interval_time, (if (it == 0) getString (R.string.never) else getString(R.string.n_days, it.toString())))
             }
 
 
@@ -296,21 +320,27 @@ class SettingsActivity : JoozdlogActivity() {
     /**
      * hide "you are logged in" line
      */
-    private fun ActivitySettingsBinding.hideLoggedInInfo(){
-        youAreSignedInAsTextView.visibility=View.GONE
-        userSignInOutTextview.visibility = View.GONE
+    private fun ActivitySettingsBinding.hideLoggedInButton(){
+        youAreSignedInAsButton.visibility=View.GONE
+        lastSynchedTimeTextView.visibility=View.GONE
+        changePasswordButton.visibility=View.GONE
+        loginLinkButton.visibility = View.GONE
+        loginLinkExplanationImageView.visibility = View.GONE
     }
-    private fun ActivitySettingsBinding.showLoggedInInfo(){
-        youAreSignedInAsTextView.visibility=View.VISIBLE
-        userSignInOutTextview.visibility = View.VISIBLE
+    private fun ActivitySettingsBinding.showLoggedInButton(){
+        youAreSignedInAsButton.visibility=View.VISIBLE
+        lastSynchedTimeTextView.visibility=View.VISIBLE
+        changePasswordButton.visibility=View.VISIBLE
+        val showLoginLinkButton = if (Preferences.username == null) View.GONE else View.VISIBLE
+        loginLinkButton.visibility = showLoginLinkButton
+        loginLinkExplanationImageView.visibility = showLoginLinkButton
     }
 
     private fun ActivitySettingsBinding.setLoggedInInfo(name: String?){
-        youAreSignedInAsTextView.text = name?.let{
-            getStringWithMakeup(R.string.you_are_signed_in_as, name)
-        } ?: getString(R.string.you_are_not_signed_in)
-        userSignInOutTextview.text = getString(if (name == null) R.string.signIn else R.string.signOut)
-
+        youAreSignedInAsButton.text = getStringWithMakeup(R.string.signed_in_as, name ?: getString(R.string.you_are_not_signed_in))
+        val showLoginLinkButton = if (name == null) View.GONE else View.VISIBLE
+        loginLinkButton.visibility = showLoginLinkButton
+        loginLinkExplanationImageView.visibility = showLoginLinkButton
     }
 
     private fun ActivitySettingsBinding.showCalendarDisabled(){
@@ -324,18 +354,25 @@ class SettingsActivity : JoozdlogActivity() {
         dontPostponeTextView.visibility = View.GONE
     }
 
+    private fun ActivitySettingsBinding.showLoginLinkHint(){
+        createLoginLinkHintCardview.visibility = View.VISIBLE
+        popupTextboxesBackground.visibility = View.VISIBLE
+    }
+
     private fun ActivitySettingsBinding.showAugmentedStartLandingTimesHint(){
         augmentedStartLandingTimesHintCardview.visibility = View.VISIBLE
         popupTextboxesBackground.visibility = View.VISIBLE
     }
 
+
     private fun ActivitySettingsBinding.closeAllHintBoxes(){
         augmentedStartLandingTimesHintCardview.visibility = View.GONE
+        createLoginLinkHintCardview.visibility = View.GONE
         popupTextboxesBackground.visibility = View.GONE
     }
 
-    private fun ActivitySettingsBinding.showAugmentedTimesNumberPicker(){
-        AugmentedNumberPicker(viewModel).apply {
+    private fun showAugmentedTimesNumberPicker(){
+        AugmentedNumberPicker().apply {
             title="HALLON AUB GRGR"
             wrapSelectorWheel = false
             maxValue = AugmentedNumberPicker.EIGHT_HOURS
@@ -343,7 +380,19 @@ class SettingsActivity : JoozdlogActivity() {
         }.show(supportFragmentManager, null)
     }
 
-    class AugmentedNumberPicker(private val viewModel: SettingsActivityViewModel): NumberPickerDialog() {
+    private fun showBackupIntervalNumberPicker(){
+        BackupIntervalNumberPicker().apply{
+            title = App.instance.getString(R.string.pick_backup_interval)
+            wrapSelectorWheel = false
+            maxValue = 365
+            selectedValue = Preferences.backupInterval
+        }.show(supportFragmentManager, null)
+
+    }
+
+
+
+    class AugmentedNumberPicker: NumberPickerDialog() {
         fun setValue(value: Int) {
             selectedValue = when (value) {
                 in (0..THIRTY) -> value
@@ -356,7 +405,7 @@ class SettingsActivity : JoozdlogActivity() {
          * Override this to actually do something with the picked number
          */
         override fun onNumberPicked(pickedNumber: Int) {
-            viewModel.pickedAugmentedStartLandingTime(unFormat(pickedNumber))
+            Preferences.standardTakeoffLandingTimes = unFormat(pickedNumber)
         }
 
         override val formatter = NumberPicker.Formatter{
@@ -380,6 +429,24 @@ class SettingsActivity : JoozdlogActivity() {
             private const val NINETY: Int = 30 + (90-30) / 5
             const val EIGHT_HOURS = NINETY + (8*60 - 90) / 15
         }
+
+    }
+
+    class BackupIntervalNumberPicker: NumberPickerDialog() {
+        /**
+         * Override this to actually do something with the picked number
+         */
+        override fun onNumberPicked(pickedNumber: Int) {
+            Preferences.backupInterval = pickedNumber
+        }
+
+        override val formatter = NumberPicker.Formatter{ when (it) {
+            0 -> App.instance.getString(R.string.never)
+            1 -> App.instance.getString(R.string.day)
+            else -> App.instance.getStringWithMakeup(R.string.n_days, it.toString()).toString()
+        }
+        }
+
 
     }
 

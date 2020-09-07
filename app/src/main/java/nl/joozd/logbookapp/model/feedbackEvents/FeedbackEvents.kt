@@ -62,7 +62,8 @@ object FeedbackEvents {
 
     enum class SettingsActivityEvents:
         Event {
-        SHOW_LOGIN_ACTIVITY,
+        LOGIN_LINK_COPIED,
+        NOT_LOGGED_IN,
         SIGNED_OUT
     }
 

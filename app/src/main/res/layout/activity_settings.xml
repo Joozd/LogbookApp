@@ -176,17 +176,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/lineBetweenCalendarCloud" />
 
-            <Switch
-                android:id="@+id/useCloudSyncSwitch"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:text="@string/use_cloud_sync"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView15" />
 
             <TextView
                 android:id="@+id/textView15"
@@ -201,25 +190,88 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/cloudSynctitleTextView" />
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/useCloudSyncSwitch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="@string/use_cloud_sync"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView15" />
+
             <TextView
-                android:id="@+id/youAreSignedInAsTextView"
+                android:id="@+id/lastSynchedTimeTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/useCloudSyncSwitch"
-                tools:text="@string/you_are_signed_in_as" />
-
-            <TextView
-                android:id="@+id/userSignInOutTextview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
-                android:text="@string/signOut"
-                android:textColor="?attr/colorAccent"
+                android:text="@string/last_synched_at"
+                android:textColor="?attr/android:textColorTertiary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/useCloudSyncSwitch" />
+
+
+
+            <Button
+                android:id="@+id/youAreSignedInAsButton"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:elevation="0dp"
+                android:padding="16dp"
+                android:text="@string/standard_augmented_time"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lastSynchedTimeTextView" />
+
+            <Button
+                android:id="@+id/changePasswordButton"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:elevation="0dp"
+                android:padding="16dp"
+                android:text="@string/change_password"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/youAreSignedInAsTextView" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/youAreSignedInAsButton" />
+
+            <Button
+                android:id="@+id/loginLinkButton"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:elevation="0dp"
+                android:padding="16dp"
+                android:text="@string/create_login_link"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/changePasswordButton" />
+
+            <ImageView
+                android:id="@+id/loginLinkExplanationImageView"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:padding="4dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="16dp"
+                app:layout_constraintBottom_toBottomOf="@+id/loginLinkButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/loginLinkButton"
+                app:srcCompat="@drawable/ic_help_outline_20px" />
 
             <View
                 android:id="@+id/lineBetweenCloudPdf"
@@ -229,7 +281,7 @@
                 android:background="#c0c0c0"
                 app:layout_constraintEnd_toEndOf="@+id/settingsUseIataSelector"
                 app:layout_constraintStart_toStartOf="@+id/settingsUseIataSelector"
-                app:layout_constraintTop_toBottomOf="@+id/userSignInOutTextview" />
+                app:layout_constraintTop_toBottomOf="@+id/loginLinkButton" />
 
             <TextView
                 android:id="@+id/textView4"
@@ -335,6 +387,21 @@
                 app:layout_constraintTop_toTopOf="@+id/augmentedCrewButton"
                 app:srcCompat="@drawable/ic_help_outline_20px" />
 
+            <Button
+                android:id="@+id/backupIntervalButton"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:elevation="0dp"
+                android:padding="16dp"
+                android:text="@string/backup_interval_time"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/augmentedCrewButton" />
+
+
             <View
                 android:id="@+id/popupTextboxesBackground"
                 android:layout_width="0dp"
@@ -344,6 +411,38 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/create_login_link_hint_cardview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="24dp"
+                android:padding="4dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="?attr/colorPrimaryBackground"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="4dp"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="@+id/loginLinkExplanationImageView"
+                app:layout_constraintEnd_toEndOf="@+id/loginLinkExplanationImageView"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:visibility="visible">
+
+                <TextView
+                    android:id="@+id/createLoginLinkPopupWindowTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center_horizontal"
+                    android:padding="8dp"
+                    android:text="@string/create_login_link_explanation"
+                    android:textSize="14sp"
+                    tools:visibility="gone" />
+
+            </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/augmented_start_landing_times_hint_cardview"

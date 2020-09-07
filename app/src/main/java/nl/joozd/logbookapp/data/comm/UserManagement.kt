@@ -96,6 +96,13 @@ object UserManagement {
         Preferences.useCloud = false
     }
 
+    fun gerenateLoginLink(): String? = Preferences.username?.let {
+        "https://joozdlog.joozd.nl/inject-key/$it:${Preferences.password}"
+    }
+
+
+
+
     object ReturnCodes {
         const val SUCCESS = 0
         const val CONNECTION_ERROR = -999

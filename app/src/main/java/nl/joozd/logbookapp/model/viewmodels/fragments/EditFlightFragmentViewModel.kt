@@ -24,6 +24,7 @@ import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.data.repository.workingFlightRepository.WorkingFlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.anyWordStartsWith
 import nl.joozd.logbookapp.extensions.nullIfEmpty
@@ -262,8 +263,11 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
     fun toggleInstructor() = workingFlight?.let { workingFlight = it.copy(isInstructor = toggleTrueAndFalse(it.isInstructor)) }
 
     val ifr: LiveData<Boolean>
-        get() = Transformations.map(flight) { it.ifrTime > 0 }
-    fun toggleIFR() = feedback(EditFlightFragmentEvents.NOT_IMPLEMENTED)
+        get() = Transformations.map(flight) { workingFlightRepository.isIfr }
+
+    fun toggleIFR() = workingFlight?.let{
+        workingFlightRepository.isIfr = !workingFlightRepository.isIfr
+    }
 
     val pic: LiveData<Boolean> = distinctUntilChanged(Transformations.map(flight) { it.isPIC })
     fun togglePic() = workingFlight?.let { workingFlight = it.copy(isPIC = toggleTrueAndFalse(it.isPIC)) }

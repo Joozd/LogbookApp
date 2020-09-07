@@ -22,14 +22,12 @@ package nl.joozd.logbookapp.ui.activities
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityLoginBinding
-import nl.joozd.logbookapp.databinding.ActivityNewUserPage2Binding
 import nl.joozd.logbookapp.extensions.onTextChanged
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.LoginActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.LoginActivityViewModel
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
@@ -46,6 +44,10 @@ class LoginActivity : JoozdlogActivity(){
         setTheme(R.style.AppTheme)
         ActivityLoginBinding.inflate(layoutInflater).apply {
             singInButton.joozdLogSetBackgroundColor()
+            Preferences.username?.let{
+                usernameEditText.setText(it)
+                passwordEditText.setText(R.string.fake_hidden_password)
+            }
 
             /**
              * Every time this is recreated, check if server is online.
@@ -53,9 +55,6 @@ class LoginActivity : JoozdlogActivity(){
              * In both cases, entering login/pass should still be possible, but it won't be checked
              * until next time it gets online.
              * TODO make a graphic feedback about this (ie. a message somewhere that server not reached)
-             *
-             * TODO MainActivity should get functionality to deal with server login errors,
-             * TODO giving people the option to go to this screen and fix things.
              */
 
             setSupportActionBarWithReturn(loginActivityToolbar)?.apply {
@@ -175,7 +174,7 @@ class LoginActivity : JoozdlogActivity(){
     private fun showYouAreAnIdiotDialog(){
         JoozdlogAlertDialog(activity).apply{
             title = "DUH"
-            message = "Well, now you will have to make a new account, and I will be stuck with a dead account taking resources on my server :(\nPlease don't forget the password again."
+            messageResource = (R.string.what_to_do_forgot_password)
             setPositiveButton(android.R.string.ok)
         }.show()
     }

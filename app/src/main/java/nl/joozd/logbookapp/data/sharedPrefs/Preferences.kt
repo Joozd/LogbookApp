@@ -109,6 +109,8 @@ object Preferences {
 
     var aircraftForcedVersion: Int by JoozdLogSharedPrefs(sharedPref, 0)
 
+    var backupInterval: Int by JoozdLogSharedPrefs(sharedPref, 0)
+
     var updateLargerFilesOverWifiOnly: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
     var newUserActivityFinished: Boolean by JoozdLogSharedPrefs(sharedPref, false)

@@ -42,6 +42,7 @@ object UserManagement {
                 Preferences.password = password
                 Preferences.lastUpdateTime = -1
             }
+            else Log.d("CreateNewUser()", "Cloud.createNewUser returned $it")
         }
     }
 

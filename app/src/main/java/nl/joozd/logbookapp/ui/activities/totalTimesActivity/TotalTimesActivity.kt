@@ -23,7 +23,7 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityTotalTimesBinding
-import nl.joozd.logbookapp.model.viewmodels.activities.TotalTimesViewModel
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.TotalTimesViewModel
 import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
 
 
@@ -40,8 +40,28 @@ class TotalTimesActivity : JoozdlogActivity() {
          */
         ActivityTotalTimesBinding.inflate(layoutInflater).apply{
             setSupportActionBarWithReturn(totalTimesToolbar)?.apply {
-                // can do stuff with toolbar here
+                setDisplayShowHomeEnabled(true)
+                setDisplayHomeAsUpEnabled(true)
+                title = getString(R.string.totalTimes)
             }
+            val totalTimesExpandableListAdapter = TotalTimesExpandableListAdapter()
+            totalTimesExListView.setAdapter(totalTimesExpandableListAdapter)
+
+            viewModel.allLists.observe(activity){ unfiltered ->
+                unfiltered.filterNotNull().also {
+                    totalTimesExpandableListAdapter.list = it
+                    it.mapIndexed { i, ttl ->
+                        if (ttl.autoOpen) totalTimesExListView.expandGroup(i)
+                    }
+                }
+
+
+
+
+
+
+            }
+            setContentView(root)
         }
     }
 

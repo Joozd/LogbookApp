@@ -42,6 +42,9 @@ import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast
 import java.util.*
 
+/**
+ * Create new user!
+ */
 class NewUserActivityPage2: JoozdlogFragment() {
 
     val viewModel: NewUserActivityViewModel by activityViewModels()

@@ -55,7 +55,7 @@ class Crew(iCrewSize: Int = 2,
     /**
      * Return amount of time to log. Cannot be negative, so 3 man ops for a 20 min flight with 30 mins to/landing is 0 minutes to log.
      */
-    fun getLogTime(totalTime: Int, pic: Boolean = false): Int{
+    fun getLogTime(totalTime: Int, pic: Boolean): Int{
         if (pic || crewSize <=2) return totalTime
         return maxOf(0, (((totalTime.toFloat()-2*takeoffLandingTimes)/crewSize) * 2 + takeoffLandingTimes * (didTakeoff.toInt() + didLanding.toInt()) + 0.5).toInt())
     }

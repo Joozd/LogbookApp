@@ -26,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.anyWordStartsWith
+import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.removeTrailingDigits
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.toggleTrueAndFalse
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.withDate
@@ -50,8 +51,8 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
 
 
     private val _flightNumber: LiveData<String> = Transformations.map(flight) { it.flightNumber }
-    private val _orig: LiveData<String> = Transformations.map(workingFlightRepository.origin) { (if (Preferences.useIataAirports) it?.iata_code else it?.ident) ?: workingFlight?.orig }
-    private val _dest: LiveData<String> = Transformations.map(workingFlightRepository.destination) { (if (Preferences.useIataAirports) it?.iata_code else it?.ident) ?: workingFlight?.orig }
+    private val _orig: LiveData<String> = Transformations.map(workingFlightRepository.origin) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: workingFlight?.orig }
+    private val _dest: LiveData<String> = Transformations.map(workingFlightRepository.destination) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: workingFlight?.orig }
     private val _timeOut: LiveData<String> = Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeOut) }
     private val _timeIn: LiveData<String> = Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeIn) }
 

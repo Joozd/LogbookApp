@@ -28,6 +28,7 @@ import android.widget.EditText
  */
 fun EditText.removeTrailingDigits(){
     val currentText = text.toString()
+    if (currentText.isEmpty()) return
     var trailingDigits: Int = 0
     while (currentText.dropLast(trailingDigits).last().isDigit()) trailingDigits++
     //We now know how many digits this EditText's text ends with (spoiler: it's [trailingDigits]

@@ -30,7 +30,10 @@ import nl.joozd.joozdlogfiletypedetector.CsvTypeDetector
 import nl.joozd.joozdlogfiletypedetector.PdfTypeDetector
 import nl.joozd.joozdlogfiletypedetector.SupportedTypes
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
+import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.JoozdlogV4Parser
 import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.MccPilotLogCsvParser
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
@@ -42,6 +45,7 @@ import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.extensions.*
 import java.io.FileNotFoundException
 import java.io.InputStream
+import java.io.Reader
 import java.time.Instant
 
 
@@ -58,7 +62,11 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     private fun run() {
         intent?.let {
             viewModelScope.launch {
-                val uri = it.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri
+                val uri = (it.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri ?: it.data).also{uri ->
+                    Log.d("HALLOOOO", "$uri")
+                    Log.d("HALLOOOO", "${it.data}")
+                }
+
                 getTypeDetector(uri)?.let { typeDetector ->
                     //check if it was actually a supported file
                     /**
@@ -79,8 +87,11 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
 
                         SupportedTypes.MCC_PILOT_LOG_LOGBOOK -> uri?.getInputStream()?.use {
                             feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
-                            Log.d("BOTERHAM", "PUNT 1")
-                            parseMccPilotLogbook(it)
+                            parseCsv(MccPilotLogCsvParser.ofInputStream(it))
+                        }
+                        SupportedTypes.JOOZDLOG_V4 -> uri?.getInputStream()?.use {
+                            feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
+                            parseCsv(JoozdlogV4Parser.ofInputStream(it))
                         }
 
                         SupportedTypes.UNSUPPORTED_PDF, SupportedTypes.UNSUPPORTED_CSV -> {
@@ -120,9 +131,8 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                 }
             }
             return if (detector?.seemsValid != true) null else detector
-        }
-        feedback(PdfParserActivityEvents.ERROR).apply{
-            putString("Error 3")
+        } ?: feedback(PdfParserActivityEvents.ERROR).apply{
+            putString("Error 3 YOLO")
         }
         return null
     }
@@ -202,6 +212,10 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
+    private suspend fun parseJoozdlogV4(inputStream: InputStream) = withContext(Dispatchers.Default){
+        val foundFlights = FlightsRepositoryExporter.csvToFlights(inputStream.reader().readLines())
+    }
+
     /**
      * Saves flights from roster, does check if CalendarSync is enabled
      */
@@ -221,6 +235,38 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                 flightRepository.saveFromRoster(fff, period = periodToSave)
                 if (finish)
                     feedback(PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED)
+            }
+        }
+    }
+
+
+    private suspend fun parseCsv(parser: ImportedLogbook, lowestId: Int = 0) = withContext(Dispatchers.Default) {
+        with(parser) {
+            if (!validImportedLogbook) {
+                feedback(PdfParserActivityEvents.NOT_A_KNOWN_LOGBOOK)
+                return@withContext
+            }
+            flights?.let { fff ->
+                if (fff.any { it == null }) { // Some flights failed to import
+                    feedback(PdfParserActivityEvents.SOME_FLIGHTS_FAILED_TO_IMPORT).apply {
+                        errorLines?.let { el ->
+                            extraData.putStringArrayList(FAILED_IMPORTS_TAG, ArrayList(el))
+                        }
+                    }
+                }
+                foundFlights = ImportedFlightsCleaner(fff.filterNotNull()).cleanFlights().also {
+                    if (it == null) {
+                        Log.w(
+                            "PdfParserActivity",
+                            "MccPilotLogCsvParser.flights null after it wasn't ????"
+                        )
+                        feedback(PdfParserActivityEvents.ERROR).apply {
+                            putString("Error 5")
+                        }
+                        return@withContext
+                    }
+                    processFlights(it, false)
+                }
             }
         }
     }
@@ -308,7 +354,10 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
 
     fun runOnce(newIntent: Intent){
         if (intent == null){
-            intent = newIntent
+            intent = newIntent.also{
+                Log.d("INTENT", "$it")
+            }
+            Log.d("INTENT", "echt heus eerlijk $intent")
             run()
         }
     }

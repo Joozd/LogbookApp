@@ -23,14 +23,12 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
-import nl.joozd.logbookapp.extensions.makeLocalDate
 import nl.joozd.logbookapp.extensions.makeLocalDateSmart
 import nl.joozd.logbookapp.extensions.makeLocalTime
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import java.io.InputStream
 import java.lang.Exception
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -41,10 +39,9 @@ import java.time.ZoneOffset
  *
  * You can also get it (async) from an InputStream with [ofInputStream]
  * @param csvLines: List of lines from a CSV file
- * @param icaoIataMap: A map to make ICAO identifiers from IATA ones
- * @param lowestID: Lowest usable ID to avoid conflicts with database
+ * @param lowestId: Lowest usable ID to avoid conflicts with database
  */
-class MccPilotLogCsvParser(private val csvLines: List<String>, private val icaoIataMap: Map<String, String>? = null, private val lowestId: Int = 0): ImportedLogbook{
+class MccPilotLogCsvParser(private val csvLines: List<String>, private val lowestId: Int = 0): ImportedLogbook{
 
     /*********************************************************************************************
      * Private parts
@@ -157,7 +154,7 @@ class MccPilotLogCsvParser(private val csvLines: List<String>, private val icaoI
     override val flights: List<Flight?>?
         get() = parseCSV()
 
-    val errorLines: List<String>
+    override val errorLines: List<String>
         get() = _errorLines
 
 
@@ -166,8 +163,8 @@ class MccPilotLogCsvParser(private val csvLines: List<String>, private val icaoI
      *********************************************************************************************/
 
     companion object{
-        suspend fun ofInputStream(inputStream: InputStream, icaoIataMap: Map<String, String>? = null, lowestId: Int = 0) = withContext(Dispatchers.IO) {
-            MccPilotLogCsvParser(inputStream.reader().readLines(), icaoIataMap, lowestId)
+        suspend fun ofInputStream(inputStream: InputStream, lowestId: Int = 0) = withContext(Dispatchers.IO) {
+            MccPilotLogCsvParser(inputStream.reader().readLines(), lowestId)
         }
 
         private const val MCC_PILOT_LOG_CSV_IDENTIFIER = "\"mcc_DATE\";\"Is_PREVEXP\";\"AC_IsSIM\";\"FlightNumber\";\"AF_DEP\";\"TIME_DEP\";\"TIME_DEPSCH\";\"AF_ARR\";\"TIME_ARR\";\"TIME_ARRSCH\";\"AC_MODEL\";\"AC_REG\";\"PILOT1_ID\";\"PILOT1_NAME\";\"PILOT1_PHONE\";\"PILOT1_EMAIL\";\"PILOT2_ID\";\"PILOT2_NAME\";\"PILOT2_PHONE\";\"PILOT2_EMAIL\";\"PILOT3_ID\";\"PILOT3_NAME\";\"PILOT3_PHONE\";\"PILOT3_EMAIL\";\"PILOT4_ID\";\"PILOT4_NAME\";\"PILOT4_PHONE\";\"PILOT4_EMAIL\";\"TIME_TOTAL\";\"TIME_PIC\";\"TIME_PICUS\";\"TIME_SIC\";\"TIME_DUAL\";\"TIME_INSTRUCTOR\";\"TIME_EXAMINER\";\"TIME_NIGHT\";\"TIME_RELIEF\";\"TIME_IFR\";\"TIME_ACTUAL\";\"TIME_HOOD\";\"TIME_XC\";\"PF\";\"TO_DAY\";\"TO_NIGHT\";\"LDG_DAY\";\"LDG_NIGHT\";\"AUTOLAND\";\"HOLDING\";\"LIFT\";\"INSTRUCTION\";\"REMARKS\";\"APP_1\";\"APP_2\";\"APP_3\";\"Pax\";\"DEICE\";\"FUEL\";\"FUELUSED\";\"DELAY\";\"FLIGHTLOG\";\"TIME_TO\";\"TIME_LDG\";\"TIME_AIR\""

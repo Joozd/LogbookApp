@@ -25,6 +25,7 @@ enum class SupportedTypes {
     KLM_ICA_ROSTER,
     KLM_ICA_MONTHLY,
     MCC_PILOT_LOG_LOGBOOK,
+    JOOZDLOG_V4,
     UNSUPPORTED_PDF,
     UNSUPPORTED_CSV
 }

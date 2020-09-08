@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.export
 
+import android.util.Base64
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -34,7 +35,7 @@ import java.time.Instant
  * Exporter class for flights
  */
 class FlightsRepositoryExporter(val flightRepository: FlightRepository): CoroutineScope by MainScope() {
-    private val allFlightsAsync = async { flightRepository.getAllFlights() }
+    private val allFlightsAsync = async { flightRepository.getAllFlights().filter{ !it.isPlanned} }
 
     suspend fun buildCsvString(): String = (listOf(FIRST_LINE_V4)  +
         allFlightsAsync.await().map{ it.toCsvV4() }).joinToString("\n")
@@ -46,8 +47,8 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
                 flightID.toString(),
                 orig,
                 dest,
-                tOut().toString(),// from original Flight
-                tIn().toString(), // from original Flight
+                Instant.ofEpochSecond(timeOut).toString(),// from original Flight
+                Instant.ofEpochSecond(timeIn).toString(), // from original Flight
                 correctedTotalTime.toString(),
                 nightTime.toString(),
                 ifrTime.toString(),
@@ -76,8 +77,8 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
                 augmentedCrew.toString(),
                 // DELETEFLAG,
                 // timeStamp,
-                signature
-            ).joinToString(";") { it.replace(';', ',') }
+                Base64.encodeToString(signature.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
+            ).joinToString(";") { it.replace(';', '~') }
 
         }
     }
@@ -100,14 +101,16 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
          */
 
         fun csvToFlights(csvBasicFlights: List<String>): List<Flight> = when (csvBasicFlights.first()){
-            FIRST_LINE_V4 -> csvBasicFlights.drop(1).map{Flight(csvFlightToBasicFlightv4(it))}
+            FIRST_LINE_V4 -> csvBasicFlights.drop(1).map{Flight(csvFlightToBasicFlightv4(it.also{
+            }))}
             else -> throw (IllegalArgumentException("Not a supported CSV format"))
         }
 
 
 
 
-        private fun csvFlightToBasicFlightv4(csvFlight: String) = csvFlight.split(';').let {v ->
+        private fun csvFlightToBasicFlightv4(csvFlight: String) = csvFlight.also{Log.d("XXXXXXXXXXXX", it)}.split(';').map{ it.replace('~', ';')}.let { v->
+            Log.d("YYYYYYYYYYYYYYYY", "$v")
             require(BasicFlight.VERSION.version == 4)
             BasicFlight(
                 flightID = -1,
@@ -143,7 +146,7 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
                 augmentedCrew = v[29].toInt(),
                 DELETEFLAG = false,
                 timeStamp = TimestampMaker.nowForSycPurposes,
-                signature = v[30],
+                signature = Base64.decode(v[30], Base64.NO_WRAP).toString(Charsets.UTF_8)
             )
         }
     }

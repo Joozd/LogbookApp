@@ -17,18 +17,32 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.interfaces
+package nl.joozd.logbookapp.data.parseSharedFiles.csvParser
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import java.io.InputStream
 
-interface ImportedLogbook {
-    val validImportedLogbook: Boolean
+class JoozdlogV4Parser(private val lines: List<String>): ImportedLogbook {
+    override val validImportedLogbook: Boolean
+        get() = lines.isNotEmpty() && lines.first() == FlightsRepositoryExporter.FIRST_LINE_V4
 
     /**
      * List of flights
      * null means a line that failed to import but didn't break the other flights
      */
-    val flights: List<Flight?>?
+    override val flights: List<Flight?>?
+        get() = FlightsRepositoryExporter.csvToFlights(lines)
 
-    val errorLines: List<String>?
+    //TODO not fixing corrupt files atm
+    override val errorLines: List<String>? = null
+
+    companion object{
+        suspend fun ofInputStream(inputstream: InputStream) = withContext(Dispatchers.IO) {
+            JoozdlogV4Parser(inputstream.reader().readLines())
+        }
+    }
 }

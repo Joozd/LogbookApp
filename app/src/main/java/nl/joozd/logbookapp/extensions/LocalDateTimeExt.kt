@@ -27,8 +27,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 private val dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
-private val dateFormatterFourDigitYear = DateTimeFormatter.ofPattern("dd-MM-yy")
-private val dateFormatterForImport = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+private val dateFormatterTwoDigitYear = DateTimeFormatter.ofPattern("dd-MM-yy")
+private val dateFormatterForFiles = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 private val dateFormatterLocalized = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
 private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 private val timeFormatterLocalized = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
@@ -38,8 +38,9 @@ private val dateAndTimeFormatter =  DateTimeFormatter.ofPattern("dd MMM yyyy HH:
 
 fun LocalDate.toDateString() = this.format(dateFormatter)
 fun LocalDate.toDateStringLocalized() = this.format(dateFormatterLocalized)
+fun LocalDate.toDateStringForFiles() = this.format(dateFormatterForFiles)
 fun LocalDateTime.toDateString() = this.format(dateFormatter)
-fun LocalDateTime.toLogbookDate() = this.format(dateFormatterFourDigitYear)
+fun LocalDateTime.toLogbookDate() = this.format(dateFormatterTwoDigitYear)
 fun LocalDateTime.toDateStringLocalized() = this.format(dateFormatterLocalized)
 fun LocalDateTime.toTimeString() = this.format(timeFormatter)
 fun LocalDateTime.toTimeStringLocalized() = this.format(timeFormatterLocalized)

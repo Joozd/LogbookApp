@@ -24,6 +24,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -38,12 +39,15 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.CalendarScraper
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.extensions.toDateStringForFiles
 import nl.joozd.logbookapp.extensions.toDateStringLocalized
 import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -69,6 +73,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _settingsUseIataSelectorTextResource = MutableLiveData<Int>()
     private val _foundCalendars = MutableLiveData<List<JoozdCalendar>>()
     private val _pickedCalendar = MutableLiveData<JoozdCalendar>()
+
+    private val _uriToShare = MutableLiveData<Uri>()
 
     // This is not used at the moment but it's there when we need it. Just set [settingsCalendarTypeSpinner] visibility to VISIBLE in SettingsActivity
     // search for tag #SETTHISIFNEEDED1
@@ -157,6 +163,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     val selectedCalendar: LiveData<JoozdCalendar>
         get() = _pickedCalendar
 
+    val csvUriToShare: LiveData<Uri>
+        get() = _uriToShare
+
     val username: LiveData<String?>
         get() = _username
 
@@ -175,6 +184,12 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     /*********************************************************************************************
      * Callable functions
      *********************************************************************************************/
+
+    fun backUpNow() = viewModelScope.launch {
+        val dateString = LocalDate.now().toDateStringForFiles()
+        //TODO make some kind of "working" animation on button
+        _uriToShare.value = JoozdlogExport.shareCsvExport("joozdlog_backup_$dateString")
+    }
 
     fun setUseIataAirports(useIata: Boolean) {
         Preferences.useIataAirports = useIata

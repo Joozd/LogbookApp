@@ -105,13 +105,12 @@ class MakePdfActivity : JoozdlogActivity() {
 
     /**
      * createFile starts a Create File dialog for result.
-     * This version is for use on devices lower than API 26
      */
     private fun createFile() {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "application/pdf"
-            putExtra(Intent.EXTRA_TITLE, "invoice.pdf")
+            putExtra(Intent.EXTRA_TITLE, "logbook.pdf")
         }
         startActivityForResult(intent, CREATE_FILE)
     }

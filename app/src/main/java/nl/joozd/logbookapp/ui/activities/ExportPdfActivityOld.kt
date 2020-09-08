@@ -33,6 +33,7 @@ import nl.joozd.logbookapp.data.miscClasses.TotalsForward
 import nl.joozd.logbookapp.data.room.Repository
 import java.util.concurrent.CountDownLatch
 
+@Deprecated("Deprecated")
 class ExportPdfActivityOld : AppCompatActivity(), CoroutineScope by MainScope() {
 /*
     private val repository = Repository.getInstance()

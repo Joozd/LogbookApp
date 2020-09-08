@@ -185,6 +185,8 @@ class SettingsActivity : JoozdlogActivity() {
 
             backupIntervalButton.setOnClickListener { showBackupIntervalNumberPicker() }
 
+            backupNowButton.setOnClickListener{ viewModel.backUpNow() }
+
             augmentedTakeoffTimeHintButton.setOnClickListener {
                 showAugmentedStartLandingTimesHint()
             }
@@ -212,6 +214,17 @@ class SettingsActivity : JoozdlogActivity() {
             /****************************************************************************************
              * Other observers
              ****************************************************************************************/
+
+            viewModel.csvUriToShare.observe(activity){
+                startActivity(Intent.createChooser(Intent().apply{
+                    action = Intent.ACTION_SEND
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    setDataAndType(it, CSV_MIME_TYPE)
+                    putExtra(Intent.EXTRA_STREAM, it)
+                }, "Gooi maar ergens heen aub"))
+            }
+
+
 
             viewModel.settingsUseIataSelectorTextResource.observe(activity) {
                 settingsUseIataSelector.text = getString(it)
@@ -453,5 +466,6 @@ class SettingsActivity : JoozdlogActivity() {
     companion object{
         private const val CALENDAR_PERMISSION_REQUEST_CODE = 1
         private const val CALENDAR_PERMISSION_TEMP_CODE = 2
+        private const val CSV_MIME_TYPE = "text/csv"
     }
 }

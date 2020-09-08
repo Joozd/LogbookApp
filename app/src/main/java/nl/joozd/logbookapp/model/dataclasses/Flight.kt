@@ -75,26 +75,7 @@ data class Flight(
     val DELETEFLAG: Boolean = false,
     val timeStamp: Long = -1,                               // timestamp should be moment of creation / last change, or when incoming sync: timestamp of sync
     val signature: String = ""
-    // val signed: Boolean = false
-
-
-
 ){
-    companion object{
-        /*
-        //TODO remove this if it doesnt cause problems
-        private fun correctDuration(duration: Duration, crew: Crew): Duration{
-            var flownMinutes: Long = 0
-            if (crew.didLanding) flownMinutes += crew.takeoffLandingTimes
-            if (crew.didTakeoff) flownMinutes += crew.takeoffLandingTimes
-            flownMinutes += ((duration.toMinutes()-2*crew.takeoffLandingTimes) / crew.crewSize) *2
-            return Duration.ofMinutes(flownMinutes)
-        }
-        */
-
-        fun createEmpty() = Flight(-1)
-    }
-
     //can be constructed as (Flight(BasicFlight))
     constructor(b: BasicFlight): this(b.flightID, b.orig, b.dest, b.timeOut, b.timeIn, b.correctedTotalTime, b.nightTime, b.ifrTime, b.simTime, b.aircraft, b.registration, b.name, b.name2, b.takeOffDay, b.takeOffNight, b.landingDay, b.landingNight, b.autoLand, b.flightNumber, b.remarks, b.isPIC, b.isPICUS, b.isCoPilot, b.isDual, b.isInstructor, b.isSim, b.isPF, b.isPlanned, b.changed, b.autoFill, b.augmentedCrew, b.DELETEFLAG, b.timeStamp, b.signature)
 
@@ -216,4 +197,10 @@ data class Flight(
     fun durationString() = FlightDataPresentationFunctions.minutesToHoursAndMinutesString(duration())
 
     // override fun toString(): String = "Flight $flightID: orig: $orig, $dest: dest, $flightNumber out: ${tOut()}, in: ${tIn()} "
+
+
+    companion object{
+
+        fun createEmpty() = Flight(-1)
+    }
 }

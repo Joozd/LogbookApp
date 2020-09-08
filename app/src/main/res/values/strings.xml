@@ -242,6 +242,7 @@
     <string name="not_signed_in">Not signed in</string>
     <string name="standard_augmented_time"><![CDATA[<b>Augmented Crew takeoff/landing time</b><br><small>%1$s minutes</small>&nbsp;]]></string>
     <string name="backup_interval_time"><![CDATA[<b>Remind me to make a backup every</b><br><small>%1$s</small>&nbsp;]]></string>
+    <string name="backup_now">Backup now</string>
     <string name="pick_backup_interval">Pick backup interval</string>
     <string name="augmented_crew_time_explanation">In case of an augmented crew (3 or more pilots), Joozdlog calculates the time that can be logged for copilots by subtracting this amount of time for each takeoff and landing, allocating the remaining time evenly over the pilots, then adds this time again for every takeoff/landing performed in the pilot\'s seat.</string>
 

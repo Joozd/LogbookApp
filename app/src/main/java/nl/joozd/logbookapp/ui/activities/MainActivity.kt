@@ -102,14 +102,7 @@ class MainActivity : JoozdlogActivity() {
             true
         }
         R.id.menu_do_something -> {
-            supportFragmentManager.commit {
-                add(R.id.mainActivityLayout, WaitingForSomethingDialog().apply{
-                    description = "test"
-                    setCancel("Is goed zo hoor"){
-                        done()
-                    }
-                })
-            }
+            viewModel.menuSelectedDoSomething()
 
             true
 

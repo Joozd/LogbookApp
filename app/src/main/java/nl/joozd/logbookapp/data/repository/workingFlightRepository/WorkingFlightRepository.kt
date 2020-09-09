@@ -50,114 +50,115 @@ import java.time.Instant
 
 class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope by MainScope() {
 
+    // This does the operations on all flights. used for saving and loading workingFlight
+    private val flightRepository = FlightRepository.getInstance()
+
+
     /********************************************************************************************
      * Private parts
      ********************************************************************************************/
 
-    private val flightRepository = FlightRepository.getInstance()
-    private val airportRepository = AirportRepository.getInstance()
+    /********************************************************************************************
+     * Private variables and livedata's
+     ********************************************************************************************/
 
-    private val origDestAircraftWorker = OrigDestAircraftWorker()
 
+    /**
+     * MutableLiveData's that are made public via an immutable getter
+     */
+    // This holds the actual working flight
+    private val _workingFlight = MediatorLiveData<Flight>()
+
+    // true if a flight is open in EditFlightFragment. Fragment takes care of setting via setOpenInEditor()
     private val _isOpenInEditor = MutableLiveData<Boolean>()
+
+    // Triggers for use in places that want to track opening and closing of WorkingFlight
     private val _openInEditorEventTrigger
         get() = distinctUntilChanged(_isOpenInEditor)
-    private val _flightIsOpen = MutableLiveData<FeedbackEvent>()
-    private val _feedbackEvent = MutableLiveData<FeedbackEvent>()
+    private val _flightIsOpen = MediatorLiveData<FeedbackEvent>()
 
+    /**
+     * Internal liveData
+     */
+    // Helper variable for setting
+    private val externallyUpdatedFlight = MutableLiveData<Flight>()
+
+    // Helper class for async parsing of airports and aircraft
+    private val origDestAircraftWorker = OrigDestAircraftWorker()
+
+    // true if flight seems to be IFR
+    private var thisFlightIsIFR = MutableLiveData<Boolean>()
+
+
+
+
+    // private val _feedbackEvent = MutableLiveData<FeedbackEvent>()
+
+    private var backupFlight: Flight? = null
     private var saving: Boolean = false
     private var savedAndClosed: Boolean = false
 
-    private var thisFlightIsIFR: Boolean? = null
+
 
     /**
-     * _workingFlight with it's sources:
+     * _workingFlight it's sources:
      */
-    private val updateWorkingFlightLock = Mutex()
-    private val _workingFlight = MediatorLiveData<Flight>()
     init{
-        _workingFlight.addSource(origin) {
-            if (it?.ident != flight?.orig)
-                _workingFlight.value = flight?.autoValues()
-        }
-
-        _workingFlight.addSource(destination) {
-            if (it?.ident != flight?.dest)
-                _workingFlight.value = flight?.autoValues()
-        }
-
-
-
-        /*
-        /**
-         * Updates IFR time if aircraft type changed
-         * IF new type is IFR, it sets ifrTime to 0 and calls autovalues
-         * if new type is VRF it sets ifrTime to -1
-         * if new type is unknown, does nothing
-         * Checks if changed aircraft type is always flown as IFR or VFR, if not the same it will
-         * recalculate IFR times and update _workingFlight
-         */
-        _workingFlight.addSource(aircraft) {
-            val workingFlightSnapshot = flight
-            var ifrTime: Int? = null
-            var needsAutoTimes = false
-
-            if (it?.type?.shortName != flight?.aircraftType && it?.type != null) {
-                launch {
-                    do {
-                        when (thisAircraftIsIFR(it.type.shortName)) {
-                            true -> flight?.let { f ->
-                                if (f.ifrTime < 0)
-                                    ifrTime = 0
-                                needsAutoTimes = true
-                            } // else there is no change
-                            false -> {
-                                ifrTime = -1
-                                needsAutoTimes = false
-                            } // -1 IFR Time means VFR
-                            null -> ifrTime = null // do nothing
-                        }
-                    } while (workingFlightSnapshot != flight) // if flight changed while doing this, do it again
-                    flight?.let{f ->
-                        ifrTime?.let {time ->
-                            _workingFlight.value = if (needsAutoTimes) f.copy(ifrTime = time).autoValues() else f.copy(ifrTime = time)
-                        }
-                    }
+        _workingFlight.addSource(origin){ airport ->
+            flight?.let { f ->
+                if (airport.ident != f.orig) {
+                    _workingFlight.value = f.copy(orig = airport.ident).autoValues()
                 }
             }
         }
-
-         */
+        _workingFlight.addSource(destination){ airport ->
+            flight?.let { f ->
+                if (airport.ident != f.dest)
+                    _workingFlight.value = f.copy(dest = airport.ident).autoValues()
+            }
+        }
+        _workingFlight.addSource(aircraft){ aircraft ->
+            flight?.let { f ->
+                _workingFlight.value = f.copy(aircraftType = aircraft.type?.shortName ?: "").autoValues()
+            }
+        }
+        _workingFlight.addSource(externallyUpdatedFlight){ newFlight ->
+            _workingFlight.value = newFlight.autoValues()
+            origDestAircraftWorker.flight = newFlight
+            checkIfFlightShouldBeIfr()
+        }
+        _workingFlight.addSource(thisFlightIsIFR){isIFR ->
+            flight?.let{
+                _workingFlight.value = it.autoValues()
+            }
+        }
     }
 
 
-    private var backupFlight: Flight? = null
+    /**
+     *
+     */
 
-
-
-
-    init{
-        _openInEditorEventTrigger.observeForever {
+    init {
+        _flightIsOpen.addSource(_openInEditorEventTrigger){
             _flightIsOpen.value =
                 FeedbackEvent(if (it) FlightEditorOpenOrClosed.OPENED else FlightEditorOpenOrClosed.CLOSED)
         }
     }
 
+    /**
+     * Initially set workingFlight
+     * - set flags to false
+     * - set backup to initial value
+     */
     private fun initialSetWorkingFlight(flight: Flight) {
-        thisFlightIsIFR = null
+        updateWorkingFlight(flight)
+        checkIfFlightShouldBeIfr()
         saving = false
         savedAndClosed = false
-        updateWorkingFlight(flight)
         backupFlight = flight
-        launch{
-            checkIfFlightShouldBeIfr()
-            updateWorkingFlightLock.withLock {
-                workingFlight.value?.let {
-
-                }
-            }
-        }
     }
+
 
     /*************************
      * Auto fill logic:
@@ -165,45 +166,73 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
 
     /**
      * Applies all automatically calculated values to a flight
+     * Also saves flight if [saving] is true
      */
-    private fun Flight.autoValues(): Flight = if (!autoFill) this.checkIfCopilot() else {
-        this
-            .withTakeoffLandings(if (isPF)1 else 0, origin.value, destination.value)
-            .updateNightTime(_workingFlight.value)
-            .updateIFRTime()
-            .checkIfCopilot()
-        //TODO calculate IFR time if needed
+    private fun Flight.autoValues(): Flight {
+        return (if (!autoFill) this.checkIfCopilot() else {
+            this
+                .withTakeoffLandings(if (isPF) 1 else 0, origin.value, destination.value)
+                .updateNightTime(_workingFlight.value)
+                .updateIFRTime()
+                .updateMultiPilotTime()
+                .checkIfCopilot()
+
+            //TODO calculate IFR time if needed
+        }).also{
+            if (saving) saveWorkingFlight()
+        }
     }
 
     /**
      * Run this after making sure aircraft type is updated
      */
     private fun Flight.checkIfCopilot(): Flight =
-         this.copy(isCoPilot = (aircraft.value?.type?.multiPilot == true && !isPIC))
+        this.copy(isCoPilot = (aircraft.value?.type?.multiPilot == true && !isPIC))
 
 
     /**
      * this will return a new flight with updated nighttime, corrected for augmented crew (same ratio)
      */
 
-    private fun Flight.updateNightTime(old: Flight?): Flight{
+    private fun Flight.updateNightTime(old: Flight?): Flight {
         return if ((old?.orig != orig || old.dest != dest || old.timeIn != timeIn || old.timeOut != timeOut) && autoFill) {
             val twilightCalculator = TwilightCalculator(timeOut)
-            val totalNightTime = twilightCalculator.minutesOfNight(this@WorkingFlightRepository.origin.value,this@WorkingFlightRepository.destination.value, timeOut, timeIn)
+            val totalNightTime = twilightCalculator.minutesOfNight(
+                this@WorkingFlightRepository.origin.value,
+                this@WorkingFlightRepository.destination.value,
+                timeOut,
+                timeIn
+            )
             val correctedNightTime = crew?.getLogTime(totalNightTime, isPIC) ?: totalNightTime
             this.copy(nightTime = correctedNightTime)
         } else this
     }
 
     private fun Flight.updateIFRTime(): Flight {
-        val ifrTimeToSet: Int = if (thisFlightIsIFR == true) duration() else 0
+        val ifrTimeToSet: Int = if (thisFlightIsIFR.value == true) duration() else 0
         return copy(ifrTime = ifrTimeToSet)
     }
 
-    private fun checkIfFlightShouldBeIfr(){
+    private fun Flight.updateMultiPilotTime(): Flight{
+        return if (aircraft.value?.type?.multiPilot == true) {
+            copy(
+                multiPilotTime = duration(),
+                isCoPilot = !(isPIC || isPICUS),
+            ).also {
+                Log.d("YEEEEEHAW", "Je moeder 123 mpTime: $multiPilotTime \n $this")
+            }
+        } else this.copy(multiPilotTime = 0, isCoPilot = false).also {
+            Log.d("XXXXXXXXXXXX", "MULTIPILOT IS FALSEEEEEE1")
+        }
+    }
+
+    private fun checkIfFlightShouldBeIfr() {
         val mostRecentFlight = flightRepository.getMostRecentFlightAsync()
-        launch{
-            thisFlightIsIFR = mostRecentFlight.await()?.ifrTime ?: 0 > 0
+        launch {
+            flight?.let{
+                thisFlightIsIFR.value =if (it.duration() > 0) it.ifrTime > 0 else mostRecentFlight.await()?.ifrTime ?: 0 > 0
+            } ?: Log.w("WorkingFlightRepository", "Trying to check IFR status on a null flight")
+
         }
     }
 
@@ -239,16 +268,22 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      * @return time to disable calendarSync to if conflict, 0 if not
      *
      */
-    fun checkConflictingWithCalendarSync(): Long{
-        return flight?.let{
+    fun checkConflictingWithCalendarSync(): Long {
+        return flight?.let {
             when {
                 !Preferences.getFlightsFromCalendar -> 0L                                            // not using calendar sync
                 Preferences.calendarDisabledUntil >= backupFlight?.timeIn ?: 0 -> 0L                 // not using calendar sync for flight being edited
                 !it.prepareForSave().isPlanned -> 0L                                                 // not planned, no problem
                 backupFlight?.isSamedPlannedFlightAs(it.prepareForSave()) == true -> 0L              // editing a planned flight in a way that doesn't break sync
-                backupFlight?.prepareForSave()?.timeOut ?: 0 < maxOf(Preferences.calendarDisabledUntil, Instant.now().epochSecond) -> 0L       // editing a flight that starts before calendar sync cutoff
-                backupFlight == null && it.timeOut > Instant.now().epochSecond -> it.timeIn+1L       // If editing a new flight that starts in the future, 1 second after end of that flight
-                else -> maxOf (backupFlight?.timeIn ?: 0, it.timeIn) + 1L                         // In other cases, i second after latest timeIn of planned flight and workingFlight
+                backupFlight?.prepareForSave()?.timeOut ?: 0 < maxOf(
+                    Preferences.calendarDisabledUntil,
+                    Instant.now().epochSecond
+                ) -> 0L       // editing a flight that starts before calendar sync cutoff
+                backupFlight == null && it.timeOut > Instant.now().epochSecond -> it.timeIn + 1L       // If editing a new flight that starts in the future, 1 second after end of that flight
+                else -> maxOf(
+                    backupFlight?.timeIn ?: 0,
+                    it.timeIn
+                ) + 1L                         // In other cases, i second after latest timeIn of planned flight and workingFlight
             }
         } ?: 0
     }
@@ -267,16 +302,16 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
 
 
     val origInDatabase: LiveData<Boolean>
-        get() = Transformations.map (origDestAircraftWorker.origAirport) {
-            (it != null).also{go ->
+        get() = Transformations.map(origDestAircraftWorker.origAirport) {
+            (it != null).also { go ->
                 if (go && saving)
                     saveWorkingFlight(flight?.autoValues())
             }
         }
 
     val destInDatabase: LiveData<Boolean>
-        get() = Transformations.map (origDestAircraftWorker.destAirport) {
-            (it != null).also{go ->
+        get() = Transformations.map(origDestAircraftWorker.destAirport) {
+            (it != null).also { go ->
                 if (go && saving)
                     saveWorkingFlight(flight?.autoValues())
             }
@@ -286,8 +321,8 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
         get() = origDestAircraftWorker.origAirport
 
     val destination: LiveData<Airport>
-        get() = Transformations.map(origDestAircraftWorker.destAirport){
-            it.also{
+        get() = Transformations.map(origDestAircraftWorker.destAirport) {
+            it.also {
                 if (it != null && saving)
                     saveWorkingFlight(flight?.autoValues())
             }
@@ -296,26 +331,19 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     val aircraft: LiveData<Aircraft>
         get() = origDestAircraftWorker.aircraft
 
-    var crew: Crew?
-    get() = flight?.let { Crew.of(it.augmentedCrew) }
-    set(crew){
-        if (crew != null && flight != null)
-            updateWorkingFlight(flight!!.copy(augmentedCrew = crew.toInt()))
-    }
 
-    var isIfr: Boolean
-        get() = thisFlightIsIFR ?: (flight?.ifrTime ?: -1 > 0)
-        set(isIfr){
-            thisFlightIsIFR = isIfr
-            launch {
-                updateWorkingFlightLock.withLock {
-                    _workingFlight.value?.let {
-                        _workingFlight.value = it.updateIFRTime()
-                    }
-                }
-            }
+    var crew: Crew?
+        get() = flight?.let { Crew.of(it.augmentedCrew) }
+        set(crew) {
+            if (crew != null && flight != null)
+                updateWorkingFlight(flight!!.copy(augmentedCrew = crew.toInt()))
         }
 
+    var isIfr: Boolean
+        get() = thisFlightIsIFR.value ?: (flight?.ifrTime ?: -1 > 0)
+        set(isIfr) {
+            thisFlightIsIFR.value = isIfr
+        }
 
 
     /*********************************************************************************************
@@ -326,23 +354,19 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      * Updates working flight.
      */
     fun updateWorkingFlight(flight: Flight) {
-        origDestAircraftWorker.flight = flight
-        launch{
-            updateWorkingFlightLock.withLock {
-                _workingFlight.value = flight.autoValues()
-            }
-            if (saving) saveWorkingFlight()
-        }
+        externallyUpdatedFlight.value = flight
     }
 
     /**
      * Saves working flight. Flight to save can be overridden but only private
      */
-    fun saveWorkingFlight() =
-        _workingFlight.value?.let {
-            saving = true
-            flightRepository.save(it.prepareForSave())
-        }
+    fun saveWorkingFlight() = launch {
+            _workingFlight.value?.let {
+                saving = true
+                flightRepository.save(it.prepareForSave())
+            }
+    }
+
     private fun saveWorkingFlight(override: Flight?) =
         override ?: _workingFlight.value?.let {
             saving = true
@@ -351,12 +375,14 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
 
     fun undoSaveWorkingFlight() = backupFlight?.let {
         saving = false
-        flightRepository.save(it) }
+        flightRepository.save(it)
+    }
         ?: workingFlight.value?.let { flightRepository.delete(it) } // if backupFlight is not set, undo means deleting new flight
 
 
-    fun notifyFinalSave(){
+    fun notifyFinalSave() {
         savedAndClosed = true
+        Log.d("FINAL", "$flight")
     }
 
     /**
@@ -367,8 +393,12 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
             val highestID = flightRepository.getHighestIdAsync()
             val mostRecentFlight = flightRepository.getMostRecentFlightAsync()
             saving = false
-            val done = async(Dispatchers.Main) {
-                updateWorkingFlight(reverseFlight(mostRecentFlight.await().also{Log.d("MostRecentFlight", "$it")} ?: Flight.createEmpty(), highestID.await() + 1))
+            val done = async {
+                updateWorkingFlight(
+                    reverseFlight(
+                        mostRecentFlight.await().also { Log.d("MostRecentFlight", "$it") }
+                            ?: Flight.createEmpty(),
+                        highestID.await() + 1))
             }
             backupFlight = null
             done.await()
@@ -378,11 +408,11 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     /**
      * Fetch a flight from FlightRepository and set it as working flight. Returns that flight if successful
      */
-    suspend fun fetchFlightByIdToWorkingFlight(id: Int): Flight?{
+    suspend fun fetchFlightByIdToWorkingFlight(id: Int): Flight? {
         val workingFlight = withContext(dispatcher) {
             flightRepository.fetchFlightByID(id)
         } ?: return null
-        return workingFlight.also{
+        return workingFlight.also {
             withContext(Dispatchers.Main) { initialSetWorkingFlight(it) }
         }
     }
@@ -390,27 +420,26 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     /**
      * Updates working flight with same aircraft, name, name2 and isPic as last completed flight
      */
-    fun updateWorkingFlightWithMostRecentData(){
-        launch(dispatcher) {
+    fun updateWorkingFlightWithMostRecentData() {
+        launch {
             flightRepository.getMostRecentFlightAsync().await()?.let { f ->
-                updateWorkingFlightLock.withLock {
                     _workingFlight.value?.let {
                         val aircraft = it.aircraftType.nullIfEmpty() ?: f.aircraftType
                         val registration = it.registration.nullIfEmpty() ?: f.registration
                         val name = it.name.nullIfEmpty() ?: f.name
                         val name2 = it.name2.nullIfEmpty() ?: f.name2
                         val isPIC = f.isPIC
-                        launch(Dispatchers.Main) {
-                            _workingFlight.value = it.copy(
+
+                        updateWorkingFlight(
+                            it.copy(
                                 aircraftType = aircraft,
                                 registration = registration,
                                 name = name,
                                 name2 = name2,
                                 isPIC = isPIC
                             )
-                        }
+                        )
                     }
-                }
             }
         }
     }
@@ -422,19 +451,20 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     val flightOpenEvents: LiveData<FeedbackEvent>
         get() = _flightIsOpen
 
-    fun setOpenInEditor(isOpen: Boolean){
+    fun setOpenInEditor(isOpen: Boolean) {
         _isOpenInEditor.value = isOpen
     }
 
     val flightIsChanged: Boolean
         get() = (flight != backupFlight) && savedAndClosed
 
+
     /*********************************************************************************************
      * Companion object
      *********************************************************************************************/
 
 
-    companion object{
+    companion object {
         private var singletonInstance: WorkingFlightRepository? = null
         fun getInstance(): WorkingFlightRepository = synchronized(this) {
             singletonInstance
@@ -445,5 +475,9 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
                 }
         }
     }
-
 }
+
+
+
+
+

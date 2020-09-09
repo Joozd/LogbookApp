@@ -176,7 +176,11 @@ replaced with getter
 
     private fun saveAircraftRegistrationWithTypeData(dataToSave: AircraftRegistrationWithTypeData) = launch(dispatcher + NonCancellable) {
         registrationDao.save(dataToSave.apply{timestamp = TimestampMaker.nowForSycPurposes})
+        launch{
+            getAircraftTypes(true)
+        }
     }
+
     private fun saveAircraftRegistrationWithTypeData(dataToSave: List<AircraftRegistrationWithTypeData>) = launch(dispatcher + NonCancellable) {
         registrationDao.save( *(dataToSave.map{it.apply {timestamp = TimestampMaker.nowForSycPurposes}}.toTypedArray()))
     }
@@ -400,7 +404,7 @@ replaced with getter
             }
 
         } ?: AircraftRegistrationWithTypeData(aircraftToSave.registration, aircraftToSave.type.name)
-
+        //TODO write to cache and to livedata
         saveAircraftRegistrationWithTypeData(newAcrwt)
         true
     }

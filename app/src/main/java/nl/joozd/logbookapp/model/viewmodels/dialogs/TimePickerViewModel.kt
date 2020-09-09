@@ -111,9 +111,13 @@ class TimePickerViewModel: JoozdlogDialogViewModel(){
         }
     }
 
+    /**
+     * If autovalues are set, workingFlightRepository takes care of this.
+     * Otherwise, just set it.
+     */
     fun toggleCopilot(){
         workingFlight?.let{ f ->
-            workingFlight = f.copy(isCoPilot = !f.isCoPilot)
+            workingFlight = if (f.autoFill) f.copy(isPIC = !f.isPIC) else f.copy(isCoPilot = !f.isCoPilot)
         }
     }
 

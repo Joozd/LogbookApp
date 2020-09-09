@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.data.repository.workingFlightRepository
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
@@ -56,7 +57,17 @@ class OrigDestAircraftWorker: CoroutineScope {
     //holds last known dest
     private val _destAirport = MutableLiveData<Airport>()
     //holds last known Aircraft
-    private val _aircraft = MutableLiveData<Aircraft>()
+    private val _aircraft = MediatorLiveData<Aircraft>()
+    init{
+        /**
+         * If aircraftDatabase gets updated, update aircraft
+         */
+        _aircraft.addSource(aircraftRepository.liveAircraftTypes){
+            _aircraft.value?.let{
+                setAircraft(it.registration)
+            }
+        }
+    }
 
     private fun setOrigAirport(ident: String?): Job {
         return when {
@@ -95,11 +106,13 @@ class OrigDestAircraftWorker: CoroutineScope {
         }
         _aircraft.value?.registration == registration -> Job() //  empty job
         else -> launch {
-            val result = aircraftRepository.getAircraftFromRegistration(registration)
+            val result = aircraftRepository.getAircraftFromRegistration(registration) ?: Aircraft(registration)
             ensureActive()
             _aircraft.value = result
         }
     }
+
+
 
     /**********************************************************************************************
      * Public parts

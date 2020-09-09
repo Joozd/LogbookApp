@@ -104,7 +104,7 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
                     //this call increases pagenumber after using it
                     finishPage(startPage(PdfDocument.PageInfo.Builder(PdfLogbookMakerValues.A4_LENGTH, PdfLogbookMakerValues.A4_WIDTH, pageNumber++).create()).apply{
                         PdfLogbookBuilder.drawLeftPage(canvas)
-                        PdfLogbookBuilder.fillLeftPage(canvas, currentFlights, totalsForward, aircraftMap)
+                        PdfLogbookBuilder.fillLeftPage(canvas, currentFlights, totalsForward)
                     })
 
                     finishPage(startPage(PdfDocument.PageInfo.Builder(PdfLogbookMakerValues.A4_LENGTH, PdfLogbookMakerValues.A4_WIDTH, pageNumber++).create()).apply{ // left page

@@ -37,6 +37,7 @@ import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
+import nl.joozd.logbookapp.utils.TimestampMaker
 import java.time.Instant
 import java.util.*
 
@@ -195,32 +196,26 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     **********************************************************************************************/
 
     fun menuSelectedDoSomething(){
-        /*
-        // Preferences.newUserActivityFinished= false
-        viewModelScope.launch(Dispatchers.Default) {
-            val allFlights = flightRepository.getAllFlights().map{
-                if (it.isPF){
-                    val twilightCalculator = TwilightCalculator(it.timeOut)
-                    val orig = airportRepository.getAirportOnce(it.orig)
-                    val dest = airportRepository.getAirportOnce(it.dest)
-
-                    val toDay = if ( orig == null || twilightCalculator.itIsDayAt(orig, it.tOut().toLocalTime())) 1 else 0
-                    val toNight = 1-toDay
-
-                    val ldgDay = if (dest == null || twilightCalculator.itIsDayAt(dest, it.tOut().toLocalTime())) 1 else 0
-                    val ldgNight = 1 - ldgDay
-
-                    it.copy(autoFill = true, takeOffDay = toDay, takeOffNight = toNight, landingDay = ldgDay, landingNight = ldgNight, timeStamp = TimestampMaker.nowForSycPurposes)
-                }
-                else it
+        /**
+         * Current function: Check all flights for multiPilot time
+         */
+        viewModelScope.launch{
+            val typesMap = aircraftRepository.getAircraftTypesMapShortNameAsync().await()
+            val timeStamp = TimestampMaker.nowForSycPurposes
+            val allFlights: List<Flight> = flightRepository.getAllFlights().mapIndexed{i, f ->
+                if (i%250 == 0) Log.d("menuSelectedDoSomething", "Fixing flight $i")
+                typesMap[f.aircraftType]?.let{ac ->
+                    if (ac.multiPilot)
+                        f.copy(multiPilotTime = f.duration(), timeStamp = timeStamp)
+                    else f
+                } ?: f
+            }.also {
+                Log.d("menuSelectedDoSomething", "Done. Fixed ${it.filter{it.timeStamp == timeStamp}.size } / ${it.size} flights")
             }
-            launch(Dispatchers.Main) { flightRepository.save(allFlights) }
+            flightRepository.save(allFlights)
             feedback(MainActivityEvents.DONE)
 
-
         }
-
-         */
     }
 
     fun menuSelectedRebuild(){

@@ -578,7 +578,7 @@ object PdfLogbookBuilder {
      * @param aircraftMap: Map of Aircraft Identification strings and aircraft (for determining multipilot time)
      * @see drawLeftPage
      */
-    fun fillLeftPage(canvas: Canvas, flights: List<Flight>, totalsForward: TotalsForward, aircraftMap: Map<String, AircraftType>){
+    fun fillLeftPage(canvas: Canvas, flights: List<Flight>, totalsForward: TotalsForward){
         val oldTotals = totalsForward.copy()
         val currentTotals = TotalsForward()
         var index=1
@@ -625,23 +625,24 @@ object PdfLogbookBuilder {
                     PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
                     Paints.smallText
                 )
-                // TODO Find out if SE or ME
-                if (0 > 0) {      // if aircraft is known and MP
+
+                if(f.multiPilotTime > 0) {
                     canvas.drawText(
-                        (f.duration() / 60).toString(),
+                        (f.multiPilotTime / 60).toString(),
                         PdfLogbookMakerValues.MP_MINS_OFFSET - 6,
                         PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
                         Paints.smallTextRight
                     )
                     canvas.drawText(
-                        (f.duration() % 60).toString().padStart(2, '0'),
+                        (f.multiPilotTime % 60).toString().padStart(2, '0'),
                         PdfLogbookMakerValues.MP_MINS_OFFSET + 6,
                         PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
                         Paints.smallText
                     )
-                    totalsForward.multiPilot += f.duration()
-                    currentTotals.multiPilot += f.duration()
+                    totalsForward.multiPilot += f.multiPilotTime
+                    currentTotals.multiPilot += f.multiPilotTime
                 }
+
 
                 canvas.drawText(
                     (f.duration() / 60).toString(),
@@ -663,22 +664,28 @@ object PdfLogbookBuilder {
                     PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
                     Paints.smallText
                 )
-                canvas.drawText(
-                    f.landingDay.toString(),
-                    (PdfLogbookMakerValues.LDG_DAY_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_OFFSET) / 2,
-                    PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
-                    Paints.smallTextCentered
-                )
-                totalsForward.landingDay += f.landingDay
-                currentTotals.landingDay += f.landingDay
 
-                canvas.drawText(
-                    f.landingNight.toString(),
-                    (PdfLogbookMakerValues.LDG_NIGHT_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_LEFT_PAGE) / 2,
-                    PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
-                    Paints.smallTextCentered)
-                totalsForward.landingNight += f.landingNight
-                currentTotals.landingNight += f.landingNight
+                if (f.landingDay != 0) {
+                    canvas.drawText(
+                        f.landingDay.toString(),
+                        (PdfLogbookMakerValues.LDG_DAY_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_OFFSET) / 2,
+                        PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
+                        Paints.smallTextCentered
+                    )
+                    totalsForward.landingDay += f.landingDay
+                    currentTotals.landingDay += f.landingDay
+                }
+
+                if (f.landingDay != 0) {
+                    canvas.drawText(
+                        f.landingNight.toString(),
+                        (PdfLogbookMakerValues.LDG_NIGHT_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_LEFT_PAGE) / 2,
+                        PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
+                        Paints.smallTextCentered
+                    )
+                    totalsForward.landingNight += f.landingNight
+                    currentTotals.landingNight += f.landingNight
+                }
             }
             index += 1
         }
@@ -686,16 +693,20 @@ object PdfLogbookBuilder {
         //totals this page:
         index = 1
         //multipilot
-        canvas.drawText(
-            (currentTotals.multiPilot/60).toString(),
-            PdfLogbookMakerValues.MP_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (currentTotals.multiPilot%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.MP_MINS_OFFSET + PdfLogbookMakerValues.MP_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (currentTotals.multiPilot != 0) {
+            canvas.drawText(
+                (currentTotals.multiPilot / 60).toString(),
+                PdfLogbookMakerValues.MP_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (currentTotals.multiPilot % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.MP_MINS_OFFSET + PdfLogbookMakerValues.MP_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
 
         //total time
         canvas.drawText(

@@ -109,15 +109,15 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             )
         }
 
-        /**
-         * Multipilot needs a bit more work. Maybe put that in crew for faster processing?
-         */
 
- /*       list.add(TotalTimesListItem(
-            categories[MULTIPILOT_TIME_INDEX],
-            "---",
-            0)
-  */
+            flights.sumBy{it.multiPilotTime}.let { t ->
+                list.add(
+                    TotalTimesListItem(
+                        categories[MULTIPILOT_TIME_INDEX],
+                        minutesToHoursAndMinutesString(t+consolidatedBalancesForward.multiPilotTime),
+                        t+consolidatedBalancesForward.multiPilotTime, MULTIPILOT_TIME_INDEX)
+                )
+            }
 
 
         flights.sumBy{it.nightTime}.let { t ->

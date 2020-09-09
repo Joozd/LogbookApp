@@ -134,7 +134,7 @@ class AddBalanceForwardDialogViewmodel: JoozdlogDialogViewModel() {
 
     fun setLandingsDay(it: Editable?){
         try{
-            val landings = hoursAndMinutesStringToInt(it?.toString())!!.toInt()
+            val landings = it?.toString()!!.toInt()
             balanceForwardSetter = balanceForwardSetter.copy(landingDay = landings)
         }
         catch (nfe: NumberFormatException) {
@@ -146,7 +146,7 @@ class AddBalanceForwardDialogViewmodel: JoozdlogDialogViewModel() {
     }
     fun setLandingsNight(it: Editable?){
         try{
-            val landings = hoursAndMinutesStringToInt(it?.toString())!!.toInt()
+            val landings = it?.toString()!!.toInt()
             balanceForwardSetter = balanceForwardSetter.copy(landingNight = landings)
         }
         catch (nfe: NumberFormatException) {

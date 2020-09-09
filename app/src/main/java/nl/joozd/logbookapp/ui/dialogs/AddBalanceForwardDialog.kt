@@ -113,7 +113,6 @@ class AddBalanceForwardDialog: JoozdlogFragment() {
                     BalanceForwardDialogEvents.NUMBER_PARSE_ERROR -> toast ( "ERROR")
                     BalanceForwardDialogEvents.UPDATE_FIELDS -> fillFields()
                     BalanceForwardDialogEvents.CLOSE_DIALOG -> {
-                        toast("DEBUG 11")
                         closeFragment()
                     }
                 }

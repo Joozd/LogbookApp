@@ -676,7 +676,7 @@ object PdfLogbookBuilder {
                     currentTotals.landingDay += f.landingDay
                 }
 
-                if (f.landingDay != 0) {
+                if (f.landingNight != 0) {
                     canvas.drawText(
                         f.landingNight.toString(),
                         (PdfLogbookMakerValues.LDG_NIGHT_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_LEFT_PAGE) / 2,
@@ -721,31 +721,41 @@ object PdfLogbookBuilder {
             Paints.smallTextCentered)
 
         //landings day
-        canvas.drawText(
-            currentTotals.landingDay.toString(),
-            PdfLogbookMakerValues.LDG_DAY_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH/2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
-        canvas.drawText(
-            currentTotals.landingNight.toString(),
-            PdfLogbookMakerValues.LDG_NIGHT_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
-
+        if (currentTotals.landingDay != 0) {
+            canvas.drawText(
+                currentTotals.landingDay.toString(),
+                PdfLogbookMakerValues.LDG_DAY_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+        //landings night
+        if (currentTotals.landingNight != 0) {
+            canvas.drawText(
+                currentTotals.landingNight.toString(),
+                PdfLogbookMakerValues.LDG_NIGHT_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
 
         //totals previous pages:
         index = 2
         //multipilot
-        canvas.drawText(
-            (oldTotals.multiPilot/60).toString(),
-            PdfLogbookMakerValues.MP_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (oldTotals.multiPilot%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.MP_MINS_OFFSET + PdfLogbookMakerValues.MP_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (oldTotals.multiPilot != 0) {
+            canvas.drawText(
+                (oldTotals.multiPilot / 60).toString(),
+                PdfLogbookMakerValues.MP_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (oldTotals.multiPilot % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.MP_MINS_OFFSET + PdfLogbookMakerValues.MP_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
 
         //total time
         canvas.drawText(
@@ -760,31 +770,41 @@ object PdfLogbookBuilder {
             Paints.smallTextCentered)
 
         //landings day
-        canvas.drawText(
-            oldTotals.landingDay.toString(),
-            PdfLogbookMakerValues.LDG_DAY_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH/2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
-        canvas.drawText(
-            oldTotals.landingNight.toString(),
-            PdfLogbookMakerValues.LDG_NIGHT_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (oldTotals.landingDay != 0) {
+            canvas.drawText(
+                oldTotals.landingDay.toString(),
+                PdfLogbookMakerValues.LDG_DAY_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+        if (oldTotals.landingNight != 0) {
+            canvas.drawText(
+                oldTotals.landingNight.toString(),
+                PdfLogbookMakerValues.LDG_NIGHT_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
 
 
         //total totals:
         index = 3
         //multipilot
-        canvas.drawText(
-            (totalsForward.multiPilot/60).toString(),
-            PdfLogbookMakerValues.MP_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (totalsForward.multiPilot%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.MP_MINS_OFFSET + PdfLogbookMakerValues.MP_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (totalsForward.multiPilot != 0) {
+            canvas.drawText(
+                (totalsForward.multiPilot / 60).toString(),
+                PdfLogbookMakerValues.MP_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (totalsForward.multiPilot % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.MP_MINS_OFFSET + PdfLogbookMakerValues.MP_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
 
         //total time
         canvas.drawText(
@@ -799,18 +819,23 @@ object PdfLogbookBuilder {
             Paints.smallTextCentered)
 
         //landings day
-        canvas.drawText(
-            totalsForward.landingDay.toString(),
-            PdfLogbookMakerValues.LDG_DAY_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH/2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
-        canvas.drawText(
-            totalsForward.landingNight.toString(),
-            PdfLogbookMakerValues.LDG_NIGHT_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if(totalsForward.landingDay != 0) {
+            canvas.drawText(
+                totalsForward.landingDay.toString(),
+                PdfLogbookMakerValues.LDG_DAY_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
 
-
+        if(totalsForward.landingNight != 0) {
+            canvas.drawText(
+                totalsForward.landingNight.toString(),
+                PdfLogbookMakerValues.LDG_NIGHT_OFFSET + PdfLogbookMakerValues.LDG_NIGHT_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
     }
 
     /**
@@ -854,31 +879,39 @@ object PdfLogbookBuilder {
                 currentTotals.simTime += f.simTime
             }
             else { // ie. if not sim:
-                canvas.drawText(
-                    (f.nightTime/60).toString(),
-                    PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET -6,
-                    PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
-                    Paints.smallTextRight)
-                canvas.drawText(
-                    (f.nightTime%60).toString().padStart(2, '0'),
-                    PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_WIDTH / 2,
-                    PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
-                    Paints.smallTextCentered)
-                totalsForward.nightTime += f.nightTime
-                currentTotals.nightTime += f.nightTime
+                if (f.nightTime != 0) {
+                    canvas.drawText(
+                        (f.nightTime / 60).toString(),
+                        PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET - 6,
+                        PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
+                        Paints.smallTextRight
+                    )
+                    canvas.drawText(
+                        (f.nightTime % 60).toString().padStart(2, '0'),
+                        PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_WIDTH / 2,
+                        PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
+                        Paints.smallTextCentered
+                    )
+                    totalsForward.nightTime += f.nightTime
+                    currentTotals.nightTime += f.nightTime
+                }
 
-                canvas.drawText(
-                    (f.ifrTime/60).toString(),
-                    PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET -6,
-                    PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
-                    Paints.smallTextRight)
-                canvas.drawText(
-                    (f.ifrTime%60).toString().padStart(2, '0'),
-                    PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_WIDTH / 2,
-                    PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
-                    Paints.smallTextCentered)
-                totalsForward.ifrTime += f.ifrTime
-                currentTotals.ifrTime += f.ifrTime
+                if (f.ifrTime != 0) {
+                    canvas.drawText(
+                        (f.ifrTime / 60).toString(),
+                        PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET - 6,
+                        PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
+                        Paints.smallTextRight
+                    )
+                    canvas.drawText(
+                        (f.ifrTime % 60).toString().padStart(2, '0'),
+                        PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_WIDTH / 2,
+                        PdfLogbookMakerValues.TOP_SECTION_HEIGHT + PdfLogbookMakerValues.ENTRY_HEIGHT * index - 6,
+                        Paints.smallTextCentered
+                    )
+                    totalsForward.ifrTime += f.ifrTime
+                    currentTotals.ifrTime += f.ifrTime
+                }
 
                 if (f.isPIC) {
                     canvas.drawText(
@@ -958,243 +991,344 @@ object PdfLogbookBuilder {
         //totals this page:
         index = 1
         //night
-        canvas.drawText(
-            (currentTotals.nightTime/60).toString(),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (currentTotals.nightTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (currentTotals.nightTime != 0) {
+            canvas.drawText(
+                (currentTotals.nightTime / 60).toString(),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (currentTotals.nightTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //ifr
-        canvas.drawText(
-            (currentTotals.ifrTime/60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (currentTotals.ifrTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (currentTotals.ifrTime != 0) {
+            canvas.drawText(
+                (currentTotals.ifrTime / 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (currentTotals.ifrTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
         //pic
-        canvas.drawText(
-            (currentTotals.picTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (currentTotals.picTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
-        //copilot
-        canvas.drawText(
-            (currentTotals.copilotTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (currentTotals.copilotTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (currentTotals.picTime != 0) {
+            canvas.drawText(
+                (currentTotals.picTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (currentTotals.picTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
+        if (currentTotals.copilotTime != 0) {
+            //copilot
+            canvas.drawText(
+                (currentTotals.copilotTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (currentTotals.copilotTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //dual
-        canvas.drawText(
-            (currentTotals.dualTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (currentTotals.dualTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (currentTotals.dualTime != 0) {
+            canvas.drawText(
+                (currentTotals.dualTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (currentTotals.dualTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //instructor
-        canvas.drawText(
-            (currentTotals.instructorTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (currentTotals.instructorTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (currentTotals.instructorTime != 0) {
+            canvas.drawText(
+                (currentTotals.instructorTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (currentTotals.instructorTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //sim
-        canvas.drawText(
-            (currentTotals.simTime/60).toString(),
-            PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (currentTotals.simTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET + PdfLogbookMakerValues.SYNTH_TIME_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (currentTotals.simTime != 0) {
+            canvas.drawText(
+                (currentTotals.simTime / 60).toString(),
+                PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (currentTotals.simTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET + PdfLogbookMakerValues.SYNTH_TIME_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
 
         //totals previous pages:
         index = 2
         //night
-        canvas.drawText(
-            (oldTotals.nightTime/60).toString(),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (oldTotals.nightTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (oldTotals.nightTime != 0) {
+            canvas.drawText(
+                (oldTotals.nightTime / 60).toString(),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (oldTotals.nightTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //ifr
-        canvas.drawText(
-            (oldTotals.ifrTime/60).toString(),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (oldTotals.ifrTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (oldTotals.ifrTime != 0) {
+            canvas.drawText(
+                (oldTotals.ifrTime / 60).toString(),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (oldTotals.ifrTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //pic
-        canvas.drawText(
-            (oldTotals.picTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (oldTotals.picTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (oldTotals.picTime != 0) {
+            canvas.drawText(
+                (oldTotals.picTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (oldTotals.picTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //copilot
-        canvas.drawText(
-            (oldTotals.copilotTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (oldTotals.copilotTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (oldTotals.copilotTime != 0) {
+            canvas.drawText(
+                (oldTotals.copilotTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (oldTotals.copilotTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //dual
-        canvas.drawText(
-            (oldTotals.dualTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (oldTotals.dualTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (oldTotals.dualTime != 0) {
+            canvas.drawText(
+                (oldTotals.dualTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (oldTotals.dualTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //instructor
-        canvas.drawText(
-            (oldTotals.instructorTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (oldTotals.instructorTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (oldTotals.instructorTime != 0) {
+            canvas.drawText(
+                (oldTotals.instructorTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (oldTotals.instructorTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //sim
-        canvas.drawText(
-            (oldTotals.simTime/60).toString(),
-            PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (oldTotals.simTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET + PdfLogbookMakerValues.SYNTH_TIME_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (oldTotals.simTime != 0) {
+            canvas.drawText(
+                (oldTotals.simTime / 60).toString(),
+                PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (oldTotals.simTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET + PdfLogbookMakerValues.SYNTH_TIME_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
 
 
         //total totals:
         index = 3
         //night
-        canvas.drawText(
-            (totalsForward.nightTime/60).toString(),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (totalsForward.nightTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (totalsForward.nightTime != 0) {
+            canvas.drawText(
+                (totalsForward.nightTime / 60).toString(),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (totalsForward.nightTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //ifr
-        canvas.drawText(
-            (totalsForward.ifrTime/60).toString(),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (totalsForward.ifrTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (totalsForward.ifrTime != 0) {
+            canvas.drawText(
+                (totalsForward.ifrTime / 60).toString(),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (totalsForward.ifrTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //pic
-        canvas.drawText(
-            (totalsForward.picTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (totalsForward.picTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (totalsForward.picTime != 0) {
+            canvas.drawText(
+                (totalsForward.picTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (totalsForward.picTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //copilot
-        canvas.drawText(
-            (totalsForward.copilotTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (totalsForward.copilotTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (totalsForward.copilotTime != 0) {
+            canvas.drawText(
+                (totalsForward.copilotTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (totalsForward.copilotTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_COPILOT_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //dual
-        canvas.drawText(
-            (totalsForward.dualTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (totalsForward.dualTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (totalsForward.dualTime != 0) {
+            canvas.drawText(
+                (totalsForward.dualTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (totalsForward.dualTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_DUAL_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //instructor
-        canvas.drawText(
-            (totalsForward.instructorTime/60).toString(),
-            PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (totalsForward.instructorTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (totalsForward.instructorTime != 0) {
+            canvas.drawText(
+                (totalsForward.instructorTime / 60).toString(),
+                PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (totalsForward.instructorTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_INST_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
+
         //sim
-        canvas.drawText(
-            (totalsForward.simTime/60).toString(),
-            PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET -6,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextRight)
-        canvas.drawText(
-            (totalsForward.simTime%60).toString().padStart(2, '0'),
-            PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET + PdfLogbookMakerValues.SYNTH_TIME_MINS_WIDTH / 2,
-            PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
-            Paints.smallTextCentered)
+        if (totalsForward.simTime != 0) {
+            canvas.drawText(
+                (totalsForward.simTime / 60).toString(),
+                PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET - 6,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextRight
+            )
+            canvas.drawText(
+                (totalsForward.simTime % 60).toString().padStart(2, '0'),
+                PdfLogbookMakerValues.SYNTH_TIME_MINS_OFFSET + PdfLogbookMakerValues.SYNTH_TIME_MINS_WIDTH / 2,
+                PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET + PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * index - 6,
+                Paints.smallTextCentered
+            )
+        }
     }
 
 

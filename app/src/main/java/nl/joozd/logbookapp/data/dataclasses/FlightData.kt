@@ -30,6 +30,7 @@ data class FlightData(
     val timeOut: Long,              // timeOut and timeIn are seconds since epoch
     val timeIn: Long,               // timeOut and timeIn are seconds since epoch
     val correctedTotalTime: Int,
+    val multiPilotTime: Int,
     val nightTime: Int,
     val ifrTime:Int,
     val simTime: Int,

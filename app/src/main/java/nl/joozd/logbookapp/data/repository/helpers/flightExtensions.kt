@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.repository.helpers
 
+import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.extensions.toInt
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
@@ -66,3 +67,10 @@ fun Flight.isSameFlightOnSameDay(f: Flight) =
             && hasSameflightNumberAs(f)
 
 fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.toUpperCase(Locale.ROOT).trim() == other.flightNumber.toUpperCase(Locale.ROOT).trim()
+
+/**
+ * Returns number of minutes of multipilot time, checking  if [Flight.aircraftType] against [aircraftMap]
+ */
+fun Flight.multiPilotTime(aircraftMap: Map<String, AircraftType>){
+    TODO("Not implemented")
+}

@@ -24,6 +24,7 @@ import android.graphics.RectF
 import android.util.Log
 import com.caverock.androidsvg.PreserveAspectRatio
 import com.caverock.androidsvg.SVG
+import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.miscClasses.TotalsForward
 import nl.joozd.logbookapp.extensions.toLogbookDate
@@ -40,7 +41,10 @@ object PdfLogbookBuilder {
         TODO("This will make the address page of logbook as found in https://www.easa.europa.eu/sites/default/files/dfu/Part-FCL.pdf")
     }
 
-
+    /**
+     * Put the lines and text for an empty logbook left page
+     * @param canvas: The canvas to draw on
+     */
     fun drawLeftPage(canvas: Canvas) {
         var lineNumber = 1
         // Outside box:
@@ -474,6 +478,11 @@ object PdfLogbookBuilder {
         }
 
     }
+
+    /**
+     * Put the lines and text for an empty logbook right page
+     * * @param canvas: The canvas to draw on
+     */
     fun drawRightPage(canvas: Canvas){
         var lineNumber = 1
         // Outside box:
@@ -561,7 +570,15 @@ object PdfLogbookBuilder {
         }
     }
 
-    fun fillLeftPage(canvas: Canvas, flights: List<Flight>, totalsForward: TotalsForward, aircraftMap: Map<String, Aircraft>){
+    /**
+     * Fill a left page with data
+     * @param flights: List of all flights to be put on this page
+     * @param totalsForward: Totals from previous page
+     * @param canvas: A canvas with a left page drawn on it
+     * @param aircraftMap: Map of Aircraft Identification strings and aircraft (for determining multipilot time)
+     * @see drawLeftPage
+     */
+    fun fillLeftPage(canvas: Canvas, flights: List<Flight>, totalsForward: TotalsForward, aircraftMap: Map<String, AircraftType>){
         val oldTotals = totalsForward.copy()
         val currentTotals = TotalsForward()
         var index=1
@@ -785,8 +802,15 @@ object PdfLogbookBuilder {
 
     }
 
+    /**
+     * Fill a right page with data
+     * @param flights: List of all flights to be put on this page
+     * @param totalsForward: Totals from previous page
+     * @param canvas: A canvas with a left page drawn on it
+     * @see drawRightPage
+     */
+
     fun fillRightPage(canvas: Canvas, flights: List<Flight>, totalsForward: TotalsForward) {
-        val TAG = "PdfTools.fillRightPage"
         val oldTotals = totalsForward.copy()
         val currentTotals = TotalsForward()
         var index = 1
@@ -903,7 +927,6 @@ object PdfLogbookBuilder {
                     currentTotals.instructorTime += f.duration()
                 }
                 if (f.signature.isNotEmpty()){
-                    Log.d(TAG, "flightID: ${f.flightID}")
                     val svg = SVG.getFromString(f.signature)
                     svg.documentPreserveAspectRatio= PreserveAspectRatio.LETTERBOX
                     val pict2 = svg.renderToPicture(900, 300)

@@ -47,6 +47,7 @@ data class Flight(
     val timeOut: Long = Instant.now().epochSecond -3600,    // timeOut and timeIn are seconds since epoch
     val timeIn: Long = Instant.now().epochSecond,           // timeOut and timeIn are seconds since epoch
     val correctedTotalTime: Int = 0,
+    val multiPilotTime: Int = 0,
     val nightTime: Int = 0,
     val ifrTime:Int = 0, // 0 means 0 minutes, -1 means this is a VFR flight
     val simTime: Int = 0,
@@ -77,7 +78,7 @@ data class Flight(
     val signature: String = ""
 ){
     //can be constructed as (Flight(BasicFlight))
-    constructor(b: BasicFlight): this(b.flightID, b.orig, b.dest, b.timeOut, b.timeIn, b.correctedTotalTime, b.nightTime, b.ifrTime, b.simTime, b.aircraft, b.registration, b.name, b.name2, b.takeOffDay, b.takeOffNight, b.landingDay, b.landingNight, b.autoLand, b.flightNumber, b.remarks, b.isPIC, b.isPICUS, b.isCoPilot, b.isDual, b.isInstructor, b.isSim, b.isPF, b.isPlanned, b.changed, b.autoFill, b.augmentedCrew, b.DELETEFLAG, b.timeStamp, b.signature)
+    constructor(b: BasicFlight): this(b.flightID, b.orig, b.dest, b.timeOut, b.timeIn, b.correctedTotalTime, b.multiPilotTime, b.nightTime, b.ifrTime, b.simTime, b.aircraft, b.registration, b.name, b.name2, b.takeOffDay, b.takeOffNight, b.landingDay, b.landingNight, b.autoLand, b.flightNumber, b.remarks, b.isPIC, b.isPICUS, b.isCoPilot, b.isDual, b.isInstructor, b.isSim, b.isPF, b.isPlanned, b.changed, b.autoFill, b.augmentedCrew, b.DELETEFLAG, b.timeStamp, b.signature)
 
     fun toBasicFlight() = BasicFlight(
         flightID,
@@ -86,6 +87,7 @@ data class Flight(
         timeOut,
         timeIn,
         correctedTotalTime,
+        multiPilotTime,
         nightTime,
         ifrTime,
         simTime,
@@ -122,6 +124,7 @@ data class Flight(
         timeOut,
         timeIn,
         correctedTotalTime,
+        multiPilotTime,
         nightTime,
         ifrTime,
         simTime,
@@ -155,11 +158,10 @@ data class Flight(
 
 
     // timeOut and timeIn are seconds since epoch
-    // nightTime, ifrTime are number of minutes
-    // isPIC etc are '0' for false and '1' for true
+    // multiPilotTime, nightTime, ifrTime are number of minutes
     // TODO ifrTime "0" is standard by aircraft
 
-    val allNames: String
+    private val allNames: String // TODO remove this comment: made private because compiler told me to
     val takeoffLanding: String
     init{
         var allNamesBuilder=name

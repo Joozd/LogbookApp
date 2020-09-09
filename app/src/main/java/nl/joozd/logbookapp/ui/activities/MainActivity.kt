@@ -35,7 +35,6 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.SettingsActivity
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
 import nl.joozd.logbookapp.extensions.fadeOut

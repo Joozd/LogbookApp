@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp
+package nl.joozd.logbookapp.ui.activities
 
 import android.Manifest
 import android.content.Intent
@@ -31,6 +31,8 @@ import android.widget.NumberPicker
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
+import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivitySettingsBinding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
@@ -38,9 +40,6 @@ import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
-import nl.joozd.logbookapp.ui.activities.ChangePasswordActivity
-import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
-import nl.joozd.logbookapp.ui.activities.LoginActivity
 import nl.joozd.logbookapp.ui.dialogs.NumberPickerDialog
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
@@ -290,7 +289,10 @@ class SettingsActivity : JoozdlogActivity() {
             }
 
             viewModel.backupInterval.observe(activity){
-                backupIntervalButton.text = getStringWithMakeup(R.string.backup_interval_time, (if (it == 0) getString (R.string.never) else getString(R.string.n_days, it.toString())))
+                backupIntervalButton.text = getStringWithMakeup(
+                    R.string.backup_interval_time, (if (it == 0) getString (
+                        R.string.never
+                    ) else getString(R.string.n_days, it.toString())))
             }
 
 
@@ -427,14 +429,14 @@ class SettingsActivity : JoozdlogActivity() {
 
         private fun format(value: Int): String = when (value) {
             in (0..THIRTY) -> minutesToHoursAndMinutesString(value)
-            in (THIRTY..NINETY) -> minutesToHoursAndMinutesString(30 + (value-THIRTY)*5)
+            in (THIRTY..NINETY) -> minutesToHoursAndMinutesString(30 + (value- THIRTY)*5)
             else -> minutesToHoursAndMinutesString(maxOf(90 + (value- NINETY)*15, 0))
         }
 
         private fun unFormat(value: Int) = when (value) {
             in (0..THIRTY) -> value
-            in (THIRTY..NINETY) -> 30 + (value-THIRTY)*5
-            else -> 90 + (value-NINETY) * 15
+            in (THIRTY..NINETY) -> 30 + (value- THIRTY)*5
+            else -> 90 + (value- NINETY) * 15
         }
 
         companion object {

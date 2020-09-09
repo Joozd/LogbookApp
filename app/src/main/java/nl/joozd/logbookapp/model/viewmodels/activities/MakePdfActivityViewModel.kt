@@ -72,7 +72,7 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
             pdfLogbook = PdfDocument().apply {
                 //get all aircraft:
                 val balancesForwardAsync = async(Dispatchers.IO) { balanceForwardRepository.getAll() }
-                val aircraftMapAsync = async(Dispatchers.IO) { aircraftRepository.requestAircraftMap()}
+                val aircraftMapAsync = aircraftRepository.getAircraftTypesMapShortNameAsync()
                 val allFlightsAsync = async(Dispatchers.IO) { flightRepository.getAllFlights()}
 
                 //fill Totals Forward with balance forward totals

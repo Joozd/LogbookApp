@@ -25,6 +25,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import nl.joozd.joozdlogcommon.BasicFlight
+import nl.joozd.joozdlogcommon.BasicFlight_version4
+import nl.joozd.joozdlogcommon.legacy.basicflight.BasicFlightVersionFunctions.upgrade4to5
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
@@ -89,6 +91,7 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
     companion object {
         const val MOST_RECENT_VERSION = 4
         const val FIRST_LINE_V4 = "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature"
+        const val FIRST_LINE_V5 = "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature"
 
         /**
          *  Read a csv with basicFlights to a list of Flights. Flight ID's will need to be assigned before saving.
@@ -101,18 +104,17 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
          */
 
         fun csvToFlights(csvBasicFlights: List<String>): List<Flight> = when (csvBasicFlights.first()){
-            FIRST_LINE_V4 -> csvBasicFlights.drop(1).map{Flight(csvFlightToBasicFlightv4(it.also{
-            }))}
+            FIRST_LINE_V4 -> csvBasicFlights.drop(1).map{Flight(upgrade4to5(csvFlightToBasicFlightv4(it)))}
+            FIRST_LINE_V5 -> csvBasicFlights.drop(1).map{Flight(upgrade4to5(csvFlightToBasicFlightv4(it)))}
             else -> throw (IllegalArgumentException("Not a supported CSV format"))
         }
 
 
 
 
-        private fun csvFlightToBasicFlightv4(csvFlight: String) = csvFlight.also{Log.d("XXXXXXXXXXXX", it)}.split(';').map{ it.replace('~', ';')}.let { v->
-            Log.d("YYYYYYYYYYYYYYYY", "$v")
-            require(BasicFlight.VERSION.version == 4)
-            BasicFlight(
+        private fun csvFlightToBasicFlightv4(csvFlight: String): BasicFlight_version4 = csvFlight.also{Log.d("XXXXXXXXXXXX", it)}.split(';').map{ it.replace('~', ';')}.let { v->
+            require(BasicFlight_version4.VERSION.version == 4)
+            BasicFlight_version4(
                 flightID = -1,
                 orig = v[1],
                 dest = v[2],
@@ -149,5 +151,47 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
                 signature = Base64.decode(v[30], Base64.NO_WRAP).toString(Charsets.UTF_8)
             )
         }
+
+        private fun csvFlightToBasicFlightv5(csvFlight: String): BasicFlight = csvFlight.also{Log.d("XXXXXXXXXXXX", it)}.split(';').map{ it.replace('~', ';')}.let { v->
+            require(BasicFlight.VERSION.version == 5)
+            BasicFlight(
+                flightID = -1,
+                orig = v[1],
+                dest = v[2],
+                timeOut = Instant.parse(v[3]).epochSecond,
+                timeIn = Instant.parse(v[4]).epochSecond,
+                correctedTotalTime = v[5].toInt(),
+                multiPilotTime = v[6].toInt(),
+                nightTime = v[7].toInt(),
+                ifrTime = v[8].toInt(),
+                simTime = v[9].toInt(),
+                aircraft = v[10],
+                registration = v[11],
+                name = v[12],
+                name2 = v[13],
+                takeOffDay = v[14].toInt(),
+                takeOffNight = v[15].toInt(),
+                landingDay = v[16].toInt(),
+                landingNight = v[17].toInt(),
+                autoLand = v[18].toInt(),
+                flightNumber = v[19],
+                remarks = v[20],
+                isPIC = v[21] == true.toString(),
+                isPICUS = v[22] == true.toString(),
+                isCoPilot = v[23] == true.toString(),
+                isDual = v[24] == true.toString(),
+                isInstructor = v[25] == true.toString(),
+                isSim = v[26] == true.toString(),
+                isPF = v[27] == true.toString(),
+                isPlanned = v[28] == true.toString(),
+                changed =true,
+                autoFill = v[29] == true.toString(),
+                augmentedCrew = v[30].toInt(),
+                DELETEFLAG = false,
+                timeStamp = TimestampMaker.nowForSycPurposes,
+                signature = Base64.decode(v[31], Base64.NO_WRAP).toString(Charsets.UTF_8)
+            )
+        }
+
     }
 }

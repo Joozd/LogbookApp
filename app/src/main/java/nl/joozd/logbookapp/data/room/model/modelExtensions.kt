@@ -42,6 +42,7 @@ fun FlightData.toFlight(): Flight =
         timeOut,
         timeIn,
         correctedTotalTime,
+        multiPilotTime,
         nightTime,
         ifrTime,
         simTime,

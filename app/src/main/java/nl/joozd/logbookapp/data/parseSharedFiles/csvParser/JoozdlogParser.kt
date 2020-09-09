@@ -26,9 +26,11 @@ import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.io.InputStream
 
-class JoozdlogV4Parser(private val lines: List<String>): ImportedLogbook {
+class JoozdlogParser(private val lines: List<String>): ImportedLogbook {
+    private val firstLines = listOf (FlightsRepositoryExporter.FIRST_LINE_V4, FlightsRepositoryExporter.FIRST_LINE_V5)
+
     override val validImportedLogbook: Boolean
-        get() = lines.isNotEmpty() && lines.first() == FlightsRepositoryExporter.FIRST_LINE_V4
+        get() = lines.isNotEmpty() && lines.first() in firstLines
 
     /**
      * List of flights
@@ -42,7 +44,7 @@ class JoozdlogV4Parser(private val lines: List<String>): ImportedLogbook {
 
     companion object{
         suspend fun ofInputStream(inputstream: InputStream) = withContext(Dispatchers.IO) {
-            JoozdlogV4Parser(inputstream.reader().readLines())
+            JoozdlogParser(inputstream.reader().readLines())
         }
     }
 }

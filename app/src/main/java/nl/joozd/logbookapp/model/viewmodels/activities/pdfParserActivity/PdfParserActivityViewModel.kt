@@ -31,7 +31,7 @@ import nl.joozd.joozdlogfiletypedetector.PdfTypeDetector
 import nl.joozd.joozdlogfiletypedetector.SupportedTypes
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
-import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.JoozdlogV4Parser
+import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.JoozdlogParser
 import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.MccPilotLogCsvParser
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -45,7 +45,6 @@ import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.extensions.*
 import java.io.FileNotFoundException
 import java.io.InputStream
-import java.io.Reader
 import java.time.Instant
 
 
@@ -91,7 +90,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                         }
                         SupportedTypes.JOOZDLOG_V4 -> uri?.getInputStream()?.use {
                             feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
-                            parseCsv(JoozdlogV4Parser.ofInputStream(it))
+                            parseCsv(JoozdlogParser.ofInputStream(it))
                         }
 
                         SupportedTypes.UNSUPPORTED_PDF, SupportedTypes.UNSUPPORTED_CSV -> {

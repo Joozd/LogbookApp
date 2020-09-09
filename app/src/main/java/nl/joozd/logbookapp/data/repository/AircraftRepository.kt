@@ -41,6 +41,7 @@ import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.util.*
 
+//TODO replace all observeForevers with getters
 
 /**
  * New implementation of aircraftRepository.
@@ -60,10 +61,11 @@ class AircraftRepository(
 
     // Cached data as MutableLiveData with getters/setters for local access
     private val _cachedAircraftTypes = MutableLiveData<List<AircraftType>>()
+
+    //This sets its field async!
     private var cachedAircraftTypes
         get() = _cachedAircraftTypes.value
         set(it) { launch(Dispatchers.Main) { _cachedAircraftTypes.value = it } }
-    private var aircraftTypesMap: Map<String, AircraftType>? = null
 
     private val _cachedConsensus= MutableLiveData<List<AircraftTypeConsensus>>()
     private var cachedConsensus
@@ -84,7 +86,12 @@ class AircraftRepository(
     private var cachedAircraftList
         get() = _cachedAircraftList.value ?: emptyList()
         set(it) { launch(Dispatchers.Main) { _cachedAircraftList.value = it} }
-    private var aircraftMap: Map<String, Aircraft>? = null
+
+    private val aircraftMap: Map<String, Aircraft>?
+        get() = _cachedAircraftList.value?.map{it.registration to it}?.reversed()?.toMap()
+
+    private val aircraftTypesMap: Map<String, AircraftType>?
+        get() = _cachedAircraftTypes.value?.map{act -> act.name to act}?.toMap()
 
     init{
         launch {
@@ -96,10 +103,15 @@ class AircraftRepository(
         getPreloadedRegistrationsLiveData().observeForever {
             cachedPreloadedRegistrations = it
         }
-
+/*
+replaced with getter
         _cachedAircraftTypes.observeForever {
             aircraftTypesMap = it.map{act -> act.name to act}.toMap()
         }
+
+ */
+
+
         _cachedPreloadedRegistrations.observeForever {
             preloadedRegistrationsMap = it.map {plr ->  plr.registration to plr.type }.toMap()
         }
@@ -117,9 +129,13 @@ class AircraftRepository(
             launch { cachedAircraftList = updateAircraftListWithNewConsensus() }
         }
 
+        /*
+         * replaced with getter
         _cachedAircraftList.observeForever { acl ->
             aircraftMap = acl.map{it.registration to it}.reversed().toMap()     // reversed to higher priority registrations will overwrite lower ones
         }
+
+         */
     }
 
     /********************************************************************************************
@@ -300,10 +316,10 @@ class AircraftRepository(
                 .toMap()
     }
 
-    private fun getAircraftTypesMap() = async {
+    private fun getAircraftTypesMapAsync() = async {
         aircraftTypesMap
             ?: getAircraftTypes()
-                .also {cachedAircraftTypes = it}
+                // .also {cachedAircraftTypes = it} No need to set that twice I reckon? GetAircraftTypes already sets it
                 .map{ it.name to it}
                 .toMap()
     }
@@ -332,6 +348,12 @@ class AircraftRepository(
 
     suspend fun requestAircraftMap() = withContext(dispatcher) { getAircraftMap().await() }
 
+    suspend fun requestAircraftTypesMap() = withContext(dispatcher) { getAircraftTypesMapAsync().await() }
+
+    fun getAircraftTypesMapShortNameAsync() = async {
+        getAircraftTypes().map{ it.shortName to it}.toMap()
+    }
+
     suspend fun getAircraftFromRegistration(reg: String): Aircraft? =
         // use [reg] if it contains at least one '-', if it doesn't try to match it to a knownRegistration minus the '-'
         (if ("-" in reg) reg else getKnownRegistrations().await().firstOrNull { r -> r.filter{it != '-'} == reg } ?: reg ).let {
@@ -347,7 +369,7 @@ class AircraftRepository(
     }
 
     suspend fun getAircraftType(typeName: String): AircraftType? =
-        getAircraftTypesMap().await()[typeName]
+        getAircraftTypesMapAsync().await()[typeName]
 
     suspend fun getAircraftTypeByShortName(shortName: String) = getAircraftTypes().firstOrNull {type -> type.shortName == shortName }
 

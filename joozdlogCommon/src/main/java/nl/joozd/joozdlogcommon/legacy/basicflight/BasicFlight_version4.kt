@@ -23,14 +23,13 @@ import nl.joozd.joozdlogcommon.serializing.*
 import nl.joozd.joozdlogcommon.serializing.unwrap
 import nl.joozd.joozdlogcommon.serializing.wrap
 
-data class BasicFlight(
+data class BasicFlight_version4(
     val flightID: Int,
     val orig: String ,
     val dest: String ,
     val timeOut: Long,              // timeOut and timeIn are seconds since epoch
     val timeIn: Long,               // timeOut and timeIn are seconds since epoch
     val correctedTotalTime: Int,
-    val multiPilotTime: Int,
     val nightTime: Int,
     val ifrTime:Int,
     val simTime: Int,
@@ -62,10 +61,9 @@ data class BasicFlight(
     val signature: String = ""
 ): JoozdlogSerializable {
     object VERSION {
-        const val version = 5
+        const val version = 4
         // version 3: Added signature: String
         // version 4: Booleans now actual Booleans
-        // version 5: Added multiPilotTime: Int
     }
 
     /**
@@ -109,16 +107,16 @@ data class BasicFlight(
         serialized += wrap(component32())
         serialized += wrap(component33())
         serialized += wrap(component34())
-        serialized += wrap(component35())
+//        serialized += wrap(component35())
 //        serialized += wrap(component36())
 
         return serialized
     }
     companion object: JoozdlogSerializable.Creator{
 
-        override fun deserialize(source: ByteArray): BasicFlight {
+        override fun deserialize(source: ByteArray): BasicFlight_version4 {
             val wraps = serializedToWraps(source)
-            return BasicFlight(
+            return BasicFlight_version4(
                 unwrap(wraps[0]),
                 unwrap(wraps[1]),
                 unwrap(wraps[2]),
@@ -151,10 +149,11 @@ data class BasicFlight(
                 unwrap(wraps[29]),
                 unwrap(wraps[30]),
                 unwrap(wraps[31]),
+                //unwrapBoolean(wraps[32]),
                 unwrap(wraps[32]),
-                unwrap(wraps[33]),
-                unwrap(wraps[34])
+                unwrap(wraps[33])
             )
+
         }
     }
 }

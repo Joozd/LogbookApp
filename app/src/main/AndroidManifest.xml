@@ -20,7 +20,7 @@
         <activity android:name=".ui.activities.MakePdfActivity" />
         <activity android:name=".ui.activities.CreateNewUserActivity" />
         <activity android:name=".ui.activities.newUserActivity.NewUserActivity" />
-        <activity android:name=".SettingsActivity">
+        <activity android:name=".ui.activities.SettingsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />

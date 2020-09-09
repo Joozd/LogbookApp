@@ -34,7 +34,10 @@ import nl.joozd.logbookapp.data.room.model.AircraftTypeData
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 
-@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, AircraftTypeConsensusData::class, PreloadedRegistration::class, BalanceForward::class], version = 7)
+/**
+ * Version 8: added multiPilotTime to FlightData
+ */
+@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, AircraftTypeConsensusData::class, PreloadedRegistration::class, BalanceForward::class], version = 8)
 abstract class JoozdlogDatabase: RoomDatabase() {
     abstract fun flightDao(): FlightDao
     abstract fun airportDao(): AirportDao
@@ -57,20 +60,27 @@ abstract class JoozdlogDatabase: RoomDatabase() {
                     context.applicationContext,
                     JoozdlogDatabase::class.java,
                     "flights_database"
-                ).addMigrations(UPDATE_4_5, UPDATE_5_6).build()
+                ).addMigrations(UPDATE_7_8).build()
                 INSTANCE = instance
                 return instance
             }
         }
-
+/*
         private val UPDATE_4_5 = object: Migration(4,5){
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE AircraftRegistrationWithTypeData ADD COLUMN timestamp INTEGER NOT NULL DEFAULT -1")
             }
         }
-        val UPDATE_5_6 = object: Migration(5,6){
+        private val UPDATE_5_6 = object: Migration(5,6){
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("CREATE TABLE PreloadedRegistration (registration TEXT NOT NULL, type TEXT NOT NULL, PRIMARY KEY(registration))")
+            }
+        }
+
+ */
+        private val UPDATE_7_8 = object: Migration(7, 8){
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE FlightData ADD COLUMN multiPilotTime INTEGER NOT NULL DEFAULT 0")
             }
         }
     }

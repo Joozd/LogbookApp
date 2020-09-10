@@ -229,8 +229,12 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
     val name2: LiveData<String>
         get() = Transformations.map(flight) { it.name2 }
     fun setName2(name2: String){
+        // If a ";" in entered value, split it and enter those names. Otherwise, enter first hit in already known names. If none known, enter "as is"
         workingFlight?.let { f ->
-            workingFlight = f.copy(name2 = if (name2.isEmpty()) "" else allNames.value?.firstOrNull{it.anyWordStartsWith(name2, ignoreCase = true)} ?: name2)
+            workingFlight = if (';' in name2){
+                f.copy(name2 = name2.split(';').joinToString(";") { it.trim() })
+            } else
+                f.copy(name2 = if (name2.isEmpty()) "" else allNames.value?.firstOrNull{it.anyWordStartsWith(name2, ignoreCase = true)} ?: name2)
         }
     }
 

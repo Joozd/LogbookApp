@@ -33,7 +33,6 @@ import android.widget.ArrayAdapter
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
@@ -48,9 +47,6 @@ import nl.joozd.logbookapp.model.viewmodels.fragments.EditFlightFragmentViewMode
 
 
 class EditFlightFragment: JoozdlogFragment(){
-    companion object{
-        const val TAG = "EditFlightFragment"
-    }
     private val mainViewModel: MainViewModel by activityViewModels()
     private val viewModel: EditFlightFragmentViewModel by activityViewModels()
 
@@ -116,7 +112,7 @@ class EditFlightFragment: JoozdlogFragment(){
             })
 
             viewModel.timeOut.observe(viewLifecycleOwner, {
-                if (viewModel.checkSim == false) {
+                if (!viewModel.checkSim) {
                     flighttOutStringField.setTextIfNotFocused(it)
                 }
             })
@@ -126,7 +122,7 @@ class EditFlightFragment: JoozdlogFragment(){
             })
 
             viewModel.simTime.observe(viewLifecycleOwner, {
-                if (viewModel.checkSim == true){
+                if (viewModel.checkSim){
                     flighttOutStringField.setTextIfNotFocused(it)
                 }
             })
@@ -178,7 +174,7 @@ class EditFlightFragment: JoozdlogFragment(){
              ************************************************************************************/
 
             @Suppress("UNCHECKED_CAST")
-            viewModel.allNames.observe(viewLifecycleOwner, {
+            viewModel.allNames.observe(viewLifecycleOwner) {
                 (flightNameField.adapter as ArrayAdapter<String>).apply {
                     clear()
                     addAll(it)
@@ -187,15 +183,15 @@ class EditFlightFragment: JoozdlogFragment(){
                     clear()
                     addAll(it)
                 }
-            })
+            }
 
             /************************************************************************************
              * Event handler observer
              ************************************************************************************/
 
             //TODO make this Resource strings
-            viewModel.feedbackEvent.observe(viewLifecycleOwner, {
-                when(it.getEvent()){
+            viewModel.feedbackEvent.observe(viewLifecycleOwner) {
+                when (it.getEvent()) {
                     EditFlightFragmentEvents.NOT_IMPLEMENTED -> toast("Not implemented!")
                     EditFlightFragmentEvents.INVALID_REG_TYPE_STRING -> toast("Error in regType string")
                     EditFlightFragmentEvents.AIRPORT_NOT_FOUND -> toast("Airport not found, no night time logged.")
@@ -203,7 +199,8 @@ class EditFlightFragment: JoozdlogFragment(){
                     EditFlightFragmentEvents.INVALID_TIME_STRING -> toast("Error in time string, no changes")
                     EditFlightFragmentEvents.INVALID_SIM_TIME_STRING -> toast("Error in time string, simTime = 0")
                 }
-            })
+                Unit
+            }
 
             /************************************************************************************
              * Toggle switches onClickListeners
@@ -249,6 +246,7 @@ class EditFlightFragment: JoozdlogFragment(){
             }
 
             autoFillCheckBox.setOnCheckedChangeListener { _, isChecked ->
+                activity?.currentFocus?.clearFocus()
                 viewModel.setAutoFill(isChecked)
             }
 
@@ -268,6 +266,7 @@ class EditFlightFragment: JoozdlogFragment(){
              * get a [TimePicker] dialog which will update through viewModel
              */
             val timeOnClickListener = View.OnClickListener {
+                activity?.currentFocus?.clearFocus()
                 // Get timePicker dialog, update flight in that dialog.
                 supportFragmentManager.commit {
                     add(R.id.mainActivityLayout, TimePicker())
@@ -305,6 +304,7 @@ class EditFlightFragment: JoozdlogFragment(){
             flighttInSelector.setOnClickListener (timeOnClickListener)
 
             flightAcRegSelector.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
                 //TODO remake this dialog as complete aircraft editor
                 supportFragmentManager.commit {
                     add(R.id.mainActivityLayout, if (viewModel.checkSim) SimTypePicker() else AircraftPicker())
@@ -312,6 +312,7 @@ class EditFlightFragment: JoozdlogFragment(){
                 }
             }
             flightTakeoffLandingSelector.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
                 supportFragmentManager.commit {
                     add(R.id.mainActivityLayout, LandingsDialog())
                     addToBackStack(null)
@@ -319,6 +320,7 @@ class EditFlightFragment: JoozdlogFragment(){
             }
 
             flightNameSelector.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
                 mainViewModel.namePickerWorkingOnName1 = true
                 supportFragmentManager.commit {
                     add(R.id.mainActivityLayout,
@@ -328,6 +330,7 @@ class EditFlightFragment: JoozdlogFragment(){
                 }
             }
             flightName2Selector.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
                 mainViewModel.namePickerWorkingOnName1 = false
                 supportFragmentManager.commit {
                     add(R.id.mainActivityLayout,
@@ -417,8 +420,7 @@ class EditFlightFragment: JoozdlogFragment(){
             }
 
             flightSaveButton.setOnClickListener {
-                it.requestFocus()
-                it.clearFocus()
+                activity?.currentFocus?.clearFocus()
                 viewModel.saveOnClose()
                 closeFragment()
             }

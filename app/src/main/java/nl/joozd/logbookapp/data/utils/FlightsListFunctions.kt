@@ -43,7 +43,7 @@ object FlightsListFunctions {
     */
 
     suspend fun makeListOfNamesAsync (flights: List<Flight>) = withContext(Dispatchers.Default){
-        flights.asSequence().map{listOfNotNull(it.name.nullIfEmpty(), it.name2).joinToString("|").split("|")}
+        flights.asSequence().map{listOfNotNull(it.name.nullIfEmpty(), it.name2).joinToString(";").split(";")} // done like this so multiple names in either will be split as well
             .flatten()
             .map{it.trim().nullIfEmpty()}
             .filterNotNull()

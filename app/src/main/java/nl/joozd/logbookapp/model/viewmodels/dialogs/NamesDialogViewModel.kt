@@ -24,6 +24,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.addName2
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.removeLastName2
@@ -74,7 +75,7 @@ class NamesDialogViewModel: JoozdlogDialogViewModel() {
     val currentNames = Transformations.map(flight) {
         when(workingOnName1){
             true -> it.name
-            false -> it.name2.split("|").joinToString("\n")
+            false -> it.name2.split(";").joinToString("\n")
             null -> "ERROR"
         }
     }
@@ -113,10 +114,16 @@ class NamesDialogViewModel: JoozdlogDialogViewModel() {
         _manualName.value = query
     }
 
-    fun addManualNameClicked(){
-        //TODO build this
-        feedback(FeedbackEvents.NamesDialogEvents.NOT_IMPLEMENTED)
+    fun addManualNameClicked() {
+        if (manualName.isBlank()) return // don't do anything if nothing typed
+        workingOnName1?.let { name1 ->
+            workingFlight?.let { f ->
+                workingFlight = if (name1) f.copy(name = manualName) else f.addName2(manualName)
+            }
+        }
     }
+
+
 
     fun removeLastName(){
         workingFlight?.let { f ->

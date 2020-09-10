@@ -29,6 +29,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.dialog_names.view.*
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.DialogNamesBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.viewmodels.MainViewModel
 import nl.joozd.logbookapp.model.viewmodels.dialogs.NamesDialogViewModel
@@ -43,7 +44,7 @@ class NamesDialog(): JoozdlogFragment() {
     private val viewModel: NamesDialogViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.dialog_names, container, false).apply{
+        DialogNamesBinding.bind(inflater.inflate(R.layout.dialog_names, container, false)).apply{
             //set color of top part
             namesDialogTopHalf.joozdLogSetBackgroundColor()
 
@@ -122,6 +123,7 @@ class NamesDialog(): JoozdlogFragment() {
                 selectedNames.text = it
             })
 
+            return root
         }
     }
 

@@ -197,18 +197,13 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     fun menuSelectedDoSomething(){
         /**
-         * Current function: Check all flights for multiPilot time
+         * Current function: Fix names lists
          */
         viewModelScope.launch{
-            val typesMap = aircraftRepository.getAircraftTypesMapShortNameAsync().await()
+
             val timeStamp = TimestampMaker.nowForSycPurposes
-            val allFlights: List<Flight> = flightRepository.getAllFlights().mapIndexed{i, f ->
-                if (i%250 == 0) Log.d("menuSelectedDoSomething", "Fixing flight $i")
-                typesMap[f.aircraftType]?.let{ac ->
-                    if (ac.multiPilot)
-                        f.copy(multiPilotTime = f.duration(), timeStamp = timeStamp)
-                    else f
-                } ?: f
+            val allFlights: List<Flight> = flightRepository.getAllFlights().map{ f ->
+                f.copy(name2 = f.name2.replace('|', ';'))
             }.also {
                 Log.d("menuSelectedDoSomething", "Done. Fixed ${it.filter{it.timeStamp == timeStamp}.size } / ${it.size} flights")
             }

@@ -124,12 +124,12 @@ object FlightDataEntryFunctions {
      */
     fun Flight.addName2(newName: String): Flight =
         if (name2.isEmpty()) this.copy(name2 = newName)
-        else this.copy(name2 = "$name2|$newName")
+        else this.copy(name2 = "$name2;$newName")
 
     fun Flight.removeLastName2(): Flight {
-        return if ("|" !in name2) this.copy(name2 = "")
+        return if (";" !in name2) this.copy(name2 = "")
         else {
-            val oneNameLess = name2.split("|").dropLast(1).joinToString("|")
+            val oneNameLess = name2.split(";").dropLast(1).joinToString(";")
             this.copy(name2= oneNameLess)
         }
 

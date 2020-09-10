@@ -80,7 +80,7 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
                 // DELETEFLAG,
                 // timeStamp,
                 Base64.encodeToString(signature.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
-            ).joinToString(";") { it.replace(';', '~') }
+            ).joinToString(";") { it.replace(';', '|') }
 
         }
     }
@@ -112,7 +112,7 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
 
 
 
-        private fun csvFlightToBasicFlightv4(csvFlight: String): BasicFlight_version4 = csvFlight.also{Log.d("XXXXXXXXXXXX", it)}.split(';').map{ it.replace('~', ';')}.let { v->
+        private fun csvFlightToBasicFlightv4(csvFlight: String): BasicFlight_version4 = csvFlight.also{Log.d("XXXXXXXXXXXX", it)}.split(';').map{ it.replace('|', ';')}.let { v->
             require(BasicFlight_version4.VERSION.version == 4)
             BasicFlight_version4(
                 flightID = -1,
@@ -152,7 +152,7 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
             )
         }
 
-        private fun csvFlightToBasicFlightv5(csvFlight: String): BasicFlight = csvFlight.also{Log.d("XXXXXXXXXXXX", it)}.split(';').map{ it.replace('~', ';')}.let { v->
+        private fun csvFlightToBasicFlightv5(csvFlight: String): BasicFlight = csvFlight.also{Log.d("XXXXXXXXXXXX", it)}.split(';').map{ it.replace('|', ';')}.let { v->
             require(BasicFlight.VERSION.version == 5)
             BasicFlight(
                 flightID = -1,

@@ -26,17 +26,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 
 import androidx.lifecycle.Transformations.distinctUntilChanged
-import androidx.work.impl.model.Preference
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.Crew
-import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.isSamedPlannedFlightAs
-import nl.joozd.logbookapp.data.repository.helpers.mostRecentCompleteFlight
 import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfEmpty
@@ -169,16 +164,16 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      * Also saves flight if [saving] is true
      */
     private fun Flight.autoValues(): Flight {
-        return (if (!autoTimes) this.checkIfCopilot() else {
-            this
+        return when {
+            //Don't autofill anything
+            !autoFill -> this.checkIfCopilot()
+            else -> this
                 .withTakeoffLandings(if (isPF) 1 else 0, origin.value, destination.value)
                 .updateNightTime(_workingFlight.value)
                 .updateIFRTime()
                 .updateMultiPilotTime()
                 .checkIfCopilot()
-
-            //TODO calculate IFR time if needed
-        }).also{
+        }.also{
             if (saving) saveWorkingFlight()
         }
     }
@@ -195,7 +190,8 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      */
 
     private fun Flight.updateNightTime(old: Flight?): Flight {
-        return if ((old?.orig != orig || old.dest != dest || old.timeIn != timeIn || old.timeOut != timeOut) && autoTimes) {
+        return if ((old?.orig != orig || old.dest != dest || old.timeIn != timeIn || old.timeOut != timeOut)) {
+            val ratio = duration().toDouble()/calculatedDuration
             val twilightCalculator = TwilightCalculator(timeOut)
             val totalNightTime = twilightCalculator.minutesOfNight(
                 this@WorkingFlightRepository.origin.value,
@@ -203,8 +199,8 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
                 timeOut,
                 timeIn
             )
-            val correctedNightTime = crew?.getLogTime(totalNightTime, isPIC) ?: totalNightTime
-            this.copy(nightTime = correctedNightTime)
+            val correctedNightTime = (crew?.getLogTime(totalNightTime, isPIC) ?: totalNightTime) * ratio
+            this.copy(nightTime = correctedNightTime.toInt())
         } else this
     }
 

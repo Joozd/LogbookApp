@@ -68,6 +68,32 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/ttofTextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/rounded_corners_white"
+            app:layout_constraintEnd_toStartOf="@+id/nightTimeLayout"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/timesDialogTopHalf">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ttofText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/totalTimeOfFlight"
+                android:imeOptions="actionNext"
+                android:importantForAutofill="no"
+                android:inputType="time"
+                android:nextFocusForward="@id/nightTimeText"
+                android:selectAllOnFocus="true"
+                tools:text="1:23" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/nightTimeLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -118,61 +144,6 @@
                 android:selectAllOnFocus="true"
                 tools:text="4:56" />
 
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            android:id="@+id/saveTimeDialog"
-            android:layout_width="100dp"
-            android:layout_height="30dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="16dp"
-            android:gravity="center"
-            android:text="@android:string/ok"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorAccent"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/cancelTimeDialog" />
-
-        <TextView
-            android:id="@+id/cancelTimeDialog"
-            android:layout_width="100dp"
-            android:layout_height="30dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
-            android:gravity="center"
-            android:text="@android:string/cancel"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorAccent"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/augmentedTextView" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/ttofTextInputLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="4dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toStartOf="@+id/nightTimeLayout"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/timesDialogTopHalf">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/ttofText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/totalTimeOfFlight"
-                android:imeOptions="actionNext"
-                android:nextFocusForward="@id/nightTimeText"
-                android:inputType="time"
-                android:importantForAutofill="no"
-                android:selectAllOnFocus="true"
-                tools:text="1:23" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -235,6 +206,35 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/dualTextview"
             app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
+
+        <TextView
+            android:id="@+id/cancelTimeDialog"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:text="@android:string/cancel"
+            android:textAllCaps="true"
+            android:textColor="?attr/colorAccent"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/augmentedTextView" />
+
+        <TextView
+            android:id="@+id/saveTimeDialog"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:text="@android:string/ok"
+            android:textAllCaps="true"
+            android:textColor="?attr/colorAccent"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/cancelTimeDialog" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

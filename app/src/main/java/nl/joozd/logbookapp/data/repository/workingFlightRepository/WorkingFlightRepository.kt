@@ -147,11 +147,12 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      * - set backup to initial value
      */
     private fun initialSetWorkingFlight(flight: Flight) {
-        updateWorkingFlight(flight)
+        setWithPreviousValuesIfNeeded(flight)
         checkIfFlightShouldBeIfr()
         saving = false
         savedAndClosed = false
         backupFlight = flight
+
     }
 
 
@@ -227,26 +228,18 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
 
         }
     }
-
-    /*
-    /**
-     * Checks if this aircraft always or never flies IFR
-     * @return: true if always IFR
-     *          false if never IFR
-     *          null if unknown of not consistent
-     */
-    private suspend fun thisAircraftIsIFR(reg: String): Boolean?{
-        val previousFlights = flightRepository.getAllFlights().filter{it.registration == reg}
-        return when{
-            previousFlights.isEmpty() -> null
-            previousFlights.all{it.ifrTime >= 0} -> true
-            previousFlights.all{it.ifrTime < 0} -> false
-            else -> null
+    private fun setWithPreviousValuesIfNeeded(f: Flight){
+        launch{
+            flightRepository.getMostRecentFlightAsync().await()?.let{oldFlight ->
+                updateWorkingFlight(f.copy(
+                    registration = f.registration.nullIfEmpty() ?: oldFlight.registration,
+                    name = f.name.nullIfEmpty() ?: oldFlight.name,
+                    name2 = f.name2.nullIfEmpty() ?: oldFlight.name2
+                ))
+                Log.d("WAHEED", "YOLO SWAG LOLOLOLOLOLOLOL")
+            } ?: Log.d("WAHEED", "XXXXXXXXXXXXX Flight? is null JWZ XXXXXXXXXXXXX")
         }
     }
-
-     */
-
 
     /*************************
      * Planned flight calendar sync check

@@ -193,6 +193,8 @@ data class Flight(
     fun tIn(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeIn), ZoneId.of("UTC"))
     fun timeOutString(): String = tOut().format(FlightDataPresentationFunctions.flightTimeFormatter)
     fun timeInString(): String = tIn().format(FlightDataPresentationFunctions.flightTimeFormatter)
+    val autoTimes: Boolean
+        get() = autoFill && (correctedTotalTime == 0 || correctedTotalTime == duration())
 
     //duration in minutes
     fun duration(): Int = if (correctedTotalTime != 0) correctedTotalTime else Crew.of(augmentedCrew).getLogTime(Duration.between(this.tOut(), this.tIn()).toMinutes().toInt(), this.isPIC)

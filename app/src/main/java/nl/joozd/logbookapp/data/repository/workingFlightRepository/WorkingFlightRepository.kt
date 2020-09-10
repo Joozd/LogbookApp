@@ -169,7 +169,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      * Also saves flight if [saving] is true
      */
     private fun Flight.autoValues(): Flight {
-        return (if (!autoFill) this.checkIfCopilot() else {
+        return (if (!autoTimes) this.checkIfCopilot() else {
             this
                 .withTakeoffLandings(if (isPF) 1 else 0, origin.value, destination.value)
                 .updateNightTime(_workingFlight.value)
@@ -195,7 +195,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      */
 
     private fun Flight.updateNightTime(old: Flight?): Flight {
-        return if ((old?.orig != orig || old.dest != dest || old.timeIn != timeIn || old.timeOut != timeOut) && autoFill) {
+        return if ((old?.orig != orig || old.dest != dest || old.timeIn != timeIn || old.timeOut != timeOut) && autoTimes) {
             val twilightCalculator = TwilightCalculator(timeOut)
             val totalNightTime = twilightCalculator.minutesOfNight(
                 this@WorkingFlightRepository.origin.value,

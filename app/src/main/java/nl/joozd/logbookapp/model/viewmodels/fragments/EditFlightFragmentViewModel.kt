@@ -267,6 +267,9 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
 
     fun toggleIFR() = workingFlight?.let{
         workingFlightRepository.isIfr = !workingFlightRepository.isIfr
+        if (workingFlightRepository.isIfr) workingFlight?.let{f ->
+            workingFlight = f.copy(ifrTime = f.duration())
+        }
     }
 
     val pic: LiveData<Boolean> = distinctUntilChanged(Transformations.map(flight) { it.isPIC })

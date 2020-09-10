@@ -124,6 +124,9 @@
     -->
 
 
+    <string name="total_time_too_large">Total time cannot be more than offblocks to on blocks</string>
+    <string name="invalid_total_time">Could not parse total time</string>
+
     <string name="no_internet">Cannot connect to server</string>
     <string name="need_internet">You need an internet connection for this.</string>
     <string name="server_problem">Cannot connect to server</string>

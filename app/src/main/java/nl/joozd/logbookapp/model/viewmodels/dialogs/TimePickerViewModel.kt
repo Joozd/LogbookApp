@@ -97,10 +97,12 @@ class TimePickerViewModel: JoozdlogDialogViewModel(){
         hoursAndMinutesStringToInt(enteredTime).let{
             when{
                 workingFlight == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
+                enteredTime.isBlank() -> workingFlight?.let { f -> workingFlight = f.copy(correctedTotalTime = 0) }
                 it == null -> feedback(TimePickerEvents.INVALID_TOTAL_TIME) // previous time can be found in ifrTime.value
                 it > workingFlight!!.duration() -> feedback(TimePickerEvents.TOTAL_TIME_GREATER_THAN_DURATION)
-                else -> workingFlight?.let { f -> workingFlight = f.copy(correctedTotalTime = it) }
+                else -> workingFlight?.let { f -> workingFlight = f.copy(correctedTotalTime = it, autoFill = false).also{f-> Log.d( "XXXX-10-9 XXX", "correctedTotalTime: $it ---- f: $f")} }
             }
+            Log.d("DEBUG-10-9", "$workingFlight")
         }
     }
 

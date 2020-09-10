@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.ui.dialogs
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -66,7 +65,7 @@ class TimePicker: JoozdlogFragment() {
 
             ttofText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
-                    viewModel.setTotalTimeOfFlight(nightTimeText.text.toString())
+                    viewModel.setTotalTimeOfFlight(ttofText.text.toString())
                 }
             }
 
@@ -87,7 +86,6 @@ class TimePicker: JoozdlogFragment() {
              ***************************************************************************************/
 
             augmentedTextView.setOnClickListener {
-                Log.d("meh", "XOXO")
                 supportFragmentManager.commit {
                     add(R.id.mainActivityLayout, AugmentedCrewDialog())
                     addToBackStack(null)
@@ -154,7 +152,9 @@ class TimePicker: JoozdlogFragment() {
 
             viewModel.feedbackEvent.observe(viewLifecycleOwner, Observer {
                 when (it.getEvent()) {
-                    TimePickerEvents.NOT_IMPLEMENTED -> toast("Not implemented")
+                    TimePickerEvents.NOT_IMPLEMENTED -> context?.toast("Not implemented")
+                    TimePickerEvents.TOTAL_TIME_GREATER_THAN_DURATION -> context?.toast(R.string.total_time_too_large)
+                    TimePickerEvents.INVALID_TOTAL_TIME -> context?.toast(R.string.invalid_total_time)
                     //TODO handle other events
                 }
             })

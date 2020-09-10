@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 import kotlinx.coroutines.withContext
+import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
@@ -39,6 +40,7 @@ object MenuFunctions {
 
 
     suspend fun sendAllFlightsAndToastResult() = withContext(Dispatchers.Main) {
+        val ctx = App.instance.ctx
         val repository = FlightRepository.getInstance()
         when (Cloud.justSendFlights(repository.requestWholeDB())) {
             0 -> longToast("Flights sent ok!")

@@ -190,7 +190,6 @@ class MainActivity : JoozdlogActivity() {
 
             //TODO tempo test function
             viewModel.internetAvailable.observe(activity, Observer {
-                Log.d("internet", "TEST123 $it")
             })
 
             viewModel.notLoggedIn.observe(activity) {
@@ -200,7 +199,6 @@ class MainActivity : JoozdlogActivity() {
             }
 
             viewModel.displayFlightsList.observe(activity, Observer { fff ->
-                Log.d("RANDOM DEBUG", "1")
                 flightsAdapter.updateList(fff)
                 if (!flightsList.canScrollVertically(-1)){ // if at top
                     val plannedFlightsInSight = findAmountOfPlannedFlightsToShow()

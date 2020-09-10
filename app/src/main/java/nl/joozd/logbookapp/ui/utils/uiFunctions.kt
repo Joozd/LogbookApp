@@ -22,11 +22,11 @@ package nl.joozd.logbookapp.ui.utils
 import android.content.Context
 import android.widget.Toast
 import nl.joozd.logbookapp.App
+fun toast(message: Int) = App.instance.ctx.toast(message)
+fun toast(message: String) = App.instance.ctx.toast(message)
 
-fun toast(message: String) =
-    Toast.makeText(App.instance.ctx, message, Toast.LENGTH_SHORT).run { show() }
-
-fun longToast(message: String) = Toast.makeText(App.instance.ctx, message, Toast.LENGTH_LONG).run { show() }
+fun longToast(message: Int) = App.instance.ctx.toast(message)
+fun longToast(message: String) = App.instance.ctx.toast(message)
 
 fun Context.toast(message: CharSequence): Toast = Toast
     .makeText(this, message, Toast.LENGTH_SHORT)

@@ -218,12 +218,8 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
             copy(
                 multiPilotTime = duration(),
                 isCoPilot = !(isPIC || isPICUS),
-            ).also {
-                Log.d("YEEEEEHAW", "Je moeder 123 mpTime: $multiPilotTime \n $this")
-            }
-        } else this.copy(multiPilotTime = 0, isCoPilot = false).also {
-            Log.d("XXXXXXXXXXXX", "MULTIPILOT IS FALSEEEEEE1")
-        }
+            )
+        } else this.copy(multiPilotTime = 0, isCoPilot = false)
     }
 
     private fun checkIfFlightShouldBeIfr() {
@@ -382,7 +378,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
 
     fun notifyFinalSave() {
         savedAndClosed = true
-        Log.d("FINAL", "$flight")
+        // Log.d("FINAL", "$flight")
     }
 
     /**
@@ -396,7 +392,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
             val done = async {
                 updateWorkingFlight(
                     reverseFlight(
-                        mostRecentFlight.await().also { Log.d("MostRecentFlight", "$it") }
+                        mostRecentFlight.await()
                             ?: Flight.createEmpty(),
                         highestID.await() + 1))
             }

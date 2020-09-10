@@ -85,9 +85,12 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/nightTime"
                 android:importantForAutofill="no"
+                android:imeOptions="actionNext"
+                android:nextFocusForward="@id/ifrTimeText"
                 android:includeFontPadding="true"
                 android:inputType="time"
                 android:singleLine="true"
+                android:selectAllOnFocus="true"
                 tools:text="1:23" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -112,6 +115,7 @@
                 android:importantForAutofill="no"
                 android:inputType="time"
                 android:singleLine="true"
+                android:selectAllOnFocus="true"
                 tools:text="4:56" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -163,6 +167,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/totalTimeOfFlight"
+                android:imeOptions="actionNext"
+                android:nextFocusForward="@id/nightTimeText"
+                android:inputType="time"
+                android:importantForAutofill="no"
+                android:selectAllOnFocus="true"
                 tools:text="1:23" />
         </com.google.android.material.textfield.TextInputLayout>
 

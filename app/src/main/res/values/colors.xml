@@ -26,6 +26,7 @@
     <color name="red">#FF0000</color>
     <color name="orange">#FF6600</color>
     <color name="yellow">#FFFF00</color>
+    <color name="green_yellow">#BBFF00</color>
     <color name="green">#00FF00</color>
     <color name="black">#FF000000</color>
     <color name="none">#00000000</color>

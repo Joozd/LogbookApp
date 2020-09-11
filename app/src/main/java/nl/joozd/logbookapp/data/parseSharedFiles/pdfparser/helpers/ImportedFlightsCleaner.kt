@@ -63,7 +63,7 @@ class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private va
             val cleanDest = iataIcaoMap[dest] ?: dest
             val bestHitRegistration = registration.findBestHitForRegistration(acMap.keys) // null if no hit found
             val cleanRegistation = bestHitRegistration ?: completeRegistration(registration)
-            val cleanType = bestHitRegistration?.let {acMap[it]?.type?.shortName} ?: UNKNOWN_TYPE
+            val cleanType = bestHitRegistration?.let {acMap[it]?.type?.shortName} ?: f.aircraftType
 
             return f.copy(orig = cleanOrig, dest = cleanDest, registration = cleanRegistation, aircraftType = cleanType, timeStamp = now)
         }

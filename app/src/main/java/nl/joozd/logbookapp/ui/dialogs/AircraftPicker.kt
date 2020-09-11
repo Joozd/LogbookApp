@@ -31,6 +31,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.databinding.DialogPickAircraftTypeBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.onTextChanged
@@ -93,9 +94,17 @@ class AircraftPicker: JoozdlogFragment(){
             }
 
             viewModel.selectedAircraft.observe(viewLifecycleOwner){
+                pickedAircraftText.text = it.registration
                 it.type?.let{t ->
                     typeDescriptionTextView.text = t.name
                 }
+                registrationFieldLayout.setErrorTextAppearance(when(it.source){
+                    Aircraft.KNOWN -> R.style.appearance_aircraft_local
+                    Aircraft.PRELOADED -> R.style.appearance_aircraft_forced_type
+                    Aircraft.CONSENSUS -> R.style.appearance_aircraft_other_user
+                    Aircraft.NONE -> R.style.appearance_aircraft_not_found
+                    else -> R.style.appearance_aircraft_not_found
+                })
             }
 
             viewModel.aircraftTypes.observe(viewLifecycleOwner) {

@@ -30,6 +30,8 @@ import nl.joozd.joozdlogcommon.ConsensusData
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.dataclasses.AircraftTypeConsensus
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.dao.AircraftTypeConsensusDao
@@ -37,6 +39,8 @@ import nl.joozd.logbookapp.data.room.dao.AircraftTypeDao
 import nl.joozd.logbookapp.data.room.dao.PreloadedRegistrationsDao
 import nl.joozd.logbookapp.data.room.dao.RegistrationDao
 import nl.joozd.logbookapp.data.room.model.*
+import nl.joozd.logbookapp.extensions.mostCommonOrNull
+import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.util.*
@@ -258,8 +262,13 @@ replaced with getter
     // Caches for non-changed parts:
     private var acrwtCache: List<Aircraft> = emptyList()
     private var acrwtRegs: List<String> = emptyList()
+
+    private var flightsCache: List<Aircraft> = emptyList()
+    private var flightsRegs: List<String> = emptyList()
+
     private var preloadedCache: List<Aircraft> = emptyList()
     private var preloadedRegs: List<String> = emptyList()
+
     private var consensusCache: List<Aircraft> = emptyList()
 
     /**
@@ -269,20 +278,25 @@ replaced with getter
      * - consensus data
      */
     private suspend fun buildCachedAircraftListFromScratch(): List<Aircraft> = withContext(dispatcher) {
+        val allAircraftAsync = async { FlightRepository.getInstance().getAllFlights() }
         ((getAircraftRegistrationsWithType().map{it.toAircraft()})
             .also {
             acrwtCache = it
             acrwtRegs = it.map{acrwt -> acrwt.registration}
         }) +
-                ((getPreloadedRegistrations().map{ it.toAircraft()})
+                getAircraftTypesFromFlights(allAircraftAsync.await(), exclude = acrwtRegs).also{
+                    flightsCache = it
+                    flightsRegs = it.map{ acFromFlight -> acFromFlight.registration}
+                } +
+                (getPreloadedRegistrations().map{ it.toAircraft()})
                     .filter{it.registration !in acrwtRegs}
                     .also {
                         preloadedCache = it
                         preloadedRegs = it.map{p -> p.registration}
-                    }) +
-                ((getConsensusData().map{it.toAircraft()})
+                    } +
+                getConsensusData().map{it.toAircraft()}
                     .filter{it.registration !in acrwtRegs && it.registration !in preloadedRegs}
-                    .also{ consensusCache = it})
+                    .also{ consensusCache = it}
     }
 
     private suspend fun updateAircraftListWithNewAcrwt(): List<Aircraft> = withContext(dispatcher) {
@@ -290,22 +304,92 @@ replaced with getter
             .also {
             acrwtCache = it
             acrwtRegs = it.map{acrwt -> acrwt.registration}
-        }) + preloadedCache + consensusCache
+        }) +
+                flightsCache.filter{it.registration !in acrwtRegs}.also{
+                    flightsCache = it
+                    flightsRegs = it.map{ac -> ac.registration}
+                } + preloadedCache.filter{it.registration !in acrwtRegs}.also{
+                    preloadedCache = it
+                    preloadedRegs = it.map{ac -> ac.registration}
+                } + consensusCache.filter { it.registration !in acrwtRegs}.also {
+                    consensusCache = it
+        }
+
+    }
+
+    private suspend fun updateAircraftListWithNewFromFlights(): List<Aircraft> = withContext(dispatcher) {
+        val flights = FlightRepository.getInstance().getAllFlights()
+        acrwtCache +
+                getAircraftTypesFromFlights(flights, acrwtRegs).also{
+                    flightsRegs = it.map{ac -> ac.registration}
+                    flightsCache = it
+                } + preloadedCache.filter{it.registration !in flightsRegs}.also{
+                    preloadedCache = it
+                    preloadedRegs = it.map{ac -> ac.registration}
+                } + consensusCache.filter { it.registration !in flightsRegs}.also {
+                    consensusCache = it
+        }
+
+
     }
 
     private suspend fun updateAircraftListWithNewPreloaded(): List<Aircraft> = withContext(dispatcher) {
-        acrwtCache + (getPreloadedRegistrations().map{ it.toAircraft()}
-            .filter{it.registration !in acrwtRegs}
+        acrwtCache + flightsCache +(getPreloadedRegistrations().map{ it.toAircraft()}
+            .filter{it.registration !in acrwtRegs && it.registration !in flightsRegs}
             .also {
                 preloadedCache = it
                 preloadedRegs = it.map{p -> p.registration}
-            }) + consensusCache
+            }) + consensusCache.filter { it.registration !in preloadedRegs}.also{
+            consensusCache = it
+        }
     }
 
     private suspend fun updateAircraftListWithNewConsensus(): List<Aircraft> = withContext(dispatcher) {
-        acrwtCache + preloadedCache + (getConsensusData().map{it.toAircraft()}
-            .filter{it.registration !in acrwtRegs && it.registration !in preloadedRegs}
+        acrwtCache + flightsCache + preloadedCache + (getConsensusData().map{it.toAircraft()}
+            .filter{it.registration !in acrwtRegs && it.registration !in flightsRegs && it.registration !in preloadedRegs}
             .also{ consensusCache = it})
+    }
+
+    /**
+     * Get aircraft types from a list of flights
+     * Will return a list of Aircraft with [Aircraft.source] = [Aircraft.FLIGHT] or [Aircraft.FLIGHT_CONFLICTING]
+     * A conflicting flight is one where multiple solutions are found.
+     */
+    private suspend fun getAircraftTypesFromFlights(flights: List<Flight>, exclude: List<String>): List<Aircraft> = withContext(Dispatchers.Default){
+        val typesMapAsync = getAircraftTypesMapShortNameAsync()
+
+        val regsToCheck = flights.filter{it.registration.isNotBlank() && it.registration !in exclude}
+            .map{it.registration to it.aircraftType.toUpperCase(Locale.ROOT)} // now we have a list of registrations paired with types
+
+        //conflicts is a list of those registrations that match multiple types in flights database
+        val conflicts = findConflicts(regsToCheck)
+        val conflictingRegs = conflicts.map{it.first}.toSet()
+
+        val typesMap = typesMapAsync.await().also{
+            Log.d("getAircraftTypesFromFlights", "types with md: ${it.filterValues{ "11" in it.shortName}}")
+        }
+        //Lists of pairs or Reg to Type (one per registration)
+        val nonConflictingAircraftRegAndType = regsToCheck.toSet().filter{it.first !in conflictingRegs && it.second in typesMap.keys}
+        val conflictingAircraftRegAndType = conflictingRegs.map{distinctReg -> regsToCheck.filter{it.first == distinctReg && it.second in typesMap.keys }.mostCommonOrNull()}.filterNotNull()
+        regsToCheck.filter{it !in nonConflictingAircraftRegAndType && it !in conflictingAircraftRegAndType}.let{
+            Log.d("getAircraftTypesFromFlights", "unfound: ${it.distinct()}")
+        }
+
+        //return:
+        nonConflictingAircraftRegAndType.map{rt ->  Aircraft(registration = rt.first, type = typesMap[rt.second], source = Aircraft.FLIGHT)} +
+                conflictingAircraftRegAndType.map{rt ->  Aircraft(registration = rt.first, type = typesMap[rt.second], source = Aircraft.FLIGHT_CONFLICTING)}
+
+    }.also{
+        Log.d("getAircraftTypesFromFlights", "Found ${it.size} aircraft: ${it.map{it.registration}}")
+    }
+
+    /**
+     * Will return all conflicts, as a list of (distinct_registration to all occurences (to make an educated guess which one is right)
+     */
+    private fun findConflicts(regsToCheck: List<Pair<String, String>>): List<Pair<String, String>>{
+        val foundRegs = regsToCheck.map{it.first}.toSet()
+        val regsMap = foundRegs.map {foundReg-> foundReg to regsToCheck.filter { it.first == foundReg }}.toMap()
+        return regsMap.filterValues { it.size >1 }.values.flatten()
     }
 
     /********************************************************************************************
@@ -354,8 +438,11 @@ replaced with getter
 
     suspend fun requestAircraftTypesMap() = withContext(dispatcher) { getAircraftTypesMapAsync().await() }
 
+    /**
+     * Will make a map of short names (UPPERCASE) to AircraftType
+     */
     fun getAircraftTypesMapShortNameAsync() = async {
-        getAircraftTypes().map{ it.shortName to it}.toMap()
+        getAircraftTypes().map{ it.shortName.toUpperCase(Locale.ROOT) to it}.toMap()
     }
 
     suspend fun getAircraftFromRegistration(reg: String): Aircraft? =

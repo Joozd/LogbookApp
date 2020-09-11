@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.data.repository
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import kotlinx.coroutines.*
@@ -37,12 +38,12 @@ import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.util.*
 
 class AirportRepository(private val airportDao: AirportDao, private val dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope by MainScope()  {
-    private val _cachedAirports = MutableLiveData<List<Airport>>()
+    private val _cachedAirports = MediatorLiveData<List<Airport>>()
     init{
         launch{
             _cachedAirports.value=getAll(true)
         }
-        getLive().observeForever {
+        _cachedAirports.addSource(getLive()){
             _cachedAirports.value = it
             launch {
                 _icaoIataMap.value = getIcaoToIataMap(true)
@@ -52,11 +53,11 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
     val liveAirports: LiveData<List<Airport>> =
         Transformations.distinctUntilChanged(_cachedAirports)
 
-    private val _icaoIataMap = MutableLiveData<Map<String, String>>()
+    private val _icaoIataMap = MediatorLiveData<Map<String, String>>()
     init{
         launch(Dispatchers.Main) { _icaoIataMap.value = getIcaoToIataMap(true) }
         Log.d("XOXOXOXOXOXOXOX", "icaoIataMap is now size ${icaoIataMap.value?.size}")
-        liveAirports.observeForever {
+        _icaoIataMap.addSource(liveAirports) {
             launch(Dispatchers.Main) {_icaoIataMap.value = getIcaoToIataMap() }
         }
     }

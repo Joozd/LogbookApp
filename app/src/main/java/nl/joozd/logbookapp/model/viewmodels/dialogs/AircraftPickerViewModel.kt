@@ -25,6 +25,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
@@ -37,23 +38,35 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
     private val typesSearchString
         get() = _typesSearchString.value ?: ""
 
-    val aircraftTypes = MediatorLiveData<List<String>>()
+    private val _aircraftTypes = MediatorLiveData<List<String>>()
+
     init{
-        aircraftTypes.addSource(aircraftRepository.liveAircraftTypes){
-            aircraftTypes.value = it.map{ac -> ac.name}.filter{typesSearchString in it}
+        _aircraftTypes.addSource(aircraftRepository.liveAircraftTypes){
+            _aircraftTypes.value = it.map{ac -> ac.name}.filter{typesSearchString in it}
         }
-        aircraftTypes.addSource(_typesSearchString){
-            aircraftTypes.value = (aircraftRepository.liveAircraftTypes.value ?: emptyList()).map{ac -> ac.name}.filter{typesSearchString in it}
+        _aircraftTypes.addSource(_typesSearchString){
+            _aircraftTypes.value = (aircraftRepository.liveAircraftTypes.value ?: emptyList()).map{ac -> ac.name}.filter{typesSearchString in it}
         }
     }
+
+    private val _knownAircraft: LiveData<List<Aircraft>>
+        get() = aircraftRepository.liveAircraftList
 
     private val _selectedAircraft = MutableLiveData(
         Aircraft(
             "XX-XXX"
         )
     )
-    val selectedAircraft
+    val selectedAircraft: LiveData<Aircraft>
         get ()= _selectedAircraft
+
+    val aircraftTypes: LiveData<List<String>>
+        get() = _aircraftTypes
+
+    val knownRegistrations = flightRepository.usedRegistrations
+
+
+
     private fun updatedSelectedAircraft(
         registration: String? = null,
         type: AircraftType? = null,

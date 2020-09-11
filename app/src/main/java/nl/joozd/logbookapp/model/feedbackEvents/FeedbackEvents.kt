@@ -153,6 +153,7 @@ object FeedbackEvents {
         REGISTRATION_HAS_MULTIPLE_CONSENSUS,// registration has multiple hits in consensus
                                             // extraData = List of found registrations in consensus
         AIRPORT_NOT_FOUND,
+        AIRCRAFT_NOT_FOUND,
         ERROR
 
     }

@@ -19,15 +19,38 @@
 
 package nl.joozd.logbookapp.data.repository.helpers
 
-fun String.findBestHitForRegistration(registrations: Collection<String>): String?{
-    if (this in registrations) return this
-    var searchableRegs = registrations.filter{it.length > length}.filter{this in it}
+import java.util.*
+
+fun String.findBestHitForRegistration(registrations: Collection<String>): String? =
+    findSortedHitsForRegistration(registrations).firstOrNull()
 
     //we'll want to search from end to start. As soon as wel have one, we're good.
+    /*
     do {
         searchableRegs.firstOrNull { it.endsWith(this) }?.let {return it}
         if (searchableRegs.none { this in it }) return null
         searchableRegs = searchableRegs.map { it.dropLast(1) }.filter { it.isNotEmpty() }
     } while (searchableRegs.none{it.endsWith(this)})
-    return null
+     */
+
+
+
+/**
+ * Searches aircraft registrations for hits, sorted by usefulness:
+ * - Exact match ("PH-EZA" -> "PH-EZA")
+ * - Last matches("ZA" -> PH-EZA")
+ * - Part after hyphen matches ( "EZ" -> PH-EZA")
+ * - First part matches("PH" -> "PH-EZA")
+ * - Any part matches ("H-E" -> "PH-EZA")
+ */
+fun String.findSortedHitsForRegistration(registration: Collection<String>, caseSensitive: Boolean = false): List<String>{
+    val query = if (caseSensitive) this else this.toUpperCase(Locale.ROOT)
+    val searchableRegs = registration.filter{it.length > length}.filter{query in it}.let {rrr->
+        if (caseSensitive) rrr else rrr.map { it.toUpperCase(Locale.ROOT) }
+    }
+        return  (searchableRegs.filter {it == query} +
+                searchableRegs.filter{it.endsWith((query))} +
+                searchableRegs.filter{'-' in it}.map {it.split('-')}.filter{it[1].startsWith(query)}.map{it.joinToString("-")} +
+                searchableRegs.filter{it.startsWith((query))} +
+                searchableRegs).distinct()
 }

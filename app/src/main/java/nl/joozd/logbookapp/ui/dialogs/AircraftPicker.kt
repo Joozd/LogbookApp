@@ -36,6 +36,7 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AircraftPickerViewModel
+import nl.joozd.logbookapp.ui.adapters.AircraftAutoCompleteAdapter
 import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
 
 
@@ -55,6 +56,8 @@ class AircraftPicker: JoozdlogFragment(){
                 typesPickerRecyclerView.layoutManager = LinearLayoutManager(context)
                 typesPickerRecyclerView.adapter = it
             }
+            val regFieldAdapter = AircraftAutoCompleteAdapter(requireActivity(), R.layout.item_custom_autocomplete)
+            registrationField.setAdapter(regFieldAdapter)
 
             /**
              * editText OnTextChanged and onFocuschanged
@@ -78,27 +81,31 @@ class AircraftPicker: JoozdlogFragment(){
              * Observers
              ******************************************************************************/
 
-            viewModel.registration.observe(viewLifecycleOwner, Observer{
+            viewModel.registration.observe(viewLifecycleOwner){
                 pickedAircraftText.text = it
                 if (!regFieldActive)
                     registrationField.setText(it)
-            })
+            }
 
-            viewModel.selectedAircraftString.observe(viewLifecycleOwner, Observer{
+            viewModel.selectedAircraftString.observe(viewLifecycleOwner) {
                 typesPickerAdapter.selectActiveItem(it)
                 typesPickerRecyclerView.scrollToPosition(typesPickerAdapter.list.indexOf(it))
-            })
+            }
 
-            viewModel.selectedAircraft.observe(viewLifecycleOwner, Observer{
+            viewModel.selectedAircraft.observe(viewLifecycleOwner){
                 it.type?.let{t ->
                     typeDescriptionTextView.text = t.name
                 }
-            })
+            }
 
-            viewModel.aircraftTypes.observe(viewLifecycleOwner, Observer {
+            viewModel.aircraftTypes.observe(viewLifecycleOwner) {
                 Log.d(this::class.simpleName, "updating list with ${it.size} items")
                 typesPickerAdapter.updateList(it)
-            })
+            }
+
+            viewModel.knownRegistrations.observe(viewLifecycleOwner){
+                regFieldAdapter.setItems(it)
+            }
 
             /******************************************************************************
              * save or cancel

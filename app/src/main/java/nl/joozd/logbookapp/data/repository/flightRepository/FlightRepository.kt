@@ -40,6 +40,7 @@ import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAsWithMargins
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightOnSameDay
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfRegistrationsAsync
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.checkPermission
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
@@ -65,6 +66,26 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         }
         requestValidLiveFlightData().observeForever { _cachedFlights.value = it }
     }
+    /**
+     * All names in those flights
+     */
+    private val _allNames = MediatorLiveData<List<String>>()
+    private val _usedRegistrations= MediatorLiveData<List<String>>()
+
+    init{
+        _allNames.addSource(_cachedFlights){
+            launch{
+                _allNames.value = makeListOfNamesAsync(it)
+            }
+        }
+
+        _usedRegistrations.addSource(_cachedFlights){
+            launch{
+                _usedRegistrations.value = makeListOfRegistrationsAsync(it)
+            }
+        }
+    }
+
     private var cachedFlightsList: List<Flight>?
         get() = _cachedFlights.value
         set(fff){
@@ -80,31 +101,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             fff.map { f -> f.toFlight() }
         }
 
-    //Might become private, depending on how i will do cloud syncs
-    suspend fun requestWholeDB(): List<Flight> = withContext(dispatcher){
-        flightDao.requestAllFlights().map{it.toFlight()}
-    }
-
-    suspend fun fetchFlightByID(id: Int): Flight? {
-        cachedFlightsList?.let {
-            return it.firstOrNull {f -> f.flightID == id }
-        }
-        return withContext(dispatcher){ flightDao.fetchFlightByID(id)?.toFlight()}
-    }
-
-    /**
-     * All names in those flights
-     */
-    private val _allNames = MediatorLiveData<List<String>>()
-    val allNames: LiveData<List<String>>
-        get() = _allNames
-    init{
-        _allNames.addSource(_cachedFlights){
-            launch{
-                _allNames.value = makeListOfNamesAsync(it)
-            }
-        }
-    }
 
     /**
      * update cached data and delete from disk
@@ -140,6 +136,18 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     private val _notLoggedIn = MutableLiveData<Boolean>()
 
+    //Might become private, depending on how i will do cloud syncs
+    suspend fun requestWholeDB(): List<Flight> = withContext(dispatcher){
+        flightDao.requestAllFlights().map{it.toFlight()}
+    }
+
+    suspend fun fetchFlightByID(id: Int): Flight? {
+        cachedFlightsList?.let {
+            return it.firstOrNull {f -> f.flightID == id }
+        }
+        return withContext(dispatcher){ flightDao.fetchFlightByID(id)?.toFlight()}
+    }
+
     /********************************************************************************************
      * Public parts:
      ********************************************************************************************/
@@ -157,6 +165,11 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     val notLoggedIn: LiveData<Boolean>
         get() = _notLoggedIn
 
+    val allNames: LiveData<List<String>>
+        get() = _allNames
+
+    val usedRegistrations: LiveData<List<String>>
+        get() = _usedRegistrations
     /********************************************************************************************
      * Vars and vals
      ********************************************************************************************/

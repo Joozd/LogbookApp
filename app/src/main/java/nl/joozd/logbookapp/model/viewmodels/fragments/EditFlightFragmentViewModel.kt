@@ -189,6 +189,8 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
                                 aircraftType = it.type?.shortName ?: "UNKNWN",
                                 registration = it.registration
                             )
+                        } ?: feedback(EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND).apply{
+                            putString(enteredData)
                         }
                     }
 
@@ -292,6 +294,7 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
      *********************************************************************************************/
 
     val allNames = distinctUntilChanged(flightRepository.allNames)
+    val knownRegistrations = distinctUntilChanged(flightRepository.usedRegistrations)
 
     fun save(){
         workingFlightRepository.saveWorkingFlight()

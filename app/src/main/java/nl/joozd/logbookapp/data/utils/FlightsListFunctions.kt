@@ -49,4 +49,8 @@ object FlightsListFunctions {
             .filterNotNull()
             .distinct().toList()
     }
+
+    suspend fun makeListOfRegistrationsAsync ( flights: List<Flight>) = withContext (Dispatchers.Default){
+        flights.map{it.registration}.distinct()
+    }
 }

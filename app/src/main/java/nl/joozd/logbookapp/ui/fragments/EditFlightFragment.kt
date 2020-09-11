@@ -44,6 +44,7 @@ import nl.joozd.logbookapp.ui.dialogs.*
 import nl.joozd.logbookapp.ui.dialogs.NamesDialog
 import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.model.viewmodels.fragments.EditFlightFragmentViewModel
+import nl.joozd.logbookapp.ui.adapters.AircraftAutoCompleteAdapter
 
 
 class EditFlightFragment: JoozdlogFragment(){
@@ -68,6 +69,8 @@ class EditFlightFragment: JoozdlogFragment(){
 
             flightNameField.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))
             flightName2Field.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))
+            val aircraftFieldAdapter = AircraftAutoCompleteAdapter(requireActivity(), R.layout.item_custom_autocomplete)
+            flightAircraftField.setAdapter(aircraftFieldAdapter)
 
             /************************************************************************************
              * observers to show data in editText fields
@@ -184,6 +187,9 @@ class EditFlightFragment: JoozdlogFragment(){
                     addAll(it)
                 }
             }
+            viewModel.knownRegistrations.observe(viewLifecycleOwner){
+                aircraftFieldAdapter.setItems(it)
+            }
 
             /************************************************************************************
              * Event handler observer
@@ -195,6 +201,7 @@ class EditFlightFragment: JoozdlogFragment(){
                     EditFlightFragmentEvents.NOT_IMPLEMENTED -> toast("Not implemented!")
                     EditFlightFragmentEvents.INVALID_REG_TYPE_STRING -> toast("Error in regType string")
                     EditFlightFragmentEvents.AIRPORT_NOT_FOUND -> toast("Airport not found, no night time logged.")
+                    EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND -> toast("TODO (open aircraft picker) [${it.getString()}]")
                     EditFlightFragmentEvents.AIRPORT_NOT_FOUND_FOR_LANDINGS -> toast("airport not found, all logged as day")
                     EditFlightFragmentEvents.INVALID_TIME_STRING -> toast("Error in time string, no changes")
                     EditFlightFragmentEvents.INVALID_SIM_TIME_STRING -> toast("Error in time string, simTime = 0")

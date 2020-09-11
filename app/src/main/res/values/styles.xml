@@ -59,6 +59,24 @@
         <item name="android:textColorPrimary">@color/white</item>
     </style>
 
+    <style name="appearance_aircraft_local" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/green</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="appearance_aircraft_forced_type" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/yellow</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="appearance_aircraft_other_user" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/orange</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="appearance_aircraft_not_found" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/red</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+
     <style name="expandableListGroupTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:background">#85C1E9</item>
         <item name="android:textColorPrimary">@color/white</item>

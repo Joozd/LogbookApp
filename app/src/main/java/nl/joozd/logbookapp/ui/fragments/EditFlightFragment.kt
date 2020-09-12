@@ -85,7 +85,6 @@ class EditFlightFragment: JoozdlogFragment(){
             })
 
             viewModel.flightNumber.observe(viewLifecycleOwner, {
-                Log.d("HALLOOO", "Ik ben Joozd!")
                 flightFlightNumberField.setTextIfNotFocused(it)
             })
 

@@ -120,7 +120,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
         }
         _workingFlight.addSource(externallyUpdatedFlight){ newFlight ->
             _workingFlight.value = newFlight.autoValues()
-            origDestAircraftWorker.flight = newFlight
+            if (!newFlight.isSim) origDestAircraftWorker.flight = newFlight
             checkIfFlightShouldBeIfr()
         }
         _workingFlight.addSource(thisFlightIsIFR){isIFR ->
@@ -223,6 +223,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     }
 
     private fun checkIfFlightShouldBeIfr() {
+        if (flight?.isSim != true) return // don't do anything on null flight or sim
         val mostRecentFlight = flightRepository.getMostRecentFlightAsync()
         launch {
             flight?.let{

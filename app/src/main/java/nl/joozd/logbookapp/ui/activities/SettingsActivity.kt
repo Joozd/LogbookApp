@@ -45,6 +45,7 @@ import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.utils.checkPermission
 
+//TODO make standard sim time picker
 class SettingsActivity : JoozdlogActivity() {
     private lateinit var mBinding: ActivitySettingsBinding
     val viewModel: SettingsActivityViewModel by viewModels()

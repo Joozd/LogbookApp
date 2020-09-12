@@ -24,7 +24,6 @@ import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.data.repository.workingFlightRepository.WorkingFlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.anyWordStartsWith
 import nl.joozd.logbookapp.extensions.nullIfEmpty
@@ -51,11 +50,11 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
 
 
 
-    private val _flightNumber: LiveData<String> = Transformations.map(flight) { it.flightNumber }
-    private val _orig: LiveData<String> = Transformations.map(workingFlightRepository.origin) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: workingFlight?.orig }
-    private val _dest: LiveData<String> = Transformations.map(workingFlightRepository.destination) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: workingFlight?.orig }
-    private val _timeOut: LiveData<String> = Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeOut) }
-    private val _timeIn: LiveData<String> = Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeIn) }
+    val flightNumber: LiveData<String> = distinctUntilChanged(Transformations.map(flight) { it.flightNumber })
+    val orig: LiveData<String> = distinctUntilChanged(Transformations.map(workingFlightRepository.origin) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: workingFlight?.orig })
+    val dest: LiveData<String> = distinctUntilChanged(Transformations.map(workingFlightRepository.destination) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: workingFlight?.orig })
+    val timeOut: LiveData<String> = distinctUntilChanged(Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeOut) })
+    val timeIn: LiveData<String> = distinctUntilChanged(Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeIn) })
 
 
 
@@ -65,18 +64,14 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
      * - setters
      *********************************************************************************************/
 
-    val flightID = Transformations.map(flight) { it.flightID }
+    val flightID = distinctUntilChanged(Transformations.map(flight) { it.flightID })
 
-    val date: LiveData<String> = Transformations.map(flight) { getDateStringFromEpochSeconds(it.timeOut) }
+    val date: LiveData<String> = distinctUntilChanged(Transformations.map(flight) { getDateStringFromEpochSeconds(it.timeOut) })
     fun setDate(date: LocalDate){
         workingFlight?.let{ workingFlight = it.withDate(date)}
     }
 
     fun getLocalDate(): LocalDate? = flight.value?.tOut()?.toLocalDate()
-
-
-    val flightNumber: LiveData<String>
-        get() = _flightNumber
 
     fun setFlightNumber(flightNumber: String){
         workingFlight?.let{
@@ -91,9 +86,6 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
         }
     }
 
-    val orig: LiveData<String>
-        get() = _orig
-    // TODO: This gives "null" if airport not found.
     fun setOrig(enteredData: String){
         workingFlight?.let {
             // initially set entered data
@@ -114,11 +106,6 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
 
         }
     }
-
-    //TODO IATA or ICAO display
-
-    val dest: LiveData<String>
-        get() = _dest
 
     fun setDest(enteredData: String){
         workingFlight?.let {
@@ -146,23 +133,23 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
     /**
      * This one also used for sim times as Fragment doesn't know or care if this flight is sim or not
      */
-
-    val timeOut: LiveData<String>
-        get() = _timeOut
     fun setTimeOut(enteredData: String){
         workingFlight?.let {
-            workingFlight = if (it.isSim) it.copy (simTime = hoursAndMinutesStringToInt(enteredData) ?: 0.also{ feedback(EditFlightFragmentEvents.INVALID_SIM_TIME_STRING)})
+            workingFlight = if (it.isSim) it.copy (simTime = hoursAndMinutesStringToInt(enteredData) ?: 0.also{
+                feedback(EditFlightFragmentEvents.INVALID_SIM_TIME_STRING)
+                Log.e("EditFlightViewModel", "INVALID_SIM_TIME_STRING")
+            })
             else it.withTimeOutStringToTime(enteredData).also{ f-> // setting null flight does nothing so we can do this
-                if (f == null) feedback(EditFlightFragmentEvents.INVALID_TIME_STRING)
+                if (f == null) feedback(EditFlightFragmentEvents.INVALID_TIME_STRING).also{
+                    Log.e("EditFlightViewModel", "INVALID_SIM_TIME_STRING")
+                }
             }
         }
     }
 
     val simTime: LiveData<String>
-        get() = Transformations.map(flight) { minutesToHoursAndMinutesString(it.simTime)}
+        get() = distinctUntilChanged(Transformations.map(flight) { minutesToHoursAndMinutesString(it.simTime)})
 
-    val timeIn: LiveData<String>
-        get() = _timeIn
     fun setTimeIn(enteredData: String){
         workingFlight?.let {
             workingFlight = it.withTimeInStringToTime(enteredData)
@@ -170,7 +157,7 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
     }
 
     val regAndType: LiveData<String>
-        get() = Transformations.map(flight) { if (it.isSim) it.aircraftType else it.regAndType() }
+        get() = distinctUntilChanged(Transformations.map(flight) { if (it.isSim) it.aircraftType else it.regAndType() })
     fun setRegAndType(enteredData: String){
         workingFlight?.let{f ->
             if (checkSim){
@@ -203,7 +190,7 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
     }
 
     val takeoffLandings: LiveData<String>
-        get() = Transformations.map(flight) { it.takeoffLanding }
+        get() = distinctUntilChanged(Transformations.map(flight) { it.takeoffLanding })
     fun setTakeoffLandings(enteredData: String){
         if ('/' in enteredData) return // do nothing since that should not be possible to change
         require(enteredData.all { it in "0123456789"}) { "$enteredData did not consist of only numbers"}
@@ -221,7 +208,7 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
     }
 
     val name: LiveData<String>
-        get() = Transformations.map(flight) { it.name }
+        get() = distinctUntilChanged(Transformations.map(flight) { it.name })
     fun setName(name: String){
         workingFlight?.let {f ->
             workingFlight = f.copy(name = if (name.isEmpty()) "" else allNames.value?.firstOrNull{it.anyWordStartsWith(name, ignoreCase = true)} ?: name)
@@ -229,7 +216,7 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
     }
 
     val name2: LiveData<String>
-        get() = Transformations.map(flight) { it.name2 }
+        get() = distinctUntilChanged(Transformations.map(flight) { it.name2 })
     fun setName2(name2: String){
         // If a ";" in entered value, split it and enter those names. Otherwise, enter first hit in already known names. If none known, enter "as is"
         workingFlight?.let { f ->
@@ -241,7 +228,7 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
     }
 
     val remarks: LiveData<String>
-        get() = Transformations.map(flight) { it.remarks }
+        get() = distinctUntilChanged(Transformations.map(flight) { it.remarks })
     fun setRemarks(remarks: String){
         workingFlight?.let {
             workingFlight = it.copy(remarks = remarks)
@@ -253,23 +240,23 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
      *********************************************************************************************/
 
     val sign: LiveData<Boolean>
-        get() = Transformations.map(flight) { it.signature.isNotEmpty() }
+        get() = distinctUntilChanged(Transformations.map(flight) { it.signature.isNotEmpty() })
     //no setter for signature as this always goes through dialog
 
     val sim: LiveData<Boolean>
         get() = distinctUntilChanged(Transformations.map(flight) { it.isSim })
-    fun toggleSim() = workingFlight?.let { workingFlight = it.copy(isSim = toggleTrueAndFalse(it.isSim)) }
+    fun toggleSim() = workingFlight?.let { workingFlight = it.copy(isSim = !it.isSim, simTime = if (it.simTime == 0 && !it.isSim) Preferences.standardSimDuration else it.simTime) } // also set sim time if it is set to isSim = true
 
     val dual: LiveData<Boolean>
-        get() = Transformations.map(flight) { it.isDual }
+        get() = distinctUntilChanged(Transformations.map(flight) { it.isDual })
     fun toggleDual() = workingFlight?.let { workingFlight = it.copy(isDual = toggleTrueAndFalse(it.isDual)) }
 
     val instructor: LiveData<Boolean>
-        get() = Transformations.map(flight) { it.isInstructor }
+        get() = distinctUntilChanged(Transformations.map(flight) { it.isInstructor })
     fun toggleInstructor() = workingFlight?.let { workingFlight = it.copy(isInstructor = toggleTrueAndFalse(it.isInstructor)) }
 
     val ifr: LiveData<Boolean>
-        get() = Transformations.map(flight) { workingFlightRepository.isIfr }
+        get() = distinctUntilChanged(Transformations.map(flight) { workingFlightRepository.isIfr })
 
     fun toggleIFR() = workingFlight?.let{
         workingFlightRepository.isIfr = !workingFlightRepository.isIfr
@@ -282,11 +269,11 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
     fun togglePic() = workingFlight?.let { workingFlight = it.copy(isPIC = toggleTrueAndFalse(it.isPIC)) }
 
     val pf: LiveData<Boolean>
-        get() = Transformations.map(flight) { it.isPF }
+        get() = distinctUntilChanged(Transformations.map(flight) { it.isPF })
     fun togglePf() = workingFlight?.let { workingFlight = it.copy(isPF = toggleTrueAndFalse(it.isPF)) }
 
     val autoFill: LiveData<Boolean>
-        get() = Transformations.map(flight) { it.autoFill }
+        get() = distinctUntilChanged(Transformations.map(flight) { it.autoFill })
     fun setAutoFill(on: Boolean) = workingFlight?.let { workingFlight = it.copy(autoFill = on) }
 
     /*********************************************************************************************

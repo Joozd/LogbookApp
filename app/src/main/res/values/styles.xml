@@ -68,7 +68,7 @@
         <item name="android:textSize">12sp</item>
     </style>
     <style name="appearance_aircraft_from_flights_conflicting" parent="@android:style/TextAppearance">
-            <item name="android:textColor">@color/green</item>
+            <item name="android:textColor">@color/orange</item>
             <item name="android:textSize">12sp</item>
     </style>
     <style name="appearance_aircraft_forced_type" parent="@android:style/TextAppearance">

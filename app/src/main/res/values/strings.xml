@@ -123,6 +123,14 @@
     Complete messages
     -->
 
+    <string name="aircraft_type_found">Found locally</string>
+    <string name="aircraft_type_in_flights">Found in Flights</string>
+    <string name="aircraft_type_in_flights_conflict">Different types found for this registration</string>
+    <string name="aircraft_type_in_consensus">Type entered by other users</string>
+    <string name="aircraft_type_from_server">Type match from server</string>
+    <string name="aircraft_type_not_found">Unknown registration, please select a type</string>
+
+
 
     <string name="total_time_too_large">Total time cannot be more than offblocks to on blocks</string>
     <string name="invalid_total_time">Could not parse total time</string>

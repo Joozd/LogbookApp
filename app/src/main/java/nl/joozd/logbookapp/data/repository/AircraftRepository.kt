@@ -362,18 +362,17 @@ replaced with getter
             .map{it.registration to it.aircraftType.toUpperCase(Locale.ROOT)} // now we have a list of registrations paired with types
 
         //conflicts is a list of those registrations that match multiple types in flights database
-        val conflicts = findConflicts(regsToCheck)
+        val conflicts = findConflicts(regsToCheck).also{
+            Log.d("FOUND CONFLICTS", "Found conflicts: ${it.distinct()}")
+        }
         val conflictingRegs = conflicts.map{it.first}.toSet()
 
-        val typesMap = typesMapAsync.await().also{
-            Log.d("getAircraftTypesFromFlights", "types with md: ${it.filterValues{ "11" in it.shortName}}")
-        }
+        val typesMap = typesMapAsync.await()
+
         //Lists of pairs or Reg to Type (one per registration)
         val nonConflictingAircraftRegAndType = regsToCheck.toSet().filter{it.first !in conflictingRegs && it.second in typesMap.keys}
         val conflictingAircraftRegAndType = conflictingRegs.map{distinctReg -> regsToCheck.filter{it.first == distinctReg && it.second in typesMap.keys }.mostCommonOrNull()}.filterNotNull()
-        regsToCheck.filter{it !in nonConflictingAircraftRegAndType && it !in conflictingAircraftRegAndType}.let{
-            Log.d("getAircraftTypesFromFlights", "unfound: ${it.distinct()}")
-        }
+        regsToCheck.filter{it !in nonConflictingAircraftRegAndType && it !in conflictingAircraftRegAndType}
 
         //return:
         nonConflictingAircraftRegAndType.map{rt ->  Aircraft(registration = rt.first, type = typesMap[rt.second], source = Aircraft.FLIGHT)} +
@@ -389,7 +388,7 @@ replaced with getter
     private fun findConflicts(regsToCheck: List<Pair<String, String>>): List<Pair<String, String>>{
         val foundRegs = regsToCheck.map{it.first}.toSet()
         val regsMap = foundRegs.map {foundReg-> foundReg to regsToCheck.filter { it.first == foundReg }}.toMap()
-        return regsMap.filterValues { it.size >1 }.values.flatten()
+        return regsMap.filterValues { it.distinct().size > 1 }.values.flatten()
     }
 
     /********************************************************************************************

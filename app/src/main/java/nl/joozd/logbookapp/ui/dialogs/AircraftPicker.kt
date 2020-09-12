@@ -3,7 +3,7 @@
  *  Copyright (c) 2020 Joost Welle
  *
  *      This program is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU Affero General Public License as
+ *      it under the terms of the GNU AfferoGeneral Public License as
  *      published by the Free Software Foundation, either version 3 of the
  *      License, or (at your option) any later version.
  *
@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.ui.dialogs
 
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
@@ -27,6 +28,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -35,6 +38,7 @@ import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.databinding.DialogPickAircraftTypeBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.onTextChanged
+import nl.joozd.logbookapp.extensions.textColor
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AircraftPickerViewModel
 import nl.joozd.logbookapp.ui.adapters.AircraftAutoCompleteAdapter
@@ -98,13 +102,44 @@ class AircraftPicker: JoozdlogFragment(){
                 it.type?.let{t ->
                     typeDescriptionTextView.text = t.name
                 }
-                registrationFieldLayout.setErrorTextAppearance(when(it.source){
-                    Aircraft.KNOWN -> R.style.appearance_aircraft_local
-                    Aircraft.PRELOADED -> R.style.appearance_aircraft_forced_type
-                    Aircraft.CONSENSUS -> R.style.appearance_aircraft_other_user
-                    Aircraft.NONE -> R.style.appearance_aircraft_not_found
-                    else -> R.style.appearance_aircraft_not_found
-                })
+                val errorText = registrationFieldLayout.findViewById<TextView>(R.id.textinput_error).apply{
+                    visibility=View.VISIBLE
+                }
+                val normalColor = requireActivity().getColorFromAttr(android.R.attr.textColorSecondary)
+                when(it.source){
+                    Aircraft.KNOWN -> {
+                        errorText.text = getString(R.string.aircraft_type_found)
+                        errorText.setTextColor(normalColor)
+                    }
+
+                    Aircraft.FLIGHT -> {
+                        errorText.text = getString(R.string.aircraft_type_in_flights)
+                        errorText.setTextColor(normalColor)
+                    }
+
+                        Aircraft.FLIGHT_CONFLICTING -> {
+                            errorText.text = getString(R.string.aircraft_type_in_flights_conflict)
+                            errorText.setTextColor(ContextCompat.getColor(errorText.context, R.color.orange))
+                        }
+
+                        Aircraft.PRELOADED -> {
+                            errorText.text = getString(R.string.aircraft_type_from_server)
+                            errorText.setTextColor(normalColor)
+                        }
+
+                        Aircraft.CONSENSUS -> {
+                            errorText.text = getString(R.string.aircraft_type_in_consensus)
+                            errorText.setTextColor(ContextCompat.getColor(errorText.context, R.color.orange))
+                        }
+
+                        Aircraft.NONE -> {
+                            errorText.text = getString(R.string.aircraft_type_not_found)
+                            errorText.setTextColor(ContextCompat.getColor(errorText.context, R.color.red))
+                        }
+
+                        else -> registrationFieldLayout.error = getString(R.string.error)
+
+                }
             }
 
             viewModel.aircraftTypes.observe(viewLifecycleOwner) {

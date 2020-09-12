@@ -114,7 +114,8 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
         }
         _workingFlight.addSource(aircraft){ aircraft ->
             flight?.let { f ->
-                _workingFlight.value = f.copy(aircraftType = aircraft.type?.shortName ?: "").autoValues()
+                if (!f.isSim)
+                    _workingFlight.value = f.copy(aircraftType = aircraft.type?.shortName ?: "").autoValues()
             }
         }
         _workingFlight.addSource(externallyUpdatedFlight){ newFlight ->
@@ -123,8 +124,9 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
             checkIfFlightShouldBeIfr()
         }
         _workingFlight.addSource(thisFlightIsIFR){isIFR ->
-            flight?.let{
-                _workingFlight.value = it.autoValues()
+            flight?.let{f ->
+                if (!f.isSim)
+                _workingFlight.value = f.autoValues()
             }
         }
     }
@@ -167,6 +169,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     private fun Flight.autoValues(): Flight {
         return when {
             //Don't autofill anything
+            isSim -> this // Don't auto anything on Sim sessions
             !autoFill -> this.checkIfCopilot()
             else -> this
                 .withTakeoffLandings(if (isPF) 1 else 0, origin.value, destination.value)
@@ -339,7 +342,9 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      * Updates working flight.
      */
     fun updateWorkingFlight(flight: Flight) {
-        externallyUpdatedFlight.value = flight
+        launch {
+            externallyUpdatedFlight.value = flight
+        }
     }
 
     /**

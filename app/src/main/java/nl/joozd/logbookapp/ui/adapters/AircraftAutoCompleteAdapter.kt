@@ -90,7 +90,6 @@ class AircraftAutoCompleteAdapter(val context: Context, private val resource: In
             @Suppress("UNCHECKED_CAST")
             outputList = (results.values as List<String>)
             if (results.count > 0) {
-                Log.d("HAHAHAHAHAHA","${results.count} items")
                 notifyDataSetChanged()
             } else {
                 notifyDataSetInvalidated()

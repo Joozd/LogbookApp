@@ -28,6 +28,7 @@ import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import java.util.*
 
 
 /**
@@ -45,7 +46,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
             _aircraftTypes.value = it.map{ac -> ac.name}.filter{typesSearchString in it}
         }
         _aircraftTypes.addSource(_typesSearchString){
-            _aircraftTypes.value = (aircraftRepository.liveAircraftTypes.value ?: emptyList()).map{ac -> ac.name}.filter{typesSearchString in it}
+            _aircraftTypes.value = (aircraftRepository.liveAircraftTypes.value ?: emptyList()).map{ac -> ac.name}.filter{typesSearchString in it.toUpperCase(Locale.ROOT)}
         }
     }
 
@@ -156,7 +157,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
     }
 
     fun updateSearchString(query: String){
-        _typesSearchString.value = query
+        _typesSearchString.value = query.toUpperCase(Locale.ROOT)
     }
 
 }

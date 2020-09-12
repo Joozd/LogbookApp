@@ -161,6 +161,9 @@ object Preferences {
     //time to allocate to pilot if flying heavy crew and did takeoff or landing
     var standardTakeoffLandingTimes: Int by JoozdLogSharedPrefs(sharedPref, 30)
 
+    //Standard amount of time entered when a user makes a flight sim
+    var standardSimDuration: Int by JoozdLogSharedPrefs(sharedPref, 210)
+
     //Calendar on device that is used to import flights
     const val NO_CALENDAR_SELECTED = ""
     var selectedCalendar: String by JoozdLogSharedPrefs(sharedPref, NO_CALENDAR_SELECTED)

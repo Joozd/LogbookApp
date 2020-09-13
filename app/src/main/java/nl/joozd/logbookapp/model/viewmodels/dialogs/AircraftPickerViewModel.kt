@@ -93,7 +93,11 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
     private fun setSelectedAircraftFromFlight(flight: Flight?){
         if (flight == null) return
         viewModelScope.launch {
-            _selectedAircraft.value = aircraftRepository.getAircraftFromRegistration(flight.registration)
+            _selectedAircraft.value = if (flight.isSim) {
+                Aircraft("SIM", aircraftRepository.getAircraftTypeByShortName(flight.aircraftType)
+                )
+            } else
+            aircraftRepository.getAircraftFromRegistration(flight.registration)
                 ?: Aircraft(
                     flight.registration,
                     aircraftRepository.getAircraftTypeByShortName(flight.aircraftType),
@@ -104,9 +108,9 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
 
     val selectedAircraftString: LiveData<String> = Transformations.map(_selectedAircraft) { it.type?.name ?: "UNKNOWN"}
 
-    fun selectAircraftTypeByString(typeString: String){
+    fun selectAircraftTypeByString(typeString: String, shortString: Boolean = false){
         viewModelScope.launch {
-            val newType = aircraftRepository.getAircraftType(typeString)
+            val newType = if (shortString) aircraftRepository.getAircraftTypeByShortName(typeString) else aircraftRepository.getAircraftType(typeString)
             updatedSelectedAircraft(type = newType)
         }
 
@@ -152,7 +156,9 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
 
     fun saveTypeOnly(){
         workingFlight?.let{
-            workingFlight = it.copy(aircraftType = selectedAircraft.value?.type?.shortName ?: "")
+            workingFlight = it.copy(aircraftType = selectedAircraft.value?.type?.shortName ?: "").also{
+                Log.d("SimTypePicker", "Saved aircraft type ${it.aircraftType}")
+            }
         }
     }
 

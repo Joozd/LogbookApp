@@ -125,11 +125,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
             }
         }
         _workingFlight.addSource(externallyUpdatedFlight) { newFlight ->
-            _workingFlight.value = newFlight.copy(
-                // Check if aircraftType remains the same, if so, keep aircraftType from old value to fix concurrency problem
-                aircraftType = if (newFlight.registration == _workingFlight.value?.registration) _workingFlight.value?.aircraftType
-                    ?: newFlight.aircraftType else newFlight.aircraftType
-            ).autoValues().also {
+            _workingFlight.value = newFlight.autoValues().also {
                 if (!newFlight.isSim) origDestAircraftWorker.flight = it
             }
 

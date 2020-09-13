@@ -48,6 +48,7 @@ import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
 //TODO needs work
 class AircraftPicker: JoozdlogFragment(){
     private val viewModel: AircraftPickerViewModel by viewModels()
+    var presetEnteredRegistration: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val binding = DialogPickAircraftTypeBinding.bind(inflater.inflate(R.layout.dialog_pick_aircraft_type, container, false)).apply{
@@ -173,6 +174,10 @@ class AircraftPicker: JoozdlogFragment(){
                 //Intentionally blank
             }
 
+            //set preset values if found:
+            presetEnteredRegistration?.let{
+                registrationField.setText(it)
+            }
         } // end of inflater.inflate(...).apply
         return binding.root
 

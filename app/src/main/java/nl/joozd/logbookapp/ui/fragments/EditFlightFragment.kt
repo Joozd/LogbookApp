@@ -195,12 +195,20 @@ class EditFlightFragment: JoozdlogFragment(){
              ************************************************************************************/
 
             //TODO make this Resource strings
-            viewModel.feedbackEvent.observe(viewLifecycleOwner) {
-                when (it.getEvent()) {
+            viewModel.feedbackEvent.observe(viewLifecycleOwner) {event ->
+                when (event.getEvent()) {
                     EditFlightFragmentEvents.NOT_IMPLEMENTED -> toast("Not implemented!")
                     EditFlightFragmentEvents.INVALID_REG_TYPE_STRING -> toast("Error in regType string")
                     EditFlightFragmentEvents.AIRPORT_NOT_FOUND -> toast("Airport not found, no night time logged.")
-                    EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND -> toast("TODO (open aircraft picker) [${it.getString()}]")
+                    EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND -> {
+                        supportFragmentManager.commit{
+                            add(R.id.mainActivityLayout, AircraftPicker().apply{
+                                presetEnteredRegistration = event.getString()
+                            })
+                            addToBackStack(null)
+                        }
+                        // toast("TODO (open aircraft picker) [${event.getString()}]")
+                    }
                     EditFlightFragmentEvents.AIRPORT_NOT_FOUND_FOR_LANDINGS -> toast("airport not found, all logged as day")
                     EditFlightFragmentEvents.INVALID_TIME_STRING -> toast("Error in time string, no changes")
                     EditFlightFragmentEvents.INVALID_SIM_TIME_STRING -> toast("Error in time string, simTime = 0")

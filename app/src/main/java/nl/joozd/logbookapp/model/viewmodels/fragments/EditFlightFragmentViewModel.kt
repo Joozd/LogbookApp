@@ -177,7 +177,12 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
                                 registration = it.registration
                             )
                         } ?: feedback(EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND).apply{
-                            putString(enteredData)
+                            putString(enteredData).also{
+                                workingFlight = f.copy(
+                                    registration = enteredData,
+                                    aircraftType= ""
+                                )
+                            }
                         }
                     }
 

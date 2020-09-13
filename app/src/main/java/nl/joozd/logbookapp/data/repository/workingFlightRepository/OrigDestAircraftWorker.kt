@@ -53,11 +53,11 @@ class OrigDestAircraftWorker: CoroutineScope {
 
 
     //holds last known orig
-    private val _origAirport = MutableLiveData<Airport>()
+    private val _origAirport = MutableLiveData<Airport?>()
     //holds last known dest
-    private val _destAirport = MutableLiveData<Airport>()
+    private val _destAirport = MutableLiveData<Airport?>()
     //holds last known Aircraft
-    private val _aircraft = MediatorLiveData<Aircraft>()
+    private val _aircraft = MediatorLiveData<Aircraft?>()
     init{
         /**
          * If aircraftDatabase gets updated, update aircraft
@@ -140,13 +140,13 @@ class OrigDestAircraftWorker: CoroutineScope {
             setAircraftJob = setAircraft(it)
         }
 
-    val origAirport: LiveData<Airport>
+    val origAirport: LiveData<Airport?>
         get() = _origAirport
 
-    val destAirport: LiveData<Airport>
+    val destAirport: LiveData<Airport?>
         get() = _destAirport
 
-    val aircraft: LiveData<Aircraft>
+    val aircraft: LiveData<Aircraft?>
         get() = _aircraft
 
     var flight: Flight? = null
@@ -156,6 +156,19 @@ class OrigDestAircraftWorker: CoroutineScope {
             if (dest != it?.dest) dest = it?.dest
             if (registration != it?.registration) registration = it?.registration
         }
+
+    /**
+     * Reset flight, making sure all fields fire again
+     * @param f: Flight to set (optional)
+     */
+    fun reset(f: Flight? = null){
+        orig = null
+        dest = null
+        registration = null
+        f?.let{
+            flight = it
+        }
+    }
 
 
 }

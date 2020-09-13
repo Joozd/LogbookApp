@@ -185,7 +185,7 @@ data class Flight(
 
     fun regAndType() =
         if ((registration + aircraftType).isEmpty()) ""
-        else registration + if (aircraftType.isNotEmpty()) "($aircraftType)" else "(???)"
+        else registration + if (aircraftType.isNotEmpty()) "($aircraftType)" else ""
 
     fun landings() = "${landingDay + landingNight}"
     fun takeoffs() = "${takeOffDay + takeOffNight}"

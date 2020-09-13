@@ -252,13 +252,10 @@ else{
      */
     fun showFlight(flightID: Int){
         viewModelScope.launch(Dispatchers.IO) {
-            workingFlightRepository.fetchFlightByIdToWorkingFlight(flightID)?.let{
-                if (it.isPlanned)
-                    workingFlightRepository.updateWorkingFlightWithMostRecentData()
-            }
-            feedback(MainActivityEvents.SHOW_FLIGHT)
+            workingFlightRepository.fetchFlightByIdToWorkingFlight(flightID)?.let {
+                feedback(MainActivityEvents.SHOW_FLIGHT)
+            } ?: feedback((MainActivityEvents.FLIGHT_NOT_FOUND))
         }
-
     }
 
     fun addFlight(){

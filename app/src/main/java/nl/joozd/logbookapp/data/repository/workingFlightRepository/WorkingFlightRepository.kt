@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.repository.workingFlightRepository
 
+import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -94,41 +95,56 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     private var savedAndClosed: Boolean = false
 
 
-
     /**
      * _workingFlight it's sources:
      */
-    init{
-        _workingFlight.addSource(origin){ airport ->
+    init {
+        _workingFlight.addSource(origin) { airport ->
             flight?.let { f ->
-                if (airport.ident != f.orig) {
-                    _workingFlight.value = f.copy(orig = airport.ident).autoValues()
+                airport?.ident?.let { ident ->
+                    if (ident != f.orig)
+                        _workingFlight.value = f.copy(orig = ident).autoValues()
                 }
             }
         }
-        _workingFlight.addSource(destination){ airport ->
+        _workingFlight.addSource(destination) { airport ->
             flight?.let { f ->
-                if (airport.ident != f.dest)
-                    _workingFlight.value = f.copy(dest = airport.ident).autoValues()
+                airport?.ident?.let { ident ->
+                    if (ident != f.dest)
+                        _workingFlight.value = f.copy(dest = ident).autoValues()
+                }
             }
         }
-        _workingFlight.addSource(aircraft){ aircraft ->
+        _workingFlight.addSource(aircraft) { aircraft ->
             flight?.let { f ->
                 if (!f.isSim)
-                    _workingFlight.value = f.copy(aircraftType = aircraft.type?.shortName ?: "").autoValues()
+                    aircraft?.type?.let {type ->
+                        _workingFlight.value =
+                            f.copy(aircraftType = type.shortName).autoValues()
+                    }
             }
         }
-        _workingFlight.addSource(externallyUpdatedFlight){ newFlight ->
-            _workingFlight.value = newFlight.autoValues()
-            if (!newFlight.isSim) origDestAircraftWorker.flight = newFlight
+        _workingFlight.addSource(externallyUpdatedFlight) { newFlight ->
+            _workingFlight.value = newFlight.copy(
+                // Check if aircraftType remains the same, if so, keep aircraftType from old value to fix concurrency problem
+                aircraftType = if (newFlight.registration == _workingFlight.value?.registration) _workingFlight.value?.aircraftType
+                    ?: newFlight.aircraftType else newFlight.aircraftType
+            ).autoValues().also {
+                if (!newFlight.isSim) origDestAircraftWorker.flight = it
+            }
+
             checkIfFlightShouldBeIfr()
         }
-        _workingFlight.addSource(thisFlightIsIFR){
-            flight?.let{f ->
+
+
+        _workingFlight.addSource(thisFlightIsIFR) {
+            flight?.let { f ->
                 if (!f.isSim)
-                _workingFlight.value = f.autoValues()
+                    _workingFlight.value = f.autoValues()
             }
         }
+
+
     }
 
 
@@ -149,11 +165,13 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      * - set backup to initial value
      */
     private fun initialSetWorkingFlight(flight: Flight) {
-        setWithPreviousValuesIfNeeded(flight)
-        checkIfFlightShouldBeIfr()
         saving = false
         savedAndClosed = false
         backupFlight = flight
+        origDestAircraftWorker.reset()
+        setWithPreviousValuesIfNeeded(flight)
+        checkIfFlightShouldBeIfr()
+
 
     }
 
@@ -234,14 +252,19 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
     }
     private fun setWithPreviousValuesIfNeeded(f: Flight){
         launch{
-            flightRepository.getMostRecentFlightAsync().await()?.let{oldFlight ->
-                updateWorkingFlight(f.copy(
-                    registration = f.registration.nullIfEmpty() ?: oldFlight.registration,
-                    name = f.name.nullIfEmpty() ?: oldFlight.name,
-                    name2 = f.name2.nullIfEmpty() ?: oldFlight.name2
-                ))
-                Log.d("WAHEED", "YOLO SWAG LOLOLOLOLOLOLOL")
-            } ?: Log.d("WAHEED", "XXXXXXXXXXXXX Flight? is null JWZ XXXXXXXXXXXXX")
+            if (f.isPlanned) {
+                flightRepository.getMostRecentFlightAsync().await()?.let{oldFlight ->
+                    updateWorkingFlight(
+                        f.copy(
+                            registration = f.registration.nullIfEmpty() ?: oldFlight.registration,
+                            name = f.name.nullIfEmpty() ?: oldFlight.name,
+                            name2 = f.name2.nullIfEmpty() ?: oldFlight.name2,
+                            isPIC = oldFlight.isPIC
+                        )
+                    )
+                }
+            }
+            else updateWorkingFlight(f)
         }
     }
 
@@ -306,10 +329,10 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
             }
         }
 
-    val origin: LiveData<Airport>
+    val origin: LiveData<Airport?>
         get() = origDestAircraftWorker.origAirport
 
-    val destination: LiveData<Airport>
+    val destination: LiveData<Airport?>
         get() = Transformations.map(origDestAircraftWorker.destAirport) {
             it.also {
                 if (it != null && saving)
@@ -317,7 +340,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
             }
         }
 
-    val aircraft: LiveData<Aircraft>
+    val aircraft: LiveData<Aircraft?>
         get() = origDestAircraftWorker.aircraft
 
 
@@ -343,9 +366,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      * Updates working flight.
      */
     fun updateWorkingFlight(flight: Flight) {
-        launch {
-            externallyUpdatedFlight.value = flight
-        }
+        externallyUpdatedFlight.value = flight
     }
 
     /**
@@ -400,14 +421,15 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      * Fetch a flight from FlightRepository and set it as working flight. Returns that flight if successful
      */
     suspend fun fetchFlightByIdToWorkingFlight(id: Int): Flight? {
-        val workingFlight = withContext(dispatcher) {
-            flightRepository.fetchFlightByID(id)
-        } ?: return null
-        return workingFlight.also {
+        Log.d("lalala","Hupfalderie fetching id $id")
+        return flightRepository.fetchFlightByID(id)?.also {
+            Log.d("lalala", "Found flight $it")
             withContext(Dispatchers.Main) { initialSetWorkingFlight(it) }
-        }
+        } ?: null.also{Log.w("NOT_FOUND", "Flight $id not found!")}
+
     }
 
+    /*
     /**
      * Updates working flight with same aircraft, name, name2 and isPic as last completed flight
      */
@@ -434,6 +456,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
             }
         }
     }
+    */
 
     /*********************************************************************************************
      * Observable status variables

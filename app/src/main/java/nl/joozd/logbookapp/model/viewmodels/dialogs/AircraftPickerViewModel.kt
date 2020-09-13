@@ -124,8 +124,8 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
             aircraftRepository.getAircraftFromRegistration(reg)
                 ?: Aircraft(
                     reg,
-                    previousType,
-                    Aircraft.PREVIOUS
+                    null,
+                    Aircraft.NONE
                 )
         )
         // search for known type with that reg, if null, make new aircraft with this reg and previous known type (if any)

@@ -28,9 +28,6 @@ import androidx.lifecycle.*
  */
 
 class MainViewModel: ViewModel() {
-
-    //shorter term undoFlight to be able to cancel subdialogs such as TimePicker or NamePicker
-
     //if true, NamePicker is working on name1, if false it is working on name2. If null, it is not set.
     var namePickerWorkingOnName1: Boolean? = null
 

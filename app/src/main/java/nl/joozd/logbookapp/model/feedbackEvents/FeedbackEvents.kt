@@ -161,6 +161,7 @@ object FeedbackEvents {
     enum class AirportPickerEvents:
         Event {
         NOT_IMPLEMENTED,
+        CUSTOM_AIRPORT_NOT_EDITED,
         ORIG_OR_DEST_NOT_SELECTED
     }
 

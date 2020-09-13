@@ -26,9 +26,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.conflate
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.AirportPickerEvents.NOT_IMPLEMENTED
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.AirportPickerEvents
 
 //TODO make sure list gets filled straight away?
 //TODO sort airportsList based on ICAO/IATA prefs?
@@ -38,7 +38,7 @@ class AirportPickerViewModel: JoozdlogDialogViewModel(){
     private var currentSearchJob: Job = Job()
 
     /**
-     * this MUST be set in onActivityCreated in Fragment so feedback event will be observed
+     * this MUST be set BEFORE onCreateView in Fragment so feedback event will be observed
      * also, feedbackEvent must be observed. If [_workingOnOrig] == null, things won't work.
      */
     private var _workingOnOrig: Boolean? = null
@@ -46,16 +46,27 @@ class AirportPickerViewModel: JoozdlogDialogViewModel(){
         get() = _workingOnOrig
     fun setWorkingOnOrig(orig: Boolean?){
         _workingOnOrig = orig
-        if (orig == null) feedback(ORIG_OR_DEST_NOT_SELECTED)
+        if (orig == null) feedback(AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED)
         else {
             workingFlight?.let {f ->
                 updateSearch((if (orig) f.orig else f.dest) ?: "")
                 viewModelScope.launch {
                     _pickedAirport.value =
                         airportRepository.getAirportOnce(if (_workingOnOrig == true) f.orig else f.dest)
+                            ?: Airport(    -1,
+                                ident = if (_workingOnOrig == true) f.orig else f.dest,
+                                municipality = context.getString(R.string.unknown),
+                                name = context.getString(R.string.unknown_airport)
+                            ).also{
+                                feedback(AirportPickerEvents.CUSTOM_AIRPORT_NOT_EDITED)
+                            }
                 }
             }
         }
+    }
+
+    fun checkWorkingOnOrigSet(){
+        if (_workingOnOrig == null) feedback(AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED)
     }
 
     private val _airportsList = MutableLiveData<List<Airport>>()
@@ -70,18 +81,25 @@ class AirportPickerViewModel: JoozdlogDialogViewModel(){
             viewModelScope.launch {
                 _pickedAirport.value =
                     airportRepository.getAirportOnce(if (_workingOnOrig == true) f.orig else f.dest)
+                        ?: Airport(    -1,
+                            ident = if (_workingOnOrig == true) f.orig else f.dest,
+                            municipality = context.getString(R.string.unknown),
+                            name = context.getString(R.string.unknown_airport)
+                            ).also{
+                            feedback(AirportPickerEvents.CUSTOM_AIRPORT_NOT_EDITED)
+                        }
             }
         }
     }
 
     val pickedAirport: LiveData<Airport>
-        get() = distinctUntilChanged(_pickedAirport)
+        get() = _pickedAirport
 
     fun pickAirport(airport: Airport) {
         workingFlight?.let {
             workingFlight = when (_workingOnOrig) {
                 null -> {
-                    feedback(ORIG_OR_DEST_NOT_SELECTED)
+                    feedback(AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED)
                     return
                 }
                 true -> it.copy(orig = airport.ident)
@@ -92,8 +110,16 @@ class AirportPickerViewModel: JoozdlogDialogViewModel(){
 
 
     fun setCustomAirport(airport: String){
-        //TODO
-        feedback(NOT_IMPLEMENTED)
+        workingFlight?.let {
+            workingFlight = when (_workingOnOrig) {
+                null -> {
+                    feedback(AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED)
+                    return
+                }
+                true -> it.copy(orig = airport)
+                false -> it.copy(dest = airport)
+            }
+        }
     }
 
     fun updateSearch(query: String){

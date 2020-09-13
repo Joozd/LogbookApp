@@ -273,6 +273,7 @@ class EditFlightFragment: JoozdlogFragment(){
              * As times are the same, just change dates in those times
              */
             val dateOnClickListener = View.OnClickListener {
+                activity?.currentFocus?.clearFocus()
                 DatePickerFragment().show(supportFragmentManager, "datePicker")
             }
 
@@ -295,19 +296,23 @@ class EditFlightFragment: JoozdlogFragment(){
             flightDateSelector.setOnClickListener(dateOnClickListener)
 
             flightFlightNumberSelector.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
                 toast("Not implemented yet!")
             }
 
             //TODO set current orig as initial selection in dialog
             //also: this might not work after rotation etc
             flightOrigSelector.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
                 supportFragmentManager.commit {
+                    //It's okay to have a parameter in this fragment constructor (see [AirportPicker])
                     add(R.id.mainActivityLayout, AirportPicker(orig = true))
                     addToBackStack(null)
                 }
             }
             //TODO set current dest as initial selection in dialog
             flightDestSelector.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
                 supportFragmentManager.commit {
                     add(R.id.mainActivityLayout, AirportPicker(orig = false))
                     addToBackStack(null)

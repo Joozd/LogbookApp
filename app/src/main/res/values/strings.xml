@@ -65,7 +65,8 @@
     <string name="totalTimes">Total Times</string>
 
     <string name="editAircraft">Edit Aircraft</string>
-
+    <string name="unknown">Unknown</string>
+    <string name="unknown_airport">Unknown Airport</string>
 
     <string name="copilot">Co-pilot</string>
     <string name="paperLogbook">Paper Logbook</string>
@@ -107,6 +108,7 @@
     <string name="settings">Settings</string>
     <string name="error">Error</string>
     <string name="never">Never</string>
+    <string name="warning">Warning</string>
 
     <string name="login">Log In</string>
 
@@ -122,6 +124,9 @@
     <!--
     Complete messages
     -->
+
+
+    <string name="custom_airport_caution_text">You are entering a custom airport. If you do not enter lat/long coordinates (TODO: NOT IMPLEMENTED IN THIS VERSION), automatic night time errors might occur.\n(You are reminded in Edit Flight screen by (!) next to airport identifier)</string>
 
     <string name="aircraft_type_found">Found locally</string>
     <string name="aircraft_type_in_flights">Found in Flights</string>

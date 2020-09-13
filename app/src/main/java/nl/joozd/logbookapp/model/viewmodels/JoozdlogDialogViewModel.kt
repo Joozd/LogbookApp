@@ -19,12 +19,16 @@
 
 package nl.joozd.logbookapp.model.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.Transformations
+import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.InitialSetFlight
 
 open class JoozdlogDialogViewModel: JoozdlogViewModel() {
     private val undoFlight = InitialSetFlight().apply{ flight = workingFlightRepository.workingFlight.value }
+    protected val context: Context
+        get() = App.instance.ctx
 
     fun undo(){
         undoFlight.flight?.let {workingFlightRepository.updateWorkingFlight(it)}

@@ -123,7 +123,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
             if (!newFlight.isSim) origDestAircraftWorker.flight = newFlight
             checkIfFlightShouldBeIfr()
         }
-        _workingFlight.addSource(thisFlightIsIFR){isIFR ->
+        _workingFlight.addSource(thisFlightIsIFR){
             flight?.let{f ->
                 if (!f.isSim)
                 _workingFlight.value = f.autoValues()

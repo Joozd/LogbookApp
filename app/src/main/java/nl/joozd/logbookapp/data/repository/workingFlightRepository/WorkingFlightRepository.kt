@@ -362,7 +362,13 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      * Updates working flight.
      */
     fun updateWorkingFlight(flight: Flight) {
-        externallyUpdatedFlight.value = flight
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            externallyUpdatedFlight.value = flight
+        }
+        else launch{
+            Log.w("updateWorkingFlight","Updating workingFlight async, better to do this sync (though in some cases like creating new from scratch this is OK)")
+            externallyUpdatedFlight.value = flight
+        }
     }
 
     /**

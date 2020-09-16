@@ -42,7 +42,7 @@ class NewUserActivityPage1: Fragment() {
          *******************************************************************************************/
 
         with(binding){
-            doneButton.setOnClickListener {
+            continueTextView.setOnClickListener {
                 viewModel.nextPage(PAGE_NUMBER)
             }
         }

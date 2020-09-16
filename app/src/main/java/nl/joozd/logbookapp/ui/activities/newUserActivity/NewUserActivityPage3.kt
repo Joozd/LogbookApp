@@ -116,6 +116,11 @@ class NewUserActivityPage3: JoozdlogFragment() {
                 viewModel.nextPage(PAGE_NUMBER)
             }
 
+            cancelTextView.setOnClickListener {
+                viewModel.noCalendarSelected()
+                viewModel.nextPage(PAGE_NUMBER)
+            }
+
             useCalendarImportTextView.setOnClickListener {
                 if (!checkPermission(Manifest.permission.READ_CALENDAR))
                     requestPermissions(arrayOf(Manifest.permission.READ_CALENDAR), CALENDAR_PERMISSION_REQUEST_CODE)
@@ -153,7 +158,11 @@ class NewUserActivityPage3: JoozdlogFragment() {
     private fun showCalendarPickerSpinner(binding: ActivityNewUserPage3Binding?){
         binding?.apply{
             useCalendarImportTextView.visibility = View.GONE
+            skipTextView.visibility = View.GONE
+
             calendarPickerSpinner.visibility = View.VISIBLE
+            cancelTextView.visibility = View.VISIBLE
+
         }
     }
 

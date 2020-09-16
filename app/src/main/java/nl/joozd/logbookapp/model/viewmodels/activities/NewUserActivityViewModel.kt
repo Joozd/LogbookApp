@@ -240,6 +240,10 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     var password1State: Editable? = null
     var password2State: Editable? = null
 
-    var openPagesState: Int? = null
+    var openPagesState: Int = INITIAL_OPEN_PAGES
     var lastOpenPageState: Int? = null
+
+    companion object{
+        private const val INITIAL_OPEN_PAGES = 4
+    }
 }

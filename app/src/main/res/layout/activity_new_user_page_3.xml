@@ -23,7 +23,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#AED6F1"
+    android:background="?attr/colorPrimaryBackground"
     tools:context=".ui.activities.newUserActivity.NewUserActivity">
 
     <TextView
@@ -140,6 +140,22 @@
         android:id="@+id/continueTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="32dp"
+        android:text="@string/_continue"
+        android:textAllCaps="true"
+        android:textColor="@color/design_default_color_primary_dark"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/calendarPickerSpinner"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/cancelTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:text="@string/_continue"
         android:textAllCaps="true"
@@ -147,9 +163,9 @@
         android:textSize="16sp"
         android:textStyle="bold"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/skipTextView"
+        app:layout_constraintBottom_toBottomOf="@+id/continueTextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/skipTextView"
+        app:layout_constraintTop_toTopOf="@+id/continueTextView"
         tools:visibility="visible" />
 
     <TextView

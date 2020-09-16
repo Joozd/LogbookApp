@@ -27,7 +27,7 @@
     tools:context=".ui.activities.newUserActivity.NewUserActivity">
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/page_2_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -39,6 +39,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/page_2_explanation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/cloud_explanation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/page_2_header" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/usernameTextInputLayout"
         android:layout_width="0dp"
@@ -49,7 +61,7 @@
         app:errorEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3">
+        app:layout_constraintTop_toBottomOf="@+id/page_2_explanation">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/userNameEditText"

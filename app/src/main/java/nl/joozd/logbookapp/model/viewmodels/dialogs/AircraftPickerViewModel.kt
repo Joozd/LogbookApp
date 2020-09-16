@@ -101,7 +101,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
                 ?: Aircraft(
                     flight.registration,
                     aircraftRepository.getAircraftTypeByShortName(flight.aircraftType),
-                    Aircraft.FLIGHT
+                    Aircraft.NONE
                 )
         }
     }

@@ -52,7 +52,7 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
 
     val flightNumber: LiveData<String> = distinctUntilChanged(Transformations.map(flight) { it.flightNumber })
     val orig: LiveData<String> = distinctUntilChanged(Transformations.map(workingFlightRepository.origin) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: workingFlight?.orig })
-    val dest: LiveData<String> = distinctUntilChanged(Transformations.map(workingFlightRepository.destination) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: workingFlight?.orig })
+    val dest: LiveData<String> = distinctUntilChanged(Transformations.map(workingFlightRepository.destination) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: workingFlight?.dest })
     val timeOut: LiveData<String> = distinctUntilChanged(Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeOut) })
     val timeIn: LiveData<String> = distinctUntilChanged(Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeIn) })
 

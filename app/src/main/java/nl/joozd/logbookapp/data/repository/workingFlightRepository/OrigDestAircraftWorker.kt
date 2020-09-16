@@ -74,8 +74,9 @@ class OrigDestAircraftWorker: CoroutineScope {
         return when {
             ident == null -> launch {
                 ensureActive()
-                _origAirport.value = null
+                _origAirport.value = null.also{ Log.d("XXXXXXXXXXXXX", "999999999999999999999999999 $ident - $it")}
             }
+
             _origAirport.value?.ident == ident -> Job() // empty job
 
             else -> launch {
@@ -153,8 +154,8 @@ class OrigDestAircraftWorker: CoroutineScope {
     var flight: Flight? = null
         set(it){
             field = it
-            if (orig != it?.orig) orig = it?.orig
-            if (dest != it?.dest) dest = it?.dest
+            if (orig != it?.orig) orig = it?.orig else _origAirport.value = _origAirport.value
+            if (dest != it?.dest) dest = it?.dest else _destAirport.value = _destAirport.value
             if (registration != it?.registration) registration = it?.registration
         }
 

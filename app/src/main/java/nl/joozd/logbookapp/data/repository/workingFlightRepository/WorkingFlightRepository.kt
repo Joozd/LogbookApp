@@ -258,7 +258,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
                             isPIC = oldFlight.isPIC
                         )
                     )
-                }
+                } ?: updateWorkingFlight(f) // in case no previous flight there yet
             }
             else updateWorkingFlight(f)
         }

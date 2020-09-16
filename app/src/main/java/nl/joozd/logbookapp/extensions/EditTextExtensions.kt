@@ -39,7 +39,7 @@ fun EditText.removeTrailingDigits(){
 }
 
 fun EditText.setTextIfNotFocused(text: CharSequence?){
-    if(!isFocused) setText(text ?: "null")
+    if(!isFocused) setText(text ?: "")
 }
 
 fun EditText.setTextIfNotFocused(resource: Int){

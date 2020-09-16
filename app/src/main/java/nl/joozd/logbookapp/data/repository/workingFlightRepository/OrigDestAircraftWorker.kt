@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.repository.workingFlightRepository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -78,7 +79,7 @@ class OrigDestAircraftWorker: CoroutineScope {
             _origAirport.value?.ident == ident -> Job() // empty job
 
             else -> launch {
-                val foundAirport = airportRepository.getAirportOnce(ident)
+                val foundAirport = airportRepository.getAirportOnce(ident).also{ Log.d("XXXXXXXXXXXXX", "88888888888888 $ident - $it")}
                 ensureActive()
                 _origAirport.value = foundAirport
             }

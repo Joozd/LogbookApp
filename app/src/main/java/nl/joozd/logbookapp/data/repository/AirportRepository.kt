@@ -33,6 +33,7 @@ import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.dao.AirportDao
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.util.*
@@ -113,7 +114,7 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
      * eg. EHAM - AMS - Amsterdam - Schiphol
      */
     suspend fun searchAirportOnce(query: String?): Airport? = withContext(dispatcher) {
-        query?.let { query ->
+        query?.nullIfEmpty()?.let { query ->
             airportDao.searchAirportByIdent(query).firstOrNull()
                 ?: airportDao.searchAirportByIata(query).firstOrNull()
                 ?: airportDao.searchAirportByMunicipality(query).firstOrNull()
@@ -122,11 +123,22 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
     }
 
     suspend fun getAirportOnce(query: String):Airport? = withContext(dispatcher){
-        if (_cachedAirports.value == null) {
-            searchAirportOnce(query)
+        when {
+            query.isBlank() -> null
+            _cachedAirports.value == null -> {
+                searchAirportOnce(query)
+            }
+            else -> _cachedAirports.value!!.firstOrNull {
+                it.ident.toUpperCase(Locale.ROOT) == query.toUpperCase(
+                    Locale.ROOT
+                )
+            }
+                ?: _cachedAirports.value!!.firstOrNull {
+                    it.iata_code.toUpperCase(Locale.ROOT) == query.toUpperCase(
+                        Locale.ROOT
+                    )
+                }
         }
-        else _cachedAirports.value!!.firstOrNull{it.ident.toUpperCase(Locale.ROOT) == query.toUpperCase(Locale.ROOT)}
-            ?: _cachedAirports.value!!.firstOrNull{it.iata_code.toUpperCase(Locale.ROOT) == query.toUpperCase(Locale.ROOT)}
     }
 
     suspend fun searchAirportsOnce(query: String): List<Airport> = withContext(dispatcher) {

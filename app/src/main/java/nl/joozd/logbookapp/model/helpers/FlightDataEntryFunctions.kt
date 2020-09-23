@@ -132,7 +132,6 @@ object FlightDataEntryFunctions {
             val oneNameLess = name2.split(";").dropLast(1).joinToString(";")
             this.copy(name2= oneNameLess)
         }
-
     }
 
 

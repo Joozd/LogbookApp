@@ -80,7 +80,7 @@ class OrigDestAircraftWorker: CoroutineScope {
             _origAirport.value?.ident == ident -> Job() // empty job
 
             else -> launch {
-                val foundAirport = airportRepository.getAirportOnce(ident).also{ Log.d("XXXXXXXXXXXXX", "88888888888888 $ident - $it")}
+                val foundAirport = airportRepository.getAirportByIcaoIdentOrNull(ident).also{ Log.d("XXXXXXXXXXXXX", "88888888888888 $ident - $it")}
                 ensureActive()
                 _origAirport.value = foundAirport
             }
@@ -95,7 +95,7 @@ class OrigDestAircraftWorker: CoroutineScope {
         _destAirport.value?.ident == ident -> Job() // empty job
 
         else -> launch {
-            val foundAirport = airportRepository.getAirportOnce(ident)
+            val foundAirport = airportRepository.getAirportByIcaoIdentOrNull(ident)
             ensureActive()
             _destAirport.value = foundAirport
         }

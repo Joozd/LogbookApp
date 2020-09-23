@@ -45,12 +45,20 @@
             android:name=".ui.activities.pdfParserActivity.PdfParserActivity"
             android:excludeFromRecents="true">
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+
                 <action android:name="android.intent.action.VIEW" />
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:host="*" />
+                <data android:mimeType="application/pdf" />
+                <data android:mimeType="text/csv" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="application/pdf" />
                 <data android:mimeType="text/csv" />
             </intent-filter>

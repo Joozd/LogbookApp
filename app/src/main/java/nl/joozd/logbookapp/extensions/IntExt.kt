@@ -68,5 +68,7 @@ fun Int.toBoolean() = this > 0
  */
 fun Int.minusOneWithFloor(floor: Int) = if (this-1 > floor) this-1 else floor
 
+fun Int.nullIfZero() = if (this == 0) null else this
+
 
 

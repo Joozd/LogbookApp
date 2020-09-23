@@ -54,6 +54,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * Private parts:
      ********************************************************************************************/
 
+    private var undoSaveFlight: Flight? = null
     private var undeleteFlight: Flight? = null
     private var undeleteFlights: List<Flight>? = null
 
@@ -240,6 +241,18 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
 
     /**
+     * put a flight in [undoSaveFlight]
+     */
+    fun setUndoSaveFlight(f: Flight){
+        undoSaveFlight = f
+    }
+
+    fun notifyFlightSaved(){
+        TODO("Make this")
+    }
+
+
+    /**
      * update cached data and save to disk
      */
     fun save(flight: Flight, sync: Boolean = true) {
@@ -346,7 +359,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     fun getMostRecentFlightAsync() =
         async(dispatcher){
             cachedFlightsList?.let {
-                it.filter {f -> !f.isPlanned && !f.isSim }.maxBy {f -> f.timeOut }
+                it.filter {f -> !f.isPlanned && !f.isSim }.maxByOrNull {f -> f.timeOut }
             } ?: flightDao.getMostRecentCompleted()?.toFlight()
         }
 

@@ -52,7 +52,7 @@ class AirportPickerViewModel: JoozdlogDialogViewModel(){
                 updateSearch((if (orig) f.orig else f.dest) ?: "")
                 viewModelScope.launch {
                     _pickedAirport.value =
-                        airportRepository.getAirportOnce(if (_workingOnOrig == true) f.orig else f.dest)
+                        airportRepository.getAirportByIcaoIdentOrNull(if (_workingOnOrig == true) f.orig else f.dest)
                             ?: Airport(    -1,
                                 ident = if (_workingOnOrig == true) f.orig else f.dest,
                                 municipality = context.getString(R.string.unknown),
@@ -80,7 +80,7 @@ class AirportPickerViewModel: JoozdlogDialogViewModel(){
         _pickedAirport.addSource(flight) {f ->
             viewModelScope.launch {
                 _pickedAirport.value =
-                    airportRepository.getAirportOnce(if (_workingOnOrig == true) f.orig else f.dest)
+                    airportRepository.getAirportByIcaoIdentOrNull(if (_workingOnOrig == true) f.orig else f.dest)
                         ?: Airport(    -1,
                             ident = if (_workingOnOrig == true) f.orig else f.dest,
                             municipality = context.getString(R.string.unknown),

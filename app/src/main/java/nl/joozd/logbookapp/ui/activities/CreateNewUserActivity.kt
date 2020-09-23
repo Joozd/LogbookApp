@@ -225,16 +225,23 @@ class CreateNewUserActivity : JoozdlogActivity() {
         binding.passwordEditText.requestFocus()
     }
 
-    private fun showUserExistsError(binding: ActivityCreateNewUserBinding) =
-        JoozdlogAlertDialog(activity).apply {
+    private fun showUserExistsError(binding: ActivityCreateNewUserBinding) = with (binding) {
+        userNameEditText.setText("")
+        userNameEditText.requestFocus()
+        usernameTextInputLayout.error = getString(R.string.username_already_taken)
+    }
+        /*
+        JoozdlogAlertDialog(activity).show {
             titleResource = R.string.username_already_taken
             setPositiveButton(android.R.string.ok) {
                 //TODO flash username box and place cursor in it
             }
         }
 
+         */
+
     private fun showUserExistsPasswordCorrect(binding: ActivityCreateNewUserBinding) =
-        JoozdlogAlertDialog(activity).apply {
+        JoozdlogAlertDialog(activity).show {
             titleResource = R.string.user_exists_password_correct
             setPositiveButton(R.string.use_this) {
                 finish()

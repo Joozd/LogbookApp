@@ -24,6 +24,7 @@ import androidx.lifecycle.MutableLiveData
 import nl.joozd.logbookapp.extensions.getBit
 import nl.joozd.logbookapp.extensions.setBit
 import nl.joozd.logbookapp.extensions.toInt
+import java.time.Duration
 
 /************************************************************************************
  * CrewValue will store info on augmented crews:                                    *
@@ -58,6 +59,11 @@ class Crew(iCrewSize: Int = 2,
     fun getLogTime(totalTime: Int, pic: Boolean): Int{
         if (pic || crewSize <=2) return totalTime
         return maxOf(0, (((totalTime.toFloat()-2*takeoffLandingTimes)/crewSize) * 2 + takeoffLandingTimes * (didTakeoff.toInt() + didLanding.toInt()) + 0.5).toInt())
+    }
+
+    fun getLogTime(totalTime: Duration, pic: Boolean): Duration{
+        if (pic || crewSize <=2) return totalTime
+        return Duration.ofMinutes(maxOf(0L, (((totalTime.toMinutes().toFloat()-2*takeoffLandingTimes)/crewSize) * 2 + takeoffLandingTimes * (didTakeoff.toInt() + didLanding.toInt()) + 0.5).toLong()))
     }
 
     operator fun plus(extraCrewMembers: Int): Crew = Crew ((crewSize + extraCrewMembers).putInRange((1..15)), didTakeoff, didLanding, takeoffLandingTimes)

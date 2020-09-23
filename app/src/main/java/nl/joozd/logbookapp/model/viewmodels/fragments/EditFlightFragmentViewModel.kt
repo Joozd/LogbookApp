@@ -202,8 +202,8 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
         workingFlight?.let {f ->
             viewModelScope.launch(Dispatchers.IO) {
                 val landings = enteredData.toInt()
-                val orig = airportRepository.getAirportOnce(f.orig)
-                val dest = airportRepository.getAirportOnce(f.dest)
+                val orig = airportRepository.getAirportByIcaoIdentOrNull(f.orig)
+                val dest = airportRepository.getAirportByIcaoIdentOrNull(f.dest)
                 if (orig == null || dest == null) feedback(EditFlightFragmentEvents.AIRPORT_NOT_FOUND_FOR_LANDINGS)
                 // If airports are not found (because, for instance, custom airport was used)
                 // it will log day TO and landing

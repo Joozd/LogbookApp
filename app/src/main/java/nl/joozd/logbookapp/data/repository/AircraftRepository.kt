@@ -456,7 +456,8 @@ replaced with getter
         getAircraftTypes().map{ it.shortName.toUpperCase(Locale.ROOT) to it}.toMap()
     }
 
-    suspend fun getAircraftFromRegistration(reg: String): Aircraft? =
+    suspend fun getAircraftFromRegistration(reg: String?): Aircraft? =
+        if (reg == null) null else
         // use [reg] if it contains at least one '-', if it doesn't try to match it to a knownRegistration minus the '-'
         (if ("-" in reg) reg else getKnownRegistrations().await().firstOrNull { r -> r.filter{it != '-'} == reg } ?: reg ).let {
             getAircraftMap().await()[it.toUpperCase(Locale.ROOT)]

@@ -122,11 +122,17 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
         }
     }
 
-    suspend fun getAirportOnce(query: String):Airport? = withContext(dispatcher){
+    /**
+     * Gets an airport from database by ICAO identifier
+     */
+    suspend fun getAirportByIcaoIdentOrNull(query: String?):Airport? = withContext(dispatcher){
         when {
+            query == null -> null
             query.isBlank() -> null
             _cachedAirports.value == null -> {
-                searchAirportOnce(query)
+                searchAirportOnce(query).let{foundAP ->
+                    if (foundAP?.ident?.toUpperCase(Locale.ROOT) == query.toUpperCase(Locale.ROOT)) foundAP else null
+                }
             }
             else -> _cachedAirports.value!!.firstOrNull {
                 it.ident.toUpperCase(Locale.ROOT) == query.toUpperCase(

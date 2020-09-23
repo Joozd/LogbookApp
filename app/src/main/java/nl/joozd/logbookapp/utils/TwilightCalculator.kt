@@ -189,7 +189,10 @@ class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the da
     /**
      * minutesOfNight but with times in [Instant]
      */
-    fun minutesOfNight(orig: Airport?, dest: Airport?, departureTime: Instant, arrivalTime: Instant): Int {
+    fun minutesOfNight(orig: Airport?, dest: Airport?, departureTime: Instant?, arrivalTime: Instant?): Int {
+        if (departureTime == null || arrivalTime == null) return 0.also{
+            Log.w("TwilightCalculator", "null value on Departur or Arrival time")
+        }
         val dt = LocalDateTime.ofInstant(departureTime, ZoneOffset.UTC)
         val at = LocalDateTime.ofInstant(arrivalTime, ZoneOffset.UTC)
         return minutesOfNight(orig, dest, dt, at)

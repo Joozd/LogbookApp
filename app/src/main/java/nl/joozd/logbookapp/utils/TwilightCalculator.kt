@@ -23,6 +23,7 @@ import android.util.Log
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.extensions.roundToMinutes
 import nl.joozd.logbookapp.extensions.toDegrees
+import nl.joozd.logbookapp.extensions.toLocalTime
 import nl.joozd.logbookapp.extensions.toRadians
 import java.time.*
 import kotlin.math.*
@@ -34,6 +35,7 @@ import kotlin.math.*
  */
 class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the daylight an night data on calculateDate!
     constructor (epochSecond: Long): this(LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSecond), ZoneOffset.UTC))
+    constructor (instant: Instant): this(LocalDateTime.ofInstant(instant, ZoneOffset.UTC))
 
     private val day = Duration.between(solstice2000, calculateDate).toDays()
     private val date= calculateDate.toLocalDate()
@@ -53,6 +55,19 @@ class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the da
         // Log.d("sunset:", "${sunsetInZ.toDateString()}, ${sunsetInZ.toTimeString()}")
         return (sunriseInZ..sunsetInZ)
     }
+
+    /**
+     * Checks if it is day at [airport].
+     */
+    fun itIsDayAt(airport: Airport, time: Instant): Boolean{
+        // Log.d("requested time", "$time")
+        return (dayTime(airport.latitude_deg, airport.longitude_deg).contains(LocalDateTime.of(date,time.toLocalTime())))
+    }
+
+    /**
+     * Checks if it is day at [airport].
+     * @param time: Time in Z as local time
+     */
     fun itIsDayAt(airport: Airport, time: LocalTime): Boolean{
         // Log.d("requested time", "$time")
         return (dayTime(airport.latitude_deg, airport.longitude_deg).contains(LocalDateTime.of(date,time)))

@@ -47,13 +47,14 @@ import kotlin.reflect.KProperty
 /**
  * Worker class for handling changes to a Flight that is being edited.
  * Has functions to retreive a flight from, or save it to [flightRepository]
- * has LiveData for things that need displaying
+ * has LiveData for things that need displaying *
  */
-class WorkingFlight: CoroutineScope by MainScope() {
+class WorkingFlight(flight: Flight): CoroutineScope by MainScope() {
     /***********************************************************************************************
      * Private parts
      ***********************************************************************************************/
-    private var originalFlight: Flight? = null
+    private lateinit var originalFlight: Flight
+    private lateinit var twilightCalculator: TwilightCalculator // this is set whenever mTimeOut is set
 
     // Use all locks of data that will be changed in changing function.
     private val origMutex = Mutex()
@@ -72,9 +73,8 @@ class WorkingFlight: CoroutineScope by MainScope() {
     private val _flightNumber = MutableLiveData<String?>()
     private val _origin = MutableLiveData<Airport?>()
     private val _destination = MutableLiveData<Airport?>()
-    private val _timeOut =
-        MutableLiveData<Instant?>()                      // date also comes from this
-    private val _timeIn = MutableLiveData<Instant?>()
+    private val _timeOut = MutableLiveData<Instant>()                      // date also comes from this
+    private val _timeIn = MutableLiveData<Instant>()
     private val _correctedTotalTime = MutableLiveData<Int?>()
     private val _multiPilotTime = MutableLiveData<Int?>()
     private val _nightTime = MutableLiveData<Int?>()
@@ -114,12 +114,15 @@ class WorkingFlight: CoroutineScope by MainScope() {
         get() = _destination.value
         set(it) = _destination.setValueOnMain(it)
 
-    private var mTimeOut: Instant?
-        get() = _timeOut.value
-        set(it) = _timeOut.setValueOnMain(it)
+    private var mTimeOut: Instant
+        get() = _timeOut.value ?: Instant.EPOCH
+        set(it) {
+            _timeOut.setValueOnMain(it)
+            twilightCalculator = TwilightCalculator(it)
+        }
 
-    private var mTimeIn: Instant?
-        get() = _timeIn.value
+    private var mTimeIn: Instant
+        get() = _timeIn.value ?: Instant.EPOCH
         set(it) = _timeIn.setValueOnMain(it)
 
     private var mCorrectedTotalTime: Int?
@@ -273,25 +276,18 @@ class WorkingFlight: CoroutineScope by MainScope() {
         }
     }
 
-    /***********************************************************************************************
-     * Public parts
-     ***********************************************************************************************/
-
-    /***************
-     * Setters
-     **************/
 
 
     /**
      * Will set all data from [flight], directly into data fields
      * Then, will start async functions for fetching data from other sources (aircraft, airports etc)
      */
-    fun setFromFlight(flight: Flight) = with(flight) {
+    private fun setFromFlight(flight: Flight) = with(flight) {
         originalFlight = this
         mFlightNumber = flightNumber
-        // mOrigin = Airport()                         // This gets to be filled async
-        // mDestination = Airport()                    // This gets to be filled async
-        mTimeOut = Instant.ofEpochSecond(timeOut)
+        // mOrigin = Airport()                          // This gets to be filled async
+        // mDestination = Airport()                     // This gets to be filled async
+        mTimeOut = Instant.ofEpochSecond(timeOut)       // this also sets [twilightCalculator]
         mTimeIn = Instant.ofEpochSecond(timeIn)
         mCorrectedTotalTime = correctedTotalTime
         mMultiPilotTime = multiPilotTime
@@ -299,7 +295,7 @@ class WorkingFlight: CoroutineScope by MainScope() {
         mIfrTime = ifrTime
         mIsIfr = ifrTime > 0
         mSimTime = simTime
-        // mAicraft = Aircraft()                       // This gets to be filled async
+        // mAicraft = Aircraft()                        // This gets to be filled async
         mTakeoffLandings = TakeoffLandings(
             takeoffDay = takeOffDay,
             takeoffNight = takeOffNight,
@@ -318,32 +314,49 @@ class WorkingFlight: CoroutineScope by MainScope() {
         mIsPic = isPIC
         mIsPF = isPF
         // Async setting of values is always locked to prevent unexpected behavior
-        launchWithLocks(origMutex, destMutex, aircraftMutex) {
+        launchWithLocks(origMutex, destMutex, aircraftMutex, nightTimeMutex) {
             setOriginFromId(orig)
             setDestFromId(dest)
             setAircraftFromFlight(flight)
         }
     }
 
+    /***********************************************************************************************
+     * Initialization block
+     ***********************************************************************************************/
+
+    init{
+        setFromFlight(flight)
+    }
+
+
+    /***********************************************************************************************
+     * Public parts
+     ***********************************************************************************************/
+
+    /***************
+     * Setters
+     **************/
+
+
     /**
      * changes timeOut to a specific date, and timeIn to the same date or one day later, if it would mean <= 0 flight time
      * Also check night time since that is different on a different date.
      */
     fun setDate(date: LocalDate) = launchWithLocks(timeInOutMutex, nightTimeMutex) {
-        mTimeOut = mTimeOut?.atDate(date)
-        mTimeIn = mTimeIn?.atDate(date)?.let {
+        mTimeOut = mTimeOut.atDate(date)
+        mTimeIn = mTimeIn.atDate(date).let {
             if (it > mTimeOut) it else it.plusDays(1)
         }
         if (mIsAutovalues) {
-            mTimeOut?.epochSecond?.let { tOut ->
-                if (checkOrigandDestHaveLatLongSet())
-                    mNightTime = TwilightCalculator(tOut).minutesOfNight(
-                        mOrigin,
-                        mDestination,
-                        mTimeOut,
-                        mTimeIn
-                    )
-            }
+
+            if (checkOrigandDestHaveLatLongSet())
+                mNightTime = twilightCalculator.minutesOfNight(
+                    mOrigin,
+                    mDestination,
+                    mTimeOut,
+                    mTimeIn
+                )
         }
     }
 
@@ -356,16 +369,16 @@ class WorkingFlight: CoroutineScope by MainScope() {
     fun setTimeOut(tOut: Instant) =
         launchWithLocks(timeInOutMutex, nightTimeMutex, ifrTimeMutex, multiPilotMutex) {
             mTimeOut = tOut
-            if (mTimeIn ?: Instant.EPOCH < tOut || (mTimeIn
-                    ?: Instant.EPOCH) - tOut > Duration.ofDays(1)
-            ) mTimeIn = mTimeIn?.atDate(tOut.toLocalDate())?.let {
+            if (mTimeIn < tOut || (mTimeIn) - tOut > Duration.ofDays(1)
+            ) mTimeIn = mTimeIn.atDate(tOut.toLocalDate()).let {
                 if (it > tOut) it else it.plusDays(1)
             }
+            twilightCalculator = TwilightCalculator(tOut.epochSecond)
             if (mIsAutovalues) {
                 val setNightAsync = async {
                     if (checkOrigandDestHaveLatLongSet())
                         mNightTime = withContext(Dispatchers.Default) {
-                            TwilightCalculator(tOut.epochSecond).minutesOfNight(
+                            twilightCalculator.minutesOfNight(
                                 mOrigin,
                                 mDestination,
                                 mTimeOut,
@@ -390,14 +403,14 @@ class WorkingFlight: CoroutineScope by MainScope() {
      * Sets timeIn to new value
      * If timeOut >= timeIn, timeIn will be adjusted to the same date, or one day later if needed
      * If timeOut is >24 hours before timeIn, timeIn will be adjusted also
+     * This assumes mTimeOut is not null. Probably correct.
      */
     fun setTimeIn(tIn: Instant) =
         launchWithLocks(timeInOutMutex, nightTimeMutex, ifrTimeMutex, multiPilotMutex) {
             mTimeIn = tIn
-            if (mTimeIn ?: Instant.EPOCH < tIn || (mTimeIn
-                    ?: Instant.EPOCH) - tIn > Duration.ofDays(1)
-            ) mTimeIn = mTimeIn?.atDate(tIn.toLocalDate())?.let {
-                if (it > tIn) it else it.plusDays(1)
+            if (mTimeIn < mTimeOut || (mTimeIn) - mTimeOut > Duration.ofDays(1)
+            ) mTimeIn = mTimeIn.atDate(tIn.toLocalDate()).let {
+                if (it < mTimeOut) it else it.plusDays(1)
             }
             if (mIsAutovalues) {
                 val setNightAsync = async {
@@ -522,6 +535,8 @@ class WorkingFlight: CoroutineScope by MainScope() {
     var landingDay: Int by TakeOffLandingDelegate(LANDING_DAY)
     var landingNight: Int by TakeOffLandingDelegate(LANDING_NIGHT)
     var autoLand: Int by TakeOffLandingDelegate(AUTOLAND)
+    var takeoff: Int by TakeOffLandingDelegate(GENERIC_TAKEOFF)
+    var landing: Int by TakeOffLandingDelegate(GENERIC_LANDING)
 
     /**
      * Set name. Nothing depends on this so can be done without any locks
@@ -675,7 +690,7 @@ class WorkingFlight: CoroutineScope by MainScope() {
         timeInOutMutex
     ) {
         val flightToSave = try {
-            originalFlight!!.copy(
+            originalFlight.copy(
                 orig = mOrigin!!.ident,
                 dest = mDestination!!.ident,
                 timeOut = mTimeOut!!.epochSecond,
@@ -712,9 +727,7 @@ class WorkingFlight: CoroutineScope by MainScope() {
         flightToSave?.let{f ->
             with (FlightRepository.getInstance()){
                 save(f)
-                originalFlight?.let {
-                    setUndoSaveFlight(it)
-                }
+                setUndoSaveFlight(originalFlight)
                 notifyFlightSaved()
             }
         }
@@ -810,6 +823,8 @@ class WorkingFlight: CoroutineScope by MainScope() {
                 LANDING_DAY -> mTakeoffLandings.landingDay
                 LANDING_NIGHT -> mTakeoffLandings.landingNight
                 AUTOLAND -> mTakeoffLandings.autoLand
+                GENERIC_TAKEOFF -> mTakeoffLandings.takeoffDay + mTakeoffLandings.takeoffNight
+                GENERIC_LANDING -> mTakeoffLandings.landingDay + mTakeoffLandings.landingNight
                 else -> error("Wrong type provided.")
             }
         }
@@ -821,12 +836,31 @@ class WorkingFlight: CoroutineScope by MainScope() {
                 LANDING_DAY -> TakeoffLandings(landingDay = value)
                 LANDING_NIGHT -> TakeoffLandings(landingNight = value)
                 AUTOLAND -> TakeoffLandings(autoLand = value)
+                GENERIC_TAKEOFF -> { // This calls the appropriate version of this delegate
+                    launchWithLocks(nightTimeMutex, origMutex){
+                        val day = mOrigin == null || twilightCalculator.itIsDayAt(mOrigin!!, mTimeOut)
+                        if (day) takeoffDay = value else takeoffNight = value
+
+                    }
+                    return
+                }
+                GENERIC_LANDING -> {    // This calls the appropriate version of this delegate
+                    launchWithLocks(nightTimeMutex, destMutex) {
+                        val day = mDestination == null || twilightCalculator.itIsDayAt(mDestination!!, mTimeIn)
+                        if (day) landingDay = value else landingNight = value
+                    }
+                    return
+                }
+                
+
                 else -> null
             }?.let {
                 mTakeoffLandings += it
             }
         }
     }
+
+
 
     companion object {
         /**
@@ -837,6 +871,8 @@ class WorkingFlight: CoroutineScope by MainScope() {
         const val LANDING_DAY = 3
         const val LANDING_NIGHT = 4
         const val AUTOLAND = 5
+        const val GENERIC_TAKEOFF = 6
+        const val GENERIC_LANDING = 7
 
 
         /**
@@ -847,9 +883,7 @@ class WorkingFlight: CoroutineScope by MainScope() {
         suspend fun fromFlightId(flightId: Int): WorkingFlight? =
             withContext(Dispatchers.Main) {
                 FlightRepository.getInstance().fetchFlightByID(flightId)?.let { f ->
-                    WorkingFlight().apply {
-                        setFromFlight(f)
-                    }
+                    WorkingFlight(f)
                 }
             }
 
@@ -860,13 +894,11 @@ class WorkingFlight: CoroutineScope by MainScope() {
         suspend fun createNew(): WorkingFlight {
             val repo = FlightRepository.getInstance()
             val idAsync = repo.getHighestIdAsync()
-            return WorkingFlight().apply {
-                setFromFlight(
-                    repo.getMostRecentFlightAsync().await()?.let { f ->
-                        reverseFlight(f, idAsync.await() + 1)
-                    } ?: Flight(idAsync.await() + 1)
-                )
-            }
+            return WorkingFlight(
+                repo.getMostRecentFlightAsync().await()?.let { f ->
+                    reverseFlight(f, idAsync.await() + 1)
+                } ?: Flight(idAsync.await() + 1)
+            )
         }
     }
 }

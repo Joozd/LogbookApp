@@ -27,6 +27,11 @@ import java.time.*
 fun Instant.toLocalDate(zoneOffset: ZoneOffset = ZoneOffset.UTC) = LocalDateTime.ofInstant(this, zoneOffset).toLocalDate()
 
 /**
+ * Gets the time from an Instant. If no [zoneOffset] given, it assumes UTC.
+ */
+fun Instant.toLocalTime(zoneOffset: ZoneOffset = ZoneOffset.UTC) = LocalDateTime.ofInstant(this, zoneOffset).toLocalTime()
+
+/**
  * Changes an instant to the same time at a different date. If no [zoneOffset] given, assumes UTC
  * @param date: New date to set
  * @param zoneOffset: Timezone at which that dat eis supposed to be

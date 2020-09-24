@@ -38,6 +38,8 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * Parses a checkin sheet into flights
+ * TODO: Add names?
+ * TODO: Add registration?
  */
 class KlcCheckinSheet(roster: String?): Roster {
 

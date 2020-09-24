@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.data.repository.helpers
 import java.util.*
 
 fun String.findBestHitForRegistration(registrations: Collection<String>): String? =
+    if (this.isBlank()) null else
     findSortedHitsForRegistration(registrations).firstOrNull()
 
     //we'll want to search from end to start. As soon as wel have one, we're good.

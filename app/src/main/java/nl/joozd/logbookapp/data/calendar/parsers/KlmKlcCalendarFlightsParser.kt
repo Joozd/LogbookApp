@@ -71,6 +71,12 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, val icaoIata
     override val flights: List<Flight>?
         get() = buildFlights()
 
+    /**
+     * Identifier of the carrier.
+     * See companion object.
+     */
+    override val carrier: String? = null
+
     override val isValid: Boolean
         get() = true
 

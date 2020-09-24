@@ -28,5 +28,6 @@ object TypeIdentifiers {
     val KLC_MONTHLY = 0 to "MONTHLY OVERVIEW"
     val KLM_ICA_ROSTER = 0 to "CREW ROSTER FROM "
     val KLM_ICA_MONTHLY = 0 to "__NOT_IMPLEMENTED__"
+    val KLC_BRIEFING_SHEET = 0 to "Cockpit Briefing for"
 
 }

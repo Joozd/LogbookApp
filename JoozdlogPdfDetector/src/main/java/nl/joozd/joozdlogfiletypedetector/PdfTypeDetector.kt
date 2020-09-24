@@ -51,6 +51,7 @@ class PdfTypeDetector(inputStream: InputStream): FileTypeDetector {
         val lines = firstPage.split('\n')
         return when {
             match(lines, TypeIdentifiers.KLC_ROSTER) -> SupportedTypes.KLC_ROSTER
+            match(lines, TypeIdentifiers.KLC_BRIEFING_SHEET) -> SupportedTypes.KLC_CHECKIN_SHEET
             match(lines, TypeIdentifiers.KLC_MONTHLY) -> SupportedTypes.KLC_MONTHLY
             match(lines, TypeIdentifiers.KLM_ICA_ROSTER) -> SupportedTypes.KLM_ICA_ROSTER // this can cascade further if other types also start wiith this
             else -> SupportedTypes.UNSUPPORTED_PDF
@@ -58,5 +59,7 @@ class PdfTypeDetector(inputStream: InputStream): FileTypeDetector {
     }
 
     private fun match(lines: List<String>, identifier: Pair<Int, String>) = lines[identifier.first].startsWith(identifier.second)
+
+    private fun checkExtraLine(lines: List<String>, extraLine: String): Boolean = extraLine in lines.joinToString("\n")
 
 }

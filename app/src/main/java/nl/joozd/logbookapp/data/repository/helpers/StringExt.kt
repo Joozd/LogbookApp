@@ -38,6 +38,7 @@ fun String.findBestHitForRegistration(registrations: Collection<String>): String
 /**
  * Searches aircraft registrations for hits, sorted by usefulness:
  * - Exact match ("PH-EZA" -> "PH-EZA")
+ * - exact match without '-' ( "PHEZA -> "PH-EZA")
  * - Last matches("ZA" -> PH-EZA")
  * - Part after hyphen matches ( "EZ" -> PH-EZA")
  * - First part matches("PH" -> "PH-EZA")
@@ -49,6 +50,7 @@ fun String.findSortedHitsForRegistration(registration: Collection<String>, caseS
         if (caseSensitive) rrr else rrr.map { it.toUpperCase(Locale.ROOT) }
     }
         return  (searchableRegs.filter {it == query} +
+                searchableRegs.filter{it.filter {c -> c != '-'} == query} +
                 searchableRegs.filter{it.endsWith((query))} +
                 searchableRegs.filter{'-' in it}.map {it.split('-')}.filter{it[1].startsWith(query)}.map{it.joinToString("-")} +
                 searchableRegs.filter{it.startsWith((query))} +

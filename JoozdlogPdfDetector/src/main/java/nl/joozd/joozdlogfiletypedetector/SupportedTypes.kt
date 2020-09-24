@@ -21,6 +21,7 @@ package nl.joozd.joozdlogfiletypedetector
 
 enum class SupportedTypes {
     KLC_ROSTER,
+    KLC_CHECKIN_SHEET,
     KLC_MONTHLY,
     KLM_ICA_ROSTER,
     KLM_ICA_MONTHLY,

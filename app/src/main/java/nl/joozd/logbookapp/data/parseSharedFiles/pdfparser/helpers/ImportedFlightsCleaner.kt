@@ -38,7 +38,7 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.reversed
 
-class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private val carrier: String = "NONE"): CoroutineScope by MainScope() {
+class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private val carrier: String? = null): CoroutineScope by MainScope() {
     private val airportRepository = AirportRepository.getInstance()
     private val aircraftRepository = AircraftRepository.getInstance()
     private val icaoIataMapAsync = async(Dispatchers.IO) {airportRepository.getIcaoToIataMap()}

@@ -21,10 +21,38 @@ package nl.joozd.logbookapp.data.parseSharedFiles.interfaces
 
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.Instant
-
+/**
+ *a Roster to be used for parsing anything into flights
+ */
 interface Roster {
+    /**
+     * Identifier of the carrier.
+     * See companion object.
+     */
+    val carrier: String?
+
+    /**
+     * true if the data provided to this parser seems to be valid
+     */
     val isValid: Boolean
+
+    /**
+     * List of all flights in this roster.
+     * Airports can be ICAO or IATA format
+     * Flights will be cleaned later, so flight ID and timestamp are not necessary.
+     */
     val flights: List<Flight>?
-    val period: ClosedRange<Instant>
+
+    /**
+     * The period covered by this roster.
+     * Should start at start of day and end at end of day
+     */
+    val period: ClosedRange<Instant>?
     //fun getFlights(icaoIataMap: Map<String, String>?): List<Flight>
+
+    companion object{
+        const val KLC = "KLC"
+        const val KLC_CHECKIN_SHEET = "KLC_CHECKIN_SHEET"
+        const val KLM = "KLM"
+    }
 }

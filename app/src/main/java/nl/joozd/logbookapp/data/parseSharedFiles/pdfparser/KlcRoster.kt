@@ -30,8 +30,7 @@ import nl.joozd.logbookapp.utils.reversed
 import java.io.InputStream
 import java.time.Instant
 
-class KlcRoster(inputStream: InputStream, val icaoIataMap: Map<String, String>?):
-    Roster {
+class KlcRoster(inputStream: InputStream, val icaoIataMap: Map<String, String>?): Roster {
 
     /*********************************************************************************************
      * Private parts
@@ -91,6 +90,8 @@ class KlcRoster(inputStream: InputStream, val icaoIataMap: Map<String, String>?)
     /*********************************************************************************************
      * Public parts
      *********************************************************************************************/
+
+    override val carrier = Roster.KLC
 
     override val isValid = roster.seemsValid
 

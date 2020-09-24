@@ -34,6 +34,8 @@ import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
 import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.JoozdlogParser
 import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.MccPilotLogCsvParser
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
+import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcCheckinSheet
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
@@ -79,6 +81,9 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                         } ?: feedback(PdfParserActivityEvents.ERROR).apply{
                             putString("Error 1")
                         }
+                        SupportedTypes.KLC_CHECKIN_SHEET -> uri?.getInputStream()?.use{
+                            parseRoster(KlcCheckinSheet.ofInputStream(it))
+                        } ?: feedback(PdfParserActivityEvents.ERROR)
 
                         SupportedTypes.KLC_MONTHLY -> uri?.getInputStream()?.use {
                             parseKlcMonthly(it)
@@ -140,6 +145,27 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      * Parser functions. This work can (should) be done async in NonCancelable coroutine
      *********************************************************************************************/
 
+    private fun parseRoster(roster: Roster): Boolean{
+        if (!roster.isValid) return false
+        viewModelScope.launch (Dispatchers.IO + NonCancellable) {
+            val mostRecentFlight = flightRepository.getMostRecentFlightAsync()
+            val cutoffTime = mostRecentFlight.await()?.timeIn ?: 0L
+            val flightsToSave = roster.flights?.filter {f -> f.timeOut > cutoffTime} ?: emptyList()
+            val periodToSave = roster.period ?: (Instant.EPOCH .. Instant.EPOCH)
+
+            //If calendar Sync will interfere, show Dialog in Activity. Dialog can restart saving.
+            if (Preferences.getFlightsFromCalendar && (Preferences.calendarDisabledUntil < periodToSave.endInclusive.epochSecond)){
+                feedback(PdfParserActivityEvents.CALENDAR_SYNC_ENABLED)
+            } else {
+                ImportedFlightsCleaner(flightsToSave, roster.carrier).cleanFlights()?.let { fff ->
+                    flightRepository.saveFromRoster(fff, period = periodToSave)
+                    feedback(PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED)
+                }
+            }
+        }
+        return true
+    }
+
     /**
      * Parse KLC roster and do all the magic.
      * Return true if work successfully launched, false if file not OK
@@ -181,6 +207,9 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
+    /*
+    These are replaced by ParseCsv
+
     private suspend fun parseMccPilotLogbook(inputStream: InputStream) = withContext(Dispatchers.Default){
         with (MccPilotLogCsvParser.ofInputStream(inputStream)) {
             if (!validImportedLogbook) {
@@ -211,9 +240,13 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
+
+
     private suspend fun parseJoozdlogV4(inputStream: InputStream) = withContext(Dispatchers.Default){
         val foundFlights = FlightsRepositoryExporter.csvToFlights(inputStream.reader().readLines())
     }
+
+    */
 
     /**
      * Saves flights from roster, does check if CalendarSync is enabled

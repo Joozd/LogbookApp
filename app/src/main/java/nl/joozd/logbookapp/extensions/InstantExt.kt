@@ -38,6 +38,13 @@ fun Instant.toLocalTime(zoneOffset: ZoneOffset = ZoneOffset.UTC) = LocalDateTime
  */
 fun Instant.atDate(date: LocalDate, zoneOffset: ZoneOffset = ZoneOffset.UTC) = LocalDateTime.ofInstant(this, zoneOffset).atDate(date).toInstant(zoneOffset)
 
+/**
+ * Changes this instant to the instant at start of day. If no timezone given, timezone = UTC
+ */
+fun Instant.atStartOfDay(zoneOffset: ZoneOffset = ZoneOffset.UTC) = this.toLocalDate(zoneOffset).atStartOfDay().toInstant(zoneOffset)
+
+fun Instant.atEndOfDay(zoneOffset: ZoneOffset = ZoneOffset.UTC) = this.toLocalDate(zoneOffset).plusDays(1).atStartOfDay().toInstant(zoneOffset)
+
 fun Instant.plusDays(daysToAdd: Int) = this.plusSeconds(daysToAdd * 86400L) // 86400 seconds is 1 day
 
 operator fun Instant.minus(other: Instant) = Duration.between(this, other)

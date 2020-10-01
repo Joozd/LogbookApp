@@ -42,13 +42,13 @@
     <item
         android:id="@+id/menu_settings"
         android:title="@string/settings" />
+    <!--
     <item
             android:id="@+id/menu_edit_aircraft"
             android:title="@string/editAircraft" />
+
     <item
             android:id="@+id/menu_do_something"
             android:title="DO SOMETHING" />
-    <item
-        android:id="@+id/menu_login"
-        android:title="@string/title_activity_login" />
+            -->
 </menu>

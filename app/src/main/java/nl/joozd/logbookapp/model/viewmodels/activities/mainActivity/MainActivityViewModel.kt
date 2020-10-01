@@ -28,15 +28,20 @@ import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
+import nl.joozd.logbookapp.model.helpers.FlightConflichtChecker
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
+import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import java.time.Instant
 import java.util.*
@@ -53,7 +58,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     private val rawFlights
         get() = flightRepository.liveFlights.value ?: emptyList()
     private val flightsList
-        get() = searchFlights(rawFlights).map{DisplayFlight.of(it,icaoIataMap, Preferences.useIataAirports) }.also{setSearchFieldHint(it.size)}
+        get() = searchFlights(rawFlights).map { DisplayFlight.of(it, icaoIataMap, Preferences.useIataAirports) }.also { setSearchFieldHint(it.size) }
 
     private val searchStringLiveData = MutableLiveData<String>()
     private val searchSpinnerSelection = MutableLiveData<Int>()
@@ -72,21 +77,22 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
             searchSpinnerSelection.value = it
         }
 
-    private val _displayFlightsList2= MediatorLiveData<List<DisplayFlight>>()
-    init{
+    private val _displayFlightsList2 = MediatorLiveData<List<DisplayFlight>>()
+
+    init {
         _displayFlightsList2.addSource(flightRepository.liveFlights) {
-            _displayFlightsList2.value = flightsList ?: _displayFlightsList2.value
+            _displayFlightsList2.value = flightsList
         }
         _displayFlightsList2.addSource(airportRepository.icaoIataMap) {
             _displayFlightsList2.value = flightsList
         }
-        _displayFlightsList2.addSource(airportRepository.useIataAirports){
+        _displayFlightsList2.addSource(airportRepository.useIataAirports) {
             _displayFlightsList2.value = flightsList
         }
-        _displayFlightsList2.addSource(searchStringLiveData){
+        _displayFlightsList2.addSource(searchStringLiveData) {
             _displayFlightsList2.value = flightsList
         }
-        _displayFlightsList2.addSource(searchSpinnerSelection){
+        _displayFlightsList2.addSource(searchSpinnerSelection) {
             _displayFlightsList2.value = flightsList
         }
     }
@@ -97,7 +103,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     private fun searchFlights(fff: List<Flight>?): List<Flight> {
         if (fff == null) return emptyList()
         if (!searchFieldOpen) return fff
-        return when(searchType){
+        return when (searchType) {
             ALL -> searchAll(fff)
             AIRPORTS -> searchAirports(fff)
             AIRCRAFT -> searchAircraft(fff)
@@ -106,44 +112,47 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
-    private fun searchAll(fff: List<Flight>) = fff.filter{
+    private fun searchAll(fff: List<Flight>) = fff.filter {
         query in it.name.toUpperCase(Locale.ROOT)
                 || query in it.name2.toUpperCase(Locale.ROOT)
                 || query in it.registration.toUpperCase(Locale.ROOT)
                 || query in it.orig.toUpperCase(Locale.ROOT)
                 || query in it.dest.toUpperCase(Locale.ROOT)
                 || query in icaoIataMap[it.orig]?.toUpperCase(Locale.ROOT) ?: ""
-                || query in icaoIataMap[it.dest]?.toUpperCase(Locale.ROOT) ?: ""}
+                || query in icaoIataMap[it.dest]?.toUpperCase(Locale.ROOT) ?: ""
+    }
 
-    private fun searchAirports(fff: List<Flight>) = fff.filter{
+    private fun searchAirports(fff: List<Flight>) = fff.filter {
         query in it.orig.toUpperCase(Locale.ROOT)
                 || query in it.dest.toUpperCase(Locale.ROOT)
                 || query in icaoIataMap[it.orig]?.toUpperCase(Locale.ROOT) ?: ""
-                || query in icaoIataMap[it.dest]?.toUpperCase(Locale.ROOT) ?: ""}.also{
+                || query in icaoIataMap[it.dest]?.toUpperCase(Locale.ROOT) ?: ""
+    }.also {
         viewModelScope.launch {
             // TODO make with async update from [airportRepository]
         }
     }
 
 
-    private fun searchAircraft(fff: List<Flight>) = fff.filter{
-        query in it.registration.toUpperCase(Locale.ROOT) }.also{
+    private fun searchAircraft(fff: List<Flight>) = fff.filter {
+        query in it.registration.toUpperCase(Locale.ROOT)
+    }.also {
         viewModelScope.launch {
             //TODO make with async update from [aircraftRepository]
         }
     }
 
-    private fun searchNames(fff: List<Flight>) = fff.filter{
+    private fun searchNames(fff: List<Flight>) = fff.filter {
         query in it.name.toUpperCase(Locale.ROOT)
                 || query in it.name2.toUpperCase(Locale.ROOT)
     }
 
-    private fun disableCalendarImportUntil(time: Long){
+    private fun disableCalendarImportUntil(time: Long) {
         Preferences.calendarDisabledUntil = time
         feedback(MainActivityEvents.CALENDAR_SYNC_PAUSED)
     }
 
-    private fun toggleSearchField(){
+    private fun toggleSearchField() {
         if (searchFieldOpen)
             closeSearchField()
         else {
@@ -152,7 +161,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
-    private fun setSearchFieldHint(it: Int){
+    private fun setSearchFieldHint(it: Int) {
         _searchFieldHint.value = if (it == rawFlights.size) null else "$it flights found"
     }
 
@@ -186,26 +195,28 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     val flightSyncProgress: LiveData<Int>
         get() = flightRepository.syncProgress
 
-    val flightOpenEvents = workingFlightRepository.flightOpenEvents
+    val workingFlight: LiveData<WorkingFlight?>
+        get() = flightRepository.workingFlight
 
-
+    val savedflight
+        get() = flightRepository.savedFlight
 
 
     /*********************************************************************************************
      * Menu functions
-    **********************************************************************************************/
+     **********************************************************************************************/
 
-    fun menuSelectedDoSomething(){
+    fun menuSelectedDoSomething() {
         /**
          * Current function: Fix names lists
          */
-        viewModelScope.launch{
+        viewModelScope.launch {
 
             val timeStamp = TimestampMaker.nowForSycPurposes
-            val allFlights: List<Flight> = flightRepository.getAllFlights().map{ f ->
+            val allFlights: List<Flight> = flightRepository.getAllFlights().map { f ->
                 f.copy(name2 = f.name2.replace('|', ';'))
             }.also {
-                Log.d("menuSelectedDoSomething", "Done. Fixed ${it.filter{it.timeStamp == timeStamp}.size } / ${it.size} flights")
+                Log.d("menuSelectedDoSomething", "Done. Fixed ${it.filter { it.timeStamp == timeStamp }.size} / ${it.size} flights")
             }
             flightRepository.save(allFlights)
             feedback(MainActivityEvents.DONE)
@@ -213,7 +224,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
-    fun menuSelectedRebuild(){
+    fun menuSelectedRebuild() {
         feedback(MainActivityEvents.NOT_IMPLEMENTED)
         /*
 val ENABLE_REBUILD = true
@@ -228,15 +239,15 @@ else{
 
     fun menuSelectedAddFlight() = addFlight()
 
-    fun menuSelectedTotalTimes(){
+    fun menuSelectedTotalTimes() {
         feedback(MainActivityEvents.NOT_IMPLEMENTED)
     }
 
-    fun menuSelectedBalanceForward(){
+    fun menuSelectedBalanceForward() {
         feedback(MainActivityEvents.NOT_IMPLEMENTED)
     }
 
-    fun menuSelectedSearch(){
+    fun menuSelectedSearch() {
         toggleSearchField()
     }
 
@@ -250,26 +261,34 @@ else{
     /**
      * Handler for clickety thingies
      */
-    fun showFlight(flightID: Int){
-        viewModelScope.launch(Dispatchers.IO) {
-            workingFlightRepository.fetchFlightByIdToWorkingFlight(flightID)?.let {
-                feedback(MainActivityEvents.SHOW_FLIGHT)
-            } ?: feedback((MainActivityEvents.FLIGHT_NOT_FOUND))
+
+
+    private val openingFlightMutex = Mutex()
+    fun showFlight(flightId: Int) = viewModelScope.launch {
+        openingFlightMutex.withLock {
+            WorkingFlight.fromFlightId(flightId)?.let {
+                flightRepository.setWorkingFlight(it)
+                // feedback(MainActivityEvents.SHOW_FLIGHT) this goes through livedata
+            } ?: feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
         }
     }
 
-    fun addFlight(){
+    fun addFlight() {
         viewModelScope.launch(Dispatchers.IO) {
-            workingFlightRepository.createNewWorkingFlight()
-            feedback(MainActivityEvents.SHOW_FLIGHT)
+            flightRepository.setWorkingFlight(WorkingFlight.createNew())
         }
     }
-    fun saveWorkingFlight() {
-        workingFlightRepository.saveWorkingFlight()
-        feedback(MainActivityEvents.FLIGHT_SAVED)
-    }
 
-    fun undoSaveWorkingFlight() = workingFlightRepository.undoSaveWorkingFlight()
+    /**
+     * Undo saving of a flight bu reverting to its backed up state in FlightRepository
+     * If a [savedflight] was given and there is no flightRepository.undoSaveFlight, it is a new flight wchich will be deleted
+     */
+    fun undoSaveWorkingFlight(savedFlightToUndo: Flight? = null) = flightRepository.undoSaveFlight?.let { undoFlight ->
+        flightRepository.save(undoFlight)
+    }
+        ?: savedFlightToUndo?.let { savedFlight ->
+            flightRepository.delete(savedFlight)
+        } ?: feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
 
     /**
      * Does one of three things:
@@ -278,14 +297,14 @@ else{
      *  * planned:          Delete flight
      *  * Not planned:      feedback(TRYING_TO_DELETE_COMPLETED_FLIGHT) with its id in ExtraData as "ID"
      */
-    fun deleteFlight(id: Int){
+    fun deleteFlight(id: Int) {
         viewModelScope.launch {
-            withContext (Dispatchers.IO) { flightRepository.fetchFlightByID(id)}.let{
-                when(it?.isPlanned){
+            withContext(Dispatchers.IO) { flightRepository.fetchFlightByID(id) }.let {
+                when (it?.isPlanned) {
                     null -> feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
                     true -> {
                         if (Preferences.getFlightsFromCalendar && it.timeOut > Preferences.calendarDisabledUntil && it.timeOut > Instant.now().epochSecond)
-                            feedback(MainActivityEvents.TRYING_TO_DELETE_CALENDAR_FLIGHT).apply{
+                            feedback(MainActivityEvents.TRYING_TO_DELETE_CALENDAR_FLIGHT).apply {
                                 extraData.putInt(MainActivityFeedbackExtraData.FLIGHT_ID, id)
                             }
                         else {
@@ -293,7 +312,7 @@ else{
                             feedback(MainActivityEvents.DELETED_FLIGHT)
                         }
                     }
-                    false -> feedback(MainActivityEvents.TRYING_TO_DELETE_COMPLETED_FLIGHT).apply{
+                    false -> feedback(MainActivityEvents.TRYING_TO_DELETE_COMPLETED_FLIGHT).apply {
                         extraData.putInt(MainActivityFeedbackExtraData.FLIGHT_ID, id)
                     }
                 }
@@ -303,7 +322,7 @@ else{
 
     fun deleteNotPlannedFlight(id: Int) = flightRepository.delete(id)
 
-    fun undoDeleteFlight(){
+    fun undoDeleteFlight() {
         flightRepository.undeleteFlight()
     }
 
@@ -312,15 +331,25 @@ else{
      * Functions related to saving/loading working flight
      *********************************************************************************************/
 
-    fun checkFlightConflictingWithCalendarSync(): Boolean = workingFlightRepository.flightIsChanged && (workingFlightRepository.checkConflictingWithCalendarSync() != 0L)
+    /**
+     * Check if a saved flight will make a conflict with calendar sync
+     * (ie. a planned flight gets times or airports changed)
+     * @param f: Flight to check against FlightRepository.undoFlight
+     */
+    fun checkFlightConflictingWithCalendarSync(f: Flight): Long = if (f == flightRepository.undoSaveFlight) 0L
+    else FlightConflichtChecker.checkConflictingWithCalendarSync(flightRepository.undoSaveFlight, f)
 
-    fun getConflictTime(): Long? = with (workingFlightRepository.checkConflictingWithCalendarSync()){
-        if (this == 0L) null else this
-    }
 
-    // Fixes a calendar sync conflict with edited flight by disabling calendar sync until after
-    fun fixCalendarSyncConflict(){
-        disableCalendarImportUntil(workingFlightRepository.checkConflictingWithCalendarSync() + 1)
+    /**
+     * Fixes a calendar sync conflict with edited flight by disabling calendar sync until after both flights.
+     * @param f: Flight to check against FlightRepository.undoFlight. Will throw error if f == null.
+     * Call this function from an observer of [FlightRepository.savedFlight]
+     */
+    fun fixCalendarSyncConflictIfNeeded(f: Flight?) {
+        if (f == null) return // no flight, no conflict
+        checkFlightConflictingWithCalendarSync(f).nullIfZero()?.let {
+            disableCalendarImportUntil(it)
+        }
     }
 
 
@@ -331,16 +360,16 @@ else{
     /**
      * This will synch time with server and launch repository update functions (which can decide for themselves if it is necessary)
      */
-    fun notifyActivityResumed(){
+    fun notifyActivityResumed() {
         GeneralRepository.synchTimeWithServer()
         flightRepository.syncIfNeeded()
         airportRepository.getAirportsIfNeeded()
         aircraftRepository.checkIfAircraftTypesUpToDate()
     }
 
-    fun deleteAndDisableCalendarImportUntillAfterThisFlight(flightId: Int){
+    fun deleteAndDisableCalendarImportUntillAfterThisFlight(flightId: Int) {
         viewModelScope.launch {
-            flightRepository.fetchFlightByID(flightId)?.let {flight ->
+            flightRepository.fetchFlightByID(flightId)?.let { flight ->
                 disableCalendarImportUntil(flight.timeIn)
                 flightRepository.delete(flight)
                 feedback(MainActivityEvents.DELETED_FLIGHT)
@@ -348,7 +377,7 @@ else{
         }
     }
 
-    fun disableCalendarImport(){
+    fun disableCalendarImport() {
         Preferences.getFlightsFromCalendar = false
     }
 
@@ -356,20 +385,18 @@ else{
      * Functions related to searching:
      *********************************************************************************************/
 
-    fun closeSearchField(){
+    fun closeSearchField() {
         feedback(MainActivityEvents.CLOSE_SEARCH_FIELD)
         query = ""
         searchFieldOpen = false
     }
 
 
-
-    fun setSearchString(it: String){
+    fun setSearchString(it: String) {
         query = it.toUpperCase(Locale.ROOT)
     }
 
-    fun setSpinnerSelection(it: Int)
-    {
+    fun setSpinnerSelection(it: Int) {
         searchType = it
     }
 
@@ -378,16 +405,19 @@ else{
      * Intent handling:
      */
 
-    fun handleIntent(intent: Intent?){
+    fun handleIntent(intent: Intent?) {
         val action: String? = intent?.action
         val data: Uri? = intent?.data
 
-        if (action == ACTION_VIEW){
+        /**
+         * Todo handle other links
+         */
+        if (action == ACTION_VIEW) {
             data?.lastPathSegment?.let {
                 Log.d("Uri", "lastPathSegment: $it")
 
                 //TODO needs sanity check
-                val loginPass = it.split(":").let{lp ->
+                val loginPass = it.split(":").let { lp ->
                     lp.first() to lp.last()
                 }
                 viewModelScope.launch {
@@ -403,12 +433,11 @@ else{
     }
 
 
-
-    companion object{
+    companion object {
         const val ALL = 0
         const val AIRPORTS = 1
         const val AIRCRAFT = 2
         const val NAMES = 3
     }
-
 }
+

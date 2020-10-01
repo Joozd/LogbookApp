@@ -17,9 +17,10 @@
  *
  */
 
-package nl.joozd.logbookapp.data.miscClasses
+package nl.joozd.logbookapp.data.miscClasses.crew
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import nl.joozd.logbookapp.extensions.getBit
 import nl.joozd.logbookapp.extensions.setBit
@@ -33,23 +34,38 @@ import java.time.Duration
  * bit 5: in seat on landing                                                        *
  * bit 6-31: amount of time reserved for takeoff/landing (standard in settings)     *
  ************************************************************************************/
-class Crew(iCrewSize: Int = 2,
+open class Crew(iCrewSize: Int = 2,
            iDidTakeoff: Boolean = true,
            iDidLanding: Boolean = true,
            iTakeoffLandingTimes: Int = 0)
 {
-    var crewSize: Int = iCrewSize
+    protected open var mCrewSize: Int = iCrewSize
 
-    var didTakeoff: Boolean = iDidTakeoff
+    protected open var mDidTakeoff: Boolean = iDidTakeoff
 
-    var didLanding: Boolean = iDidLanding
+    protected open var mDidLanding: Boolean = iDidLanding
 
-    var takeoffLandingTimes: Int = iTakeoffLandingTimes
+    protected open var mTakeoffLandingTimes: Int = iTakeoffLandingTimes
+
+    /**
+     * Getters for stored values.
+     */
+    val size
+        get() = mCrewSize
+
+    val takeoff
+        get() = mDidTakeoff
+
+    val landing
+        get() = mDidLanding
+
+    val times
+        get() = mTakeoffLandingTimes
 
     fun toInt():Int {
-        var value = if (crewSize > 15) 15 else crewSize
-        value = value.setBit(4, didTakeoff).setBit(5, didLanding)
-        value += takeoffLandingTimes.shl(6)
+        var value = if (mCrewSize > 15) 15 else mCrewSize
+        value = value.setBit(4, mDidTakeoff).setBit(5, mDidLanding)
+        value += mTakeoffLandingTimes.shl(6)
         return value
     }
 
@@ -57,38 +73,38 @@ class Crew(iCrewSize: Int = 2,
      * Return amount of time to log. Cannot be negative, so 3 man ops for a 20 min flight with 30 mins to/landing is 0 minutes to log.
      */
     fun getLogTime(totalTime: Int, pic: Boolean): Int{
-        if (pic || crewSize <=2) return totalTime
-        return maxOf(0, (((totalTime.toFloat()-2*takeoffLandingTimes)/crewSize) * 2 + takeoffLandingTimes * (didTakeoff.toInt() + didLanding.toInt()) + 0.5).toInt())
+        if (pic || mCrewSize <=2) return totalTime
+        return maxOf(0, (((totalTime.toFloat()-2*mTakeoffLandingTimes)/mCrewSize) * 2 + mTakeoffLandingTimes * (mDidTakeoff.toInt() + mDidLanding.toInt()) + 0.5).toInt())
     }
 
     fun getLogTime(totalTime: Duration, pic: Boolean): Duration{
-        if (pic || crewSize <=2) return totalTime
-        return Duration.ofMinutes(maxOf(0L, (((totalTime.toMinutes().toFloat()-2*takeoffLandingTimes)/crewSize) * 2 + takeoffLandingTimes * (didTakeoff.toInt() + didLanding.toInt()) + 0.5).toLong()))
+        if (pic || mCrewSize <=2) return totalTime
+        return Duration.ofMinutes(maxOf(0L, (((totalTime.toMinutes().toFloat()-2*mTakeoffLandingTimes)/mCrewSize) * 2 + mTakeoffLandingTimes * (mDidTakeoff.toInt() + mDidLanding.toInt()) + 0.5).toLong()))
     }
 
-    operator fun plus(extraCrewMembers: Int): Crew = Crew ((crewSize + extraCrewMembers).putInRange((1..15)), didTakeoff, didLanding, takeoffLandingTimes)
-    operator fun minus(extraCrewMembers: Int): Crew = Crew ((crewSize - extraCrewMembers).putInRange((1..15)), didTakeoff, didLanding, takeoffLandingTimes)
+    operator fun plus(extraCrewMembers: Int): Crew = Crew ((mCrewSize + extraCrewMembers).putInRange((1..15)), mDidTakeoff, mDidLanding, mTakeoffLandingTimes)
+    operator fun minus(extraCrewMembers: Int): Crew = Crew ((mCrewSize - extraCrewMembers).putInRange((1..15)), mDidTakeoff, mDidLanding, mTakeoffLandingTimes)
 
 
     operator fun plusAssign(extraCrewMembers: Int){
-        crewSize += extraCrewMembers
-        crewSize = crewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
+        mCrewSize += extraCrewMembers
+        mCrewSize = mCrewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
     }
 
     operator fun minusAssign(fewerCrewMebers: Int){
-        crewSize -= fewerCrewMebers
-        crewSize = crewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
+        mCrewSize -= fewerCrewMebers
+        mCrewSize = mCrewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
     }
 
-    operator fun inc(): Crew{
-        crewSize++
-        crewSize = crewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
+    operator fun inc(): Crew {
+        mCrewSize++
+        mCrewSize = mCrewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
         return this
     }
 
-    operator fun dec(): Crew{
-        crewSize--
-        crewSize = crewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
+    operator fun dec(): Crew {
+        mCrewSize--
+        mCrewSize = mCrewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
         return this
     }
 
@@ -105,6 +121,7 @@ class Crew(iCrewSize: Int = 2,
     companion object {
         const val MIN_CREW_SIZE = 1
         const val MAX_CREW_SIZE = 15
+        val CREW_RANGE = (MIN_CREW_SIZE..MAX_CREW_SIZE)
 
         fun of(value: Int) = if (value == 0) Crew() else Crew(
             iCrewSize = 15.and(value),

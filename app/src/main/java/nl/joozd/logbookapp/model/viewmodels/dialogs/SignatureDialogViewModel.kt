@@ -23,9 +23,12 @@ import com.caverock.androidsvg.SVG
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
 class SignatureDialogViewModel: JoozdlogDialogViewModel() {
-    private var _signature: String = workingFlight?.signature ?: ""
+    private val wf = flightRepository.wf
+    private var _signature: String = wf.signature.value ?: ""
     val signature: String
         get() = _signature
+
+    private val undoSignature = signature
 
     val signatureSvg: SVG
         get() = SVG.getFromString(signature)
@@ -39,9 +42,10 @@ class SignatureDialogViewModel: JoozdlogDialogViewModel() {
         _signature = ""
     }
 
-    fun saveSignature(){
-        workingFlight?.let{
-            workingFlight = it.copy(signature = signature)
-        }
-    }
+    /**
+     * Set signature
+     */
+    fun setSignature(signature: String) = wf.setSignature(signature)
+
+    override fun undo() = wf.setSignature(undoSignature)
 }

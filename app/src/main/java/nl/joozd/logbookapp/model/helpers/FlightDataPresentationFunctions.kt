@@ -19,10 +19,6 @@
 
 package nl.joozd.logbookapp.model.helpers
 
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.data.miscClasses.Crew
-import nl.joozd.logbookapp.extensions.nullIfEmpty
-import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -50,6 +46,8 @@ object FlightDataPresentationFunctions {
     }
 
     fun minutesToHoursAndMinutesString(minutes: Int): String = "${minutes/60}:${(minutes%60).toString().padStart(2,'0')}"
+
+    fun minutesToHoursAndMinutesString(minutes: Long) = minutesToHoursAndMinutesString(minutes.toInt())
 
     /**
      * Make a string like "1:23" into minutes (83 in this case). Also works for "1:23:45.678"

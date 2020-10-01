@@ -30,7 +30,7 @@ import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.miscClasses.Crew
+import nl.joozd.logbookapp.data.miscClasses.crew.Crew
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.isSamedPlannedFlightAs
 import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
@@ -44,6 +44,7 @@ import nl.joozd.logbookapp.utils.TwilightCalculator
 import nl.joozd.logbookapp.utils.reverseFlight
 import java.time.Instant
 
+@Deprecated ("switch to WorkingFlight implementation")
 class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope by MainScope() {
 
     // This does the operations on all flights. used for saving and loading workingFlight
@@ -268,33 +269,7 @@ class WorkingFlightRepository(private val dispatcher: CoroutineDispatcher = Disp
      * Planned flight calendar sync check
      *************************/
 
-    /**
-     * Checks a bunch of things
-     * - Is it a planned flight?
-     * - Is calendarSync on?
-     * - Is the flight changed in a way that will make it not match a planned flight?     *
-     * @return time to disable calendarSync to if conflict, 0 if not
-     *
-     */
-    fun checkConflictingWithCalendarSync(): Long {
-        return flight?.let {
-            when {
-                !Preferences.getFlightsFromCalendar -> 0L                                            // not using calendar sync
-                Preferences.calendarDisabledUntil >= backupFlight?.timeIn ?: 0 -> 0L                 // not using calendar sync for flight being edited
-                !it.prepareForSave().isPlanned -> 0L                                                 // not planned, no problem
-                backupFlight?.isSamedPlannedFlightAs(it.prepareForSave()) == true -> 0L              // editing a planned flight in a way that doesn't break sync
-                backupFlight?.prepareForSave()?.timeOut ?: 0 < maxOf(
-                    Preferences.calendarDisabledUntil,
-                    Instant.now().epochSecond
-                ) -> 0L       // editing a flight that starts before calendar sync cutoff
-                backupFlight == null && it.timeOut > Instant.now().epochSecond -> it.timeIn + 1L       // If editing a new flight that starts in the future, 1 second after end of that flight
-                else -> maxOf(
-                    backupFlight?.timeIn ?: 0,
-                    it.timeIn
-                ) + 1L                         // In other cases, i second after latest timeIn of planned flight and workingFlight
-            }
-        } ?: 0
-    }
+
 
     /********************************************************************************************
      * Working flight:

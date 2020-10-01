@@ -63,19 +63,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/flightFlightID"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:textColor="@color/white"
-                android:visibility="visible"
-                app:layout_constraintBottom_toTopOf="@+id/scrollView2"
-                app:layout_constraintStart_toStartOf="@+id/flightInfoText"
-                app:layout_constraintTop_toTopOf="@+id/flightInfoText" />
-
             <ScrollView
                 android:id="@+id/scrollView2"
                 android:layout_width="match_parent"
@@ -262,11 +249,37 @@
                         android:alpha="0.9"
                         android:rotation="90"
                         app:layout_constraintBottom_toBottomOf="@+id/flighttOutStringWrapper"
-                        app:layout_constraintEnd_toStartOf="@+id/flighttOutStringWrapper"
-                        app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/flighttOutStringWrapper"
                         app:srcCompat="@drawable/triangle" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/flightSimTimeWrapper"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+
+                        android:layout_marginTop="4dp"
+                        android:background="@drawable/rounded_corners_white"
+                        app:layout_constraintEnd_toStartOf="@+id/flighttInSelector"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toEndOf="@+id/flighttOutSelector"
+                        app:layout_constraintTop_toBottomOf="@+id/flightOrigWrapper">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/flightSimTimeField"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/simtTime"
+                            android:imeOptions="actionNext"
+                            android:importantForAutofill="no"
+                            android:includeFontPadding="false"
+                            android:inputType="time"
+                            android:nextFocusForward="@id/flightAircraftField"
+                            android:selectAllOnFocus="true"
+                            android:textAlignment="center"
+                            tools:text="12:34" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/flighttOutStringWrapper"
@@ -292,7 +305,8 @@
                             android:inputType="time"
                             android:nextFocusForward="@id/flighttInStringField"
                             android:selectAllOnFocus="true"
-                            android:textAlignment="center" />
+                            android:textAlignment="center"
+                            tools:text="12:34" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -330,8 +344,6 @@
                         android:rotation="270"
                         app:layout_constraintBottom_toBottomOf="@+id/flighttOutStringWrapper"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flighttInStringWrapper"
                         app:layout_constraintTop_toTopOf="@+id/flighttOutStringWrapper"
                         app:srcCompat="@drawable/triangle" />
 

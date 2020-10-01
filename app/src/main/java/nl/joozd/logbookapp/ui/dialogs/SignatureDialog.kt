@@ -20,13 +20,10 @@
 package nl.joozd.logbookapp.ui.dialogs
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import com.caverock.androidsvg.SVG
 import com.github.gcacace.signaturepad.views.SignaturePad
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogSignatureBinding
@@ -45,8 +42,7 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
 
 class SignatureDialog: JoozdlogFragment() {
-    val viewModel: SignatureDialogViewModel by viewModels()
-
+    private val viewModel: SignatureDialogViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         with (DialogSignatureBinding.bind(inflater.inflate(R.layout.dialog_signature, container, false))) {
@@ -64,13 +60,10 @@ class SignatureDialog: JoozdlogFragment() {
 
             clearTextView.setOnClickListener {
                 viewModel.signatureCleared()
-                setBoxVisibility(this)
+                setBoxVisibility()
             }
 
-            setBoxVisibility(this)
-
-
-
+            setBoxVisibility()
 
             /**
              * Observers:
@@ -80,17 +73,18 @@ class SignatureDialog: JoozdlogFragment() {
 
 
             /**
-             * UI related butons:
+             * UI related buttons:
              */
 
             cancelTextView.setOnClickListener {
+                viewModel.undo()
                 closeFragment()
             }
             backgroundLayout.setOnClickListener {
+                viewModel.undo()
                 closeFragment()
             }
             saveTextView.setOnClickListener {
-                viewModel.saveSignature()
                 closeFragment()
             }
             signLayout.setOnClickListener { }
@@ -99,15 +93,13 @@ class SignatureDialog: JoozdlogFragment() {
         }
     }
 
-    private fun setBoxVisibility(binding: DialogSignatureBinding) = with(binding){
-        if (viewModel.signature.isNotEmpty()) {
-            Log.d("AAP", "NIET EMPTY")
+    private fun DialogSignatureBinding.setBoxVisibility() {
+        if (viewModel.signature.isNotBlank()) {
             signaturePad.visibility = View.INVISIBLE
             signatureImageView.setSVG(viewModel.signatureSvg)
             signatureImageView.visibility = View.VISIBLE
         }
         else {
-            Log.d("AAP", "WEL EMPTY")
             signatureImageView.visibility = View.INVISIBLE
             signaturePad.visibility = View.VISIBLE
             signaturePad.clear()

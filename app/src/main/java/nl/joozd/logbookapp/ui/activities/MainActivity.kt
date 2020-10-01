@@ -32,16 +32,12 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
-import nl.joozd.logbookapp.extensions.fadeOut
-import nl.joozd.logbookapp.extensions.getColorFromAttr
-import nl.joozd.logbookapp.extensions.onTextChanged
-import nl.joozd.logbookapp.extensions.showAnimated
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
+import nl.joozd.logbookapp.extensions.*
+import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityFeedbackExtraData
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModel
@@ -49,7 +45,6 @@ import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivity
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesActivity
 import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.dialogs.LoginDialog
-import nl.joozd.logbookapp.ui.dialogs.WaitingForSomethingDialog
 import nl.joozd.logbookapp.ui.fragments.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.customs.CustomSnackbar
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
@@ -179,7 +174,6 @@ class MainActivity : JoozdlogActivity() {
             /**
              * Search field and -spinner functions
              */
-
             mainSearchField.onTextChanged {
                 viewModel.setSearchString(it)
             }
@@ -189,8 +183,7 @@ class MainActivity : JoozdlogActivity() {
              *******************************************************************************************/
 
             //TODO tempo test function
-            viewModel.internetAvailable.observe(activity, Observer {
-            })
+            // viewModel.internetAvailable.observe(activity){}
 
             viewModel.notLoggedIn.observe(activity) {
                 if (it && Preferences.useCloud){
@@ -198,7 +191,7 @@ class MainActivity : JoozdlogActivity() {
                 }
             }
 
-            viewModel.displayFlightsList.observe(activity, Observer { fff ->
+            viewModel.displayFlightsList.observe(activity,){ fff ->
                 flightsAdapter.updateList(fff)
                 if (!flightsList.canScrollVertically(-1)){ // if at top
                     val plannedFlightsInSight = findAmountOfPlannedFlightsToShow()
@@ -209,16 +202,16 @@ class MainActivity : JoozdlogActivity() {
 
                     if (positionToScrollTo != 0) flightsList.scrollBy(0, -30.dpToPixels().toInt())
                 }
-            })
+            }
 
-            viewModel.searchFieldHint.observe(activity, Observer {
+            viewModel.searchFieldHint.observe(activity) {
                 mainSearchBoxLayout.hint = it ?: getString(R.string.search)
-            })
+            }
 
-            viewModel.feedbackEvent.observe(activity, Observer {
+            viewModel.feedbackEvent.observe(activity) {
                 when (it.getEvent()) {
                     MainActivityEvents.NOT_IMPLEMENTED -> toast("Not Implemented")
-                    MainActivityEvents.SHOW_FLIGHT -> showFlight(this)
+                    // MainActivityEvents.SHOW_FLIGHT -> showFlight() this is now through liveData
                     MainActivityEvents.OPEN_SEARCH_FIELD -> {
                         searchField.visibility = View.VISIBLE
                         mainSearchField.requestFocus()
@@ -231,11 +224,9 @@ class MainActivity : JoozdlogActivity() {
                         searchTypeSpinner.setSelection(0)
                         //reset search types spinner//
                         searchField.visibility = View.GONE
-
                     }
-                    MainActivityEvents.FLIGHT_SAVED -> showSaveSnackbar(this)
                     MainActivityEvents.DELETED_FLIGHT -> showDeleteSnackbar(this)
-                    MainActivityEvents.FLIGHT_NOT_FOUND -> longToast("ERROR: Flight ID not found!")
+                    MainActivityEvents.FLIGHT_NOT_FOUND -> longToast("ERROR: Flight not found!")
                     MainActivityEvents.TRYING_TO_DELETE_CALENDAR_FLIGHT ->
                         showDeletePlannedCalendarFlightDialog(
                             it.extraData.getInt(
@@ -252,27 +243,18 @@ class MainActivity : JoozdlogActivity() {
                     MainActivityEvents.DONE -> longToast(" Yay fixed!")
                     MainActivityEvents.ERROR -> longToast("An error occurred :(")
                 }
-            })
-
-            viewModel.flightOpenEvents.observe(activity) {
-                if (it.getEvent() == FeedbackEvents.FlightEditorOpenOrClosed.CLOSED) {
-                    if (viewModel.checkFlightConflictingWithCalendarSync()){
-                        showFlightConflictsWithCalendarSyncDialog()
-                    }
-                    mainToolbar.showAnimated()
-                    if (snackbarShowing == null) addButton.show()
-                }
             }
 
-            viewModel.airportSyncProgress.observe(activity, Observer { p ->
+            viewModel.airportSyncProgress.observe(activity) { p ->
                 when {
                     p == -1 -> airportSyncProgressBar?.remove()
                     airportSyncProgressBar != null -> airportSyncProgressBar?.progress = p
                     else -> airportSyncProgressBar =
                         makeProgressBar(this, R.string.loadingAirports, p).show()
                 }
-            })
-            viewModel.flightSyncProgress.observe(activity, Observer { p ->
+            }
+
+            viewModel.flightSyncProgress.observe(activity) { p ->
                 when {
                     p == -1 -> flightsSyncProgressBar?.remove()
 
@@ -280,9 +262,40 @@ class MainActivity : JoozdlogActivity() {
 
                     else -> flightsSyncProgressBar = makeProgressBar(this, R.string.loadingFlights, p).show()
                 }
-            })
+            }
 
+            /**
+             * If workingFlight gives a WorkingFlight, show it in an EditFlightFragment.
+             * If it is null, it means a workingFlight is closed. Check for conflicts and show undo-bar if a flight was saved.
+             */
+            viewModel.workingFlight.observe(activity) {
+                it?.let {
+                    with(supportFragmentManager) {
+                        findFragmentByTag(EDIT_FLIGHT_TAG)?.let {
+                            commit { remove(it) }
+                        }
+                    }
+                    showFlight()
+                }
+            }
 
+            viewModel.savedflight.observe(activity) { suf ->
+                Log.d("MainActivity", "saved $suf")
+                suf.get()?.let {
+                    Log.d("MainActivity", "got $it")
+                    if (viewModel.checkFlightConflictingWithCalendarSync(it) > 0)
+                        showFlightConflictsWithCalendarSyncDialog(it)
+                    else showSaveSnackbar(it)
+                }
+            }
+
+            /*******************************************************************************************
+             * Other listeners:
+             *******************************************************************************************/
+
+            supportFragmentManager.addOnBackStackChangedListener {
+                makeAddButtonAndToolbarVisibleOrNot()
+            }
 
             setContentView(root)
         }
@@ -306,7 +319,7 @@ class MainActivity : JoozdlogActivity() {
      * Shows a flight in EditFlightFragment.
      * If Flight is entered, that will be loaded, if left blank or null, a new flight will be made.
      */
-    private fun showFlight(binding: ActivityMainNewBinding) = with(binding) {
+    private fun ActivityMainNewBinding.showFlight(){
         viewModel.closeSearchField()
         snackbarShowing?.dismiss()
         addButton.fadeOut()
@@ -314,8 +327,23 @@ class MainActivity : JoozdlogActivity() {
         mainToolbar.visibility = View.GONE
         val flightEditor = EditFlightFragment()
         supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, flightEditor)
+            add(R.id.mainActivityLayout, flightEditor, EDIT_FLIGHT_TAG)
             addToBackStack(null)
+        }
+    }
+
+    /**
+     * Checks if an EditFlightFragment is open and sets toolbar / addbutton visibiity accordingly
+     * Actually checks if backstack is empty.
+     */
+    private fun ActivityMainNewBinding.makeAddButtonAndToolbarVisibleOrNot(){
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            mainToolbar.visibility = View.VISIBLE
+            addButton.fadeIn()
+        } else {
+            Log.d("Backstack size", "${supportFragmentManager.backStackEntryCount}")
+            mainToolbar.visibility = View.GONE
+            addButton.fadeOut()
         }
     }
 
@@ -363,12 +391,12 @@ class MainActivity : JoozdlogActivity() {
 
     }
 
-    private fun showFlightConflictsWithCalendarSyncDialog(){
+    private fun showFlightConflictsWithCalendarSyncDialog(f: Flight){
         JoozdlogAlertDialog(this).apply {
             titleResource = R.string.calendar_sync_conflict
             messageResource = R.string.calendar_sync_edited_flight
             setPositiveButton(android.R.string.ok) {
-                viewModel.fixCalendarSyncConflict()}
+                viewModel.fixCalendarSyncConflictIfNeeded(f)}
             setNegativeButton(android.R.string.cancel){
                 viewModel.undoSaveWorkingFlight()
             }
@@ -382,11 +410,12 @@ class MainActivity : JoozdlogActivity() {
         }.show()
     }
 
-    private fun showSaveSnackbar(binding: ActivityMainNewBinding) = with (binding) {
-        snackbarShowing = CustomSnackbar.make(mainActivityLayout).apply {
+    private fun ActivityMainNewBinding.showSaveSnackbar(f: Flight? = null) {
+        Log.d("showSaveSnackBar()", "started")
+        snackbarShowing = CustomSnackbar.make(root).apply {
             setMessage(R.string.savedFlight)
             setOnAction { //onAction = UNDO
-                viewModel.undoSaveWorkingFlight()
+                viewModel.undoSaveWorkingFlight(f)
                 dismiss()
             }
             setOnActionBarShown { addButton.hide() }
@@ -437,6 +466,7 @@ class MainActivity : JoozdlogActivity() {
 
     companion object{
         const val TAG = "MainActivity"
+        const val EDIT_FLIGHT_TAG = "EDIT_FLIGHT_TAG"
         const val PLANNED_FLIGHTS_IN_SIGHT = 3
 
     }

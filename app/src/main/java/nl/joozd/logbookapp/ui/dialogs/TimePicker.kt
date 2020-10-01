@@ -40,7 +40,7 @@ import nl.joozd.logbookapp.model.viewmodels.dialogs.TimePickerViewModel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
 
-class TimePicker: JoozdlogFragment() {
+open class TimePicker: JoozdlogFragment() {
     companion object{
         private val paddedMinutes = IntArray(60) {it}.map{v -> v.toString().padStart(2,'0')}.toTypedArray()
         private val paddedHours = IntArray(24) {it}.map{v -> v.toString().padStart(2,'0')}.toTypedArray()
@@ -159,28 +159,28 @@ class TimePicker: JoozdlogFragment() {
                 }
             })
 
-            viewModel.totalTime.observe(viewLifecycleOwner, Observer { ttofText.setText(it)})
+            viewModel.totalTime.observe(viewLifecycleOwner) { ttofText.setText(it)}
 
-            viewModel.ifrTime.observe(viewLifecycleOwner, Observer { ifrTimeText.setText(it) })
+            viewModel.ifrTime.observe(viewLifecycleOwner) { ifrTimeText.setText(it) }
 
-            viewModel.nightTime.observe(viewLifecycleOwner, Observer { nightTimeText.setText(it)})
+            viewModel.nightTime.observe(viewLifecycleOwner) { nightTimeText.setText(it)}
 
-            viewModel.augmentedCrew.observe(viewLifecycleOwner, Observer {
-                augmentedTextView.showIfActive(it)
-            })
+            viewModel.augmentedCrew.crewSize.observe(viewLifecycleOwner) {
+                augmentedTextView.showIfActive(it > 2)
+            }
 
-            viewModel.pic.observe(viewLifecycleOwner, Observer {
+            viewModel.pic.observe(viewLifecycleOwner) {
                 picTextView.showIfActive(it)
-            })
-            viewModel.coPilot.observe(viewLifecycleOwner, Observer {
+            }
+            viewModel.coPilot.observe(viewLifecycleOwner) {
                 coPilotTextView.showIfActive(it)
-            })
-            viewModel.dual.observe(viewLifecycleOwner, Observer {
+            }
+            viewModel.dual.observe(viewLifecycleOwner) {
                 dualTextview.showIfActive(it)
-            })
-            viewModel.instructor.observe(viewLifecycleOwner, Observer {
+            }
+            viewModel.instructor.observe(viewLifecycleOwner) {
                 instructorTextView.showIfActive(it)
-            })
+            }
         }
 
 

@@ -19,14 +19,10 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
-import android.util.Log
 import androidx.lifecycle.*
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
-import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import java.util.*
 
@@ -35,12 +31,16 @@ import java.util.*
  * Viewmodel for [AircraftPicker] and [SimTypePicker] fragments
  */
 class AircraftPickerViewModel: JoozdlogDialogViewModel(){
+    private val undoAircraft = workingFlight.aircraft.value
     private val _typesSearchString = MutableLiveData<String>()
     private val typesSearchString
         get() = _typesSearchString.value ?: ""
 
-    private val _aircraftTypes = MediatorLiveData<List<String>>()
+    private val _knownAircraft: LiveData<List<Aircraft>>
+        get() = aircraftRepository.liveAircraftList
 
+
+    private val _aircraftTypes = MediatorLiveData<List<String>>()
     init{
         _aircraftTypes.addSource(aircraftRepository.liveAircraftTypes){
             _aircraftTypes.value = it.map{ac -> ac.name}.filter{typesSearchString in it}
@@ -50,63 +50,35 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
         }
     }
 
-    private val _knownAircraft: LiveData<List<Aircraft>>
-        get() = aircraftRepository.liveAircraftList
 
-    private val _selectedAircraft = MutableLiveData(
-        Aircraft(
-            "XX-XXX"
-        )
-    )
-    val selectedAircraft: LiveData<Aircraft>
-        get ()= _selectedAircraft
+    // Active aircraft in [workingFligght] or a placeholder [Aircraft] while workingFlight is loading data
+    val selectedAircraft = Transformations.map(workingFlight.aircraft) { it ?: Aircraft("...")}
 
     val aircraftTypes: LiveData<List<String>>
         get() = _aircraftTypes
 
     val knownRegistrations = flightRepository.usedRegistrations
 
+    val registration: LiveData<String> = Transformations.map(selectedAircraft) { it.registration }
 
-
-    private fun updatedSelectedAircraft(
-        registration: String? = null,
-        type: AircraftType? = null,
-        source: Int? = null
-    ) {
-        Log.d(this::class.simpleName, "updatedSelectedAircraft($registration, $type, $source)")
-        _selectedAircraft.value = _selectedAircraft.value?.let {
-            it.copy(
-                registration = registration ?: it.registration,
-                type = type ?: it.type,
-                source = source ?: it.source
-            )
-        } ?: Aircraft(
-            registration ?: "XX-XXX",
-            type,
-            source ?: Aircraft.NONE
-        )
-    }
-    private fun setSelectedAircraft(aircraft: Aircraft){
-        Log.d(this::class.simpleName, "setSelectedAircraft($aircraft)")
-        _selectedAircraft.value = aircraft
-    }
-    private fun setSelectedAircraftFromFlight(flight: Flight?){
-        if (flight == null) return
-        viewModelScope.launch {
-            _selectedAircraft.value = if (flight.isSim) {
-                Aircraft("SIM", aircraftRepository.getAircraftTypeByShortName(flight.aircraftType)
-                )
-            } else
-            aircraftRepository.getAircraftFromRegistration(flight.registration)
-                ?: Aircraft(
-                    flight.registration,
-                    aircraftRepository.getAircraftTypeByShortName(flight.aircraftType),
-                    Aircraft.NONE
-                )
+    private var mAircraft: Aircraft
+        get() = selectedAircraft.value!!
+        set(newAircraft){
+            workingFlight.setAircraft(newAircraft)
         }
+
+
+    /**
+     * Update selected aircaft's registration, type or source
+     */
+    private fun updatedSelectedAircraft(registration: String? = null, type: AircraftType? = null, source: Int? = null) {
+        mAircraft = mAircraft.copy(
+                registration = registration ?: mAircraft.registration,
+                type = type ?: mAircraft.type,
+                source = source ?: mAircraft.source)
     }
 
-    val selectedAircraftString: LiveData<String> = Transformations.map(_selectedAircraft) { it.type?.name ?: "UNKNOWN"}
+    val selectedAircraftString: LiveData<String> = Transformations.map(selectedAircraft) { it.type?.name ?: "UNKNOWN"}
 
     fun selectAircraftTypeByString(typeString: String, shortString: Boolean = false){
         viewModelScope.launch {
@@ -117,53 +89,27 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
         //TODO set AircraftRegistrationWithTypeData
     }
 
-    val registration: LiveData<String> = Transformations.map(selectedAircraft) { it.registration }
-    fun updateRegistration(reg: String) = viewModelScope.launch {
-        val previousType = selectedAircraft.value?.type
-        setSelectedAircraft(
-            aircraftRepository.getAircraftFromRegistration(reg)
-                ?: Aircraft(
-                    reg,
-                    null,
-                    Aircraft.NONE
-                )
-        )
-        // search for known type with that reg, if null, make new aircraft with this reg and previous known type (if any)
-        // set found type as [_selectedAircraftString] and [_selectedAircraftType]
+    /**
+     * Called when user is typing in registrationField in UI.
+     * workingFlight will look for aircraft to match registration or will create one with null type
+     */
+    fun updateRegistration(reg: String){
+        workingFlight.setAircraft(registration = reg)
     }
 
-    fun start(){
-        setSelectedAircraftFromFlight(workingFlight)
-    }
-
-    fun saveAircraft() {
-        selectedAircraft.value?.let{ac ->
-            if (ac.type != null){
-                viewModelScope.launch (NonCancellable) {
-                    aircraftRepository.saveAircraft(ac)
-                }
-            }
-        }
-        workingFlight?.let {
-            Log.d(this::class.simpleName, "selectedAircraft = ${selectedAircraft.value}")
-            workingFlight = it.copy(
-                registration = selectedAircraft.value?.registration ?: "".also{Log.d(this::class.simpleName, "selectedAircraft.value?.registration is null")},
-                aircraftType = selectedAircraft.value?.type?.shortName ?: ""
-            ).also{Log.d(this@AircraftPickerViewModel::class.simpleName,"saved $it")}
-            //TODO: Save reg+type to repo
-        }
-    }
-
-    fun saveTypeOnly(){
-        workingFlight?.let{
-            workingFlight = it.copy(aircraftType = selectedAircraft.value?.type?.shortName ?: "").also{
-                Log.d("SimTypePicker", "Saved aircraft type ${it.aircraftType}")
-            }
-        }
+    fun saveAircraftToRepository() {
+        TODO("Not implemented")
     }
 
     fun updateSearchString(query: String){
         _typesSearchString.value = query.toUpperCase(Locale.ROOT)
+    }
+
+    /**
+     * Revert aircraft to what it was when this viewModel was created
+     */
+    override fun undo() {
+        workingFlight.setAircraft(undoAircraft)
     }
 
 }

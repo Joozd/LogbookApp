@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.model.dataclasses
 
-import nl.joozd.logbookapp.data.miscClasses.Crew
+import nl.joozd.logbookapp.data.miscClasses.crew.Crew
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.toMonthYear
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
@@ -72,7 +72,7 @@ data class DisplayFlight(
             takeoffsAndLandings = "${f.takeoffs()}/${f.landings()}",
             flightNumber = f.flightNumber,
             remarks = f.remarks,
-            augmented = Crew.of(f.augmentedCrew).crewSize > 2,
+            augmented = Crew.of(f.augmentedCrew).size > 2,
             ifr = f.ifrTime > 0,
             dual = f.isDual,
             picus = f.isPICUS,

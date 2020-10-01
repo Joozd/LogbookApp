@@ -29,6 +29,7 @@ import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.DialogAugmentedCrewBinding
+import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.extensions.toInt
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AugmentedCrewDialogViewModel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
@@ -54,35 +55,33 @@ class AugmentedCrewDialog: JoozdlogFragment(){
 
             timeForTakeoffLandingEditText.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus){
-                    viewModel.setTakeoffLandingTime(timeForTakeoffLandingEditText.text.toInt()).also{
-                        Preferences.standardTakeoffLandingTimes = it
-                    }
+                    viewModel.setTakeoffLandingTime(timeForTakeoffLandingEditText.text)
                 }
             }
 
             /**
              * observers:
              */
+            viewModel.crewsize.observe(viewLifecycleOwner) {
+                crewSizeEditText.setText(it.toString())
+            }
+
+            viewModel.didTakeoff.observe(viewLifecycleOwner) {
+                didTakeoffCheckbox.isChecked = it
+            }
+
+            viewModel.didLanding.observe(viewLifecycleOwner) {
+                didLandingCheckbox.isChecked = it
+            }
+
+            viewModel.takeoffLandingTimes.observe(viewLifecycleOwner) { t ->
+                timeForTakeoffLandingEditText.setText(t)
+            }
 
 
-            viewModel.augmentedCrewData.observe(viewLifecycleOwner, Observer{
-                crewSizeEditText.setText(it.crewSize.toString())
-                didTakeoffCheckbox.isChecked = it.didTakeoff
-                didLandingCheckbox.isChecked = it.didLanding
-                it.takeoffLandingTimes.let {t ->
-                    timeForTakeoffLandingEditText.setText(
-                        if (t == 0)
-                            Preferences.standardTakeoffLandingTimes.also {newT ->
-                                viewModel.setTakeoffLandingTime(newT) // Can safely set this as Crew will always report full flight time for crew <= 2
-                            }.toString ()
-                        else t.toString()
-                    ).also{
-                        Log.d("YOLO", "swag 0001 $t")
-                    }
-                }
-            })
-
-
+            /**
+             * Buttons
+             */
             cancelCrewDialogButton.setOnClickListener {
                 viewModel.undo()
                 closeFragment()

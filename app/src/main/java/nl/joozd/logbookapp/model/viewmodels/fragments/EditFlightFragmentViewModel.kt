@@ -19,30 +19,12 @@
 
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
-import android.util.Log
-import androidx.lifecycle.*
-import androidx.lifecycle.Transformations.distinctUntilChanged
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.anyWordStartsWith
-import nl.joozd.logbookapp.extensions.nullIfEmpty
-import nl.joozd.logbookapp.extensions.removeTrailingDigits
-import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.toggleTrueAndFalse
-import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.withDate
-import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.withRegAndType
-import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.withTakeoffLandings
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.getDateStringFromEpochSeconds
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.getTimestringFromEpochSeconds
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
-import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
-import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.withTimeInStringToTime
-import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.withTimeOutStringToTime
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
-import java.time.LocalDate
 
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+
+@Deprecated("Switch to NewEditFlightFragmentViewModel")
 class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
+    /*
 
     /**********************************************************************************************
      * Private parts
@@ -50,11 +32,11 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
 
 
 
-    val flightNumber: LiveData<String> = distinctUntilChanged(Transformations.map(flight) { it.flightNumber })
-    val orig: LiveData<String> = distinctUntilChanged(Transformations.map(workingFlightRepository.origin) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: workingFlight?.orig })
-    val dest: LiveData<String> = distinctUntilChanged(Transformations.map(workingFlightRepository.destination) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: workingFlight?.dest })
-    val timeOut: LiveData<String> = distinctUntilChanged(Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeOut) })
-    val timeIn: LiveData<String> = distinctUntilChanged(Transformations.map(flight) { getTimestringFromEpochSeconds(it.timeIn) })
+    val flightNumber: LiveData<String> = workingFlight.flightNumber
+    val orig: LiveData<String> = Transformations.map(workingFlight.origin) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: "(...)" }
+    val dest: LiveData<String> = Transformations.map(workingFlight.destination) { (if (Preferences.useIataAirports) it?.iata_code?.nullIfEmpty() else it?.ident) ?: "(...)" }
+    val timeOut: LiveData<String> = Transformations.map(workingFlight.timeOut) { it.toTimeString()}
+    val timeIn: LiveData<String> = Transformations.map(workingFlight.timeIn) { it.toTimeString()}
 
 
 
@@ -64,88 +46,52 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
      * - setters
      *********************************************************************************************/
 
-    val flightID = distinctUntilChanged(Transformations.map(flight) { it.flightID })
-
-    val date: LiveData<String> = distinctUntilChanged(Transformations.map(flight) { getDateStringFromEpochSeconds(it.timeOut) })
+    val date: LiveData<String> = Transformations.map(workingFlight.date) { it.toDateString() }
     fun setDate(date: LocalDate){
-        workingFlight?.let{ workingFlight = it.withDate(date)}
+        workingFlight.setDate(date)
     }
-
-    fun getLocalDate(): LocalDate? = flight.value?.tOut()?.toLocalDate()
-
-    fun setFlightNumber(flightNumber: String){
-        workingFlight?.let{
-            if (flightNumber != workingFlight?.flightNumber?.removeTrailingDigits())
-                workingFlight = it.copy(flightNumber = flightNumber)
-            else {
-                val oldFN = it.flightNumber
-                workingFlight = it.copy (flightNumber = flightNumber)
-                workingFlight = it.copy (flightNumber = oldFN)
-
-            }
-        }
-    }
-
-    fun setOrig(enteredData: String){
-        workingFlight?.let {
-            // initially set entered data
-            workingFlight = it.copy(orig = enteredData)
-
-            // Check if entered data is a known airport, and if so, set that airport as [orig]
-            viewModelScope.launch {
-                airportRepository.searchAirportOnce(enteredData)?.let{foundAirport ->
-                    //make sure we have most recent workingFlight in case search was taking a while
-                    workingFlight?.let{f ->
-                        workingFlight = f.copy(orig = foundAirport.ident)
-                    }
-                } ?: feedback(EditFlightFragmentEvents.AIRPORT_NOT_FOUND).apply {
-                    extraData.putString("enteredData", enteredData)
-                    extraData.putBoolean("orig", true)
-                }
-            }
-
-        }
-    }
-
-    fun setDest(enteredData: String){
-        workingFlight?.let {
-            // initially set entered data
-            workingFlight = it.copy(dest = enteredData)
-
-            // Check if entered data is a known airport, and if so, set that airport as [dest]
-            viewModelScope.launch {
-                airportRepository.searchAirportOnce(enteredData)?.let{foundAirport ->
-                    //make sure we have most recent workingFlight in case search was taking a while
-                    workingFlight?.let{ f ->
-                        workingFlight = f.copy(dest = foundAirport.ident)
-                    }
-                } ?: feedback(EditFlightFragmentEvents.AIRPORT_NOT_FOUND).apply {
-                    extraData.putString("enteredData", enteredData)
-                    extraData.putBoolean("orig", false)
-                }
-            }
-        }
-    }
-
-    val origChecked = workingFlightRepository.origInDatabase
-    val destChecked = workingFlightRepository.destInDatabase
 
     /**
-     * This one also used for sim times as Fragment doesn't know or care if this flight is sim or not
+     * Sets flightnumber if it is not only the first letters of old flightNumber.
+     * (eg of it was "KL123", setting "KL" will be ignored and will result in old flightNumber being set to reset EditText field through LiveData
+     *
      */
-    fun setTimeOut(enteredData: String){
-        workingFlight?.let {
-            workingFlight = if (it.isSim) it.copy (simTime = hoursAndMinutesStringToInt(enteredData) ?: 0.also{
-                feedback(EditFlightFragmentEvents.INVALID_SIM_TIME_STRING)
-                Log.e("EditFlightViewModel", "INVALID_SIM_TIME_STRING")
-            })
-            else it.withTimeOutStringToTime(enteredData).also{ f-> // setting null flight does nothing so we can do this
-                if (f == null) feedback(EditFlightFragmentEvents.INVALID_TIME_STRING).also{
-                    Log.e("EditFlightViewModel", "INVALID_SIM_TIME_STRING")
-                }
+    fun setFlightNumber(flightNumber: String){
+            if (flightNumber != workingFlight.flightNumber.value!!.removeTrailingDigits())
+                workingFlight.setFlightNumber(flightNumber)
+            else {
+                workingFlight.setFlightNumber(workingFlight.flightNumber.value!!)
             }
-        }
+
     }
+
+    /**
+     * Set origin. workingFlight will take care of heavy lifting.
+     */
+    fun setOrig(enteredData: String){
+        workingFlight.setOrig(enteredData)
+    }
+
+    /**
+     * Set destination. workingFlight will take care of heavy lifting.
+     */
+    fun setDest(enteredData: String){
+        workingFlight.setDest(enteredData)
+    }
+
+    val origChecked = Transformations.map(workingFlight.origin) { it?.checkIfValidCoordinates() ?: false }
+    val destChecked = Transformations.map(workingFlight.destination) { it?.checkIfValidCoordinates() ?: false }
+
+    /**
+     * set Time Out.
+     * Take first 4 digits (padded with 0's at start) and convert it into a LocalTime and set that.
+     */
+    fun setTimeOut(enteredData: Editable){
+
+
+    }
+
+    fun setSimTime(enteredData: Editable)
 
     val simTime: LiveData<String>
         get() = distinctUntilChanged(Transformations.map(flight) { minutesToHoursAndMinutesString(it.simTime)})
@@ -307,4 +253,9 @@ class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
 
     val checkSim: Boolean
         get() = workingFlight?.isSim == true
+
+    */
+
 }
+
+

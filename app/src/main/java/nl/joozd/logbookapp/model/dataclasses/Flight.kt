@@ -34,7 +34,7 @@ package nl.joozd.logbookapp.model.dataclasses
  * -x rebuild user data, when in production make sure backwards compatibility is here!
  */
 
-import nl.joozd.logbookapp.data.miscClasses.Crew
+import nl.joozd.logbookapp.data.miscClasses.crew.Crew
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions

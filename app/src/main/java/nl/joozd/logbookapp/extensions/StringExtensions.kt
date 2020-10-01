@@ -27,6 +27,8 @@ import java.util.*
  */
 fun String.nullIfEmpty() = if (this.isEmpty()) null else this
 
+fun String.nullIfBlank() = if (this.isBlank()) null else this
+
 fun String.emptyIfNotTrue(keep: Boolean) = if (keep) this else ""
 
 fun String.nullIfNotTrue(keep: Boolean?) = if (keep == true) this else null

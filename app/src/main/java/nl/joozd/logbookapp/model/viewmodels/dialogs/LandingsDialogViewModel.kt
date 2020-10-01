@@ -24,23 +24,64 @@ import nl.joozd.logbookapp.extensions.minusOneWithFloor
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
 class LandingsDialogViewModel: JoozdlogDialogViewModel() {
-    val toDay = Transformations.map(flight){ it.takeOffDay }
-    val toNight = Transformations.map(flight){ it.takeOffNight }
-    val ldgDay = Transformations.map(flight){ it.landingDay }
-    val ldgNight = Transformations.map(flight){ it.landingNight }
-    val autoland = Transformations.map(flight){ it.autoLand }
+    private val undoLandings = workingFlight.takeoffLandings.value!!
+    private val undoAutoValues = workingFlight.isAutoValues.value!!
+
+    val toDay = Transformations.map(workingFlight.takeoffLandings){ it.takeoffDay }
+    val toNight = Transformations.map(workingFlight.takeoffLandings){ it.takeoffNight }
+    val ldgDay = Transformations.map(workingFlight.takeoffLandings){ it.landingDay }
+    val ldgNight = Transformations.map(workingFlight.takeoffLandings){ it.landingNight }
+    val autoland = Transformations.map(workingFlight.takeoffLandings){ it.autoLand }
 
 
+    /**
+     * Add or subtract one takeoff or landing or autoland on click.
+     * workingFlight will take care of not becoming negative.
+     */
+    fun toDayUpButtonClick() {
+        workingFlight.takeoffDay++
+        workingFlight.setAutoValues(false)
+    }
+    fun toNightUpButtonClick() {
+        workingFlight.takeoffNight++
+        workingFlight.setAutoValues(false)
+    }
+    fun ldgDayUpButtonClick() {
+        workingFlight.landingDay++
+        workingFlight.setAutoValues(false)
+    }
+    fun ldgNightUpButtonClick(){
+        workingFlight.landingNight++
+        workingFlight.setAutoValues(false)
+    }
+    fun autolandUpButtonClick() {
+        workingFlight.autoLand++
+        workingFlight.setAutoValues(false)
+    }
 
-    fun toDayUpButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffDay = it.takeOffDay + 1, autoFill = false) }}
-    fun toNightUpButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffNight = it.takeOffNight + 1, autoFill = false) }}
-    fun ldgDayUpButtonClick() { workingFlight?.let { workingFlight = it.copy(landingDay = it.landingDay + 1, autoFill = false) }}
-    fun ldgNightUpButtonClick() { workingFlight?.let { workingFlight = it.copy(landingNight = it.landingNight + 1, autoFill = false) }}
-    fun autolandUpButtonClick() { workingFlight?.let { workingFlight = it.copy(autoLand = it.autoLand + 1, autoFill = false) }}
+    fun toDayDownButtonClick() {
+        workingFlight.takeoffDay--
+        workingFlight.setAutoValues(false)
+    }
+    fun toNightDownButtonClick() {
+        workingFlight.takeoffNight--
+        workingFlight.setAutoValues(false)
+    }
+    fun ldgDayDownButtonClick() {
+        workingFlight.landingDay--
+        workingFlight.setAutoValues(false)
+    }
+    fun ldgNightDownButtonClick() {
+        workingFlight.landingNight--
+        workingFlight.setAutoValues(false)
+    }
+    fun autolandDownButtonClick() {
+        workingFlight.autoLand--
+        workingFlight.setAutoValues(false)
+    }
 
-    fun toDayDownButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffDay = it.takeOffDay.minusOneWithFloor(0), autoFill = false) }}
-    fun toNightDownButtonClick() { workingFlight?.let { workingFlight = it.copy(takeOffNight = it.takeOffNight.minusOneWithFloor(0), autoFill = false) }}
-    fun ldgDayDownButtonClick() { workingFlight?.let { workingFlight = it.copy(landingDay = it.landingDay.minusOneWithFloor(0), autoFill = false) }}
-    fun ldgNightDownButtonClick() { workingFlight?.let { workingFlight = it.copy(landingNight = it.landingNight.minusOneWithFloor(0), autoFill = false) }}
-    fun autolandDownButtonClick() { workingFlight?.let { workingFlight = it.copy(autoLand = it.autoLand.minusOneWithFloor(0), autoFill = false) }}
+    override fun undo(){
+        workingFlight.setTakeoffLandings(undoLandings)
+        workingFlight.setAutoValues(undoAutoValues)
+    }
 }

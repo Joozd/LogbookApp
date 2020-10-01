@@ -27,8 +27,7 @@ import androidx.lifecycle.*
  * ie. to tell a dialog which data it is working on
  */
 
+@Deprecated( "No longer used)")
 class MainViewModel: ViewModel() {
-    //if true, NamePicker is working on name1, if false it is working on name2. If null, it is not set.
-    var namePickerWorkingOnName1: Boolean? = null
 
 }

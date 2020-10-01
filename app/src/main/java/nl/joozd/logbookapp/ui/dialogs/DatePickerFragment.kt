@@ -29,20 +29,20 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.viewmodels.fragments.EditFlightFragmentViewModel
+import nl.joozd.logbookapp.model.viewmodels.fragments.NewEditFlightFragmentViewModel
 import java.time.LocalDate
 import java.util.*
 
 
 class DatePickerFragment: DialogFragment(), DatePickerDialog.OnDateSetListener {
-    private val effViewModel: EditFlightFragmentViewModel by activityViewModels()
+    private val effViewModel: NewEditFlightFragmentViewModel by activityViewModels()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // Use the current date as the default date in the picker
-        effViewModel.getLocalDate()?.let{
-            Log.d("datethingy", "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX - $it - XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+        effViewModel.localDate?.let{
         return DatePickerDialog(requireContext(), R.style.DatePicker, this, it.year, it.month.value-1, it.dayOfMonth)
         }
-        //This is only reached if effViewMOdel.localDate.value == null
+        //This is only reached if effViewModel.localDate.value == null
         val c = Calendar.getInstance()
         val year = c.get(Calendar.YEAR)
         val month = c.get(Calendar.MONTH)

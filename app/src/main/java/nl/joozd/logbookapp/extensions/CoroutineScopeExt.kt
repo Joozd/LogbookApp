@@ -46,7 +46,7 @@ fun <T> CoroutineScope.launchWithLocks(vararg mutex: Mutex, block: suspend () ->
 /**
  * Launches a coroutine with the given CoroutineContext with all Mutex locks in place
  */
-fun <T> CoroutineScope.launchWithLocks(context: CoroutineContext, vararg mutex: Mutex, block: suspend () -> T ) {
+fun <T> CoroutineScope.launchWithLocks(context: CoroutineContext, vararg mutex: Mutex, block: suspend () -> T ) =
     launch(context){
         mutex.forEach{
             it.lock()
@@ -60,4 +60,3 @@ fun <T> CoroutineScope.launchWithLocks(context: CoroutineContext, vararg mutex: 
             }
         }
     }
-}

@@ -39,4 +39,10 @@ data class TakeoffLandings(val takeoffDay: Int = 0, val takeoffNight: Int = 0, v
         landingNight = landingNight - other.landingNight,
         autoLand = autoLand - other.autoLand
     )
+
+    /**
+     * ToString will display combined takeoff and landings
+     * eg. TakeoffLandings(1,2,3,4,5).ToString wil be "3/7"
+     */
+    override fun toString() = "${takeoffDay + takeoffNight}/${landingDay + landingNight}"
 }

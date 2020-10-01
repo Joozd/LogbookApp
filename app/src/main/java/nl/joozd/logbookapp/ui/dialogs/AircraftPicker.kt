@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.ui.dialogs
 
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
@@ -31,14 +30,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.databinding.DialogPickAircraftTypeBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.onTextChanged
-import nl.joozd.logbookapp.extensions.textColor
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AircraftPickerViewModel
 import nl.joozd.logbookapp.ui.adapters.AircraftAutoCompleteAdapter
@@ -100,9 +97,8 @@ class AircraftPicker: JoozdlogFragment(){
 
             viewModel.selectedAircraft.observe(viewLifecycleOwner){
                 pickedAircraftText.text = it.registration
-                it.type?.let{t ->
-                    typeDescriptionTextView.text = t.name
-                }
+                typeDescriptionTextView.text = it.type?.name ?: "" // set type text to found type or to empty string
+
                 val errorText = registrationFieldLayout.findViewById<TextView>(R.id.textinput_error).apply{
                     visibility=View.VISIBLE
                 }
@@ -161,13 +157,17 @@ class AircraftPicker: JoozdlogFragment(){
                 closeFragment()
             }
 
+            aircraftPickerLayout.setOnClickListener {
+                viewModel.undo()
+                closeFragment()
+            }
+
             /**
              * A bit more complex than other JoozdlogDialogs:
              * - save AircraftRegistrationWithTypeData
              * - update flight
              */
             aircraftPickerSave.setOnClickListener {
-                viewModel.saveAircraft()
                 closeFragment()
             }
             aircraftPickerDialogBox.setOnClickListener {
@@ -182,10 +182,4 @@ class AircraftPicker: JoozdlogFragment(){
         return binding.root
 
     } // end of onCreateView()
-
-    override fun onStart() {
-        super.onStart()
-        viewModel.start() // initially set fields and get aircraft type data from repository
-    }
-
 }

@@ -20,26 +20,25 @@
 package nl.joozd.logbookapp.model.viewmodels
 
 import android.content.Context
-import androidx.lifecycle.Transformations
 import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.InitialSetFlight
 
-open class JoozdlogDialogViewModel: JoozdlogViewModel() {
-    private val undoFlight = InitialSetFlight().apply{ flight = workingFlightRepository.workingFlight.value }
+abstract class JoozdlogDialogViewModel: JoozdlogViewModel() {
+    protected val workingFlight = flightRepository.wf
+
     protected val context: Context
         get() = App.instance.ctx
 
-    fun undo(){
-        undoFlight.flight?.let {workingFlightRepository.updateWorkingFlight(it)}
-    }
 
-    val flight = workingFlightRepository.workingFlight
-    protected var workingFlight: Flight?
-        get() = workingFlightRepository.workingFlight.value
-        set(f) {
-            f?.let {
-                workingFlightRepository.updateWorkingFlight(it)
-            }
-        }
+
+    /**
+     * Set undo values on initial construction
+     * If multiple Dialogs are opened at the same time, this will get overwritten
+     */
+    protected val snapshot = workingFlight.toFlight()
+
+    /**
+     * Undo all changes made after starting this dialog (including changes made in other dialogs or EditFlightFragment)
+     * Can be overridden by a custom undo function
+     */
+    open fun undo() = workingFlight.setFromFlight(snapshot)
 }

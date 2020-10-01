@@ -145,6 +145,8 @@ object FeedbackEvents {
     enum class EditFlightFragmentEvents:
         Event {
         NOT_IMPLEMENTED,
+        SAVING,
+        CLOSE_EDIT_FLIGHT_FRAGMENT,
         INVALID_REG_TYPE_STRING,
         AIRPORT_NOT_FOUND_FOR_LANDINGS,
         INVALID_TIME_STRING,                // flight not updated due bad time string

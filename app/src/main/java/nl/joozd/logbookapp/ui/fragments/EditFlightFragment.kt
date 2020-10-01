@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.ui.fragments
 
-import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
@@ -31,37 +30,35 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
+import androidx.fragment.app.viewModels
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.databinding.EditFlightBinding
-import nl.joozd.logbookapp.model.viewmodels.MainViewModel
+import nl.joozd.logbookapp.databinding.LayoutEditFlightFragmentBinding
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
+import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.dialogs.*
-import nl.joozd.logbookapp.ui.dialogs.NamesDialog
 import nl.joozd.logbookapp.ui.utils.toast
-import nl.joozd.logbookapp.model.viewmodels.fragments.EditFlightFragmentViewModel
+
+import nl.joozd.logbookapp.model.viewmodels.fragments.NewEditFlightFragmentViewModel
 import nl.joozd.logbookapp.ui.adapters.AircraftAutoCompleteAdapter
+import nl.joozd.logbookapp.ui.dialogs.airportPicker.DestPicker
+import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
+import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog
+import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
 
 
 class EditFlightFragment: JoozdlogFragment(){
-    private val mainViewModel: MainViewModel by activityViewModels()
-    private val viewModel: EditFlightFragmentViewModel by activityViewModels()
-
-    override fun onAttach(context: Context) {
-        viewModel.onStart()
-        super.onAttach(context)
-    }
+    private val viewModel: NewEditFlightFragmentViewModel by viewModels()
 
     /**
      * Will define all listeners etc, and set initial
      */
     @ExperimentalCoroutinesApi
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        with (EditFlightBinding.bind(inflater.inflate(R.layout.edit_flight, container, false))) {
+        with (LayoutEditFlightFragmentBinding.bind(inflater.inflate(R.layout.layout_edit_flight_fragment, container, false))) {
             (flightInfoText.background as GradientDrawable).colorFilter = PorterDuffColorFilter(
                 requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
                 PorterDuff.Mode.SRC_IN
@@ -76,10 +73,6 @@ class EditFlightFragment: JoozdlogFragment(){
              * observers to show data in editText fields
              ************************************************************************************/
 
-            viewModel.flightID.observe(viewLifecycleOwner) {
-                flightFlightID.text = it.toString()
-            }
-
             viewModel.date.observe(viewLifecycleOwner, {
                 flightDateField.setTextIfNotFocused(it)
             })
@@ -88,88 +81,87 @@ class EditFlightFragment: JoozdlogFragment(){
                 flightFlightNumberField.setTextIfNotFocused(it)
             })
 
-            viewModel.orig.observe(viewLifecycleOwner) {
+
+            viewModel.origin.observe(viewLifecycleOwner) {
                 flightOrigField.setTextIfNotFocused(it)
             }
 
-            viewModel.origChecked.observe(viewLifecycleOwner, { checked ->
+            viewModel.originIsValid.observe(viewLifecycleOwner) { checked ->
                 val drawable: Drawable? = when(checked){
                     true -> ContextCompat.getDrawable(App.instance, R.drawable.ic_check_circle_outline_20px)
                     false -> ContextCompat.getDrawable(App.instance, R.drawable.ic_error_outline_20px)
                     null -> null
                 }
                 flightOrigField.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
-            })
+            }
 
-            viewModel.dest.observe(viewLifecycleOwner, {
+            viewModel.destination.observe(viewLifecycleOwner) {
                 flightDestField.setTextIfNotFocused(it)
-            })
-            viewModel.destChecked.observe(viewLifecycleOwner, { checked ->
+            }
+            viewModel.destinationIsValid.observe(viewLifecycleOwner) { checked ->
                 val drawable: Drawable? = when(checked){
                     true -> ContextCompat.getDrawable(App.instance, R.drawable.ic_check_circle_outline_20px)
                     false -> ContextCompat.getDrawable(App.instance, R.drawable.ic_error_outline_20px)
                     null -> null
                 }
                 flightDestField.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
-            })
+            }
 
-            viewModel.timeOut.observe(viewLifecycleOwner, {
-                if (!viewModel.checkSim) {
-                    flighttOutStringField.setTextIfNotFocused(it)
-                }
-            })
+            viewModel.timeOut.observe(viewLifecycleOwner) {
+                // removed unnessecary sim check as setting an invisible fiedl doesn't do much bad
+                flighttOutStringField.setTextIfNotFocused(it)
+            }
 
             viewModel.timeIn.observe(viewLifecycleOwner, {
                 flighttInStringField.setTextIfNotFocused(it)
             })
 
-            viewModel.simTime.observe(viewLifecycleOwner, {
-                if (viewModel.checkSim){
-                    flighttOutStringField.setTextIfNotFocused(it)
-                }
-            })
-
-            viewModel.regAndType.observe(viewLifecycleOwner, {
+            viewModel.aircraft.observe(viewLifecycleOwner) {
                 flightAircraftField.setTextIfNotFocused(it)
-            })
+            }
 
-            viewModel.takeoffLandings.observe(viewLifecycleOwner, {
+            viewModel.landings.observe(viewLifecycleOwner) {
                 flightTakeoffLandingField.setTextIfNotFocused(it)
-            })
+            }
 
-            viewModel.name.observe(viewLifecycleOwner, {
+            viewModel.name.observe(viewLifecycleOwner) {
                 flightNameField.setTextIfNotFocused(it)
-            })
+            }
 
-            viewModel.name2.observe(viewLifecycleOwner, {
+            viewModel.name2.observe(viewLifecycleOwner) {
                 flightName2Field.setTextIfNotFocused(it)
-            })
+            }
 
-            viewModel.remarks.observe(viewLifecycleOwner, {
+            viewModel.remarks.observe(viewLifecycleOwner) {
                 flightRemarksField.setTextIfNotFocused(it)
-            })
+            }
+            viewModel.simTime.observe(viewLifecycleOwner) {
+                flightSimTimeField.setText(minutesToHoursAndMinutesString(it))
+            }
 
             /************************************************************************************
              * observers to show data in toggle fields
              ************************************************************************************/
 
-            viewModel.sign.observe(viewLifecycleOwner) { active -> signSelector.showIfActive(active) }
+            viewModel.isSigned.observe(viewLifecycleOwner) { active -> signSelector.showIfActive(active) }
 
             //This one does a little bit more
-            viewModel.sim.observe(viewLifecycleOwner) { active ->
+            viewModel.isSim.observe(viewLifecycleOwner) { active ->
                 if (active)
-                    makeSimLayout(this)
+                    makeSimLayout()
                 else
-                    makeNormalLayout(this)
+                    makeNormalLayout()
                 simSelector.showIfActive(active)
             }
 
-            viewModel.dual.observe(viewLifecycleOwner, { active -> dualSelector.showIfActive(active) })
-            viewModel.instructor.observe(viewLifecycleOwner, { active -> instructorSelector.showIfActive(active) })
-            viewModel.ifr.observe(viewLifecycleOwner, { active -> ifrSelector.showIfActive(active) })
-            viewModel.pic.observe(viewLifecycleOwner, { active -> picSelector.showIfActive(active) })
-            viewModel.pf.observe(viewLifecycleOwner, { active -> pfSelector.showIfActive(active) })
-            viewModel.autoFill.observe(viewLifecycleOwner, { active -> autoFillCheckBox.isChecked = active })
+            viewModel.isDual.observe(viewLifecycleOwner) { active -> dualSelector.showIfActive(active) }
+            viewModel.isInstructor.observe(viewLifecycleOwner, { active -> instructorSelector.showIfActive(active) })
+            viewModel.isIfr.observe(viewLifecycleOwner) { active -> ifrSelector.showIfActive(active) }
+            viewModel.isPic.observe(viewLifecycleOwner) { active -> picSelector.showIfActive(active) }
+            viewModel.isPF.observe(viewLifecycleOwner) { active -> pfSelector.showIfActive(active) }
+            viewModel.isAutoValues.observe(viewLifecycleOwner) { active ->
+                autoFillCheckBox.isChecked = active
+            }
 
             /************************************************************************************
              * miscellaneous observers
@@ -186,8 +178,8 @@ class EditFlightFragment: JoozdlogFragment(){
                     addAll(it)
                 }
             }
-            viewModel.knownRegistrations.observe(viewLifecycleOwner){
-                aircraftFieldAdapter.setItems(it)
+            viewModel.knownRegistrations.observe(viewLifecycleOwner) { registrations ->
+                aircraftFieldAdapter.setItems(registrations)
             }
 
             /************************************************************************************
@@ -212,6 +204,7 @@ class EditFlightFragment: JoozdlogFragment(){
                     EditFlightFragmentEvents.AIRPORT_NOT_FOUND_FOR_LANDINGS -> toast("airport not found, all logged as day")
                     EditFlightFragmentEvents.INVALID_TIME_STRING -> toast("Error in time string, no changes")
                     EditFlightFragmentEvents.INVALID_SIM_TIME_STRING -> toast("Error in time string, simTime = 0")
+                    EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT -> closeFragment()
                 }
                 Unit
             }
@@ -246,7 +239,7 @@ class EditFlightFragment: JoozdlogFragment(){
 
             ifrSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                viewModel.toggleIFR()
+                viewModel.toggleIfr()
             }
 
             picSelector.setOnClickListener {
@@ -256,12 +249,12 @@ class EditFlightFragment: JoozdlogFragment(){
 
             pfSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                viewModel.togglePf()
+                viewModel.togglePF()
             }
 
-            autoFillCheckBox.setOnCheckedChangeListener { _, isChecked ->
+            autoFillCheckBox.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                viewModel.setAutoFill(isChecked)
+                viewModel.toggleAutoValues()
             }
 
             /*************************************************************************************
@@ -306,7 +299,7 @@ class EditFlightFragment: JoozdlogFragment(){
                 activity?.currentFocus?.clearFocus()
                 supportFragmentManager.commit {
                     //It's okay to have a parameter in this fragment constructor (see [AirportPicker])
-                    add(R.id.mainActivityLayout, AirportPicker(orig = true))
+                    add(R.id.mainActivityLayout, OrigPicker())
                     addToBackStack(null)
                 }
             }
@@ -314,7 +307,7 @@ class EditFlightFragment: JoozdlogFragment(){
             flightDestSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
                 supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout, AirportPicker(orig = false))
+                    add(R.id.mainActivityLayout, DestPicker())
                     addToBackStack(null)
                 }
             }
@@ -326,7 +319,7 @@ class EditFlightFragment: JoozdlogFragment(){
                 activity?.currentFocus?.clearFocus()
                 //TODO remake this dialog as complete aircraft editor
                 supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout, if (viewModel.checkSim) SimTypePicker() else AircraftPicker())
+                    add(R.id.mainActivityLayout, if (viewModel.sim) SimTypePicker() else AircraftPicker())
                     addToBackStack(null)
                 }
             }
@@ -340,23 +333,25 @@ class EditFlightFragment: JoozdlogFragment(){
 
             flightNameSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                mainViewModel.namePickerWorkingOnName1 = true
                 supportFragmentManager.commit {
                     add(R.id.mainActivityLayout,
-                        NamesDialog()
+                        Name1Dialog()
                     )
                     addToBackStack(null)
                 }
             }
             flightName2Selector.setOnClickListener {
+                Log.d("DEBUG", "xXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxX 1 1 1 1 1 1")
                 activity?.currentFocus?.clearFocus()
-                mainViewModel.namePickerWorkingOnName1 = false
                 supportFragmentManager.commit {
                     add(R.id.mainActivityLayout,
-                        NamesDialog()
+                        Name2Dialog().also{
+                            Log.d("DEBUG", "xXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxX 2 2 2 2 2 2")
+                        }
                     )
                     addToBackStack(null)
                 }
+                Log.d("DEBUG", "xXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxX 3 3 3 3 3 3")
             }
 
             /**************************************************************************************
@@ -386,13 +381,18 @@ class EditFlightFragment: JoozdlogFragment(){
 
             flighttOutStringField.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
-                    viewModel.setTimeOut(flighttOutStringField.text.toString())
+                    viewModel.setTimeOut(flighttOutStringField.text)
             }
 
             flighttInStringField.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
-                    viewModel.setTimeIn(flighttInStringField.text.toString())
+                    viewModel.setTimeIn(flighttInStringField.text)
             }
+            flightSimTimeField.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus)
+                    viewModel.setSimTime(flightSimTimeField.text)
+            }
+
             flightAircraftField.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
                     viewModel.setRegAndType(flightAircraftField.text.toString())
@@ -440,34 +440,31 @@ class EditFlightFragment: JoozdlogFragment(){
 
             flightSaveButton.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
-                viewModel.saveOnClose()
-                closeFragment()
+                viewModel.saveAndClose()
             }
             return root
         } // end of binding.apply()
 
     } // end of onCreateView
 
-
-    override fun onDestroy() {
-        Log.d("XXXXXXXXXXXXXXXXXXXXX", "Detaching Fragment QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ")
-        viewModel.onClosingFragment()
-        super.onDestroy()
-    }
-
     /**************************************************************************
      * private worker functions:
      **************************************************************************/
 
-    // private fun EditFlightBinding.isSimLayout(): Boolean = ifrSelector.visibility == View.GONE
+    // private fun LayoutEditFlightFragmentBinding.isSimLayout(): Boolean = ifrSelector.visibility == View.GONE
 
     /**
      * Switch layout for edit_flight View to sim
-     * @param binding: EditFlightBinding to change layout on
+     * @param binding: LayoutEditFlightFragmentBinding to change layout on
      */
-    private fun makeSimLayout(binding: EditFlightBinding) = with (binding){
-        flighttOutStringWrapper.hint=getString(R.string.simtTime)
-        flighttOutStringField.hint=getString(R.string.simtTime)
+    private fun LayoutEditFlightFragmentBinding.makeSimLayout() {
+        //flighttOutStringWrapper.hint=getString(R.string.simtTime)
+        //flighttOutStringField.hint=getString(R.string.simtTime)
+        flightSimTimeWrapper.visibility = View.VISIBLE
+        flightAircraftWrapper.constrainTopToBottom(flightSimTimeWrapper, "4dp")
+        flighttOutSelector.constrainToCenterVertical(flightSimTimeWrapper)
+        flighttInSelector.constrainToCenterVertical(flightSimTimeWrapper)
+        flighttOutStringWrapper.visibility = View.GONE
         autoFillCheckBox.isChecked = false
         autoFillCheckBox.isEnabled = false
         flighttInStringWrapper.visibility=View.GONE
@@ -483,19 +480,19 @@ class EditFlightFragment: JoozdlogFragment(){
         flightDestSelector.visibility=View.GONE
         //v.flightTakeoffLandingWrapper.visibility=View.GONE
         //v.flightTakeoffLandingSelector.isEnabled=false
-        viewModel.simTime.value?.let{
-            flighttOutStringField.setText(it)
-        }
     }
 
     /**
      * Switch layout for edit_flight View to normal
-     * @param binding: EditFlightBinding to change layout on
+     * @param binding: LayoutEditFlightFragmentBinding to change layout on
      */
-    private fun makeNormalLayout(binding: EditFlightBinding) = with (binding){
+    private fun LayoutEditFlightFragmentBinding.makeNormalLayout() {
         // v.autoFillCheckBox.isEnabled = viewModel.workingFlight.value?.autoFill ?: 0 > 0
-        flighttOutStringWrapper.hint = getString(R.string.timeOut)
-        flighttOutStringField.hint = getString(R.string.timeOut)
+        flightSimTimeWrapper.visibility = View.GONE
+        flighttOutStringWrapper.visibility = View.VISIBLE
+        flightAircraftWrapper.constrainTopToBottom(flighttOutStringWrapper, "4dp")
+        flighttOutSelector.constrainToCenterVertical(flighttOutStringWrapper)
+        flighttInSelector.constrainToCenterVertical(flighttOutStringWrapper)
         flighttInStringWrapper.visibility = View.VISIBLE
         flightFlightNumberWrapper.visibility = View.VISIBLE
         dualSelector.visibility = View.VISIBLE
@@ -508,9 +505,11 @@ class EditFlightFragment: JoozdlogFragment(){
         flightDestWrapper.visibility = View.VISIBLE
         flightDestSelector.visibility = View.VISIBLE
         flightTakeoffLandingWrapper.visibility = View.VISIBLE
-        flightTakeoffLandingSelector.isEnabled = true
-        viewModel.timeOut.value?.let {
-            flighttOutStringField.setText(it)
-        }
+        //flightTakeoffLandingSelector.isEnabled = true
+        autoFillCheckBox.isChecked = viewModel.isAutoValues.value == true
+        autoFillCheckBox.isEnabled = true
     }
+
+
+
 }

@@ -35,4 +35,8 @@ data class Aircraft(val registration: String, val type: AircraftType? = null, va
         const val CONSENSUS = 4     // Set from server's consensus
         const val PREVIOUS = 5      // Set because previously selected was this type
     }
+
+    override fun toString() = type?.let{
+        "$registration(${type.shortName})"
+    } ?: "$registration(???)"
 }

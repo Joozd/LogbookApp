@@ -98,7 +98,6 @@ class SimTypePicker: JoozdlogFragment(){
              * - update flight
              */
             aircraftPickerSave.setOnClickListener {
-                viewModel.saveTypeOnly()
                 closeFragment()
             }
             aircraftPickerDialogBox.setOnClickListener {
@@ -108,10 +107,5 @@ class SimTypePicker: JoozdlogFragment(){
         } // end of inflater.inflate(...).apply
 
     } // end of onCreateView()
-
-    override fun onStart() {
-        super.onStart()
-        viewModel.start() // initially set fields and get aircraft type data from repository
-    }
 
 }

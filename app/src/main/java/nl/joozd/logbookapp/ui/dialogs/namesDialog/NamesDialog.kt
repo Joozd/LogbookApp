@@ -17,31 +17,33 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs
+package nl.joozd.logbookapp.ui.dialogs.namesDialog
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.dialog_names.view.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogNamesBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
-import nl.joozd.logbookapp.model.viewmodels.MainViewModel
-import nl.joozd.logbookapp.model.viewmodels.dialogs.NamesDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog.NamesDialogViewModel
 import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
 //TODO if only one name selected in recyclerView, set that as active name if OK pressed
-class NamesDialog(): JoozdlogFragment() {
+ abstract class NamesDialog: JoozdlogFragment() {
+    /**
+     * Set to true if working on PIC, or false if working on other names (Flight.name2)
+     */
+    abstract val workingOnName1: Boolean
     // If this is true, we are editing PIC name so only one name allowed
     // if null or false, will return false (null check on different places)
-    private val mainViewModel: MainViewModel by activityViewModels()
-    private val viewModel: NamesDialogViewModel by viewModels()
+    /**
+     * ViewModel to use for this dialog
+     */
+    abstract val viewModel: NamesDialogViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         DialogNamesBinding.bind(inflater.inflate(R.layout.dialog_names, container, false)).apply{
@@ -80,18 +82,15 @@ class NamesDialog(): JoozdlogFragment() {
 
             // Save/Cancel onClickListeners:
             saveTextView.setOnClickListener{
-                mainViewModel.namePickerWorkingOnName1 = null
                 closeFragment()
             }
 
             //on cancel, revert to previous flight, set viewModel.namePickerWorkingOnName1 to null and close
             cancelTextView.setOnClickListener {
-                mainViewModel.namePickerWorkingOnName1 = null
                 viewModel.undo()
                 closeFragment()
             }
             editAircraftLayout.setOnClickListener {
-                mainViewModel.namePickerWorkingOnName1 = null
                 viewModel.undo()
                 closeFragment()
             }
@@ -129,6 +128,5 @@ class NamesDialog(): JoozdlogFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.workingOnName1 = mainViewModel.namePickerWorkingOnName1
     }
 }

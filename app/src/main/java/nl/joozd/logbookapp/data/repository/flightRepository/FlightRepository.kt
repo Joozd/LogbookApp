@@ -41,9 +41,11 @@ import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAsWithMargins
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightOnSameDay
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfRegistrationsAsync
+import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.checkPermission
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
+import java.lang.ref.WeakReference
 import java.time.Instant
 
 //TODO reorder this and make direct DB functions private
@@ -54,9 +56,14 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * Private parts:
      ********************************************************************************************/
 
-    private var undoSaveFlight: Flight? = null
+
+
     private var undeleteFlight: Flight? = null
     private var undeleteFlights: List<Flight>? = null
+
+    private val _savedFlight = MutableLiveData<SingleUseFlight>()
+
+    private val _workingFlight = MutableLiveData<WorkingFlight?>()
 
 
     private val _cachedFlights = MutableLiveData<List<Flight>>()
@@ -157,6 +164,20 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * Observables:
      ********************************************************************************************/
 
+    /**
+     * Flight to be edited in EditFlightFragmnt + dialogs
+     */
+    val workingFlight: LiveData<WorkingFlight?>
+        get() = _workingFlight
+    val wf
+        get() = workingFlight.value!! // shortcut
+
+    /**
+     * saved flight set through [notifyFlightSaved]
+     */
+    val savedFlight: LiveData<SingleUseFlight>
+        get() = _savedFlight
+
     //list of valid flights (not soft-deleted ones)
     val liveFlights: LiveData<List<Flight>> = distinctUntilChanged(_cachedFlights)
 
@@ -178,6 +199,16 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /********************************************************************************************
      * Public functions
      ********************************************************************************************/
+
+    fun setWorkingFlight(f: WorkingFlight?){
+        if (Looper.myLooper() != Looper.getMainLooper()) launch(Dispatchers.Main){
+            Log.d("setWorkingFlight", "setWorkingFlight called on a background thread, setting workingFlight async on main")
+            _workingFlight.value = f
+        }
+        else _workingFlight.value = f
+
+    }
+
 
     /**
      * Delete functions. Use delete(flight) or delete(flightsList)
@@ -241,21 +272,24 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
 
     /**
-     * put a flight in [undoSaveFlight]
+     * put a flight in [undoSaveFlight] so you can undo saving a flight or check any changes made
      */
-    fun setUndoSaveFlight(f: Flight){
-        undoSaveFlight = f
-    }
+    var undoSaveFlight: Flight? = null
 
-    fun notifyFlightSaved(){
-        TODO("Make this")
+    /**
+     * Close working flight (set it's liveData to null)
+     */
+    fun closeWorkingFlight(){
+        _workingFlight.value = null
     }
-
 
     /**
      * update cached data and save to disk
+     * @param flight: Flight to save
+     * @param sync: Whether or not to sync to server after saving
+     * @param notify: Whether or not to update [savedFlight]
      */
-    fun save(flight: Flight, sync: Boolean = true) {
+    fun save(flight: Flight, sync: Boolean = true, notify: Boolean = false) {
         //update cached flights
         cachedFlightsList = ((cachedFlightsList?: emptyList()).filter { it.flightID != flight.flightID }
                 + listOf(flight).filter { !it.DELETEFLAG })
@@ -263,6 +297,11 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         //Save flight to disk
         launch (dispatcher + NonCancellable) {
             flightDao.insertFlights(flight.toModel())
+            if (notify) launch(Dispatchers.Main) {
+
+                _savedFlight.value = SingleUseFlight(flight).also{
+                    Log.d("FLightReposiroty.save()","Notifying!")
+                } }
             if (sync) syncAfterChange()
         }
     }
@@ -418,10 +457,33 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         }}
     }
 
+    /********************************************************************************************
+     * Interfaces:
+     ********************************************************************************************/
+/*
+
+//spielerij
+
+    /**
+     * OnSavesListeners will run when notifyFlightSaved() is called
+     */
+
+    // Will hold all listeners. No duplicates as it is a Set
+    private val onSavedListeners = emptySet<WeakReference<OnSavedListener>>().toMutableSet()
+
+    /**
+     * Calling object must hold a reference to [listener] or it will be garbage collected.
+     */
+    fun addOnSaveListener(listener: OnSavedListener): Boolean = onSavedListeners.add(WeakReference(listener))
+
+    fun removeOnSaveListener(listener: OnSavedListener): Boolean = onSavedListeners.remove(WeakReference(listener))
+
+    interface OnSavedListener{
+        fun onSaved(f: Flight)
+    }
 
 
-
-
+ */
     /********************************************************************************************
      * Companion object:
      ********************************************************************************************/
@@ -444,15 +506,4 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         const val MIN_SYNC_INTERVAL = 30*60 // seconds
         const val MIN_CALENDAR_CHECK_INTERVAL = 30 // seconds
     }
-
-
-
-    /*
-    //TODO remove when ready
-    suspend fun updateNamesDivider(): Boolean{
-        val allFlights = withContext(dispatcher) {getAllFlights() }.map{it.copy(name2 = it.name2.split(",").joinToString("|"))}
-        save(allFlights.map{it.copy(timeStamp = TimestampMaker.nowForSycPurposes)})
-        return true
-    }
-    */
 }

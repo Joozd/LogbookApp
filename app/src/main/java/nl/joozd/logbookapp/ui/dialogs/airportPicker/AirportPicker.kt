@@ -17,22 +17,20 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs
+package nl.joozd.logbookapp.ui.dialogs.airportPicker
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.viewModels
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.*
 
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogAirportsBinding
-import nl.joozd.logbookapp.model.viewmodels.dialogs.AirportPickerViewModel
+import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.AirportPickerViewModel
 
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.onTextChanged
@@ -51,15 +49,9 @@ import kotlin.math.abs
  * but viewModel will persist.
  */
 @ExperimentalCoroutinesApi
-class AirportPicker(): JoozdlogFragment() {
-    private var workingOnOrig: Boolean? = null // this must be set before first-time attachment
-
-
-     // Constructor with parameter will not be called upon recreation
-    constructor(orig: Boolean): this(){
-         workingOnOrig = orig
-    }
-    private val viewModel: AirportPickerViewModel by viewModels()
+abstract class AirportPicker(): JoozdlogFragment() {
+    protected abstract val workingOnOrig: Boolean // this must be set before first-time attachment
+    protected abstract val viewModel: AirportPickerViewModel
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -163,15 +155,6 @@ class AirportPicker(): JoozdlogFragment() {
                 altitudeField.text = "alt: ${it.elevation_ft}\'"
             }
         }.root
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-         // set if working on orig or dest, or if that is not done in this instance, check if it has been set before.
-        workingOnOrig?.let {
-            viewModel.setWorkingOnOrig(it)
-        } ?: viewModel.checkWorkingOnOrigSet()
     }
 
     private fun latToString(latitude: Double): String =

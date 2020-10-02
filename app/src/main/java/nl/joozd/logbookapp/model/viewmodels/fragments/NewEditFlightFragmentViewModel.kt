@@ -27,10 +27,7 @@ import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.anyWordStartsWith
-import nl.joozd.logbookapp.extensions.nullIfBlank
-import nl.joozd.logbookapp.extensions.toDateString
-import nl.joozd.logbookapp.extensions.toTimeString
+import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
@@ -117,8 +114,12 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     /**
      * Set FlightNumber
      */
-    fun setFlightNumber(newFlightNumber: String){
-        wf.setFlightNumber(newFlightNumber)
+    fun setFlightNumber(newFlightNumber: Editable?){
+        newFlightNumber?.toString()?.let{
+            if (it != (wf.flightNumber.value ?: "").removeTrailingDigits())
+                wf.setFlightNumber(it)
+            else wf.setFlightNumber(wf.flightNumber.value ?: "")
+        }
     }
 
     /**

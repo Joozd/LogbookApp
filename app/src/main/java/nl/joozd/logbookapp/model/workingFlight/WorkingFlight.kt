@@ -35,6 +35,7 @@ import nl.joozd.logbookapp.data.miscClasses.crew.ObservableCrew
 import nl.joozd.logbookapp.data.repository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
@@ -345,6 +346,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * Gives all data in this WorkingFlight as a [Flight]
      */
     fun toFlight() = originalFlight.copy(
+        flightNumber = mFlightNumber,
         orig = mOrigin!!.ident,
         dest = mDestination!!.ident,
         timeOut = mTimeOut.epochSecond,
@@ -372,8 +374,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         isPIC = mIsPic,
         isCoPilot = mIsCopilot,
         isPF = mIsPF,
-        autoFill = mIsAutovalues,
-        timeStamp = TimestampMaker.nowForSycPurposes
+        autoFill = mIsAutovalues
     )
 
 
@@ -850,7 +851,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         }
         flightToSave?.let{f ->
             with (FlightRepository.getInstance()){
-                save(f, notify = true)
+                save(f.prepareForSave(), notify = true)
                 undoSaveFlight = if (newFlight) null else originalFlight
 
                 closeWorkingFlight()

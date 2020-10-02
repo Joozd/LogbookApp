@@ -363,7 +363,7 @@ class EditFlightFragment: JoozdlogFragment(){
 
             flightFlightNumberField.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
-                    viewModel.setFlightNumber(flightFlightNumberField.text.toString())
+                    viewModel.setFlightNumber(flightFlightNumberField.text)
                 else {
                     flightFlightNumberField.removeTrailingDigits()
                 }

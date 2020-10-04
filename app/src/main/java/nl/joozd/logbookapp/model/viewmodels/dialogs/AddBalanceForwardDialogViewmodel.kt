@@ -31,7 +31,7 @@ import nl.joozd.joozdlogcommon.BalanceForward
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardDialogEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 import java.lang.NumberFormatException
 
 
@@ -40,7 +40,7 @@ import java.lang.NumberFormatException
  * As this is only for inputting data, and not for retrieving, only limited feedback is required
  * TODO toch wel met livedata :/
  */
-class AddBalanceForwardDialogViewmodel: JoozdlogDialogViewModel() {
+class AddBalanceForwardDialogViewmodel: JoozdlogDialogViewModelWithWorkingFlight() {
 
     /**********************************************************************************************
      * Private parts

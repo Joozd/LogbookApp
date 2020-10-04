@@ -20,10 +20,10 @@
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
 
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
 @Deprecated("Switch to NewEditFlightFragmentViewModel")
-class EditFlightFragmentViewModel: JoozdlogDialogViewModel(){
+class EditFlightFragmentViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     /*
 
     /**********************************************************************************************

@@ -170,7 +170,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     val workingFlight: LiveData<WorkingFlight?>
         get() = _workingFlight
     val wf
-        get() = workingFlight.value!! // shortcut
+        get() = workingFlight.value!! // shortcut.
 
     /**
      * saved flight set through [notifyFlightSaved]

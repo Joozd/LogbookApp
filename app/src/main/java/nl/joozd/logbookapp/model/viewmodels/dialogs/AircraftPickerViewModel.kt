@@ -23,14 +23,14 @@ import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 import java.util.*
 
 
 /**
  * Viewmodel for [AircraftPicker] and [SimTypePicker] fragments
  */
-class AircraftPickerViewModel: JoozdlogDialogViewModel(){
+class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     private val undoAircraft = workingFlight.aircraft.value
     private val _typesSearchString = MutableLiveData<String>()
     private val typesSearchString

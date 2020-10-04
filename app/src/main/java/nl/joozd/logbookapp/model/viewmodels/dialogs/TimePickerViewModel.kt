@@ -23,12 +23,12 @@ import androidx.lifecycle.Transformations
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.TimePickerEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
 /**
  * Does not support changing orig or dest during this dialog open
  */
-class TimePickerViewModel: JoozdlogDialogViewModel() {
+class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
 
     val augmentedCrew
         get() = workingFlight.crew

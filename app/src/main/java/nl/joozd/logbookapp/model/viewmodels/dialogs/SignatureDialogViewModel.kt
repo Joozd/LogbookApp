@@ -20,9 +20,9 @@
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import com.caverock.androidsvg.SVG
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
-class SignatureDialogViewModel: JoozdlogDialogViewModel() {
+class SignatureDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     private val wf = flightRepository.wf
     private var _signature: String = wf.signature.value ?: ""
     val signature: String

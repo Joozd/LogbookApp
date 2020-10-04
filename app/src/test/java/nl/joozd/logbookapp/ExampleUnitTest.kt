@@ -19,16 +19,14 @@
 
 package nl.joozd.logbookapp
 
+import androidx.annotation.UiThread
 import nl.joozd.joozdlogcommon.serializing.listFromBytes
 import nl.joozd.joozdlogcommon.serializing.mapFromBytes
 import nl.joozd.joozdlogcommon.serializing.packList
 import nl.joozd.joozdlogcommon.serializing.toByteArray
-import nl.joozd.joozdlogcommon.utils.aircraftdbbuilder.AircraftTypesConsensus
-import nl.joozd.logbookapp.utils.mostRecentCompleteFlight
-import nl.joozd.logbookapp.utils.reverseFlight
-import org.junit.Test
 
 import org.junit.Assert.*
+import org.junit.Test
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -79,30 +77,14 @@ class ExampleUnitTest {
         assertEquals(deserialized, map)
     }
 
-
-    fun testAircraftWorker(){
-        val emptyFile = java.io.File("c:\\temp\\file1")
-        val emptyFile2 = java.io.File("c:\\temp\\file2")
-        val aircraftFile = java.io.File("c:\\temp\\planes2.dat")
-        val atw = AircraftTypesConsensus(aircraftFile, emptyFile, emptyFile2)
-        print(atw.forcedMap)
-
-       // val type1 = atw.aircraftTypes.aircraftTypes[77]
-        //val type2 = atw.aircraftTypes.aircraftTypes[103]
-        /*
-        val tc1 = TypeCounter(type1, 2)
-        val tc2 = TypeCounter(type1, 3)
-        val tc3 = TypeCounter(type1, 4)
-        val tc4 = TypeCounter(type2, 1)
-        atw.removeCounter("PH-ABC", type1)
-        atw.removeCounter("PH-ABC", type2)
-        atw.removeCounter("PH-ABC", type2)
-        atw.addCounter("PH-ABC", type2)
-        print("${atw.consensusMap}")
-        atw.writeConsensusMapToFile()
-        */
-        //atw.addForcedTypeToFile("PH-TST", type1)
-        //atw.addForcedTypeToFile("PH-JZD", type2)
+    @Test
+    fun testMediator() {
+        val test = MyChild()
+        var value: String? = null
+        test.myObservable.observeForever {
+            value = it
+        }
+        assertEquals("3", value)
     }
 
 }

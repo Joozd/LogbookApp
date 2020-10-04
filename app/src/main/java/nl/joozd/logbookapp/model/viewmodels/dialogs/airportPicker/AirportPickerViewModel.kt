@@ -26,13 +26,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.conflate
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
 //TODO make sure list gets filled straight away?
 //TODO sort airportsList based on ICAO/IATA prefs?
 
 @ExperimentalCoroutinesApi
-abstract class AirportPickerViewModel: JoozdlogDialogViewModel(){
+abstract class AirportPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     /**
      * MediatorLiveData for kepping track of which airport is picked.
      * Add sources in implementing classes

@@ -25,9 +25,9 @@ import nl.joozd.logbookapp.data.miscClasses.crew.Crew
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.extensions.toInt
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
-class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
+class AugmentedCrewDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     private val undoCrew = Crew.of(workingFlight.crew.toInt())
     private val crew // shortcut
         get() = workingFlight.crew

@@ -22,12 +22,9 @@ package nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
-abstract class NamesDialogViewModel: JoozdlogDialogViewModel() {
+abstract class NamesDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     /**
      * Set to true if working on PIC, or false if working on other names (name2)
      */

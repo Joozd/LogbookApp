@@ -20,10 +20,9 @@
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import androidx.lifecycle.Transformations
-import nl.joozd.logbookapp.extensions.minusOneWithFloor
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
-class LandingsDialogViewModel: JoozdlogDialogViewModel() {
+class LandingsDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     private val undoLandings = workingFlight.takeoffLandings.value!!
     private val undoAutoValues = workingFlight.isAutoValues.value!!
 

@@ -24,6 +24,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
@@ -55,7 +56,7 @@ object InternetStatus: CoroutineScope by MainScope() {
 
     // This is the one that gets changed, immutable one is exposed for observing as `internetAvailable`
     // wanted to name it _internetAvailable, but compiler complained.
-    private val mutableInternetAvaibale = MutableLiveData<Boolean>()
+    private val mutableInternetAvailable = MutableLiveData<Boolean>()
 
     /**
      * Local variables
@@ -74,15 +75,19 @@ object InternetStatus: CoroutineScope by MainScope() {
         connectivityManager.registerNetworkCallback(request, object: ConnectivityManager.NetworkCallback(){
             override fun onAvailable(network: Network) {
                 onlineNetworks.add(network)
-                launch {
-                    mutableInternetAvaibale.value = onlineNetworks.isNotEmpty()
+                if (Looper.myLooper() == Looper.getMainLooper()) // make sure this is set on main thread
+                    mutableInternetAvailable.value = onlineNetworks.isNotEmpty()
+                else launch {
+                    mutableInternetAvailable.value = onlineNetworks.isNotEmpty()
                 }
             }
 
             override fun onLost(network: Network) {
                 onlineNetworks.remove(network)
-                launch {
-                    mutableInternetAvaibale.value = onlineNetworks.isNotEmpty()
+                if (Looper.myLooper() == Looper.getMainLooper()) // make sure this is set on main thread
+                    mutableInternetAvailable.value = onlineNetworks.isNotEmpty()
+                else launch {
+                    mutableInternetAvailable.value = onlineNetworks.isNotEmpty()
                 }
             }
         })
@@ -95,9 +100,9 @@ object InternetStatus: CoroutineScope by MainScope() {
 
     // This is the one to watch. Immutable version of mutableInternetAvailable.
     val internetAvailableLiveData: LiveData<Boolean>
-        get() = mutableInternetAvaibale
+        get() = mutableInternetAvailable
 
     //If you need a snapshot
     val internetAvailable: Boolean?
-        get() = mutableInternetAvaibale.value
+        get() = mutableInternetAvailable.value
 }

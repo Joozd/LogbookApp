@@ -41,6 +41,9 @@ object UserManagement {
                 Preferences.username = username
                 Preferences.password = password
                 Preferences.lastUpdateTime = -1
+                Preferences.useCloud = true
+                Log.d("CreateNewUser()", "created username: $username, password: $password")
+                Log.d("CreateNewUser()", "check: ${Preferences.username}, password: ${Preferences.password}")
             }
             else Log.d("CreateNewUser()", "Cloud.createNewUser returned $it")
         }

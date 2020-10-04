@@ -25,7 +25,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.databinding.ActivityLoginBinding
 import nl.joozd.logbookapp.databinding.DialogLoginBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
@@ -71,6 +70,10 @@ class LoginDialog: JoozdlogFragment() {
                     usernameEditText.text.toString(),
                     passwordEditText.text.toString()
                 )
+            }
+
+            cancelButton.setOnClickListener {
+                viewModel.signOut()
             }
 
             background.setOnClickListener{} // do nothing, just catch missed clicks

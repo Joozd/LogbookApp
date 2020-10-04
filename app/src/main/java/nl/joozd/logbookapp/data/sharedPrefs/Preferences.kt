@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.data.sharedPrefs
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
+import android.util.Log
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.dataclasses.SupportedCalendarTypes
@@ -49,7 +50,10 @@ object Preferences {
     var usernameResource: String by JoozdLogSharedPrefs(sharedPref, USERNAME_NOT_SET)
     var username: String?
         get() = if (usernameResource == USERNAME_NOT_SET) null else usernameResource
-        set(it) { usernameResource = it?.toLowerCase(Locale.ROOT) ?: USERNAME_NOT_SET }
+        set(it) {
+            usernameResource = it?.toLowerCase(Locale.ROOT) ?: USERNAME_NOT_SET
+            Log.d("Preferences", "Name set to $it")
+        }
     //TODO NOTE THIS MAY BREAK MY ACCOUNT
 
     /**
@@ -86,12 +90,11 @@ object Preferences {
      * will return bytearray from hashed password
      */
     val key: ByteArray?
-    get() {
+    get() =
         password?.let {
-            return Base64.decode(it, Base64.DEFAULT)
+            Base64.decode(it, Base64.DEFAULT)
         }
-        return null
-    }
+
 
     var lastUpdateTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
 
@@ -172,7 +175,7 @@ object Preferences {
     // var normallyFliesIFR: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
     // true if user wants to use cloud -
-    var useCloud: Boolean by JoozdLogSharedPrefs(sharedPref, true)
+    var useCloud: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
     var acceptedCloudSyncTerms: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 

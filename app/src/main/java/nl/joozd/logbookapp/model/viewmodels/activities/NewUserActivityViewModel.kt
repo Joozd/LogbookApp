@@ -48,6 +48,8 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * Private parts
      *******************************************************************************************/
 
+    val internetAvailable: LiveData<Boolean> = InternetStatus.internetAvailableLiveData
+
     private val _page2Feedback = MutableLiveData<FeedbackEvent>()
     private val _page3Feedback = MutableLiveData<FeedbackEvent>()
 
@@ -147,6 +149,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * Sign out user, send that as feedback
      */
     fun signOutClicked(){
+        Log.d("NewUserActivity", "Sign out clicked!")
         Preferences.username = null
         Preferences.password = ""
         _username.value = null
@@ -159,7 +162,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         Log.d("signUpClicked", "user: $username, pass1: $pass1, pass2: $pass2")
         Preferences.useCloud = true
         when{
-            InternetStatus.internetAvailable != true -> feedback(NewUserActivityEvents.NO_INTERNET, _page2Feedback)
+            internetAvailable.value != true -> feedback(NewUserActivityEvents.NO_INTERNET, _page2Feedback)
             pass1.isBlank() -> feedback(NewUserActivityEvents.PASSWORD_TOO_SHORT, _page2Feedback)
             username.isBlank() -> feedback(NewUserActivityEvents.USERNAME_TOO_SHORT, _page2Feedback)
             pass1 != pass2 -> feedback(NewUserActivityEvents.PASSWORDS_DO_NOT_MATCH, _page2Feedback)

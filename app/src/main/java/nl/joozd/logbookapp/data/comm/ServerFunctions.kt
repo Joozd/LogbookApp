@@ -115,8 +115,10 @@ object ServerFunctions {
      * @return true is success, false if username/pass incorrect, null if connection problem
      */
     fun login(client: Client): Boolean?{
-        if (Preferences.username == null || Preferences.key == null)
+        if (Preferences.username == null || Preferences.key == null) {
+            Log.d("Serverfunctions.login", "username: ${Preferences.username}, keySize: ${Preferences.key?.size}")
             return false
+        }
         //payLoad is LoginData.serialize()
         val payLoad = LoginData(Preferences.username!!, Preferences.key!!, BasicFlight.VERSION.version).serialize()
 

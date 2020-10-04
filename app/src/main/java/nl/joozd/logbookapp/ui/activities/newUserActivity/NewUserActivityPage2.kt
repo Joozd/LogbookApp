@@ -118,18 +118,18 @@ class NewUserActivityPage2: JoozdlogFragment() {
 
             signUpButton.setOnClickListener {
                 if (Preferences.acceptedCloudSyncTerms)
-                    JoozdlogAlertDialog(requireActivity()).apply {
+                    JoozdlogAlertDialog(requireActivity()).show {
                         messageResource = R.string.cannot_restore_password
                         setPositiveButton(android.R.string.ok){
                             viewModel.signUpClicked(userNameEditText.text.toString(), passwordEditText.text.toString(), repeatPasswordEditText.text.toString())
                         }
                         setNegativeButton(R.string.already_forgot)
-                    }.show()
+                    }
                 else {
-                    JoozdlogAlertDialog(requireActivity()).apply {
+                    JoozdlogAlertDialog(requireActivity()).show {
                         messageResource = R.string.must_accept_terms
                         setPositiveButton(android.R.string.ok)
-                    }.show()
+                    }
                 }
             }
 
@@ -155,8 +155,8 @@ class NewUserActivityPage2: JoozdlogFragment() {
          */
 
         // TODO this doesn't work as Activity eats these first, needs a personal feedback livedata
-        viewModel.page2Feedback.observe(viewLifecycleOwner, Observer {
-            Log.d("Event!", "${it.type}")
+        viewModel.page2Feedback.observe(viewLifecycleOwner) {
+            Log.d("Event!", "${it.type}, already consumed: ${it.consumed}")
             when(it.getEvent()){
                 NewUserActivityEvents.NOT_IMPLEMENTED -> { toast("Not implemented!")}
                 NewUserActivityEvents.USER_EXISTS_PASSWORD_INCORRECT -> showUserExistsError(binding)
@@ -174,7 +174,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
                 NewUserActivityEvents.LOGGED_IN_AS -> viewModel.nextPage(PAGE_NUMBER)
                 NewUserActivityEvents.FINISHED -> viewModel.nextPage(PAGE_NUMBER)
             }
-        })
+        }
 
         return binding.root
     }
@@ -300,6 +300,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
         youAreSignedInAsTextView.text = requireActivity().getStringWithMakeup(R.string.you_are_signed_in_as, username)
     }
 
+    //TODO make this
     private fun ActivityNewUserPage2Binding.setWaitingForServerLayout(){
         toast("waiting for server")
     }

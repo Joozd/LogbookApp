@@ -44,6 +44,9 @@ import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.utils.checkPermission
 
+/**
+ * Calendar import
+ */
 class NewUserActivityPage3: JoozdlogFragment() {
     val viewModel: NewUserActivityViewModel by activityViewModels()
 

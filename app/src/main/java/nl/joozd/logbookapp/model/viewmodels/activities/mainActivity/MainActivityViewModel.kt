@@ -116,6 +116,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     private fun searchAll(fff: List<Flight>) = fff.filter {
         query in it.name.toUpperCase(Locale.ROOT)
                 || query in it.name2.toUpperCase(Locale.ROOT)
+                || query in it.flightNumber.toUpperCase(Locale.ROOT)
                 || query in it.registration.toUpperCase(Locale.ROOT)
                 || query in it.orig.toUpperCase(Locale.ROOT)
                 || query in it.dest.toUpperCase(Locale.ROOT)

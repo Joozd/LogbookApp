@@ -84,6 +84,9 @@
         <item name="android:textSize">12sp</item>
     </style>
 
+    <style parent="@android:style/Widget.Spinner" name="SpinnerAsEditText">
+        <item name="android:background">@android:drawable/edit_text</item>
+    </style>
 
     <style name="expandableListGroupTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:background">#85C1E9</item>

@@ -44,6 +44,7 @@ import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivity
 import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivity
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesActivity
 import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
+import nl.joozd.logbookapp.ui.dialogs.AboutDialog
 import nl.joozd.logbookapp.ui.dialogs.LoginDialog
 import nl.joozd.logbookapp.ui.fragments.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.customs.CustomSnackbar
@@ -84,6 +85,10 @@ class MainActivity : JoozdlogActivity() {
         }
         R.id.app_bar_search -> {
             viewModel.menuSelectedSearch()
+            true
+        }
+        R.id.menu_about -> {
+            viewModel.menuSelectedAboutDialog()
             true
         }
         /*
@@ -245,6 +250,7 @@ class MainActivity : JoozdlogActivity() {
                             )
                         )
                     MainActivityEvents.CALENDAR_SYNC_PAUSED -> showCalendarSyncRestartInfo()
+                    MainActivityEvents.SHOW_ABOUT_DIALOG -> showAboutDialog()
                     MainActivityEvents.DONE -> longToast(" Yay fixed!")
                     MainActivityEvents.ERROR -> longToast("An error occurred :(")
                 }
@@ -413,6 +419,14 @@ class MainActivity : JoozdlogActivity() {
             messageResource = R.string.you_can_start_calendar_sync_again
             setPositiveButton(android.R.string.ok)
         }.show()
+    }
+
+    private fun showAboutDialog(){
+        supportFragmentManager.commit{
+            add(R.id.mainActivityLayout, AboutDialog())
+            addToBackStack(null)
+        }
+
     }
 
     private fun ActivityMainNewBinding.showSaveSnackbar(f: Flight? = null) {

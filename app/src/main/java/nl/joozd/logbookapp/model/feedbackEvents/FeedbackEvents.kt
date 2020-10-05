@@ -25,8 +25,7 @@ object FeedbackEvents {
     enum class MainActivityEvents:
         Event {
         NOT_IMPLEMENTED,
-        SHOW_FLIGHT,
-        FLIGHT_SAVED,
+        SHOW_ABOUT_DIALOG,
         FLIGHT_NOT_FOUND,
         TRYING_TO_DELETE_COMPLETED_FLIGHT,
         TRYING_TO_DELETE_CALENDAR_FLIGHT,

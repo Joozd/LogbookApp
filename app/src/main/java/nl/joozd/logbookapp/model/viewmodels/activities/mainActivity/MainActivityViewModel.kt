@@ -263,6 +263,12 @@ else{
         }
     }
 
+    fun menuSelectedAboutDialog(){
+        viewModelScope.launch {
+            feedback(MainActivityEvents.SHOW_ABOUT_DIALOG)
+        }
+    }
+
 
     /**
      * Handler for clickety thingies

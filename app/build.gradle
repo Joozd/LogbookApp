@@ -31,7 +31,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 9
-        versionName "0.1.1.3"
+        versionName "JoozdLog 0.1.1.3"
 
         vectorDrawables.useSupportLibrary = true
 

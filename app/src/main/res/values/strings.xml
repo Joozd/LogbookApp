@@ -242,6 +242,7 @@
     <string name="cannot_restore_password">Don\'t lose your password. You cannot restore it.</string>
     <string name="already_forgot">I already forgot :(</string>
     <string name="cloud_sync_terms">Cloud Sync terms</string>
+    <string name="about">About Joozdlog</string>
     <string name="calendar_import">Calendar Import</string>
     <string name="calendar_import_description_line1">You can import flights from your device\'s calendar.</string>
     <string name="calendar_import_description_line2">This will look for entries like \"KL1234 AMS-LCY" in whatever calendar you pick.</string>

@@ -1,0 +1,136 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "6ea16d87036a73bf1d5653e29929bdc9",
+    "entities": [
+      {
+        "tableName": "Airport",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `ident` TEXT NOT NULL, `type` TEXT NOT NULL, `name` TEXT NOT NULL, `latitude_deg` REAL NOT NULL, `longitude_deg` REAL NOT NULL, `elevation_ft` INTEGER NOT NULL, `continent` TEXT NOT NULL, `iso_country` TEXT NOT NULL, `iso_region` TEXT NOT NULL, `municipality` TEXT NOT NULL, `scheduled_service` TEXT NOT NULL, `gps_code` TEXT NOT NULL, `iata_code` TEXT NOT NULL, `local_code` TEXT NOT NULL, `home_link` TEXT NOT NULL, `wikipedia_link` TEXT NOT NULL, `keywords` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ident",
+            "columnName": "ident",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude_deg",
+            "columnName": "latitude_deg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude_deg",
+            "columnName": "longitude_deg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elevation_ft",
+            "columnName": "elevation_ft",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "continent",
+            "columnName": "continent",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iso_country",
+            "columnName": "iso_country",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iso_region",
+            "columnName": "iso_region",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "municipality",
+            "columnName": "municipality",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scheduled_service",
+            "columnName": "scheduled_service",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gps_code",
+            "columnName": "gps_code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iata_code",
+            "columnName": "iata_code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "local_code",
+            "columnName": "local_code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "home_link",
+            "columnName": "home_link",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wikipedia_link",
+            "columnName": "wikipedia_link",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "keywords",
+            "columnName": "keywords",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6ea16d87036a73bf1d5653e29929bdc9')"
+    ]
+  }
+}

@@ -20,6 +20,8 @@
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
 import android.text.Editable
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.GlobalScope
@@ -38,13 +40,24 @@ import java.time.format.DateTimeFormatter
 
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
+    private val wf = flightRepository.workingFlight.value!!
 
+
+    /**
+     * MediatorLiveData
+     */
+
+    val _aircraft = MediatorLiveData<String>().apply{
+        addSource(wf.aircraft) {ac -> value = (if (sim) ac?.type?.shortName else ac?.toString()) ?: NO_DATA_STRING}
+        addSource (wf.isSim) { sim -> value = (if (sim) wf.aircraft.value?.type?.shortName else wf.aircraft.value?.toString()) ?: NO_DATA_STRING}
+    }
+
+    //Transformations.map(wf.aircraft)
     /**
      * Observables
      */
     // this will cause nullpointerexception if not set
     // However, fragment should only be
-    private val wf = flightRepository.workingFlight.value!!
     val date = Transformations.map(wf.date){ it.toDateString() ?: NO_DATA_STRING }
     val localDate
             get() = wf.date.value
@@ -56,8 +69,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     val destinationIsValid = Transformations.map(wf.destination){ it != null && it.latitude_deg != 0.0 && it.longitude_deg != 0.0}
     val timeOut = Transformations.map(wf.timeOut) { it.toTimeString()}
     val timeIn = Transformations.map(wf.timeIn) { it.toTimeString()}
-    val aircraft = Transformations.map(wf.aircraft) { (if (sim) it?.type?.shortName else it?.toString()) ?: NO_DATA_STRING}
     val landings = Transformations.map(wf.takeoffLandings){it.toString()}
+    val aircraft: LiveData<String>
+        get() = _aircraft
     val name
         get() = wf.name
     val name2

@@ -45,21 +45,20 @@
             android:excludeFromRecents="true">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <action android:name="android.intent.action.VIEW" />
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:host="*" />
                 <data android:mimeType="application/pdf" />
                 <data android:mimeType="text/csv" />
+                <data android:mimeType="text/comma-separated-values" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data android:mimeType="application/pdf" />
                 <data android:mimeType="text/csv" />
+                <data android:mimeType="text/comma-separated-values" />
             </intent-filter>
         </activity>
         <activity
@@ -68,12 +67,10 @@
             android:theme="@style/AppTheme.Launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 

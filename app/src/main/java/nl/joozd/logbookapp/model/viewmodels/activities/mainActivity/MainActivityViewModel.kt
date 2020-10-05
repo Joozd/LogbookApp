@@ -108,6 +108,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
             AIRPORTS -> searchAirports(fff)
             AIRCRAFT -> searchAircraft(fff)
             NAMES -> searchNames(fff)
+            FLIGHTNUMBER -> searchFlightnumber(fff)
             else -> fff
         }
     }
@@ -145,6 +146,10 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     private fun searchNames(fff: List<Flight>) = fff.filter {
         query in it.name.toUpperCase(Locale.ROOT)
                 || query in it.name2.toUpperCase(Locale.ROOT)
+    }
+
+    private fun searchFlightnumber(fff: List<Flight>) = fff.filter {
+        query in it.flightNumber.toUpperCase(Locale.ROOT)
     }
 
     private fun disableCalendarImportUntil(time: Long) {
@@ -396,6 +401,9 @@ else{
         query = it.toUpperCase(Locale.ROOT)
     }
 
+    /**
+     * Set selection from Search Spinner
+     */
     fun setSpinnerSelection(it: Int) {
         searchType = it
     }
@@ -438,6 +446,7 @@ else{
         const val AIRPORTS = 1
         const val AIRCRAFT = 2
         const val NAMES = 3
+        const val FLIGHTNUMBER = 4
     }
 }
 

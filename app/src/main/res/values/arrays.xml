@@ -27,6 +27,7 @@
         <item>Airports</item>
         <item>Aircraft</item>
         <item>Names</item>
+        <item>Flightnumber</item>
     </string-array>
     <string-array name="supported_calendars">
         <item>KLC Joozdter</item>

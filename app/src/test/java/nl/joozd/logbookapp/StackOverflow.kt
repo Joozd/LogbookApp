@@ -63,6 +63,4 @@ abstract class MyFixedClass: ViewModel(){
 
 class MyChild: MyFixedClass(){
     override val mySource = Transformations.map(myRepository.someData) { it.toString() }
-
-    // This is where init { addSources() } would be called
 }

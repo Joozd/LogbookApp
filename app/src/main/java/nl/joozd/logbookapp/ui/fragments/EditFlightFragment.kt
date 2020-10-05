@@ -395,7 +395,7 @@ class EditFlightFragment: JoozdlogFragment(){
 
             flightAircraftField.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
-                    viewModel.setRegAndType(flightAircraftField.text.toString())
+                    viewModel.setRegAndType(flightAircraftField.text)
             }
 
             flightTakeoffLandingField.setOnFocusChangeListener { _, hasFocus ->

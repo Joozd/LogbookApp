@@ -185,11 +185,13 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Else, it will save exactly [reg] and [type] in [reg]([type]).
      * Closing bracket is ignored. If no opening bracket, it is all reg.
      */
+    @Suppress("MemberVisibilityCanBePrivate")
     fun setRegAndType(regAndTypeString: String){
         if (sim) wf.setAircraft(type = regAndTypeString)
         else when{
             regAndTypeString.isBlank() -> wf.setAircraft(Aircraft("")) // no reg and type if field is empty
-            "(" !in regAndTypeString -> viewModelScope.launch {
+
+            "(" !in regAndTypeString -> viewModelScope.launch { // only registration entered
                 aircraftRepository.getBestHitForPartialRegistration(regAndTypeString)?.let{
                     wf.setAircraft(it)
                 } ?: feedback(EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND).apply{
@@ -198,6 +200,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
                     wf.setAircraft(regAndTypeString)
                 }
             }
+
             else -> { // If a ( or ) in [regAndTypeString] it will save exactly [reg] and [type] in [reg]([type]). Closing bracket is ignored. If no opening bracket, it is all reg.
                 val reg: String?
                 val type: String?
@@ -211,6 +214,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
         }
     }
+
+    fun setRegAndType(regAndTypeEditable: Editable) = setRegAndType(regAndTypeEditable.toString())
 
     /**
      * Set takeoff/landings from a string.

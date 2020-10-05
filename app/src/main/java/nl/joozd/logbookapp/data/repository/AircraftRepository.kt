@@ -484,6 +484,7 @@ replaced with getter
     suspend fun getBestHitForPartialRegistration(r: String): Aircraft? = r.toUpperCase(Locale.ROOT).let { reg ->
         val map = getAircraftMap().await()
         map[reg]
+            ?: map.mapKeys { it.key.filter{c -> c != '-' }}[reg]          // get "PH-EZA" when searching for "PHEZA"
             ?: map[reg.findBestHitForRegistration(acrwtCache.map { it.registration })]
             ?: map[reg.findBestHitForRegistration(preloadedCache.map { it.registration })]
             ?: map[reg.findBestHitForRegistration(consensusCache.map { it.registration })]

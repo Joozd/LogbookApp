@@ -15,6 +15,4 @@
 /imageSources/
 /app/release/
 /app/release/app-release.aab
-
-/app/src/test/java/nl/joozd/logbookapp/
-/app/src/test/java/nl/joozd/logbookapp/StackOverflow.kt
+/app/src/test/*

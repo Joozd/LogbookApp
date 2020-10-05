@@ -403,7 +403,7 @@ class MainActivity : JoozdlogActivity() {
             setPositiveButton(android.R.string.ok) {
                 viewModel.fixCalendarSyncConflictIfNeeded(f)}
             setNegativeButton(android.R.string.cancel){
-                viewModel.undoSaveWorkingFlight()
+                viewModel.undoSaveWorkingFlight(f)
             }
         }.show()
     }

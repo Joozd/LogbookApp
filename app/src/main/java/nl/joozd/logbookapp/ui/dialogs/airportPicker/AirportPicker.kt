@@ -135,10 +135,15 @@ abstract class AirportPicker(): JoozdlogFragment() {
                 airportPickerAdapter.submitList(it)
             }
 
+            /**
+             * Set text in search field, as well as in "selected" airport.
+             * Only set search field if it is blank.
+             * TODO make that happen in a better way.
+             */
             viewModel.pickedAirport.observe(viewLifecycleOwner) {
                 airportPickerAdapter.pickAirport(it)
 
-                airportsSearchField.setText(it.ident)
+                if ((airportsSearchField.text?.toString() ?: "null").isBlank()) airportsSearchField.setText(it.ident)
                 airportPickerTitle.text =
                     if (viewModel.workingOnOrig == true) getString(R.string.origin).toUpperCase(Locale.ROOT)
                     else getString(R.string.destination).toUpperCase(Locale.ROOT)

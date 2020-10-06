@@ -79,11 +79,16 @@ abstract class AirportPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(
         get() = pickedAirportMediator
 
 
-
+    /**
+     * Do some search magic. Needs at least [MIN_CHARACTERS] characters for performance reasons
+     * TODO this doesn't cancel correctly
+     */
     fun updateSearch(query: String){
-        currentSearchJob.cancel()
-        currentSearchJob = viewModelScope.launch{
-            collectAirports(airportRepository.getQueryFlow(query))
+        if (query.length >= MIN_CHARACTERS) {
+            currentSearchJob.cancel()
+            currentSearchJob = viewModelScope.launch {
+                collectAirports(airportRepository.getQueryFlow(query))
+            }
         }
         //feedback(NOT_IMPLEMENTED)
     }
@@ -93,5 +98,9 @@ abstract class AirportPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(
             _airportsList.value = it
             delay(200)
         }
+    }
+
+    companion object{
+        const val MIN_CHARACTERS = 3
     }
 }

@@ -229,9 +229,10 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         if ('/' in tlString) tlString.split('/').let{
             wf.takeoff = it[0].toInt()
             wf.landing = it[1].toInt()
+        } else {
+            wf.takeoff = tlString.toInt()
+            wf.landing = tlString.toInt()
         }
-        wf.takeoff = tlString.toInt()
-        wf.landing = tlString.toInt()
     }
 
     /**

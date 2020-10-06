@@ -104,6 +104,7 @@
     <string name="hidden_password">"••••••••"</string>
     <string name="newUser">New User</string>
     <string name="landings">Landings</string>
+    <string name="takeoffs_landings">Takeoffs/Landings</string>
     <string name="arrowRight">➔</string>
     <string name="settings">Settings</string>
     <string name="error">Error</string>

@@ -405,7 +405,7 @@
                             android:layout_height="wrap_content"
                             android:digits="AND/1234567890"
                             android:ems="10"
-                            android:hint="@string/landings"
+                            android:hint="@string/takeoffs_landings"
                             android:imeOptions="actionNext"
                             android:importantForAutofill="no"
                             android:includeFontPadding="false"

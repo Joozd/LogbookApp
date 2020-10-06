@@ -46,7 +46,7 @@ class TotalTimesViewModel: JoozdlogActivityViewModel() {
 
     init{
         viewModelScope.launch{
-            val allFlights = async { flightRepository.getAllFlights() }
+            val allFlights = async { flightRepository.getAllFlights().filter{ !it.isPlanned} }
             val allBalancesForward = async { balanceForwardRepository.getAll() }
             _allLists.value?.let{
                 val totalTimes = async(Dispatchers.Default) { TotalTimes(allFlights.await(), allBalancesForward.await()) }

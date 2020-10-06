@@ -32,11 +32,10 @@
             android:layout_marginTop="64dp"
             android:layout_marginEnd="32dp"
             android:layout_marginBottom="64dp"
-            android:background="@drawable/rounded_corners"
             android:elevation="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -66,169 +65,193 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/registrationFieldLayout"
-                android:layout_width="0dp"
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:scrollIndicators="none"
+            android:scrollbarSize="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/aircraftPickerTopHalf">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/airportPickerDataLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/rounded_corners_white"
-                app:layout_constraintEnd_toStartOf="@+id/setCurrentTextButton"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/aircraftPickerTopHalf">
+                android:background="@drawable/bottom_corners">
 
-            <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/registrationField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/search"
-                    android:selectAllOnFocus="true" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <Button
-                android:id="@+id/setCurrentTextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/setThis"
-                app:layout_constraintBottom_toBottomOf="@+id/registrationFieldLayout"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/registrationFieldLayout" />
-
-        <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/aircraftPickerList"
-                android:layout_width="0dp"
-                android:layout_height="200dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:background="@color/white"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/registrationFieldLayout">
-
-        </androidx.recyclerview.widget.RecyclerView>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintLayout2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/rounded_corners_white"
-                android:elevation="9dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/aircraftPickerList">
-
-            <TextView
-                    android:id="@+id/pickedRegistrationText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:textColor="?attr/android:textColorTertiary"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                    android:id="@+id/pickedManufacturerTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="?attr/android:textColorTertiary"
-                    app:layout_constraintStart_toStartOf="@+id/pickedRegistrationText"
-                    app:layout_constraintTop_toBottomOf="@+id/pickedRegistrationText" />
-
-            <TextView
-                    android:id="@+id/pickedModelTextView"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/registrationFieldLayout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:textColor="?attr/android:textColorTertiary"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/rounded_corners_white"
+                    app:layout_constraintEnd_toStartOf="@+id/setCurrentTextButton"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/registrationField"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/search"
+                        android:selectAllOnFocus="true" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Button
+                    android:id="@+id/setCurrentTextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/setThis"
+                    app:layout_constraintBottom_toBottomOf="@+id/registrationFieldLayout"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/pickedManufacturerTextView"
-                    app:layout_constraintTop_toTopOf="@+id/pickedManufacturerTextView" />
+                    app:layout_constraintTop_toTopOf="@+id/registrationFieldLayout" />
 
-            <TextView
-                    android:id="@+id/pickedMpSpTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="?attr/android:textColorTertiary"
-                    app:layout_constraintStart_toStartOf="@+id/pickedRegistrationText"
-                    app:layout_constraintTop_toBottomOf="@+id/pickedManufacturerTextView" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/aircraftPickerList"
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@color/white"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/registrationFieldLayout">
 
-            <TextView
-                    android:id="@+id/pickedMeSeTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    app:layout_constraintStart_toEndOf="@+id/pickedMpSpTextView"
-                    app:layout_constraintTop_toTopOf="@+id/pickedMpSpTextView" />
+                </androidx.recyclerview.widget.RecyclerView>
 
-            <TextView
-                    android:id="@+id/pickedEngineTypeTextView"
-                    android:layout_width="wrap_content"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintLayout2"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/rounded_corners_white"
+                    android:elevation="9dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/aircraftPickerList">
+
+                    <TextView
+                        android:id="@+id/pickedRegistrationText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:textColor="?attr/android:textColorTertiary"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/pickedManufacturerTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/android:textColorTertiary"
+                        app:layout_constraintStart_toStartOf="@+id/pickedRegistrationText"
+                        app:layout_constraintTop_toBottomOf="@+id/pickedRegistrationText" />
+
+                    <TextView
+                        android:id="@+id/pickedModelTextView"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="?attr/android:textColorTertiary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/pickedManufacturerTextView"
+                        app:layout_constraintTop_toTopOf="@+id/pickedManufacturerTextView" />
+
+                    <TextView
+                        android:id="@+id/pickedMpSpTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/android:textColorTertiary"
+                        app:layout_constraintStart_toStartOf="@+id/pickedRegistrationText"
+                        app:layout_constraintTop_toBottomOf="@+id/pickedManufacturerTextView" />
+
+                    <TextView
+                        android:id="@+id/pickedMeSeTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        app:layout_constraintStart_toEndOf="@+id/pickedMpSpTextView"
+                        app:layout_constraintTop_toTopOf="@+id/pickedMpSpTextView" />
+
+                    <TextView
+                        android:id="@+id/pickedEngineTypeTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:textColor="?attr/android:textColorTertiary"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/pickedMeSeTextView"
+                        app:layout_constraintTop_toTopOf="@+id/pickedMeSeTextView" />
+
+                    <TextView
+                        android:id="@+id/pickedIFRTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="16dp"
+                        android:text="@string/ifrString"
+                        android:textColor="?attr/android:textColorTertiary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:visibility="invisible" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/aircraftPickerSave"
+                    android:layout_width="100dp"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginBottom="8dp"
-                    android:textColor="?attr/android:textColorTertiary"
+                    android:gravity="center"
+                    android:text="@android:string/ok"
+                    android:textAllCaps="true"
+                    android:textColor="?attr/colorAccent"
+                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/pickedMeSeTextView"
-                    app:layout_constraintTop_toTopOf="@+id/pickedMeSeTextView" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/aircraftPickerCancel"
+                    app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
-            <TextView
-                android:id="@+id/pickedIFRTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/ifrString"
-                android:textColor="?attr/android:textColorTertiary"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="invisible" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/aircraftPickerCancel"
+                    android:layout_width="100dp"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:text="@android:string/cancel"
+                    android:textAllCaps="true"
+                    android:textColor="?attr/colorAccent"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@+id/aircraftPickerSave"
+                    app:layout_constraintEnd_toStartOf="@+id/aircraftPickerSave"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/aircraftPickerSave" />
 
-        <TextView
-                android:id="@+id/aircraftPickerSave"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="8dp"
-                android:gravity="center"
-                android:text="@android:string/ok"
-                android:textAllCaps="true"
-                android:textColor="?attr/colorAccent"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/aircraftPickerCancel"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
-        <TextView
-                android:id="@+id/aircraftPickerCancel"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginBottom="8dp"
-                android:gravity="center"
-                android:text="@android:string/cancel"
-                android:textAllCaps="true"
-                android:textColor="?attr/colorAccent"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/aircraftPickerSave"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

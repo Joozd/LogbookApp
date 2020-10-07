@@ -47,3 +47,9 @@ fun String.removeTrailingDigits(): String{
 fun String.anyWordStartsWith(substring: String, ignoreCase: Boolean = false) =
     if (ignoreCase) this.toUpperCase(Locale.ROOT).split(" ").any{it.startsWith(substring.toUpperCase(Locale.ROOT))}
     else this.split(" ").any{it.startsWith(substring)}
+
+/**
+ * Checks if [this] in [other], ignoring case
+ */
+@Suppress("FunctionName")
+infix fun String.in_ignoreCase(other: String): Boolean = this.toUpperCase(Locale.ROOT) in other.toUpperCase(Locale.ROOT)

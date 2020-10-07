@@ -29,6 +29,12 @@ import nl.joozd.logbookapp.data.repository.AircraftRepository
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 
+/**
+ * Sync aircraftTypes with server
+ * - First, check version of forcedTypes and update that list if needed
+ * TODO - Then, check local consensus data to send, and send it
+ * TODO - Finally, download consensus data from server
+ */
 class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
 

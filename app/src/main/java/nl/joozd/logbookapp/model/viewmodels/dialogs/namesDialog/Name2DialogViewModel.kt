@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
+import androidx.lifecycle.map
 import nl.joozd.logbookapp.R
 
 class Name2DialogViewModel: NamesDialogViewModel() {
@@ -36,7 +37,7 @@ class Name2DialogViewModel: NamesDialogViewModel() {
     /**
      * One string with all names we are working on now, separated by '\n'
      */
-    override val currentNames = Transformations.map(workingFlight.name2List) { it.joinToString("\n")}
+    override val currentNames = workingFlight.name2List.map{ it.joinToString("\n")}
 
     /**
      * Add a selected name to the list of names, or replace name if only one name allowed

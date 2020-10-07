@@ -24,6 +24,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 
 @Dao
@@ -33,6 +34,10 @@ interface PreloadedRegistrationsDao {
 
     @Query("SELECT * FROM PreloadedRegistration")
     fun requestLiveRegistrations(): LiveData<List<PreloadedRegistration>>
+
+    @Query("SELECT * FROM PreloadedRegistration")
+    fun registrationsFlow(): Flow<List<PreloadedRegistration>>
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(vararg regs: PreloadedRegistration)

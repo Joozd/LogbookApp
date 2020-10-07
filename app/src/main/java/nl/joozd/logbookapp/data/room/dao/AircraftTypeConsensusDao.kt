@@ -24,6 +24,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.room.model.AircraftTypeConsensusData
 
 @Dao
@@ -32,7 +33,10 @@ interface AircraftTypeConsensusDao {
     suspend fun getAllConsensusData(): List<AircraftTypeConsensusData>
 
     @Query("SELECT * FROM AircraftTypeConsensusData")
-    fun getLiveConsensusData(): LiveData<List<AircraftTypeConsensusData>>
+    fun consensusDataFlow(): Flow<List<AircraftTypeConsensusData>>
+
+    @Query("SELECT * FROM AircraftTypeConsensusData")
+    fun requestLiveConsensusData(): LiveData<List<AircraftTypeConsensusData>>
 
     @Query("SELECT * FROM AircraftTypeConsensusData WHERE registration = :reg LIMIT 1")
     suspend fun getConsensus(reg: String?): AircraftTypeConsensusData?

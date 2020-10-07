@@ -23,6 +23,7 @@ import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.extensions.in_ignoreCase
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 import java.util.*
 
@@ -32,21 +33,17 @@ import java.util.*
  */
 class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     private val undoAircraft = workingFlight.aircraft.value
-    private val _typesSearchString = MutableLiveData<String>()
+    private val _typesSearchString = MutableLiveData("")
     private val typesSearchString
         get() = _typesSearchString.value ?: ""
 
-    private val _knownAircraft: LiveData<List<Aircraft>>
-        get() = aircraftRepository.liveAircraftList
-
-
-    private val _aircraftTypes = MediatorLiveData<List<String>>()
-    init{
-        _aircraftTypes.addSource(aircraftRepository.liveAircraftTypes){
-            _aircraftTypes.value = it.map{ac -> ac.name}.filter{typesSearchString in it}
+    private val _aircraftTypes = MediatorLiveData<List<String>>().apply {
+        addSource(aircraftRepository.aircraftTypesLiveData){
+            // Create a list of names of all known aircraft matching [typesSearchString]
+            value = it.map{ac -> ac.name}.filter{name -> typesSearchString in_ignoreCase name}
         }
-        _aircraftTypes.addSource(_typesSearchString){
-            _aircraftTypes.value = (aircraftRepository.liveAircraftTypes.value ?: emptyList()).map{ac -> ac.name}.filter{typesSearchString in it.toUpperCase(Locale.ROOT)}
+        addSource(_typesSearchString){
+            value = (aircraftRepository.aircraftTypes ?: emptyList()).map{ac -> ac.name}.filter{typesSearchString in_ignoreCase it}
         }
     }
 
@@ -97,8 +94,11 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
         workingFlight.setAircraft(registration = reg)
     }
 
+    /**
+     * Save aircraft to repository
+     */
     fun saveAircraftToRepository() {
-        TODO("Not implemented")
+        aircraftRepository.saveAircraft(mAircraft)
     }
 
     fun updateSearchString(query: String){

@@ -168,6 +168,7 @@ class AircraftPicker: JoozdlogFragment(){
              * - update flight
              */
             aircraftPickerSave.setOnClickListener {
+                viewModel.saveAircraftToRepository()
                 closeFragment()
             }
             aircraftPickerDialogBox.setOnClickListener {

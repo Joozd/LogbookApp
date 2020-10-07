@@ -22,10 +22,7 @@ package nl.joozd.logbookapp.data.repository.flightRepository
 import android.Manifest
 import android.os.Looper
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -66,9 +63,10 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     private val _workingFlight = MutableLiveData<WorkingFlight?>()
 
 
+    // TODO change this to MediatorLiveData
     private val _cachedFlights = MutableLiveData<List<Flight>>()
     init {
-        // May be some delay in filling stuff listening to this
+        // Fill it before first observer arrives so it is cached right away
         launch {
             _cachedFlights.value = withContext(dispatcher){ flightDao.requestValidFlights().map {it.toFlight() }}
         }
@@ -105,7 +103,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         }
 
     private fun requestValidLiveFlightData() =
-        Transformations.map(flightDao.requestNonDeletedLiveData()) { fff ->
+        flightDao.requestNonDeletedLiveData().map { fff ->
             fff.map { f -> f.toFlight() }
         }
 

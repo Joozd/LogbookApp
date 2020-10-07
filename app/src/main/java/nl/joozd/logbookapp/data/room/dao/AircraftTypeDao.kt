@@ -24,6 +24,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.room.model.AircraftTypeData
 
 @Dao
@@ -33,6 +34,9 @@ interface AircraftTypeDao {
 
     @Query("SELECT * FROM AircraftTypeData")
     fun requestLiveAircraftTypes(): LiveData<List<AircraftTypeData>>
+
+    @Query("SELECT * FROM AircraftTypeData")
+    fun aircraftTypesFlow(): Flow<List<AircraftTypeData>>
 
     @Query("SELECT * FROM AircraftTypeData where name = :name LIMIT 1")
     fun getAircraftType(name: String): AircraftTypeData?

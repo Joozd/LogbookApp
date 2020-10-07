@@ -24,12 +24,16 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
 
 @Dao
 interface RegistrationDao {
     @Query("SELECT * FROM AircraftRegistrationWithTypeData")
     suspend fun requestAllRegistrations(): List<AircraftRegistrationWithTypeData>
+
+    @Query("SELECT * FROM AircraftRegistrationWithTypeData")
+    fun allRegistrationsFlow(): Flow<List<AircraftRegistrationWithTypeData>>
 
     @Query("SELECT * FROM AircraftRegistrationWithTypeData")
     fun requestLiveRegistrations(): LiveData<List<AircraftRegistrationWithTypeData>>

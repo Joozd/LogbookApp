@@ -138,8 +138,12 @@ dependencies {
 
 
     // Lifecycle components
-    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-    implementation "androidx.lifecycle:lifecycle-common-java8:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-extensions:$androidx_lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidx_lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidx_lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$androidx_lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-process:$androidx_lifecycle_version"
+
 
     //Background  worker thingy
     implementation "androidx.work:work-runtime:$work_version"

@@ -20,6 +20,10 @@
 package nl.joozd.logbookapp.data.comm.protocol
 
 import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.Observer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import nl.joozd.joozdlogcommon.ProtocolVersion
@@ -29,6 +33,7 @@ import nl.joozd.joozdlogcommon.serializing.intFromBytes
 import nl.joozd.joozdlogcommon.serializing.toByteArray
 import nl.joozd.joozdlogcommon.serializing.wrap
 import nl.joozd.joozdlogcommon.utils.LzwCompressor
+import nl.joozd.logbookapp.data.comm.InternetStatus
 
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -38,9 +43,17 @@ import java.net.ConnectException
 import java.net.SocketException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLSocketFactory
+import kotlin.coroutines.CoroutineContext
 
-class Client: Closeable, CoroutineScope by MainScope() {
-
+class Client: Closeable, CoroutineScope {
+    /**
+     * The context of this scope.
+     * Context is encapsulated by the scope and used for implementation of coroutine builders that are extensions on the scope.
+     * Accessing this property in general code is not recommended for any purposes except accessing the [Job] instance for advanced usages.
+     *
+     * By convention, should contain an instance of a [job][Job] to enforce structured concurrency.
+     */
+    override val coroutineContext: CoroutineContext = Dispatchers.IO + Job()
 
     private val socket = try {
         SSLSocketFactory.getDefault().createSocket(
@@ -190,35 +203,45 @@ class Client: Closeable, CoroutineScope by MainScope() {
      * If a new instance if asked in the mean time, the closing is cancelled
      */
     override fun close(){
+        timeOut = timeOut()
         try{
             mutex.unlock()
         } catch(e: java.lang.Exception){
             Log.w("Client", "already unlocked, probably closed before opening again? ${e.stackTraceToString()}")
         }
-        timeOut()
-    }
 
-    /**
-     * Will send END_OF_SESSION and close socket
-     */
-    private fun finalClose(){
-        socket.use {
-            //Log.d(TAG, "sending EOS, closing socket")
-            this.sendRequest(JoozdlogCommsKeywords.END_OF_SESSION)
-        }
     }
 
     private fun timeOut(timeOutMillis: Long = 10000): Job = launch{
+        Log.d("Client()", "Starting $timeOutMillis millis timeout")
         delay(timeOutMillis)
+        Log.d("Client()", "$timeOutMillis millis passed")
         if (isActive) {
+            Log.d("Client()", "Closing Client")
             instance = null
             finalClose()
         }
     }
 
+    /**
+     * Will send END_OF_SESSION and close socket
+     * Will set lifeCycle to DESTROYED
+     * Will cancel all running jobs
+     */
+    private fun finalClose(){
+        try{
+            socket.use {
+                //Log.d(TAG, "sending EOS, closing socket")
+                this.sendRequest(JoozdlogCommsKeywords.END_OF_SESSION)
+            }
+        } finally {
+            coroutineContext.cancel()
+        }
+    }
+
     companion object{
         private var instance: Client? = null
-        private var timeOut = Job()
+        private var timeOut: Job = Job()
         private val mutex = Mutex()
 
         const val SERVER_URL = "joozd.nl"
@@ -231,11 +254,13 @@ class Client: Closeable, CoroutineScope by MainScope() {
          * Client will be locked untill starting timeOut()
          */
         suspend fun getInstance(): Client {
+            mutex.lock()
             try{ // in a try loop so it won't spam Log with exceptions
                 timeOut.cancel()
             } finally{
-                mutex.lock()
-                return instance ?: Client().also{ instance = it }
+
+                return instance?.also{Log.d("Client()", "Reusing instance")}
+                    ?: Client().also{ instance = it }.also{Log.d("Client()", "Creating new instance")}
             }
         }
     }

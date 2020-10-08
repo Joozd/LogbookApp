@@ -23,6 +23,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.asLiveData
 import kotlinx.coroutines.*
@@ -34,6 +35,7 @@ import nl.joozd.joozdlogcommon.ConsensusData
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.dataclasses.AircraftTypeConsensus
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
@@ -44,6 +46,7 @@ import nl.joozd.logbookapp.data.room.dao.RegistrationDao
 import nl.joozd.logbookapp.data.room.model.*
 
 import nl.joozd.logbookapp.extensions.mostCommonOrNull
+import nl.joozd.logbookapp.extensions.observeOnce
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
@@ -67,12 +70,22 @@ class AircraftRepository(
     private val preloadedRegistrationsDao: PreloadedRegistrationsDao,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ): CoroutineScope by MainScope() {
+
+    /**
+     * Livedata of al AircraftTypes
+     */
     val aircraftTypesLiveData: LiveData<List<AircraftType>>
         get() = _aircraftTypesLiveData
 
+    /**
+     * LiveData of all Aircraft
+     */
     val aircraftListLiveData: LiveData<List<Aircraft>>
         get() = _aircraftListLiveData
 
+    /**
+     * Livedata of all aircraft as map
+     */
     val aircraftMapLiveData: LiveData<Map<String, Aircraft>>
         get() = _aircraftMapLiveData
 
@@ -87,6 +100,15 @@ class AircraftRepository(
 
     val aircraftTypes: List<AircraftType>?
         get() = _aircraftTypesLiveData.value // null if not observed
+
+    /**
+     * This just waits for [aircraftMapLiveData] to emit a value, then returns that
+     */
+    suspend fun requireMap(): Map<String, Aircraft> =
+        if (aircraftMap.isNotEmpty()) aircraftMap
+        else getFullAircraftList().map{it.registration to it}.toMap()
+
+
 
 
     /********************************************************************************************
@@ -258,6 +280,7 @@ class AircraftRepository(
     private var consensusCache: List<Aircraft> = emptyList()
     private var consensusRegs: List<String> = emptyList()
 
+
     /**
      * fill [acrwtCache] and [acrwtRegs] with data from Database (ie. cache it)
      */
@@ -309,6 +332,35 @@ class AircraftRepository(
      * - consensus data
      * - aircraft data from imported flights that is conflicting with other data from imported flights
      */
+
+    /**
+     * This one is for when we need to force an aircraft map and all data may not have been loaded yet.
+     * Uses cached data where available.
+     */
+    private suspend fun getFullAircraftList(): List<Aircraft> = withContext(dispatcher){
+        val fillers = emptyList<Deferred<Unit>>().toMutableList()
+        val types = aircraftTypesLiveData.value ?: aircraftTypeDao.requestAllAircraftTypes().map{it.toAircraftType()}
+        if(acrwtCache.isEmpty()){
+            val acrwt = acrwtLiveData.value ?: registrationDao.requestAllRegistrations()
+            fillers.add(fillAcrwtCacheAsync(acrwt, types))
+        }
+        // fill both flihgts and conflicting
+        if (aircraftFromFlightsCache.isEmpty()){
+            val flights = allFlights.value ?: FlightRepository.getInstance().getAllFlights()
+            fillers.add(fillAircraftFromFlightsCacheAsync(flights, types))
+        }
+        if (preloadedAircraftCache.isEmpty()){
+            val preloadedRegs = preloadedRegistrationsLiveData.value ?: preloadedRegistrationsDao.requestAllRegistrations()
+            fillers.add(fillPreloadedAircraftCacheAsync(preloadedRegs, types))
+        }
+        if(consensusCache.isEmpty()){
+            val consensus = consensusLiveData.value ?: aircraftTypeConsensusDao.getAllConsensusData().map{consensusData -> consensusData.toAircraftTypeConsensus().toAircraft()}
+        }
+        fillers.awaitAll()
+        mergeCaches()
+    }
+
+
     private suspend fun updateAircraftListWithNewAcrwt(acrwt: List<AircraftRegistrationWithTypeData>, types: List<AircraftType>): List<Aircraft> = withContext(dispatcher) {
         fillAcrwtCacheAsync(acrwt, types).await()
         mergeCaches()

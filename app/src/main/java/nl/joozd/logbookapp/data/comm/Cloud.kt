@@ -54,7 +54,7 @@ object Cloud {
      **********************************************************************************************/
 
     suspend fun getTime(): Long? = withContext(Dispatchers.IO) {
-        Client().use { client ->
+        Client.getInstance().use { client ->
             ServerFunctions.getTimestamp(client)
         }
     }
@@ -64,7 +64,7 @@ object Cloud {
      * Calling function should consider storing username and pasword in [Preferences]
      */
     suspend fun createNewUser(name: String, key: ByteArray): Boolean? = withContext(Dispatchers.IO) {
-        Client().use {
+        Client.getInstance().use {
             ServerFunctions.createNewAccount(it, name, key)
         }
     }
@@ -74,7 +74,7 @@ object Cloud {
      * Calling function should consider storing username and pasword in [Preferences]
      */
     suspend fun createNewUser(name: String, password: String): Boolean? = withContext(Dispatchers.IO) {
-        Client().use {
+        Client.getInstance().use {
             ServerFunctions.createNewAccount(it, name, Encryption.md5Hash(password))
         }
     }
@@ -84,7 +84,7 @@ object Cloud {
      * Calling function should consider storing username and pasword in [Preferences]
      */
     suspend fun changePassword(newPassword: String): Boolean? = withContext(Dispatchers.IO) {
-        Client().use {client ->
+        Client.getInstance().use {client ->
             ServerFunctions.login(client)?.let{
                 if (!it) return@withContext it
             }
@@ -100,7 +100,7 @@ object Cloud {
      * ServerFunctions.testLogin returns 1 if success, 2 if failed, negative value if connection failed
      */
     suspend fun checkUser(username: String, password: String): Boolean? =  withContext(Dispatchers.IO) {
-            when (Client().use{
+            when (Client.getInstance().use{
                 ServerFunctions.testLogin(it, username, password)
             }) {
                 1 -> true
@@ -118,7 +118,7 @@ object Cloud {
      * ServerFunctions.testLogin returns 1 if success, 2 if failed, negative value if connection failed
      */
     suspend fun checkUserFromLink(username: String, password: String): Boolean? =  withContext(Dispatchers.IO) {
-        when (Client().use{
+        when (Client.getInstance().use{
             ServerFunctions.testLoginFromLink(it, username, password)
         }) {
             1 -> true
@@ -136,14 +136,14 @@ object Cloud {
      **********************************************************************************************/
 
     suspend fun getAirportDbVersion(): Int = withContext(Dispatchers.IO) {
-        Client().use { server ->
+        Client.getInstance().use { server ->
             ServerFunctions.getAirportDbVersion(server) // no need to handle errors as negative values won't be higher than available ones
         }
     }
 
     // returns List<BasicAirport>
     suspend fun getAirports(listener: (Int) -> Unit = {}) = withContext(Dispatchers.IO) {
-        Client().use {
+        Client.getInstance().use {
             ServerFunctions.getAirports(it, listener)
         }
     }
@@ -164,19 +164,19 @@ object Cloud {
      * Needs a list of [ConsensusData] which will hold all aircraft to be added to consensus as well as all aircraft to be removed from it.
      */
     suspend fun sendAircraftConsensus(consensus: List<ConsensusData>, listener: (Int) -> Unit = {}): Boolean = withContext(Dispatchers.IO) {
-        Client().use{
+        Client.getInstance().use{
             true
         }
     }
 
     suspend fun getAircraftTypes(listener: (Int) -> Unit = {}): List<AircraftType>? = withContext(Dispatchers.IO) {
-        Client().use{
+        Client.getInstance().use{
             ServerFunctions.getAircraftTypes(it, listener)
         }
     }
 
     suspend fun getForcedTypes(listener: (Int) -> Unit = {}): List<ForcedTypeData>? = withContext(Dispatchers.IO) {
-        Client().use{
+        Client.getInstance().use{
             ServerFunctions.getForcedTypes(it, listener)
         }
     }
@@ -185,7 +185,7 @@ object Cloud {
 
 
     suspend fun getAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? = withContext(Dispatchers.IO) {
-        Client().use{
+        Client.getInstance().use{
             ServerFunctions.getAircraftTypesVersion(it, listener).also{
                 Log.d("aircraftTypes", "version: $it")
             }
@@ -193,7 +193,7 @@ object Cloud {
     }
 
     suspend fun getForcedAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? = withContext(Dispatchers.IO) {
-        Client().use{
+        Client.getInstance().use{
             ServerFunctions.getForcedAircraftTypesVersion(it, listener)
         }
     }
@@ -208,7 +208,7 @@ object Cloud {
      */
     suspend fun requestAllFlights(f: (Int) -> Unit = {}): List<Flight>? =
         withContext(Dispatchers.IO) {
-            Client().use {
+            Client.getInstance().use {
                 if (ServerFunctions.login(it) != true) {
                     f(100)
                     null
@@ -234,7 +234,7 @@ object Cloud {
      *  3: time sync failed
      */
     suspend fun justSendFlights(f: List<Flight>): Int = withContext(Dispatchers.IO) {
-        Client().use { client ->
+        Client.getInstance().use { client ->
             val timeStamp = ServerFunctions.getTimestamp(client) ?: return@withContext 3
             val loggedIn = ServerFunctions.login(client) == true
             when {
@@ -260,7 +260,7 @@ object Cloud {
         withContext(Dispatchers.IO) f@{
             syncingFlights = true
             listener(0)
-            Client().use { server ->
+            Client.getInstance().use { server ->
                 listener(5) // Connection is made!
                 with(ServerFunctions) {
                     //sync time with server

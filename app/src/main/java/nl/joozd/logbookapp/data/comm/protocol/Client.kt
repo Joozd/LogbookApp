@@ -20,6 +20,8 @@
 package nl.joozd.logbookapp.data.comm.protocol
 
 import android.util.Log
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
 import nl.joozd.joozdlogcommon.ProtocolVersion
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.joozdlogcommon.comms.Packet
@@ -37,13 +39,7 @@ import java.net.SocketException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLSocketFactory
 
-class Client: Closeable {
-    companion object{
-        const val SERVER_URL = "joozd.nl"
-        const val SERVER_PORT = 1337
-        const val TAG = "comm.protocol.Client"
-        const val MAX_MESSAGE_SIZE = Int.MAX_VALUE-1
-    }
+class Client: Closeable, CoroutineScope by MainScope() {
 
 
     private val socket = try {
@@ -128,29 +124,9 @@ class Client: Closeable {
     }
 
     /**
-     * If this returns null, there is an error.
-     */
-    fun readFromServer(): ByteArray? = try {
-        socket?.let {
-            try {
-                getInput(BufferedInputStream(it.getInputStream()))
-            } catch (e: IOException) {
-                Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
-                null
-            }
-        }
-    } catch (e: Exception) {
-        Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
-        null
-    }
-
-
-
-
-    /**
      * Runs listsner f with a 0-100 percentage completed value
      */
-    fun readFromServer(f: (Int) -> Unit): ByteArray? {
+    fun readFromServer(f: (Int) -> Unit = {}): ByteArray? {
         try {
             socket?.let {
                 return try {
@@ -166,70 +142,10 @@ class Client: Closeable {
         return null
     }
 
-    fun readCompressedFromServer(): ByteArray? {
-        try {
-            socket?.let {
-                return try {
-                    uncompressInput(BufferedInputStream(it.getInputStream()))
-                } catch (e: IOException) {
-                    Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
-                    null
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
-        }
-        return null
-    }
-
-
-
-    private fun uncompressInput(inputStream: BufferedInputStream): ByteArray {
-        val header = ByteArray(Packet.HEADER.length+4)
-
-        //Read the header as it comes in, or fail trying.
-        repeat (header.size){
-            val r = inputStream.read()
-            if (r<0) throw IOException("Stream too short: ${it-1} bytes")
-            header[it] = r.toByte()
-        }
-        val expectedSize =
-            intFromBytes(header.takeLast(4))
-        if (expectedSize > MAX_MESSAGE_SIZE) throw IOException("size bigger than $MAX_MESSAGE_SIZE")
-
-        return LzwCompressor.decompressFromInputStream(inputStream, expectedSize)
-    }
-
-
-
-    private fun getInput(inputStream: BufferedInputStream): ByteArray {
-        val buffer = ByteArray(8192)
-        val header = ByteArray(Packet.HEADER.length+4)
-
-        //Read the header as it comes in, or fail trying.
-        repeat (header.size){
-            val r = inputStream.read()
-            if (r<0) throw IOException("Stream too short: ${it-1} bytes")
-            header[it] = r.toByte()
-        }
-        val expectedSize =
-            intFromBytes(header.takeLast(4))
-        if (expectedSize > MAX_MESSAGE_SIZE) throw IOException("size bigger than $MAX_MESSAGE_SIZE")
-        val message = mutableListOf<Byte>()
-
-        //read buffers until correct amount of bytes reached or fail trying
-        while (message.size < expectedSize){
-            val b = inputStream.read(buffer)
-            if (b<0) throw IOException("Stream too short: expect $expectedSize, got ${message.size}")
-            message.addAll(buffer.take(b))
-        }
-        return message.toByteArray()
-    }
-
     /**
-     * Runs listsner f with a 0-100 percentage completed value
+     * Runs listener f with a 0-100 percentage completed value
      */
-    private fun getInput(inputStream: BufferedInputStream, f: (Int) -> Unit): ByteArray {
+    private fun getInput(inputStream: BufferedInputStream, f: (Int) -> Unit = {}): ByteArray {
         val buffer = ByteArray(8192)
         val header = ByteArray(Packet.HEADER.length+4)
 
@@ -265,19 +181,62 @@ class Client: Closeable {
      * @param request: A string as defined in nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
      * @param extraData: A bytearray with extra data to be sent as part of this request
      */
-    fun sendRequest(request: String, extraData: ByteArray? = null, compressed: Boolean = false): Int{
-        return if (compressed) {
-            sendRequest(JoozdlogCommsKeywords.NEXT_IS_COMPRESSED)
-            this.sendCompressed(Packet(wrap(request) + (extraData ?: ByteArray(0))))
-        } else
-            this.sendToServer(Packet(wrap(request) + (extraData ?: ByteArray(0))))
+    fun sendRequest(request: String, extraData: ByteArray? = null): Int =
+        sendToServer(Packet(wrap(request) + (extraData ?: ByteArray(0))))
+
+
+    /**
+     * Will call timeOut, which will close the connection after 10 seconds.
+     * If a new instance if asked in the mean time, the closing is cancelled
+     */
+    override fun close(){
+        try{
+            mutex.unlock()
+        } catch(e: java.lang.Exception){
+            Log.w("Client", "already unlocked, probably closed before opening again? ${e.stackTraceToString()}")
+        }
+        timeOut()
     }
 
-
-    override fun close(){
+    /**
+     * Will send END_OF_SESSION and close socket
+     */
+    private fun finalClose(){
         socket.use {
             //Log.d(TAG, "sending EOS, closing socket")
             this.sendRequest(JoozdlogCommsKeywords.END_OF_SESSION)
+        }
+    }
+
+    private fun timeOut(timeOutMillis: Long = 10000): Job = launch{
+        delay(timeOutMillis)
+        if (isActive) {
+            instance = null
+            finalClose()
+        }
+    }
+
+    companion object{
+        private var instance: Client? = null
+        private var timeOut = Job()
+        private val mutex = Mutex()
+
+        const val SERVER_URL = "joozd.nl"
+        const val SERVER_PORT = 1337
+        const val TAG = "comm.protocol.Client"
+        const val MAX_MESSAGE_SIZE = Int.MAX_VALUE-1
+
+        /**
+         * Returns an open instance if it is available
+         * Client will be locked untill starting timeOut()
+         */
+        suspend fun getInstance(): Client {
+            try{ // in a try loop so it won't spam Log with exceptions
+                timeOut.cancel()
+            } finally{
+                mutex.lock()
+                return instance ?: Client().also{ instance = it }
+            }
         }
     }
 

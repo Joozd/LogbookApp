@@ -22,9 +22,6 @@ package nl.joozd.logbookapp.data.repository
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.asLiveData
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.map
@@ -35,7 +32,6 @@ import nl.joozd.joozdlogcommon.ConsensusData
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.dataclasses.AircraftTypeConsensus
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
@@ -46,14 +42,11 @@ import nl.joozd.logbookapp.data.room.dao.RegistrationDao
 import nl.joozd.logbookapp.data.room.model.*
 
 import nl.joozd.logbookapp.extensions.mostCommonOrNull
-import nl.joozd.logbookapp.extensions.observeOnce
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.util.*
 
-//WORK IN PROGRESS
-//Changing to MediatorLiveData which is observed Forever to keep caches filled
 
 /**
  * Repository for everything aircraft.

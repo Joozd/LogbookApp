@@ -234,13 +234,10 @@ object ServerFunctions {
      * @param compressed: Whether or not to compress the flights. Keep false for now.
      * @return: true if server responds OK, else false.
      */
-    fun sendFlights(client: Client, flightsToSend: List<Flight>, compressed: Boolean = false): Boolean{
-        client.sendRequest(JoozdlogCommsKeywords.SENDING_FLIGHTS,
-            packSerialized(flightsToSend.map {
-                it.toBasicFlight().serialize()
-            }),
-            compressed = compressed
-        )
+    fun sendFlights(client: Client, flightsToSend: List<Flight>): Boolean{
+        client.sendRequest(
+            JoozdlogCommsKeywords.SENDING_FLIGHTS,
+            packSerialized(flightsToSend.map {it.toBasicFlight().serialize() }))
         return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
     }
 

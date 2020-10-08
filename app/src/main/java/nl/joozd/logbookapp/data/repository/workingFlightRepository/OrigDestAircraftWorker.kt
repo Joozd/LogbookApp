@@ -63,7 +63,7 @@ class OrigDestAircraftWorker: CoroutineScope {
         /**
          * If aircraftDatabase gets updated, update aircraft
          */
-        _aircraft.addSource(aircraftRepository.liveAircraftTypes){
+        _aircraft.addSource(aircraftRepository.aircraftListLiveData){
             _aircraft.value?.let{
                 setAircraft(it.registration)
             }

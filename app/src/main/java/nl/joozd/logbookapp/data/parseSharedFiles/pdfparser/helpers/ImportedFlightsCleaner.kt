@@ -42,11 +42,12 @@ class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private va
     private val airportRepository = AirportRepository.getInstance()
     private val aircraftRepository = AircraftRepository.getInstance()
     private val icaoIataMapAsync = async(Dispatchers.IO) {airportRepository.getIcaoToIataMap()}
-    private val aircraftMapAsync = async(Dispatchers.IO) { aircraftRepository.requestAircraftMap() }
+    private val aircraftMap
+        get() = aircraftRepository.aircraftMap
 
     suspend fun cleanFlights(): List<Flight>?{
         val iataToIcaoMap = icaoIataMapAsync.await().reversed()
-        val aircraftMap = aircraftMapAsync.await()
+        val aircraftMap = aircraftMap
         val now = TimestampMaker.nowForSycPurposes
         return dirtyFlights?.map{cleanFlight(it, aircraftMap, iataToIcaoMap, now)}
     }

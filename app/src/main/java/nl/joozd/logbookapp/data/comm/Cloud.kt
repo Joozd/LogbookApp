@@ -307,8 +307,7 @@ object Cloud {
 
                     val takenIDs = newFlightsFromServer.map { it.flightID }
                     val lowestFixedID =
-                        (takenIDs.max()
-                            ?: -1) + 1 // null on empty list, but empty list means no fixes
+                        (takenIDs.maxOrNull() ?: -1) + 1 // null on empty list, but empty list means no fixes
                     val fixedNewLocalFlights = newLocalFlights.filter { it.flightID in takenIDs }
                         .mapIndexed { index: Int, flight: Flight ->
                             flight.copy(flightID = lowestFixedID + index)

@@ -19,7 +19,7 @@
 
 
 /**
- * Cleans flights parsed by [KlcMonthlyParser]
+ * Cleans flights parsed by [MonthlyOverview] instances
  * Gets airport and aircraft data from repository.
  * usage:
  * val cleaner =
@@ -31,6 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.MonthlyOverview
 import nl.joozd.logbookapp.data.repository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration

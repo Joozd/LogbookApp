@@ -27,7 +27,7 @@ import nl.joozd.joozdlogcommon.serializing.wrap
 /**
  * Add or remove an opinion to/from consensus
  * @param registration: Registration of aircraft this applies to
- * @param serializedType: AircraftType. Can be non-serialized thriugh secondary constructor
+ * @param serializedType: AircraftType. Can be non-serialized through secondary constructor
  * @param subtract: If true, this needs to be subtracted from consensus
  */
 
@@ -37,6 +37,7 @@ data class ConsensusData(val registration: String,
                          val subtract: Boolean = false
                         ) : JoozdlogSerializable {
     constructor(registration: String, aircraftType: AircraftType, subtract: Boolean = false): this(registration, aircraftType.serialize(), subtract)
+
     override fun serialize(): ByteArray {
         var serialized = ByteArray(0)
 

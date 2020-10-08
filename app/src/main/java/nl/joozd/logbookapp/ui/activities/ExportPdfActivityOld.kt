@@ -19,19 +19,9 @@
 
 package nl.joozd.logbookapp.ui.activities
 
-import android.content.Intent
-import android.graphics.pdf.PdfDocument
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.util.Log
-import kotlinx.android.synthetic.main.activity_export_pdf.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.miscClasses.TotalsForward
-import nl.joozd.logbookapp.data.room.Repository
-import java.util.concurrent.CountDownLatch
 
 @Deprecated("Deprecated")
 class ExportPdfActivityOld : AppCompatActivity(), CoroutineScope by MainScope() {

@@ -32,6 +32,7 @@ import nl.joozd.joozdlogcommon.ConsensusData
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.dataclasses.AircraftTypeConsensus
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
@@ -111,7 +112,7 @@ class AircraftRepository(
     /**
      * Sources:
      */
-    private val acrwtLiveData = registrationDao.allRegistrationsFlow().asLiveData()
+    private val acrwtLiveData = registrationDao.allRegistrationsFlow().map{it.map {acrwtd -> AircraftRegistrationWithType(acrwtd)} }.asLiveData()
     private val aircraftTypeLiveData = aircraftTypeDao.aircraftTypesFlow().map { it.map {atd -> atd.toAircraftType() } }.asLiveData()
     private val allFlights = FlightRepository.getInstance().liveFlights
     private val consensusLiveData = aircraftTypeConsensusDao.consensusDataFlow().map{ it.map{consensusData -> consensusData.toAircraftTypeConsensus().toAircraft()} }.asLiveData()
@@ -137,14 +138,14 @@ class AircraftRepository(
                     value = updateAircraftListWithNewPreloaded(it, types )
                 }
                 acrwtLiveData.value?.let{
-                    value = updateAircraftListWithNewAcrwt(it, types)
+                    value = updateAircraftListWithNewAcrwt(it)
                 }
             }
         }
 
         addSource(acrwtLiveData) {
             launchWithLock {
-                value = aircraftTypeLiveData.value?.let { types -> updateAircraftListWithNewAcrwt(it, types) }
+                value = aircraftTypeLiveData.value?.let { types -> updateAircraftListWithNewAcrwt(it) }
             }
         }
 
@@ -186,11 +187,11 @@ class AircraftRepository(
      ********************************************************************************************/
 
     private fun saveAircraftRegistrationWithTypeData(dataToSave: AircraftRegistrationWithTypeData) = launch(dispatcher + NonCancellable) {
-        registrationDao.save(dataToSave.apply{timestamp = TimestampMaker.nowForSycPurposes})
+        registrationDao.save(dataToSave)
     }
 
     private fun saveAircraftRegistrationWithTypeData(dataToSave: List<AircraftRegistrationWithTypeData>) = launch(dispatcher + NonCancellable) {
-        registrationDao.save( *(dataToSave.map{it.apply {timestamp = TimestampMaker.nowForSycPurposes}}.toTypedArray()))
+        registrationDao.save( *(dataToSave.toTypedArray()))
     }
 
     private fun savePreloadedRegistrations(dataToSave: PreloadedRegistration) = launch (dispatcher + NonCancellable) {
@@ -234,9 +235,9 @@ class AircraftRepository(
      * Functions to transform other types to [Aircraft] (private)
      ********************************************************************************************/
 
-    private fun AircraftRegistrationWithTypeData.toAircraft(types: List<AircraftType>?) = Aircraft(
+    private fun AircraftRegistrationWithType.toAircraft() = Aircraft(
         registration,
-        types?.firstOrNull{ it.name == type},
+        type,
         Aircraft.KNOWN
     )
 
@@ -276,9 +277,10 @@ class AircraftRepository(
 
     /**
      * fill [acrwtCache] and [acrwtRegs] with data from Database (ie. cache it)
+     * Not really needed to do this async, but doing that anyway to stay in line with other filler functions
      */
-    private fun fillAcrwtCacheAsync(acrwt: List<AircraftRegistrationWithTypeData>, types: List<AircraftType>) = async(dispatcher) {
-        acrwt.map{it.toAircraft(types)}.let {
+    private fun fillAcrwtCacheAsync(acrwt: List<AircraftRegistrationWithType>) = async(Dispatchers.Default) {
+        acrwt.map{it.toAircraft()}.let {
             acrwtCache = it
             acrwtRegs = it.map{acrwt -> acrwt.registration}
         }
@@ -311,7 +313,7 @@ class AircraftRepository(
     /**
      * fill [consensusCache] and [consensusRegs] with data from Database (ie. cache it)
      */
-    private fun fillConsensusCacheAsync(consensus: List<Aircraft>) = async(dispatcher) {
+    private fun fillConsensusCacheAsync(consensus: List<Aircraft>) = async(Dispatchers.Default) {
         consensusCache = consensus
         consensusRegs = consensus.map { ac -> ac.registration }
     }
@@ -334,8 +336,8 @@ class AircraftRepository(
         val fillers = emptyList<Deferred<Unit>>().toMutableList()
         val types = aircraftTypesLiveData.value ?: aircraftTypeDao.requestAllAircraftTypes().map{it.toAircraftType()}
         if(acrwtCache.isEmpty()){
-            val acrwt = acrwtLiveData.value ?: registrationDao.requestAllRegistrations()
-            fillers.add(fillAcrwtCacheAsync(acrwt, types))
+            val acrwt = acrwtLiveData.value ?: registrationDao.requestAllRegistrations().map{ AircraftRegistrationWithType(it) }
+            fillers.add(fillAcrwtCacheAsync(acrwt))
         }
         // fill both flihgts and conflicting
         if (aircraftFromFlightsCache.isEmpty()){
@@ -354,8 +356,8 @@ class AircraftRepository(
     }
 
 
-    private suspend fun updateAircraftListWithNewAcrwt(acrwt: List<AircraftRegistrationWithTypeData>, types: List<AircraftType>): List<Aircraft> = withContext(dispatcher) {
-        fillAcrwtCacheAsync(acrwt, types).await()
+    private suspend fun updateAircraftListWithNewAcrwt(acrwt: List<AircraftRegistrationWithType>): List<Aircraft> = withContext(dispatcher) {
+        fillAcrwtCacheAsync(acrwt).await()
         mergeCaches()
     }
 
@@ -477,25 +479,27 @@ class AircraftRepository(
      */
     fun saveAircraft(aircraftToSave: Aircraft) {
         if (aircraftToSave.type?.name == null) return // do nothing as no new type data known
-        val newAcrwt: AircraftRegistrationWithTypeData = acrwtLiveData.value?.firstOrNull{it.registration == aircraftToSave.registration}?.apply {
+        val newAcrwt: AircraftRegistrationWithType = acrwtLiveData.value?.firstOrNull{it.registration == aircraftToSave.registration}?.let {
             //If we get here, an aircraft with that registration already exists. We need to update it's data for consensus. (or not, if it is the same)
             when{
-                aircraftToSave.type?.name == type  -> {}                        // do nothing as this is already known as is
-                !knownToServer -> type = aircraftToSave.type.name               // Just change type as server was not informed about changes yet
-                else -> {                                                       // Set previousType to current type, update type to new type and set!knownToServer
-                    previousType = type
-                    type = aircraftToSave.type.name
+                aircraftToSave.type == it.type  -> it                             // do nothing as this is already known as is
+                !it.knownToServer -> it.copy(type = aircraftToSave.type)               // Just change type as server was not informed about changes yet
+                else -> {  it.copy(                                               // Set previousType to current type, update type to new type and set!knownToServer
+                    previousType = it.type,
+                    type = aircraftToSave.type,
                     knownToServer = false
+                )
                 }
             }
 
-        } ?: AircraftRegistrationWithTypeData(aircraftToSave.registration, aircraftToSave.type.name)
-        saveAircraftRegistrationWithTypeData(newAcrwt)
+        } ?: AircraftRegistrationWithType(aircraftToSave.registration, aircraftToSave.type, knownToServer = false)
+        saveAircraftRegistrationWithTypeData(newAcrwt.toModel())
     }
 
     fun saveAircraft(aircraftToSave: List<Aircraft>) {
-        TODO("Not implemented")
-        // Put them in ACRWT database
+        aircraftToSave.forEach{
+            saveAircraft(it)
+        }
     }
 
     fun deleteAircraft(aircraft: Aircraft){

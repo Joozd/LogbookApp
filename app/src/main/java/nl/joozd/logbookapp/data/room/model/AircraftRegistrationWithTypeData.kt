@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.room.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -32,14 +33,17 @@ import androidx.room.PrimaryKey
  *      if ![knownToServer] this is to be sent to server for consensus (subtract counter)
  *      if [knownToServer], if [type] is changed, change this to previous type
  */
-
+@Suppress("ArrayInDataClass")
 @Entity
 data class AircraftRegistrationWithTypeData(
     @PrimaryKey val registration: String,
-    var type: String = UNKNOWN,
+
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    var serializedType: ByteArray, // serialized AircraftType
     var knownToServer: Boolean = false,
-    var previousType: String = UNKNOWN,
-    var timestamp: Long = -1
+
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    var serializedPreviousType: ByteArray, // serialized AircraftType
 ){
     companion object {
         const val UNKNOWN = "UNKNOWN_TYPE"

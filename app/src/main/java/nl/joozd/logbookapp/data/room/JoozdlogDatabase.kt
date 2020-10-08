@@ -36,8 +36,9 @@ import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 
 /**
  * Version 8: added multiPilotTime to FlightData
+ * Version 9: Changed AircraftRegistrationWithTypeData
  */
-@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, AircraftTypeConsensusData::class, PreloadedRegistration::class, BalanceForward::class], version = 8)
+@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, AircraftTypeConsensusData::class, PreloadedRegistration::class, BalanceForward::class], version = 9, exportSchema = true)
 abstract class JoozdlogDatabase: RoomDatabase() {
     abstract fun flightDao(): FlightDao
     abstract fun airportDao(): AirportDao
@@ -60,7 +61,8 @@ abstract class JoozdlogDatabase: RoomDatabase() {
                     context.applicationContext,
                     JoozdlogDatabase::class.java,
                     "flights_database"
-                ).addMigrations(UPDATE_7_8).build()
+                ).addMigrations(UPDATE_8_9)
+                    .build()
                 INSTANCE = instance
                 return instance
             }
@@ -81,6 +83,12 @@ abstract class JoozdlogDatabase: RoomDatabase() {
         private val UPDATE_7_8 = object: Migration(7, 8){
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE FlightData ADD COLUMN multiPilotTime INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+        private val UPDATE_8_9 = object: Migration(8, 9){
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("DROP TABLE AircraftRegistrationWithTypeData")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `AircraftRegistrationWithTypeData` (`registration` TEXT NOT NULL, `serializedType` BLOB NOT NULL, `knownToServer` INTEGER NOT NULL, `serializedPreviousType` BLOB NOT NULL, PRIMARY KEY(`registration`))")
             }
         }
     }

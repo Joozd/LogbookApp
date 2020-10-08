@@ -24,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.joozdlogcommon.AircraftType
+import nl.joozd.joozdlogcommon.ConsensusData
 import nl.joozd.joozdlogcommon.ForcedTypeData
 import nl.joozd.logbookapp.data.comm.protocol.Client
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -32,6 +33,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.joozdlogcommon.exceptions.NotAuthorizedException
 import nl.joozd.logbookapp.data.room.model.AircraftTypeConsensusData
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.room.model.toAircraftTypeConsensus
 import nl.joozd.logbookapp.data.utils.Encryption
 
 import java.time.Instant
@@ -155,6 +157,16 @@ object Cloud {
      */
     suspend fun getAircraftConsensus(listener: (Int) -> Unit = {}): List<AircraftTypeConsensusData> {
         TODO("Not Implemented")
+    }
+
+    /**
+     * Send AircraftConsensus to server
+     * Needs a list of [ConsensusData] which will hold all aircraft to be added to consensus as well as all aircraft to be removed from it.
+     */
+    suspend fun sendAircraftConsensus(consensus: List<ConsensusData>, listener: (Int) -> Unit = {}): Boolean = withContext(Dispatchers.IO) {
+        Client().use{
+            true
+        }
     }
 
     suspend fun getAircraftTypes(listener: (Int) -> Unit = {}): List<AircraftType>? = withContext(Dispatchers.IO) {

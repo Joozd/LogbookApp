@@ -50,7 +50,7 @@ class SelectableStringAdapter(
         holder.itemBackground.setOnClickListener {
             itemClick(holder.nameTextView.text.toString())
         }
-        holder.itemBackground.setBackgroundColor(if (holder.nameTextView.text.toString() == selectedEntry) color?: holder.itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary) else holder.itemBackground.ctx.getColor(R.color.none) )
+        holder.itemBackground.setBackgroundColor(if (holder.nameTextView.text.toString() == selectedEntry) color?: holder.itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary) else 0x00000000 )
     }
 
     override fun getItemCount(): Int = list.size
@@ -65,14 +65,17 @@ class SelectableStringAdapter(
         notifyDataSetChanged()
     }
 
-    fun selectActiveItem(activeItem: String) {
-        if (activeItem in list) {
-            val previousIndex = list.indexOf(selectedEntry)
-            val foundIndex = list.indexOf(activeItem)
-            selectedEntry = activeItem
+    /**
+     * Select [activeItem] as ative item, or select nothing as active if null
+     */
+    fun selectActiveItem(activeItem: String?) {
+        val previousIndex = list.indexOf(selectedEntry)
+        val foundIndex = list.indexOf(activeItem)
+        selectedEntry = activeItem
+        if (previousIndex >= 0)
             notifyItemChanged(previousIndex)
+        if (foundIndex >= 0) // if activeItem not found (because it is null, for example), don't notify an invalid item as changed
             notifyItemChanged(foundIndex)
-        }
     }
 
     class ViewHolder(override val containerView: View) :

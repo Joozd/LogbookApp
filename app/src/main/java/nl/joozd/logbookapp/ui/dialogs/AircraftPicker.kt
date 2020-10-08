@@ -35,6 +35,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.databinding.DialogPickAircraftTypeBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
+import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AircraftPickerViewModel
@@ -50,7 +51,7 @@ class AircraftPicker: JoozdlogFragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val binding = DialogPickAircraftTypeBinding.bind(inflater.inflate(R.layout.dialog_pick_aircraft_type, container, false)).apply{
             //set color of dialog head
-            (aircraftPickerTopHalf?.background as GradientDrawable).colorFilter = PorterDuffColorFilter(requireActivity().getColorFromAttr(android.R.attr.colorPrimary), PorterDuff.Mode.SRC_IN) // set background color to bakground with rounded corners
+            aircraftPickerTopHalf.joozdLogSetBackgroundColor()
 
             val typesPickerAdapter = SelectableStringAdapter {
                 Log.d(this::class.simpleName, "clicked on $it")
@@ -84,20 +85,18 @@ class AircraftPicker: JoozdlogFragment(){
              * Observers
              ******************************************************************************/
 
-            viewModel.registration.observe(viewLifecycleOwner){
-                pickedAircraftText.text = it
-                if (!regFieldActive)
-                    registrationField.setText(it)
-            }
-
+/*
             viewModel.selectedAircraftString.observe(viewLifecycleOwner) {
                 typesPickerAdapter.selectActiveItem(it)
                 typesPickerRecyclerView.scrollToPosition(typesPickerAdapter.list.indexOf(it))
             }
 
+ */
+
             viewModel.selectedAircraft.observe(viewLifecycleOwner){
-                pickedAircraftText.text = it.registration
+                pickedAircraftText.text = it.registration.nullIfBlank() ?: getString(R.string.aircraft)
                 typeDescriptionTextView.text = it.type?.name ?: "" // set type text to found type or to empty string
+                typesPickerAdapter.selectActiveItem(it.type?.name)
 
                 val errorText = registrationFieldLayout.findViewById<TextView>(R.id.textinput_error).apply{
                     visibility=View.VISIBLE
@@ -114,27 +113,27 @@ class AircraftPicker: JoozdlogFragment(){
                         errorText.setTextColor(normalColor)
                     }
 
-                        Aircraft.FLIGHT_CONFLICTING -> {
-                            errorText.text = getString(R.string.aircraft_type_in_flights_conflict)
-                            errorText.setTextColor(ContextCompat.getColor(errorText.context, R.color.orange))
-                        }
+                    Aircraft.FLIGHT_CONFLICTING -> {
+                        errorText.text = getString(R.string.aircraft_type_in_flights_conflict)
+                        errorText.setTextColor(ContextCompat.getColor(errorText.context, R.color.orange))
+                    }
 
-                        Aircraft.PRELOADED -> {
-                            errorText.text = getString(R.string.aircraft_type_from_server)
-                            errorText.setTextColor(normalColor)
-                        }
+                    Aircraft.PRELOADED -> {
+                        errorText.text = getString(R.string.aircraft_type_from_server)
+                        errorText.setTextColor(normalColor)
+                    }
 
-                        Aircraft.CONSENSUS -> {
-                            errorText.text = getString(R.string.aircraft_type_in_consensus)
-                            errorText.setTextColor(ContextCompat.getColor(errorText.context, R.color.orange))
-                        }
+                    Aircraft.CONSENSUS -> {
+                        errorText.text = getString(R.string.aircraft_type_in_consensus)
+                        errorText.setTextColor(ContextCompat.getColor(errorText.context, R.color.orange))
+                    }
 
-                        Aircraft.NONE -> {
-                            errorText.text = getString(R.string.aircraft_type_not_found)
-                            errorText.setTextColor(ContextCompat.getColor(errorText.context, R.color.red))
-                        }
+                    Aircraft.NONE -> {
+                        errorText.text = getString(R.string.aircraft_type_not_found)
+                        errorText.setTextColor(ContextCompat.getColor(errorText.context, R.color.red))
+                    }
 
-                        else -> registrationFieldLayout.error = getString(R.string.error)
+                    else -> registrationFieldLayout.error = getString(R.string.error)
 
                 }
             }

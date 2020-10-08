@@ -49,14 +49,12 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
 
 
     // Active aircraft in [workingFligght] or a placeholder [Aircraft] while workingFlight is loading data
-    val selectedAircraft = Transformations.map(workingFlight.aircraft) { it ?: Aircraft("...")}
+    val selectedAircraft = workingFlight.aircraft.map { it ?: Aircraft("...")}
 
     val aircraftTypes: LiveData<List<String>>
         get() = _aircraftTypes
 
-    val knownRegistrations = flightRepository.usedRegistrations
-
-    val registration: LiveData<String> = Transformations.map(selectedAircraft) { it.registration }
+    val knownRegistrations = aircraftRepository.aircraftListLiveData.map{ it.map{ac -> ac.registration}}
 
     private var mAircraft: Aircraft
         get() = selectedAircraft.value!!

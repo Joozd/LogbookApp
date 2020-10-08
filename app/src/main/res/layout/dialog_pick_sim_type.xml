@@ -22,7 +22,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" android:background="#60000000"
+    android:layout_height="match_parent"
+    android:background="#60000000"
+    android:fitsSystemWindows="true"
     android:id="@+id/aircraftPickerLayout">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -32,7 +34,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="64dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginBottom="64dp"
+        android:layout_marginBottom="32dp"
         android:background="@drawable/rounded_corners"
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.repository.helpers
 
+import android.util.Log
 import java.util.*
 
 fun String.findBestHitForRegistration(registrations: Collection<String>): String? =
@@ -43,17 +44,24 @@ fun String.findBestHitForRegistration(registrations: Collection<String>): String
  * - Last matches("ZA" -> PH-EZA")
  * - Part after hyphen matches ( "EZ" -> PH-EZA")
  * - First part matches("PH" -> "PH-EZA")
+ * - First part matches ignoring '-' ("PHE"-> "PH-EZA"
  * - Any part matches ("H-E" -> "PH-EZA")
+ * - Partial match ignoring '-' ("HEZ -> PH-EZA")
  */
 fun String.findSortedHitsForRegistration(registrations: Collection<String>, caseSensitive: Boolean = false): List<String>{
     val query = if (caseSensitive) this else this.toUpperCase(Locale.ROOT)
-    val searchableRegs = registrations.filter{it.length > length}.filter{query in it}.let { rrr->
+
+    val searchableRegs = registrations.filter{it.length > length}.filter{query.filter{c -> c != '-'} in registrations.map{ it.filter{c -> c != '-'} } }.let { rrr->
         if (caseSensitive) rrr else rrr.map { it.toUpperCase(Locale.ROOT) }
     }
+
         return  (searchableRegs.filter {it == query} +
                 searchableRegs.filter{it.filter {c -> c != '-'} == query} +
                 searchableRegs.filter{it.endsWith((query))} +
                 searchableRegs.filter{'-' in it}.map {it.split('-')}.filter{it[1].startsWith(query)}.map{it.joinToString("-")} +
-                searchableRegs.filter{it.startsWith((query))} +
-                searchableRegs).distinct()
+                searchableRegs.filter{it.startsWith(query)} +
+                searchableRegs.filter{it.filter{c -> c != '-'}.startsWith(query)} +
+                searchableRegs.filter{query in it} +
+                searchableRegs.filter{query in it.filter{c -> c != '-'} }
+                ).distinct()
 }

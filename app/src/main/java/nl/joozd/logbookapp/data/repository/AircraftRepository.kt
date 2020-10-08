@@ -467,9 +467,9 @@ class AircraftRepository(
     fun getBestHitForPartialRegistration(r: String): Aircraft? = r.toUpperCase(Locale.ROOT).let { reg ->
         aircraftMap[reg]
             ?: aircraftMap.mapKeys { it.key.filter{c -> c != '-' }}[reg]          // get "PH-EZA" when searching for "PHEZA"
-            ?: aircraftMap[reg.findBestHitForRegistration(acrwtCache.map { it.registration })]
-            ?: aircraftMap[reg.findBestHitForRegistration(preloadedAircraftCache.map { it.registration })]
-            ?: aircraftMap[reg.findBestHitForRegistration(consensusCache.map { it.registration })]
+            ?: aircraftMap[reg.findBestHitForRegistration(acrwtRegs)]
+            ?: aircraftMap[reg.findBestHitForRegistration(preloadedAircraftRegs)]
+            ?: aircraftMap[reg.findBestHitForRegistration(consensusRegs)]
     }
 
     /**

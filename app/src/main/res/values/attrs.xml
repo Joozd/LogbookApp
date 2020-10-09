@@ -29,6 +29,7 @@
     </declare-styleable>
 
     <attr name="colorPrimaryBackground" format="reference|color" />
+    <attr name="textColorWarning" format="reference|color" />
 
 
 </resources>

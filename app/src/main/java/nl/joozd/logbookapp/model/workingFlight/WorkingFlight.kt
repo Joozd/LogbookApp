@@ -679,9 +679,6 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     var landingNight: Int by TakeOffLandingDelegate(LANDING_NIGHT)
     var autoLand: Int by TakeOffLandingDelegate(AUTOLAND)
     var takeoff: Int by TakeOffLandingDelegate(GENERIC_TAKEOFF)
-
-
-
     var landing: Int by TakeOffLandingDelegate(GENERIC_LANDING)
 
     /**

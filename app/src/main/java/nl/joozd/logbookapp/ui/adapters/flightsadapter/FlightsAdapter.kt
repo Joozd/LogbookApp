@@ -30,7 +30,7 @@ import kotlinx.android.synthetic.main.item_sim.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.getDateStringFromEpochSeconds
+import nl.joozd.logbookapp.model.dataclasses.Flight
 
 /**
  * Adapter for RecyclerView for displaying Flights in JoozdLog
@@ -47,7 +47,7 @@ class FlightsAdapter(
     class SimViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
         fun bindItem(flight: DisplayFlight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
             with(flight){
-                simLayout.makePlannedColorIfNeeded(planned)
+                simLayout.setColorAccordingstatus(planned)
                 simDateDayText.text = dateDay
                 simDateMonthYearText.text = monthAndYear
                 simNamesText.text = names
@@ -69,7 +69,7 @@ class FlightsAdapter(
         fun bindItem(flight: DisplayFlight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
 
             with(flight) {
-                flightLayout.makePlannedColorIfNeeded(planned)
+                flightLayout.setColorAccordingstatus(planned, this.checkIfIncomplete())
                 dateDayText.text = dateDay
                 dateMonthYearText.text = monthAndYear
                 namesText.text = names

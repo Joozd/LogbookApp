@@ -22,15 +22,22 @@ package nl.joozd.logbookapp.ui.adapters.flightsadapter
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
-fun ViewGroup.makePlannedColorIfNeeded(planned: Boolean){
+fun ViewGroup.setColorAccordingstatus(planned: Boolean, warning: Boolean = false){
     val normalColor = context.getColorFromAttr(android.R.attr.textColorSecondary)
     val plannedColor = context.getColorFromAttr(android.R.attr.textColorHighlight)
+    val warningColor = context.getColorFromAttr(R.attr.textColorWarning)
+    val colorToSet =  when{
+        planned -> plannedColor
+        warning -> warningColor
+        else -> normalColor
+    }
     for (c in 0 until this.childCount) {
         val v: View = getChildAt(c)
         if (v is TextView) {
-            v.setTextColor(if (planned) plannedColor else normalColor)
+            v.setTextColor(colorToSet)
         }
     }
 }

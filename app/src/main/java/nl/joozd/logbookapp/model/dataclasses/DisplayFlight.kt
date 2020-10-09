@@ -55,6 +55,18 @@ data class DisplayFlight(
     val sim: Boolean = false,
     val planned: Boolean = false
 ){
+
+    /**
+     * Returns false if any of the checked data points is not filled
+     */
+    fun checkIfIncomplete(checkNames: Boolean = true): Boolean =
+        orig.isBlank()
+                || dest.isBlank()
+                || type.isBlank()
+                || registration.isBlank()
+                || (checkNames && names.isBlank())
+
+
     companion object{
         fun of(f: Flight, icaoIataMap: Map<String, String>, useIATA: Boolean) = DisplayFlight(
             flightID = f.flightID,

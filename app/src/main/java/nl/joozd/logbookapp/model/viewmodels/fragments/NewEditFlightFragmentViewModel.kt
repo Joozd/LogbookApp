@@ -311,7 +311,12 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
     fun togglePF(force: Boolean? = null){
-        wf.setIsPF(force ?: wf.isPF.value == false)
+        val newValue = force ?: wf.isPF.value == false
+        wf.setIsPF(newValue)
+        if (wf.isAutoValues.value == true) {
+            wf.takeoff = newValue.toInt() // Boolean.toInt() is 1 if true or 0 if false
+            wf.landing = newValue.toInt()
+        }
     }
 
     fun toggleAutoValues(force: Boolean? = null){

@@ -42,6 +42,9 @@ import java.time.format.DateTimeFormatter
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val wf = flightRepository.workingFlight.value!!
 
+    // If this is true, no more windows should be opened
+    private var closing: Boolean = false
+
 
     /**
      * MediatorLiveData
@@ -322,6 +325,19 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         wf.saveAndClose()
         feedback(EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT)
     }
+
+    /**
+     * Let the viewModel know the Fragment is about to close itself
+     */
+    fun notifyClosing(){
+        closing = true
+    }
+
+
+    /**
+     * Check if
+     */
+    fun checkIfStillOpen(): Boolean = !closing
 
 
 

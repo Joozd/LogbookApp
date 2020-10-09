@@ -49,7 +49,8 @@ import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
 
-
+//TODO fix crash upon entering a non-existent registration and clicking "save" (dialog gets opened but workingFlight gets closed(null))
+//TODO  Need to decide if I want to discard or show popup or something
 class EditFlightFragment: JoozdlogFragment(){
     private val viewModel: NewEditFlightFragmentViewModel by viewModels()
 
@@ -193,13 +194,14 @@ class EditFlightFragment: JoozdlogFragment(){
                     EditFlightFragmentEvents.INVALID_REG_TYPE_STRING -> toast("Error in regType string")
                     EditFlightFragmentEvents.AIRPORT_NOT_FOUND -> toast("Airport not found, no night time logged.")
                     EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND -> {
-                        supportFragmentManager.commit{
-                            add(R.id.mainActivityLayout, AircraftPicker().apply{
-                                presetEnteredRegistration = event.getString()
-                            })
-                            addToBackStack(null)
+                        if (viewModel.checkIfStillOpen()) { // only autofire this window if Fragment is not closing
+                            supportFragmentManager.commit {
+                                add(R.id.mainActivityLayout, AircraftPicker().apply {
+                                    presetEnteredRegistration = event.getString()
+                                })
+                                addToBackStack(null)
+                            }
                         }
-                        // toast("TODO (open aircraft picker) [${event.getString()}]")
                     }
                     EditFlightFragmentEvents.AIRPORT_NOT_FOUND_FOR_LANDINGS -> toast("airport not found, all logged as day")
                     EditFlightFragmentEvents.INVALID_TIME_STRING -> toast("Error in time string, no changes")
@@ -430,15 +432,18 @@ class EditFlightFragment: JoozdlogFragment(){
             //click on empty part == cancel
             flightInfoLayout.setOnClickListener {
                 //TODO fire some "undo cancel" SnackBar?
+                viewModel.notifyClosing()
                 closeFragment()
             }
 
             flightCancelButton2.setOnClickListener {
                 //TODO fire some "undo cancel" SnackBar?
+                viewModel.notifyClosing()
                 closeFragment()
             }
 
             flightSaveButton.setOnClickListener {
+                viewModel.notifyClosing()
                 activity?.currentFocus?.clearFocus()
                 viewModel.saveAndClose()
             }

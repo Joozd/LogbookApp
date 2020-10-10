@@ -38,7 +38,7 @@ class CsvTypeDetector(inputStream: InputStream): FileTypeDetector {
 
     private fun getType(lines: List<String>?): SupportedTypes = when (lines?.firstOrNull()){
         MCC_PILOT_LOG_CSV_IDENTIFIER -> SupportedTypes.MCC_PILOT_LOG_LOGBOOK
-        JOOZDLOG_V4 -> SupportedTypes.JOOZDLOG_V4
+        JOOZDLOG_V4 -> SupportedTypes.JOOZDLOG_CSV_BACKUP
         else -> SupportedTypes.UNSUPPORTED_CSV
     }
 

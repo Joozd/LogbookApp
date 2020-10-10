@@ -38,6 +38,7 @@ import kotlin.coroutines.CoroutineContext
  * - get an [Aircraft] from a registration
  * and put those in observable values
  */
+@Deprecated("This is no longer used)")
 class OrigDestAircraftWorker: CoroutineScope {
     override val coroutineContext: CoroutineContext = Job() + Dispatchers.Main
     private val airportRepository = AirportRepository.getInstance()

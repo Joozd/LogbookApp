@@ -53,7 +53,6 @@ abstract class AirportPicker(): JoozdlogFragment() {
     protected abstract val workingOnOrig: Boolean // this must be set before first-time attachment
     protected abstract val viewModel: AirportPickerViewModel
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return DialogAirportsBinding.bind(inflater.inflate(R.layout.dialog_airports, container, false)).apply {
             //Set background color for title bar
@@ -143,7 +142,7 @@ abstract class AirportPicker(): JoozdlogFragment() {
             viewModel.pickedAirport.observe(viewLifecycleOwner) {
                 airportPickerAdapter.pickAirport(it)
 
-                if ((airportsSearchField.text?.toString() ?: "null").isBlank()) airportsSearchField.setText(it.ident)
+                // if ((airportsSearchField.text?.toString() ?: "null").isBlank()) airportsSearchField.setText(it.ident)
                 airportPickerTitle.text =
                     if (viewModel.workingOnOrig == true) getString(R.string.origin).toUpperCase(Locale.ROOT)
                     else getString(R.string.destination).toUpperCase(Locale.ROOT)
@@ -157,21 +156,21 @@ abstract class AirportPicker(): JoozdlogFragment() {
                 latLonField.text = "$latString - $lonString"
 
                 //This one should actually be a string resource
-                altitudeField.text = "alt: ${it.elevation_ft}\'"
+                altitudeField.text = getString(R.string.alt_with_placeholder, it.elevation_ft.toString()) // "alt: ${it.elevation_ft}\'"
             }
         }.root
     }
 
     private fun latToString(latitude: Double): String =
-        "${abs(latitude).toInt().toString()
-            .padStart(2,'0')}.${(latitude % 1).toString()
-            .drop(2)
-            .take(3)}${if (latitude > 0) "N" else "S"}"
+        abs(latitude).toString(2,3) + if (latitude > 0) "N" else "S"
 
     private fun lonToString(longitude: Double): String =
-        "${abs(longitude).toInt().toString()
-            .padStart(3,'0')}.${(longitude % 1).toString()
-            .drop(2)
-            .take(3)}${if (longitude > 0) "E" else "W"}"
+        abs(longitude).toString(3,3) + if (longitude > 0) "E" else "W"
+
+    private fun Double.toString(minDigitsBeforeDecimal: Int = 3, maxDigitsAfterDecimal: Int = 3): String{
+        this.toString().split('.').let{it[0] to it[1]}.apply{
+            return "${first.padStart(minDigitsBeforeDecimal, '0')}.${second.take(maxDigitsAfterDecimal)}"
+        }
+    }
 }
 

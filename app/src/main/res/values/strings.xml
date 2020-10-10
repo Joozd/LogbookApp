@@ -59,6 +59,7 @@
 
     <string name="departure">departure</string>
     <string name="arrival">arrival</string>
+    <string name="alt_with_placeholder">alt: %1$s\'</string>
 
     <string name="landing">Landing</string>
     <string name="autoland">Autoland</string>

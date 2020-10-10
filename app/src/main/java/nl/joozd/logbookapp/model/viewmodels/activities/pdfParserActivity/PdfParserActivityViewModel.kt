@@ -93,7 +93,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                             feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
                             parseCsv(MccPilotLogCsvParser.ofInputStream(it))
                         }
-                        SupportedTypes.JOOZDLOG_V4 -> uri?.getInputStream()?.use {
+                        SupportedTypes.JOOZDLOG_CSV_BACKUP -> uri?.getInputStream()?.use {
                             feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
                             parseCsv(JoozdlogParser.ofInputStream(it))
                         }
@@ -126,7 +126,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             val mimeType = App.instance.contentResolver.getType(uri) ?: "NONE"
             val detector = when {
                 "application/pdf" in mimeType -> PdfTypeDetector(inputStream)
-                "text/csv" in mimeType -> CsvTypeDetector(inputStream)
+                "text/csv" in mimeType || "text/comma-separated-values" in mimeType -> CsvTypeDetector(inputStream)
                 else -> {
                     feedback(PdfParserActivityEvents.ERROR).apply{
                         putString("Error 2: ${App.instance.contentResolver.getType(uri)}")

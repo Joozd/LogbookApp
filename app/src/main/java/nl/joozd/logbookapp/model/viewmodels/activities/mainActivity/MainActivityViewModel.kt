@@ -219,8 +219,8 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         viewModelScope.launch {
 
             val timeStamp = TimestampMaker.nowForSycPurposes
-            val allFlights: List<Flight> = flightRepository.getAllFlights().map { f ->
-                f.copy(name2 = f.name2.replace('|', ';'))
+            val allFlights: List<Flight> = flightRepository.getAllFlights().filter{"|" in it.name2}.map { f ->
+                f.copy(name2 = f.name2.split('|').map{it.trim()}.joinToString(";"), timeStamp = timeStamp)
             }.also {
                 Log.d("menuSelectedDoSomething", "Done. Fixed ${it.filter { it.timeStamp == timeStamp }.size} / ${it.size} flights")
             }

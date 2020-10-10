@@ -60,8 +60,11 @@ class FlightsAdapter(
                 simLayout.closeIfSwiped()
                 simLayout.setOnClickListener { onClick(flightID) }
                 simDeleteLayer.setOnClickListener {
-                    simLayout.closeIfSwiped()
-                    onDelete(flightID) }
+                    if (simLayout.isOpen) {
+                        simLayout.closeIfSwiped()
+                        onDelete(flightID)
+                    }
+                }
             }
         }
     }
@@ -99,11 +102,12 @@ class FlightsAdapter(
                 flightLayout.translationZ = 10f
                 flightLayout.setOnClickListener { onClick(flightID) }
                 deleteLayer.setOnClickListener {
-                    flightLayout.closeIfSwiped()
-                    onDelete(flightID) }
+                    if (flightLayout.isOpen) {
+                        flightLayout.closeIfSwiped()
+                        onDelete(flightID)
+                    }
+                }
             }
-
-
         }
     }
 

@@ -49,6 +49,9 @@ class SwipableConstraintLayout(ctx: Context, attributes: AttributeSet): Constrai
     private var opened = false
     private var closing = false
 
+    val isOpen: Boolean
+        get() = opened
+
     override fun onAttachedToWindow() {
         parentViewHolder = parent.parent as RecyclerView
         parentView = parent as View

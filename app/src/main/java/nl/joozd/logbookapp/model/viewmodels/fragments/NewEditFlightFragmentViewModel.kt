@@ -144,20 +144,24 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Checks if entered data is found in airportRepository.
      * If it is not found, it will enter it "as is" as identifier (ICAO code)
      */
-    fun setOrig(origString: String) = viewModelScope.launch{
+    private fun setOrig(origString: String) = viewModelScope.launch{
         val ident = airportRepository.searchAirportOnce(origString)?.ident ?: origString
         wf.setOrig(ident)
     }
+
+    fun setOrig(origEditable: Editable?) = origEditable?.let { setOrig(it.toString()) }
 
     /**
      * Set destination.
      * Checks if entered data is found in airportRepository.
      * If it is not found, it will enter it "as is" as identifier (ICAO code)
      */
-    fun setDest(destString: String) = viewModelScope.launch{
+    private fun setDest(destString: String) = viewModelScope.launch{
         val ident = airportRepository.searchAirportOnce(destString)?.ident ?: destString
         wf.setDest(ident)
     }
+
+    fun setDest(destEditable: Editable?) = destEditable?.let {setDest (it.toString())}
 
 
     /**

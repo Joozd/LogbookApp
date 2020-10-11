@@ -76,13 +76,14 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                     when (typeDetector.typeOfFile) {
                         SupportedTypes.KLC_ROSTER -> uri?.getInputStream()?.use {
                             //TODO check if calendar sync is active
-                            if (!parseKlcRoster(it, airportRepository.getIcaoToIataMap()))
+                            if (!parseRoster(KlcRoster(it)))
                                 feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
                         } ?: feedback(PdfParserActivityEvents.ERROR).apply{
                             putString("Error 1")
                         }
                         SupportedTypes.KLC_CHECKIN_SHEET -> uri?.getInputStream()?.use{
-                            parseRoster(KlcCheckinSheet.ofInputStream(it))
+                            if (!parseRoster(KlcCheckinSheet.ofInputStream(it)))
+                                feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
                         } ?: feedback(PdfParserActivityEvents.ERROR)
 
                         SupportedTypes.KLC_MONTHLY -> uri?.getInputStream()?.use {
@@ -150,11 +151,11 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         viewModelScope.launch (Dispatchers.IO + NonCancellable) {
             val mostRecentFlight = flightRepository.getMostRecentFlightAsync()
             val cutoffTime = mostRecentFlight.await()?.timeIn ?: 0L
-            val flightsToSave = roster.flights?.filter {f -> f.timeOut > cutoffTime} ?: emptyList()
-            val periodToSave = roster.period ?: (Instant.EPOCH .. Instant.EPOCH)
+            flightsToSave = roster.flights?.filter {f -> f.timeOut > cutoffTime} ?: emptyList()
+            periodToSave = roster.period ?: (Instant.EPOCH .. Instant.EPOCH)
 
             //If calendar Sync will interfere, show Dialog in Activity. Dialog can restart saving.
-            if (Preferences.getFlightsFromCalendar && (Preferences.calendarDisabledUntil < periodToSave.endInclusive.epochSecond)){
+            if (Preferences.getFlightsFromCalendar && (Preferences.calendarDisabledUntil < periodToSave!!.endInclusive.epochSecond)){ // has just been set to non-null
                 feedback(PdfParserActivityEvents.CALENDAR_SYNC_ENABLED)
             } else {
                 ImportedFlightsCleaner(flightsToSave, roster.carrier).cleanFlights()?.let { fff ->
@@ -162,27 +163,6 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                     feedback(PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED)
                 }
             }
-        }
-        return true
-    }
-
-    /**
-     * Parse KLC roster and do all the magic.
-     * Return true if work successfully launched, false if file not OK
-     */
-    private fun parseKlcRoster(inputStream: InputStream, icaoIataMap: Map<String, String>):  Boolean{
-        //TODO next line should probably be async? It does things with a file.
-        val roster = KlcRoster(inputStream, icaoIataMap)
-        if (!roster.isValid) return false
-
-        viewModelScope.launch (Dispatchers.IO + NonCancellable){
-            val mostRecentFlight = flightRepository.getMostRecentFlightAsync()
-
-            //Decision: Only flights newer than newest complete flight fill be saved
-            val cutoffTime = mostRecentFlight.await()?.timeIn ?: 0L
-            flightsToSave = roster.flights?.filter {f -> f.timeOut > cutoffTime} ?: emptyList()
-            periodToSave = roster.period
-            saveFlightsFromRoster()
         }
         return true
     }
@@ -400,6 +380,9 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
 
     fun disableCalendarUntilAfterLastFlight(){
         val maxIn = periodToSave?.endInclusive?.epochSecond
+        Log.d("PeriodToSave", "p2s: $periodToSave")
+        Log.d("PeriodToSave", "end: ${periodToSave?.endInclusive}")
+        Log.d("PeriodToSave", "second: ${periodToSave?.endInclusive?.epochSecond}")
         if (maxIn == null) {
             feedback(PdfParserActivityEvents.ERROR).apply{
                 putString("Error 7")

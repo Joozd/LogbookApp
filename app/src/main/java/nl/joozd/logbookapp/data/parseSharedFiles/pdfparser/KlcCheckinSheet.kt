@@ -113,7 +113,7 @@ class KlcCheckinSheet(roster: String?): Roster {
      */
     override val period: ClosedRange<Instant>? by lazy{
         val startEpochSecond = flights?.minByOrNull { it.timeOut }?.timeOut
-        val lastEpochSecond = flights?.minByOrNull { it.timeIn }?.timeIn
+        val lastEpochSecond = flights?.maxByOrNull { it.timeIn }?.timeIn
         if (startEpochSecond == null || lastEpochSecond == null) null
         else {
             (Instant.ofEpochSecond(startEpochSecond).atStartOfDay() .. Instant.ofEpochSecond(lastEpochSecond).atEndOfDay())

@@ -135,7 +135,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
     private fun syncAfterChange(){
         if (!Cloud.syncingFlights)
-            JoozdlogWorkersHub.synchronizeFlights(delay = false)
+            JoozdlogWorkersHub.synchronizeFlights(delay = true)
     }
 
     private val _syncProgress = MutableLiveData<Int>(-1)

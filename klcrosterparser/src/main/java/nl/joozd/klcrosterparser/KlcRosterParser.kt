@@ -146,8 +146,8 @@ class KlcRosterParser(inputStream: InputStream) {
             // val dateRangeString = header.slice(header.indexOf(dateRangeStartMarker)+ dateRangeStartMarker.length until header.indexOf(dateRangeEndMarker))
             // val startEnd = dateRangeString.split(" - ")
             val startEnd = dateRangeResult!!.groups[1]!!.value to dateRangeResult.groups[2]!!.value
-            startOfRoster = LocalDateTime.of (LocalDate.parse(startEnd.first, DateTimeFormatter.ofPattern("ddMMMyy", Locale.US)), LocalTime.MIDNIGHT).atZone(ZoneOffset.UTC).toInstant()
-            endOfRoster = LocalDateTime.of (LocalDate.parse(startEnd.second, DateTimeFormatter.ofPattern("ddMMMyy", Locale.US)), LocalTime.MIDNIGHT).atZone(ZoneOffset.UTC).toInstant()
+            startOfRoster = LocalDate.parse(startEnd.first, DateTimeFormatter.ofPattern("ddMMMyy", Locale.US)).atStartOfDay().atZone(ZoneOffset.UTC).toInstant()
+            endOfRoster = LocalDate.parse(startEnd.second, DateTimeFormatter.ofPattern("ddMMMyy", Locale.US)).plusDays(1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant()
         }
     }
     val period: ClosedRange<Long>? = if (startOfRoster?.epochSecond == null || endOfRoster?.epochSecond == null) null

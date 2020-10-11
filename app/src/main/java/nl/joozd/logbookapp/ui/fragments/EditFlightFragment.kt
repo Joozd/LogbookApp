@@ -373,12 +373,12 @@ class EditFlightFragment: JoozdlogFragment(){
 
             flightOrigField.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
-                    viewModel.setOrig(flightOrigField.text.toString())
+                    viewModel.setOrig(flightOrigField.text)
             }
 
             flightDestField.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
-                    viewModel.setDest(flightDestField.text.toString())
+                    viewModel.setDest(flightDestField.text)
             }
 
             flighttOutStringField.setOnFocusChangeListener { _, hasFocus ->

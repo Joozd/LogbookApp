@@ -30,7 +30,12 @@ import nl.joozd.logbookapp.utils.reversed
 import java.io.InputStream
 import java.time.Instant
 
-class KlcRoster(inputStream: InputStream, val icaoIataMap: Map<String, String>?): Roster {
+
+/**
+ * Will transfor a KLC PDF roster into flights
+ * Flights need to be cleaned before use.
+ */
+class KlcRoster(inputStream: InputStream): Roster {
 
     /*********************************************************************************************
      * Private parts
@@ -102,10 +107,8 @@ class KlcRoster(inputStream: InputStream, val icaoIataMap: Map<String, String>?)
      */
     override val flights: List<Flight>?
     get() {
-        val iataIcaoMap = icaoIataMap?.reversed() ?: emptyMap<String, String>()
         Log.d("KLC Roster Parser", "found ${flightsToPlan.size} flights")
-        return flightsToPlan.map{it.copy (orig = iataIcaoMap[it.orig] ?: it.orig, dest = iataIcaoMap[it.dest] ?: it.dest)} +
-                simsToPlan
+        return flightsToPlan + simsToPlan
     }
 
     override val period = (Instant.ofEpochSecond(roster.period!!.start)..Instant.ofEpochSecond(roster.period!!.endInclusive))

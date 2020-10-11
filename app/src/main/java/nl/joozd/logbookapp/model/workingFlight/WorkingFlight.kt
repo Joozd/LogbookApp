@@ -497,7 +497,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * If not found, sets [origin] to to Airport(ident = dest)
      * if found and [isAutoValues], calculates night time
      */
-    fun setDest(dest: String) = launchWithLocks(origMutex, nightTimeMutex){
+    fun setDest(dest: String) = launchWithLocks(destMutex, nightTimeMutex){
         setDestFromId(AirportRepository.getInstance().searchAirportOnce(dest)?.ident ?: dest)
     }
 
@@ -506,7 +506,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * if found and [isAutoValues], calculates night time
      * Can be null but shouldn't
      */
-    fun setDest(dest: Airport?) = launchWithLocks(origMutex, nightTimeMutex){
+    fun setDest(dest: Airport?) = launchWithLocks(destMutex, nightTimeMutex){
         mDestination = dest ?: Airport(ident = "null")
         if (mIsAutovalues){
             calculateNightJob().join()

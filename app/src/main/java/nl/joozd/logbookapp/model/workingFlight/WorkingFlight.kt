@@ -423,10 +423,10 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
             if (isPlanned && autoFill) FlightRepository.getInstance().getMostRecentFlightAsync().await()?.let { f ->
                 calculateNightJob().join() // set night time
                 mIsIfr = f.ifrTime > 0
-                mName = f.name
-                mName2 = f.name2
+                if (mName.isBlank()) mName = f.name
+                if (mName2.isBlank()) mName2 = f.name2
                 mIsPic = f.isPIC
-                setAircraft(f.registration)
+                if (flight.registration.isBlank()) setAircraft(f.registration)
             }
         }
         mIsAutovalues = autoFill

@@ -114,6 +114,9 @@ object Preferences {
 
     var backupInterval: Int by JoozdLogSharedPrefs(sharedPref, 0)
 
+    //Instant epochseconds of most recent backup
+    var mostRecentBackup: Long by JoozdLogSharedPrefs(sharedPref, 0L)
+
     var updateLargerFilesOverWifiOnly: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
     var newUserActivityFinished: Boolean by JoozdLogSharedPrefs(sharedPref, false)

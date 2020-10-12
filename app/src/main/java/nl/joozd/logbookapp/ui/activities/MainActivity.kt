@@ -52,6 +52,7 @@ import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogProgressBar
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
+import java.time.Instant
 
 
 class MainActivity : JoozdlogActivity() {
@@ -188,12 +189,34 @@ class MainActivity : JoozdlogActivity() {
                 viewModel.setSearchString(it)
             }
 
+            /**
+             * Hide backup mnessage until end of day or untill next creation of viewModel
+             */
+            dontBackupButton.setOnClickListener { viewModel.dismissBackup() }
+
+            backupButton.setOnClickListener { viewModel.backUpNow() }
+
+            /**
+             * Set dynamic text fields:
+             */
+            backupMessage.text = getString(R.string.backup_message_main_activity, viewModel.daysSinceLastBackup)
+
             /*******************************************************************************************
              * Observers below here
              *******************************************************************************************/
 
-            //TODO tempo test function
-            // viewModel.internetAvailable.observe(activity){}
+            viewModel.showBackupNotice.observe(activity){
+                backupReminderLayout.visibility = if (it) View.VISIBLE else View.GONE
+            }
+
+            viewModel.backupUri.observe(activity){
+                startActivity(Intent.createChooser(Intent().apply{
+                    action = Intent.ACTION_SEND
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    setDataAndType(it, CSV_MIME_TYPE)
+                    putExtra(Intent.EXTRA_STREAM, it)
+                }, "Gooi maar ergens heen aub"))
+            }
 
             viewModel.notLoggedIn.observe(activity) {
                 if (it && Preferences.useCloud){
@@ -487,6 +510,7 @@ class MainActivity : JoozdlogActivity() {
         const val TAG = "MainActivity"
         const val EDIT_FLIGHT_TAG = "EDIT_FLIGHT_TAG"
         const val PLANNED_FLIGHTS_IN_SIGHT = 3
+        private const val CSV_MIME_TYPE = "text/csv"
 
     }
 }

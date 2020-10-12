@@ -111,6 +111,7 @@
     <string name="error">Error</string>
     <string name="never">Never</string>
     <string name="warning">Warning</string>
+    <string name="dismiss">Dismiss</string>
 
     <string name="login">Log In</string>
 
@@ -281,7 +282,7 @@
     <string name="loggings_preferences">Logging Preferences</string>
 
     <string name = "fake_hidden_password">••••••••••</string>
-
+    <string name="backup_message_main_activity">You have not backed up your logbook for %1$s days.</string>
 
 
 </resources>

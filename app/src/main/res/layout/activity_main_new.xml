@@ -94,17 +94,69 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/searchField">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/backup_reminder_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="8dp"
+            android:background="@drawable/rounded_corners_white">
+
+            <TextView
+                android:id="@+id/backup_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="?android:attr/textColorSecondary"
+                tools:text="@string/backup_message_main_activity"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/backup_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:padding="4dp"
+                android:textAllCaps="true"
+                android:textColor="?android:attr/textColorHighlight"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/backup_message"
+                android:text="@string/backup_now" />
+
+            <TextView
+                android:id="@+id/dont_backup_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:padding="4dp"
+                android:textAllCaps="true"
+                android:textColor="?android:attr/textColorHighlight"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/backup_message"
+                android:text="@string/dismiss" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
             android:id="@+id/fastscroller"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:scrollbars="none"
             app:handleDrawable="@drawable/scrollbar_thumb_drawable_light"
             app:handleHeight="30dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/backup_reminder_layout"
             app:popupDrawable="@drawable/scrollbar_popup_drawable_light">
 
             <androidx.recyclerview.widget.RecyclerView
@@ -151,6 +203,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:animateLayoutChanges="true"
+        android:elevation="8dp"
         android:orientation="vertical"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"

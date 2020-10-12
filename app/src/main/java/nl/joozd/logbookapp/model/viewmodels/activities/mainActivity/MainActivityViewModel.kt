@@ -26,24 +26,24 @@ import android.content.Intent.ACTION_VIEW
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.nullIfZero
+import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
 import nl.joozd.logbookapp.model.helpers.FlightConflichtChecker
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
+import nl.joozd.logbookapp.utils.CoroutineTimerTask
 import nl.joozd.logbookapp.utils.TimestampMaker
-import java.time.Instant
+import java.time.*
 import java.util.*
 
 class MainActivityViewModel: JoozdlogActivityViewModel() {
@@ -51,7 +51,6 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     /*********************************************************************************************
      * Private parts
      *********************************************************************************************/
-
     private val icaoIataMap
         get() = airportRepository.icaoIataMap.value ?: emptyMap()
 
@@ -59,6 +58,10 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         get() = flightRepository.liveFlights.value ?: emptyList()
     private val flightsList
         get() = searchFlights(rawFlights).map { DisplayFlight.of(it, icaoIataMap, Preferences.useIataAirports) }.also { setSearchFieldHint(it.size) }
+
+    private val _showBackupNotice = MutableLiveData(backupDialogShouldBeShown())
+
+    private val _backupUri = MutableLiveData<Uri>()
 
     private val searchStringLiveData = MutableLiveData<String>()
     private val searchSpinnerSelection = MutableLiveData<Int>()
@@ -77,25 +80,27 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
             searchSpinnerSelection.value = it
         }
 
-    private val _displayFlightsList2 = MediatorLiveData<List<DisplayFlight>>()
-
-    init {
-        _displayFlightsList2.addSource(flightRepository.liveFlights) {
-            _displayFlightsList2.value = flightsList
+    private val _displayFlightsList2 = MediatorLiveData<List<DisplayFlight>>().apply{
+        addSource(flightRepository.liveFlights) {
+            value = flightsList
         }
-        _displayFlightsList2.addSource(airportRepository.icaoIataMap) {
-            _displayFlightsList2.value = flightsList
+        addSource(airportRepository.icaoIataMap) {
+            value = flightsList
         }
-        _displayFlightsList2.addSource(airportRepository.useIataAirports) {
-            _displayFlightsList2.value = flightsList
+        addSource(airportRepository.useIataAirports) {
+            value = flightsList
         }
-        _displayFlightsList2.addSource(searchStringLiveData) {
-            _displayFlightsList2.value = flightsList
+        addSource(searchStringLiveData) {
+            value = flightsList
         }
-        _displayFlightsList2.addSource(searchSpinnerSelection) {
-            _displayFlightsList2.value = flightsList
+        addSource(searchSpinnerSelection) {
+            value = flightsList
         }
     }
+
+
+
+
 
     /**
      * Will search flights, return immediate results but if needed also update [_displayFlightsList2] async with more detailed data
@@ -171,6 +176,16 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         _searchFieldHint.value = if (it == rawFlights.size) null else "$it flights found"
     }
 
+    /**
+     * Returns whether the time between now and most recent backup is greater than [Preferences.backupInterval] days
+     * Will count days starting from midnight LT, so if I just backed up and set it to 1 day, I will get a reminder at midnight.
+     */
+    private fun backupDialogShouldBeShown(): Boolean {
+        if (Preferences.backupInterval == 0) return false
+        val mostRecentBackup = Instant.ofEpochSecond(Preferences.mostRecentBackup).atStartOfDay(OffsetDateTime.now().offset)
+        return Instant.now() - mostRecentBackup > Duration.ofDays(Preferences.backupInterval.toLong())
+    }
+
     /*********************************************************************************************
      * Public parts
      *********************************************************************************************/
@@ -184,10 +199,6 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     val searchFieldHint
         get() = _searchFieldHint
-
-    /**
-     * Livedata related to synchronization:
-     */
 
     val internetAvailable: LiveData<Boolean>
         get() = InternetStatus.internetAvailableLiveData
@@ -206,6 +217,18 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     val savedflight
         get() = flightRepository.savedFlight
+
+    val showBackupNotice: LiveData<Boolean>
+        get() = _showBackupNotice
+
+    val backupUri: LiveData<Uri>
+        get() = _backupUri
+
+    /**
+     * Exposed vals
+     */
+
+    val daysSinceLastBackup: String = (minOf((Instant.now() - Instant.ofEpochSecond(Preferences.mostRecentBackup)).toDays(), 999L).toString())
 
 
     /*********************************************************************************************
@@ -271,8 +294,24 @@ else{
 
 
     /**
-     * Handler for clickety thingies
+     * Handlers for clickety thingies
      */
+    fun dismissBackup() {
+        _showBackupNotice.value = false
+        CoroutineTimerTask(Instant.now().atEndOfDay(OffsetDateTime.now().offset)).run(viewModelScope + Dispatchers.Main){
+            _showBackupNotice.value = backupDialogShouldBeShown()
+        }
+
+    }
+
+    fun backUpNow() = viewModelScope.launch {
+        _showBackupNotice.value = false
+        val dateString = LocalDate.now().toDateStringForFiles()
+        //TODO make some kind of "working" animation on button
+        _backupUri.value = JoozdlogExport.shareCsvExport("joozdlog_backup_$dateString")
+        Preferences.mostRecentBackup = Instant.now().epochSecond
+    }
+
 
 
     private val openingFlightMutex = Mutex()

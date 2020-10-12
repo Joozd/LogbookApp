@@ -24,6 +24,6 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 
 abstract class JoozdlogDialogViewModel: JoozdlogViewModel() {
-    protected val context: Context
-        get() = App.instance.ctx
+    //protected val context: Context
+    //    get() = App.instance.ctx
 }

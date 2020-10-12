@@ -35,7 +35,8 @@
     <string name="retry">Retry</string>
 
     <string name="clear">Clear</string>
-    <string name="editFlight">Add Flight</string>
+    <string name="add_flight">Add Flight</string>
+    <string name="edit_flight">Edit Flight</string>
     <string name="destination">Destination</string>
     <string name="origin">Origin</string>
     <string name="timeOut">Time Out</string>

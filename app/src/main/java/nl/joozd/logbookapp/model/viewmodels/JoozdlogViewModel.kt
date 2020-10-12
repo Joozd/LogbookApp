@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -26,6 +27,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.repository.*
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.workingFlightRepository.WorkingFlightRepository
@@ -43,6 +45,9 @@ open class JoozdlogViewModel: ViewModel() {
     private val _feedbackEvent = MutableLiveData<FeedbackEvent>()
     val feedbackEvent: LiveData<FeedbackEvent>
         get() = _feedbackEvent
+
+    protected val context: Context
+        get() = App.instance.ctx
 
     /**
      * Gives feedback to activity.

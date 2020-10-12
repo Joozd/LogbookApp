@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/top_corners"
                 android:gravity="center_vertical"
-                android:text="@string/editFlight"
+                android:text="@string/add_flight"
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="20sp"

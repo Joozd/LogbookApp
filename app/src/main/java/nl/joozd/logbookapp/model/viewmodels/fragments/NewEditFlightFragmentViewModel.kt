@@ -20,11 +20,7 @@
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
 import android.text.Editable
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -34,6 +30,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmen
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
+import nl.joozd.logbookapp.R
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -42,8 +39,15 @@ import java.time.format.DateTimeFormatter
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val wf = flightRepository.workingFlight.value!!
 
+    private val _title = MutableLiveData<String>(context.getString(if(wf.newFlight) R.string.add_flight else R.string.edit_flight))
+
     // If this is true, no more windows should be opened
     private var closing: Boolean = false
+
+
+        /**
+     * MediatorLiveData
+     */
 
 
     /**
@@ -114,6 +118,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         get() = wf.isAutoValues
     val knownRegistrations
         get() = flightRepository.usedRegistrations
+
+    val title: LiveData<String>
+        get() = _title
 
 
     /**

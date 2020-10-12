@@ -591,7 +591,7 @@ fun nextWrap(bytes: ByteArray): ByteArray {
                 bytes
             )
         ).toByteArray()
-        else -> error("nextWrap(): WIERD ERROR should have failed eralier - type is ${bytes[0]}")
+        else -> error("nextWrap(): WIERD ERROR should have failed earlier - type is ${bytes[0]}")
     }
 }
 

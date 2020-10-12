@@ -164,8 +164,12 @@ object Cloud {
      * Needs a list of [ConsensusData] which will hold all aircraft to be added to consensus as well as all aircraft to be removed from it.
      */
     suspend fun sendAircraftConsensus(consensus: List<ConsensusData>, listener: (Int) -> Unit = {}): Boolean = withContext(Dispatchers.IO) {
+        listener(0)
         Client.getInstance().use{
-            true
+            listener(20)
+            ServerFunctions.sendConsensus(it, consensus).also{
+                listener(100)
+            }
         }
     }
 
@@ -181,9 +185,6 @@ object Cloud {
         }
     }
 
-
-
-
     suspend fun getAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? = withContext(Dispatchers.IO) {
         Client.getInstance().use{
             ServerFunctions.getAircraftTypesVersion(it, listener).also{
@@ -195,6 +196,15 @@ object Cloud {
     suspend fun getForcedAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? = withContext(Dispatchers.IO) {
         Client.getInstance().use{
             ServerFunctions.getForcedAircraftTypesVersion(it, listener)
+        }
+    }
+
+    /**
+     * Get a consensus Map (map of Registration to serialized type)
+     */
+    suspend fun getConsensus(listener: (Int) -> Unit = {}): Map<String, ByteArray>? = withContext(Dispatchers.IO) {
+        Client.getInstance().use{
+            ServerFunctions.getConsensus(it, listener)
         }
     }
 

@@ -24,21 +24,30 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.*
+import nl.joozd.joozdlogcommon.ConsensusData
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.repository.AircraftRepository
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.extensions.nullIfEmpty
+import nl.joozd.logbookapp.extensions.toConsensusDataList
 
 /**
  * Sync aircraftTypes with server
  * - First, check version of forcedTypes and update that list if needed
- * TODO - Then, check local consensus data to send, and send it
+ * Then, check local consensus data to send, and send it
  * TODO - Finally, download consensus data from server
  */
 class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
 
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO + NonCancellable) {
+        var saveForced: Job? = null
+        var saveTypes: Job? = null
+        // var sendConsensus: Job? = null // this one is called straight away
+        // var receiveConsensus: Job? = null // same
+
         Log.d(this::class.simpleName,"Started doWork()")
         val aircraftRepository = AircraftRepository.getInstance()
 
@@ -46,11 +55,11 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
         val serverForcedVersion = Cloud.getForcedAircraftTypesVersion() ?: return@withContext Result.retry()
         Log.d(this::class.simpleName, "serverVersions $serverTypesVersion / $serverForcedVersion")
 
-        var saveTypes: Job? = null
+
         if (serverTypesVersion != Preferences.aircraftTypesVersion) {
             Cloud.getAircraftTypes()?.let {
                 Log.d(this::class.simpleName, "Downlaoded ${it.size} types")
-                saveTypes = launch(NonCancellable) {
+                saveTypes = launch {
                     aircraftRepository.replaceAllTypesWith(it)
                     Preferences.aircraftTypesVersion = serverTypesVersion
                 }
@@ -58,11 +67,11 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
             } ?: return@withContext Result.retry()
         }
 
-        var saveForced: Job? = null
+
         if (serverForcedVersion != Preferences.aircraftForcedVersion) {
             Cloud.getForcedTypes()?.let {
                 Log.d(this::class.simpleName, "Downlaoded ${it.size} forcedTypes")
-                saveForced = launch(NonCancellable) {
+                saveForced = launch {
                     aircraftRepository.replaceAllPreloadedWith(it.map {
                         PreloadedRegistration(registration = it.registration, type = it.type)
                     })
@@ -70,8 +79,28 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
                 }
             } ?: return@withContext Result.retry()
         }
+
+        // collect unsent consensus data:
+        val sendConsensus = launch{
+            aircraftRepository.getAcrwtData().filter{ !it.knownToServer }.nullIfEmpty()?.let{
+                if (Cloud.sendAircraftConsensus(it.map{acrwt -> acrwt.toConsensusDataList()}.flatten())){
+                    aircraftRepository.saveAcrwtData(it.map{acrwt -> acrwt.copy(knownToServer = true, serializedPreviousType = ByteArray(0))})
+                }
+            }
+        }
+
+        val receiveConsensus = launch{
+            Cloud.getConsensus()?.let{
+                aircraftRepository.replaceConsensusData(it)
+            }
+        }
+
+
+
         saveTypes?.join()
         saveForced?.join()
+        sendConsensus?.join()
+        receiveConsensus?.join()
 
         return@withContext Result.success()
     }

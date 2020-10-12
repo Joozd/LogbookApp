@@ -111,6 +111,17 @@ object ServerFunctions {
     }
 
     /**
+     * Gets consensus data from server
+     * If success, will return a Map<Registration to ByteArray>. ByteArray is a serialized AircraftType.
+     */
+    fun getConsensus(client: Client, listener: (Int) -> Unit = {}): Map<String, ByteArray>?{
+        client.sendRequest(JoozdlogCommsKeywords.REQUEST_AIRCRAFT_CONSENSUS)
+        return client.readFromServer(listener)?.let{
+            mapFromBytes(it)
+        }
+    }
+
+    /**
      * Logs a user in. User will remain logged in until connection with [client] is lost.
      * @return true is success, false if username/pass incorrect, null if connection problem
      */
@@ -190,27 +201,10 @@ object ServerFunctions {
         return result.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
     }
 
-    fun requestFlightsSince(client: Client, timeStamp: Long): List<Flight>?{
-        client.sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS_SINCE_TIMESTAMP,
-            wrap(timeStamp)
-        )
-        client.readFromServer()?.let{
-            if (it.contentEquals(JoozdlogCommsKeywords.NOT_LOGGED_IN.toByteArray())) throw (NotAuthorizedException("Server responded ${JoozdlogCommsKeywords.NOT_LOGGED_IN}"))
-            if (it.contentEquals(JoozdlogCommsKeywords.SERVER_ERROR.toByteArray())) return null
-            return unpackSerialized(it)
-                .map{ serializedBasicFlight->
-                    Flight(
-                        BasicFlight.deserialize(serializedBasicFlight)
-                    )
-                }
-        }
-        return null
-    }
-
     /**
      * Runs listsner f with a 0-100 percentage completed value
      */
-    fun requestFlightsSince(client: Client, timeStamp: Long, f: (Int) -> Unit): List<Flight>?{
+    fun requestFlightsSince(client: Client, timeStamp: Long, f: (Int) -> Unit = {}): List<Flight>?{
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS_SINCE_TIMESTAMP,
             wrap(timeStamp)
         )
@@ -231,7 +225,6 @@ object ServerFunctions {
      * Send flights to server
      * @param client: an initialized Client to send/receive data
      * @param flightsToSend: A list of Flights to send to server
-     * @param compressed: Whether or not to compress the flights. Keep false for now.
      * @return: true if server responds OK, else false.
      */
     fun sendFlights(client: Client, flightsToSend: List<Flight>): Boolean{
@@ -247,6 +240,14 @@ object ServerFunctions {
         )
         val reply = client.readFromServer()
         return reply?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
+    }
+
+    /**
+     * Send consensus data to server
+     */
+    fun sendConsensus(client: Client, consensus: List<ConsensusData>): Boolean{
+        client.sendRequest(JoozdlogCommsKeywords.SENDING_AIRCRAFT_CONSENSUS, packSerializable(consensus))
+        return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
     }
 
     /**

@@ -102,6 +102,28 @@ class AircraftRepository(
         if (aircraftMap.isNotEmpty()) aircraftMap
         else getFullAircraftList().map{it.registration to it}.toMap()
 
+    /**
+     * Get ACRWT data from Dao (for SyncAircraftWorker)
+     */
+    suspend fun getAcrwtData(): List<AircraftRegistrationWithTypeData> = registrationDao.requestAllRegistrations()
+
+    /**
+     * SavesACRWT data to disk (for SyncAircraftWorker)
+     */
+    fun saveAcrwtData(data: List<AircraftRegistrationWithTypeData>) = saveAircraftRegistrationWithTypeData(data)
+
+    /**
+     * Replace entire Consensus DB with new data (for SyncAircraftWorker)
+     */
+    suspend fun replaceConsensusData(newData: Map<String, ByteArray>) {
+        aircraftTypeConsensusDao.clearDb()
+        newData.map{
+            AircraftTypeConsensusData(it.key, it.value)
+        }.let {
+            aircraftTypeConsensusDao.save(*it.toTypedArray())
+        }
+    }
+
 
 
 

@@ -23,6 +23,7 @@ import android.util.Log
 import androidx.work.*
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 object JoozdlogWorkersHub {
@@ -81,33 +82,39 @@ object JoozdlogWorkersHub {
     /**
      * Gets airports from server and overwrites airportsDB if different.
      * If this work already exists, do nothing ( [ExistingWorkPolicy.KEEP] )
+     * Runs once per day, when charging.
      */
-    fun getAirportsFromServer(onlyUnmetered: Boolean = true){
+    fun getAirportsFromServer(onlyUnmetered: Boolean = false){
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
+            .setRequiresCharging(true)
             .build()
 
-        val task = OneTimeWorkRequestBuilder<SyncAirportsWorker>()
+        val task = PeriodicWorkRequestBuilder<SyncAirportsWorker>(Duration.ofDays(1))
             .setConstraints(constraints)
             .addTag(GET_AIRPORTS)
             .build()
 
         with (WorkManager.getInstance(App.instance)){
-            enqueueUniqueWork(GET_AIRPORTS, ExistingWorkPolicy.REPLACE, task)
+            enqueueUniquePeriodicWork(GET_AIRPORTS, ExistingPeriodicWorkPolicy.KEEP, task)
         }
     }
 
-    fun synchronizeAircraftTypes(){
+    /**
+     * Gets aircraft types from server, and sends consensus data to server
+     */
+    fun synchronizeAircraftTypes(onlyUnmetered: Boolean = false){
         val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
+            .setRequiresCharging(true)
             .build()
-        val task = OneTimeWorkRequestBuilder<SyncAircraftTypesWorker>()
+        val task = PeriodicWorkRequestBuilder<SyncAircraftTypesWorker>(Duration.ofDays(1))
             .setConstraints(constraints)
             .addTag(SYNC_AIRCRAFT_TYPES)
             .build()
 
         with (WorkManager.getInstance(App.instance)){
-            enqueueUniqueWork(SYNC_AIRCRAFT_TYPES, ExistingWorkPolicy.REPLACE, task)
+            enqueueUniquePeriodicWork(SYNC_AIRCRAFT_TYPES, ExistingPeriodicWorkPolicy.KEEP, task)
         }
     }
 

@@ -39,5 +39,5 @@ interface RegistrationDao {
     fun requestLiveRegistrations(): LiveData<List<AircraftRegistrationWithTypeData>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun save(vararg regs: AircraftRegistrationWithTypeData)
+    suspend fun save(vararg regs: AircraftRegistrationWithTypeData)
 }

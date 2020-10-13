@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.repository
 
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -41,6 +42,7 @@ import nl.joozd.logbookapp.data.room.dao.AircraftTypeDao
 import nl.joozd.logbookapp.data.room.dao.PreloadedRegistrationsDao
 import nl.joozd.logbookapp.data.room.dao.RegistrationDao
 import nl.joozd.logbookapp.data.room.model.*
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 
 import nl.joozd.logbookapp.extensions.mostCommonOrNull
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -201,6 +203,17 @@ class AircraftRepository(
     init{
         _aircraftMapLiveData.observeForever {
             aircraftMap = it
+        }
+    }
+
+    /**
+     * Observing consensusOptIn to make sure it is used or not
+     * If [consensusLiveData] is empty, don't do anything as this will get triggered when it is filled.
+     */
+
+    private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        when (key) {
+            Preferences::consensusOptIn.name -> launch { _aircraftListLiveData.value = consensusLiveData.value?.let { updateAircraftListWithNewConsensus(it) } }
         }
     }
 
@@ -394,8 +407,10 @@ class AircraftRepository(
     }
 
     private suspend fun updateAircraftListWithNewConsensus(consensus: List<Aircraft>): List<Aircraft> = withContext(dispatcher) {
-        fillConsensusCacheAsync(consensus).await()
+        // If not opted in, make sure consensusCache is empty
+        fillConsensusCacheAsync(if (Preferences.consensusOptIn) consensus else emptyList()).await()
         mergeCaches()
+
     }
 
     /**

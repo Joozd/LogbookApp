@@ -63,7 +63,7 @@
                 android:layout_marginEnd="16dp"
                 android:text="@string/loggings_preferences"
                 android:textColor="?attr/android:textColor"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
@@ -112,6 +112,71 @@
                 app:layout_constraintTop_toTopOf="@+id/augmentedCrewButton"
                 app:srcCompat="@drawable/ic_help_outline_20px" />
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/settingsUseIataSelector"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/augmentedCrewButton"
+                tools:text="Use ICAO airport identifiers" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/settingsUseConsensusOptIn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="@string/use_consensus_data"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/settingsUseIataSelector" />
+
+            <TextView
+                android:id="@+id/consensusDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/consensus_dscription"
+                android:textColor="?attr/android:textColorTertiary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/settingsUseConsensusOptIn" />
+
+            <View
+                android:id="@+id/lineBetweenLoggingBackup"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="#c0c0c0"
+                app:layout_constraintEnd_toEndOf="@+id/settingsUseIataSelector"
+                app:layout_constraintStart_toStartOf="@+id/settingsUseIataSelector"
+                app:layout_constraintTop_toBottomOf="@+id/consensusDescription" />
+
+            <TextView
+                android:id="@+id/backupPreferencesTitleTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/loggings_preferences"
+                android:textColor="?attr/android:textColor"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lineBetweenLoggingBackup" />
+
             <Button
                 android:id="@+id/backupIntervalButton"
                 style="?android:attr/borderlessButtonStyle"
@@ -125,7 +190,7 @@
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/augmentedCrewButton" />
+                app:layout_constraintTop_toBottomOf="@+id/backupPreferencesTitleTextView" />
 
             <Button
                 android:id="@+id/backupNowButton"
@@ -143,28 +208,17 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/backupIntervalButton" />
 
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/settingsUseIataSelector"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/backupNowButton"
-                tools:text="Use ICAO airport identifiers" />
+
 
             <View
-                android:id="@+id/lineBetweenIataCalendar"
+                android:id="@+id/lineBetweenBackupCalendar"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_marginTop="16dp"
                 android:background="#c0c0c0"
                 app:layout_constraintEnd_toEndOf="@+id/settingsUseIataSelector"
                 app:layout_constraintStart_toStartOf="@+id/settingsUseIataSelector"
-                app:layout_constraintTop_toBottomOf="@+id/settingsUseIataSelector" />
+                app:layout_constraintTop_toBottomOf="@+id/backupNowButton" />
 
             <TextView
                 android:id="@+id/calendarSyncTitleTextView"
@@ -175,11 +229,11 @@
                 android:layout_marginEnd="16dp"
                 android:text="@string/calendar_sync_settings"
                 android:textColor="?attr/android:textColor"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lineBetweenIataCalendar" />
+                app:layout_constraintTop_toBottomOf="@+id/lineBetweenBackupCalendar" />
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/settingsGetFlightsFromCalendarSelector"

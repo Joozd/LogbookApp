@@ -80,18 +80,27 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
             } ?: return@withContext Result.retry()
         }
 
-        // collect unsent consensus data:
+        /**
+         * collect unsent consensus data and send it to server (if optIn)
+         */
         val sendConsensus = launch{
-            aircraftRepository.getAcrwtData().filter{ !it.knownToServer }.nullIfEmpty()?.let{
-                if (Cloud.sendAircraftConsensus(it.map{acrwt -> acrwt.toConsensusDataList()}.flatten())){
-                    aircraftRepository.saveAcrwtData(it.map{acrwt -> acrwt.copy(knownToServer = true, serializedPreviousType = ByteArray(0))})
+            if (Preferences.consensusOptIn) {
+                aircraftRepository.getAcrwtData().filter { !it.knownToServer }.nullIfEmpty()?.let {
+                    if (Cloud.sendAircraftConsensus(it.map { acrwt -> acrwt.toConsensusDataList() }.flatten())) {
+                        aircraftRepository.saveAcrwtData(it.map { acrwt -> acrwt.copy(knownToServer = true, serializedPreviousType = ByteArray(0)) })
+                    }
                 }
             }
         }
 
+        /**
+         * Receive complete consensus DB from server (if optIn)
+         */
         val receiveConsensus = launch{
-            Cloud.getConsensus()?.let{
-                aircraftRepository.replaceConsensusData(it)
+            if (Preferences.consensusOptIn) {
+                Cloud.getConsensus()?.let {
+                    aircraftRepository.replaceConsensusData(it)
+                }
             }
         }
 

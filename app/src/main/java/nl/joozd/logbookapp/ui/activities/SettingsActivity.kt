@@ -149,6 +149,10 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.setUseIataAirports(isChecked)
             }
 
+            settingsUseConsensusOptIn.setOnCheckedChangeListener { _, isChecked ->
+                viewModel.setConsensusOptIn(isChecked)
+            }
+
             settingsGetFlightsFromCalendarSelector.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.setGetFlightsFromCalendar(isChecked)
             }
@@ -231,6 +235,11 @@ class SettingsActivity : JoozdlogActivity() {
             }
             viewModel.useIataAirports.observe(activity) {
                 settingsUseIataSelector.isChecked = it
+            }
+
+            viewModel.consensusOptIn.observe(activity){
+                settingsUseConsensusOptIn.isChecked = it
+                consensusDescription.visibility = if (it) View.VISIBLE else View.GONE
             }
 
             viewModel.getFlightsFromCalendar.observe(activity) {

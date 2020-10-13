@@ -59,6 +59,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     private val calendarScraper = CalendarScraper(context)
 
+    private val _consensusOptIn = MutableLiveData(Preferences.consensusOptIn)
     private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
     private val _getFlightsFromCalendar = MutableLiveData(Preferences.getFlightsFromCalendar)
     private val _useCloudSync = MutableLiveData(Preferences.useCloud)
@@ -114,6 +115,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
             Preferences::backupInterval.name -> _backupInterval.value = Preferences.backupInterval
 
+            Preferences::consensusOptIn.name -> _consensusOptIn.value = Preferences.consensusOptIn
+
 
 
 
@@ -133,6 +136,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
      *********************************************************************************************/
 
     val useIataAirports = distinctUntilChanged(_useIataAirports)
+
+    val consensusOptIn: LiveData<Boolean>
+        get() = _consensusOptIn
 
     val getFlightsFromCalendar = distinctUntilChanged(_getFlightsFromCalendar)
 
@@ -193,6 +199,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     fun setUseIataAirports(useIata: Boolean) {
         Preferences.useIataAirports = useIata
+    }
+
+    fun setConsensusOptIn(optIn: Boolean){
+        Preferences.consensusOptIn = optIn
     }
 
     fun setGetFlightsFromCalendar(it: Boolean) {

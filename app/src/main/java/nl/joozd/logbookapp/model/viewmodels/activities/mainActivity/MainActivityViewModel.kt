@@ -35,6 +35,7 @@ import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.*
+// import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
@@ -228,7 +229,8 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
      * Exposed vals
      */
 
-    val daysSinceLastBackup: String = (minOf((Instant.now() - Instant.ofEpochSecond(Preferences.mostRecentBackup)).toDays(), 999L).toString())
+    // SHows how many days you have not backed up. Days are counted at midnight local time.
+    val daysSinceLastBackup: String = (minOf((Instant.now() - Instant.ofEpochSecond(Preferences.mostRecentBackup).atStartOfDay((OffsetDateTime.now().offset))).toDays(), 999L).toString())
 
 
     /*********************************************************************************************
@@ -301,7 +303,6 @@ else{
         CoroutineTimerTask(Instant.now().atEndOfDay(OffsetDateTime.now().offset)).run(viewModelScope + Dispatchers.Main){
             _showBackupNotice.value = backupDialogShouldBeShown()
         }
-
     }
 
     fun backUpNow() = viewModelScope.launch {

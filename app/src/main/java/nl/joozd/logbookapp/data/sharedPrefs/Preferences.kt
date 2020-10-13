@@ -132,6 +132,11 @@ object Preferences {
     var useIataAirports: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
     /**
+     * Opt-in for Aircraft Type Consensus
+     */
+    var consensusOptIn: Boolean by JoozdLogSharedPrefs(sharedPref, true)
+
+    /**
      * Get planned flights from calendar?
      */
     var getFlightsFromCalendar: Boolean by JoozdLogSharedPrefs(sharedPref, false)

@@ -21,9 +21,16 @@ package nl.joozd.logbookapp.data.sharedPrefs
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import androidx.lifecycle.MutableLiveData
 import kotlin.reflect.KProperty
 
-class  JoozdLogSharedPrefs<T>(private val sharedPrefs: SharedPreferences, private val defaultValue: T){
+/**
+ * Use a var as a SharedPreference.
+ * @param sharedPrefs: SharedPreferences to use
+ * @param defaultValue: Default value to return. Needs to be used to set type of variable to set
+ * @param liveData: LiveData to update with this
+ */
+class JoozdLogSharedPrefs<T>(private val sharedPrefs: SharedPreferences, private val defaultValue: T, private val liveData: MutableLiveData<T>? = null){
 
 
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
@@ -32,6 +39,7 @@ class  JoozdLogSharedPrefs<T>(private val sharedPrefs: SharedPreferences, privat
 
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         setPreference(property.name, value)
+        liveData?.postValue(value)
     }
 
     private fun getPreference(key: String, defaultValue: T): T {

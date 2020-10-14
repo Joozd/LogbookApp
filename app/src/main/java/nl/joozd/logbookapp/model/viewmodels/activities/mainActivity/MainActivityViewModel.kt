@@ -23,9 +23,11 @@ package nl.joozd.logbookapp.model.viewmodels.activities.mainActivity
 
 import android.content.Intent
 import android.content.Intent.ACTION_VIEW
+import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -60,7 +62,14 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     private val flightsList
         get() = searchFlights(rawFlights).map { DisplayFlight.of(it, icaoIataMap, Preferences.useIataAirports) }.also { setSearchFieldHint(it.size) }
 
-    private val _showBackupNotice = MutableLiveData(backupDialogShouldBeShown())
+    private val _backupInterval: LiveData<Int> = Preferences.backupIntervalLiveData
+
+    private val _showBackupNotice = MediatorLiveData<Boolean>().apply{
+        value = backupDialogShouldBeShown()
+        addSource(_backupInterval){
+            value = backupDialogShouldBeShown()
+        }
+    }
 
     private val _backupUri = MutableLiveData<Uri>()
 
@@ -197,6 +206,9 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     val displayFlightsList: LiveData<List<DisplayFlight>>
         get() = _displayFlightsList2
+
+    val picNameNeedsToBeSet: LiveData<Boolean>
+        get() = distinctUntilChanged(Preferences.picNameNeedsToBeSetLiveData)
 
     val searchFieldHint
         get() = _searchFieldHint

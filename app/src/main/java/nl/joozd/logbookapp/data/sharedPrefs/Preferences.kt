@@ -23,6 +23,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.dataclasses.SupportedCalendarTypes
@@ -112,7 +114,14 @@ object Preferences {
 
     var aircraftForcedVersion: Int by JoozdLogSharedPrefs(sharedPref, 0)
 
-    var backupInterval: Int by JoozdLogSharedPrefs(sharedPref, 0)
+    /**
+     * Amount of days that need to have passed for a notice to be shown
+     */
+    @Suppress("ObjectPropertyName")
+    private val _backupInterval = MutableLiveData<Int>()
+    val backupIntervalLiveData: LiveData<Int>
+        get() = _backupInterval
+    var backupInterval: Int by JoozdLogSharedPrefs(sharedPref, 0, _backupInterval)
 
     //Instant epochseconds of most recent backup
     var mostRecentBackup: Long by JoozdLogSharedPrefs(sharedPref, 0L)
@@ -134,7 +143,20 @@ object Preferences {
     /**
      * Opt-in for Aircraft Type Consensus
      */
-    var consensusOptIn: Boolean by JoozdLogSharedPrefs(sharedPref, true)
+    @Suppress("ObjectPropertyName")
+    private val _consensusOptIn = MutableLiveData<Boolean>()
+    val consensusOptInLiveData: LiveData<Boolean>
+        get() = _consensusOptIn
+    var consensusOptIn: Boolean by JoozdLogSharedPrefs(sharedPref, true, _consensusOptIn)
+
+    /**
+     * If true, if PIC name is not set, flight will be marked incomplete (red)
+     */
+    @Suppress("ObjectPropertyName")
+    private val _picNameNeedsToBeSet = MutableLiveData<Boolean>()
+    val picNameNeedsToBeSetLiveData: LiveData<Boolean>
+        get() = _picNameNeedsToBeSet
+    var picNameNeedsToBeSet: Boolean by JoozdLogSharedPrefs(sharedPref, true, _picNameNeedsToBeSet)
 
     /**
      * Get planned flights from calendar?

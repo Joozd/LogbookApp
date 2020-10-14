@@ -60,6 +60,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val calendarScraper = CalendarScraper(context)
 
     private val _consensusOptIn = MutableLiveData(Preferences.consensusOptIn)
+    private val _picNameNeedsToBeSet = MutableLiveData(Preferences.picNameNeedsToBeSet)
     private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
     private val _getFlightsFromCalendar = MutableLiveData(Preferences.getFlightsFromCalendar)
     private val _useCloudSync = MutableLiveData(Preferences.useCloud)
@@ -117,6 +118,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
             Preferences::consensusOptIn.name -> _consensusOptIn.value = Preferences.consensusOptIn
 
+            Preferences::picNameNeedsToBeSet.name -> _picNameNeedsToBeSet.value = Preferences.picNameNeedsToBeSet
+
 
 
 
@@ -139,6 +142,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val consensusOptIn: LiveData<Boolean>
         get() = _consensusOptIn
+
+    val picNameNeedsToBeSet: LiveData<Boolean>
+        get() = _picNameNeedsToBeSet
 
     val getFlightsFromCalendar = distinctUntilChanged(_getFlightsFromCalendar)
 
@@ -203,6 +209,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     fun setConsensusOptIn(optIn: Boolean){
         Preferences.consensusOptIn = optIn
+    }
+
+    fun setMarkIncompleteWithoutPIC(it: Boolean){
+        Preferences.picNameNeedsToBeSet = it
     }
 
     fun setGetFlightsFromCalendar(it: Boolean) {

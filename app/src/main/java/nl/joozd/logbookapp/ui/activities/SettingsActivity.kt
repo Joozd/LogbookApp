@@ -153,6 +153,11 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.setConsensusOptIn(isChecked)
             }
 
+            settingsMarkInclompleteWithoutPicSwitch.setOnCheckedChangeListener { _, isChecked ->
+                viewModel.setMarkIncompleteWithoutPIC(isChecked)
+            }
+
+
             settingsGetFlightsFromCalendarSelector.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.setGetFlightsFromCalendar(isChecked)
             }
@@ -240,6 +245,11 @@ class SettingsActivity : JoozdlogActivity() {
             viewModel.consensusOptIn.observe(activity){
                 settingsUseConsensusOptIn.isChecked = it
                 consensusDescription.visibility = if (it) View.VISIBLE else View.GONE
+            }
+
+            viewModel.picNameNeedsToBeSet.observe(activity){
+                settingsMarkInclompleteWithoutPicSwitch.isChecked = it
+                markInclompleteWithoutPicText.visibility = if (it) View.VISIBLE else View.GONE
             }
 
             viewModel.getFlightsFromCalendar.observe(activity) {

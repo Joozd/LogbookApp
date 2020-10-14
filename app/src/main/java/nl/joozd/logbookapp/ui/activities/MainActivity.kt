@@ -209,6 +209,13 @@ class MainActivity : JoozdlogActivity() {
                 backupReminderLayout.visibility = if (it) View.VISIBLE else View.GONE
             }
 
+            /**
+             * Redraw flights list when requirements for PIC name being filled changes
+             */
+            viewModel.picNameNeedsToBeSet.observe(activity){
+                flightsAdapter.notifyDataSetChanged()
+            }
+
             viewModel.backupUri.observe(activity){
                 startActivity(Intent.createChooser(Intent().apply{
                     action = Intent.ACTION_SEND

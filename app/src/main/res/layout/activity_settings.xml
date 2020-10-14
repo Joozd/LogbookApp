@@ -143,13 +143,37 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/consensus_dscription"
+                android:text="@string/consensus_description"
                 android:textColor="?attr/android:textColorTertiary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/settingsUseConsensusOptIn" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/settingsMarkInclompleteWithoutPicSwitch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:padding="16dp"
+                android:text="@string/mark_incomplete_without_pic"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/consensusDescription" />
+            <TextView
+                android:id="@+id/markInclompleteWithoutPicText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/mark_incomplete_without_pic_description"
+                android:textColor="?attr/android:textColorTertiary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/settingsMarkInclompleteWithoutPicSwitch" />
 
             <View
                 android:id="@+id/lineBetweenLoggingBackup"
@@ -159,7 +183,7 @@
                 android:background="#c0c0c0"
                 app:layout_constraintEnd_toEndOf="@+id/settingsUseIataSelector"
                 app:layout_constraintStart_toStartOf="@+id/settingsUseIataSelector"
-                app:layout_constraintTop_toBottomOf="@+id/consensusDescription" />
+                app:layout_constraintTop_toBottomOf="@+id/markInclompleteWithoutPicText" />
 
             <TextView
                 android:id="@+id/backupPreferencesTitleTextView"
@@ -168,7 +192,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/loggings_preferences"
+                android:text="@string/backup_preferences"
                 android:textColor="?attr/android:textColor"
                 android:textSize="20sp"
                 android:textStyle="bold"

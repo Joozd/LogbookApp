@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.model.dataclasses
 
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.toMonthYear
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
@@ -59,7 +60,7 @@ data class DisplayFlight(
     /**
      * Returns false if any of the checked data points is not filled
      */
-    fun checkIfIncomplete(checkNames: Boolean = true): Boolean =
+    fun checkIfIncomplete(checkNames: Boolean = Preferences.picNameNeedsToBeSet): Boolean =
         orig.isBlank()
                 || dest.isBlank()
                 || type.isBlank()

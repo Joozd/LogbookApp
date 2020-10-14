@@ -266,7 +266,9 @@
     <string name="monthly_overview_explanation">Monthly Overviews import supported for selected carriers (currently only KLC) only. Just share your PDF with Joozdlog.</string>
     <string name="loggings_prefs_description">General preferences pertaining to (automatic) logging and times.</string>
     <string name="use_consensus_data">Use Aircraft Consensus Data</string>
-    <string name="consensus_dscription">JoozdLog Cloud collects (anonymous) Aircraft Registration and type data so you don\'t have to enter aircraft types that somebody else already entered. Typical collected data would be \"4 users said PH-XXX is a Cessna 172\". Switching this off will stop sending and receiving this data.</string>
+    <string name="consensus_description">JoozdLog Cloud collects (anonymous) Aircraft Registration and type data so you don\'t have to enter aircraft types that somebody else already entered. Typical collected data would be \"4 users said PH-XXX is a Cessna 172\". Switching this off will stop sending and receiving this data.</string>
+    <string name="mark_incomplete_without_pic">Name needs to be set</string>
+    <string name="mark_incomplete_without_pic_description">If no names are set on a completed flight, flight will be marked as incomplete</string>
     <string name="signed_in_as"><![CDATA[<b>Signed in as</b><br><small>%1$s</small>&nbsp;]]></string>
     <string name="not_signed_in">Not signed in</string>
     <string name="standard_augmented_time"><![CDATA[<b>Augmented Crew takeoff/landing time</b><br><small>%1$s minutes</small>&nbsp;]]></string>
@@ -283,6 +285,7 @@
     <string name="change_password_explanation">You can use this screen to change your password when you are logged in. Just enter the new password twice and you are good to go.</string>
     <string name="new_password">New Password</string>
     <string name="loggings_preferences">Logging Preferences</string>
+    <string name="backup_preferences">Backup Preferences</string>
 
     <string name = "fake_hidden_password">••••••••••</string>
     <string name="backup_message_main_activity">You have not backed up your logbook for %1$s days.</string>

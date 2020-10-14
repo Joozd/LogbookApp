@@ -30,7 +30,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityCreateNewUserBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.CreateNewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.CreateNewUserActivityViewModel
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast
@@ -56,8 +56,6 @@ class CreateNewUserActivity : JoozdlogActivity() {
 
             // Restore texts from savedInstanceState, eg. on rotate or app switch
             userNameEditText.setTextIfNotNull(viewModel.userNameState)
-            passwordEditText.setTextIfNotNull(viewModel.password1State)
-            repeatPasswordEditText.setTextIfNotNull(viewModel.password2State)
 
             /*******************************************************************************************
              * EditText onFocusChanged and onTextChanged
@@ -74,12 +72,6 @@ class CreateNewUserActivity : JoozdlogActivity() {
 
             userNameEditText.onTextChanged {
                 usernameTextInputLayout.error = ""
-            }
-            passwordEditText.onTextChanged {
-                passwordTextInputLayout.error = null
-            }
-            repeatPasswordEditText.onTextChanged {
-                repeatPasswordTextInputLayout.error = ""
             }
 
             /*******************************************************************************************
@@ -100,58 +92,45 @@ class CreateNewUserActivity : JoozdlogActivity() {
             signUpButton.setOnClickListener {
                 if (Preferences.acceptedCloudSyncTerms)
                     JoozdlogAlertDialog(activity).show {
-                        messageResource = nl.joozd.logbookapp.R.string.cannot_restore_password
+                        messageResource = R.string.cannot_restore_password
                         setPositiveButton(android.R.string.ok){
-                            viewModel.signUpClicked(userNameEditText.text.toString(), passwordEditText.text.toString(), repeatPasswordEditText.text.toString())
+                            viewModel.signUpClicked(userNameEditText.text.toString())
                         }
-                        setNegativeButton(nl.joozd.logbookapp.R.string.already_forgot)
                     }
                 else {
                     JoozdlogAlertDialog(activity).show {
-                        messageResource = nl.joozd.logbookapp.R.string.must_accept_terms
+                        messageResource = R.string.must_accept_terms
                         setPositiveButton(android.R.string.ok)
                     }
                 }
             }
 
-            passwordRequirementsText.setOnClickListener {
-                showPasswordRequirements()
-            }
-
-
             /*******************************************************************************************
              * Observers:
              *******************************************************************************************/
 
-            viewModel.acceptedTerms.observe(activity, Observer {
+            viewModel.acceptedTerms.observe(activity) {
                 tcCheckbox.isChecked = it
-            })
+            }
 
             /*******************************************************************************************
              * Viewmodel feedback
              *******************************************************************************************/
 
-            viewModel.feedbackEvent.observe(activity, Observer {
+            viewModel.feedbackEvent.observe(activity) {
                 Log.d("Event!", "${it.type}")
                 when(it.getEvent()){
-                    FeedbackEvents.NewUserActivityEvents.NOT_IMPLEMENTED -> { toast("Not implemented!")}
-                    FeedbackEvents.NewUserActivityEvents.USER_EXISTS_PASSWORD_INCORRECT -> showUserExistsError(this)
-                    FeedbackEvents.NewUserActivityEvents.USER_EXISTS_PASSWORD_CORRECT -> showUserExistsPasswordCorrect(this)
-                    FeedbackEvents.NewUserActivityEvents.PASSWORDS_DO_NOT_MATCH -> showPasswordsDoNotMatchError(this)
-                    FeedbackEvents.NewUserActivityEvents.PASSWORD_DOES_NOT_MEET_STANDARDS -> showPasswordDoesNotMeetStandardsError(this)
-                    FeedbackEvents.NewUserActivityEvents.PASSWORD_TOO_SHORT -> {
-                        showPasswordCannotBeEmptyError(this)
-                    }
-                    FeedbackEvents.NewUserActivityEvents.USERNAME_TOO_SHORT -> showUsernameCannotBeEmptyError(this)
-                    FeedbackEvents.NewUserActivityEvents.NO_INTERNET -> showCreateAccountNoInternetError(this)
-                    FeedbackEvents.NewUserActivityEvents.WAITING_FOR_SERVER -> this.setWaitingForServerLayout()
-                    FeedbackEvents.NewUserActivityEvents.SERVER_NOT_RESPONDING -> {
+                    CreateNewUserActivityEvents.USER_EXISTS -> showUserExistsError()
+                    CreateNewUserActivityEvents.USERNAME_TOO_SHORT -> showUsernameCannotBeEmptyError()
+                    CreateNewUserActivityEvents.NO_INTERNET -> showCreateAccountNoInternetError()
+                    CreateNewUserActivityEvents.WAITING_FOR_SERVER -> this.setWaitingForServerLayout()
+                    CreateNewUserActivityEvents.SERVER_NOT_RESPONDING -> {
                         setNotWaitingForServerLayout()
                         showCreateAccountServerError()
                     }
-                    FeedbackEvents.NewUserActivityEvents.FINISHED -> finish()
+                    CreateNewUserActivityEvents.FINISHED -> finish()
                 }
-            })
+            }
 
 
             setContentView(root)
@@ -168,16 +147,6 @@ class CreateNewUserActivity : JoozdlogActivity() {
      * Functions showing AlertDialogs
      *******************************************************************************************/
 
-    /**
-     * Show password requirements. At this moment just a static string. TODO Maybe generate something from the function that checks it? Or is that just too much fuzz?
-     */
-    private fun showPasswordRequirements() = JoozdlogAlertDialog(activity).show {
-        titleResource = R.string.pass_requirements
-        messageResource = R.string.password_requirements
-        setPositiveButton(android.R.string.ok)
-    }
-
-
     private fun showCreateAccountServerError() =
         JoozdlogAlertDialog(activity).apply {
             titleResource = R.string.no_internet
@@ -188,7 +157,7 @@ class CreateNewUserActivity : JoozdlogActivity() {
             }
         }.show()
 
-    private fun showCreateAccountNoInternetError(binding: ActivityCreateNewUserBinding ) =
+    private fun ActivityCreateNewUserBinding.showCreateAccountNoInternetError() =
         JoozdlogAlertDialog(activity).show {
             titleResource = R.string.no_internet
             messageResource = R.string.no_internet_create_account
@@ -197,35 +166,20 @@ class CreateNewUserActivity : JoozdlogActivity() {
                 finish()
             }
             setNegativeButton(R.string.retry){
-                binding.run{
-                    viewModel.signUpClicked(userNameEditText.text.toString(), passwordEditText.text.toString(), repeatPasswordEditText.text.toString())
+                run{
+                    viewModel.signUpClicked(userNameEditText.text.toString())
                 }
             }
             setNeutralButton(android.R.string.cancel) {}
         }
 
-    private fun showPasswordCannotBeEmptyError(binding: ActivityCreateNewUserBinding) {
-        binding.passwordTextInputLayout.error = activity.getString(R.string.password_cannot_be_empty)
-        binding.passwordEditText.requestFocus()
+
+    private fun ActivityCreateNewUserBinding.showUsernameCannotBeEmptyError() {
+        usernameTextInputLayout.error = activity.getString(R.string.username_cannot_be_empty)
+        userNameEditText.requestFocus()
     }
 
-
-    private fun showUsernameCannotBeEmptyError(binding: ActivityCreateNewUserBinding) {
-        binding.usernameTextInputLayout.error = activity.getString(R.string.username_cannot_be_empty)
-        binding.userNameEditText.requestFocus()
-    }
-
-    private fun showPasswordsDoNotMatchError(binding: ActivityCreateNewUserBinding){
-        binding.repeatPasswordTextInputLayout.error = activity.getString(R.string.passwords_do_not_match)
-        binding.userNameEditText.requestFocus()
-    }
-
-    private fun showPasswordDoesNotMeetStandardsError(binding: ActivityCreateNewUserBinding){
-        binding.passwordTextInputLayout.error = activity.getString(R.string.password_does_not_meet_standards)
-        binding.passwordEditText.requestFocus()
-    }
-
-    private fun showUserExistsError(binding: ActivityCreateNewUserBinding) = with (binding) {
+    private fun ActivityCreateNewUserBinding.showUserExistsError(){
         userNameEditText.setText("")
         userNameEditText.requestFocus()
         usernameTextInputLayout.error = getString(R.string.username_already_taken)
@@ -240,16 +194,6 @@ class CreateNewUserActivity : JoozdlogActivity() {
 
          */
 
-    private fun showUserExistsPasswordCorrect(binding: ActivityCreateNewUserBinding) =
-        JoozdlogAlertDialog(activity).show {
-            titleResource = R.string.user_exists_password_correct
-            setPositiveButton(R.string.use_this) {
-                finish()
-            }
-            setNegativeButton(android.R.string.cancel){
-                viewModel.signOut()
-            }
-        }
 
 
     /*******************************************************************************************

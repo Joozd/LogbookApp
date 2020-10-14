@@ -86,12 +86,6 @@ class LoginActivity : JoozdlogActivity(){
              * OnClickedListeners
              *******************************************************************************************/
 
-            singInButton.setOnClickListener {
-                viewModel.signIn(
-                    usernameEditText.text.toString(),
-                    passwordEditText.text.toString()
-                )
-            }
 
             forgotPasswordTextView.setOnClickListener {
                 showYouAreAnIdiotDialog()

@@ -28,7 +28,7 @@ import kotlin.reflect.KProperty
  * Use a var as a SharedPreference.
  * @param sharedPrefs: SharedPreferences to use
  * @param defaultValue: Default value to return. Needs to be used to set type of variable to set
- * @param liveData: LiveData to update with this
+ * @param liveData: LiveData to update with this. NOTE: Won't start emitting until data has been changed.
  */
 class JoozdLogSharedPrefs<T>(private val sharedPrefs: SharedPreferences, private val defaultValue: T, private val liveData: MutableLiveData<T>? = null){
 

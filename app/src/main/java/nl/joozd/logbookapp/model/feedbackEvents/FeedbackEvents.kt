@@ -88,11 +88,7 @@ object FeedbackEvents {
     }
 
     enum class CreateNewUserActivityEvents: Event{
-        USER_EXISTS_PASSWORD_INCORRECT,
-        USER_EXISTS_PASSWORD_CORRECT,
-        PASSWORDS_DO_NOT_MATCH,
-        PASSWORD_DOES_NOT_MEET_STANDARDS,
-        PASSWORD_TOO_SHORT, // ie. empty password provided
+        USER_EXISTS,
         USERNAME_TOO_SHORT, // ie. empty username provided
         NO_INTERNET,
         WAITING_FOR_SERVER,
@@ -119,7 +115,7 @@ object FeedbackEvents {
         NOT_IMPLEMENTED,
         SHOW_SIGN_IN_DIALOG,
         LOGGED_IN_AS, // as Preferences.username
-        USER_EXISTS_PASSWORD_INCORRECT,
+        USER_EXISTS,
         USER_EXISTS_PASSWORD_CORRECT,
         PASSWORDS_DO_NOT_MATCH,
         PASSWORD_DOES_NOT_MEET_STANDARDS,

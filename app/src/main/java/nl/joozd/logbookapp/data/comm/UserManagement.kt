@@ -26,6 +26,9 @@ object UserManagement {
     val signedIn: Boolean
         get() = Preferences.username != null
 
+    val username
+        get() = Preferences.username
+
     // This is used to check if loginActivity got returned to after a new user was just
     // successfully created and it can close right away
     var justCreatedNewUser: Boolean = false
@@ -61,7 +64,6 @@ object UserManagement {
             null -> ReturnCodes.CONNECTION_ERROR
         }
     }
-
 
 
     /**
@@ -102,9 +104,6 @@ object UserManagement {
     fun gerenateLoginLink(): String? = Preferences.username?.let {
         "https://joozdlog.joozd.nl/inject-key/$it:${Preferences.password}"
     }
-
-
-
 
     object ReturnCodes {
         const val SUCCESS = 0

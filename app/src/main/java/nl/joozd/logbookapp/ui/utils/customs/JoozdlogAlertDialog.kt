@@ -38,7 +38,7 @@ import androidx.fragment.app.FragmentActivity
  * Same goes for [message] / [messageResource]
  * [setPositiveButton] / [setNegativeButton] / [setNeutralButton] for buttons
  */
-class JoozdlogAlertDialog(private val ctx: FragmentActivity): DialogFragment() {
+class JoozdlogAlertDialog(val ctx: FragmentActivity): DialogFragment() {
     private var builder = AlertDialog.Builder(ctx)
     private var attachedActivity: FragmentActivity? = null
 
@@ -114,7 +114,7 @@ class JoozdlogAlertDialog(private val ctx: FragmentActivity): DialogFragment() {
         }
         builder.setNeutralButton(text, listener?.let{DialogInterface.OnClickListener(listener)})
     }
-    fun show(tag: String = "bla", block: JoozdlogAlertDialog.() -> Unit = {}): JoozdlogAlertDialog {
+    inline fun show(tag: String = "bla", block: JoozdlogAlertDialog.() -> Unit = {}): JoozdlogAlertDialog {
         block()
         show(ctx.supportFragmentManager, tag)
         return this

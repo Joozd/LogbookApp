@@ -41,7 +41,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.utils.checkPasswordSafety
+import nl.joozd.logbookapp.utils.generatePassword
 
 class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     /*******************************************************************************************
@@ -158,35 +158,31 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     //TODO document this
     // TODO finish this in Fragment
     // TODO needs a way to handle time when server is busy (in Fragment)
-    fun signUpClicked(username: String, pass1: String, pass2: String){
-        Log.d("signUpClicked", "user: $username, pass1: $pass1, pass2: $pass2")
-        Preferences.useCloud = true
-        when{
-            internetAvailable.value != true -> feedback(NewUserActivityEvents.NO_INTERNET, _page2Feedback)
-            pass1.isBlank() -> feedback(NewUserActivityEvents.PASSWORD_TOO_SHORT, _page2Feedback)
-            username.isBlank() -> feedback(NewUserActivityEvents.USERNAME_TOO_SHORT, _page2Feedback)
-            pass1 != pass2 -> feedback(NewUserActivityEvents.PASSWORDS_DO_NOT_MATCH, _page2Feedback)
-            !checkPasswordSafety(pass1) -> feedback(NewUserActivityEvents.PASSWORD_DOES_NOT_MEET_STANDARDS, _page2Feedback)
-            else -> { // passwords match, are good enough, username not empty and internet looks OK
-                feedback(NewUserActivityEvents.WAITING_FOR_SERVER, _page2Feedback)
-                viewModelScope.launch{
-                    when(UserManagement.createNewUser(username, pass1)){
-                        true -> feedback(NewUserActivityEvents.LOGGED_IN_AS, _page2Feedback)
-                        null -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
-                        false -> { // username taken, check to see if password correct
-                            when(UserManagement.login(username, pass1)){
-                                true -> feedback(NewUserActivityEvents.USER_EXISTS_PASSWORD_CORRECT, _page2Feedback)
-                                false -> feedback(NewUserActivityEvents.USER_EXISTS_PASSWORD_INCORRECT, _page2Feedback)
-                                null -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
-                            }
+    fun signUpClicked(usernameEditable: Editable?) {
+        usernameEditable?.toString()?.let { username ->
+            Log.d("signUpClicked", "user: $username")
+            Preferences.useCloud = true
+            when {
+                internetAvailable.value != true -> feedback(NewUserActivityEvents.NO_INTERNET, _page2Feedback)
+                username.isBlank() -> feedback(NewUserActivityEvents.USERNAME_TOO_SHORT, _page2Feedback)
+                else -> { // username not empty and internet looks OK
+                    feedback(NewUserActivityEvents.WAITING_FOR_SERVER, _page2Feedback)
+                    viewModelScope.launch {
+                        val pass1 = generatePassword(16)
+                        when (UserManagement.createNewUser(username, pass1)) {
+                            true -> feedback(NewUserActivityEvents.LOGGED_IN_AS, _page2Feedback)
+                            null -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
+                            false -> feedback(NewUserActivityEvents.USER_EXISTS, _page2Feedback)
                         }
                     }
                 }
             }
         }
-
-
     }
+
+
+
+
 
     fun dontUseCloud(){
         Preferences.useCloud = false
@@ -240,8 +236,6 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
 
     //page 2 editTexts
     var userNameState: Editable? = null
-    var password1State: Editable? = null
-    var password2State: Editable? = null
 
     var openPagesState: Int = INITIAL_OPEN_PAGES
     var lastOpenPageState: Int? = null

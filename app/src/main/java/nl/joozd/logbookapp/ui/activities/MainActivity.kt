@@ -52,6 +52,7 @@ import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogProgressBar
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.time.Instant
 
 
@@ -225,10 +226,14 @@ class MainActivity : JoozdlogActivity() {
                 }, "Gooi maar ergens heen aub"))
             }
 
+            /**
+             * Checks for bad login data
+             */
             viewModel.notLoggedIn.observe(activity) {
                 if (it && Preferences.useCloud){
                     showLoginDialog()
                 }
+                else hideLoginDialog()
             }
 
             viewModel.displayFlightsList.observe(activity,){ fff ->
@@ -344,7 +349,14 @@ class MainActivity : JoozdlogActivity() {
 
     override fun onResume() {
         super.onResume()
+         //Checks or no airport DB downloaded
+        if (Preferences.airportDbVersion == 0) JoozdlogWorkersHub.getAirportsFromServer()
+
+         // Checks for no aircraft types downloaded
+        if (Preferences.aircraftTypesVersion == 0) JoozdlogWorkersHub.getAircraftTypes()
+
         // show New User activity if that hasn't been finished yet
+
         if (!Preferences.newUserActivityFinished)
             startActivity(Intent(this, NewUserActivity::class.java))
         viewModel.notifyActivityResumed()
@@ -388,10 +400,19 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
+    //TODO make this something else. Password is no longer known to users.
     private fun showLoginDialog(){
         supportFragmentManager.commit{
-            add(R.id.mainActivityLayout, LoginDialog())
+            add(R.id.mainActivityLayout, LoginDialog(), LOGIN_DIALOG_TAG)
             addToBackStack(null)
+        }
+    }
+
+    private fun hideLoginDialog(){
+        supportFragmentManager.findFragmentByTag(LOGIN_DIALOG_TAG)?.let {
+            supportFragmentManager.commit {
+                remove(it)
+            }
         }
     }
 
@@ -517,6 +538,9 @@ class MainActivity : JoozdlogActivity() {
         const val TAG = "MainActivity"
         const val EDIT_FLIGHT_TAG = "EDIT_FLIGHT_TAG"
         const val PLANNED_FLIGHTS_IN_SIGHT = 3
+
+        const val LOGIN_DIALOG_TAG = "LOGIN_DIALOG"
+
         private const val CSV_MIME_TYPE = "text/csv"
 
     }

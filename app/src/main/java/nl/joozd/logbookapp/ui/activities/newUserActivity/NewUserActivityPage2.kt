@@ -29,7 +29,9 @@ import android.widget.EditText
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
+import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityNewUserPage2Binding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
@@ -51,24 +53,14 @@ class NewUserActivityPage2: JoozdlogFragment() {
     private var mBinding: ActivityNewUserPage2Binding? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val binding = ActivityNewUserPage2Binding.bind(inflater.inflate(R.layout.activity_new_user_page_2, container, false))
-        mBinding = binding
+        val binding = ActivityNewUserPage2Binding.bind(inflater.inflate(R.layout.activity_new_user_page_2, container, false)).apply {
 
-
-        // Restore texts from savedInstanceState, eg. on rotate or app switch
-        binding.apply{
+            // Restore texts from savedInstanceState, eg. on rotate or app switch
             userNameEditText.setTextIfNotNull(viewModel.userNameState)
-            passwordEditText.setTextIfNotNull(viewModel.password1State)
-            repeatPasswordEditText.setTextIfNotNull(viewModel.password2State)
-        }
+            /*******************************************************************************************
+             * EditText onFocusChanged and onTextChanged
+             *******************************************************************************************/
 
-
-
-        /*******************************************************************************************
-         * EditText onFocusChanged and onTextChanged
-         *******************************************************************************************/
-
-        with(binding){
             userNameEditText.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) userNameEditText.setText(userNameEditText.text.toString().toLowerCase(Locale.ROOT))
             }
@@ -76,21 +68,11 @@ class NewUserActivityPage2: JoozdlogFragment() {
             userNameEditText.onTextChanged {
                 usernameTextInputLayout.error = ""
             }
-            passwordEditText.onTextChanged {
-                passwordTextInputLayout.error = null
-            }
-            repeatPasswordEditText.onTextChanged {
-                repeatPasswordTextInputLayout.error = ""
-            }
-        }
 
-        /*******************************************************************************************
-         * OnClickedListeners
-         *******************************************************************************************/
-        with(binding) {
-            signInTextView.setOnClickListener {
-                viewModel.signInClicked()
-            }
+
+            /*******************************************************************************************
+             * OnClickedListeners
+             *******************************************************************************************/
 
             signOutTextView.setOnClickListener {
                 viewModel.signOutClicked()
@@ -118,13 +100,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
 
             signUpButton.setOnClickListener {
                 if (Preferences.acceptedCloudSyncTerms)
-                    JoozdlogAlertDialog(requireActivity()).show {
-                        messageResource = R.string.cannot_restore_password
-                        setPositiveButton(android.R.string.ok){
-                            viewModel.signUpClicked(userNameEditText.text.toString(), passwordEditText.text.toString(), repeatPasswordEditText.text.toString())
-                        }
-                        setNegativeButton(R.string.already_forgot)
-                    }
+                    viewModel.signUpClicked(userNameEditText.text)
                 else {
                     JoozdlogAlertDialog(requireActivity()).show {
                         messageResource = R.string.must_accept_terms
@@ -133,58 +109,52 @@ class NewUserActivityPage2: JoozdlogFragment() {
                 }
             }
 
-            passwordRequirementsText.setOnClickListener {
-                showPasswordRequirements()
+
+            /*******************************************************************************************
+             * Observers:
+             *******************************************************************************************/
+
+            viewModel.username.observe(viewLifecycleOwner) {
+                setLoggedInLayout(it)
             }
-        }
 
-        /*******************************************************************************************
-         * Observers:
-         *******************************************************************************************/
+            viewModel.acceptTerms.observe(viewLifecycleOwner) {
+                tcCheckbox.isChecked = it
+            }
 
-        viewModel.username.observe(viewLifecycleOwner, Observer {
-            binding.setLoggedInLayout(it)
-        })
+            /**
+             * Event observers:
+             */
 
-        viewModel.acceptTerms.observe(viewLifecycleOwner, Observer {
-            binding.tcCheckbox.isChecked = it
-        })
+            // TODO this doesn't work as Activity eats these first, needs a personal feedback livedata
+            viewModel.page2Feedback.observe(viewLifecycleOwner) {
+                Log.d("Event!", "${it.type}, already consumed: ${it.consumed}")
+                when (it.getEvent()) {
+                    NewUserActivityEvents.NOT_IMPLEMENTED -> {
+                        toast("Not implemented!")
+                    }
+                    NewUserActivityEvents.USER_EXISTS -> showUserExistsError()
 
-        /**
-         * Event observers:
-         */
-
-        // TODO this doesn't work as Activity eats these first, needs a personal feedback livedata
-        viewModel.page2Feedback.observe(viewLifecycleOwner) {
-            Log.d("Event!", "${it.type}, already consumed: ${it.consumed}")
-            when(it.getEvent()){
-                NewUserActivityEvents.NOT_IMPLEMENTED -> { toast("Not implemented!")}
-                NewUserActivityEvents.USER_EXISTS_PASSWORD_INCORRECT -> showUserExistsError(binding)
-                NewUserActivityEvents.USER_EXISTS_PASSWORD_CORRECT -> showUserExistsPasswordCorrect(binding)
-                NewUserActivityEvents.PASSWORDS_DO_NOT_MATCH -> showPasswordsDoNotMatchError(binding)
-                NewUserActivityEvents.PASSWORD_DOES_NOT_MEET_STANDARDS -> showPasswordDoesNotMeetStandardsError(binding)
-                NewUserActivityEvents.PASSWORD_TOO_SHORT -> showPasswordCannotBeEmptyError(binding)
-                NewUserActivityEvents.USERNAME_TOO_SHORT -> showUsernameCannotBeEmptyError(binding)
-                NewUserActivityEvents.NO_INTERNET -> showCreateAccountNoInternetError()
-                NewUserActivityEvents.WAITING_FOR_SERVER -> binding.setWaitingForServerLayout()
-                NewUserActivityEvents.SERVER_NOT_RESPONDING -> {
-                    binding.setNotWaitingForServerLayout()
-                    showCreateAccountServerError()
+                    NewUserActivityEvents.USERNAME_TOO_SHORT -> showUsernameCannotBeEmptyError()
+                    NewUserActivityEvents.NO_INTERNET -> showCreateAccountNoInternetError()
+                    NewUserActivityEvents.WAITING_FOR_SERVER -> setWaitingForServerLayout()
+                    NewUserActivityEvents.SERVER_NOT_RESPONDING -> {
+                        setNotWaitingForServerLayout()
+                        showCreateAccountServerError()
+                    }
+                    NewUserActivityEvents.LOGGED_IN_AS -> showPasswordLinkDialog()
+                    NewUserActivityEvents.FINISHED -> viewModel.nextPage(PAGE_NUMBER)
                 }
-                NewUserActivityEvents.LOGGED_IN_AS -> viewModel.nextPage(PAGE_NUMBER)
-                NewUserActivityEvents.FINISHED -> viewModel.nextPage(PAGE_NUMBER)
             }
-        }
 
-        return binding.root
+            return root
+        }
     }
 
     override fun onStop() {
         super.onStop()
         mBinding?.apply {
             viewModel.userNameState = userNameEditText.text
-            viewModel.password1State = passwordEditText.text
-            viewModel.password2State = repeatPasswordEditText.text
         }
     }
 
@@ -194,6 +164,15 @@ class NewUserActivityPage2: JoozdlogFragment() {
     /*******************************************************************************************
      * Functions showing AlertDialogs
      *******************************************************************************************/
+
+    private fun showPasswordLinkDialog() =  JoozdlogAlertDialog(requireActivity()).show {
+
+        title = App.instance.getString(R.string.created_account, UserManagement.username)
+        setPositiveButton(android.R.string.ok) {
+            viewModel.nextPage(PAGE_NUMBER)
+        }
+
+    }
 
     /**
      * Feedback dialogs for when bad data is entered when creating account
@@ -218,58 +197,30 @@ class NewUserActivityPage2: JoozdlogFragment() {
             }
             setNegativeButton(R.string.retry){
                 mBinding?.run{
-                    viewModel.signUpClicked(userNameEditText.text.toString(), passwordEditText.text.toString(), repeatPasswordEditText.text.toString())
+                    viewModel.signUpClicked(userNameEditText.text)
                 }
             }
             setNeutralButton(android.R.string.cancel) {}
         }.show()
 
-    private fun showPasswordCannotBeEmptyError(binding: ActivityNewUserPage2Binding) {
-        binding.passwordTextInputLayout.error = requireActivity().getString(R.string.password_cannot_be_empty)
-        binding.passwordEditText.requestFocus()
+
+    private fun ActivityNewUserPage2Binding.showUsernameCannotBeEmptyError() {
+        usernameTextInputLayout.error = requireActivity().getString(R.string.username_cannot_be_empty)
+        userNameEditText.requestFocus()
     }
 
-
-    private fun showUsernameCannotBeEmptyError(binding: ActivityNewUserPage2Binding) {
-        binding.usernameTextInputLayout.error = requireActivity().getString(R.string.username_cannot_be_empty)
-        binding.userNameEditText.requestFocus()
-    }
-
-    private fun showPasswordsDoNotMatchError(binding: ActivityNewUserPage2Binding){
-        binding.repeatPasswordTextInputLayout.error = requireActivity().getString(R.string.passwords_do_not_match)
-        binding.userNameEditText.requestFocus()
-    }
-
-    private fun showPasswordDoesNotMeetStandardsError(binding: ActivityNewUserPage2Binding){
-        binding.passwordTextInputLayout.error = requireActivity().getString(R.string.password_does_not_meet_standards)
-        binding.passwordEditText.requestFocus()
-    }
-
-    private fun showUserExistsError(binding: ActivityNewUserPage2Binding) =
-        JoozdlogAlertDialog(requireActivity()).apply {
+    private fun showUserExistsError() =
+        JoozdlogAlertDialog(requireActivity()).show {
+            Log.d("XOXOXOXOXOXO", "LALALALALALALALALALALALAHIHIHIHIHIHIJOOOOO")
             titleResource = R.string.username_already_taken
-            setPositiveButton(android.R.string.ok) {
-                //TODO flash username box and place cursor in it
-            }
+            setPositiveButton(android.R.string.ok)
         }
 
-    private fun showUserExistsPasswordCorrect(binding: ActivityNewUserPage2Binding) =
-        JoozdlogAlertDialog(requireActivity()).apply {
-            titleResource = R.string.user_exists_password_correct
-            setPositiveButton(android.R.string.ok) {
-                binding.setLoggedInLayout(Preferences.username)
-            }
-        }
 
 
     /**
      * Other dialogs
      */
-
-    private fun showPasswordRequirements() = JoozdlogAlertDialog(requireActivity()).apply {
-        titleResource = R.string.pass_requirements
-        setPositiveButton(android.R.string.ok)
-    }
 
     /*******************************************************************************************
      * Functions for changing layout
@@ -282,16 +233,11 @@ class NewUserActivityPage2: JoozdlogFragment() {
         val enabled = username != null
 
         userNameEditText.makeEnabled(!enabled)
-        passwordEditText.makeEnabled(!enabled)
-        repeatPasswordEditText.makeEnabled(!enabled)
         signUpButton.makeEnabled(!enabled)
         tcCheckbox.makeEnabled(!enabled)
 
-        alreadyHaveAnAccountFirstPartTextView.visibility = if (enabled) View.GONE else View.VISIBLE
-        signInTextView.visibility =  if (enabled) View.GONE else View.VISIBLE
         dontWantCloudSyncTextView.visibility = if (enabled) View.GONE else View.VISIBLE
         skipThisStepTextView.visibility = if (enabled) View.GONE else View.VISIBLE
-        passwordRequirementsText.visibility = if (enabled) View.GONE else View.VISIBLE
 
         youAreSignedInAsTextView.visibility = if (enabled) View.VISIBLE else View.GONE
         signOutTextView.visibility = if (enabled) View.VISIBLE else View.GONE
@@ -330,7 +276,5 @@ class NewUserActivityPage2: JoozdlogFragment() {
     companion object{
         private const val PAGE_NUMBER = 2
         private const val USERNAME_BUNDLE_KEY = "USERNAME"
-        private const val PASS1_BUNDLE_KEY = "PASS1"
-        private const val PASS2_BUNDLE_KEY = "PASS2"
     }
 }

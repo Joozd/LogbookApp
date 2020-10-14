@@ -151,6 +151,8 @@
     <string name="login_error">Login Error</string>
     <string name="login_error_message">Saved username/password cannot log in to server. Please try to login first</string>
     <string name="waiting_for_server">Waiting for server</string>
+    <string name="created_account">Created account %1$s.</string>
+    <string name="create_login_link_hint">You can created a login link from the settings menu. I stronly suggest you do as it\'s your only way in if you lose your phone!</string>
 
 
     <string name="no_internet_create_account">No internet connection available. You can create and account in the settings screen when you have one, or you can connect to the internet now and retry.</string>
@@ -165,7 +167,7 @@
 
     <string name="password_does_not_meet_standards">Password does not meet standards. It needs a length of at least 6 and at least 2 different characters.</string>
     <string name="password_does_not_meet_standards_short">Password does not meet standards.</string>
-    <string name="username_already_taken">This username is already taken.</string>
+    <string name="username_already_taken">This username is already taken. If this is you, use your login link if you have it, or create a new account.</string>
     <string name="user_exists_password_correct">This username exists, and you have entered the correct password for it. If this is not you, please pick another username and a more secure password.</string>
     <string name ="what_to_do_forgot_password">If your login is still working on this device, you can change it to something you catually can remember via the settings screen, or you can generate a login link.</string>
     <string name="use_this">Use this</string>
@@ -239,12 +241,11 @@
     <string name="dontWantCloudSync">Don\'t want to use cloud sync?</string>
     <string name="create_account">Create new account</string>
     <string name="you_are_signed_in_as">You are signed in as <![CDATA[<b>%1$s</b>]]>.</string>
-    <string name="you_are_not_signed_in">You are not signed in.</string>
+    <string name="you_are_not_signed_in">Your login credentials arer no longer valid. You can use your login link, or make a new account in the Settings menu.</string>
     <string name="you_need_to_be_signed_in">You need to be signed in before you can perform this action.</string>
     <string name="i_accept_terms">I accept the terms and conditions</string>
     <string name="must_accept_terms">You must accept the terms and conditions to use Cloud Sync</string>
     <string name="cannot_restore_password">Don\'t lose your password. You cannot restore it.</string>
-    <string name="already_forgot">I already forgot :(</string>
     <string name="cloud_sync_terms">Cloud Sync terms</string>
     <string name="about">About Joozdlog</string>
     <string name="calendar_import">Calendar Import</string>

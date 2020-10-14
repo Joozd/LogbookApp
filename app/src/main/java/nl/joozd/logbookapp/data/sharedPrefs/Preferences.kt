@@ -31,6 +31,7 @@ import nl.joozd.logbookapp.data.calendar.dataclasses.SupportedCalendarTypes
 import nl.joozd.logbookapp.data.utils.Encryption
 import java.util.*
 
+@Suppress("ObjectPropertyName")
 object Preferences {
     private val sharedPref by lazy{
         with (App.instance.ctx) {
@@ -117,7 +118,6 @@ object Preferences {
     /**
      * Amount of days that need to have passed for a notice to be shown
      */
-    @Suppress("ObjectPropertyName")
     private val _backupInterval = MutableLiveData<Int>()
     val backupIntervalLiveData: LiveData<Int>
         get() = _backupInterval

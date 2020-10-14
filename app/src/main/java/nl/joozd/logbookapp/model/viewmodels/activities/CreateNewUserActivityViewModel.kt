@@ -32,6 +32,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.CreateNewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.utils.checkPasswordSafety
+import nl.joozd.logbookapp.utils.generatePassword
 
 class CreateNewUserActivityViewModel: JoozdlogActivityViewModel() {
 
@@ -57,34 +58,24 @@ class CreateNewUserActivityViewModel: JoozdlogActivityViewModel() {
      * Public functions
      *******************************************************************************************/
 
-    fun signUpClicked(username: String, pass1: String, pass2: String) {
-        Log.d("signUpClicked", "user: $username, pass1: $pass1, pass2: $pass2")
+    fun signUpClicked(username: String) {
+        Log.d("signUpClicked", "user: $username")
         Preferences.useCloud = true
         when {
             InternetStatus.internetAvailable != true -> feedback(CreateNewUserActivityEvents.NO_INTERNET)
-            pass1.isBlank() -> feedback(CreateNewUserActivityEvents.PASSWORD_TOO_SHORT)
             username.isBlank() -> feedback(CreateNewUserActivityEvents.USERNAME_TOO_SHORT)
-            pass1 != pass2 -> feedback(CreateNewUserActivityEvents.PASSWORDS_DO_NOT_MATCH)
-            !checkPasswordSafety(pass1) -> feedback(CreateNewUserActivityEvents.PASSWORD_DOES_NOT_MEET_STANDARDS)
             else -> { // passwords match, are good enough, username not empty and internet looks OK
                 feedback(CreateNewUserActivityEvents.WAITING_FOR_SERVER)
                 viewModelScope.launch {
-                    when (UserManagement.createNewUser(username, pass1)) {
+                    when (UserManagement.createNewUser(username, generatePassword(16))) {
                         true -> feedback(CreateNewUserActivityEvents.FINISHED)
                         null -> feedback(CreateNewUserActivityEvents.SERVER_NOT_RESPONDING)
-                        false -> { // username taken, check to see if password correct
-                            when (UserManagement.login(username, pass1)) {
-                                true -> feedback(CreateNewUserActivityEvents.USER_EXISTS_PASSWORD_CORRECT)
-                                false -> feedback(CreateNewUserActivityEvents.USER_EXISTS_PASSWORD_INCORRECT)
-                                null -> feedback(CreateNewUserActivityEvents.SERVER_NOT_RESPONDING)
-                            }
-                        }
+                        false -> feedback(CreateNewUserActivityEvents.USER_EXISTS)
                     }
                 }
             }
         }
     }
-
 
     fun dontUseCloud(){
         Preferences.useCloud = false
@@ -106,8 +97,6 @@ class CreateNewUserActivityViewModel: JoozdlogActivityViewModel() {
      *******************************************************************************************/
 
     var userNameState: Editable? = null
-    var password1State: Editable? = null
-    var password2State: Editable? = null
 
     /*******************************************************************************************
      * Cleanup on cleared

@@ -69,8 +69,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         // Fill it before first observer arrives so it is cached right away
         launch {
             _cachedFlights.value = withContext(dispatcher){ flightDao.requestValidFlights().map {it.toFlight() }}
+            requestValidLiveFlightData().observeForever { _cachedFlights.value = it }
         }
-        requestValidLiveFlightData().observeForever { _cachedFlights.value = it }
+
     }
     /**
      * All names in those flights

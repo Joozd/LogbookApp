@@ -51,21 +51,33 @@ class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
      * Try to downlaod airport DB from server. If that fails, try to get it from WWW. If that fails, retry or fail.
      */
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        val serverDbVersion = Cloud.getAirportDbVersion()
-        Log.d("syncAirportsWorker", "server DB = $serverDbVersion, local DB = ${Preferences.airportDbVersion}")
-        when (serverDbVersion){
-            -1 -> return@withContext (if (getFromWWWIfNeeded())  Result.success() else Result.failure()).also{ progress = 100 }                               // -1 is server reported unable
-            -2 -> return@withContext (if (getFromWWWIfNeeded())  Result.success() else Result.retry()).also{ progress = 100 }                                 // -2 means connection failure
-            Preferences.airportDbVersion -> return@withContext Result.success().also{ progress = 100 }    // DB is up-to-date
+        airportsRepository.acquireLock()
+        try {
+            val serverDbVersion = Cloud.getAirportDbVersion()
+            Log.d("syncAirportsWorker", "server DB = $serverDbVersion, local DB = ${Preferences.airportDbVersion}")
+            when (serverDbVersion) {
+                -1 -> return@withContext (if (getFromWWWIfNeeded()) Result.success() else Result.failure()).also { progress = 100 }                               // -1 is server reported unable
+                -2 -> return@withContext (if (getFromWWWIfNeeded()) Result.success() else Result.retry()).also { progress = 100 }                                 // -2 means connection failure
+                Preferences.airportDbVersion -> return@withContext Result.success().also { progress = 100 }    // DB is up-to-date
+            }
+            progress = 5
+            Cloud.getAirports { processDownloadProgress(it) }?.map { Airport(it) }?.let {
+                AirportRepository.getInstance().replaceDbWith(it)
+                progress = 99
+                Preferences.airportDbVersion = serverDbVersion
+                progress = 100
+            } ?: return@withContext Result.retry()                                       // something happened with connection?
+            Result.success()
         }
-        progress = 5
-        Cloud.getAirports{ processDownloadProgress(it) }?.map{ Airport(it) }?.let {
-            AirportRepository.getInstance().replaceDbWith(it)
-            progress = 99
-            Preferences.airportDbVersion = serverDbVersion
-            progress = 100
-        }?: return@withContext Result.retry()                                       // something happened with connection?
-        Result.success()
+        catch(exception: Exception) {
+            Log.e("SyncAirportsWorker", "exception:\n${exception.stackTraceToString()}")
+            Result.failure()
+        }
+        finally {
+            //in finally so lock always gets released
+            airportsRepository.releaseLock()
+        }
+
     }.also{
         progress = -1
     }

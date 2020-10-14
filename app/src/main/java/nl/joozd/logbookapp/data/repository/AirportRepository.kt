@@ -27,6 +27,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Mutex
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.repository.helpers.FlowingAirportSearcher
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
@@ -36,9 +37,14 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
+import java.lang.Exception
 import java.util.*
 
 class AirportRepository(private val airportDao: AirportDao, private val dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope by MainScope()  {
+
+    //Mutex lock to make sure forced and scheduled workers don't interfere with each other
+    private val lockedForWorker = Mutex()
+
     private val _cachedAirports = MediatorLiveData<List<Airport>>()
     init{
         launch{
@@ -167,36 +173,8 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
      * customAirports are those airports that are used in logbook but not in airport Database
      * eg. Wickenburg (E25)
      */
-    /* TODO look at this. Decision: Make repositories speak to each other (seems best now) or make separate class
 
-    private fun getCustomAirportsAsync(flights: List<FlightData>) = async(Dispatchers.IO) {
-        ((flights.map { it.orig } + flights.map { it.dest })
-            .distinct()
-            .filter { it !in (getIdents()) })
-            .map { name -> Airport(ident = name, name = "User airport")}
-    }
-
-    //Deferred<List<Airport>>
-    var customAirports = getCustomAirportsAsync()
-    val liveCustomAirports = MutableLiveData<List<Airport>>()
-    val distinctLiveCustomAirports = Transformations.distinctUntilChanged(liveCustomAirports)
-
-    init{
-        launch{
-            liveCustomAirports.value = customAirports.await()
-        }
-        liveFlights.observeForever {
-            launch { liveCustomAirports.value = getCustomAirportsAsync(it).await() }
-        }
-    }
-
-    val completeLiveAirports = MutableLiveData<List<Airport>>()
-    init{
-        completeLiveAirports.value = (distinctLiveCustomAirports.value ?: emptyList()) + (liveAirports.value?: emptyList())
-        distinctLiveCustomAirports.observeForever { completeLiveAirports.value = (it ?: emptyList()) + (liveAirports.value?: emptyList()) }
-        liveAirports.observeForever { completeLiveAirports.value = (distinctLiveCustomAirports.value ?: emptyList()) + (it ?: emptyList()) }
-    }
-    */
+    //TODO make this
 
     /********************************************************************************************
      * Sync functions:
@@ -204,7 +182,7 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
 
     fun getAirportsIfNeeded(){
         if (TimestampMaker.nowForSycPurposes - Preferences.airportUpdateTimestamp > MINIMUM_AIRPORT_CHECK_DELAY){
-            JoozdlogWorkersHub.getAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
+            JoozdlogWorkersHub.periodicGetAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
         }
     }
 
@@ -219,6 +197,18 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
         require (progress in (-1..100)) {"Progress reported to setAirportSyncProgress not in range -1..100"}
         launch (Dispatchers.Main) {
             _airportSyncProgress.value = progress
+        }
+    }
+
+    suspend fun acquireLock(){
+        lockedForWorker.lock()
+    }
+
+    fun releaseLock(){
+        try{
+            lockedForWorker.unlock()
+        } catch (e: Exception){
+            Log.w("AirportRepo", "Requested to unlock an already unlocked lockedForWorker\n${e.stackTraceToString()}")
         }
     }
 

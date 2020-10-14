@@ -33,6 +33,17 @@ object JoozdlogWorkersHub {
 
     private const val MIN_DELAY_FOR_OUTBOUND_SYNC: Long = 1 // minutes
 
+
+    /**
+     * These will be set to true if a forced update job is scheduled.
+     * If set to true, a periodic job will not be scheduled.
+     * A forced job should set this to false after completing and schedule a periodic job.
+     */
+    var forcedAirportWork: Boolean = false
+    var forcedAircraftWork: Boolean = false
+
+
+
     /**
      * Synchronizes time with server, stores offset in SharedPrefs through [Preferences]
      * If another Worker is already trying to do that, that one is canceled
@@ -84,7 +95,7 @@ object JoozdlogWorkersHub {
      * If this work already exists, do nothing ( [ExistingWorkPolicy.KEEP] )
      * Runs once per day, when charging.
      */
-    fun getAirportsFromServer(onlyUnmetered: Boolean = false){
+    fun periodicGetAirportsFromServer(onlyUnmetered: Boolean = false){
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
             .setRequiresCharging(true)
@@ -101,9 +112,28 @@ object JoozdlogWorkersHub {
     }
 
     /**
+     * Gets airports from server and overwrites airportsDB if different.
+     * If this work already exists, do nothing ( [ExistingWorkPolicy.KEEP] )
+     */
+    fun getAirportsFromServer(onlyUnmetered: Boolean = false){
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val task = OneTimeWorkRequestBuilder<SyncAirportsWorker>()
+            .setConstraints(constraints)
+            .addTag(GET_AIRPORTS)
+            .build()
+
+        with (WorkManager.getInstance(App.instance)){
+            enqueueUniqueWork(GET_AIRPORTS, ExistingWorkPolicy.REPLACE, task)
+        }
+    }
+
+    /**
      * Gets aircraft types from server, and sends consensus data to server
      */
-    fun synchronizeAircraftTypes(onlyUnmetered: Boolean = false){
+    fun periodicSynchronizeAircraftTypes(onlyUnmetered: Boolean = false){
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
             .setRequiresCharging(true)
@@ -117,6 +147,24 @@ object JoozdlogWorkersHub {
             enqueueUniquePeriodicWork(SYNC_AIRCRAFT_TYPES, ExistingPeriodicWorkPolicy.KEEP, task)
         }
     }
+
+    /**
+     * Gets aircraft types from server, and sends consensus data to server
+     */
+    fun getAircraftTypes(onlyUnmetered: Boolean = false){
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        val task = OneTimeWorkRequestBuilder<SyncAircraftTypesWorker>()
+            .setConstraints(constraints)
+            .addTag(SYNC_AIRCRAFT_TYPES)
+            .build()
+
+        with (WorkManager.getInstance(App.instance)){
+            enqueueUniqueWork(SYNC_AIRCRAFT_TYPES, ExistingWorkPolicy.KEEP, task)
+        }
+    }
+
 
     /**
      * Constants for use as tags

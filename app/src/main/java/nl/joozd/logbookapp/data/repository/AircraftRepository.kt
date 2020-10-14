@@ -46,7 +46,6 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 
 import nl.joozd.logbookapp.extensions.mostCommonOrNull
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.util.*
 
@@ -201,8 +200,10 @@ class AircraftRepository(
      * Observing aircraftMap forever, to make sure all MediatorLiveData are observed and working
      */
     init{
-        _aircraftMapLiveData.observeForever {
-            aircraftMap = it
+        launch { // make sure this happens on main thread
+            _aircraftMapLiveData.observeForever {
+                aircraftMap = it
+            }
         }
     }
 
@@ -554,7 +555,7 @@ class AircraftRepository(
 
     fun checkIfAircraftTypesUpToDate(){
         Log.d(this::class.simpleName,"Firing JoozdlogWorkersHub.synchronizeAircraftTypes()")
-        JoozdlogWorkersHub.synchronizeAircraftTypes()
+        JoozdlogWorkersHub.periodicSynchronizeAircraftTypes()
     }
 
 

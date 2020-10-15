@@ -17,7 +17,7 @@
   ~
   -->
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">JoozdLog alpha test</string>
     <string name="preference_file_key">nl.joozd.logbookapp.PREFERENCE_FILE_KEY</string>
 
@@ -193,7 +193,7 @@
     - Strings for new user experience
     -->
     <string name="welcome_message">hallon aub!(grgr)\n\nWelkom bij deze beta versie van Joozdlog.\n\nOp de volgende paar schermen kan je wat dingen instellen. Aanrader!\n\nFeedback en bugreports mogen via de watsap.\nBugs liefst met een beschrijving vanw at je aan het doen was cq hoe je het kan reproduceren.\nVeel logplezier!</string>
-    <string name="cloud_explanation">JoozdLog Cloud is handig voor als je je telefoon kwijtraakt, Joozd zijn software heeft opgekloodt, je een nieuwe telefoon koopt of je meerdere apparaten tegelijk wil gebruiken.\nDit is geen backup, lees terms&amp;conditions voor waarom niet en meer info.</string>
+    <string name="cloud_explanation" tools:ignore="Typos">JoozdLog Cloud is handig voor als je je telefoon kwijtraakt, Joozd zijn software heeft opgekloodt, je een nieuwe telefoon koopt of je meerdere apparaten tegelijk wil gebruiken.\nDit is geen backup, lees terms&amp;conditions voor waarom niet en meer info.</string>
     <string name="you_can_set_settings_in_settings">If you want to adjust any more settings, take a look at the Settings menu after you click "done"!</string>
 
     <!--
@@ -270,6 +270,8 @@
     <string name="loggings_prefs_description">General preferences pertaining to (automatic) logging and times.</string>
     <string name="use_consensus_data">Use Aircraft Consensus Data</string>
     <string name="consensus_description">JoozdLog Cloud collects (anonymous) Aircraft Registration and type data so you don\'t have to enter aircraft types that somebody else already entered. Typical collected data would be \"4 users said PH-XXX is a Cessna 172\". Switching this off will stop sending and receiving this data.</string>
+    <string name="icao_iata_description">Display airports with their IATA identifier ("AMS") if this is switched on, or with their ICAO identifier ("EHAM") if it is off.</string>
+
     <string name="mark_incomplete_without_pic">Name needs to be set</string>
     <string name="mark_incomplete_without_pic_description">If no names are set on a completed flight, flight will be marked as incomplete</string>
     <string name="signed_in_as"><![CDATA[<b>Signed in as</b><br><small>%1$s</small>&nbsp;]]></string>

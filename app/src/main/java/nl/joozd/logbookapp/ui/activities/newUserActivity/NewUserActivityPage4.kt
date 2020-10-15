@@ -25,43 +25,54 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.activity_new_user_page_4.*
+import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityNewUserPage4Binding
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
+import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
 
 
 class NewUserActivityPage4: Fragment() {
-    val viewModel: NewUserActivityViewModel by activityViewModels()
+    private val viewModel: NewUserActivityViewModel by activityViewModels()
+    private val settingsViewmodel: SettingsActivityViewModel by viewModels() // this handles settings changes pretty well :)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val binding = ActivityNewUserPage4Binding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_4, container, false))
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        ActivityNewUserPage4Binding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_4, container, false)).apply {
 
-        /*******************************************************************************************
-         * OnClickListeners
-         *******************************************************************************************/
+            /*******************************************************************************************
+             * OnClickListeners
+             *******************************************************************************************/
 
-        with(binding){
             doneButton.setOnClickListener {
                 viewModel.done()
             }
-            icaoIataSwitch.setOnClickListener {
-                viewModel.icaoIataToggle()
+            icaoIataSwitch.setOnCheckedChangeListener { _, isChecked ->
+                settingsViewmodel.setUseIataAirports(isChecked)
             }
-        }
+            consensusSwitch.setOnCheckedChangeListener { _, isChecked ->
+                settingsViewmodel.setConsensusOptIn(isChecked)
+            }
 
-        /*******************************************************************************************
-         * Observers
-         *******************************************************************************************/
 
-        viewModel.useIataAirports.observe(viewLifecycleOwner, Observer { useIata ->
-            icaoIataSwitch.isChecked = useIata
-            // icaoIataSwitch.text = requireActivity().getString(if (useIata) R.string.useIataAirports else R.string.useIcaoAirports)
-        })
+            /*******************************************************************************************
+             * Observers
+             *******************************************************************************************/
 
-        return binding.root
-    }
+            viewModel.useIataAirports.observe(viewLifecycleOwner) { useIata ->
+                icaoIataSwitch.isChecked = useIata
+                // icaoIataSwitch.text = requireActivity().getString(if (useIata) R.string.useIataAirports else R.string.useIcaoAirports)
+            }
+
+            settingsViewmodel.useIataAirports.observe(viewLifecycleOwner){
+                icaoIataSwitch.isChecked = it
+            }
+
+            settingsViewmodel.consensusOptIn.observe(viewLifecycleOwner){
+                consensusSwitch.isChecked = it
+            }
+
+        }.root
+
 
     companion object{
         private const val PAGE_NUMBER = 4

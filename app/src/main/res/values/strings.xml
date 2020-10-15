@@ -192,7 +192,7 @@
     <!--
     - Strings for new user experience
     -->
-    <string name="welcome_message">hallon aub!(grgr)\n\nWelkom bij deze beta versie van Joozdlog.\n\nOp de volgende paar schermen kan je wat dingen instellen. Aanrader!\n\nFeedback en bugreports mogen via de watsap.\nBugs liefst met een beschrijving vanw at je aan het doen was cq hoe je het kan reproduceren.\nVeel logplezier!</string>
+    <string name="welcome_message">hallon aub!(grgr)\n\nWelkom bij deze beta versie van Joozdlog.\n\nOp de volgende paar schermen kan je wat dingen instellen. Aanrader!\n\nFeedback en bugreports mogen via de watsap.\nBugs liefst met een beschrijving van wat je aan het doen was cq hoe je het kan reproduceren.\nVeel logplezier!</string>
     <string name="cloud_explanation" tools:ignore="Typos">JoozdLog Cloud is handig voor als je je telefoon kwijtraakt, Joozd zijn software heeft opgekloodt, je een nieuwe telefoon koopt of je meerdere apparaten tegelijk wil gebruiken.\nDit is geen backup, lees terms&amp;conditions voor waarom niet en meer info.</string>
     <string name="you_can_set_settings_in_settings">If you want to adjust any more settings, take a look at the Settings menu after you click "done"!</string>
 

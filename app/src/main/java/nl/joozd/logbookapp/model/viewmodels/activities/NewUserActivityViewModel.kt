@@ -20,6 +20,9 @@
 package nl.joozd.logbookapp.model.viewmodels.activities
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.SharedPreferences
 import android.text.Editable
 import android.util.Log
@@ -32,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.CalendarScraper
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.comm.InternetStatus
@@ -174,8 +178,18 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
-
-
+    /**
+     * Copy a login link to clipboard (assuming logged in, else do nothing)
+     */
+    fun copyLoginLinkToClipboard(){
+        UserManagement.gerenateLoginLink()?.let { loginLink ->
+            with(App.instance) {
+                (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
+                    ClipData.newPlainText(getString(R.string.login_link), loginLink)
+                )
+            }
+        }
+    }
 
 
     fun dontUseCloud(){

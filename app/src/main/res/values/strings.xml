@@ -152,7 +152,7 @@
     <string name="login_error_message">Saved username/password cannot log in to server. Please try to login first</string>
     <string name="waiting_for_server">Waiting for server</string>
     <string name="created_account">Created account %1$s.</string>
-    <string name="create_login_link_hint">You can created a login link from the settings menu. I stronly suggest you do as it\'s your only way in if you lose your phone!</string>
+    <string name="create_login_link_hint">A login link has been placed on your clipboard. Paste it into an email or text message to send it to yourself!\nYou can also create a login link from the settings menu. I strongly suggest you do as it\'s your only way in if you lose your phone!</string>
 
 
     <string name="no_internet_create_account">No internet connection available. You can create and account in the settings screen when you have one, or you can connect to the internet now and retry.</string>
@@ -254,7 +254,6 @@
     <string name="calendar_import_description_line3">Apart from these entries, none of your calendar contents are being saved or transmitted.</string>
     <string name="do_you_want_to_enable_this">Do you want to enable this?</string>
     <string name="use_calendar_import">Use Calendar Import</string>
-    <string name="dont_use_multiple_device">Using this on multiple devices might lead to performance problems, so don\'t do that</string>
     <string name="use_cloud_sync">Use Cloud Sync</string>
     <string name="use_wifi_for_large_files">Only use WiFi for larger files</string>
 

@@ -52,8 +52,8 @@ class NewUserActivityPage2: JoozdlogFragment() {
     val viewModel: NewUserActivityViewModel by activityViewModels()
     private var mBinding: ActivityNewUserPage2Binding? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val binding = ActivityNewUserPage2Binding.bind(inflater.inflate(R.layout.activity_new_user_page_2, container, false)).apply {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        ActivityNewUserPage2Binding.bind(inflater.inflate(R.layout.activity_new_user_page_2, container, false)).apply {
 
             // Restore texts from savedInstanceState, eg. on rotate or app switch
             userNameEditText.setTextIfNotNull(viewModel.userNameState)
@@ -147,9 +147,8 @@ class NewUserActivityPage2: JoozdlogFragment() {
                 }
             }
 
-            return root
-        }
-    }
+        }.root
+
 
     override fun onStop() {
         super.onStop()
@@ -168,7 +167,9 @@ class NewUserActivityPage2: JoozdlogFragment() {
     private fun showPasswordLinkDialog() =  JoozdlogAlertDialog(requireActivity()).show {
 
         title = App.instance.getString(R.string.created_account, UserManagement.username)
+        messageResource = R.string.create_login_link_hint
         setPositiveButton(android.R.string.ok) {
+            viewModel.copyLoginLinkToClipboard()
             viewModel.nextPage(PAGE_NUMBER)
         }
 

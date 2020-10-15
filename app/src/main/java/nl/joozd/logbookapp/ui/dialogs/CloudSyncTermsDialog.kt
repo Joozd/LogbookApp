@@ -24,8 +24,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.dialog_cloud_sync_terms.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.DialogCloudSyncTermsBinding
@@ -36,21 +34,19 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 class CloudSyncTermsDialog: JoozdlogFragment() {
     val viewModel: CloudSyncTermsDialogViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val binding = DialogCloudSyncTermsBinding.bind(inflater.inflate(R.layout.dialog_cloud_sync_terms, container, false))
-
-        with(binding){
-            acceptTermsBackground.setOnClickListener {  } // catch clicks so they don't fall through
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        DialogCloudSyncTermsBinding.bind(inflater.inflate(R.layout.dialog_cloud_sync_terms, container, false)).apply {
+            acceptTermsBackground.setOnClickListener { } // catch clicks so they don't fall through
 
             // termsTextView.movementMethod = ScrollingMovementMethod()
 
             termsScrollView.viewTreeObserver.addOnScrollChangedListener {
-                    if (termsScrollView.getChildAt(0).bottom
-                        <= termsScrollView.height + termsScrollView.scrollY
-                    ) {
-                        viewModel.scrolledToBottom()
-                    } // else { //Not at bottom }
-                }
+                if (termsScrollView.getChildAt(0).bottom
+                    <= termsScrollView.height + termsScrollView.scrollY
+                ) {
+                    viewModel.scrolledToBottom()
+                } // else { //Not at bottom }
+            }
 
 
 
@@ -64,25 +60,23 @@ class CloudSyncTermsDialog: JoozdlogFragment() {
                 isClickable = clickable
             }
 
-            cancelTextView.apply{
+            cancelTextView.apply {
                 setOnClickListener {
                     closeFragment()
                 }
                 setTextColor(requireActivity().getColorFromAttr(android.R.attr.colorAccent))
             }
 
-        }
 
-        viewModel.text.observe(viewLifecycleOwner, Observer {
-            termsTextView.text = it
-        })
 
-        viewModel.waitedLongEnough.observe(viewLifecycleOwner, Observer {
-            iAcceptTextView.isClickable = it
-            if (it)
-                iAcceptTextView.setTextColor(requireActivity().getColorFromAttr(android.R.attr.colorAccent))
-        })
+            viewModel.text.observe(viewLifecycleOwner) {
+                termsTextView.text = it
+            }
 
-        return binding.root
-    }
+            viewModel.waitedLongEnough.observe(viewLifecycleOwner) {
+                iAcceptTextView.isClickable = it
+                if (it)
+                    iAcceptTextView.setTextColor(requireActivity().getColorFromAttr(android.R.attr.colorAccent))
+            }
+        }.root
 }

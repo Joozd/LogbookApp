@@ -131,6 +131,14 @@ object JoozdlogWorkersHub {
         }
     }
 
+    /**
+     * Reschedule Aircraft and Airport updates
+     */
+    fun rescheduleAircraftAndAirports(onlyUnmetered: Boolean){
+        periodicGetAirportsFromServer(onlyUnmetered, true)
+        periodicSynchronizeAircraftTypes(onlyUnmetered, true)
+    }
+
 
     /**
      * Constants for use as tags

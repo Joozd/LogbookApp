@@ -256,6 +256,8 @@
     <string name="use_calendar_import">Use Calendar Import</string>
     <string name="dont_use_multiple_device">Using this on multiple devices might lead to performance problems, so don\'t do that</string>
     <string name="use_cloud_sync">Use Cloud Sync</string>
+    <string name="use_wifi_for_large_files">Only use WiFi for larger files</string>
+
     <string name="cloud_sync_title">Cloud Sync</string>
     <string name="add_chrono_update_remarks">Save old times as remarks</string>
     <string name="sync_flights_across_devices">Synchronize flights across multiple devices or easily migrate to a new device</string>

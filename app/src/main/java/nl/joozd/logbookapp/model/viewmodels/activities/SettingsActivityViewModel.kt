@@ -46,6 +46,7 @@ import nl.joozd.logbookapp.extensions.toDateStringLocalized
 import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -68,6 +69,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _standardTakeoffLandingTimes = MutableLiveData(Preferences.standardTakeoffLandingTimes)
     private val _lastUpdateTime = MutableLiveData(makeTimeString(Preferences.lastUpdateTime))
     private val _backupInterval = MutableLiveData(Preferences.backupInterval)
+    private val _updateLargerFilesOverWifiOnly = MutableLiveData(Preferences.updateLargerFilesOverWifiOnly)
 
     private val _username = MutableLiveData(Preferences.username) // <String?>
     private val _calendarDisabledUntil = MutableLiveData(Preferences.calendarDisabledUntil) //  <Long>
@@ -120,6 +122,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
             Preferences::picNameNeedsToBeSet.name -> _picNameNeedsToBeSet.value = Preferences.picNameNeedsToBeSet
 
+            Preferences::updateLargerFilesOverWifiOnly.name -> _updateLargerFilesOverWifiOnly.value = Preferences.updateLargerFilesOverWifiOnly
+
 
 
 
@@ -162,6 +166,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val backupInterval: LiveData<Int>
         get() = _backupInterval
+
+    val updateLargerFilesOverWifiOnly: LiveData<Boolean>
+        get() = _updateLargerFilesOverWifiOnly
 
     val settingsUseIataSelectorTextResource: LiveData<Int>
         get() = _settingsUseIataSelectorTextResource
@@ -227,6 +234,14 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     fun useCloudSyncToggled(){
         Preferences.useCloud = !Preferences.useCloud
+    }
+
+    /**
+     * Toggles Preferences.updateLargerFilesOverWifiOnly and reschedules workers with that preference
+     */
+    fun useWifiForLargeFilesToggled(){
+        Preferences.updateLargerFilesOverWifiOnly = !Preferences.updateLargerFilesOverWifiOnly
+        JoozdlogWorkersHub.rescheduleAircraftAndAirports(Preferences.updateLargerFilesOverWifiOnly)
     }
 
     fun copyLoginLinkToClipboard(){

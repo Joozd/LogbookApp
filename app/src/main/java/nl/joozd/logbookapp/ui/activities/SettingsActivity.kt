@@ -170,6 +170,10 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.useCloudSyncToggled()
             }
 
+            useWifiForLargeFilesSwitch.setOnCheckedChangeListener { _, isChecked ->
+                viewModel.useWifiForLargeFilesToggled()
+            }
+
             youAreSignedInAsButton.setOnClickListener {
                 startActivity(Intent(activity, LoginActivity::class.java))
             }
@@ -313,6 +317,10 @@ class SettingsActivity : JoozdlogActivity() {
                     R.string.backup_interval_time, (if (it == 0) getString (
                         R.string.never
                     ) else getString(R.string.n_days, it.toString())))
+            }
+
+            viewModel.updateLargerFilesOverWifiOnly.observe(activity){
+                useWifiForLargeFilesSwitch.isChecked = it
             }
 
 

@@ -444,6 +444,18 @@
                 app:layout_constraintTop_toTopOf="@+id/loginLinkButton"
                 app:srcCompat="@drawable/ic_help_outline_20px" />
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/useWifiForLargeFilesSwitch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="@string/use_wifi_for_large_files"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/loginLinkButton" />
+
             <View
                 android:id="@+id/lineBetweenCloudPdf"
                 android:layout_width="0dp"
@@ -452,7 +464,7 @@
                 android:background="#c0c0c0"
                 app:layout_constraintEnd_toEndOf="@+id/settingsUseIataSelector"
                 app:layout_constraintStart_toStartOf="@+id/settingsUseIataSelector"
-                app:layout_constraintTop_toBottomOf="@+id/loginLinkButton" />
+                app:layout_constraintTop_toBottomOf="@+id/useWifiForLargeFilesSwitch" />
 
             <TextView
                 android:id="@+id/textView4"

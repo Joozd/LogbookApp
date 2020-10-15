@@ -31,6 +31,7 @@ object JoozdlogWorkersHub {
      * Constants for influencing behaviour
      */
     private const val MIN_DELAY_FOR_OUTBOUND_SYNC: Long = 1 // minutes
+    private const val DELAY_FOR_OVERWRITE_MINUTES: Long = 15 // minutes
 
 
     /**
@@ -93,7 +94,7 @@ object JoozdlogWorkersHub {
      * If this work already exists, do nothing ( [ExistingWorkPolicy.KEEP] )
      * Runs once per day.
      * @param onlyUnmetered: If set to true, runs only on Networktype.UNMETERED
-     * @param overwrite: If set to true, will replace previously enqueued work (use this when changing onlyUnmetered preference)
+     * @param overwrite: If set to true, will replace previously enqueued work (use this when changing onlyUnmetered preference), with a DELAY_FOR_OVERWRITE_MINUTES minute delay.
      *
      */
     fun periodicGetAirportsFromServer(onlyUnmetered: Boolean = false, overwrite: Boolean = false){
@@ -101,10 +102,12 @@ object JoozdlogWorkersHub {
             .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
             .build()
 
-        val task = PeriodicWorkRequestBuilder<SyncAirportsWorker>(Duration.ofDays(1))
-            .setConstraints(constraints)
-            .addTag(GET_AIRPORTS)
-            .build()
+        val task = PeriodicWorkRequestBuilder<SyncAirportsWorker>(Duration.ofDays(1)).apply {
+            setConstraints(constraints)
+            addTag(GET_AIRPORTS)
+            if (overwrite)
+                setInitialDelay(DELAY_FOR_OVERWRITE_MINUTES, TimeUnit.MINUTES)
+        }.build()
 
         with (WorkManager.getInstance(App.instance)){
             enqueueUniquePeriodicWork(GET_AIRPORTS, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
@@ -121,10 +124,12 @@ object JoozdlogWorkersHub {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
             .build()
-        val task = PeriodicWorkRequestBuilder<SyncAircraftTypesWorker>(Duration.ofDays(1))
-            .setConstraints(constraints)
-            .addTag(SYNC_AIRCRAFT_TYPES)
-            .build()
+        val task = PeriodicWorkRequestBuilder<SyncAircraftTypesWorker>(Duration.ofDays(1)).apply {
+            setConstraints(constraints)
+            addTag(SYNC_AIRCRAFT_TYPES)
+            if (overwrite)
+                setInitialDelay(DELAY_FOR_OVERWRITE_MINUTES, TimeUnit.MINUTES)
+        }.build()
 
         with (WorkManager.getInstance(App.instance)){
             enqueueUniquePeriodicWork(SYNC_AIRCRAFT_TYPES, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)

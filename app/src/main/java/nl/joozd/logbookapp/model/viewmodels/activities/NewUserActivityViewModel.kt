@@ -122,12 +122,6 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         feedback(NewUserActivityEvents.FINISHED)
     }
 
-    fun syncGeneralData(){
-        GeneralRepository.synchTimeWithServer()
-        airportRepository.getAirportsIfNeeded()
-        aircraftRepository.checkIfAircraftTypesUpToDate()
-    }
-
     fun syncFlights(){
         flightRepository.syncIfNeeded()
     }

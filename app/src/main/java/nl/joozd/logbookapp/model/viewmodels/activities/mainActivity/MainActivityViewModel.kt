@@ -427,8 +427,6 @@ else{
     fun notifyActivityResumed() {
         GeneralRepository.synchTimeWithServer()
         flightRepository.syncIfNeeded()
-        airportRepository.getAirportsIfNeeded()
-        aircraftRepository.checkIfAircraftTypesUpToDate()
     }
 
     fun deleteAndDisableCalendarImportUntillAfterThisFlight(flightId: Int) {

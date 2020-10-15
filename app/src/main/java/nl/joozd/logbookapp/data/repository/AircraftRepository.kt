@@ -553,12 +553,6 @@ class AircraftRepository(
 
     fun replaceAllPreloadedWith(newPreloaded: List<PreloadedRegistration>) = replacePreloadedTypesDB(newPreloaded)
 
-    fun checkIfAircraftTypesUpToDate(){
-        Log.d(this::class.simpleName,"Firing JoozdlogWorkersHub.synchronizeAircraftTypes()")
-        JoozdlogWorkersHub.periodicSynchronizeAircraftTypes()
-    }
-
-
         /********************************************************************************************
          * Companion object
          ********************************************************************************************/

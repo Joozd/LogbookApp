@@ -46,8 +46,6 @@ class NewUserActivity : JoozdlogActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.syncGeneralData()
-
         setTheme(R.style.AppTheme)
         val binding = ActivityNewUserBinding.inflate(layoutInflater)
 

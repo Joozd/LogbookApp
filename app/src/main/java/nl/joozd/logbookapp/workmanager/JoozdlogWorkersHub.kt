@@ -30,7 +30,6 @@ object JoozdlogWorkersHub {
     /**
      * Constants for influencing behaviour
      */
-
     private const val MIN_DELAY_FOR_OUTBOUND_SYNC: Long = 1 // minutes
 
 
@@ -41,7 +40,6 @@ object JoozdlogWorkersHub {
      */
     var forcedAirportWork: Boolean = false
     var forcedAircraftWork: Boolean = false
-
 
 
     /**
@@ -63,6 +61,7 @@ object JoozdlogWorkersHub {
             enqueue(task)
         }
     }
+
 
     /**
      * Synchronizes all flights with server (worker uses FlightRepository)
@@ -86,19 +85,20 @@ object JoozdlogWorkersHub {
                 enqueue(task)
             }
         }
-
-
     }
+
 
     /**
      * Gets airports from server and overwrites airportsDB if different.
      * If this work already exists, do nothing ( [ExistingWorkPolicy.KEEP] )
-     * Runs once per day, when charging.
+     * Runs once per day.
+     * @param onlyUnmetered: If set to true, runs only on Networktype.UNMETERED
+     * @param overwrite: If set to true, will replace previously enqueued work (use this when changing onlyUnmetered preference)
+     *
      */
-    fun periodicGetAirportsFromServer(onlyUnmetered: Boolean = false){
+    fun periodicGetAirportsFromServer(onlyUnmetered: Boolean = false, overwrite: Boolean = false){
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
-            .setRequiresCharging(true)
             .build()
 
         val task = PeriodicWorkRequestBuilder<SyncAirportsWorker>(Duration.ofDays(1))
@@ -107,36 +107,19 @@ object JoozdlogWorkersHub {
             .build()
 
         with (WorkManager.getInstance(App.instance)){
-            enqueueUniquePeriodicWork(GET_AIRPORTS, ExistingPeriodicWorkPolicy.KEEP, task)
+            enqueueUniquePeriodicWork(GET_AIRPORTS, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
         }
     }
 
-    /**
-     * Gets airports from server and overwrites airportsDB if different.
-     * If this work already exists, do nothing ( [ExistingWorkPolicy.KEEP] )
-     */
-    fun getAirportsFromServer(onlyUnmetered: Boolean = false){
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-
-        val task = OneTimeWorkRequestBuilder<SyncAirportsWorker>()
-            .setConstraints(constraints)
-            .addTag(GET_AIRPORTS)
-            .build()
-
-        with (WorkManager.getInstance(App.instance)){
-            enqueueUniqueWork(GET_AIRPORTS, ExistingWorkPolicy.REPLACE, task)
-        }
-    }
 
     /**
      * Gets aircraft types from server, and sends consensus data to server
+     * @param onlyUnmetered: If set to true, runs only on Networktype.UNMETERED
+     * @param overwrite: If set to true, will replace previously enqueued work (use this when changing onlyUnmetered preference)
      */
-    fun periodicSynchronizeAircraftTypes(onlyUnmetered: Boolean = false){
+    fun periodicSynchronizeAircraftTypes(onlyUnmetered: Boolean = false, overwrite: Boolean = false){
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
-            .setRequiresCharging(true)
             .build()
         val task = PeriodicWorkRequestBuilder<SyncAircraftTypesWorker>(Duration.ofDays(1))
             .setConstraints(constraints)
@@ -144,24 +127,7 @@ object JoozdlogWorkersHub {
             .build()
 
         with (WorkManager.getInstance(App.instance)){
-            enqueueUniquePeriodicWork(SYNC_AIRCRAFT_TYPES, ExistingPeriodicWorkPolicy.KEEP, task)
-        }
-    }
-
-    /**
-     * Gets aircraft types from server, and sends consensus data to server
-     */
-    fun getAircraftTypes(onlyUnmetered: Boolean = false){
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-        val task = OneTimeWorkRequestBuilder<SyncAircraftTypesWorker>()
-            .setConstraints(constraints)
-            .addTag(SYNC_AIRCRAFT_TYPES)
-            .build()
-
-        with (WorkManager.getInstance(App.instance)){
-            enqueueUniqueWork(SYNC_AIRCRAFT_TYPES, ExistingWorkPolicy.KEEP, task)
+            enqueueUniquePeriodicWork(SYNC_AIRCRAFT_TYPES, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
         }
     }
 

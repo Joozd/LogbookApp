@@ -22,16 +22,29 @@ package nl.joozd.logbookapp
 import nl.joozd.logbookapp.utils.DelegatesExt
 import android.app.Application
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 
-class App : Application() {
+class App : Application(), CoroutineScope by MainScope() {
     companion object {
         var instance: App by DelegatesExt.notNullSingleValue()
     }
 
     val ctx: Context by lazy {applicationContext}
+
     override fun onCreate() {
         super.onCreate()
         instance = this
+        launch{
+            JoozdlogWorkersHub.periodicGetAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
+            JoozdlogWorkersHub.periodicSynchronizeAircraftTypes(Preferences.updateLargerFilesOverWifiOnly)
+        }
     }
+
+
+
 }

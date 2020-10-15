@@ -349,13 +349,6 @@ class MainActivity : JoozdlogActivity() {
 
     override fun onResume() {
         super.onResume()
-         //Checks or no airport DB downloaded
-        if (Preferences.airportDbVersion == 0) JoozdlogWorkersHub.getAirportsFromServer()
-
-         // Checks for no aircraft types downloaded
-        if (Preferences.aircraftTypesVersion == 0) JoozdlogWorkersHub.getAircraftTypes()
-
-        // show New User activity if that hasn't been finished yet
 
         if (!Preferences.newUserActivityFinished)
             startActivity(Intent(this, NewUserActivity::class.java))

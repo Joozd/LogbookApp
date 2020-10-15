@@ -180,11 +180,15 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
      * Sync functions:
      ********************************************************************************************/
 
+    /*
+    //This is now checked daily as scheduled work from [App]
     fun getAirportsIfNeeded(){
         if (TimestampMaker.nowForSycPurposes - Preferences.airportUpdateTimestamp > MINIMUM_AIRPORT_CHECK_DELAY){
             JoozdlogWorkersHub.periodicGetAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
         }
     }
+
+    */
 
     /**
      * Observable for worker to send progress to

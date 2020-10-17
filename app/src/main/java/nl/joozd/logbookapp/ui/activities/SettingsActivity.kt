@@ -33,6 +33,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivitySettingsBinding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
@@ -170,12 +171,8 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.useCloudSyncToggled()
             }
 
-            useWifiForLargeFilesSwitch.setOnCheckedChangeListener { _, isChecked ->
-                viewModel.useWifiForLargeFilesToggled()
-            }
-
             youAreSignedInAsButton.setOnClickListener {
-                startActivity(Intent(activity, LoginActivity::class.java))
+                viewModel.copyLoginLinkToClipboard()
             }
 
             changePasswordButton.setOnClickListener {
@@ -183,11 +180,15 @@ class SettingsActivity : JoozdlogActivity() {
             }
 
             loginLinkButton.setOnClickListener {
-                viewModel.copyLoginLinkToClipboard()
+                startActivity(UserManagement.generateLoginLinkIntent())
             }
 
             loginLinkExplanationImageView.setOnClickListener {
                 showLoginLinkHint()
+            }
+
+            useWifiForLargeFilesSwitch.setOnCheckedChangeListener { _, isChecked ->
+                viewModel.useWifiForLargeFilesToggled()
             }
 
             addRemarksToChronoUpdatesSwitch.setOnCheckedChangeListener { _, isChecked ->

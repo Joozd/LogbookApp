@@ -42,7 +42,6 @@ import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.checkPermission
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
-import java.lang.ref.WeakReference
 import java.time.Instant
 
 //TODO reorder this and make direct DB functions private
@@ -379,9 +378,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         }
     }
 
-    fun setNotLoggedInFlag(loggedIn: Boolean = false){
+    fun setNotLoggedInFlag(notLoggedIn: Boolean = false){
         launch {
-            _notLoggedIn.value = loggedIn
+            _notLoggedIn.value = notLoggedIn
         }
     }
 

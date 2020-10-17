@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.ui.activities.newUserActivity
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
@@ -35,7 +34,6 @@ import nl.joozd.logbookapp.extensions.minusOneWithFloor
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
-import nl.joozd.logbookapp.ui.activities.LoginActivity
 import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
 
 class NewUserActivity : JoozdlogActivity() {
@@ -74,7 +72,6 @@ class NewUserActivity : JoozdlogActivity() {
         viewModel.feedbackEvent.observe(this, Observer {
             when(it.getEvent()){
                 NewUserActivityEvents.FINISHED -> closeAndstartMainActivity()
-                NewUserActivityEvents.SHOW_SIGN_IN_DIALOG -> startActivity(Intent(this, LoginActivity::class.java))
                 NewUserActivityEvents.NEXT_PAGE -> {
                     it.getInt().let{nextPage ->
                         viewModel.openPagesState = maxOf(viewModel.openPagesState ?: 1, nextPage + 1)

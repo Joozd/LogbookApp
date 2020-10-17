@@ -98,6 +98,7 @@ object Cloud {
     /**
      * Check username / pass
      * ServerFunctions.testLogin returns 1 if success, 2 if failed, negative value if connection failed
+     * @return true if correct, false if incorrect, null if unexpected response, server error or no connection
      */
     suspend fun checkUser(username: String, password: String): Boolean? =  withContext(Dispatchers.IO) {
             when (Client.getInstance().use{
@@ -112,6 +113,12 @@ object Cloud {
                 else -> null
             }
         }
+
+    suspend fun checkUser(): Boolean? =  withContext(Dispatchers.IO) {
+        Client.getInstance().use {
+            ServerFunctions.login(it)
+        }
+    }
 
     /**
      * Check username / pass

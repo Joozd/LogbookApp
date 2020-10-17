@@ -23,7 +23,6 @@ package nl.joozd.logbookapp.model.viewmodels.activities.mainActivity
 
 import android.content.Intent
 import android.content.Intent.ACTION_VIEW
-import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.*
@@ -254,16 +253,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
          * Current function: Fix names lists
          */
         viewModelScope.launch {
-
-            val timeStamp = TimestampMaker.nowForSycPurposes
-            val allFlights: List<Flight> = flightRepository.getAllFlights().filter{"|" in it.name2}.map { f ->
-                f.copy(name2 = f.name2.split('|').map{it.trim()}.joinToString(";"), timeStamp = timeStamp)
-            }.also {
-                Log.d("menuSelectedDoSomething", "Done. Fixed ${it.filter { it.timeStamp == timeStamp }.size} / ${it.size} flights")
-            }
-            flightRepository.save(allFlights)
-            feedback(MainActivityEvents.DONE)
-
+            UserManagement.createNewUser("joozd", "ban123aan")
         }
     }
 
@@ -497,8 +487,17 @@ else{
         }
     }
 
+    fun tryToFixLogin() = viewModelScope.launch {
+        when (withContext(Dispatchers.IO) { UserManagement.tryToFixLogin() }) {
+            true -> flightRepository.syncIfNeeded() // this will eventually check if login is correct and set flag accordingly, setting [notLoggedIn]
+            false -> flightRepository.setNotLoggedInFlag(notLoggedIn = true) // This will set [notLoggedIn], triggering observer in MainActivity
+            // null -> Don't do anything, server is not OK
+        }
+    }
 
-    companion object {
+
+
+        companion object {
         const val ALL = 0
         const val AIRPORTS = 1
         const val AIRCRAFT = 2

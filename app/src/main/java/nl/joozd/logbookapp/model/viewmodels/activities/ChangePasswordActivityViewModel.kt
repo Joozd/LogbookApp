@@ -19,16 +19,20 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.utils.checkPasswordSafety
+import nl.joozd.logbookapp.utils.generatePassword
 
 class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
 
@@ -52,25 +56,36 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
      * Public functions
      */
 
-    fun submitClicked(password: String, repeatPassword: String){
-        Log.d("submitClicked()", "pass1: $password, pass2: $repeatPassword")
+    fun submitClicked(){
+        val password = generatePassword(16)
+        Log.d("submitClicked()", "pass1: $password")
         when {
             InternetStatus.internetAvailable != true -> feedback(ChangePasswordEvents.NO_INTERNET)
-            password.isBlank() -> feedback(ChangePasswordEvents.PASSWORD_TOO_SHORT)
-            password != repeatPassword -> feedback(ChangePasswordEvents.PASSWORDS_DO_NOT_MATCH)
-            !checkPasswordSafety(password) -> feedback(ChangePasswordEvents.PASSWORD_DOES_NOT_MEET_STANDARDS)
             else -> { // passwords match, are good enough, username not empty and internet looks OK
                 feedback(ChangePasswordEvents.WAITING_FOR_SERVER)
                 viewModelScope.launch {
                     when (UserManagement.changePassword(password)){
-                        UserManagement.ReturnCodes.SUCCESS -> feedback(ChangePasswordEvents.FINISHED)
-                        UserManagement.ReturnCodes.NO_PASSWORD, UserManagement.ReturnCodes.NO_USERNAME -> feedback(ChangePasswordEvents.NOT_LOGGED_IN)
-                        UserManagement.ReturnCodes.WRONG_CREDENTIALS -> feedback(ChangePasswordEvents.LOGIN_INCORRECT)
-
+                        UserManagement.ReturnCodes.SUCCESS -> {
+                            sendPasswordLinksToClipboard(UserManagement.generateLoginLink())
+                            feedback(ChangePasswordEvents.FINISHED)
+                        }
+                        UserManagement.ReturnCodes.NO_PASSWORD, UserManagement.ReturnCodes.NO_USERNAME -> feedback(ChangePasswordEvents.NOT_LOGGED_IN).also {Log.d("XXXXXX", "1")}
+                        UserManagement.ReturnCodes.WRONG_CREDENTIALS -> feedback(ChangePasswordEvents.LOGIN_INCORRECT).also {Log.d("XXXXXX", "2")}
                         UserManagement.ReturnCodes.CONNECTION_ERROR -> feedback(ChangePasswordEvents.SERVER_NOT_RESPONDING)
                     }
                 }
             }
         }
+    }
+
+    private fun sendPasswordLinksToClipboard(new: String?) {
+        new?.let { newLink ->
+            with(App.instance) {
+                (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
+                    ClipData.newPlainText(getString(R.string.login_link), newLink)
+                )
+            }
+            feedback(ChangePasswordEvents.LOGIN_LINK_COPIED)
+        } ?: feedback(ChangePasswordEvents.NOT_LOGGED_IN)
     }
 }

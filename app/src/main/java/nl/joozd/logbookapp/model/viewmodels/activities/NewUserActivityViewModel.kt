@@ -40,7 +40,6 @@ import nl.joozd.logbookapp.data.calendar.CalendarScraper
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
@@ -182,7 +181,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * Copy a login link to clipboard (assuming logged in, else do nothing)
      */
     fun copyLoginLinkToClipboard(){
-        UserManagement.gerenateLoginLink()?.let { loginLink ->
+        UserManagement.generateLoginLink()?.let { loginLink ->
             with(App.instance) {
                 (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
                     ClipData.newPlainText(getString(R.string.login_link), loginLink)

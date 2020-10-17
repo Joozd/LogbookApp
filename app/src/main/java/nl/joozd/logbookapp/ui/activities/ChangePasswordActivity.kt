@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.ui.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
@@ -28,7 +29,6 @@ import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityChangePasswordBinding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
-import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.ChangePasswordActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.LoginDialog
@@ -69,19 +69,8 @@ class ChangePasswordActivity : JoozdlogActivity() {
              * Buttons, onFocusChangeds, etc
              ***************************************************************************************/
 
-            passwordEditText.onTextChanged {
-                passwordTextInputLayout.error = null
-            }
-            repeatPasswordEditText.onTextChanged {
-                repeatPasswordTextInputLayout.error = null
-            }
-
             submitButton.setOnClickListener {
-                viewModel.submitClicked(passwordEditText.text.toString(), repeatPasswordEditText.text.toString())
-            }
-
-            passwordRequirementsText.setOnClickListener {
-                showPasswordRequirements()
+                viewModel.submitClicked()
             }
 
             /****************************************************************************************
@@ -95,18 +84,14 @@ class ChangePasswordActivity : JoozdlogActivity() {
 
             viewModel.feedbackEvent.observe(activity){
                 when (it.getEvent()){
+                    ChangePasswordEvents.LOGIN_LINK_COPIED -> showCopiedDialog()
                     ChangePasswordEvents.FINISHED -> {
-                        toast("Done!")
                         closeWaitingDialog()
-                        finish()
                     }
 
                     ChangePasswordEvents.WAITING_FOR_SERVER -> showWaitingForServerLayout()
 
                     ChangePasswordEvents.NO_INTERNET -> showNoInternetError()
-                    ChangePasswordEvents.PASSWORD_TOO_SHORT -> showPasswordCannotBeEmptyError()
-                    ChangePasswordEvents.PASSWORDS_DO_NOT_MATCH -> showPasswordsDoNotMatchError()
-                    ChangePasswordEvents.PASSWORD_DOES_NOT_MEET_STANDARDS -> showPasswordDoesNotMeetStandardsError()
                     ChangePasswordEvents.NOT_LOGGED_IN, ChangePasswordEvents.LOGIN_INCORRECT -> {
                         Log.d("Debug 3", "plekje 3")
                         closeWaitingDialog()
@@ -192,31 +177,6 @@ class ChangePasswordActivity : JoozdlogActivity() {
         }
     }
 
-    /**
-     * Show password requirements. At this moment just a static string. TODO Maybe generate something from the function that checks it? Or is that just too much fuzz?
-     */
-    private fun showPasswordRequirements() = JoozdlogAlertDialog(activity).show {
-        titleResource = R.string.pass_requirements
-        messageResource = R.string.password_requirements
-        setPositiveButton(android.R.string.ok)
-    }
-
-    private fun ActivityChangePasswordBinding.showPasswordCannotBeEmptyError() {
-        passwordTextInputLayout.error = activity.getString(R.string.password_cannot_be_empty)
-        passwordEditText.requestFocus()
-    }
-    private fun ActivityChangePasswordBinding.showPasswordsDoNotMatchError(){
-        repeatPasswordEditText.setText("")
-        repeatPasswordTextInputLayout.error = activity.getString(R.string.passwords_do_not_match)
-        repeatPasswordEditText.requestFocus()
-    }
-
-    private fun ActivityChangePasswordBinding.showPasswordDoesNotMeetStandardsError(){
-        passwordEditText.setText("")
-        repeatPasswordEditText.setText("")
-        passwordTextInputLayout.error = activity.getString(R.string.password_does_not_meet_standards)
-        passwordEditText.requestFocus()
-    }
 
     /**
      * This should not happen as another dialog is already looking at that
@@ -249,11 +209,31 @@ class ChangePasswordActivity : JoozdlogActivity() {
         setNegativeButton(android.R.string.cancel){
             finish()
         }
+    }
 
+    private fun showCopiedDialog() = JoozdlogAlertDialog(activity).show{
+        titleResource = R.string.changed_password
+        messageResource = R.string.changed_password_message
+        setPositiveButton(android.R.string.ok) { finish() }
+        setNegativeButton(R.string.mail_to_myself){
+            sendLoginEmail()
+            finish()
+
+        }
+    }
+
+
+    private fun sendLoginEmail(){
+        UserManagement.generateLoginLinkIntent()?.let {
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(Intent.createChooser(it, getString(R.string.send_using)))
+            }
+        } ?: toast("ChangePass error 1: No login stored")
     }
 
 
     companion object{
+
         const val NO_INTERNET_DIALOG_TAG = "NO_INTERNET_DIALOG_TAG"
         const val WAITING_DIALOG_TAG = "WAITING_DIALOG_TAG"
     }

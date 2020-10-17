@@ -213,6 +213,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/backupPreferencesTitleTextView" />
 
@@ -391,7 +392,7 @@
                 android:layout_height="wrap_content"
                 android:elevation="0dp"
                 android:padding="16dp"
-                android:text="@string/standard_augmented_time"
+                android:text="@string/signed_in_as"
                 android:textAlignment="textStart"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="16sp"

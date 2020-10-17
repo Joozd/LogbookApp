@@ -105,13 +105,13 @@ class MainActivity : JoozdlogActivity() {
             //TODO decide if this becomes a new activity or a fragment
             true
         }
-        /*
+
         R.id.menu_do_something -> {
             viewModel.menuSelectedDoSomething()
 
             true
 
-        }
+        } /*
 
         R.id.menu_login -> {
             startActivity(Intent(this, ChangePasswordActivity::class.java))
@@ -231,7 +231,10 @@ class MainActivity : JoozdlogActivity() {
              */
             viewModel.notLoggedIn.observe(activity) {
                 if (it && Preferences.useCloud){
-                    showLoginDialog()
+                    if (Preferences.newPassword.isNotEmpty()) // app got killed while changing password
+                        viewModel.tryToFixLogin()
+                    else
+                        showLoginDialog()
                 }
                 else hideLoginDialog()
             }

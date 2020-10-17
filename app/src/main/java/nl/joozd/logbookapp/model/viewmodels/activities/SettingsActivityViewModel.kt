@@ -245,7 +245,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     }
 
     fun copyLoginLinkToClipboard(){
-        UserManagement.gerenateLoginLink()?.let { loginLink ->
+        UserManagement.generateLoginLink()?.let { loginLink ->
             with (App.instance) {
                 (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
                     ClipData.newPlainText(getString(R.string.login_link), loginLink)

@@ -98,6 +98,8 @@ object Preferences {
             Base64.decode(it, Base64.DEFAULT)
         }
 
+    //Placeholder for new password when changing pass. If app gets killed during password change, this will remain set.
+    var newPassword: String by JoozdLogSharedPrefs(sharedPref, "")
 
     var lastUpdateTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
 

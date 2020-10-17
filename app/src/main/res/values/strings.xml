@@ -149,7 +149,12 @@
     <string name="server_problem">Cannot connect to server</string>
     <string name="server_problem_message">The server cannot be reached. It may be down, or your internet may have problems. Please try again later.</string>
     <string name="login_error">Login Error</string>
-    <string name="login_error_message">Saved username/password cannot log in to server. Please try to login first</string>
+    <string name="changed_password">Changed password</string>
+    <string name="changed_password_message">Your password has changed. Please send your login link to yourself to make sure it is saved.</string>
+    <string name="mail_to_myself">Send it to myself</string>
+    <string name="send_using">Pick an app:</string>
+
+    <string name="login_error_message">Cannot log in to server.</string>
     <string name="waiting_for_server">Waiting for server</string>
     <string name="created_account">Created account %1$s.</string>
     <string name="create_login_link_hint">A login link has been placed on your clipboard. Paste it into an email or text message to send it to yourself!\nYou can also create a login link from the settings menu. I strongly suggest you do as it\'s your only way in if you lose your phone!</string>
@@ -234,8 +239,8 @@
     <string name="alreadyHaveAnAccountQuestion">Already have an account?</string>
     <string name="signIn">Sign in</string>
     <string name="signOut">Sign out</string>
-    <string name="youCannotResetPassword">You cannot recover your password! Don\'t forget it!</string>
-    <string name="iDidForgetMyPassword">I forgot my password anyway :(</string>
+    <string name="youCannotResetPassword">Don\'t forget to save your new login link!</string>
+    <string name="use_old_link_if_failed_maybe">If something goes wrong and the new login link doesn\'t work (like when app gets killed halfway), you should be able to log in with the old link. So make sure you have that saved before continuing.</string>
     <string name="make_new_account">Make a new account</string>
     <string name="skipThisStep">Skip this step</string>
     <string name="dontWantCloudSync">Don\'t want to use cloud sync?</string>
@@ -281,12 +286,12 @@
     <string name="pick_backup_interval">Pick backup interval</string>
     <string name="augmented_crew_time_explanation">In case of an augmented crew (3 or more pilots), Joozdlog calculates the time that can be logged for copilots by subtracting this amount of time for each takeoff and landing, allocating the remaining time evenly over the pilots, then adds this time again for every takeoff/landing performed in the pilot\'s seat.</string>
 
-    <string name="change_password">Change Password</string>
+    <string name="change_password">Change Login Credentials</string>
     <string name="create_login_link">Create a login link</string>
     <string name="login_link_created">Login link copied to clipboard!</string>
     <string name="login_link">Joozdlog Login Link</string>
     <string name="create_login_link_explanation">This will create a login link that you can paste in your favorite app (email, sms, notepad, anywhere). If you click that link, it will try to log you in with the username/password currently set on this device.</string>
-    <string name="change_password_explanation">You can use this screen to change your password when you are logged in. Just enter the new password twice and you are good to go.</string>
+    <string name="change_password_explanation">You can use this screen to change your password when you think your login link might have been compromised. A new login link will be created for you to save in your favorite app.</string>
     <string name="new_password">New Password</string>
     <string name="loggings_preferences">Logging Preferences</string>
     <string name="backup_preferences">Backup Preferences</string>

@@ -23,7 +23,18 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.Instant
 
 interface MonthlyOverview {
+    /**
+     * true if this seems to be a valid monthly overview (gross error check)
+     */
     val validMonthlyOverview: Boolean
+
+    /**
+     * List of flights in this Monthly Overview (to be cleaned)
+     */
     val flights: List<Flight>?
+
+    /**
+     * Period that this Monthly Overview applies to
+     */
     val period: ClosedRange<Instant>?
 }

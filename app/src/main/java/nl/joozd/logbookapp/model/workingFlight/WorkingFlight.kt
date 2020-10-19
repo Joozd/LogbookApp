@@ -942,8 +942,8 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
                 LANDING_DAY -> mTakeoffLandings.landingDay
                 LANDING_NIGHT -> mTakeoffLandings.landingNight
                 AUTOLAND -> mTakeoffLandings.autoLand
-                GENERIC_TAKEOFF -> mTakeoffLandings.takeoffDay + mTakeoffLandings.takeoffNight
-                GENERIC_LANDING -> mTakeoffLandings.landingDay + mTakeoffLandings.landingNight
+                GENERIC_TAKEOFF -> takeoffDay + takeoffNight
+                GENERIC_LANDING -> landingDay + landingNight
                 else -> error("Wrong type provided.")
             }
         }
@@ -960,14 +960,16 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
                 AUTOLAND -> mTakeoffLandings.copy(autoLand = maxOf(value, 0))
                 GENERIC_TAKEOFF -> { // This calls the appropriate version of this delegate
                     launchWithLocks(nightTimeMutex, origMutex, takeoffLandingMutex){
+                        Log.d("GENERIC_TAKEOFF", "Setting $thisRef to $value")
                         val day = mOrigin == null || twilightCalculator.itIsDayAt(mOrigin!!, mTimeOut)
+                        Log.d("GENERIC_TAKEOFF", "day == $day")
                         if (day) takeoffDay = value else takeoffNight = value
-
                     }
                     return
                 }
                 GENERIC_LANDING -> {    // This calls the appropriate version of this delegate
                     launchWithLocks(nightTimeMutex, destMutex, takeoffLandingMutex) {
+                        Log.d("GENERIC_LANDING", "Setting $thisRef to $value")
                         val day = mDestination == null || twilightCalculator.itIsDayAt(mDestination!!, mTimeIn)
                         if (day) landingDay = value else landingNight = value
                     }

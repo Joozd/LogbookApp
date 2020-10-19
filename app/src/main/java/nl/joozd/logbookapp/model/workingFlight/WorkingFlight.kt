@@ -185,7 +185,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
 
     private var mTakeoffLandings: TakeoffLandings
         get() = _takeoffLanding.value ?: TakeoffLandings()
-        set(it) = _takeoffLanding.postValue(it)
+        set(it) { _takeoffLanding.value = it } // this needs to be set on main thread or it will cause concurrency problems
 
     private var mName: String
         get() = _name.value!!
@@ -959,20 +959,14 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
                 LANDING_NIGHT -> mTakeoffLandings.copy(landingNight = maxOf(value, 0))
                 AUTOLAND -> mTakeoffLandings.copy(autoLand = maxOf(value, 0))
                 GENERIC_TAKEOFF -> { // This calls the appropriate version of this delegate
-                    launchWithLocks(nightTimeMutex, origMutex, takeoffLandingMutex){
-                        Log.d("GENERIC_TAKEOFF", "Setting $thisRef to $value")
                         val day = mOrigin == null || twilightCalculator.itIsDayAt(mOrigin!!, mTimeOut)
-                        Log.d("GENERIC_TAKEOFF", "day == $day")
                         if (day) takeoffDay = value else takeoffNight = value
-                    }
+
                     return
                 }
                 GENERIC_LANDING -> {    // This calls the appropriate version of this delegate
-                    launchWithLocks(nightTimeMutex, destMutex, takeoffLandingMutex) {
-                        Log.d("GENERIC_LANDING", "Setting $thisRef to $value")
                         val day = mDestination == null || twilightCalculator.itIsDayAt(mDestination!!, mTimeIn)
                         if (day) landingDay = value else landingNight = value
-                    }
                     return
                 }
 
@@ -994,7 +988,6 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
          * connect mediatorLiveData
          */
         _isCopilot.addSource(_isPic){isPic ->
-            Log.d("LALALALA", "yolo yolo swag $isPic")
             _isCopilot.value = (!isPic && _aircraft.value?.type?.multiPilot == true)
         }
         _isCopilot.addSource(_aircraft){ac ->

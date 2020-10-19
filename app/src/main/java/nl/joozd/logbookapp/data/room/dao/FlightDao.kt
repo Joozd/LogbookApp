@@ -35,6 +35,9 @@ interface FlightDao {
     @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 ORDER BY timeOut DESC")
     suspend fun requestValidFlights(): List<FlightData>
 
+    @Query("SELECT * FROM FlightData WHERE timeStamp >= :timeStamp")
+    suspend fun getFLightsWithTimestampAfter(timeStamp: Long): List<FlightData>
+
     @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
     fun requestLiveData(): LiveData<List<FlightData>>
 

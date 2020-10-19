@@ -28,6 +28,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.CreateNewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
@@ -68,7 +69,10 @@ class CreateNewUserActivityViewModel: JoozdlogActivityViewModel() {
                 feedback(CreateNewUserActivityEvents.WAITING_FOR_SERVER)
                 viewModelScope.launch {
                     when (UserManagement.createNewUser(username, generatePassword(16))) {
-                        true -> feedback(CreateNewUserActivityEvents.FINISHED)
+                        true -> {
+                            FlightRepository.getInstance().syncIfNeeded()
+                            feedback(CreateNewUserActivityEvents.FINISHED)
+                        }
                         null -> feedback(CreateNewUserActivityEvents.SERVER_NOT_RESPONDING)
                         false -> feedback(CreateNewUserActivityEvents.USER_EXISTS)
                     }

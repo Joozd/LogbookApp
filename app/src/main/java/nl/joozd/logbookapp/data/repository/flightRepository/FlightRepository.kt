@@ -348,11 +348,13 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * This does two things:
      * first, it updates
+     * TODO fix this documentation
      */
     fun syncIfNeeded(){
         launch {
             val needsServerSync =
                 TimestampMaker.nowForSycPurposes - Preferences.lastUpdateTime > MIN_SYNC_INTERVAL
+                        || getFlightsChangedAfter(Preferences.lastUpdateTime).isNotEmpty()
             val needsCalendarSync =
                 TimestampMaker.nowForSycPurposes - Preferences.lastCalendarCheckTime > MIN_CALENDAR_CHECK_INTERVAL
             if ((needsCalendarSync || needsServerSync) && Preferences.getFlightsFromCalendar) {
@@ -392,6 +394,13 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     suspend fun getAllFlights(): List<Flight> = cachedFlightsList ?: withContext(dispatcher) {
         flightDao.requestValidFlights().map{it.toFlight()}
     }
+
+    /**
+     * Get all flights with a timestamp higher than or equal to [timeStamp]
+     */
+    suspend fun getFlightsChangedAfter(timeStamp: Long) =
+        flightDao.getFLightsWithTimestampAfter(timeStamp).map{it.toFlight()}
+
 
     fun getMostRecentFlightAsync() =
         async(dispatcher){

@@ -30,13 +30,11 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityPdfParserBinding
-
-
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
 import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
-import nl.joozd.logbookapp.ui.activities.newUserActivity.*
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
@@ -57,6 +55,13 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (Preferences.aircraftTypesVersion == 0 || Preferences.airportDbVersion == 0) {
+            toast("Cannot import without Airport DB, try again later")
+            //TODO try to download it first before failing?
+            finish()
+        }
+
 
         Log.d("PdfParserActivity", "started")
         ActivityPdfParserBinding.inflate(layoutInflater).apply {

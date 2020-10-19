@@ -329,13 +329,13 @@ object Cloud {
                         .mapIndexed { index: Int, flight: Flight ->
                             flight.copy(flightID = lowestFixedID + index)
                         }
-                    launch(Dispatchers.Main) {
-                        flightRepository.delete(
-                            newLocalFlights.filter { it.flightID in takenIDs },
-                            sync = false
-                        )
-                        flightRepository.save(fixedNewLocalFlights, sync = false)
-                    }
+
+                    flightRepository.delete(
+                        newLocalFlights.filter { it.flightID in takenIDs },
+                        sync = false
+                    )
+                    flightRepository.save(fixedNewLocalFlights, sync = false)
+
                     fixedLocalFlights.addAll(fixedNewLocalFlights)
 
                     listener(50)
@@ -378,10 +378,10 @@ object Cloud {
 
                     //Save flights with current timestamps and clear `changed` flags
                     //listsner from 85 to 100
-                    launch(Dispatchers.Main) {
-                        flightRepository.save(flightsToSend.map { it.copy(unknownToServer = false) } + newFlightsFromServer,
-                            sync = false) // { listener(85 + it * 15 / 100) } // TODO Listsner not implemented
-                    }
+
+                    flightRepository.save(flightsToSend.map { it.copy(unknownToServer = false) } + newFlightsFromServer,
+                        sync = false) // { listener(85 + it * 15 / 100) } // TODO Listsner not implemented
+
 
                     // Profit!
                     listener(100)

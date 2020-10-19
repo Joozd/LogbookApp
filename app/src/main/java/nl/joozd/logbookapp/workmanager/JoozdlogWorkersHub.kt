@@ -58,15 +58,14 @@ object JoozdlogWorkersHub {
             .build()
 
         with (WorkManager.getInstance(App.instance)){
-            cancelAllWorkByTag(SYNC_TIME)
-            enqueue(task)
+            enqueueUniqueWork(SYNC_TIME, ExistingWorkPolicy.KEEP, task)
         }
     }
 
 
     /**
      * Synchronizes all flights with server (worker uses FlightRepository)
-     * If another Worker is already trying to do that, that one is canceled
+     * If another Worker is already trying to do that, that one is replaced
      */
     fun synchronizeFlights(delay: Boolean = true){
         if (Preferences.useCloud) {
@@ -82,8 +81,7 @@ object JoozdlogWorkersHub {
             }.build()
 
             with(WorkManager.getInstance(App.instance)) {
-                cancelAllWorkByTag(SYNC_FLIGHTS)
-                enqueue(task)
+                enqueueUniqueWork(SYNC_FLIGHTS, ExistingWorkPolicy.REPLACE, task)
             }
         }
     }

@@ -250,12 +250,11 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     fun menuSelectedDoSomething() {
         /**
-         * Current function: Fix names lists
+         * Current function: force full update on next update
          */
-        viewModelScope.launch {
-            UserManagement.createNewUser("joozd", "ban123aan")
-        }
+        Preferences.lastUpdateTime = -1
     }
+
 
     fun menuSelectedRebuild() {
         feedback(MainActivityEvents.NOT_IMPLEMENTED)

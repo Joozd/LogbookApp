@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.workmanager
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +41,7 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
 
 
     override suspend fun doWork(): Result = try {
+        Log.d("SyncFlightsWorker", "Started")
         withContext(Dispatchers.IO) {
             val flightsRepository = FlightRepository.getInstance()
             when(val result = Cloud.syncAllFlights(flightsRepository) { processDownloadProgress(it) }) {
@@ -54,6 +56,7 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
         }
     } finally{
         progress = -1
+        Log.d("SyncFlightsWorker", "Done")
     }
 
     private fun processDownloadProgress(p: Int){

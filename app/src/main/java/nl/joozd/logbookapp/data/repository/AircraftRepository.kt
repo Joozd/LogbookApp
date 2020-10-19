@@ -445,9 +445,7 @@ class AircraftRepository(
             .map{it.registration to it.aircraftType.toUpperCase(Locale.ROOT)} // now we have a list of registrations paired with types
 
         //conflicts is a list of those registrations that match multiple types in flights database
-        val conflicts = findConflicts(regsToCheck).also{
-            Log.d("FOUND CONFLICTS", "Found conflicts: ${it.distinct()}")
-        }
+        val conflicts = findConflicts(regsToCheck)
         val conflictingRegs = conflicts.map{it.first}.toSet()
 
         //Lists of pairs or Reg to Type (one per registration)

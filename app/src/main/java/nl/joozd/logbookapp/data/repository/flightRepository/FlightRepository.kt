@@ -95,11 +95,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     private var cachedFlightsList: List<Flight>?
         get() = _cachedFlights.value
         set(fff){
-            if (Looper.myLooper() == Looper.getMainLooper())
-                _cachedFlights.value = fff
-            else launch{
-                _cachedFlights.value = fff
-            }
+            _cachedFlights.postValue(fff)
         }
 
     private fun requestValidLiveFlightData() =

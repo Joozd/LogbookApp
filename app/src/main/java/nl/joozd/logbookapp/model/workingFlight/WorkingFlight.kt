@@ -410,7 +410,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         mIsSim = isSim
         mIsDual = isDual
         mIsInstructor = isInstructor
-        mIsPic = isPIC.also{ Log.d( "XXXXXXXXXXXXXXXxxx", "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYa")}
+        mIsPic = isPIC
         mIsPF = isPF
         // Async setting of values is always locked to prevent unexpected behavior
         launchWithLocks(origMutex, destMutex, aircraftMutex, nightTimeMutex, multiPilotMutex) {
@@ -423,6 +423,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
             if (isPlanned && autoFill) FlightRepository.getInstance().getMostRecentFlightAsync().await()?.let { f ->
                 calculateNightJob().join() // set night time
                 mIsIfr = f.ifrTime > 0
+                if (mIsIfr) mIfrTime = duration()
                 if (mName.isBlank()) mName = f.name
                 if (mName2.isBlank()) mName2 = f.name2
                 mIsPic = f.isPIC

@@ -66,5 +66,15 @@ fun Instant.plusDays(daysToAdd: Int): Instant = this.plusSeconds(daysToAdd * 864
 fun Instant.toTimeString(zoneOffset: ZoneOffset = ZoneOffset.UTC, formatter: DateTimeFormatter? = DateTimeFormatter.ofPattern("HH:mm")) =
     this.toLocalTime(zoneOffset).format(formatter)
 
+/**
+ * Rounds an instant down to the previous round hour
+ * eg 12:34:56.789 becomes 12:00 on same date
+ * 12:00:00.000 stays 12:00
+ */
+fun Instant.roundHoursDown(): Instant{
+    val localDateTime = LocalDateTime.ofInstant(this, ZoneOffset.UTC)
+    return LocalDateTime.of(localDateTime.toLocalDate(), LocalTime.of(localDateTime.hour, 0)).toInstant(ZoneOffset.UTC)
+}
+
 
 operator fun Instant.minus(other: Instant): Duration = Duration.between(other, this)

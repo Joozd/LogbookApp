@@ -197,6 +197,10 @@ data class Flight(
     //duration in minutes
     val calculatedDuration: Int
         get() = Crew.of(augmentedCrew).getLogTime(Duration.between(this.tOut(), this.tIn()).toMinutes().toInt(), this.isPIC)
+
+    /**
+     * Get the logged duration of a flight in minutes (corrected for augmented crew and [correctedTotalTime])
+     */
     fun duration(): Int = if (correctedTotalTime != 0) correctedTotalTime else calculatedDuration
 
     fun durationString() = FlightDataPresentationFunctions.minutesToHoursAndMinutesString(duration())

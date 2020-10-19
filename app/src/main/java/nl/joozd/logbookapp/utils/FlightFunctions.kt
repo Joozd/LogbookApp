@@ -20,7 +20,7 @@
 package nl.joozd.logbookapp.utils
 
 import android.util.Log
-import nl.joozd.logbookapp.extensions.toInt
+import nl.joozd.logbookapp.extensions.roundHoursDown
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.*
 
@@ -34,8 +34,8 @@ fun reverseFlight(flight: Flight, newID: Int, unknownToServer: Boolean = true): 
         flightnumber = flightnumber.dropLast(1)
     }
     flightnumber = if (flightnumberDigits.isEmpty()) flightnumber else flightnumber+(flightnumberDigits.toLong() + 1).toString()
-    val midnight = LocalDate.now().atStartOfDay().atZone(ZoneOffset.UTC).toInstant().epochSecond
-    return flight.copy(flightID = newID, orig=flight.dest, dest=flight.orig, flightNumber = flightnumber, timeOut = midnight, timeIn = midnight, remarks = "", correctedTotalTime = 0, ifrTime = 0, nightTime = 0, unknownToServer = unknownToServer).also{Log.d("reverseFlight", "$it")}
+    val now = Instant.now().roundHoursDown().epochSecond
+    return flight.copy(flightID = newID, orig=flight.dest, dest=flight.orig, flightNumber = flightnumber, timeOut = now, timeIn = now + 3600, remarks = "", correctedTotalTime = 0, ifrTime = 0, nightTime = 0, unknownToServer = unknownToServer, isPlanned = true).also{Log.d("reverseFlight", "$it")}
 }
 
 

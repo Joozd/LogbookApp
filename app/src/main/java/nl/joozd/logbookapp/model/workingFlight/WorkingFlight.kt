@@ -38,7 +38,6 @@ import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.TwilightCalculator
 import nl.joozd.logbookapp.utils.reverseFlight
 import java.time.*
@@ -123,7 +122,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
 
     private var mFlightNumber: String
         get() = _flightNumber.value!!
-        set(it) = _flightNumber.setValueOnMain(it)
+        set(it) = _flightNumber.postValue(it)
 
     /**
      * Don't set this to null, Only nullable because first use is async.
@@ -132,7 +131,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         get() = _origin.value
         set(it) {
             require (it != null) { "Don't set mOrigin to null" }
-            _origin.setValueOnMain(it)
+            _origin.postValue(it)
         }
 
     /**
@@ -142,59 +141,59 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         get() = _destination.value
         set(it) {
             require (it != null) { "Don't set mDestination to null" }
-            _destination.setValueOnMain(it)
+            _destination.postValue(it)
         }
 
     private var mTimeOut: Instant
         get() = _timeOut.value ?: Instant.EPOCH
         set(it) {
-            _timeOut.setValueOnMain(it)
+            _timeOut.postValue(it)
             twilightCalculator = TwilightCalculator(it)
         }
 
     private var mTimeIn: Instant
         get() = _timeIn.value ?: Instant.EPOCH
-        set(it) = _timeIn.setValueOnMain(it)
+        set(it) = _timeIn.postValue(it)
 
     private var mCorrectedTotalTime: Int
         get() = _correctedTotalTime.value!!
-        set(it) = _correctedTotalTime.setValueOnMain(it)
+        set(it) = _correctedTotalTime.postValue(it)
 
     private var mMultiPilotTime: Int
         get() = _multiPilotTime.value!!
-        set(it) = _multiPilotTime.setValueOnMain(it)
+        set(it) = _multiPilotTime.postValue(it)
 
     private var mNightTime: Int
         get() = _nightTime.value!!
-        set(it) = _nightTime.setValueOnMain(it)
+        set(it) = _nightTime.postValue(it)
 
     private var mIfrTime: Int
         get() = _ifrTime.value!!
-        set(it) = _ifrTime.setValueOnMain(it)
+        set(it) = _ifrTime.postValue(it)
 
     private var mIsIfr: Boolean
         get() = _isIfr.value!!
-        set(it) = _isIfr.setValueOnMain(it)
+        set(it) = _isIfr.postValue(it)
 
     private var mSimTime: Int
         get() = _simTime.value!!
-        set(it) = _simTime.setValueOnMain(it)
+        set(it) = _simTime.postValue(it)
 
     private var mAircraft: Aircraft?
         get() = _aircraft.value
-        set(it) = _aircraft.setValueOnMain(it)
+        set(it) = _aircraft.postValue(it)
 
     private var mTakeoffLandings: TakeoffLandings
         get() = _takeoffLanding.value ?: TakeoffLandings()
-        set(it) = _takeoffLanding.setValueOnMain(it)
+        set(it) = _takeoffLanding.postValue(it)
 
     private var mName: String
         get() = _name.value!!
-        set(it) = _name.setValueOnMain(it)
+        set(it) = _name.postValue(it)
 
     private var mName2: String
         get() = _name2.value!!
-        set(it) = _name2.setValueOnMain(it)
+        set(it) = _name2.postValue(it)
 
     private var mName2List: List<String>
         get() = name2List.value!!
@@ -206,11 +205,11 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
 
     private var mRemarks: String
         get() = _remarks.value!!
-        set(it) = _remarks.setValueOnMain(it)
+        set(it) = _remarks.postValue(it)
 
     private var mSignature: String
         get() = _signature.value!!
-        set(it) = _signature.setValueOnMain(it)
+        set(it) = _signature.postValue(it)
 
     private var mAugmentedCrew: Crew
         get() = crew
@@ -218,35 +217,35 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
 
     private var mIsSim: Boolean
         get() = _isSim.value!!
-        set(it) = _isSim.setValueOnMain(it)
+        set(it) = _isSim.postValue(it)
 
     private var mIsDual: Boolean
         get() = _isDual.value!!
-        set(it) = _isDual.setValueOnMain(it)
+        set(it) = _isDual.postValue(it)
 
     private var mIsInstructor: Boolean
         get() = _isInstructor.value!!
-        set(it) = _isInstructor.setValueOnMain(it)
+        set(it) = _isInstructor.postValue(it)
 
     private var mIsPic: Boolean
         get() = _isPic.value!!
-        set(it) = _isPic.setValueOnMain(it)
+        set(it) = _isPic.postValue(it)
 
     private var mIsPF: Boolean
         get() = _isPF.value!!
-        set(it) = _isPF.setValueOnMain(it)
+        set(it) = _isPF.postValue(it)
 
     private var mIsAutovalues: Boolean
         get() = _isAutoValues.value!!
-        set(it) = _isAutoValues.setValueOnMain(it)
+        set(it) = _isAutoValues.postValue(it)
 
     private var mIsCopilot: Boolean
         get() = _isCopilot.value ?: isPic.value == false && _aircraft.value?.type?.multiPilot == true // generate value if _isCopilot hasn't been observed yet
-        set(it) = _isCopilot.setValueOnMain(it)
+        set(it) = _isCopilot.postValue(it)
 
     private var mDuration: Duration
         get() = _duration.value ?: correctedDuration() // generate value if _duration hasn't been observed yet
-        set(it) = _duration.setValueOnMain(it)
+        set(it) = _duration.postValue(it)
 
 
     /**
@@ -272,7 +271,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * otherwise it will get it from registration
      * If that doesn't fetch a type, it sets type to null
      */
-    private suspend fun setAircraftFromFlight(f: Flight) {
+    private fun setAircraftFromFlight(f: Flight) {
         mAircraft =
             AircraftRepository.getInstance().getAircraftTypeByShortName(f.aircraftType)?.let {
                 Aircraft(registration = f.registration, type = it, source = Aircraft.FLIGHT)
@@ -287,7 +286,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     private suspend fun getAirport(id: String): Airport? =
         AirportRepository.getInstance().getAirportByIcaoIdentOrNull(id)
 
-    private suspend fun getAircraftByRegistration(reg: String) =
+    private fun getAircraftByRegistration(reg: String) =
         AircraftRepository.getInstance().getAircraftFromRegistration(reg)
 
     /**
@@ -330,17 +329,6 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     private fun checkOrigandDestHaveLatLongSet() =
         (mOrigin?.checkIfValidCoordinates() ?: false)
                 && (mDestination?.checkIfValidCoordinates() ?: false)
-
-    /**
-     * Private extension functions
-     */
-    private fun <T> MutableLiveData<T>.setValueOnMain(newValue: T) {
-        if (Looper.myLooper() == Looper.getMainLooper()) value = newValue
-        else launch(Dispatchers.Main) {
-            Log.w("WorkingFlight", "Data implicitly set on main thread")
-            value = newValue
-        }
-    }
 
     /**
      * Gives all data in this WorkingFlight as a [Flight]

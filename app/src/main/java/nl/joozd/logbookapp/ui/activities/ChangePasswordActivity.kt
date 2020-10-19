@@ -200,11 +200,8 @@ class ChangePasswordActivity : JoozdlogActivity() {
     private fun showIncorrectLoginError() = JoozdlogAlertDialog(activity).show{
         titleResource = R.string.login_error
         messageResource = R.string.login_error_message
-        setPositiveButton(R.string.login){
-            supportFragmentManager.commit {
-                add(R.id.changePasswordBackgroundLayout, LoginDialog())
-                addToBackStack(null)
-            }
+        setPositiveButton(R.string.create_account){
+            startActivity(Intent(activity, CreateNewUserActivity::class.java))
         }
         setNegativeButton(android.R.string.cancel){
             finish()

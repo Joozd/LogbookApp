@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.ui.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
@@ -27,6 +28,7 @@ import androidx.activity.viewModels
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityCreateNewUserBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
@@ -91,12 +93,7 @@ class CreateNewUserActivity : JoozdlogActivity() {
 
             signUpButton.setOnClickListener {
                 if (Preferences.acceptedCloudSyncTerms)
-                    JoozdlogAlertDialog(activity).show {
-                        messageResource = R.string.cannot_restore_password
-                        setPositiveButton(android.R.string.ok){
-                            viewModel.signUpClicked(userNameEditText.text.toString())
-                        }
-                    }
+                    viewModel.signUpClicked(userNameEditText.text.toString())
                 else {
                     JoozdlogAlertDialog(activity).show {
                         messageResource = R.string.must_accept_terms
@@ -128,7 +125,7 @@ class CreateNewUserActivity : JoozdlogActivity() {
                         setNotWaitingForServerLayout()
                         showCreateAccountServerError()
                     }
-                    CreateNewUserActivityEvents.FINISHED -> finish()
+                    CreateNewUserActivityEvents.FINISHED -> exportLoginLink()
                 }
             }
 
@@ -193,6 +190,16 @@ class CreateNewUserActivity : JoozdlogActivity() {
         }
 
          */
+
+    private fun exportLoginLink() {
+        UserManagement.generateLoginLinkIntent()?.let {
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(Intent.createChooser(it, getString(R.string.send_using)))
+            }
+        } ?: toast("NewUserActivity error 1: No login stored")
+    }
+
+
 
 
 

@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
 
+import android.util.Log
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
@@ -61,6 +62,7 @@ class KlcCheckinSheet(roster: String?): Roster {
         val lines = sheetAsText!!.split('\n').map{it.trim()}
         val startOfFlightLines = lines.indexOf(START_OF_FLIGHTS)+1
         val flightLines = lines.drop(startOfFlightLines).take(lines.indexOf(END_OF_FLIGHTS) - startOfFlightLines)
+            .filter{it.split(' ')[TIME_OUT].all{it.isDigit()}} // bit hacky way to catch lines that are actually a flight (not RESH/RESK for instance)
         return flightLines.map{line ->
             lineToFlight(line)
         }
@@ -68,6 +70,7 @@ class KlcCheckinSheet(roster: String?): Roster {
 
     //TODO add registration to flight?
     private fun lineToFlight(line: String): Flight{
+        Log.d("Line", line)
         val dateFormat = DateTimeFormatter.ofPattern("ddMMM", Locale.US)
         val timeFormat = DateTimeFormatter.ofPattern("HHmm")
 

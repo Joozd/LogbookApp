@@ -542,11 +542,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      */
     fun setTimeIn(tIn: Instant) =
         launchWithLocks(timeInOutMutex, nightTimeMutex, ifrTimeMutex, multiPilotMutex) {
-            mTimeIn = tIn
-            if (mTimeIn < mTimeOut || (mTimeIn) - mTimeOut > Duration.ofDays(1)
-            ) mTimeIn = mTimeIn.atDate(tIn.toLocalDate()).let {
-                if (it < mTimeOut) it else it.plusDays(1)
-            }
+            mTimeIn = if (tIn > mTimeOut) tIn else tIn + Duration.ofDays(1)
             if (mIsAutovalues) {
                 val setNightJob = calculateNightJob()
                 if (mIsIfr)

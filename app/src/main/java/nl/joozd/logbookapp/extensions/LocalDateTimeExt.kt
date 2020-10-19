@@ -23,6 +23,7 @@ import android.nfc.FormatException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -68,3 +69,9 @@ fun LocalDateTime.roundToMinutes() =
     else this.withSecond(0).plusMinutes(1)
 
 fun LocalDateTime.atDate(date: LocalDate) = LocalDateTime.of(date, this.toLocalTime())
+
+/**
+ * Instant at start of day
+ * @param zoneOffset Zoneoffset, defaults to UTC
+ */
+fun LocalDate.toInstant(zoneOffset: ZoneOffset = java.time.ZoneOffset.UTC) = atStartOfDay(zoneOffset).toInstant()

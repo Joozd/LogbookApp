@@ -201,7 +201,11 @@ data class Flight(
     /**
      * Get the logged duration of a flight in minutes (corrected for augmented crew and [correctedTotalTime])
      */
-    fun duration(): Int = if (correctedTotalTime != 0) correctedTotalTime else calculatedDuration
+    fun duration(): Int = (if (correctedTotalTime != 0) correctedTotalTime else calculatedDuration).let{
+        // if (it > 0) it else ((it+24*60).also { Log.w("FLIGHT", "NEGATIVE TIME, FIXING AT RUNTIME FOR FLIGHT $this") })
+        if (it >= 0 ) it else it+86400
+
+    }
 
     fun durationString() = FlightDataPresentationFunctions.minutesToHoursAndMinutesString(duration())
 

@@ -250,9 +250,15 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     fun menuSelectedDoSomething() {
         /**
-         * Current function: force full update on next update
+         * Current function: fix negative flight times
          */
-        Preferences.lastUpdateTime = -1
+        viewModelScope.launch{
+            flightRepository.getAllFlights().filter{it.timeIn < it.timeOut}.map{
+                it.copy(timeIn = it.timeIn+86400, timeStamp = TimestampMaker.nowForSycPurposes)
+            }.let{
+                flightRepository.save(it)
+            }
+        }
     }
 
 

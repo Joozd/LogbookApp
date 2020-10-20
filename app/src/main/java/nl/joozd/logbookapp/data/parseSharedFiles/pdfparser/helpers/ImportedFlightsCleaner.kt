@@ -37,6 +37,7 @@ import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
+import nl.joozd.logbookapp.utils.TwilightCalculator
 import nl.joozd.logbookapp.utils.reversed
 
 class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private val carrier: String? = null): CoroutineScope by MainScope() {
@@ -56,17 +57,21 @@ class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private va
      * changes IATA to ICAO idents (leaves ICAO alone)
      * changes aircraft type to the one from database
      * completes registration if needed (eg. KLC monthlies state "EXY" which should be "PH-EXY"
+     * Calculates night time if autoFill is true
      * Sets timestamp to now
      */
-    private fun cleanFlight(f: Flight, acMap: Map<String, Aircraft>, iataIcaoMap: Map<String, String>, now: Long): Flight{
+    private suspend fun cleanFlight(f: Flight, acMap: Map<String, Aircraft>, iataIcaoMap: Map<String, String>, now: Long): Flight{
         with (f){
+            val twilightCalculator = TwilightCalculator(timeOut)
+
             val cleanOrig = iataIcaoMap[orig] ?: orig
             val cleanDest = iataIcaoMap[dest] ?: dest
             val bestHitRegistration = registration.findBestHitForRegistration(acMap.keys) // null if no hit found
             val cleanRegistation = bestHitRegistration ?: completeRegistration(registration)
             val cleanType = bestHitRegistration?.let {acMap[it]?.type?.shortName} ?: f.aircraftType
+            val nightTime = if (autoFill) twilightCalculator.minutesOfNight(airportRepository.getAirportByIcaoIdentOrNull(cleanOrig), airportRepository.getAirportByIcaoIdentOrNull(cleanDest), timeOut, timeIn) else 0
 
-            return f.copy(orig = cleanOrig, dest = cleanDest, registration = cleanRegistation, aircraftType = cleanType, timeStamp = now)
+            return f.copy(orig = cleanOrig, dest = cleanDest, registration = cleanRegistation, aircraftType = cleanType, nightTime = nightTime, timeStamp = now)
         }
     }
 

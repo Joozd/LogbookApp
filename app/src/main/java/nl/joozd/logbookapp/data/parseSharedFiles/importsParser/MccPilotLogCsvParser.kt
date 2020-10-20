@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.csvParser
+package nl.joozd.logbookapp.data.parseSharedFiles.importsParser
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers

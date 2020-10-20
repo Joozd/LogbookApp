@@ -30,9 +30,8 @@ import nl.joozd.joozdlogfiletypedetector.CsvTypeDetector
 import nl.joozd.joozdlogfiletypedetector.PdfTypeDetector
 import nl.joozd.joozdlogfiletypedetector.SupportedTypes
 import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
-import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.JoozdlogParser
-import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.MccPilotLogCsvParser
+import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.JoozdlogParser
+import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.MccPilotLogCsvParser
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.MonthlyOverview
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster

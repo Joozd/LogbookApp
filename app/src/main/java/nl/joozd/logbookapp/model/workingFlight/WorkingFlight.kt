@@ -51,6 +51,7 @@ import kotlin.reflect.KProperty
 class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineScope by MainScope() {
 
     private val initialFlight = flight
+
     /***********************************************************************************************
      * Private parts
      ***********************************************************************************************/
@@ -72,33 +73,31 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * Mutable LiveData for feeding UI (possible through it's ViewModels)
      */
     // private val _date = MutableLiveData<LocalDate?>()  comes from timeOut
-    private val _flightNumber = MutableLiveData<String>()
+    private val _flightNumber = MutableLiveData("")
     private val _origin = MutableLiveData<Airport?>()
     private val _destination = MutableLiveData<Airport?>()                  // null while searching
-    private val _timeOut = MutableLiveData<Instant>()                      // date also comes from this
-    private val _timeIn = MutableLiveData<Instant>()
-    private val _correctedTotalTime = MutableLiveData<Int>()
-    private val _multiPilotTime = MutableLiveData<Int>()
-    private val _nightTime = MutableLiveData<Int>()
-    private val _ifrTime = MutableLiveData<Int>()
-    private val _isIfr = MutableLiveData<Boolean>()
-    private val _simTime = MutableLiveData<Int>()
+    private val _timeOut = MutableLiveData(Instant.EPOCH)                      // date also comes from this
+    private val _timeIn = MutableLiveData(Instant.EPOCH)
+    private val _correctedTotalTime = MutableLiveData(0)
+    private val _multiPilotTime = MutableLiveData(0)
+    private val _nightTime = MutableLiveData(0)
+    private val _ifrTime = MutableLiveData(0)
+    private val _isIfr = MutableLiveData(false)
+    private val _simTime = MutableLiveData(0)
     private val _aircraft = MutableLiveData<Aircraft?>()                    // null while searching
-    private val _takeoffLanding =
-        MutableLiveData<TakeoffLandings>()        // consolidated into one observable for consequent updating
-    private val _name = MutableLiveData<String>()
-    private val _name2 =
-        MutableLiveData<String>()                         // [name2List] also comes from this
-    private val _remarks = MutableLiveData<String>()
-    private val _signature =
-        MutableLiveData<String>()                     // [isSigned] also comes from this
+    private val _takeoffLanding = MutableLiveData(TakeoffLandings())        // consolidated into one observable for consequent updating
+    private val _name = MutableLiveData("")
+    private val _name2 = MutableLiveData("")                         // [name2List] also comes from this
+    private val _remarks = MutableLiveData("")
+    private val _signature = MutableLiveData("")                     // [isSigned] also comes from this
+
     // private val _augmentedCrew = MutableLiveData(Crew()) // this is moved to [crew] which will hold all things crew.
-    private val _isSim = MutableLiveData<Boolean>()
-    private val _isDual = MutableLiveData<Boolean>()
-    private val _isInstructor = MutableLiveData<Boolean>()
-    private val _isPic = MutableLiveData<Boolean>()
-    private val _isPF = MutableLiveData<Boolean>()
-    private val _isAutoValues = MutableLiveData<Boolean>()
+    private val _isSim = MutableLiveData(false)
+    private val _isDual = MutableLiveData(false)
+    private val _isInstructor = MutableLiveData(false)
+    private val _isPic = MutableLiveData(false)
+    private val _isPF = MutableLiveData(false)
+    private val _isAutoValues = MutableLiveData(false)
 
     private val _isCopilot = MediatorLiveData<Boolean>()
     private val _duration = MediatorLiveData<Duration>()
@@ -106,12 +105,8 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
 
     /**
      * crew composition:
-     * This is a var so operator functions like ++ and -- can be used
      */
-    @Suppress("SetterBackingFieldAssignment")
     val crew = ObservableCrew()
-
-
 
     /**
      * private vars for getting/setting mutable livedata
@@ -120,129 +115,84 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     private val mDate: LocalDate
         get() = date.value!!
 
-    private var mFlightNumber: String
-        get() = _flightNumber.value!!
-        set(it) = _flightNumber.setOnMainIfAble(it)
+    private var mFlightNumber: String by ShowInLiveData(_flightNumber)
 
     /**
      * Don't set this to null, Only nullable because first use is async.
      */
-    private var mOrigin: Airport?
-        get() = _origin.value
-        set(it) {
-            require (it != null) { "Don't set mOrigin to null" }
-            _origin.setOnMainIfAble(it)
-        }
+    private var mOrigin: Airport? by ShowInLiveDataNullable(_origin) { require(it != null) { "Don't set mOrigin to null" } }
 
     /**
      * Don't set this to null, Only nullable because first use is async.
      */
-    private var mDestination: Airport?
-        get() = _destination.value
-        set(it) {
-            require (it != null) { "Don't set mDestination to null" }
-            _destination.setOnMainIfAble(it)
-        }
+    private var mDestination: Airport? by ShowInLiveDataNullable(_destination) { require(it != null) { "Don't set mDestination to null" } }
 
-    private var mTimeOut: Instant
-        get() = _timeOut.value ?: Instant.EPOCH
-        set(it) {
-            _timeOut.setOnMainIfAble(it)
-            twilightCalculator = TwilightCalculator(it)
-        }
+    private var mTimeOut: Instant by ShowInLiveData(_timeOut) { twilightCalculator = TwilightCalculator(it) }
 
-    private var mTimeIn: Instant
-        get() = _timeIn.value ?: Instant.EPOCH
-        set(it) = _timeIn.setOnMainIfAble(it)
+    private var mTimeIn: Instant by ShowInLiveData(_timeIn)
 
-    private var mCorrectedTotalTime: Int
-        get() = _correctedTotalTime.value!!
-        set(it) = _correctedTotalTime.setOnMainIfAble(it)
+    private var mCorrectedTotalTime: Int by ShowInLiveData(_correctedTotalTime)
 
-    private var mMultiPilotTime: Int
-        get() = _multiPilotTime.value!!
-        set(it) = _multiPilotTime.setOnMainIfAble(it)
+    private var mMultiPilotTime: Int by ShowInLiveData(_multiPilotTime)
 
-    private var mNightTime: Int
-        get() = _nightTime.value!!
-        set(it) = _nightTime.setOnMainIfAble(it)
+    private var mNightTime: Int by ShowInLiveData(_nightTime)
 
-    private var mIfrTime: Int
-        get() = _ifrTime.value!!
-        set(it) = _ifrTime.setOnMainIfAble(it)
+    private var mIfrTime: Int by ShowInLiveData(_ifrTime)
 
-    private var mIsIfr: Boolean
-        get() = _isIfr.value!!
-        set(it) = _isIfr.setOnMainIfAble(it)
+    private var mIsIfr: Boolean by ShowInLiveData(_isIfr)
 
-    private var mSimTime: Int
-        get() = _simTime.value!!
-        set(it) = _simTime.setOnMainIfAble(it)
+    private var mSimTime: Int by ShowInLiveData(_simTime)
 
-    private var mAircraft: Aircraft?
-        get() = _aircraft.value
-        set(it) = _aircraft.setOnMainIfAble(it)
+    private var mAircraft: Aircraft? by ShowInLiveDataNullable(_aircraft)
 
-    private var mTakeoffLandings: TakeoffLandings
-        get() = _takeoffLanding.value ?: TakeoffLandings()
-        set(it) { _takeoffLanding.value = it } // this needs to be set on main thread or it will cause concurrency problems
+    // this needs to be set on main thread or it will cause concurrency problems
+    private var mTakeoffLandings: TakeoffLandings by ShowInLiveData(_takeoffLanding)
 
-    private var mName: String
-        get() = _name.value!!
-        set(it) = _name.setOnMainIfAble(it)
+    private var mName: String by ShowInLiveData(_name)
 
-    private var mName2: String
-        get() = _name2.value!!
-        set(it) = _name2.setOnMainIfAble(it)
+    private var mName2: String by ShowInLiveData(_name2)
 
     private var mName2List: List<String>
-        get() = name2List.value!!
-        set(namesList) { mName2 = namesList.joinToString(";") }
+        get() = mName2.split(";")
+        set(namesList) {
+            mName2 = namesList.joinToString(";")
+        }
 
+    //Not sure what to do with this. Keeping it the way it is for now (setting value directly on main)
+    //Only used in MediatorLivedata itself atm so OK if it stays that way
     private var mAllNamesList: List<String>
         get() = allNamesList.value ?: emptyList()
-        set(namesList) { _allNamesList.value = namesList }
+        set(namesList) {
+            _allNamesList.value = namesList
+        }
 
-    private var mRemarks: String
-        get() = _remarks.value!!
-        set(it) = _remarks.setOnMainIfAble(it)
+    private var mRemarks: String by ShowInLiveData(_remarks)
 
-    private var mSignature: String
-        get() = _signature.value!!
-        set(it) = _signature.setOnMainIfAble(it)
+    private var mSignature: String by ShowInLiveData(_signature)
 
+    //another weird one.
     private var mAugmentedCrew: Crew
         get() = crew
         set(it) = crew.clone(it)
 
-    private var mIsSim: Boolean
-        get() = _isSim.value!!
-        set(it) = _isSim.setOnMainIfAble(it)
+    private var mIsSim: Boolean by ShowInLiveData(_isSim)
 
-    private var mIsDual: Boolean
-        get() = _isDual.value!!
-        set(it) = _isDual.setOnMainIfAble(it)
+    private var mIsDual: Boolean by ShowInLiveData(_isDual)
 
-    private var mIsInstructor: Boolean
-        get() = _isInstructor.value!!
-        set(it) = _isInstructor.setOnMainIfAble(it)
+    private var mIsInstructor: Boolean by ShowInLiveData(_isInstructor)
 
-    private var mIsPic: Boolean
-        get() = _isPic.value!!
-        set(it) = _isPic.setOnMainIfAble(it)
+    private var mIsPic: Boolean by ShowInLiveData(_isPic)
 
-    private var mIsPF: Boolean
-        get() = _isPF.value!!
-        set(it) = _isPF.setOnMainIfAble(it)
+    private var mIsPF: Boolean by ShowInLiveData(_isPF)
 
-    private var mIsAutovalues: Boolean
-        get() = _isAutoValues.value!!
-        set(it) = _isAutoValues.setOnMainIfAble(it)
+    private var mIsAutovalues: Boolean by ShowInLiveData(_isAutoValues)
 
+    //Custom getter. I might thing about this if it becomes a problem.
     private var mIsCopilot: Boolean
         get() = _isCopilot.value ?: isPic.value == false && _aircraft.value?.type?.multiPilot == true // generate value if _isCopilot hasn't been observed yet
         set(it) = _isCopilot.setOnMainIfAble(it)
 
+    //MediatorLiveData. Leave alone for now.
     private var mDuration: Duration
         get() = _duration.value ?: correctedDuration() // generate value if _duration hasn't been observed yet
         set(it) = _duration.setOnMainIfAble(it)
@@ -320,7 +270,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * If correctedTotalTime != 0, it returns that.
      */
     private fun correctedDuration(): Duration = mCorrectedTotalTime.nullIfZero()?.let { Duration.ofMinutes(it.toLong()) }
-        ?: mAugmentedCrew.getLogTime(mTimeIn - mTimeOut,mIsPic)
+        ?: mAugmentedCrew.getLogTime(mTimeIn - mTimeOut, mIsPic)
 
 
     /**
@@ -455,7 +405,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     /**
      * Set Flightnumber. Nothing depends on this so it just gets done without any locks
      */
-    fun setFlightNumber(newFlightNumber: String){
+    fun setFlightNumber(newFlightNumber: String) {
         mFlightNumber = newFlightNumber
     }
 
@@ -464,7 +414,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * If not found, sets [origin] to Airport(ident = orig)
      * if found and [isAutoValues], calculates night time
      */
-    fun setOrig(orig: String) = launchWithLocks(origMutex, nightTimeMutex){
+    fun setOrig(orig: String) = launchWithLocks(origMutex, nightTimeMutex) {
         setOriginFromId(AirportRepository.getInstance().searchAirportOnce(orig)?.ident ?: orig)
     }
 
@@ -473,9 +423,9 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * if found and [isAutoValues], calculates night time
      * Can be null but shouldn't
      */
-    fun setOrig(orig: Airport?) = launchWithLocks(origMutex, nightTimeMutex){
+    fun setOrig(orig: Airport?) = launchWithLocks(origMutex, nightTimeMutex) {
         mOrigin = orig ?: Airport(ident = "null")
-        if (mIsAutovalues){
+        if (mIsAutovalues) {
             calculateNightJob().join()
             setDayOrNightForTakeoffLandings()
         }
@@ -486,7 +436,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * If not found, sets [origin] to to Airport(ident = dest)
      * if found and [isAutoValues], calculates night time
      */
-    fun setDest(dest: String) = launchWithLocks(destMutex, nightTimeMutex){
+    fun setDest(dest: String) = launchWithLocks(destMutex, nightTimeMutex) {
         setDestFromId(AirportRepository.getInstance().searchAirportOnce(dest)?.ident ?: dest)
     }
 
@@ -495,9 +445,9 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * if found and [isAutoValues], calculates night time
      * Can be null but shouldn't
      */
-    fun setDest(dest: Airport?) = launchWithLocks(destMutex, nightTimeMutex){
+    fun setDest(dest: Airport?) = launchWithLocks(destMutex, nightTimeMutex) {
         mDestination = dest ?: Airport(ident = "null")
-        if (mIsAutovalues){
+        if (mIsAutovalues) {
             calculateNightJob().join()
             setDayOrNightForTakeoffLandings()
         }
@@ -631,9 +581,12 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
             val repo = AircraftRepository.getInstance()
             if (registration == null && type == null) return@launchWithLocks
             mAircraft =
-                if (type == null) repo.getAircraftFromRegistration(registration)?: Aircraft(registration ?: "") else Aircraft(
+                if (type == null) repo.getAircraftFromRegistration(registration) ?: Aircraft(registration ?: "") else Aircraft(
                     registration = registration ?: mAircraft?.registration ?: "",
-                    type = repo.getAircraftTypeByShortName(type) ?: AircraftType("", type, multiPilot = false, multiEngine = false), // If type not found, use entered data as type shortname (which is what will end up in logbook)
+                    type = repo.getAircraftTypeByShortName(type) ?: AircraftType("",
+                                                                                 type,
+                                                                                 multiPilot = false,
+                                                                                 multiEngine = false), // If type not found, use entered data as type shortname (which is what will end up in logbook)
                     source = Aircraft.FLIGHT
                 )
             if (mIsAutovalues) mMultiPilotTime =
@@ -645,7 +598,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * If [aircraft] is null, it will reset from flight (this can happen when AircraftPicker dialog wants to reset after being initialized before [mAircraft] was filled.)
      * @see [setAircraft] above
      */
-    fun setAircraft(aircraft: Aircraft?){
+    fun setAircraft(aircraft: Aircraft?) {
         if (aircraft != null) setAircraft(aircraft.registration, aircraft.type?.shortName)
         else {
             launchWithLocks(multiPilotMutex, aircraftMutex) {
@@ -751,7 +704,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     /**
      * Sets IFR time to 0 or to whole flight
      */
-    fun setIsIfr(isIFR: Boolean) = launchWithLocks(ifrTimeMutex){
+    fun setIsIfr(isIFR: Boolean) = launchWithLocks(ifrTimeMutex) {
         mIsIfr = isIFR
         mIfrTime = if (isIFR) mDuration.toMinutes().toInt() else 0
     }
@@ -772,7 +725,6 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     }
 
 
-
     /**
      * sets isPF. If mAugmentedCrew.crewSize > 2 it will also adjust all times
      * (shortcut do doing that is resetting timeOut to itself so it will recalculate)
@@ -789,6 +741,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         launchWithLocks(ifrTimeMutex, multiPilotMutex, nightTimeMutex, takeoffLandingMutex) {
             mIsAutovalues = autovalues
             if (autovalues) {
+                mCorrectedTotalTime = 0
                 val setNightJob = calculateNightJob()
                 if (mIsIfr) {
                     mIfrTime = mDuration.toMinutes().toInt()
@@ -805,7 +758,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     /**
      * Set TakeoffLandings to a TakeoffLandings object, eg for undo purposes
      */
-    fun setTakeoffLandings(takeoffLandings: TakeoffLandings){
+    fun setTakeoffLandings(takeoffLandings: TakeoffLandings) {
         mTakeoffLandings = takeoffLandings
     }
 
@@ -831,8 +784,8 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
             Log.w("WorkingFlight", "Null values in WorkingFlight, not saving:\n${ex.printStackTrace()}")
             null
         }
-        flightToSave?.let{f ->
-            with (FlightRepository.getInstance()){
+        flightToSave?.let { f ->
+            with(FlightRepository.getInstance()) {
                 save(f.prepareForSave(), notify = true)
                 undoSaveFlight = if (newFlight) null else originalFlight
 
@@ -876,7 +829,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         get() = _ifrTime
 
     val isIfr: LiveData<Boolean>
-    get() = _isIfr
+        get() = _isIfr
 
     val simTime: LiveData<Int>
         get() = _simTime
@@ -959,26 +912,26 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
                 LANDING_NIGHT -> mTakeoffLandings.copy(landingNight = maxOf(value, 0))
                 AUTOLAND -> mTakeoffLandings.copy(autoLand = maxOf(value, 0))
                 GENERIC_TAKEOFF -> { // This calls the appropriate version of this delegate
-                        val day = mOrigin == null || twilightCalculator.itIsDayAt(mOrigin!!, mTimeOut)
-                        if (day) {
-                            takeoffDay = value
-                            takeoffNight = 0
-                        } else {
-                            takeoffDay = 0
-                            takeoffNight = value
-                        }
+                    val day = mOrigin == null || twilightCalculator.itIsDayAt(mOrigin!!, mTimeOut)
+                    if (day) {
+                        takeoffDay = value
+                        takeoffNight = 0
+                    } else {
+                        takeoffDay = 0
+                        takeoffNight = value
+                    }
 
                     return
                 }
                 GENERIC_LANDING -> {    // This calls the appropriate version of this delegate
-                        val day = mDestination == null || twilightCalculator.itIsDayAt(mDestination!!, mTimeIn)
-                        if (day) {
-                            landingDay = value
-                            landingNight = 0
-                        } else {
-                            landingDay = 0
-                            landingNight = value
-                        }
+                    val day = mDestination == null || twilightCalculator.itIsDayAt(mDestination!!, mTimeIn)
+                    if (day) {
+                        landingDay = value
+                        landingNight = 0
+                    } else {
+                        landingDay = 0
+                        landingNight = value
+                    }
                     return
                 }
 
@@ -989,6 +942,32 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
             }
         }
     }
+
+    /**
+     * Connects a variable to a liveData which will be updated whenever the variable is (possibly with a small delay as postValue is used)
+     */
+    private inner class ShowInLiveData<T: Any>(val target: MutableLiveData<T>, private val extraWork: ((T) -> Unit)? = null) {
+        private var field = target.value
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): T = field!!
+
+        operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+            field = value
+            extraWork?.let {w ->  w(value) }
+            target.postValue(value)
+        }
+    }
+
+    private inner class ShowInLiveDataNullable<T>(val target: MutableLiveData<T?>, private val extraWork: ((T?) -> Unit)? = null) {
+        private var field = target.value
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): T? = field
+
+        operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+            field = value
+            extraWork?.let {w ->  w(value) }
+            target.postValue(value)
+        }
+    }
+
 
     private fun <T> MutableLiveData<T>.setOnMainIfAble(v: T){
         if(Looper.myLooper() == Looper.getMainLooper())

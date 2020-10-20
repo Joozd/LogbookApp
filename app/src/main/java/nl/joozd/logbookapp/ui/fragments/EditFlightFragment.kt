@@ -49,8 +49,6 @@ import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
 
-//TODO fix crash upon entering a non-existent registration and clicking "save" (dialog gets opened but workingFlight gets closed(null))
-//TODO  Need to decide if I want to discard or show popup or something
 class EditFlightFragment: JoozdlogFragment(){
     private val viewModel: NewEditFlightFragmentViewModel by viewModels()
 

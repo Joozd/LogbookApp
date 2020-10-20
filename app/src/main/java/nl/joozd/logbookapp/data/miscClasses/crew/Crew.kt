@@ -19,9 +19,7 @@
 
 package nl.joozd.logbookapp.data.miscClasses.crew
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.getBit
 import nl.joozd.logbookapp.extensions.setBit
 import nl.joozd.logbookapp.extensions.toInt
@@ -130,5 +128,7 @@ open class Crew(iCrewSize: Int = 2,
             iTakeoffLandingTimes = value.ushr(6)
         )
         fun of(crewSize: Int, didTakeoff: Boolean, didLanding: Boolean, nonStandardTimes: Int) = Crew(crewSize,didTakeoff,didLanding,nonStandardTimes)
+
+        fun asCoco(): Crew = Crew(3, iDidTakeoff = false, iDidLanding = false, iTakeoffLandingTimes = Preferences.standardTakeoffLandingTimes)
     }
 }

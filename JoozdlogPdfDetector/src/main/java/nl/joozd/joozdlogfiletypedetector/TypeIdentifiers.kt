@@ -21,13 +21,14 @@ package nl.joozd.joozdlogfiletypedetector
 
 /**
  * Identify type of file by this:
+ * supports following pairs:
  * pair(# of line to look at, text to find there)
+ * Pair<Identifier string, [strict] (true means whole line needs to match, false means identifier IN line)
  */
 object TypeIdentifiers {
     val KLC_ROSTER = 1 to "Individual duty plan for"
     val KLC_MONTHLY = 0 to "MONTHLY OVERVIEW"
     val KLM_ICA_ROSTER = 0 to "CREW ROSTER FROM "
-    val KLM_ICA_MONTHLY = 0 to "__NOT_IMPLEMENTED__"
+    val KLM_ICA_MONTHLY = "VOOR VRAGEN OVER VLIEGUREN: FLIGHTCREWSUPPORT@KLM.COM" to false
     val KLC_BRIEFING_SHEET = 0 to "Cockpit Briefing for"
-
 }

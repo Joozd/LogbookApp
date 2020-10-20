@@ -45,6 +45,7 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.utils.CoroutineTimerTask
 import nl.joozd.logbookapp.utils.TimestampMaker
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.time.*
 import java.util.*
 
@@ -250,8 +251,11 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     fun menuSelectedDoSomething() {
         /**
-         * Current function: fix negative flight times
+         * Current function: force update aircraft/airports on next update
          */
+        JoozdlogWorkersHub.periodicSynchronizeAircraftTypes(false, true)
+
+        /*
         viewModelScope.launch{
             flightRepository.getAllFlights().filter{it.timeIn < it.timeOut}.map{
                 it.copy(timeIn = it.timeIn+86400, timeStamp = TimestampMaker.nowForSycPurposes)
@@ -259,6 +263,8 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
                 flightRepository.save(it)
             }
         }
+
+         */
     }
 
 

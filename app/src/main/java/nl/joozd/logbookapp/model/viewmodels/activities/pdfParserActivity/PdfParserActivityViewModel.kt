@@ -31,6 +31,7 @@ import nl.joozd.joozdlogfiletypedetector.PdfTypeDetector
 import nl.joozd.joozdlogfiletypedetector.SupportedTypes
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.JoozdlogParser
+import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.LogTenProParser
 import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.MccPilotLogCsvParser
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.MonthlyOverview
@@ -97,11 +98,16 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                             parseMonthly(KlmMonthlyParser(it))
                         } ?: feedback(PdfParserActivityEvents.ERROR)
 
-
                         SupportedTypes.MCC_PILOT_LOG_LOGBOOK -> uri?.getInputStream()?.use {
                             feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
                             parseCsv(MccPilotLogCsvParser.ofInputStream(it))
                         }
+
+                        SupportedTypes.LOGTEN_PRO_LOGBOOK -> uri?.getInputStream()?.use{
+                            feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
+                            parseCsv(LogTenProParser.ofInputStream(it))
+                        }
+
                         SupportedTypes.JOOZDLOG_CSV_BACKUP -> uri?.getInputStream()?.use {
                             feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
                             parseCsv(JoozdlogParser.ofInputStream(it))
@@ -138,7 +144,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             val mimeType = App.instance.contentResolver.getType(uri) ?: "NONE"
             val detector = when {
                 "application/pdf" in mimeType -> PdfTypeDetector(inputStream)
-                "text/csv" in mimeType || "text/comma-separated-values" in mimeType -> CsvTypeDetector(inputStream)
+                "text/csv" in mimeType || "text/comma-separated-values" in mimeType || "text/plain" in mimeType-> CsvTypeDetector(inputStream)
                 else -> {
                     feedback(PdfParserActivityEvents.ERROR).apply{
                         putString("Error 2: ${App.instance.contentResolver.getType(uri)}")
@@ -219,7 +225,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     }
 
 
-    private suspend fun parseCsv(parser: ImportedLogbook, lowestId: Int = 0) = withContext(Dispatchers.Default) {
+    private suspend fun parseCsv(parser: ImportedLogbook) = withContext(Dispatchers.Default) {
         with(parser) {
             if (!validImportedLogbook) {
                 feedback(PdfParserActivityEvents.NOT_A_KNOWN_LOGBOOK)
@@ -233,19 +239,26 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                         }
                     }
                 }
-                foundFlights = ImportedFlightsCleaner(fff.filterNotNull()).cleanFlights().also {
-                    if (it == null) {
-                        Log.w(
-                            "PdfParserActivity",
-                            "MccPilotLogCsvParser.flights null after it wasn't ????"
+                foundFlights = (
+                        if (parser.needsCleaning)
+                            ImportedFlightsCleaner(fff.filterNotNull()).cleanFlights()
+                        else
+                            fff.filterNotNull()
                         )
-                        feedback(PdfParserActivityEvents.ERROR).apply {
-                            putString("Error 5")
+                    .also {
+                        if (it == null) {
+                            Log.w(
+                                "PdfParserActivity",
+                                "MccPilotLogCsvParser.flights null after it wasn't ????"
+                            )
+                            feedback(PdfParserActivityEvents.ERROR).apply {
+                                putString("Error 5")
+                            }
+                            return@withContext
                         }
-                        return@withContext
+
+                        processFlights(it, false)
                     }
-                    processFlights(it, false)
-                }
             }
         }
     }

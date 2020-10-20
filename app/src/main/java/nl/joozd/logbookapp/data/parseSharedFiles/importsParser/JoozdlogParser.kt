@@ -27,6 +27,8 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.io.InputStream
 
 class JoozdlogParser(private val lines: List<String>): ImportedLogbook {
+    override val needsCleaning = false
+
     private val firstLines = listOf (FlightsRepositoryExporter.FIRST_LINE_V4, FlightsRepositoryExporter.FIRST_LINE_V5)
 
     override val validImportedLogbook: Boolean

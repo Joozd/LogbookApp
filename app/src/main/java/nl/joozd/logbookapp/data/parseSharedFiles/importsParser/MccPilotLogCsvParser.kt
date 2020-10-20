@@ -42,6 +42,7 @@ import java.time.ZoneOffset
  * @param lowestId: Lowest usable ID to avoid conflicts with database
  */
 class MccPilotLogCsvParser(private val csvLines: List<String>, private val lowestId: Int = 0): ImportedLogbook{
+    override val needsCleaning = true
 
     /*********************************************************************************************
      * Private parts

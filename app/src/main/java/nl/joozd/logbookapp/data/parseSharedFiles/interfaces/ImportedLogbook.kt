@@ -22,6 +22,13 @@ package nl.joozd.logbookapp.data.parseSharedFiles.interfaces
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
 interface ImportedLogbook {
+    /**
+     * Set to true if flights need cleaning (iata to icao, registrations matched to types,
+     * night times calculated
+     * @see ImportedFlightsCleaner
+     */
+    val needsCleaning: Boolean
+
     val validImportedLogbook: Boolean
 
     /**

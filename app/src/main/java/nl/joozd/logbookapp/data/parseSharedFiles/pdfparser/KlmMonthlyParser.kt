@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
+import nl.joozd.logbookapp.data.miscClasses.crew.Crew
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.MonthlyOverview
 import nl.joozd.logbookapp.extensions.toInstant
 import nl.joozd.logbookapp.extensions.toLocalDate
@@ -32,6 +33,10 @@ import java.time.format.DateTimeFormatter
 
 /**
  * Recommend to create this async as it has some blocking code in constructor (reading of inputstream)
+ *
+ * Parser for KLM Montlhly Overview.
+ * Will create 2 man flights for CP and FO, 3 man flight for SO
+ * All flights are assumed IFR, and as PNF
  */
 class KlmMonthlyParser(inputStream: InputStream): MonthlyOverview {
 
@@ -88,10 +93,12 @@ class KlmMonthlyParser(inputStream: InputStream): MonthlyOverview {
         val tIn = LocalDateTime.of(date, timeIn).toInstant(ZoneOffset.UTC).epochSecond.let{
             if (it > tOut) it else it + ONE_DAY
         }
+        val duration = Duration.between(Instant.ofEpochSecond(tOut), Instant.ofEpochSecond(tIn)).toMinutes().toInt()
+        val crew = if (function == COCO) Crew.asCoco() else Crew()
+        val isPIC = function == CAPTAIN
+        val logTime = crew.getLogTime(duration, isPIC)
 
-        val coPilots= listOf(COCO, COPILOT)
-
-        Flight(-1, flightNumber = flightNumber,  orig = orig, dest = dest, timeOut = tOut, timeIn = tIn, registration = registration, isPIC = function == CAPTAIN, isCoPilot = function in coPilots)
+        Flight(-1, flightNumber = flightNumber, orig = orig, dest = dest, timeOut = tOut, timeIn = tIn, ifrTime = logTime, multiPilotTime = logTime, registration = registration, isPIC = isPIC, isCoPilot = !isPIC, augmentedCrew = crew.toInt(), isPlanned = false)
     }
 
     private fun makeFlights() = flightLine.findAll(text).map{

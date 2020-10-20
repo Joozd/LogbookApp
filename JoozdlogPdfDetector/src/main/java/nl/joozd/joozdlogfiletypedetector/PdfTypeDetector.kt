@@ -39,10 +39,6 @@ class PdfTypeDetector(inputStream: InputStream): FileTypeDetector {
     override val debugData: String
         get() = firstPage
 
-    val isRoster = typeOfFile in listOf(SupportedTypes.KLC_ROSTER, SupportedTypes.KLM_ICA_ROSTER)
-    val isMonthly = typeOfFile in listOf(SupportedTypes.KLC_MONTHLY, SupportedTypes.KLM_ICA_MONTHLY)
-
-
 
     /**
      * Returns the type of PDF found, or UNSUPPORTED
@@ -54,12 +50,29 @@ class PdfTypeDetector(inputStream: InputStream): FileTypeDetector {
             match(lines, TypeIdentifiers.KLC_BRIEFING_SHEET) -> SupportedTypes.KLC_CHECKIN_SHEET
             match(lines, TypeIdentifiers.KLC_MONTHLY) -> SupportedTypes.KLC_MONTHLY
             match(lines, TypeIdentifiers.KLM_ICA_ROSTER) -> SupportedTypes.KLM_ICA_ROSTER // this can cascade further if other types also start wiith this
+            match(lines, TypeIdentifiers.KLM_ICA_MONTHLY) -> SupportedTypes.KLM_ICA_MONTHLY
             else -> SupportedTypes.UNSUPPORTED_PDF
         }
     }
 
-    private fun match(lines: List<String>, identifier: Pair<Int, String>) = lines[identifier.first].startsWith(identifier.second)
+    /**
+     * This needs to know which line to look at
+     */
+    private fun match(lines: List<String>, identifier: Pair<*, *>) = when {
+        identifier.first is Int && identifier.second is String -> lines[identifier.first as Int].startsWith(identifier.second as String)
+        identifier.first is String && identifier.second is Boolean -> matchAnyLine(lines, identifier.first as String, identifier.second as Boolean)
+        else -> throw(IllegalArgumentException("identifier pair not supported"))
+    }
+
+    /**
+     * This will identify
+     * @param strict If set to true, line will need to be an exact match (will be trimmed though. If false, 'in' is enough
+     * @param lines Lines to check
+     * @param identifier String to check against those lines
+     */
+    private fun matchAnyLine(lines: List<String>, identifier: String, strict: Boolean = false) = if (strict) lines.any{identifier.trim() == it.trim()} else  lines.any{identifier in it}
 
     private fun checkExtraLine(lines: List<String>, extraLine: String): Boolean = extraLine in lines.joinToString("\n")
+
 
 }

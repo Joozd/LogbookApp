@@ -122,7 +122,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
 
     private var mFlightNumber: String
         get() = _flightNumber.value!!
-        set(it) = _flightNumber.postValue(it)
+        set(it) = _flightNumber.setOnMainIfAble(it)
 
     /**
      * Don't set this to null, Only nullable because first use is async.
@@ -131,7 +131,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         get() = _origin.value
         set(it) {
             require (it != null) { "Don't set mOrigin to null" }
-            _origin.postValue(it)
+            _origin.setOnMainIfAble(it)
         }
 
     /**
@@ -141,47 +141,47 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         get() = _destination.value
         set(it) {
             require (it != null) { "Don't set mDestination to null" }
-            _destination.postValue(it)
+            _destination.setOnMainIfAble(it)
         }
 
     private var mTimeOut: Instant
         get() = _timeOut.value ?: Instant.EPOCH
         set(it) {
-            _timeOut.postValue(it)
+            _timeOut.setOnMainIfAble(it)
             twilightCalculator = TwilightCalculator(it)
         }
 
     private var mTimeIn: Instant
         get() = _timeIn.value ?: Instant.EPOCH
-        set(it) = _timeIn.postValue(it)
+        set(it) = _timeIn.setOnMainIfAble(it)
 
     private var mCorrectedTotalTime: Int
         get() = _correctedTotalTime.value!!
-        set(it) = _correctedTotalTime.postValue(it)
+        set(it) = _correctedTotalTime.setOnMainIfAble(it)
 
     private var mMultiPilotTime: Int
         get() = _multiPilotTime.value!!
-        set(it) = _multiPilotTime.postValue(it)
+        set(it) = _multiPilotTime.setOnMainIfAble(it)
 
     private var mNightTime: Int
         get() = _nightTime.value!!
-        set(it) = _nightTime.postValue(it)
+        set(it) = _nightTime.setOnMainIfAble(it)
 
     private var mIfrTime: Int
         get() = _ifrTime.value!!
-        set(it) = _ifrTime.postValue(it)
+        set(it) = _ifrTime.setOnMainIfAble(it)
 
     private var mIsIfr: Boolean
         get() = _isIfr.value!!
-        set(it) = _isIfr.postValue(it)
+        set(it) = _isIfr.setOnMainIfAble(it)
 
     private var mSimTime: Int
         get() = _simTime.value!!
-        set(it) = _simTime.postValue(it)
+        set(it) = _simTime.setOnMainIfAble(it)
 
     private var mAircraft: Aircraft?
         get() = _aircraft.value
-        set(it) = _aircraft.postValue(it)
+        set(it) = _aircraft.setOnMainIfAble(it)
 
     private var mTakeoffLandings: TakeoffLandings
         get() = _takeoffLanding.value ?: TakeoffLandings()
@@ -189,11 +189,11 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
 
     private var mName: String
         get() = _name.value!!
-        set(it) = _name.postValue(it)
+        set(it) = _name.setOnMainIfAble(it)
 
     private var mName2: String
         get() = _name2.value!!
-        set(it) = _name2.postValue(it)
+        set(it) = _name2.setOnMainIfAble(it)
 
     private var mName2List: List<String>
         get() = name2List.value!!
@@ -205,11 +205,11 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
 
     private var mRemarks: String
         get() = _remarks.value!!
-        set(it) = _remarks.postValue(it)
+        set(it) = _remarks.setOnMainIfAble(it)
 
     private var mSignature: String
         get() = _signature.value!!
-        set(it) = _signature.postValue(it)
+        set(it) = _signature.setOnMainIfAble(it)
 
     private var mAugmentedCrew: Crew
         get() = crew
@@ -217,35 +217,35 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
 
     private var mIsSim: Boolean
         get() = _isSim.value!!
-        set(it) = _isSim.postValue(it)
+        set(it) = _isSim.setOnMainIfAble(it)
 
     private var mIsDual: Boolean
         get() = _isDual.value!!
-        set(it) = _isDual.postValue(it)
+        set(it) = _isDual.setOnMainIfAble(it)
 
     private var mIsInstructor: Boolean
         get() = _isInstructor.value!!
-        set(it) = _isInstructor.postValue(it)
+        set(it) = _isInstructor.setOnMainIfAble(it)
 
     private var mIsPic: Boolean
         get() = _isPic.value!!
-        set(it) = _isPic.postValue(it)
+        set(it) = _isPic.setOnMainIfAble(it)
 
     private var mIsPF: Boolean
         get() = _isPF.value!!
-        set(it) = _isPF.postValue(it)
+        set(it) = _isPF.setOnMainIfAble(it)
 
     private var mIsAutovalues: Boolean
         get() = _isAutoValues.value!!
-        set(it) = _isAutoValues.postValue(it)
+        set(it) = _isAutoValues.setOnMainIfAble(it)
 
     private var mIsCopilot: Boolean
         get() = _isCopilot.value ?: isPic.value == false && _aircraft.value?.type?.multiPilot == true // generate value if _isCopilot hasn't been observed yet
-        set(it) = _isCopilot.postValue(it)
+        set(it) = _isCopilot.setOnMainIfAble(it)
 
     private var mDuration: Duration
         get() = _duration.value ?: correctedDuration() // generate value if _duration hasn't been observed yet
-        set(it) = _duration.postValue(it)
+        set(it) = _duration.setOnMainIfAble(it)
 
 
     /**
@@ -960,13 +960,25 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
                 AUTOLAND -> mTakeoffLandings.copy(autoLand = maxOf(value, 0))
                 GENERIC_TAKEOFF -> { // This calls the appropriate version of this delegate
                         val day = mOrigin == null || twilightCalculator.itIsDayAt(mOrigin!!, mTimeOut)
-                        if (day) takeoffDay = value else takeoffNight = value
+                        if (day) {
+                            takeoffDay = value
+                            takeoffNight = 0
+                        } else {
+                            takeoffDay = 0
+                            takeoffNight = value
+                        }
 
                     return
                 }
                 GENERIC_LANDING -> {    // This calls the appropriate version of this delegate
                         val day = mDestination == null || twilightCalculator.itIsDayAt(mDestination!!, mTimeIn)
-                        if (day) landingDay = value else landingNight = value
+                        if (day) {
+                            landingDay = value
+                            landingNight = 0
+                        } else {
+                            landingDay = 0
+                            landingNight = value
+                        }
                     return
                 }
 
@@ -976,6 +988,12 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
                 mTakeoffLandings = it
             }
         }
+    }
+
+    private fun <T> MutableLiveData<T>.setOnMainIfAble(v: T){
+        if(Looper.myLooper() == Looper.getMainLooper())
+            value = v
+        else postValue(v)
     }
 
 
@@ -1043,7 +1061,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
             val f = repo.getMostRecentFlightAsync().await()?.let { f ->
                 reverseFlight(f, idAsync.await() + 1)
             } ?: Flight(idAsync.await() + 1)
-            return WorkingFlight(f, newFlight = true)
+            return withContext(Dispatchers.Main){WorkingFlight(f, newFlight = true)}
         }
     }
 }

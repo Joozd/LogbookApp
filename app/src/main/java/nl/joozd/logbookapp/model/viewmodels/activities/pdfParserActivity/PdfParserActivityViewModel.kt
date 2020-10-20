@@ -34,6 +34,7 @@ import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
 import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.JoozdlogParser
 import nl.joozd.logbookapp.data.parseSharedFiles.csvParser.MccPilotLogCsvParser
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.MonthlyOverview
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcCheckinSheet
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -42,9 +43,11 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivity
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcRoster
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcMonthlyParser
+import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlmMonthlyParser
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.helpers.ImportedFlightsCleaner
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.extensions.*
+import nl.joozd.logbookapp.ui.utils.toast
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.time.Instant
@@ -63,10 +66,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     private fun run() {
         intent?.let {
             viewModelScope.launch {
-                val uri = (it.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri ?: it.data).also{uri ->
-                    Log.d("HALLOOOO", "$uri")
-                    Log.d("HALLOOOO", "${it.data}")
-                }
+                val uri = (it.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri ?: it.data)
 
                 getTypeDetector(uri)?.let { typeDetector ->
                     //check if it was actually a supported file
@@ -87,8 +87,17 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                         } ?: feedback(PdfParserActivityEvents.ERROR)
 
                         SupportedTypes.KLC_MONTHLY -> uri?.getInputStream()?.use {
-                            parseKlcMonthly(it)
+                            parseMonthly(KlcMonthlyParser(it))
                         } ?: feedback(PdfParserActivityEvents.ERROR)
+
+                        SupportedTypes.KLM_ICA_ROSTER -> {
+                            toast("Sorry, KLM Roster Not supported atm, use ical calendar")
+                        }
+
+                        SupportedTypes.KLM_ICA_MONTHLY -> uri?.getInputStream()?.use {
+                            parseMonthly(KlmMonthlyParser(it))
+                        } ?: feedback(PdfParserActivityEvents.ERROR)
+
 
                         SupportedTypes.MCC_PILOT_LOG_LOGBOOK -> uri?.getInputStream()?.use {
                             feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
@@ -100,8 +109,11 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                         }
 
                         SupportedTypes.UNSUPPORTED_PDF, SupportedTypes.UNSUPPORTED_CSV -> {
-                            Log.d("GOT PDF:", "\n\n${typeDetector.debugData}\n\n")
+                            Log.d("GOT FILE:", "\n\n${typeDetector.debugData}\n\n")
+                            toast("Unsupported file")
+                            feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
                         }
+                        
                         else -> feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
                     }
                 }
@@ -167,66 +179,22 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         return true
     }
 
-    private suspend fun parseKlcMonthly(inputStream: InputStream) {
-        //TODO: move Strings to resource file
-        with (KlcMonthlyParser(inputStream)){
-            if (!validMonthlyOverview){
-                feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
+    private suspend fun parseMonthly(monthlyOverview: MonthlyOverview) = with(monthlyOverview){
+        if (!validMonthlyOverview){
+            feedback(PdfParserActivityEvents.NOT_A_KNOWN_ROSTER)
+            return
+        }
+        foundFlights = ImportedFlightsCleaner(flights).cleanFlights().also {
+            if (it == null) {
+                Log.w("PdfParserActivity", "KlcMonthlyParser.flights == null")
+                feedback(PdfParserActivityEvents.ERROR).apply{
+                    putString("Error 4")
+                }
                 return
             }
-            foundFlights = ImportedFlightsCleaner(flights).cleanFlights().also {
-                if (it == null) {
-                    Log.w("PdfParserActivity", "KlcMonthlyParser.flights == null")
-                    feedback(PdfParserActivityEvents.ERROR).apply{
-                        putString("Error 4")
-                    }
-                    return
-                }
-                processFlights(it)
-            }
+            processFlights(it)
         }
     }
-
-    /*
-    These are replaced by ParseCsv
-
-    private suspend fun parseMccPilotLogbook(inputStream: InputStream) = withContext(Dispatchers.Default){
-        with (MccPilotLogCsvParser.ofInputStream(inputStream)) {
-            if (!validImportedLogbook) {
-                feedback(PdfParserActivityEvents.NOT_A_KNOWN_LOGBOOK)
-                return@withContext
-            }
-            flights?.let {fff ->
-                if (fff.any { it == null }) { // Some flights failed to import
-                    feedback(PdfParserActivityEvents.SOME_FLIGHTS_FAILED_TO_IMPORT).apply {
-                        extraData.putStringArrayList(FAILED_IMPORTS_TAG, ArrayList(errorLines))
-                    }
-                }
-                foundFlights = ImportedFlightsCleaner(fff.filterNotNull()).cleanFlights().also {
-                    if (it == null) {
-                        Log.w("PdfParserActivity", "MccPilotLogCsvParser.flights null after it wasn't ????")
-                        feedback(PdfParserActivityEvents.ERROR).apply{
-                            putString("Error 5")
-                        }
-                        return@withContext
-                    }
-                    processFlights(it, false)
-                }
-
-
-
-            }
-
-        }
-    }
-
-
-
-    private suspend fun parseJoozdlogV4(inputStream: InputStream) = withContext(Dispatchers.Default){
-        val foundFlights = FlightsRepositoryExporter.csvToFlights(inputStream.reader().readLines())
-    }
-
-    */
 
     /**
      * Saves flights from roster, does check if CalendarSync is enabled

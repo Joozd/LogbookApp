@@ -94,7 +94,6 @@ class CalendarScraper(private val context: Context) {
      */
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
     fun getEventsBetween(activeCalendar: JoozdCalendar, start: Instant? = null, end: Instant? = null): List<JoozdCalendarEvent> {
-        Log.d(this::class.simpleName, "checkpoint 0, activeCalendar= $activeCalendar, start = $start, end = $end")
         val selection: String
         val selectionArgs: Array<String>
         when {
@@ -110,7 +109,6 @@ class CalendarScraper(private val context: Context) {
                     end!!.toEpochMilli().toString())
             }
             end == null -> {
-                Log.d(this::class.simpleName, "checkpoint 0.1")
                 selection = "((${CalendarContract.Events.CALENDAR_ID} = ?) AND (" +
                         "${CalendarContract.Events.DTSTART} >= ?))"
                 selectionArgs = arrayOf(
@@ -128,10 +126,6 @@ class CalendarScraper(private val context: Context) {
             }
         }
         val foundEvents: MutableList<JoozdCalendarEvent> = mutableListOf()
-        Log.d(this::class.simpleName, "checkpoint 1, selection = $selection")
-        selectionArgs.forEach {
-            Log.d(this::class.simpleName, "checkpoint 1.1, $it")
-        }
 
         context.contentResolver.query(
             CalendarContract.Events.CONTENT_URI,
@@ -155,10 +149,7 @@ class CalendarScraper(private val context: Context) {
                             "",
                             cur.getLong(EVENT_ID_INDEX)
                         )
-                    ).also{ Log.d(this::class.simpleName, "Found ${foundEvents.size} items")
-                        Log.d(this::class.simpleName, "${foundEvents.last()}")
-
-                    }
+                    )
                 }
             }
         }

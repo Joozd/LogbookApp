@@ -105,13 +105,13 @@ class MainActivity : JoozdlogActivity() {
             //TODO decide if this becomes a new activity or a fragment
             true
         }
-
+/*
         R.id.menu_do_something -> {
             viewModel.menuSelectedDoSomething()
 
             true
 
-        } /*
+        }
 
         R.id.menu_login -> {
             startActivity(Intent(this, ChangePasswordActivity::class.java))

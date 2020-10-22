@@ -20,29 +20,31 @@
 package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
 
 import android.util.Log
+import androidx.core.text.isDigitsOnly
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.extensions.atEndOfDay
 import nl.joozd.logbookapp.extensions.atStartOfDay
+import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.io.InputStream
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Parses a checkin sheet into flights
- * TODO: Add names?
- * TODO: Add registration?
  */
+
 class KlcCheckinSheet(roster: String?): Roster {
+    private val aircraftRegex = "/([A-Z]{5})".toRegex()
+    private val dateFormat = DateTimeFormatter.ofPattern("ddMMM", Locale.US)
+    private val timeFormat = DateTimeFormatter.ofPattern("HHmm")
+
 
     /**
      * a "line"looks like:
@@ -63,16 +65,14 @@ class KlcCheckinSheet(roster: String?): Roster {
         val startOfFlightLines = lines.indexOf(START_OF_FLIGHTS)+1
         val flightLines = lines.drop(startOfFlightLines).take(lines.indexOf(END_OF_FLIGHTS) - startOfFlightLines)
             .filter{it.split(' ')[TIME_OUT].all{it.isDigit()}} // bit hacky way to catch lines that are actually a flight (not RESH/RESK for instance)
-        return flightLines.map{line ->
-            lineToFlight(line)
-        }
+        val crewLines = getCrewLines(lines)
+
+        return addNames(flightLines.map{line -> lineToFlight(line)}, crewLines, myName = getMyName(lines))
     }
 
     //TODO add registration to flight?
     private fun lineToFlight(line: String): Flight{
         Log.d("Line", line)
-        val dateFormat = DateTimeFormatter.ofPattern("ddMMM", Locale.US)
-        val timeFormat = DateTimeFormatter.ofPattern("HHmm")
 
         val words = line.split(' ')
         val date = MonthDay.parse(words[DATE], dateFormat).atYear(Year.now().value)
@@ -80,8 +80,130 @@ class KlcCheckinSheet(roster: String?): Roster {
         val tIn = (LocalDateTime.of(date, LocalTime.parse(words[TIME_IN],timeFormat)).toInstant(ZoneOffset.UTC).epochSecond).let{
             if (it > tOut) it else it + ONE_DAY
         }
-        return Flight(-1, orig = words[ORIG], dest = words[DEST], timeOut = tOut, timeIn = tIn)
+        val registration = aircraftRegex.find(line)?.groupValues?.get(1) ?: ""
+        return Flight(-1, flightNumber = words[FLIGHTNUMBER], orig = words[ORIG], dest = words[DEST], timeOut = tOut, timeIn = tIn, registration = registration)
     }
+
+    /**
+     * Adds names found in [lines] to corresponding Flights
+     */
+    private fun addNames(flights: List<Flight>, lines: Sequence<String>, myName: String): List<Flight>{
+        val newFlights = ArrayList<Flight>()
+
+        // a map of all found crew as (psn to name)
+        val crewList = HashMap<Int, String>()
+
+        // List of most recently found crew, to be used untill a new crew is found
+        var currentCrew = emptyList<String>()
+
+        lines.forEach{ line ->
+            Log.d("addNames", "line $line")
+            /**
+             * Every line is a flight
+             * examples:
+             * 04Sep KL991 44692 53917 63034 74061 DINTEN VAN SPIJK, REBECCA
+             * 04Sep KL992
+             *
+             * If there are numbers in a line, that means a crew change.
+             * If a number is followed by another number, that function stays the same person
+             * If it followed by [A-Z] that is a new function, whose name is all text until next number
+             * Names are written in reverse order, separated by commas (VRIES, DE, HENK), all caps
+             * should become "Ullllll, lll lll lll, Ulllll Ulll Ulll" (U = uppercase, l = lowercase)
+             */
+            // update crewList
+            line.putNamesInMap(crewList, myName)
+            if (line.getNumbers().isNotEmpty()){
+                currentCrew = line.getNumbers().map{psn -> crewList[psn] ?: "ERROR"}
+            }
+            val name = currentCrew.firstOrNull() ?: ""
+            val name2 = if (currentCrew.size > 1) currentCrew.drop(1).joinToString(";") else ""
+
+            //Now, we have all names for the flight that goes with this line. Next: Find that flight
+
+
+            //dateString = 09Sep, flightNumber = KL123
+            val (dateString, flightNumber) = line.split(' ').let {it[0] to it[1]}
+            val date = MonthDay.parse(dateString, dateFormat).atYear(Year.now().value)
+
+            flights.firstOrNull{it.tOut().toLocalDate() == date && it.flightNumber == flightNumber}?.let{
+                newFlights.add(it.copy(name = name, name2 = name2))
+            }
+        }
+        return newFlights
+    }
+
+    private fun getMyName(lines: List<String>) = lines.first().drop(MY_NAME_START.length).let{truncated->
+        truncated.take(truncated.indexOf(MY_NAME_END))
+    }
+
+
+    /**
+     * Private helper functions for parsing crew names
+     */
+    private fun getCrewLines(lines: List<String>) =
+        """\d\d[A-Z][a-z]{2}.*""".toRegex()
+            .findAll(lines.drop(lines.indexOf(START_OF_CREW_INFO)).joinToString("\n"))
+            .map{it.value}
+
+    private fun String.getNumbers(): List<Int> = split(' ').filter{it.isDigitsOnly()}.map{it.toInt()}
+
+    private fun String.putNamesInMap(map: MutableMap<Int, String>, myName: String) {
+        getNumbers().forEach {
+            Log.d("putNamesInMap", "number $it")
+            //rawName is all text from current Number until first next Digit
+            val rawName = drop(indexOf(it.toString()) + (it.toString().length)).let { s ->
+                Log.d("putNamesInMap", "S: $s")
+                s.take(s.firstOrNull {c -> c.isDigit() }?.let {digit -> s.indexOf(digit) } ?: 999)
+            }.trim().also{
+                Log.d("putNamesInMap", "rawname $it")
+            }
+
+            rawNameToName(rawName).nullIfEmpty()?.let { name ->
+                map[it] = if (name.toUpperCase(Locale.ROOT) == myName) MY_NAME else name
+            }
+        }
+    }
+
+    /**
+     * Takes a RawName ("JANSEN, JAN", of "VRIES, VAN DE, HENK"
+     */
+    private fun rawNameToName(rawName: String): String {
+        fun String.withCapital(): String = toLowerCase(Locale.ROOT).capitalize(Locale.ROOT)
+        fun capitalizeAllWords(line: String): String = line.split(' ')
+            .filter{!it.isBlank()} // remove any extra spaces
+            .joinToString(" ") {
+                it.split('-')
+                .joinToString("-") { it.withCapital() }
+            }.trim()
+
+        rawName.split(',').let {names ->
+            /**
+             * A complete name is 2 or 3 names long (Jan-Henk Nicolaas, van de, Wilde Wetering)
+             * If names, all are words are Capitalized, else only first and last
+             */
+            return when (names.size) {
+                0 -> ""
+                1 -> names.first().withCapital()
+                2 -> {
+                    val firstNames = capitalizeAllWords(names[1])
+                    val lastNames = capitalizeAllWords(names[0])
+                    "$firstNames $lastNames"
+                }
+                else -> { // 3 or more, ignore any words past [2]
+                    val firstNames = capitalizeAllWords(names[2])
+                    val lastNames = capitalizeAllWords(names[0])
+                    val beforesetsels = names[1].toLowerCase(Locale.ROOT)
+                    "$firstNames $beforesetsels $lastNames"
+                }
+            }
+        }
+    }
+
+
+
+
+
+
 
 
     /*********************************************************************************************
@@ -131,6 +253,11 @@ class KlcCheckinSheet(roster: String?): Roster {
         const val START_OF_FLIGHTS =
             "Date Flt Callsign Dep Arr Blk Grd Pax Payload Eq Prev Next Special Info CTOT"
         const val END_OF_FLIGHTS = "Daily Summary"
+        const val START_OF_CREW_INFO = "Crew Info"
+        const val MY_NAME_START = "Cockpit Briefing for "
+        const val MY_NAME_END = " KLC AUTO BRIEFING"
+
+        const val MY_NAME = "SELF"
 
         const val DATE = 0
         const val FLIGHTNUMBER = 1

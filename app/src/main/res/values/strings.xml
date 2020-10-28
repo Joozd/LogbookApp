@@ -300,6 +300,8 @@
     <string name="new_password">New Password</string>
     <string name="loggings_preferences">Logging Preferences</string>
     <string name="backup_preferences">Backup Preferences</string>
+    <string name="backup_prefs_description">You should periodically backup your logbook.</string>
+
 
     <string name = "fake_hidden_password">••••••••••</string>
     <string name="backup_message_main_activity">You have not backed up your logbook for %1$s days.</string>

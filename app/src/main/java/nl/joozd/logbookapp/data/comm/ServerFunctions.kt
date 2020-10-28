@@ -200,10 +200,14 @@ object ServerFunctions {
 
     /**
      * Change password on a logged-in account
+     * @param client: The [Client] to use
+     * @param newPassword: The new password to set. (this only works when logged in so no need for old pass)
+     * @param email: Email to send new login link to.
      * @return true on success, null on connection error, false on server error (other result than "OK")
      */
-    fun changePassword(client: Client, newPassword: ByteArray): Boolean? {
-        if (client.sendRequest(JoozdlogCommsKeywords.UPDATE_PASSWORD, newPassword) < 0) return null
+    fun changePassword(client: Client, newPassword: ByteArray, email: String): Boolean? {
+        val payload = LoginDataWithEmail("", newPassword, 0, email).serialize() // username and basicFlightVersion are unused in this function
+        if (client.sendRequest(JoozdlogCommsKeywords.UPDATE_PASSWORD, payload) < 0) return null
         val result = client.readFromServer()
         Log.d(TAG, "Result for changePassword() was ${result?.toString(Charsets.UTF_8)}")
         return result.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
@@ -278,6 +282,4 @@ object ServerFunctions {
         update(password.toByteArray())
         digest()
     }
-
-
 }

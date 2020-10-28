@@ -22,14 +22,18 @@ package nl.joozd.logbookapp.model.viewmodels.activities
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.SharedPreferences
+import android.text.Editable
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.utils.generatePassword
@@ -39,6 +43,15 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
     /***********************************************************************************************
      * Private parts
      ***********************************************************************************************/
+
+    private val _emailAddress = MutableLiveData(Preferences.emailAddress)
+
+    private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        when (key) {
+            Preferences::emailAddress.name ->
+                _emailAddress.value = Preferences.emailAddress
+        }
+    }
 
 
 
@@ -52,11 +65,18 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
     val online: LiveData<Boolean>
         get() = InternetStatus.internetAvailableLiveData
 
+
+    val emailAddress: LiveData<String?>
+        get() = _emailAddress
+
     /**
      * Public functions
      */
 
-    fun submitClicked(){
+    fun submitClicked(email: Editable? = null){
+        email?.let{
+            Preferences.emailAddress = it.toString()
+        }
         val password = generatePassword(16)
         Log.d("submitClicked()", "pass1: $password")
         when {
@@ -64,7 +84,7 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
             else -> { // passwords match, are good enough, username not empty and internet looks OK
                 feedback(ChangePasswordEvents.WAITING_FOR_SERVER)
                 viewModelScope.launch {
-                    when (UserManagement.changePassword(password)){
+                    when (UserManagement.changePassword(password, email?.toString())){
                         UserManagement.ReturnCodes.SUCCESS -> {
                             sendPasswordLinksToClipboard(UserManagement.generateLoginLink())
                             feedback(ChangePasswordEvents.FINISHED)

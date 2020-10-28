@@ -23,6 +23,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
+import androidx.core.util.PatternsCompat
 import androidx.fragment.app.commit
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
@@ -70,7 +71,10 @@ class ChangePasswordActivity : JoozdlogActivity() {
              ***************************************************************************************/
 
             submitButton.setOnClickListener {
-                viewModel.submitClicked()
+                if (!PatternsCompat.EMAIL_ADDRESS.matcher(emailEditText.text.toString()).matches()) {
+                    noEmailDialog { viewModel.submitClicked() }
+                } else
+                viewModel.submitClicked(emailEditText.text)
             }
 
             /****************************************************************************************
@@ -80,6 +84,10 @@ class ChangePasswordActivity : JoozdlogActivity() {
             //Only change password when online
             viewModel.online.observe(activity){
                 checkInternet(it)
+            }
+
+            viewModel.emailAddress.observe(activity){
+                emailEditText.setText(it)
             }
 
             viewModel.feedbackEvent.observe(activity){
@@ -218,6 +226,20 @@ class ChangePasswordActivity : JoozdlogActivity() {
 
         }
     }
+
+    /**
+     * Shows a dialog complaining no email was entered. Positive button will execute function provided as [f].
+     * Negative button will close the dialog.
+     */
+    private fun noEmailDialog(f: () -> Unit) =
+        JoozdlogAlertDialog(this).show {
+            titleResource = R.string.username_already_taken
+            messageResource = R.string.no_email_text
+            setPositiveButton(R.string.i_dont_care){
+                f()
+            }
+            setNegativeButton(android.R.string.cancel)
+        }
 
 
     private fun sendLoginEmail(){

@@ -100,7 +100,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
 
             signUpButton.setOnClickListener {
                 if (!EMAIL_ADDRESS.matcher(emailEditText.text.toString()).matches()) {
-                    noEmailDialog(){
+                    noEmailDialog{
                         if (Preferences.acceptedCloudSyncTerms)
                             viewModel.signUpClicked(userNameEditText.text)
                         else {

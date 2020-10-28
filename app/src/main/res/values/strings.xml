@@ -53,7 +53,7 @@
     <string name="dualString">Dual</string>
     <string name="instructorString">Instructor</string>
     <string name="username">Username</string>
-    <string name="email">Email address</string>
+    <string name="email">Email address for login link</string>
     <string name="email_reason">Your email address will only be used once to send a login link and will not be stored outside your phone.</string>
     <string name="autovalue">Auto Values</string>
     <string name="takeoff">Takeoff</string>

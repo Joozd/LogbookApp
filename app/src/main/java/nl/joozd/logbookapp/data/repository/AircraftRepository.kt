@@ -191,8 +191,10 @@ class AircraftRepository(
 
     // Map of [allAircraft] as [registration] to [aircraft]
     private val _aircraftMapLiveData = MediatorLiveData<Map<String, Aircraft>>().apply{
-        addSource(aircraftListLiveData){acList ->
-            value = acList.map{ it.registration to it }.toMap()
+        addSource(aircraftListLiveData) {source ->
+            source?.let { acList ->
+                value = acList.map { it.registration to it }.toMap()
+            }
         }
     }
 

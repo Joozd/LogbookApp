@@ -29,6 +29,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.NumberPicker
 import androidx.activity.viewModels
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.App
@@ -78,7 +79,6 @@ class SettingsActivity : JoozdlogActivity() {
         setTheme(R.style.AppTheme)
         mBinding = ActivitySettingsBinding.inflate(layoutInflater).apply {
 
-
             setSupportActionBarWithReturn(settingsToolbar)?.apply {
                 setDisplayShowHomeEnabled(true)
                 setDisplayHomeAsUpEnabled(true)
@@ -113,36 +113,31 @@ class SettingsActivity : JoozdlogActivity() {
                         viewModel.calendarPicked(position)
                     }
                 }
-/*
-            ArrayAdapter.createFromResource(
-                activity,
-                R.array.supported_calendars,
-                android.R.layout.simple_spinner_item
-            ).apply {
-                // Specify the layout to use when the list of choices appears
-                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            }.also { aa ->
-                // Apply the adapter to the spinner
-                settingsCalendarTypeSpinner.apply {
-                    adapter = aa
-                    if (Preferences.calendarType >= 0) setSelection(Preferences.calendarType)
-                }
-            }
-            settingsCalendarTypeSpinner.onItemSelectedListener =
-                object : AdapterView.OnItemSelectedListener {
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        //mainSearchField.text = mainSearchField.text
-                        viewModel.calendarTypePicked(position)
-                    }
-                }
+            /****************************************************************************************
+             * Expand or collapse groups of settings
+             ****************************************************************************************/
 
-*/
+            loggingPreferencesSelector.setOnClickListener {
+                loggingPreferencesLayout.toggleVisibility()
+            }
+
+            backupPreferencesSelector.setOnClickListener {
+                backupPreferencesLayout.toggleVisibility()
+            }
+
+            syncPreferencesSelector.setOnClickListener {
+                syncPreferencesLayout.toggleVisibility()
+            }
+
+            cloudPreferencesSelector.setOnClickListener {
+                cloudPreferencesLayout.toggleVisibility()
+            }
+
+            pdfPreferencesSelector.setOnClickListener {
+                pdfPreferencesLayout.toggleVisibility()
+            }
+
+
             /****************************************************************************************
              * Logic for setters and other thingies
              ****************************************************************************************/
@@ -360,6 +355,14 @@ class SettingsActivity : JoozdlogActivity() {
     /***********************************************************************************************
      * Private functions for changing layout
      ***********************************************************************************************/
+
+    /**
+     * show or hide a group of Views
+     */
+    private fun ConstraintLayout.toggleVisibility() {
+        visibility = if (this.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+    }
+
 
     /**
      * hide "you are logged in" line

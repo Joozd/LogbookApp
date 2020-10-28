@@ -4,7 +4,7 @@
 <p>Joozdlog is open-source, source can be found at <a href = "https://github.com/Joozd/LogbookApp">https://github.com/Joozd/LogbookApp</a><br><br><br></p>
 <p>Joozdlog uses things made by other people, most notably:<br><br>
 - <a href = "https://itextpdf.com/en">iTextPdf</a><br><br>
-- <a href = "https://openflights.org/data.html">OpenFlights.org airport data</a>(Edited by Joozd for use in this app)<br><br><br></p>
+- <a href = "https://ourairports.com/">OurAirports.com airport data</a>(Edited by Joozd for use in this app)<br><br><br></p>
 <p>JoozdLog is free software. You can redistribute it, for more info on that check the <a href = "https://github.com/Joozd/LogbookApp">git repository</a>.</p>
 
 

@@ -190,6 +190,14 @@ object ServerFunctions {
         return result?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
     }
 
+    fun createNewAccountWithEmail(client: Client, name: String, key: ByteArray, email: String): Boolean?{
+        val payLoad = LoginDataWithEmail(name, key, BasicFlight.VERSION.version, email).serialize()
+        client.sendRequest(JoozdlogCommsKeywords.NEW_ACCOUNT_EMAIL, payLoad)
+        val result = client.readFromServer()
+        Log.d(TAG, "Result was ${result?.toString(Charsets.UTF_8)}")
+        return result?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
+    }
+
     /**
      * Change password on a logged-in account
      * @return true on success, null on connection error, false on server error (other result than "OK")

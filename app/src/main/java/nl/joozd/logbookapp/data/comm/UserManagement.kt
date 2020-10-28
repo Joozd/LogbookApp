@@ -43,14 +43,14 @@ object UserManagement {
      * @return false if username taken
      * @return null if server or connection error
      */
-    suspend fun createNewUser(username: String, password: String): Boolean? {
-        return (Cloud.createNewUser(username, password)).also {
+    suspend fun createNewUser(username: String, password: String, email: String? = null): Boolean? {
+        return (if (email == null) Cloud.createNewUser(username, password) else Cloud.createNewUser(username, password, email)).also {
             if (it == true) {
                 Preferences.username = username
                 Preferences.password = password
                 Preferences.lastUpdateTime = -1
                 Preferences.useCloud = true
-                Log.d("CreateNewUser()", "created username: $username, password: $password")
+                Log.d("CreateNewUser()", "created username: $username, password: $password, email: $email")
                 Log.d("CreateNewUser()", "check: ${Preferences.username}, password: ${Preferences.password}")
             } else Log.d("CreateNewUser()", "Cloud.createNewUser returned $it")
         }

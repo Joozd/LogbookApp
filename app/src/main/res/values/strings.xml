@@ -53,6 +53,8 @@
     <string name="dualString">Dual</string>
     <string name="instructorString">Instructor</string>
     <string name="username">Username</string>
+    <string name="email">Email address</string>
+    <string name="email_reason">Your email address will only be used once to send a login link and will not be stored outside your phone.</string>
     <string name="autovalue">Auto Values</string>
     <string name="takeoff">Takeoff</string>
     <string name="day">day</string>
@@ -173,6 +175,9 @@
     <string name="password_does_not_meet_standards">Password does not meet standards. It needs a length of at least 6 and at least 2 different characters.</string>
     <string name="password_does_not_meet_standards_short">Password does not meet standards.</string>
     <string name="username_already_taken">This username is already taken. If this is you, use your login link if you have it, or create a new account.</string>
+    <string name="no_email">No email</string>
+    <string name="no_email_text">No working email address was entered. I recommend you enter your email so a login link can be sent. Your email will not be stored outside your phone and will not be used for anything else.</string>
+    <string name="i_dont_care">I don\'t care</string>
     <string name="user_exists_password_correct">This username exists, and you have entered the correct password for it. If this is not you, please pick another username and a more secure password.</string>
     <string name ="what_to_do_forgot_password">If your login is still working on this device, you can change it to something you catually can remember via the settings screen, or you can generate a login link.</string>
     <string name="use_this">Use this</string>
@@ -198,7 +203,7 @@
     - Strings for new user experience
     -->
     <string name="welcome_message">hallon aub!(grgr)\n\nWelkom bij deze beta versie van Joozdlog.\n\nOp de volgende paar schermen kan je wat dingen instellen. Aanrader!\n\nFeedback en bugreports mogen via de watsap.\nBugs liefst met een beschrijving van wat je aan het doen was cq hoe je het kan reproduceren.\nVeel logplezier!</string>
-    <string name="cloud_explanation" tools:ignore="Typos">JoozdLog Cloud is handig voor als je je telefoon kwijtraakt, Joozd zijn software heeft opgekloodt, je een nieuwe telefoon koopt of je meerdere apparaten tegelijk wil gebruiken.\nDit is geen backup, lees terms&amp;conditions voor waarom niet en meer info.</string>
+    <string name="cloud_explanation" tools:ignore="Typos">JoozdLog Cloud is handig voor als je een nieuwe telefoon koopt of je meerdere apparaten tegelijk wil gebruiken.\nDit is geen backup, lees terms&amp;conditions.</string>
     <string name="you_can_set_settings_in_settings">If you want to adjust any more settings, take a look at the Settings menu after you click "done"!</string>
 
     <!--

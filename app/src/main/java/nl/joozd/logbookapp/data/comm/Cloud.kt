@@ -80,6 +80,16 @@ object Cloud {
     }
 
     /**
+     * Creates a new user
+     * Calling function should consider storing username and pasword in [Preferences]
+     */
+    suspend fun createNewUser(name: String, password: String, email: String): Boolean? = withContext(Dispatchers.IO) {
+        Client.getInstance().use {
+            ServerFunctions.createNewAccountWithEmail(it, name, Encryption.md5Hash(password), email)
+        }
+    }
+
+    /**
      * Changes a user's password
      * Calling function should consider storing username and pasword in [Preferences]
      */

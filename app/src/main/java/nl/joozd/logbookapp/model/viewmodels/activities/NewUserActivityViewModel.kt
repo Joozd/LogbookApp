@@ -47,11 +47,15 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.utils.generatePassword
 
 class NewUserActivityViewModel: JoozdlogActivityViewModel() {
+    //TODO this should be dynamic
+    val email = "euroshopper@gmail.com"
+
+
     /*******************************************************************************************
      * Private parts
      *******************************************************************************************/
 
-    val internetAvailable: LiveData<Boolean> = InternetStatus.internetAvailableLiveData
+    private val internetAvailable: LiveData<Boolean> = InternetStatus.internetAvailableLiveData
 
     private val _page2Feedback = MutableLiveData<FeedbackEvent>()
     private val _page3Feedback = MutableLiveData<FeedbackEvent>()
@@ -59,6 +63,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     private val calendarScraper = CalendarScraper(context)
 
     private val _username = MutableLiveData(Preferences.username)
+    private val _emailAddress = MutableLiveData(Preferences.emailAddress)
     private val _acceptTerms = MutableLiveData(Preferences.acceptedCloudSyncTerms)
     private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
 
@@ -70,9 +75,12 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
 
     private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         // Log.d("AirportRepository", "key = $key")
-        if (key == Preferences::usernameResource.name) _username.value = Preferences.username
-        if (key == Preferences::acceptedCloudSyncTerms.name) _acceptTerms.value = Preferences.acceptedCloudSyncTerms
-        if (key == Preferences::useIataAirports.name) _useIataAirports.value = Preferences.useIataAirports
+        when(key) {
+            Preferences::usernameResource.name -> _username.value = Preferences.username
+            Preferences::acceptedCloudSyncTerms.name -> _acceptTerms . value = Preferences . acceptedCloudSyncTerms
+            Preferences::useIataAirports.name -> _useIataAirports.value = Preferences.useIataAirports
+            Preferences::emailAddress.name -> _emailAddress.value = Preferences.emailAddress
+        }
     }
     init{
         Preferences.getSharedPreferences().registerOnSharedPreferenceChangeListener (onSharedPrefsChangedListener)
@@ -91,6 +99,9 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
 
     val username: LiveData<String?>
         get() = _username
+
+    val emailAddress: LiveData<String>
+        get() = _emailAddress
 
     val acceptTerms: LiveData<Boolean>
         get() = _acceptTerms
@@ -138,10 +149,6 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * Page2 functions
      *******************************************************************************************/
 
-    fun signInClicked(){
-        feedback(NewUserActivityEvents.SHOW_SIGN_IN_DIALOG)
-    }
-
     /**
      * Sign out user, send that as feedback
      */
@@ -155,7 +162,10 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     //TODO document this
     // TODO finish this in Fragment
     // TODO needs a way to handle time when server is busy (in Fragment)
-    fun signUpClicked(usernameEditable: Editable?) {
+    fun signUpClicked(usernameEditable: Editable?, email: Editable? = null) {
+        email?.let{
+            Preferences.emailAddress = it.toString()
+        }
         usernameEditable?.toString()?.let { username ->
             Log.d("signUpClicked", "user: $username")
             Preferences.useCloud = true
@@ -166,7 +176,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
                     feedback(NewUserActivityEvents.WAITING_FOR_SERVER, _page2Feedback)
                     viewModelScope.launch {
                         val pass1 = generatePassword(16)
-                        when (UserManagement.createNewUser(username, pass1)) {
+                        when (UserManagement.createNewUser(username, pass1, email?.toString())) { // UserManagement will call the correct Cloud function
                             true -> feedback(NewUserActivityEvents.LOGGED_IN_AS, _page2Feedback)
                             null -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
                             false -> feedback(NewUserActivityEvents.USER_EXISTS, _page2Feedback)

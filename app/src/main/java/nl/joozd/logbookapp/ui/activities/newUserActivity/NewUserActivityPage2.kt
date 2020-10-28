@@ -26,9 +26,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import androidx.core.util.PatternsCompat.EMAIL_ADDRESS
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
@@ -49,6 +49,7 @@ import java.util.*
  */
 class NewUserActivityPage2: JoozdlogFragment() {
 
+
     val viewModel: NewUserActivityViewModel by activityViewModels()
     private var mBinding: ActivityNewUserPage2Binding? = null
 
@@ -68,7 +69,6 @@ class NewUserActivityPage2: JoozdlogFragment() {
             userNameEditText.onTextChanged {
                 usernameTextInputLayout.error = ""
             }
-
 
             /*******************************************************************************************
              * OnClickedListeners
@@ -99,12 +99,26 @@ class NewUserActivityPage2: JoozdlogFragment() {
             }
 
             signUpButton.setOnClickListener {
-                if (Preferences.acceptedCloudSyncTerms)
-                    viewModel.signUpClicked(userNameEditText.text)
+                if (!EMAIL_ADDRESS.matcher(emailEditText.text.toString()).matches()) {
+                    noEmailDialog(){
+                        if (Preferences.acceptedCloudSyncTerms)
+                            viewModel.signUpClicked(userNameEditText.text)
+                        else {
+                            JoozdlogAlertDialog(requireActivity()).show {
+                                messageResource = R.string.must_accept_terms
+                                setPositiveButton(android.R.string.ok)
+                            }
+                        }
+                    }
+                }
                 else {
-                    JoozdlogAlertDialog(requireActivity()).show {
-                        messageResource = R.string.must_accept_terms
-                        setPositiveButton(android.R.string.ok)
+                    if (Preferences.acceptedCloudSyncTerms)
+                        viewModel.signUpClicked(userNameEditText.text, emailEditText.text)
+                    else {
+                        JoozdlogAlertDialog(requireActivity()).show {
+                            messageResource = R.string.must_accept_terms
+                            setPositiveButton(android.R.string.ok)
+                        }
                     }
                 }
             }
@@ -116,6 +130,10 @@ class NewUserActivityPage2: JoozdlogFragment() {
 
             viewModel.username.observe(viewLifecycleOwner) {
                 setLoggedInLayout(it)
+            }
+
+            viewModel.emailAddress.observe(viewLifecycleOwner){
+                emailEditText.setText(it)
             }
 
             viewModel.acceptTerms.observe(viewLifecycleOwner) {
@@ -217,6 +235,20 @@ class NewUserActivityPage2: JoozdlogFragment() {
             setPositiveButton(android.R.string.ok)
         }
 
+    /**
+     * Shows a dialog complaining no email was entered. Positive button will execute function provided as [f].
+     * Negative button will close the dialog.
+     */
+    private fun noEmailDialog(f: () -> Unit) =
+        JoozdlogAlertDialog(requireActivity()).show {
+            titleResource = R.string.username_already_taken
+            messageResource = R.string.no_email_text
+            setPositiveButton(R.string.i_dont_care){
+                f()
+            }
+            setNegativeButton(android.R.string.cancel)
+        }
+
 
 
     /**
@@ -232,17 +264,21 @@ class NewUserActivityPage2: JoozdlogFragment() {
      */
     private fun ActivityNewUserPage2Binding.setLoggedInLayout(username: String? = null){
         val enabled = username != null
+        val ifLoggedOut = if (enabled) View.GONE else View.VISIBLE // show if not logged in
+        val ifLoggedIn = if (enabled) View.VISIBLE else View.GONE // show if logged in
 
-        userNameEditText.makeEnabled(!enabled)
-        signUpButton.makeEnabled(!enabled)
-        tcCheckbox.makeEnabled(!enabled)
+        usernameTextInputLayout.visibility = ifLoggedOut
+        emailTextInputLayout.visibility = ifLoggedOut
+        emailReasonTextView.visibility = ifLoggedOut
+        signUpButton.visibility = ifLoggedOut
+        tcCheckbox.visibility = ifLoggedOut
 
-        dontWantCloudSyncTextView.visibility = if (enabled) View.GONE else View.VISIBLE
-        skipThisStepTextView.visibility = if (enabled) View.GONE else View.VISIBLE
+        dontWantCloudSyncTextView.visibility = ifLoggedOut
+        skipThisStepTextView.visibility = ifLoggedOut
 
-        youAreSignedInAsTextView.visibility = if (enabled) View.VISIBLE else View.GONE
-        signOutTextView.visibility = if (enabled) View.VISIBLE else View.GONE
-        continueTextView.visibility = if (enabled) View.VISIBLE else View.GONE
+        youAreSignedInAsTextView.visibility = ifLoggedIn
+        signOutTextView.visibility = ifLoggedIn
+        continueTextView.visibility = ifLoggedIn
 
         youAreSignedInAsTextView.text = requireActivity().getStringWithMakeup(R.string.you_are_signed_in_as, username)
     }

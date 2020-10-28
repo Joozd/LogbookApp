@@ -31,7 +31,8 @@ object JoozdlogWorkersHub {
      * Constants for influencing behaviour
      */
     private const val MIN_DELAY_FOR_OUTBOUND_SYNC: Long = 1 // minutes
-    private const val DELAY_FOR_OVERWRITE_MINUTES: Long = 15 // minutes
+    private const val DELAY_FOR_OVERWRITE_MINUTES: Long = 1 // minutes
+
 
 
     /**

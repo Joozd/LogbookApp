@@ -31,10 +31,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.MonthlyOverview
 import nl.joozd.logbookapp.data.repository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.TwilightCalculator
@@ -70,8 +70,10 @@ class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private va
             val cleanRegistation = bestHitRegistration ?: completeRegistration(registration)
             val cleanType = bestHitRegistration?.let {acMap[it]?.type?.shortName} ?: f.aircraftType
             val nightTime = if (autoFill) twilightCalculator.minutesOfNight(airportRepository.getAirportByIcaoIdentOrNull(cleanOrig), airportRepository.getAirportByIcaoIdentOrNull(cleanDest), timeOut, timeIn) else 0
+            val cleanName = if (Preferences.getNamesFromRosters) name else ""
+            val cleanName2 = if (Preferences.getNamesFromRosters) name2 else ""
 
-            return f.copy(orig = cleanOrig, dest = cleanDest, registration = cleanRegistation, aircraftType = cleanType, nightTime = nightTime, timeStamp = now)
+            return f.copy(orig = cleanOrig, dest = cleanDest, registration = cleanRegistation, aircraftType = cleanType, nightTime = nightTime, timeStamp = now, name = cleanName, name2 = cleanName2)
         }
     }
 

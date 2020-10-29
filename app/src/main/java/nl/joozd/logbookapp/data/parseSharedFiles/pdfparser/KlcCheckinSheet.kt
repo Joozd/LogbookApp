@@ -127,7 +127,7 @@ class KlcCheckinSheet(roster: String?): Roster {
             val date = MonthDay.parse(dateString, dateFormat).atYear(Year.now().value)
 
             flights.firstOrNull{it.tOut().toLocalDate() == date && it.flightNumber == flightNumber}?.let{
-                newFlights.add(it.copy(name = name, name2 = name2))
+                newFlights.add(it.copy(name = name, name2 = name2, isPIC = name == MY_NAME))
             }
         }
         return newFlights

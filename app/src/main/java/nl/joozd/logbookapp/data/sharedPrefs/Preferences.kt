@@ -182,7 +182,7 @@ object Preferences {
     /**
      * Accept aircraft change from Monthly Overview without confirmation?
      */
-    var updateAircraftWithoutAsking: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+    var updateAircraftWithoutAsking: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
     /**
      * Max time difference before montly/actual becomes a conflict (in minutes)
@@ -190,6 +190,11 @@ object Preferences {
     var maxChronoAdjustment: Int by JoozdLogSharedPrefs(sharedPref, 180)
 
     var showOldTimesOnChronoUpdate: Boolean by JoozdLogSharedPrefs(sharedPref, true)
+
+    /**
+     * Add names from rosters?
+     */
+    var getNamesFromRosters: Boolean by JoozdLogSharedPrefs(sharedPref, defaultValue = true)
 
     /*************************
      * Other settings

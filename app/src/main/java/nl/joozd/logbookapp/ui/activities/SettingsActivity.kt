@@ -186,6 +186,10 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.useWifiForLargeFilesToggled()
             }
 
+            addNamesFromRosterSwitch.setOnCheckedChangeListener { _, isChecked ->
+                viewModel.setAddNamesFromRoster(isChecked)
+            }
+
             addRemarksToChronoUpdatesSwitch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.setShowOldTimesOnChronoUpdate(isChecked)
             }
@@ -270,6 +274,11 @@ class SettingsActivity : JoozdlogActivity() {
             viewModel.lastUpdateTime.observe(activity){
                 lastSynchedTimeTextView.text = getStringWithMakeup(R.string.last_synched_at, it)
             }
+
+            viewModel.getNamesFromRosters.observe(activity) {
+                addNamesFromRosterSwitch.isChecked = it
+            }
+
 
             viewModel.showOldTimesOnChronoUpdate.observe(activity) {
                 addRemarksToChronoUpdatesSwitch.isChecked = it

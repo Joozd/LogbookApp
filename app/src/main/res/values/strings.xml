@@ -268,14 +268,15 @@
     <string name="use_wifi_for_large_files">Only use WiFi for larger files</string>
 
     <string name="cloud_sync_title">Cloud Sync</string>
-    <string name="add_chrono_update_remarks">Save old times as remarks</string>
+    <string name="add_chrono_update_remarks">Add remark when Monthly Overview has changes</string>
+    <string name="add_names_from_rosters">Add names to flights if found</string>
     <string name="sync_flights_across_devices">Synchronize flights across multiple devices or easily migrate to a new device</string>
     <string name="last_synched_at">Last synchronized at: %1$s</string>
     <string name="disabled_until">Disabled until %1$s</string>
     <string name="n_days">%1$s days</string>
     <string name="enable_now">Enable now</string>
-    <string name="monthly_overviews">Monthly Overviews</string>
-    <string name="monthly_overview_explanation">Monthly Overviews import supported for selected carriers (currently only KLC) only. Just share your PDF with Joozdlog.</string>
+    <string name="import_settings">Import settings</string>
+    <string name="monthly_overview_explanation">Monthly Overviews, rosters and checking sheets import supported for selected carriers (currently only KLC/KLM) only. Just share your PDF/CSV/TXT with Joozdlog.</string>
     <string name="loggings_prefs_description">General preferences pertaining to (automatic) logging and times.</string>
     <string name="use_consensus_data">Use Aircraft Consensus Data</string>
     <string name="consensus_description">JoozdLog Cloud collects (anonymous) Aircraft Registration and type data so you don\'t have to enter aircraft types that somebody else already entered. Typical collected data would be \"4 users said PH-XXX is a Cessna 172\". Switching this off will stop sending and receiving this data.</string>

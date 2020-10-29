@@ -65,6 +65,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
     private val _getFlightsFromCalendar = MutableLiveData(Preferences.getFlightsFromCalendar)
     private val _useCloudSync = MutableLiveData(Preferences.useCloud)
+    private val _getNamesFromRosters = MutableLiveData(Preferences.getNamesFromRosters)
     private val _showOldTimesOnChronoUpdate = MutableLiveData(Preferences.showOldTimesOnChronoUpdate)
     private val _standardTakeoffLandingTimes = MutableLiveData(Preferences.standardTakeoffLandingTimes)
     private val _lastUpdateTime = MutableLiveData(makeTimeString(Preferences.lastUpdateTime))
@@ -107,6 +108,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
             Preferences::calendarDisabledUntil.name ->
                 _calendarDisabledUntil.value = Preferences.calendarDisabledUntil
+
+            Preferences::getNamesFromRosters.name ->
+                _getNamesFromRosters.value = Preferences.getNamesFromRosters
 
             Preferences::showOldTimesOnChronoUpdate.name ->
                 _showOldTimesOnChronoUpdate.value = Preferences.showOldTimesOnChronoUpdate
@@ -154,6 +158,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val useCloudSync: LiveData<Boolean>
         get() = _useCloudSync
+
+    val getNamesFromRosters: LiveData<Boolean>
+        get() = _getNamesFromRosters
 
     val showOldTimesOnChronoUpdate: LiveData<Boolean>
         get() = _showOldTimesOnChronoUpdate
@@ -226,6 +233,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         if (it && !Preferences.getFlightsFromCalendar) // if it is switched on from being off
             Preferences.calendarDisabledUntil = 0
         Preferences.getFlightsFromCalendar = it
+    }
+
+    fun setAddNamesFromRoster(it: Boolean){
+        Preferences.getNamesFromRosters = it
     }
 
     fun setShowOldTimesOnChronoUpdate(it: Boolean) {

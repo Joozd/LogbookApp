@@ -38,6 +38,7 @@ import java.util.*
 
 /**
  * Parses a checkin sheet into flights
+ * TODO change when name is SELF (search for WIP_SELF)
  */
 
 class KlcCheckinSheet(roster: String?): Roster {
@@ -158,45 +159,54 @@ class KlcCheckinSheet(roster: String?): Roster {
                 Log.d("putNamesInMap", "rawname $it")
             }
 
-            rawNameToName(rawName).nullIfEmpty()?.let { name ->
-                map[it] = if (name.toUpperCase(Locale.ROOT) == myName) MY_NAME else name
-            }
+            //TODO WIP_SELF name is in another order (FIRST LAST, MIDDLE) for MY_NAME
+            map[it] = rawNameToName(rawName, myName).toString()
         }
     }
 
     /**
      * Takes a RawName ("JANSEN, JAN", of "VRIES, VAN DE, HENK"
+     * and turns it into a Name
      */
-    private fun rawNameToName(rawName: String): String {
-        fun String.withCapital(): String = toLowerCase(Locale.ROOT).capitalize(Locale.ROOT)
-        fun capitalizeAllWords(line: String): String = line.split(' ')
-            .filter{!it.isBlank()} // remove any extra spaces
-            .joinToString(" ") {
-                it.split('-')
-                .joinToString("-") { it.withCapital() }
-            }.trim()
+    private fun rawNameToName(rawName: String, myName: String): Name =
+        with (Name.ofList(rawName.split(','))){
+            if (checkMyName == myName) Name(MY_NAME) else this
+        }
 
-        rawName.split(',').let {names ->
+
+    /**
+     * Helper class for names.
+     */
+    private data class Name(val first: String = "", val last: String = "", val middle: String = ""){
+        val checkMyName = (if (middle.isNotEmpty()) "$first $last, $middle" else "$first $last")
+            .toUpperCase(Locale.ROOT)
+
+        override fun toString() = listOf(first, middle.toLowerCase(Locale.ROOT), last).filter {!it.isBlank()}.joinToString(" ")
+
+        companion object{
             /**
              * A complete name is 2 or 3 names long (Jan-Henk Nicolaas, van de, Wilde Wetering)
-             * If names, all are words are Capitalized, else only first and last
+             * If 2 names, all are words are Capitalized, else only first and last
              */
-            return when (names.size) {
-                0 -> ""
-                1 -> names.first().withCapital()
-                2 -> {
-                    val firstNames = capitalizeAllWords(names[1])
-                    val lastNames = capitalizeAllWords(names[0])
-                    "$firstNames $lastNames"
-                }
-                else -> { // 3 or more, ignore any words past [2]
-                    val firstNames = capitalizeAllWords(names[2])
-                    val lastNames = capitalizeAllWords(names[0])
-                    val beforesetsels = names[1].toLowerCase(Locale.ROOT)
-                    "$firstNames $beforesetsels $lastNames"
+            fun ofList(names: List<String>): Name {
+                return when (names.size) {
+                    0 -> Name()
+                    1 -> Name(names.first().withCapital())
+                    2 -> Name(capitalizeAllWords(names[1]), capitalizeAllWords(names[0]))
+                    else -> // 3 or more, ignore any words past [2]
+                        Name(capitalizeAllWords(names[2]), capitalizeAllWords(names[0]), names[1].toLowerCase(Locale.ROOT))
                 }
             }
+
+            private fun capitalizeAllWords(line: String): String = line.split(' ')
+                .filter{!it.isBlank()} // remove any extra spaces
+                .joinToString(" ") {
+                    it.split('-')
+                        .joinToString("-") { it.withCapital() }
+                }.trim()
+            private fun String.withCapital(): String = toLowerCase(Locale.ROOT).capitalize(Locale.ROOT)
         }
+
     }
 
 

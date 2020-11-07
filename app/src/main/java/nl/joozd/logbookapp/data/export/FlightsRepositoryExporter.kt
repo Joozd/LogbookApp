@@ -35,6 +35,7 @@ import java.time.Instant
 
 /**
  * Exporter class for flights
+ * TODO upgrade to V5
  */
 class FlightsRepositoryExporter(val flightRepository: FlightRepository): CoroutineScope by MainScope() {
     private val allFlightsAsync = async { flightRepository.getAllFlights().filter{ !it.isPlanned} }
@@ -89,7 +90,7 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
 
 
     companion object {
-        const val MOST_RECENT_VERSION = 4
+        const val MOST_RECENT_VERSION = 5
         const val FIRST_LINE_V4 = "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature"
         const val FIRST_LINE_V5 = "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature"
 
@@ -105,7 +106,7 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
 
         fun csvToFlights(csvBasicFlights: List<String>): List<Flight> = when (csvBasicFlights.first()){
             FIRST_LINE_V4 -> csvBasicFlights.drop(1).map{Flight(upgrade4to5(csvFlightToBasicFlightv4(it)))}
-            FIRST_LINE_V5 -> csvBasicFlights.drop(1).map{Flight(upgrade4to5(csvFlightToBasicFlightv4(it)))}
+            FIRST_LINE_V5 -> csvBasicFlights.drop(1).map{Flight(csvFlightToBasicFlightv5(it))}
             else -> throw (IllegalArgumentException("Not a supported CSV format"))
         }
 

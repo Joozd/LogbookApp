@@ -35,11 +35,14 @@ object JoozdlogCommsKeywords {
     const val UNKNOWN_USER_OR_PASS = "UNKNOWN_USER_PASS_COMBO"
     const val NOT_LOGGED_IN = "NOT_LOGGED_IN"
     const val SERVER_ERROR = "SERVER_ERROR "
+    const val BAD_DATA_RECEIVED = "BAD_DATA_RECEIVED"
+    const val NOT_A_VALID_EMAIL_ADDRESS = "NOT_A_VALID_EMAIL_ADDRESS"
     const val NEXT_IS_COMPRESSED = "NEXT_IS_COMPRESSED"
     const val HELLO = "HELLO" // to be done before any communications with PROTOCOL_VERSION. Do this right after creating SSL connection.
 
     //general keywords
     const val REQUEST_TIMESTAMP = "REQUEST_TIMESTAMP"
+    const val REQUEST_BACKUP_MAIL = "REQUEST_BACKUP_MAIL"
 
     //account keywords
     const val LOGIN = "LOGIN"

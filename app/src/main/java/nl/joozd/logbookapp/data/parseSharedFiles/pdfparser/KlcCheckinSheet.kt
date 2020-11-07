@@ -158,9 +158,8 @@ class KlcCheckinSheet(roster: String?): Roster {
             }.trim().also{
                 Log.d("putNamesInMap", "rawname $it")
             }
-
-            //TODO WIP_SELF name is in another order (FIRST LAST, MIDDLE) for MY_NAME
-            map[it] = rawNameToName(rawName, myName).toString()
+            if (rawName.isNotBlank())
+                map[it] = rawNameToName(rawName, myName).toString()
         }
     }
 
@@ -208,13 +207,6 @@ class KlcCheckinSheet(roster: String?): Roster {
         }
 
     }
-
-
-
-
-
-
-
 
     /*********************************************************************************************
      * Public parts

@@ -22,6 +22,14 @@ package nl.joozd.logbookapp.model.feedbackEvents
 object FeedbackEvents {
     interface Event
 
+    enum class GeneralEvents:
+    Event{
+        DONE,
+        NOT_IMPLEMENTED,
+        ERROR,
+        OK
+    }
+
     enum class MainActivityEvents:
         Event {
         NOT_IMPLEMENTED,

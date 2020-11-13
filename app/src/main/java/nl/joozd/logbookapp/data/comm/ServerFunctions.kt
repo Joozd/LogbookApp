@@ -21,6 +21,8 @@ package nl.joozd.logbookapp.data.comm
 
 import android.util.Base64
 import android.util.Log
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.*
 import nl.joozd.logbookapp.data.comm.protocol.Client
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -31,6 +33,8 @@ import nl.joozd.joozdlogcommon.serializing.*
 import nl.joozd.joozdlogcommon.serializing.longFromBytes
 import nl.joozd.joozdlogcommon.serializing.unwrapInt
 import nl.joozd.joozdlogcommon.serializing.wrap
+import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.ui.utils.toast
 import java.security.MessageDigest
 
 object ServerFunctions {
@@ -47,6 +51,20 @@ object ServerFunctions {
         }
         Log.e("getTimestamp", "readFromServer() returned null")
         return null
+    }
+
+    fun requestBackup(client: Client): Boolean {
+        val n = Preferences.username.also{Log.d("DEBUG1","key: $it")}
+        val k = Preferences.key.also{Log.d("DEBUG1","key: $it")}
+        if (n == null || k == null) return false
+        val payload = LoginDataWithEmail(n, k, BasicFlight.VERSION.version, Preferences.emailAddress).serialize()
+        client.sendRequest(JoozdlogCommsKeywords.REQUEST_BACKUP_MAIL, payload)
+        return client.readFromServer()?.toString(Charsets.UTF_8).let{r ->
+            (r == JoozdlogCommsKeywords.OK).also{
+                if (!it) (Log.w("requestBackup()", "Got unexpected result: $r"))
+                if(r == JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS) MainScope().launch { App.instance.toast("Invalid email: ${Preferences.emailAddress}") }
+            }
+        }
     }
 
     /**

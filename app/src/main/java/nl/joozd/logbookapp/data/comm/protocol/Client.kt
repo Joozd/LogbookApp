@@ -231,7 +231,7 @@ class Client: Closeable, CoroutineScope {
     private fun finalClose(){
         try{
             socket.use {
-                //Log.d(TAG, "sending EOS, closing socket")
+                Log.d(TAG, "sending EOS, closing socket")
                 this.sendRequest(JoozdlogCommsKeywords.END_OF_SESSION)
             }
         } finally {

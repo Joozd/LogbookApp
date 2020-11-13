@@ -42,6 +42,7 @@ class App : Application(), CoroutineScope by MainScope() {
         launch{
             JoozdlogWorkersHub.periodicGetAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
             JoozdlogWorkersHub.periodicSynchronizeAircraftTypes(Preferences.updateLargerFilesOverWifiOnly)
+            JoozdlogWorkersHub.periodicBackupFromServer()
         }
     }
 

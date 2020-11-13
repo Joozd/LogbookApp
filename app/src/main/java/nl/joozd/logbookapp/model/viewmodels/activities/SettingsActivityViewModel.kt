@@ -70,6 +70,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _standardTakeoffLandingTimes = MutableLiveData(Preferences.standardTakeoffLandingTimes)
     private val _lastUpdateTime = MutableLiveData(makeTimeString(Preferences.lastUpdateTime))
     private val _backupInterval = MutableLiveData(Preferences.backupInterval)
+    private val _backupFromCloud = MutableLiveData(Preferences.backupFromCloud)
     private val _updateLargerFilesOverWifiOnly = MutableLiveData(Preferences.updateLargerFilesOverWifiOnly)
 
     private val _username = MutableLiveData(Preferences.username) // <String?>
@@ -122,6 +123,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
             Preferences::backupInterval.name -> _backupInterval.value = Preferences.backupInterval
 
+            Preferences::backupFromCloud.name -> _backupFromCloud.value = Preferences.backupFromCloud
+
             Preferences::consensusOptIn.name -> _consensusOptIn.value = Preferences.consensusOptIn
 
             Preferences::picNameNeedsToBeSet.name -> _picNameNeedsToBeSet.value = Preferences.picNameNeedsToBeSet
@@ -173,6 +176,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val backupInterval: LiveData<Int>
         get() = _backupInterval
+
+    val backupFromCloud: LiveData<Boolean>
+        get() = _backupFromCloud
 
     val updateLargerFilesOverWifiOnly: LiveData<Boolean>
         get() = _updateLargerFilesOverWifiOnly

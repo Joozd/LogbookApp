@@ -69,6 +69,9 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         addSource(_backupInterval){
             value = backupDialogShouldBeShown()
         }
+        addSource(Preferences.mostRecentBackupLiveData){
+            value = backupDialogShouldBeShown()
+        }
     }
 
     private val _backupUri = MutableLiveData<Uri>()

@@ -31,9 +31,11 @@ import android.widget.NumberPicker
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivitySettingsBinding
@@ -42,6 +44,7 @@ import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
+import nl.joozd.logbookapp.ui.dialogs.CloudBackupDialog
 import nl.joozd.logbookapp.ui.dialogs.NumberPickerDialog
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
@@ -198,6 +201,11 @@ class SettingsActivity : JoozdlogActivity() {
 
             backupIntervalButton.setOnClickListener { showBackupIntervalNumberPicker() }
 
+            backupFromCloudSwitch.setOnClickListener {
+                toggleBackupFromCloudWithDialogIfNeeded()
+                backupFromCloudSwitch.isChecked = Preferences.backupFromCloud
+            }
+
             backupNowButton.setOnClickListener{ viewModel.backUpNow() }
 
             augmentedTakeoffTimeHintButton.setOnClickListener {
@@ -268,7 +276,7 @@ class SettingsActivity : JoozdlogActivity() {
 
             viewModel.useCloudSync.observe(activity) {
                 useCloudSyncSwitch.isChecked = it
-                if (it) showLoggedInButton() else hideLoggedInButton()
+                if (it) showCloudSyncItems() else hideCloudSyncItems()
             }
 
             viewModel.lastUpdateTime.observe(activity){
@@ -302,9 +310,9 @@ class SettingsActivity : JoozdlogActivity() {
             //     binding.settingsCalendarTypeSpinner.setSelection(it)
             // })
 
-            viewModel.username.observe(activity, Observer {
+            viewModel.username.observe(activity) {
                 setLoggedInInfo(it)
-            })
+            }
 
             viewModel.calendarDisabled.observe(activity) {
                 if (it)
@@ -322,6 +330,10 @@ class SettingsActivity : JoozdlogActivity() {
                     R.string.backup_interval_time, (if (it == 0) getString (
                         R.string.never
                     ) else getString(R.string.n_days, it.toString())))
+            }
+
+            viewModel.backupFromCloud.observe(activity){
+                backupFromCloudSwitch.isChecked = it
             }
 
             viewModel.updateLargerFilesOverWifiOnly.observe(activity){
@@ -376,20 +388,22 @@ class SettingsActivity : JoozdlogActivity() {
     /**
      * hide "you are logged in" line
      */
-    private fun ActivitySettingsBinding.hideLoggedInButton(){
+    private fun ActivitySettingsBinding.hideCloudSyncItems(){
         youAreSignedInAsButton.visibility=View.GONE
         lastSynchedTimeTextView.visibility=View.GONE
         changePasswordButton.visibility=View.GONE
         loginLinkButton.visibility = View.GONE
         loginLinkExplanationImageView.visibility = View.GONE
+        backupFromCloudSwitch.visibility = View.GONE
     }
-    private fun ActivitySettingsBinding.showLoggedInButton(){
+    private fun ActivitySettingsBinding.showCloudSyncItems(){
         youAreSignedInAsButton.visibility=View.VISIBLE
         lastSynchedTimeTextView.visibility=View.VISIBLE
         changePasswordButton.visibility=View.VISIBLE
         val showLoginLinkButton = if (Preferences.username == null) View.GONE else View.VISIBLE
         loginLinkButton.visibility = showLoginLinkButton
         loginLinkExplanationImageView.visibility = showLoginLinkButton
+        backupFromCloudSwitch.visibility = View.VISIBLE
     }
 
     private fun ActivitySettingsBinding.setLoggedInInfo(name: String?){
@@ -443,9 +457,17 @@ class SettingsActivity : JoozdlogActivity() {
             maxValue = 365
             selectedValue = Preferences.backupInterval
         }.show(supportFragmentManager, null)
-
     }
 
+    private fun toggleBackupFromCloudWithDialogIfNeeded(){
+        if(Preferences.backupFromCloud) Preferences.backupFromCloud = false
+        else {
+            supportFragmentManager.commit {
+                add(R.id.settingsActivityLayout, CloudBackupDialog(), null)
+                addToBackStack(null)
+            }
+        }
+    }
 
 
     class AugmentedNumberPicker: NumberPickerDialog() {

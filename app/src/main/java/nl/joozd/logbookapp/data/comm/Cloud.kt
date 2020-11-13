@@ -148,6 +148,15 @@ object Cloud {
         }
     }
 
+    suspend fun requestBackup(): Boolean? = withContext(Dispatchers.IO) {
+        Client.getInstance().use {
+            ServerFunctions.login(it)
+            ServerFunctions.requestBackup(it)
+        }
+    }
+
+
+
     /**********************************************************************************************
      * Airport sync functions
      **********************************************************************************************/

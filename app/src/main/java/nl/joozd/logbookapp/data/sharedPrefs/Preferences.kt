@@ -127,8 +127,13 @@ object Preferences {
         get() = _backupInterval
     var backupInterval: Int by JoozdLogSharedPrefs(sharedPref, 0, _backupInterval)
 
+    var backupFromCloud: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+
     //Instant epochseconds of most recent backup
-    var mostRecentBackup: Long by JoozdLogSharedPrefs(sharedPref, 0L)
+    private val _mostRecentBackup = MutableLiveData<Long>()
+    val mostRecentBackupLiveData: LiveData<Long>
+        get() = _mostRecentBackup
+    var mostRecentBackup: Long by JoozdLogSharedPrefs(sharedPref, 0L, _mostRecentBackup)
 
     var updateLargerFilesOverWifiOnly: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 

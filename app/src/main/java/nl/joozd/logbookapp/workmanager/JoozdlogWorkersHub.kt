@@ -136,6 +136,24 @@ object JoozdlogWorkersHub {
     }
 
     /**
+     * Schedule a check whether server should send a backup email
+     *
+     */
+    fun periodicBackupFromServer(){
+        Log.d("periodBackupFrmServer()", "added task to check for backup")
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        val task = PeriodicWorkRequestBuilder<RequestBackupIfScheduled>(Duration.ofDays(1)).apply {
+            setConstraints(constraints)
+            addTag(GET_BACKUP_EMAIL)
+        }.build()
+        with (WorkManager.getInstance(App.instance)){
+            enqueueUniquePeriodicWork(GET_BACKUP_EMAIL, ExistingPeriodicWorkPolicy.REPLACE, task)
+        }
+    }
+
+    /**
      * Reschedule Aircraft and Airport updates
      */
     fun rescheduleAircraftAndAirports(onlyUnmetered: Boolean){
@@ -147,8 +165,9 @@ object JoozdlogWorkersHub {
     /**
      * Constants for use as tags
      */
-    private const val SYNC_TIME = "syncTime"
-    private const val SYNC_FLIGHTS = "syncFlights"
-    private const val GET_AIRPORTS = "getAirports"
-    private const val SYNC_AIRCRAFT_TYPES = "syncAircraftTypes"
+    private const val SYNC_TIME = "SYNC_TIME"
+    private const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
+    private const val GET_AIRPORTS = "GET_AIRPORTS"
+    private const val SYNC_AIRCRAFT_TYPES = "SYNC_AIRCRAFT_TYPES"
+    private const val GET_BACKUP_EMAIL = "GET_BACKUP_EMAIL"
 }

@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.model.dataclasses
 
+import android.util.Log
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfEmpty
@@ -81,7 +82,7 @@ data class DisplayFlight(
             simTime = minutesToHoursAndMinutesString(f.simTime),
             registration = f.registration,
             type = f.aircraftType,
-            names = listOf(f.name, f.name2).filter{it.isNotEmpty()}.joinToString(", "),
+            names = buildNames(f.name, f.name2),
             takeoffsAndLandings = "${f.takeoffs()}/${f.landings()}",
             flightNumber = f.flightNumber,
             remarks = f.remarks,
@@ -95,5 +96,14 @@ data class DisplayFlight(
             sim = f.isSim,
             planned = f.isPlanned
         )
+        private fun buildNames(vararg names: String): String{
+            val nn  = names.map{
+                if (';' in it) it.split(';').map{it.trim()} else listOf(it)
+            }.flatten()
+            Log.d("DEBUG", "names: $names")
+            Log.d("DEBUG", "nn: $nn")
+            return if (nn.size <=2) nn.joinToString(", ")
+            else nn.take(2).joinToString(", ") + " + ${nn.drop(2).size}"
+        }
     }
 }

@@ -72,5 +72,8 @@ object JoozdlogCommsKeywords {
     const val END_OF_SESSION = "END_OF_SESSION"
     const val SAVE_CHANGES = "SAVE_CHANGES"
 
+    //debug keywords
+    const val DEBUG_SEND_TEST_MAIL = "DEBUG_SEND_TEST_MAIL"
+
 
 }

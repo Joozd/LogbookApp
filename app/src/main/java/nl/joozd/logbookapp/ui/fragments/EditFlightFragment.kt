@@ -32,6 +32,7 @@ import android.widget.ArrayAdapter
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
+import kotlinx.android.synthetic.main.dialog_about.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
@@ -48,6 +49,7 @@ import nl.joozd.logbookapp.ui.dialogs.airportPicker.DestPicker
 import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 
 class EditFlightFragment: JoozdlogFragment(){
     private val viewModel: NewEditFlightFragmentViewModel by viewModels()
@@ -211,6 +213,17 @@ class EditFlightFragment: JoozdlogFragment(){
                     EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT -> closeFragment()
                 }
                 Unit
+            }
+
+            /************************************************************************************
+             * Long-press help dialogs:
+             ************************************************************************************/
+
+            flightRemarksField.setOnLongClickListener {
+                JoozdlogAlertDialog(requireActivity()).show{
+                    message = "LONG PRESS TEXT UAB"
+                }
+                true
             }
 
             /************************************************************************************

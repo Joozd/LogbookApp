@@ -208,6 +208,30 @@
     <string name="you_can_set_settings_in_settings">If you want to adjust any more settings, take a look at the Settings menu after you click "done"!</string>
 
     <!--
+    - Strings for help when long-pressing things
+    -->
+
+    <string name="edit_flight_date_help">The date of this flight, in UTC. If your flight spans across multiple days, enter the date of departure.</string>
+    <string name="edit_flight_flight_number_help">The flightnumber of this flight. Not required, will not end up in pdf logbook.</string>
+    <string name="edit_flight_orig_help">The place of departure. You can enter ICAO and IATA identifiers such as EHGG, GRQ or E25</string>
+    <string name="edit_flight_dest_help">The place of arrival. You can enter ICAO and IATA identifiers such as EHGG, GRQ or E25</string>
+    <string name="edit_flight_time_out_help">The time of departure, in UTC. You can enter times like 0103, 22:33 or 12 which wil become 00:12Z</string>
+    <string name="edit_flight_time_in_help">The time of arrival, in UTC. If earlier than Time Out, it will be read on the next day.</string>
+    <string name="edit_flight_aircraft_help">The aircraft used on this flight. You can enter partial registrations such as XO if you mean PH-EXO. It will take the top hit in the drop-down list that will appear after entering 2 letters.\nIf the registration is not known by you or the server, you will get to a dialog where you can assign a type to this registration.</string>
+    <string name="edit_flight_takeoff_landing_help">Takeoffs and landings. Enter for example 1 for 1 takeoff/landing, or 2/0 if you did 2 takeoffs and 0 landings.</string>
+    <string name="edit_flight_name_help">Name of the PIC, required by EASA-FCL.</string>
+    <string name="edit_flight_name2_help">Names of other crew members. Not required.\nYou can enter multiple names, separated by semicolons.</string>
+    <string name="edit_flight_remarks_help">Remarks. Will end up in pdf logbook.</string>
+    <string name="edit_flight_sim_help">Select if this is a simulator session.</string>
+    <string name="edit_flight_sign_help">Select if you want a signature in your pdf logbook.</string>
+    <string name="edit_flight_dual_help">Select if this is a dual instruction flight.</string>
+    <string name="edit_flight_instructor_help">Select if this you want to log this flight as instructor.</string>
+    <string name="edit_flight_ifr_help">Select if this flight was conducted under IFR.</string>
+    <string name="edit_flight_pic_help">Select if you are pilot in command or PICUS on this flight. There is no distinction between those in an EASA-FCL logbook.</string>
+    <string name="edit_flight_pf_help">Select if you were pilot flying on this flight.</string>
+    <string name="edit_flight_autovalues_help">If this box is ticked, IFR and night times will be automatically calculated from other inserted data.</string>
+
+    <!--
     - Strings for BalanceForward activity & dialog
     -->
 

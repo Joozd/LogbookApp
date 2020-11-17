@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.ui.fragments
 
+import android.app.Activity
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
@@ -219,11 +220,73 @@ class EditFlightFragment: JoozdlogFragment(){
              * Long-press help dialogs:
              ************************************************************************************/
 
+            flightDateField.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_date_help)
+            }
+
+            flightFlightNumberField.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_flight_number_help)
+            }
+
+            flightOrigField.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_orig_help)
+            }
+
+            flightDestField.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_dest_help)
+            }
+
+            flighttOutStringField.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_time_out_help)
+            }
+
+            flighttInStringField.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_time_in_help)
+            }
+
+            flightAircraftField.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_aircraft_help)
+            }
+
+            flightTakeoffLandingField.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_takeoff_landing_help)
+            }
+
+            flightNameField.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_name_help)
+            }
+
+            flightName2Field.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_name2_help)
+            }
+
             flightRemarksField.setOnLongClickListener {
-                JoozdlogAlertDialog(requireActivity()).show{
-                    message = "LONG PRESS TEXT UAB"
-                }
-                true
+                showHelpMessage(R.string.edit_flight_remarks_help)
+            }
+
+            simSelector.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_sim_help)
+            }
+            signSelector.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_sign_help)
+            }
+            dualSelector.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_dual_help)
+            }
+            instructorSelector.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_instructor_help)
+            }
+            ifrSelector.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_ifr_help)
+            }
+            picSelector.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_pic_help)
+            }
+            pfSelector.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_pf_help)
+            }
+            autoFillCheckBox.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_autovalues_help)
             }
 
             /************************************************************************************
@@ -536,6 +599,14 @@ class EditFlightFragment: JoozdlogFragment(){
         autoFillCheckBox.isEnabled = true
     }
 
-
-
+    private fun showHelpMessage(message: Int): Boolean{
+        supportFragmentManager.commit {
+            add(R.id.mainActivityLayout, MessageDialog.make(message))
+            addToBackStack(null)
+        }
+        return true
+    }
 }
+
+
+

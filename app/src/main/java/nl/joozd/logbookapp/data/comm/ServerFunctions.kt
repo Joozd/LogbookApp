@@ -300,4 +300,11 @@ object ServerFunctions {
         update(password.toByteArray())
         digest()
     }
+/*
+    fun sendTestMail(client: Client): Boolean{
+        client.sendRequest(JoozdlogCommsKeywords.DEBUG_SEND_TEST_MAIL)
+        return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
+    }
+
+ */
 }

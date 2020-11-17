@@ -411,5 +411,11 @@ object Cloud {
     } finally {
         syncingFlights = false
     }
+/*
+    suspend fun sendTestMail(): Boolean =
+        Client.getInstance().use{
+            ServerFunctions.sendTestMail(it)
+        }
+*/
 
 }

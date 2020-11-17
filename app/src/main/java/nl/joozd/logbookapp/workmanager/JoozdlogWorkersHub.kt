@@ -72,6 +72,7 @@ object JoozdlogWorkersHub {
         if (Preferences.useCloud) {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
+                .setRequiresBatteryNotLow(true)
                 .build()
 
             val task = OneTimeWorkRequestBuilder<SyncFlightsWorker>().apply {
@@ -99,6 +100,7 @@ object JoozdlogWorkersHub {
     fun periodicGetAirportsFromServer(onlyUnmetered: Boolean = false, overwrite: Boolean = false){
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
             .build()
 
         val task = PeriodicWorkRequestBuilder<SyncAirportsWorker>(Duration.ofDays(1)).apply {
@@ -122,6 +124,7 @@ object JoozdlogWorkersHub {
     fun periodicSynchronizeAircraftTypes(onlyUnmetered: Boolean = false, overwrite: Boolean = false){
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
             .build()
         val task = PeriodicWorkRequestBuilder<SyncAircraftTypesWorker>(Duration.ofDays(1)).apply {
             setConstraints(constraints)
@@ -143,13 +146,14 @@ object JoozdlogWorkersHub {
         Log.d("periodBackupFrmServer()", "added task to check for backup")
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
             .build()
         val task = PeriodicWorkRequestBuilder<RequestBackupIfScheduled>(Duration.ofDays(1)).apply {
             setConstraints(constraints)
             addTag(GET_BACKUP_EMAIL)
         }.build()
         with (WorkManager.getInstance(App.instance)){
-            enqueueUniquePeriodicWork(GET_BACKUP_EMAIL, ExistingPeriodicWorkPolicy.REPLACE, task)
+            enqueueUniquePeriodicWork(GET_BACKUP_EMAIL, ExistingPeriodicWorkPolicy.KEEP, task)
         }
     }
 
@@ -161,7 +165,6 @@ object JoozdlogWorkersHub {
         periodicSynchronizeAircraftTypes(onlyUnmetered, true)
     }
 
-
     /**
      * Constants for use as tags
      */
@@ -170,4 +173,5 @@ object JoozdlogWorkersHub {
     private const val GET_AIRPORTS = "GET_AIRPORTS"
     private const val SYNC_AIRCRAFT_TYPES = "SYNC_AIRCRAFT_TYPES"
     private const val GET_BACKUP_EMAIL = "GET_BACKUP_EMAIL"
+    private const val TEST_EMAIL = "GET_BACKUP_EMAIL"
 }

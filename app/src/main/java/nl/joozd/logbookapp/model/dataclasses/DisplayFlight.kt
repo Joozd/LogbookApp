@@ -100,8 +100,6 @@ data class DisplayFlight(
             val nn  = names.map{
                 if (';' in it) it.split(';').map{it.trim()} else listOf(it)
             }.flatten()
-            Log.d("DEBUG", "names: $names")
-            Log.d("DEBUG", "nn: $nn")
             return if (nn.size <=2) nn.joinToString(", ")
             else nn.take(2).joinToString(", ") + " + ${nn.drop(2).size}"
         }

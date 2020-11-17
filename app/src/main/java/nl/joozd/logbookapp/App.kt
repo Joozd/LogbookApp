@@ -29,7 +29,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 
-class App : Application(), CoroutineScope by MainScope() {
+class App : Application(){
     companion object {
         var instance: App by DelegatesExt.notNullSingleValue()
     }
@@ -39,13 +39,8 @@ class App : Application(), CoroutineScope by MainScope() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        launch{
-            JoozdlogWorkersHub.periodicGetAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
-            JoozdlogWorkersHub.periodicSynchronizeAircraftTypes(Preferences.updateLargerFilesOverWifiOnly)
-            JoozdlogWorkersHub.periodicBackupFromServer()
-        }
+        JoozdlogWorkersHub.periodicGetAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
+        JoozdlogWorkersHub.periodicSynchronizeAircraftTypes(Preferences.updateLargerFilesOverWifiOnly)
+        JoozdlogWorkersHub.periodicBackupFromServer()
     }
-
-
-
 }

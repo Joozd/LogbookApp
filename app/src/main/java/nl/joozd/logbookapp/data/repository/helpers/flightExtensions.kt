@@ -19,13 +19,10 @@
 
 package nl.joozd.logbookapp.data.repository.helpers
 
-import nl.joozd.joozdlogcommon.AircraftType
-import nl.joozd.logbookapp.extensions.toInt
+import nl.joozd.logbookapp.extensions.atEndOfDay
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.*
 import java.util.*
 
 const val PLANNING_MARGIN = 300 // seconds = 5 minutes. Flights saved with timeIn more than this
@@ -33,7 +30,8 @@ const val PLANNING_MARGIN = 300 // seconds = 5 minutes. Flights saved with timeI
 
 fun Flight.prepareForSave(): Flight{
     val now = Instant.now().epochSecond
-    return this.copy(isPlanned = (timeIn > now + PLANNING_MARGIN), timeStamp = TimestampMaker.nowForSycPurposes)
+    //planned if time in later than now (with a bit of margin) or sim later than end of local day
+    return this.copy(isPlanned = if (isSim) timeIn > Instant.now().atEndOfDay(ZonedDateTime.now().offset).epochSecond else (timeIn > now + PLANNING_MARGIN), timeStamp = TimestampMaker.nowForSycPurposes)
 }
 
 fun Flight.isSamedPlannedFlightAs(f: Flight) =
@@ -67,10 +65,3 @@ fun Flight.isSameFlightOnSameDay(f: Flight) =
             && hasSameflightNumberAs(f)
 
 fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.toUpperCase(Locale.ROOT).trim() == other.flightNumber.toUpperCase(Locale.ROOT).trim()
-
-/**
- * Returns number of minutes of multipilot time, checking  if [Flight.aircraftType] against [aircraftMap]
- */
-fun Flight.multiPilotTime(aircraftMap: Map<String, AircraftType>){
-    TODO("Not implemented")
-}

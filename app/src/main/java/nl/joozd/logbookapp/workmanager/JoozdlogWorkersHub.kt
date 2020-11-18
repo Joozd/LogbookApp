@@ -142,7 +142,7 @@ object JoozdlogWorkersHub {
      * Schedule a check whether server should send a backup email
      *
      */
-    fun periodicBackupFromServer(){
+    fun periodicBackupFromServer(force: Boolean = false){
         Log.d("periodBackupFrmServer()", "added task to check for backup")
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -153,7 +153,7 @@ object JoozdlogWorkersHub {
             addTag(GET_BACKUP_EMAIL)
         }.build()
         with (WorkManager.getInstance(App.instance)){
-            enqueueUniquePeriodicWork(GET_BACKUP_EMAIL, ExistingPeriodicWorkPolicy.KEEP, task)
+            enqueueUniquePeriodicWork(GET_BACKUP_EMAIL, if (force) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
         }
     }
 

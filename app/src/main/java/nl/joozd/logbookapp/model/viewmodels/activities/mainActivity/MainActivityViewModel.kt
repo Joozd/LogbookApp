@@ -196,7 +196,9 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     private fun backupDialogShouldBeShown(): Boolean {
         if (Preferences.backupInterval == 0) return false
         val mostRecentBackup = Instant.ofEpochSecond(Preferences.mostRecentBackup).atStartOfDay(OffsetDateTime.now().offset)
-        return Instant.now() - mostRecentBackup > Duration.ofDays(Preferences.backupInterval.toLong())
+        return (Instant.now() - mostRecentBackup > Duration.ofDays(Preferences.backupInterval.toLong())).also{
+            if (it) feedback(MainActivityEvents.BACKUP_NEEDED)
+        }
     }
 
     /*********************************************************************************************

@@ -288,6 +288,7 @@ class MainActivity : JoozdlogActivity() {
                             )
                         )
                     MainActivityEvents.CALENDAR_SYNC_PAUSED -> showCalendarSyncRestartInfo()
+                    MainActivityEvents.BACKUP_NEEDED -> JoozdlogWorkersHub.periodicBackupFromServer(true) // If a backup should be made, try to do that through server
                     MainActivityEvents.SHOW_ABOUT_DIALOG -> showAboutDialog()
                     MainActivityEvents.DONE -> longToast(" Yay fixed!")
                     MainActivityEvents.ERROR -> longToast("An error occurred :(")

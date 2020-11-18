@@ -24,21 +24,40 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
 class CloudBackupDialogViewModel: JoozdlogDialogViewModel() {
-    var emailAddress = Preferences.emailAddress
+    var email1 = Preferences.emailAddress
+    var email2 = Preferences.emailAddress
 
     fun okClicked(){
-        Preferences.emailAddress = emailAddress
+        if (email1 != email2) feedback(GeneralEvents.ERROR).putInt(3)
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(GeneralEvents.ERROR).putInt(4)
+        Preferences.emailAddress = email1
         Preferences.backupFromCloud = true
         feedback(GeneralEvents.DONE)
     }
 
     fun updateEmail(it: String){
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(it.trim()).matches())
+                feedback(GeneralEvents.ERROR).putString("Not an email address").putInt(1) // TODO make other errors as well
+                email1 = it.trim()
+    }
+
+    fun updateEmail2(it: String){
         when {
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(it.trim()).matches() ->
-                feedback(GeneralEvents.ERROR).putString("Not an email address") // TODO make other errors as well
+            it.trim() != email1 ->
+                feedback(GeneralEvents.ERROR).putString("Does not match").putInt(2) // TODO make other errors as well
             else -> {
-                emailAddress = it.trim()
+                email2 = it.trim()
+
             }
         }
     }
+
+    fun checkSame1(s: String): Boolean =
+        (s.trim() == email2 && android.util.Patterns.EMAIL_ADDRESS.matcher(email2).matches())
+
+    fun checkSame2(s: String): Boolean =
+        (s.trim() == email1 && android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()).also{
+            email2 = s
+        }
+
 }

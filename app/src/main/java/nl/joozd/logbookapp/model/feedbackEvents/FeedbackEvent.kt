@@ -45,8 +45,9 @@ class FeedbackEvent(val type: FeedbackEvents.Event) {
     }
     fun getInt(): Int = extraData.getInt(INTEGER)
 
-    fun putString(value: String?){
+    fun putString(value: String?): FeedbackEvent{
         extraData.putString(STRING, value)
+        return this
     }
     fun getString(): String? = extraData.getString(STRING)
 

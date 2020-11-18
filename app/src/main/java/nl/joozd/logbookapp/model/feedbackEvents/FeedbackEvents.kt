@@ -41,6 +41,7 @@ object FeedbackEvents {
         OPEN_SEARCH_FIELD,
         CLOSE_SEARCH_FIELD,
         CALENDAR_SYNC_PAUSED,
+        BACKUP_NEEDED,
         DONE,
         ERROR
     }

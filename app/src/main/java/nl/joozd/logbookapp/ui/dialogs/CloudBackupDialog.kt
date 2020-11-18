@@ -20,26 +20,41 @@
 package nl.joozd.logbookapp.ui.dialogs
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogCloudBackupBinding
-import nl.joozd.logbookapp.extensions.onFocusChange
+import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
 import nl.joozd.logbookapp.model.viewmodels.dialogs.CloudBackupDialogViewModel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.toast
 
 class CloudBackupDialog: JoozdlogFragment() {
     private val viewModel: CloudBackupDialogViewModel by viewModels()
+
+    private val okButtonListener = View.OnClickListener{
+        activity?.currentFocus?.clearFocus()
+        it.requestFocus()
+        viewModel.okClicked()
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         DialogCloudBackupBinding.bind(inflater.inflate(R.layout.dialog_cloud_backup, container, false)).apply{
             aboutDialogTopHalf.joozdLogSetBackgroundColor()
 
-            emailAddressEditText.setText(viewModel.emailAddress)
+            emailAddressEditText.setText(viewModel.email1)
+            emailAddress2EditText.setText(viewModel.email2)
+
+            emailAddressEditText.onTextChanged { text ->
+                emailAddressLayout.error = ""
+                enableOkButton(okButton, viewModel.checkSame1(text))
+            }
 
             emailAddressEditText.setOnFocusChangeListener { _, hasFocus ->
                 if(!hasFocus)
@@ -48,16 +63,25 @@ class CloudBackupDialog: JoozdlogFragment() {
                     }
             }
 
+
+            emailAddress2EditText.onTextChanged { text ->
+                emailAddress2Layout.error = ""
+                enableOkButton(okButton, viewModel.checkSame2(text))
+            }
+
+            emailAddress2EditText.setOnFocusChangeListener { _, hasFocus ->
+                if(!hasFocus)
+                    emailAddress2EditText.text?.toString()?.let {
+                        viewModel.updateEmail2(it)
+                    }
+            }
+
             cloudBackupDialogBox.setOnClickListener{ } // do nothing, catch clicks
 
             cloudBackupDialogBackground.setOnClickListener { closeFragment() }
 
 
-            okButton.setOnClickListener(){
-                activity?.currentFocus?.clearFocus()
-                it.requestFocus()
-                viewModel.okClicked()
-            }
+            okButton.setOnClickListener(okButtonListener)
 
             cancelButton.setOnClickListener { closeFragment() }
 
@@ -65,12 +89,36 @@ class CloudBackupDialog: JoozdlogFragment() {
                 when (it.getEvent()){
                     GeneralEvents.DONE -> closeFragment()
                     GeneralEvents.ERROR -> {
-                        emailAddressLayout.error = it.getString()
+                        when(it.getInt()){
+                            1 -> emailAddressLayout.error = it.getString()
+                            2 -> emailAddress2Layout.error = it.getString()
+                            3 -> toast("ERROR 3: Bad match")
+                            4 -> toast("ERROR 4: Not an email")
+                        }
+
                     }
                 }
             }
 
         }.root
+
+    /**
+     * Only use for OK button
+     */
+    private fun enableOkButton(v: TextView, enabled: Boolean){
+        Log.d("TextView.enable", "enabled: $enabled")
+        if (!enabled){
+            v.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
+                it.requestFocus()
+            }
+            v.setTextColor(requireActivity().getColorFromAttr(android.R.attr.textColorTertiary))
+        }
+        else{
+            v.setOnClickListener(okButtonListener)
+            v.setTextColor(requireActivity().getColorFromAttr(android.R.attr.colorAccent))
+        }
+    }
 
 
 }

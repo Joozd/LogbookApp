@@ -32,10 +32,8 @@ import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivitySettingsBinding

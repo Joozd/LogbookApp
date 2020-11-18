@@ -48,11 +48,9 @@ class RequestBackupIfScheduled(appContext: Context, workerParams: WorkerParamete
      * dependent work will not execute if you return [ListenableWorker.Result.failure]
      */
     override suspend fun doWork(): Result = withContext(Dispatchers.IO + NonCancellable) {
-        Log.d("DEBUG1", "CHECKPOINT 1")
         if (!Preferences.backupFromCloud || !backupNeeded()) Result.success() // If backup not needed, this (checking if it is needed) is all we do.
         else {
-            Log.d("DEBUG1", "CHECKPOINT 2")
-            when (Cloud.requestBackup().also{ Log.d("DEBUG1", "CHECKPOINT 3: $it")}) {
+            when (Cloud.requestBackup()) {
                 true -> Result.success().also{
                     Preferences.mostRecentBackup = Instant.now().epochSecond
                 }

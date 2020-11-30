@@ -173,6 +173,10 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
 
             //If calendar Sync will interfere, show Dialog in Activity. Dialog can restart saving.
             if (Preferences.getFlightsFromCalendar && (Preferences.calendarDisabledUntil < periodToSave!!.endInclusive.epochSecond)){ // has just been set to non-null
+                if (Preferences.alwaysPostponeCalendarSync){
+                    disableCalendarUntilAfterLastFlight()
+                }
+                else
                 feedback(PdfParserActivityEvents.CALENDAR_SYNC_ENABLED)
             } else {
                 ImportedFlightsCleaner(flightsToSave, roster.carrier).cleanFlights()?.let { fff ->

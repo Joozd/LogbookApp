@@ -115,6 +115,7 @@
     <string name="settings">Settings</string>
     <string name="error">Error</string>
     <string name="never">Never</string>
+    <string name="always">Always</string>
     <string name="warning">Warning</string>
     <string name="dismiss">Dismiss</string>
 
@@ -190,6 +191,8 @@
     <string name="delete_calendar_flight">You are deleting a a flight from your calendar. Do you want to disable calendar import?</string>
     <string name="delete_calendar_flight_until_end">Until end of flight</string>
     <string name="you_can_start_calendar_sync_again">You can start calendar synchronizing again by re-enabling it in the Settings menu</string>
+    <string name="always_postpone_calendar_sync">Postpone on conflict</string>
+
 
     <!--
     - Strings for SettingsActivity
@@ -255,8 +258,8 @@
     - Strings for PdfParserActivity
     -->
 
-    <string name="calendar_update_active">You are loading a roster file, but calendar sync is enabled. Do you want to disable calendar sync?</string>
-    <string name="calendar_update_pause_untill_end_of_roster">Until end of roster</string>
+    <string name="calendar_update_active">You are loading a roster file, but calendar sync is enabled. Do you want to disable calendar sync until end of this roster?</string>
+
 
 
     <string name="receivedIntent">Receiving data</string>

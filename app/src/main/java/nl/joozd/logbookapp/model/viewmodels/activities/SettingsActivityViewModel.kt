@@ -64,6 +64,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _picNameNeedsToBeSet = MutableLiveData(Preferences.picNameNeedsToBeSet)
     private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
     private val _getFlightsFromCalendar = MutableLiveData(Preferences.getFlightsFromCalendar)
+    private val _alwaysPostponeCalendarSync = MutableLiveData(Preferences.alwaysPostponeCalendarSync)
     private val _useCloudSync = MutableLiveData(Preferences.useCloud)
     private val _getNamesFromRosters = MutableLiveData(Preferences.getNamesFromRosters)
     private val _showOldTimesOnChronoUpdate = MutableLiveData(Preferences.showOldTimesOnChronoUpdate)
@@ -97,6 +98,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
             Preferences::getFlightsFromCalendar.name ->
                 _getFlightsFromCalendar.value = Preferences.getFlightsFromCalendar
+
+            Preferences::alwaysPostponeCalendarSync.name ->
+                _alwaysPostponeCalendarSync.value = Preferences.alwaysPostponeCalendarSync
 
             Preferences::selectedCalendar.name ->
                 _pickedCalendar.value = _foundCalendars.value?.firstOrNull {c -> c.name == Preferences.selectedCalendar}
@@ -159,6 +163,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val getFlightsFromCalendar = distinctUntilChanged(_getFlightsFromCalendar)
 
+    val alwaysPostponeCalendarSync = distinctUntilChanged(_alwaysPostponeCalendarSync)
+
     val useCloudSync: LiveData<Boolean>
         get() = _useCloudSync
 
@@ -208,7 +214,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     val calendarDisabledUntilString: String
         get(){
             val time = LocalDateTime.ofInstant(Instant.ofEpochSecond(Preferences.calendarDisabledUntil), ZoneOffset.UTC)
-            return "${time.toDateStringLocalized()} ${time.toTimeStringLocalized()}Z"
+            return "${time.toDateStringLocalized()} ${time.toTimeStringLocalized()} Z"
         }
 
 
@@ -239,6 +245,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         if (it && !Preferences.getFlightsFromCalendar) // if it is switched on from being off
             Preferences.calendarDisabledUntil = 0
         Preferences.getFlightsFromCalendar = it
+    }
+
+    fun setAutoPostponeCalendarSync(it: Boolean){
+        Preferences.alwaysPostponeCalendarSync = it
     }
 
     fun setAddNamesFromRoster(it: Boolean){

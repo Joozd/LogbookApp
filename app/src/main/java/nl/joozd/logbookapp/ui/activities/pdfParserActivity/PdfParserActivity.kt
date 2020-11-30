@@ -114,11 +114,12 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                     PdfParserActivityEvents.CALENDAR_SYNC_ENABLED -> {
                         JoozdlogAlertDialog(activity).apply {
                             messageResource = R.string.calendar_update_active
-                            setPositiveButton(android.R.string.yes) {
-                                viewModel.disableCalendarImport()
+                            setPositiveButton(R.string.always) {
+                                viewModel.disableCalendarUntilAfterLastFlight()
+                                Preferences.alwaysPostponeCalendarSync = true
                                 viewModel.saveFlights()
                             }
-                            setNegativeButton(R.string.calendar_update_pause_untill_end_of_roster) {
+                            setNegativeButton(android.R.string.ok) {
                                 viewModel.disableCalendarUntilAfterLastFlight()
                                 viewModel.saveFlights(finish = false)
                             }

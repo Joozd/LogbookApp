@@ -183,6 +183,11 @@ object Preferences {
      */
     var calendarType: Int by JoozdLogSharedPrefs(sharedPref, SupportedCalendarTypes.INVALID)
 
+    /**
+     * Postpone calendar sync without asking
+     */
+    var alwaysPostponeCalendarSync: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+
 
     /**
      * Accept aircraft change from Monthly Overview without confirmation?

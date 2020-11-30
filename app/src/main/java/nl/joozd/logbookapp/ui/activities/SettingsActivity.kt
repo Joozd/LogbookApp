@@ -159,6 +159,10 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.setGetFlightsFromCalendar(isChecked)
             }
 
+            autoPostponeCalendarSyncSelector.setOnCheckedChangeListener { _, isChecked ->
+                viewModel.setAutoPostponeCalendarSync(isChecked)
+            }
+
             dontPostponeTextView.setOnClickListener {
                 viewModel.dontPostponeCalendarSync()
             }
@@ -270,6 +274,10 @@ class SettingsActivity : JoozdlogActivity() {
                     settingsCalendarPickerSpinner.visibility = View.GONE
                     // settingsCalendarTypeSpinner.visibility = View.GONE
                 }
+            }
+
+            viewModel.alwaysPostponeCalendarSync.observe(activity){
+                autoPostponeCalendarSyncSelector.isChecked = it
             }
 
             viewModel.useCloudSync.observe(activity) {

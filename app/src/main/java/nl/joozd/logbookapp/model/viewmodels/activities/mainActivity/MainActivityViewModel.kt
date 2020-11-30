@@ -171,9 +171,9 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         query in it.flightNumber.toUpperCase(Locale.ROOT)
     }
 
-    private fun disableCalendarImportUntil(time: Long) {
+    private fun disableCalendarImportUntil(time: Long, silent: Boolean = false) {
         Preferences.calendarDisabledUntil = time
-        feedback(MainActivityEvents.CALENDAR_SYNC_PAUSED)
+        if (!silent) feedback(MainActivityEvents.CALENDAR_SYNC_PAUSED)
     }
 
     private fun toggleSearchField() {
@@ -405,6 +405,7 @@ else{
      * Check if a saved flight will make a conflict with calendar sync
      * (ie. a planned flight gets times or airports changed)
      * @param f: Flight to check against FlightRepository.undoFlight
+     * @return time (epochSecond) to disable calendarSync to if conflict, 0 if not
      */
     fun checkFlightConflictingWithCalendarSync(f: Flight): Long = if (f == flightRepository.undoSaveFlight) 0L
     else FlightConflichtChecker.checkConflictingWithCalendarSync(flightRepository.undoSaveFlight, f)
@@ -415,10 +416,10 @@ else{
      * @param f: Flight to check against FlightRepository.undoFlight. Will throw error if f == null.
      * Call this function from an observer of [FlightRepository.savedFlight]
      */
-    fun fixCalendarSyncConflictIfNeeded(f: Flight?) {
+    fun fixCalendarSyncConflictIfNeeded(f: Flight?, silent: Boolean = false) {
         if (f == null) return // no flight, no conflict
         checkFlightConflictingWithCalendarSync(f).nullIfZero()?.let {
-            disableCalendarImportUntil(it)
+            disableCalendarImportUntil(it, silent)
         }
     }
 

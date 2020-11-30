@@ -333,9 +333,14 @@ class MainActivity : JoozdlogActivity() {
                 Log.d("MainActivity", "saved $suf")
                 suf.get()?.let {
                     Log.d("MainActivity", "got $it")
-                    if (viewModel.checkFlightConflictingWithCalendarSync(it) > 0)
-                        showFlightConflictsWithCalendarSyncDialog(it)
-                    else showSaveSnackbar(it)
+                    // If editing a flight that will be changed by CalendarSync, postpone calendarSync silently when in the next hour, or with dialog if longer
+                    val conflictTime = viewModel.checkFlightConflictingWithCalendarSync(it)
+                    val now = Instant.now().epochSecond
+                    when (conflictTime) {
+                        in (0L..now) -> showSaveSnackbar(it)                                                        // flight is not a conflict with calSync
+                        in (now..(now+60*60+it.duration()*60)) -> viewModel.fixCalendarSyncConflictIfNeeded(it, silent = true)     // Flight starts in the next 60 minutes
+                        else -> showFlightConflictsWithCalendarSyncDialog(it)                                       // show dialog
+                    }
                 }
             }
 

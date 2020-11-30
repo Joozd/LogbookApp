@@ -37,13 +37,13 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     private val typesSearchString
         get() = _typesSearchString.value ?: ""
 
-    private val _aircraftTypes = MediatorLiveData<List<String>>().apply {
+    private val _aircraftTypes = MediatorLiveData<List<AircraftType>>().apply {
         addSource(aircraftRepository.aircraftTypesLiveData){
             // Create a list of names of all known aircraft matching [typesSearchString]
-            value = it.map{ac -> ac.name}.filter{name -> typesSearchString in_ignoreCase name}
+            value = it.filter{type -> typesSearchString in_ignoreCase type.name}
         }
         addSource(_typesSearchString){
-            value = (aircraftRepository.aircraftTypes ?: emptyList()).map{ac -> ac.name}.filter{typesSearchString in_ignoreCase it}
+            value = (aircraftRepository.aircraftTypes ?: emptyList()).filter{typesSearchString in_ignoreCase it.name}
         }
     }
 
@@ -51,7 +51,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     // Active aircraft in [workingFligght] or a placeholder [Aircraft] while workingFlight is loading data
     val selectedAircraft = workingFlight.aircraft.map { it ?: Aircraft("...")}
 
-    val aircraftTypes: LiveData<List<String>>
+    val aircraftTypes: LiveData<List<AircraftType>>
         get() = _aircraftTypes
 
     val knownRegistrations = aircraftRepository.aircraftListLiveData.map{ it.map{ac -> ac.registration}}
@@ -73,12 +73,20 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
                 source = source ?: mAircraft.source)
     }
 
-    val selectedAircraftString: LiveData<String> = Transformations.map(selectedAircraft) { it.type?.name ?: "UNKNOWN"}
+    val selectedAircraftType: LiveData<AircraftType?> = Transformations.map(selectedAircraft) { it.type }
 
     fun selectAircraftTypeByString(typeString: String, shortString: Boolean = false){
         viewModelScope.launch {
             val newType = if (shortString) aircraftRepository.getAircraftTypeByShortName(typeString) else aircraftRepository.getAircraftType(typeString)
             updatedSelectedAircraft(type = newType)
+        }
+
+        //TODO set AircraftRegistrationWithTypeData
+    }
+
+    fun selectAircraftType(type: AircraftType){
+        viewModelScope.launch {
+            updatedSelectedAircraft(type = type)
         }
 
         //TODO set AircraftRegistrationWithTypeData

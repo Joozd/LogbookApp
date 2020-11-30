@@ -40,6 +40,7 @@ import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AircraftPickerViewModel
 import nl.joozd.logbookapp.ui.adapters.AircraftAutoCompleteAdapter
+import nl.joozd.logbookapp.ui.adapters.AircraftPickerAdapter
 import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
 
 
@@ -53,9 +54,9 @@ class AircraftPicker: JoozdlogFragment(){
             //set color of dialog head
             aircraftPickerTopHalf.joozdLogSetBackgroundColor()
 
-            val typesPickerAdapter = SelectableStringAdapter {
+            val typesPickerAdapter = AircraftPickerAdapter() {
                 Log.d(this::class.simpleName, "clicked on $it")
-                viewModel.selectAircraftTypeByString(it)
+                viewModel.selectAircraftType(it)
             }.also {
                 typesPickerRecyclerView.layoutManager = LinearLayoutManager(context)
                 typesPickerRecyclerView.adapter = it
@@ -96,7 +97,7 @@ class AircraftPicker: JoozdlogFragment(){
             viewModel.selectedAircraft.observe(viewLifecycleOwner){
                 pickedAircraftText.text = it.registration.nullIfBlank() ?: getString(R.string.aircraft)
                 typeDescriptionTextView.text = it.type?.name ?: "" // set type text to found type or to empty string
-                typesPickerAdapter.selectActiveItem(it.type?.name)
+                typesPickerAdapter.selectActiveItem(it.type)
 
                 val errorText = registrationFieldLayout.findViewById<TextView>(R.id.textinput_error).apply{
                     visibility=View.VISIBLE

@@ -36,7 +36,7 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AircraftPickerViewModel
-import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
+import nl.joozd.logbookapp.ui.adapters.AircraftPickerAdapter
 
 
 class SimTypePicker: JoozdlogFragment(){
@@ -47,9 +47,9 @@ class SimTypePicker: JoozdlogFragment(){
             //set color of dialog head
             (aircraftPickerTopHalf?.background as GradientDrawable).colorFilter = PorterDuffColorFilter(requireActivity().getColorFromAttr(android.R.attr.colorPrimary), PorterDuff.Mode.SRC_IN) // set background color to bakground with rounded corners
 
-            val typesPickerAdapter = SelectableStringAdapter {
+            val typesPickerAdapter = AircraftPickerAdapter {
                 Log.d(this::class.simpleName, "clicked on $it")
-                viewModel.selectAircraftTypeByString(it)
+                viewModel.selectAircraftType(it)
             }.also {
                 typesPickerRecyclerView.layoutManager = LinearLayoutManager(context)
                 typesPickerRecyclerView.adapter = it
@@ -67,10 +67,10 @@ class SimTypePicker: JoozdlogFragment(){
              * Observers
              ******************************************************************************/
 
-            viewModel.selectedAircraftString.observe(viewLifecycleOwner, Observer{
+            viewModel.selectedAircraftType.observe(viewLifecycleOwner) {
                 typesPickerAdapter.selectActiveItem(it)
                 typesPickerRecyclerView.scrollToPosition(typesPickerAdapter.list.indexOf(it))
-            })
+            }
 
             viewModel.selectedAircraft.observe(viewLifecycleOwner, Observer{
                 it.type?.let{t ->
@@ -78,10 +78,10 @@ class SimTypePicker: JoozdlogFragment(){
                 }
             })
 
-            viewModel.aircraftTypes.observe(viewLifecycleOwner, Observer {
+            viewModel.aircraftTypes.observe(viewLifecycleOwner) {
                 Log.d(this::class.simpleName, "updating list with ${it.size} items")
                 typesPickerAdapter.updateList(it)
-            })
+            }
 
             /******************************************************************************
              * save or cancel

@@ -24,8 +24,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.item_picker_aircraft_type.*
 import kotlinx.android.synthetic.main.item_picker_dialog.*
+import kotlinx.android.synthetic.main.item_picker_dialog.itemBackground
+import kotlinx.android.synthetic.main.item_picker_dialog.nameTextView
+import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
@@ -37,20 +42,20 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
  * @param itemClick: Action to be performed onClick on an item
  * itemLayout must have a field named [itemBackground]
  */
-class SelectableStringAdapter(
-    var list: List<String> = emptyList(),
+class AircraftPickerAdapter(
+    var list: List<AircraftType> = emptyList(),
     var color: Int? = null,
-    private val itemLayout: Int = R.layout.item_picker_dialog,
-    private val itemClick: (String) -> Unit
-): RecyclerView.Adapter<SelectableStringAdapter.ViewHolder>() {
-    private var selectedEntry: String? = null
+    private val itemLayout: Int = R.layout.item_picker_aircraft_type,
+    private val itemClick: (AircraftType) -> Unit
+): RecyclerView.Adapter<AircraftPickerAdapter.ViewHolder>() {
+    private var selectedEntry: AircraftType? = null
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItem(list[position])
         holder.itemBackground.setOnClickListener {
-            itemClick(holder.nameTextView.text.toString())
+            holder.ac?.let {itemClick(it)}
         }
-        holder.itemBackground.setBackgroundColor(if (holder.nameTextView.text.toString() == selectedEntry) color?: holder.itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary) else 0x00000000 )
+        holder.itemBackground.setBackgroundColor(if (holder.nameTextView.text.toString() == selectedEntry?.name) color?: holder.itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary) else 0x00000000 )
     }
 
     override fun getItemCount(): Int = list.size
@@ -60,7 +65,7 @@ class SelectableStringAdapter(
         return ViewHolder(view)
     }
 
-    fun updateList(l: List<String>){
+    fun updateList(l: List<AircraftType>){
         list = l
         notifyDataSetChanged()
     }
@@ -68,7 +73,7 @@ class SelectableStringAdapter(
     /**
      * Select [activeItem] as ative item, or select nothing as active if null
      */
-    fun selectActiveItem(activeItem: String?) {
+    fun selectActiveItem(activeItem: AircraftType?) {
         val previousIndex = list.indexOf(selectedEntry)
         val foundIndex = list.indexOf(activeItem)
         selectedEntry = activeItem
@@ -81,9 +86,13 @@ class SelectableStringAdapter(
     class ViewHolder(override val containerView: View) :
         RecyclerView.ViewHolder(containerView),
         LayoutContainer {
-
-        fun bindItem(name: String) {
-            nameTextView.text = name
+        private var aircraft: AircraftType? = null
+        val ac: AircraftType?
+            get() = aircraft
+        fun bindItem(ac: AircraftType) {
+            aircraft = ac
+            nameTextView.text = ac.name
+            typeTextView.text = ac.shortName
         }
     }
 }

@@ -144,6 +144,9 @@
     <string name="aircraft_type_from_server">Type match from server</string>
     <string name="aircraft_type_not_found">Unknown registration, please select a type</string>
 
+    <string name="unknown_file_title">Unknown File</string>
+    <string name="unknown_file_message">The file youare trying to import into Joozdlog is not supported yet. If you want it to be, please mail it to joozdlog@joozd.nl and if I feel like it I might support it in a future version.</string>
+
 
 
     <string name="total_time_too_large">Total time cannot be more than offblocks to on blocks</string>

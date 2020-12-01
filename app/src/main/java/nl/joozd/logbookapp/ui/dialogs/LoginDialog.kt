@@ -26,11 +26,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogLoginBinding
-import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.LoginActivityViewModel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast
 
 //TODO probably replace this with JoozdlogAlertDialog?

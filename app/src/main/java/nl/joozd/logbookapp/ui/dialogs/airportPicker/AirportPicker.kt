@@ -38,7 +38,7 @@ import nl.joozd.logbookapp.ui.adapters.AirportPickerAdapter
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.AirportPickerEvents
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
 
 import java.util.*
 import kotlin.math.abs
@@ -119,7 +119,7 @@ abstract class AirportPicker(): JoozdlogFragment() {
                         closeFragment()
                     }
                     AirportPickerEvents.CUSTOM_AIRPORT_NOT_EDITED -> {
-                        JoozdlogAlertDialog(requireActivity()).show {
+                        JoozdlogAlertDialogV1(requireActivity()).show {
                             titleResource = R.string.warning
                             messageResource = R.string.custom_airport_caution_text // TODO remove TODO from string once no longer necessary
                             setPositiveButton(android.R.string.ok)

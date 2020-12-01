@@ -40,7 +40,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEv
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.CloudSyncTermsDialog
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
 import nl.joozd.logbookapp.ui.utils.toast
 import java.util.*
 
@@ -104,7 +104,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
                         if (Preferences.acceptedCloudSyncTerms)
                             viewModel.signUpClicked(userNameEditText.text)
                         else {
-                            JoozdlogAlertDialog(requireActivity()).show {
+                            JoozdlogAlertDialogV1(requireActivity()).show {
                                 messageResource = R.string.must_accept_terms
                                 setPositiveButton(android.R.string.ok)
                             }
@@ -115,7 +115,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
                     if (Preferences.acceptedCloudSyncTerms)
                         viewModel.signUpClicked(userNameEditText.text, emailEditText.text)
                     else {
-                        JoozdlogAlertDialog(requireActivity()).show {
+                        JoozdlogAlertDialogV1(requireActivity()).show {
                             messageResource = R.string.must_accept_terms
                             setPositiveButton(android.R.string.ok)
                         }
@@ -182,7 +182,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
      * Functions showing AlertDialogs
      *******************************************************************************************/
 
-    private fun showPasswordLinkDialog() =  JoozdlogAlertDialog(requireActivity()).show {
+    private fun showPasswordLinkDialog() =  JoozdlogAlertDialogV1(requireActivity()).show {
 
         title = App.instance.getString(R.string.created_account, UserManagement.username)
         messageResource = R.string.create_login_link_hint
@@ -197,7 +197,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
      * Feedback dialogs for when bad data is entered when creating account
      */
     private fun showCreateAccountServerError() =
-        JoozdlogAlertDialog(requireActivity()).apply {
+        JoozdlogAlertDialogV1(requireActivity()).apply {
             titleResource = R.string.no_internet
             messageResource = R.string.no_server_create_account
             setPositiveButton(R.string._continue) {
@@ -207,7 +207,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
         }.show()
 
     private fun showCreateAccountNoInternetError() =
-        JoozdlogAlertDialog(requireActivity()).apply {
+        JoozdlogAlertDialogV1(requireActivity()).apply {
             titleResource = R.string.no_internet
             messageResource = R.string.no_internet_create_account
             setPositiveButton(R.string.skip) {
@@ -229,7 +229,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
     }
 
     private fun showUserExistsError() =
-        JoozdlogAlertDialog(requireActivity()).show {
+        JoozdlogAlertDialogV1(requireActivity()).show {
             Log.d("XOXOXOXOXOXO", "LALALALALALALALALALALALAHIHIHIHIHIHIJOOOOO")
             titleResource = R.string.username_already_taken
             setPositiveButton(android.R.string.ok)
@@ -240,7 +240,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
      * Negative button will close the dialog.
      */
     private fun noEmailDialog(f: () -> Unit) =
-        JoozdlogAlertDialog(requireActivity()).show {
+        JoozdlogAlertDialogV1(requireActivity()).show {
             titleResource = R.string.username_already_taken
             messageResource = R.string.no_email_text
             setPositiveButton(R.string.i_dont_care){

@@ -36,6 +36,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivity
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
 import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
@@ -108,11 +109,18 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                         closeAndstartMainActivity()
                     }
                     PdfParserActivityEvents.NOT_A_KNOWN_ROSTER, PdfParserActivityEvents.NOT_A_KNOWN_LOGBOOK -> {
-                        toast("Unsupported file")
-                        closeAndstartMainActivity()
+                        Log.d("LALALA", "DEBUG POINT 1")
+                        JoozdlogAlertDialog().show(activity){
+                            Log.d("LALALA", "DEBUG POINT 2")
+                            titleResource = R.string.unknown_file_title
+                            messageResource = R.string.unknown_file_message
+                            setPositiveButton(android.R.string.ok){
+                                closeAndstartMainActivity()
+                            }
+                        }
                     }
                     PdfParserActivityEvents.CALENDAR_SYNC_ENABLED -> {
-                        JoozdlogAlertDialog(activity).apply {
+                        JoozdlogAlertDialog().show(activity) {
                             messageResource = R.string.calendar_update_active
                             setPositiveButton(R.string.always) {
                                 viewModel.disableCalendarUntilAfterLastFlight()
@@ -126,15 +134,15 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                             setNeutralButton(android.R.string.cancel) {
                                 startMainActivity(this@PdfParserActivity)
                             }
-                        }.show()
+                        }
                     }
                     PdfParserActivityEvents.CALENDAR_SYNC_PAUSED -> {
-                        JoozdlogAlertDialog(activity).apply {
+                        JoozdlogAlertDialog().show(activity) {
                             messageResource = R.string.you_can_start_calendar_sync_again
                             setPositiveButton(android.R.string.ok) {
                                 closeAndstartMainActivity()
                             }
-                        }.show()
+                        }
                     }
                     null -> {
                     }
@@ -158,7 +166,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
 
     private fun showChronoDialog(extraData: Bundle){
         //TODO use resources
-        JoozdlogAlertDialog(activity).apply {
+        JoozdlogAlertDialogV1(activity).apply {
             val total =
                 extraData.getInt(PdfParserActivityViewModel.TOTAL_FLIGHTS_IN_CHRONO)
             val new = extraData.getInt(PdfParserActivityViewModel.NEW_FLIGHTS)

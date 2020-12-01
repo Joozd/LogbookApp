@@ -26,7 +26,6 @@ import android.util.Log
 import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -34,7 +33,7 @@ import nl.joozd.logbookapp.databinding.ActivityCreateNewUserBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.CreateNewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.CreateNewUserActivityViewModel
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
 import nl.joozd.logbookapp.ui.utils.toast
 
 class CreateNewUserActivity : JoozdlogActivity() {
@@ -95,7 +94,7 @@ class CreateNewUserActivity : JoozdlogActivity() {
                 if (Preferences.acceptedCloudSyncTerms)
                     viewModel.signUpClicked(userNameEditText.text.toString())
                 else {
-                    JoozdlogAlertDialog(activity).show {
+                    JoozdlogAlertDialogV1(activity).show {
                         messageResource = R.string.must_accept_terms
                         setPositiveButton(android.R.string.ok)
                     }
@@ -145,7 +144,7 @@ class CreateNewUserActivity : JoozdlogActivity() {
      *******************************************************************************************/
 
     private fun showCreateAccountServerError() =
-        JoozdlogAlertDialog(activity).apply {
+        JoozdlogAlertDialogV1(activity).apply {
             titleResource = R.string.no_internet
             messageResource = R.string.no_server_create_account
             setPositiveButton(R.string._continue) {
@@ -155,7 +154,7 @@ class CreateNewUserActivity : JoozdlogActivity() {
         }.show()
 
     private fun ActivityCreateNewUserBinding.showCreateAccountNoInternetError() =
-        JoozdlogAlertDialog(activity).show {
+        JoozdlogAlertDialogV1(activity).show {
             titleResource = R.string.no_internet
             messageResource = R.string.no_internet_create_account
             setPositiveButton(R.string.skip) {

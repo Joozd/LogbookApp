@@ -50,38 +50,88 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
+                android:id="@+id/dialogTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                tools:text="Title of Dialog"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
                 android:id="@+id/dialogMessage"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="24dp"
                 android:layout_marginBottom="16dp"
-                android:text="@string/you_are_not_signed_in"
+                tools:text="This is the descriptionm of this dialog. Probably best to use this to make it clear what the buttons below hgere do, or just to pass on some information!"
                 android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/dialogTitle" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/right_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.55"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/left_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.45"/>
+
         <TextView
-            android:id="@+id/signOutButton"
-            android:layout_width="100dp"
+            android:id="@+id/positiveButton"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            android:gravity="center"
+            android:layout_width="0dp"
+            android:gravity="end"
             android:padding="6dp"
-            android:text="@string/signOut"
             android:textAllCaps="true"
             android:textColor="?attr/colorAccent"
             android:textSize="14sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/topHalf" />
+            app:layout_constraintStart_toStartOf="@+id/right_guideline"
+            app:layout_constraintTop_toBottomOf="@+id/topHalf"
+            tools:text="OK" />
+
+        <TextView
+            android:id="@+id/negativeButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:padding="6dp"
+            android:textAllCaps="true"
+            android:textColor="?attr/colorAccent"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/left_guideline"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/topHalf"
+            app:layout_constraintVertical_bias="1.0"
+            tools:text="NEGATIVE_BUTTON" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

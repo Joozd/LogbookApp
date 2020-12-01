@@ -20,12 +20,17 @@
 package nl.joozd.logbookapp.ui.utils.customs
 
 
-import android.app.AlertDialog
-import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.commit
+import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.DialogJoozdlogFourButtonBinding
+import nl.joozd.logbookapp.databinding.DialogJoozdlogTwoButtonBinding
+import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
 
 /**
@@ -38,90 +43,175 @@ import androidx.fragment.app.FragmentActivity
  * Same goes for [message] / [messageResource]
  * [setPositiveButton] / [setNegativeButton] / [setNeutralButton] for buttons
  */
-class JoozdlogAlertDialog(val ctx: FragmentActivity): DialogFragment() {
-    private var builder = AlertDialog.Builder(ctx)
-    private var attachedActivity: FragmentActivity? = null
+class JoozdlogAlertDialog(): JoozdlogFragment() {
+    var title: CharSequence? = null
+    var message: CharSequence = "Dialog."
 
     var titleResource: Int? = null
-        set (res){
-            field = res
-            res?.let {
-                builder.setTitle(it)
-            }
-        }
-
-    var title: CharSequence = ""
-        set (title){
-            field = title
-            builder.setTitle(title)
-        }
 
     var messageResource: Int? = null
-    set(messageID){
-        field = messageID
-        messageID?.let {
-            builder.setMessage(it)
-        }
-    }
 
-    var message: CharSequence = ""
-        set(msg){
-            field = msg
-            builder.setMessage(msg)
-        }
+    fun title() = titleResource?.let {ctx.getString(it)} ?: title
+    fun message() = messageResource?.let {ctx.getString(it)} ?: message
+
+    private var _positiveButton: ButtonDescriptor? = null
+    private var _negativeButton: ButtonDescriptor? = null
+    private var _neutralButton: ButtonDescriptor? = null
+    private var _bonusButton: ButtonDescriptor? = null
+
+
 
     /**
      * @param resource: String resource for text
      * @param onClick: Onclick action
      */
-    fun setPositiveButton(resource: Int, onClick: ((dialog: DialogInterface) -> Unit)? = null){
-        val listener: ((dialog: DialogInterface, id: Int) -> Unit)? = if (onClick == null) null else {dialog, _ ->
-            onClick(dialog)
-        }
-        builder.setPositiveButton(resource, listener?.let{DialogInterface.OnClickListener(listener)})
+    fun setPositiveButton(resource: Int,onClick: View.OnClickListener? = null){
+        _positiveButton = ButtonDescriptor(null, resource, onClick)
     }
 
-    fun setPositiveButton(text: CharSequence, onClick: ((dialog: DialogInterface) -> Unit)? = null){
-        val listener: ((dialog: DialogInterface, id: Int) -> Unit)? = if (onClick == null) null else {dialog, _ ->
-            onClick(dialog)
-        }
-        builder.setPositiveButton(text, listener?.let{DialogInterface.OnClickListener(listener)})
+    fun setPositiveButton(text: CharSequence, onClick: View.OnClickListener? = null){
+        _positiveButton = ButtonDescriptor(text, null, onClick)
     }
 
-    fun setNegativeButton(resource: Int, onClick: ((dialog: DialogInterface) -> Unit)? = null){
-        val listener: ((dialog: DialogInterface, id: Int) -> Unit)? = if (onClick == null) null else {dialog, _ ->
-            onClick(dialog)
-        }
-        builder.setNegativeButton(resource, listener?.let{DialogInterface.OnClickListener(listener)})
+    fun setNegativeButton(resource: Int,onClick: View.OnClickListener? = null){
+        _negativeButton = ButtonDescriptor(null, resource, onClick)
     }
 
-    fun setNegativeButton(text: CharSequence, onClick: ((dialog: DialogInterface) -> Unit)? = null){
-        val listener: ((dialog: DialogInterface, id: Int) -> Unit)? = if (onClick == null) null else {dialog, _ ->
-            onClick(dialog)
-        }
-        builder.setNegativeButton(text, listener?.let{DialogInterface.OnClickListener(listener)})
-    }
-    fun setNeutralButton(resource: Int, onClick: ((dialog: DialogInterface) -> Unit)? = null){
-        val listener: ((dialog: DialogInterface, id: Int) -> Unit)? = if (onClick == null) null else {dialog, _ ->
-            onClick(dialog)
-        }
-        builder.setNeutralButton(resource, listener?.let{DialogInterface.OnClickListener(listener)})
+    fun setNegativeButton(text: CharSequence, onClick: View.OnClickListener? = null){
+        _negativeButton = ButtonDescriptor(text, null, onClick)
     }
 
-    fun setNeutralButton(text: CharSequence, onClick: ((dialog: DialogInterface) -> Unit)? = null){
-        val listener: ((dialog: DialogInterface, id: Int) -> Unit)? = if (onClick == null) null else {dialog, _ ->
-            onClick(dialog)
-        }
-        builder.setNeutralButton(text, listener?.let{DialogInterface.OnClickListener(listener)})
+    fun setNeutralButton(resource: Int,onClick: View.OnClickListener? = null){
+        _neutralButton = ButtonDescriptor(null, resource, onClick)
     }
-    inline fun show(tag: String = "bla", block: JoozdlogAlertDialog.() -> Unit = {}): JoozdlogAlertDialog {
+
+    fun setNeutralButton(text: CharSequence, onClick: View.OnClickListener? = null){
+        _neutralButton = ButtonDescriptor(text, null, onClick)
+    }
+
+    fun setBonusButton(resource: Int,onClick: View.OnClickListener? = null){
+        _bonusButton = ButtonDescriptor(null, resource, onClick)
+    }
+
+    fun setBonusButton(text: CharSequence, onClick: View.OnClickListener? = null){
+        _bonusButton = ButtonDescriptor(text, null, onClick)
+    }
+
+    fun show(context: FragmentActivity, tag: String = "bla", block: JoozdlogAlertDialog.() -> Unit = {}): JoozdlogAlertDialog {
+        // retainInstance = true // not too happy about this solution, but should work for now
         block()
-        show(ctx.supportFragmentManager, tag)
+        Log.d("LALALA", "DEBUG POINT 3")
+
+        context.supportFragmentManager.commit{
+            add(android.R.id.content,this@JoozdlogAlertDialog, tag)
+            Log.d("LALALA", "DEBUG POINT 4")
+        }
+        Log.d("LALALA", "DEBUG POINT 5")
         return this
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return builder.create()
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        getCorrectBinding(inflater, container).root
+
+
+    private fun getCorrectBinding(inflater: LayoutInflater, container: ViewGroup?) = if (_neutralButton == null && _bonusButton == null)
+        DialogJoozdlogTwoButtonBinding.bind(inflater.inflate(R.layout.dialog_joozdlog_two_button, container, false) ).apply{
+            Log.d("LALALA", "DEBUG POINT 6")
+            var forceOkButton = false
+                title()?.let { dialogTitle.text = title() } ?: run {
+                    dialogTitle.visibility = View.GONE
+                }
+
+                dialogMessage.text = message()
+
+                /**
+                 * Make sure at least an "ok" button is shown
+                 */
+                if (listOf(_positiveButton, _negativeButton, _bonusButton, _neutralButton).all{it == null}){
+                    positiveButton.setText(android.R.string.ok)
+                    positiveButton.setOnClickListener { supportFragmentManager.popBackStack() }
+                    forceOkButton = true
+                }
+
+                _positiveButton?.let{ bd ->
+                    positiveButton.text = bd.text
+                    positiveButton.setOnClickListener { v ->
+                        bd.onClick?.onClick(v)
+                        supportFragmentManager.popBackStack()
+                    }
+                }
+
+                _negativeButton?.let{bd ->
+                    negativeButton.text = bd.text
+                    negativeButton.setOnClickListener { v ->
+                        bd.onClick?.onClick(v)
+                        supportFragmentManager.popBackStack()
+                    }
+                }
+
+                if (_positiveButton == null && !forceOkButton) positiveButton.visibility = View.GONE
+                if (_negativeButton == null) negativeButton.visibility = View.GONE
+        }
+            else
+        DialogJoozdlogFourButtonBinding.bind(inflater.inflate(R.layout.dialog_joozdlog_four_button, container, false) ).apply{
+            var forceOkButton = false
+            title()?.let { dialogTitle.text = title() } ?: run {
+                dialogTitle.visibility = View.GONE
+            }
+
+            dialogMessage.text = message()
+
+            /**
+             * Make sure at least an "ok" button is shown
+             */
+            if (listOf(_positiveButton, _negativeButton, _bonusButton, _neutralButton).all{it == null}){
+                positiveButton.setText(android.R.string.ok)
+                positiveButton.setOnClickListener { supportFragmentManager.popBackStack() }
+                forceOkButton = true
+            }
+
+            _positiveButton?.let{ bd ->
+                positiveButton.text = bd.text
+                positiveButton.setOnClickListener { v ->
+                    bd.onClick?.onClick(v)
+                    supportFragmentManager.popBackStack()
+                }
+            }
+
+            _negativeButton?.let{bd ->
+                negativeButton.text = bd.text
+                negativeButton.setOnClickListener { v ->
+                    bd.onClick?.onClick(v)
+                    supportFragmentManager.popBackStack()
+                }
+            }
+            _neutralButton?.let{bd ->
+                neutralButton.text = bd.text
+                neutralButton.setOnClickListener { v ->
+                    bd.onClick?.onClick(v)
+                    supportFragmentManager.popBackStack()
+                }
+            }
+            _bonusButton?.let{ bd ->
+                bonusButton.text = bd.text
+                bonusButton.setOnClickListener { v ->
+                    bd.onClick?.onClick(v)
+                    supportFragmentManager.popBackStack()
+                }
+            }
+
+            if (_positiveButton == null && !forceOkButton) positiveButton.visibility = View.GONE
+            if (_negativeButton == null) negativeButton.visibility = View.GONE
+            if (_neutralButton == null && _bonusButton != null) neutralButton.visibility = View.GONE
+            if (_bonusButton == null && _neutralButton != null) bonusButton.visibility = View.GONE
+        }
+
+
+
+    private inner class ButtonDescriptor(val t: CharSequence?, val r: Int?, val onClick: View.OnClickListener?){
+        val text: CharSequence
+            get() = r?.let{ ctx.getString(it) } ?: t ?: ""
     }
+
 }
 

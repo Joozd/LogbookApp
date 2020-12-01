@@ -48,7 +48,7 @@ import nl.joozd.logbookapp.ui.dialogs.AboutDialog
 import nl.joozd.logbookapp.ui.dialogs.LoginDialog
 import nl.joozd.logbookapp.ui.fragments.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.customs.CustomSnackbar
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogProgressBar
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
@@ -431,7 +431,7 @@ class MainActivity : JoozdlogActivity() {
     }
 
     private fun showDeletePlannedCalendarFlightDialog(id: Int){
-        JoozdlogAlertDialog(this).apply {
+        JoozdlogAlertDialogV1(this).show {
             messageResource = R.string.delete_calendar_flight
             setPositiveButton(android.R.string.yes){
                 viewModel.disableCalendarImport()
@@ -441,22 +441,22 @@ class MainActivity : JoozdlogActivity() {
                 viewModel.deleteAndDisableCalendarImportUntillAfterThisFlight(id)
             }
             setNeutralButton(android.R.string.cancel)
-        }.show()
+        }
     }
 
     private fun showDeleteCompletedFlightDialog(id: Int){
-        JoozdlogAlertDialog(this).apply {
+        JoozdlogAlertDialogV1(this).show {
             title = "WARNING"
             messageResource = R.string.delete_completed_flight
             setPositiveButton("Continue") {
                 viewModel.deleteNotPlannedFlight(id)}
             setNegativeButton("Cancel")
-        }.show()
+        }
 
     }
 
     private fun showFlightConflictsWithCalendarSyncDialog(f: Flight){
-        JoozdlogAlertDialog(this).apply {
+        JoozdlogAlertDialogV1(this).show {
             titleResource = R.string.calendar_sync_conflict
             messageResource = R.string.calendar_sync_edited_flight
             setPositiveButton(android.R.string.ok) {
@@ -464,14 +464,14 @@ class MainActivity : JoozdlogActivity() {
             setNegativeButton(android.R.string.cancel){
                 viewModel.undoSaveWorkingFlight(f)
             }
-        }.show()
+        }
     }
 
     private fun showCalendarSyncRestartInfo(){
-        JoozdlogAlertDialog(this).apply{
+        JoozdlogAlertDialogV1(this).show{
             messageResource = R.string.you_can_start_calendar_sync_again
             setPositiveButton(android.R.string.ok)
-        }.show()
+        }
     }
 
     private fun showAboutDialog(){

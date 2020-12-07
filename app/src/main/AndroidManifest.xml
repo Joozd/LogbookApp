@@ -76,6 +76,12 @@
                     android:host="joozdlog.joozd.nl"
                     android:pathPrefix="/inject-key"
                     android:scheme="https" />
+
+                <data
+                    android:host="joozdlog.joozd.nl"
+                    android:pathPrefix="/verify-email"
+                    android:scheme="https" />
+
             </intent-filter>
         </activity>
 

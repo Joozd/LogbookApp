@@ -100,6 +100,20 @@ object Preferences {
 
     var emailAddress: String by JoozdLogSharedPrefs(sharedPref, "")
 
+    /**
+     * [emailVerified] is true if email verification code was deemed correct by server
+     * set this to false if server gives an INCORRECT_EMAIL_ADDRESS error
+     */
+    var emailVerified: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+
+    /**
+     * a list of jobs waiting for email confirmation
+     * Parse this into an [EmailJobsWaiting] object
+     */
+    var _emailJobsWaiting: Int by JoozdLogSharedPrefs(sharedPref, 0)
+
+    val emailJobsWaiting: EmailJobsWaiting = EmailJobsWaiting(_emailJobsWaiting)
+
     //Placeholder for new password when changing pass. If app gets killed during password change, this will remain set.
     var newPassword: String by JoozdLogSharedPrefs(sharedPref, "")
 

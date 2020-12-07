@@ -32,7 +32,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/page_2_header"
@@ -82,28 +82,6 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/emailTextInputLayout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="32dp"
-                android:background="@drawable/rounded_corners_white"
-                app:errorEnabled="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/usernameTextInputLayout">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/emailEditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/email_for_login"
-                    android:inputType="textNoSuggestions|text"
-                    android:singleLine="true" />
-
-            </com.google.android.material.textfield.TextInputLayout>
 
             <CheckBox
                 android:id="@+id/tcCheckbox"
@@ -112,7 +90,7 @@
                 android:layout_marginTop="16dp"
                 android:text="@string/i_accept_terms"
                 app:layout_constraintStart_toStartOf="@+id/usernameTextInputLayout"
-                app:layout_constraintTop_toBottomOf="@+id/emailReasonTextView" />
+                app:layout_constraintTop_toBottomOf="@+id/usernameTextInputLayout" />
 
             <TextView
                 android:id="@+id/signUpButton"
@@ -202,14 +180,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/signUpButton" />
 
-            <TextView
-                android:id="@+id/emailReasonTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="@string/email_reason"
-                app:layout_constraintEnd_toEndOf="@+id/emailTextInputLayout"
-                app:layout_constraintStart_toStartOf="@+id/emailTextInputLayout"
-                app:layout_constraintTop_toBottomOf="@+id/emailTextInputLayout" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 

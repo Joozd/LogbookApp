@@ -26,29 +26,63 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityNewUserPage1Binding
+import nl.joozd.logbookapp.extensions.onTextChanged
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
-
+import nl.joozd.logbookapp.ui.utils.toast
 
 class NewUserActivityPage1: Fragment() {
     val viewModel: NewUserActivityViewModel by activityViewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val binding = ActivityNewUserPage1Binding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_1, container, false))
-
-        /*******************************************************************************************
-         * OnClickedListeners
-         *******************************************************************************************/
-
-        with(binding){
-            continueTextView.setOnClickListener {
-                viewModel.nextPage(PAGE_NUMBER)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        ActivityNewUserPage1Binding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_1, container, false)).apply {
+            emailAddressEditText.onTextChanged {
+                emailAddressLayout.error = ""
             }
-        }
 
-        return binding.root
-    }
+            emailAddressEditText.setOnFocusChangeListener { _, hasFocus ->
+                if(!hasFocus)
+                    emailAddressEditText.text?.toString()?.let {
+                        viewModel.updateEmail(it)
+                    }
+            }
+
+
+            emailAddress2EditText.onTextChanged {
+                emailAddress2Layout.error = ""
+            }
+
+            emailAddress2EditText.setOnFocusChangeListener { _, hasFocus ->
+                if(!hasFocus)
+                    emailAddress2EditText.text?.toString()?.let {
+                        viewModel.updateEmail2(it)
+                    }
+            }
+
+            viewModel.feedbackEvent.observe(viewLifecycleOwner){
+                when (it.getEvent()){
+                    FeedbackEvents.GeneralEvents.DONE -> viewModel.nextPage(PAGE_NUMBER)
+                    FeedbackEvents.GeneralEvents.ERROR -> {
+                        when(it.getInt()){
+                            1 -> emailAddressLayout.error = it.getString()
+                            2 -> emailAddress2Layout.error = it.getString()
+                            3 -> toast("ERROR 3: Bad match")
+                            4 -> toast("ERROR 4: Not an email")
+                        }
+                    }
+                }
+            }
+
+
+            continueTextView.setOnClickListener {
+                viewModel.okClickedPage1()
+            }
+
+
+
+        }.root
+
 
     companion object{
         private const val PAGE_NUMBER = 1

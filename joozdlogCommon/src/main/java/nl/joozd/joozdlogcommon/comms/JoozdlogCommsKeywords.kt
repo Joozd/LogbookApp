@@ -36,6 +36,7 @@ object JoozdlogCommsKeywords {
     const val NOT_LOGGED_IN = "NOT_LOGGED_IN"
     const val SERVER_ERROR = "SERVER_ERROR "
     const val BAD_DATA_RECEIVED = "BAD_DATA_RECEIVED"
+    const val EMAIL_NOT_KNOWN_OR_VERIFIED = "EMAIL_NOT_KNOWN_OR_VERIFIED"
     const val NOT_A_VALID_EMAIL_ADDRESS = "NOT_A_VALID_EMAIL_ADDRESS"
     const val NEXT_IS_COMPRESSED = "NEXT_IS_COMPRESSED"
     const val HELLO = "HELLO" // to be done before any communications with PROTOCOL_VERSION. Do this right after creating SSL connection.
@@ -48,6 +49,8 @@ object JoozdlogCommsKeywords {
     const val LOGIN = "LOGIN"
     const val NEW_ACCOUNT = "NEW_ACCOUNT"
     const val NEW_ACCOUNT_EMAIL = "NEW_ACCOUNT_EMAIL"
+    const val SET_EMAIL = "SET_EMAIL"               // Sets email hash on server, can expect to receive an email on given address with a confirmation link
+    const val CONFIRM_EMAIL = "CONFIRM_EMAIL"       // confirm email hash
     const val CHANGE_PASSWORD = "CHANGE_PASSWORD" // will delete all saved files on server
     const val UPDATE_PASSWORD = "UPDATE_PASSWORD" // should be done after being logged in as it will recrypt all flights with new password
 

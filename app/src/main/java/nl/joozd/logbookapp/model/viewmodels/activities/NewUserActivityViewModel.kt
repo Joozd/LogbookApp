@@ -42,14 +42,12 @@ import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.utils.generatePassword
 
 class NewUserActivityViewModel: JoozdlogActivityViewModel() {
-    //TODO this should be dynamic
-    val email = "euroshopper@gmail.com"
-
 
     /*******************************************************************************************
      * Private parts
@@ -57,6 +55,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
 
     private val internetAvailable: LiveData<Boolean> = InternetStatus.internetAvailableLiveData
 
+    private val _page1Feedback = MutableLiveData<FeedbackEvent>()
     private val _page2Feedback = MutableLiveData<FeedbackEvent>()
     private val _page3Feedback = MutableLiveData<FeedbackEvent>()
 
@@ -90,6 +89,9 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     /*******************************************************************************************
      * Observables
      *******************************************************************************************/
+
+    val page1Feedback: LiveData<FeedbackEvent>
+        get() = _page1Feedback
 
     val page2Feedback: LiveData<FeedbackEvent>
         get() = _page2Feedback
@@ -145,6 +147,43 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      *******************************************************************************************/
 
 
+    var email1 = Preferences.emailAddress
+    var email2 = Preferences.emailAddress
+
+    fun okClickedPage1(){
+        if (email1 != email2) feedback(FeedbackEvents.GeneralEvents.ERROR, _page1Feedback).putInt(3)
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(FeedbackEvents.GeneralEvents.ERROR, _page1Feedback).putInt(4)
+        Preferences.emailAddress = email1
+        Preferences.backupFromCloud = true
+        feedback(FeedbackEvents.GeneralEvents.DONE, _page1Feedback)
+    }
+
+    fun updateEmail(it: String){
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(it.trim()).matches())
+            feedback(FeedbackEvents.GeneralEvents.ERROR).putString("Not an email address").putInt(1) // TODO make other errors as well
+        email1 = it.trim()
+    }
+
+    fun updateEmail2(it: String){
+        when {
+            it.trim() != email1 ->
+                feedback(FeedbackEvents.GeneralEvents.ERROR).putString("Does not match").putInt(2) // TODO make other errors as well
+            else -> {
+                email2 = it.trim()
+
+            }
+        }
+    }
+
+    fun checkSame1(s: String): Boolean =
+        (s.trim() == email2 && android.util.Patterns.EMAIL_ADDRESS.matcher(email2).matches())
+
+    fun checkSame2(s: String): Boolean =
+        (s.trim() == email1 && android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()).also{
+            email2 = s
+        }
+
+
     /*******************************************************************************************
      * Page2 functions
      *******************************************************************************************/
@@ -162,10 +201,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     //TODO document this
     // TODO finish this in Fragment
     // TODO needs a way to handle time when server is busy (in Fragment)
-    fun signUpClicked(usernameEditable: Editable?, email: Editable? = null) {
-        email?.let{
-            Preferences.emailAddress = it.toString()
-        }
+    fun signUpClicked(usernameEditable: Editable?) {
         usernameEditable?.toString()?.let { username ->
             Log.d("signUpClicked", "user: $username")
             Preferences.useCloud = true
@@ -173,11 +209,15 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
                 internetAvailable.value != true -> feedback(NewUserActivityEvents.NO_INTERNET, _page2Feedback)
                 username.isBlank() -> feedback(NewUserActivityEvents.USERNAME_TOO_SHORT, _page2Feedback)
                 else -> { // username not empty and internet looks OK
+                    val email = Preferences.emailAddress.takeIf { it.isNotEmpty() }
                     feedback(NewUserActivityEvents.WAITING_FOR_SERVER, _page2Feedback)
                     viewModelScope.launch {
                         val pass1 = generatePassword(16)
                         when (UserManagement.createNewUser(username, pass1, email?.toString())) { // UserManagement will call the correct Cloud function
-                            true -> feedback(NewUserActivityEvents.LOGGED_IN_AS, _page2Feedback)
+                            true -> {
+                                feedback(NewUserActivityEvents.LOGGED_IN_AS, _page2Feedback)
+                                Preferences.emailJobsWaiting.sendLoginLink = true
+                            }
                             null -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
                             false -> feedback(NewUserActivityEvents.USER_EXISTS, _page2Feedback)
                         }

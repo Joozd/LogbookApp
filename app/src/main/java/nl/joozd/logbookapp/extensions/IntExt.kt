@@ -60,6 +60,12 @@ fun Int.pow(n: Int): Int{
  */
 fun Int.toBoolean() = this > 0
 
+/**
+ * bitwise mask
+ * (eg. if [this] is 1100 and [mask] is 0100 this will return 1000
+ */
+infix fun Int.mask(mask: Int) = this and mask.inv()
+
 
 /**
  * Subtracts one, or sets a minimum value.

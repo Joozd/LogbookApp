@@ -56,7 +56,7 @@
     <string name="email_for_login">Email address for login link</string>
     <string name="email">Email address</string>
     <string name="email_repeat">Repeat Email address</string>
-    <string name="email_reason">Your email address will only be used once to send a login link and will not be stored outside your phone.</string>
+    <string name="email_reason">Your email address will not be stored outside your phone.</string>
     <string name="autovalue">Auto Values</string>
     <string name="takeoff">Takeoff</string>
     <string name="day">day</string>
@@ -211,7 +211,7 @@
     - Strings for new user experience
     -->
     <string name="welcome_message">hallon aub!(grgr)\n\nWelkom bij deze beta versie van Joozdlog.\n\nOp de volgende paar schermen kan je wat dingen instellen. Aanrader!\n\nFeedback en bugreports mogen via de watsap.\nBugs liefst met een beschrijving van wat je aan het doen was cq hoe je het kan reproduceren.\nVeel logplezier!</string>
-    <string name="cloud_explanation" tools:ignore="Typos">JoozdLog Cloud is handig voor als je een nieuwe telefoon koopt of je meerdere apparaten tegelijk wil gebruiken.\nDit is geen backup, lees terms&amp;conditions.</string>
+    <string name="cloud_explanation" tools:ignore="Typos">JoozdLog Cloud is handig voor als je een nieuwe telefoon koopt of je meerdere apparaten tegelijk wil gebruiken.\nDit is geen backup, lees terms&amp;conditions.\nInactieve accounts worden na een jaar verwijderd.</string>
     <string name="you_can_set_settings_in_settings">If you want to adjust any more settings, take a look at the Settings menu after you click "done"!</string>
 
     <!--
@@ -345,6 +345,7 @@
     <string name="fake_hidden_password">••••••••••</string>
     <string name="backup_message_main_activity">You have not backed up your logbook for %1$s days.</string>
     <string name="cloud_backup_explanation">Send a periodic email to yourself from the cloud. Your email address is not saved on the server, so backups will be initiated from this device (and stop if you uninstall or kill the app, they should run with the app in the background).</string>
+    <string name="new_user_email_reason">I suggest you enter your email address here. It is used to send you your login link, and you can use it to send yourself backups periodically. \nI will only store a one-way code to check if your email address has been verified. That code cannot be used to find any personal data such as your email address.</string>
 
 
 </resources>

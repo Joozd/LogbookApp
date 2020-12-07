@@ -25,12 +25,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_picker_aircraft_type.*
-import kotlinx.android.synthetic.main.item_picker_dialog.*
 import kotlinx.android.synthetic.main.item_picker_dialog.itemBackground
 import kotlinx.android.synthetic.main.item_picker_dialog.nameTextView
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 

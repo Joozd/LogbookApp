@@ -69,7 +69,7 @@ class NewUserActivity : JoozdlogActivity() {
          * Event observers:
          */
 
-        viewModel.feedbackEvent.observe(this, Observer {
+        viewModel.feedbackEvent.observe(this) {
             when(it.getEvent()){
                 NewUserActivityEvents.FINISHED -> closeAndstartMainActivity()
                 NewUserActivityEvents.NEXT_PAGE -> {
@@ -86,7 +86,7 @@ class NewUserActivity : JoozdlogActivity() {
                     }
                 }
             }
-        })
+        }
 
         setContentView(binding.root)
 
@@ -110,7 +110,7 @@ class NewUserActivity : JoozdlogActivity() {
         override fun getItemCount(): Int = availablePages
 
         override fun createFragment(position: Int): Fragment = when(position){
-            0 -> NewUserActivityPage1()
+            0 -> NewUserActivityPage0()
             1 -> NewUserActivityPage2()
             2 -> NewUserActivityPage3()
             3 -> NewUserActivityPage4()

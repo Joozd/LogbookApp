@@ -26,7 +26,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.core.util.PatternsCompat.EMAIL_ADDRESS
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import nl.joozd.logbookapp.App
@@ -40,7 +39,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEv
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.CloudSyncTermsDialog
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast
 import java.util.*
 
@@ -99,26 +98,12 @@ class NewUserActivityPage2: JoozdlogFragment() {
             }
 
             signUpButton.setOnClickListener {
-                if (!EMAIL_ADDRESS.matcher(emailEditText.text.toString()).matches()) {
-                    noEmailDialog{
-                        if (Preferences.acceptedCloudSyncTerms)
-                            viewModel.signUpClicked(userNameEditText.text)
-                        else {
-                            JoozdlogAlertDialogV1(requireActivity()).show {
-                                messageResource = R.string.must_accept_terms
-                                setPositiveButton(android.R.string.ok)
-                            }
-                        }
-                    }
-                }
+                if (Preferences.acceptedCloudSyncTerms)
+                    viewModel.signUpClicked(userNameEditText.text)
                 else {
-                    if (Preferences.acceptedCloudSyncTerms)
-                        viewModel.signUpClicked(userNameEditText.text, emailEditText.text)
-                    else {
-                        JoozdlogAlertDialogV1(requireActivity()).show {
-                            messageResource = R.string.must_accept_terms
-                            setPositiveButton(android.R.string.ok)
-                        }
+                    JoozdlogAlertDialog().show(requireActivity()) {
+                        messageResource = R.string.must_accept_terms
+                        setPositiveButton(android.R.string.ok)
                     }
                 }
             }
@@ -130,10 +115,6 @@ class NewUserActivityPage2: JoozdlogFragment() {
 
             viewModel.username.observe(viewLifecycleOwner) {
                 setLoggedInLayout(it)
-            }
-
-            viewModel.emailAddress.observe(viewLifecycleOwner){
-                emailEditText.setText(it)
             }
 
             viewModel.acceptTerms.observe(viewLifecycleOwner) {
@@ -182,7 +163,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
      * Functions showing AlertDialogs
      *******************************************************************************************/
 
-    private fun showPasswordLinkDialog() =  JoozdlogAlertDialogV1(requireActivity()).show {
+    private fun showPasswordLinkDialog() =  JoozdlogAlertDialog().show(requireActivity()) {
 
         title = App.instance.getString(R.string.created_account, UserManagement.username)
         messageResource = R.string.create_login_link_hint
@@ -197,17 +178,17 @@ class NewUserActivityPage2: JoozdlogFragment() {
      * Feedback dialogs for when bad data is entered when creating account
      */
     private fun showCreateAccountServerError() =
-        JoozdlogAlertDialogV1(requireActivity()).apply {
+        JoozdlogAlertDialog().show(requireActivity()) {
             titleResource = R.string.no_internet
             messageResource = R.string.no_server_create_account
             setPositiveButton(R.string._continue) {
                 viewModel.dontUseCloud()
                 viewModel.nextPage(PAGE_NUMBER)
             }
-        }.show()
+        }
 
     private fun showCreateAccountNoInternetError() =
-        JoozdlogAlertDialogV1(requireActivity()).apply {
+        JoozdlogAlertDialog().show(requireActivity()) {
             titleResource = R.string.no_internet
             messageResource = R.string.no_internet_create_account
             setPositiveButton(R.string.skip) {
@@ -220,7 +201,7 @@ class NewUserActivityPage2: JoozdlogFragment() {
                 }
             }
             setNeutralButton(android.R.string.cancel) {}
-        }.show()
+        }
 
 
     private fun ActivityNewUserPage2Binding.showUsernameCannotBeEmptyError() {
@@ -229,27 +210,11 @@ class NewUserActivityPage2: JoozdlogFragment() {
     }
 
     private fun showUserExistsError() =
-        JoozdlogAlertDialogV1(requireActivity()).show {
+        JoozdlogAlertDialog().show(requireActivity()) {
             Log.d("XOXOXOXOXOXO", "LALALALALALALALALALALALAHIHIHIHIHIHIJOOOOO")
             titleResource = R.string.username_already_taken
             setPositiveButton(android.R.string.ok)
         }
-
-    /**
-     * Shows a dialog complaining no email was entered. Positive button will execute function provided as [f].
-     * Negative button will close the dialog.
-     */
-    private fun noEmailDialog(f: () -> Unit) =
-        JoozdlogAlertDialogV1(requireActivity()).show {
-            titleResource = R.string.username_already_taken
-            messageResource = R.string.no_email_text
-            setPositiveButton(R.string.i_dont_care){
-                f()
-            }
-            setNegativeButton(android.R.string.cancel)
-        }
-
-
 
     /**
      * Other dialogs
@@ -268,8 +233,6 @@ class NewUserActivityPage2: JoozdlogFragment() {
         val ifLoggedIn = if (enabled) View.VISIBLE else View.GONE // show if logged in
 
         usernameTextInputLayout.visibility = ifLoggedOut
-        emailTextInputLayout.visibility = ifLoggedOut
-        emailReasonTextView.visibility = ifLoggedOut
         signUpButton.visibility = ifLoggedOut
         tcCheckbox.visibility = ifLoggedOut
 

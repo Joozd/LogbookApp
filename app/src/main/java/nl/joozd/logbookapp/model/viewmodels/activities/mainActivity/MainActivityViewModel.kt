@@ -485,20 +485,25 @@ else{
          * Todo handle other links
          */
         if (action == ACTION_VIEW) {
-            data?.lastPathSegment?.let {
-                Log.d("Uri", "lastPathSegment: $it")
+            when(data?.pathSegments?.firstOrNull()){
+                "inject-key"-> {
+                    data.lastPathSegment?.let {
+                        Log.d("Uri", "lastPathSegment: $it")
 
-                //TODO needs sanity check
-                val loginPass = it.split(":").let { lp ->
-                    lp.first() to lp.last()
+                        //TODO needs sanity check
+                        val loginPass = it.split(":").let { lp ->
+                            lp.first() to lp.last()
+                        }
+                        viewModelScope.launch {
+                            val result = UserManagement.loginFromLink(loginPass)
+                            Log.d("LinkLogin", "result: $result")
+                            flightRepository.syncIfNeeded()
+                        }
+                    }
                 }
-                viewModelScope.launch {
-                    val result = UserManagement.loginFromLink(loginPass)
-                    Log.d("LinkLogin", "result: $result")
-                    flightRepository.syncIfNeeded()
+                "verify-email" -> {
+                    TODO("Send email verification to server. If server gives OK, set Preferences.emailVerified to true and execute any waiting emailJobs from Preferences.emailJobsWaiting")
                 }
-
-
             }
 
         }

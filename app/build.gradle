@@ -30,8 +30,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 23
-        versionName "JoozdLog 0.1.4.2"
+        versionCode 24
+        versionName "JoozdLog 0.1.5"
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -50,11 +50,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    /*
-    viewBinding {
-        enabled = true
-    }
-     */
 
     buildFeatures {
         viewBinding = true

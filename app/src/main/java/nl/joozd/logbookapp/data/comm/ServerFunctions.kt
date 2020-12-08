@@ -54,17 +54,19 @@ object ServerFunctions {
         return null
     }
 
-    fun requestBackup(client: Client): Boolean {
+    fun requestBackup(client: Client): CloudFunctionResults {
         val n = Preferences.username.also{Log.d("DEBUG1","key: $it")}
         val k = Preferences.key.also{Log.d("DEBUG1","key: $it")}
-        if (n == null || k == null) return false
+        if (n == null || k == null) return CloudFunctionResults.NO_LOGIN_DATA
         val payload = LoginDataWithEmail(n, k, BasicFlight.VERSION.version, Preferences.emailAddress).serialize()
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_BACKUP_MAIL, payload)
-        return client.readFromServer()?.toString(Charsets.UTF_8).let{r ->
-            (r == JoozdlogCommsKeywords.OK).also{
-                if (!it) (Log.w("requestBackup()", "Got unexpected result: $r"))
-                if(r == JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS) MainScope().launch { App.instance.toast("Invalid email: ${Preferences.emailAddress}") }
-            }
+        return when (client.readFromServer()?.toString(Charsets.UTF_8)) {
+            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
+            JoozdlogCommsKeywords.BAD_DATA_RECEIVED -> CloudFunctionResults.DATA_ERROR
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
+            JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> CloudFunctionResults.EMAIL_DOES_NOT_MATCH
+            null -> CloudFunctionResults.CLIENT_ERROR
+            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
         }
     }
 

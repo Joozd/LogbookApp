@@ -21,12 +21,12 @@ package nl.joozd.logbookapp.data.sharedPrefs
 
 import android.util.Log
 import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.extensions.mask
 
 
 /**
  * Keeps track of which email jobs are to be executed once email is confirmed
+ * You can iterate over open jobs, this will take care of flagging for success etc
  */
 class EmailJobsWaiting(var maskedValues: Int ): Iterable<suspend () -> Unit> {
     var sendLoginLink: Boolean
@@ -52,8 +52,8 @@ class EmailJobsWaiting(var maskedValues: Int ): Iterable<suspend () -> Unit> {
     /**
      * Values for use in Iterator
      */
-    private val runSendLoginLink = suspend { if (Cloud.requestLoginLinkMail() == CloudFunctionResults.OK) sendLoginLink = false }
-    private val runSendBackupCsv = suspend { if (Cloud.requestBackup() == true) sendBackupCsv = false }
+    private val runSendLoginLink = suspend { Cloud.requestLoginLinkMail(); Unit }
+    private val runSendBackupCsv = suspend { Cloud.requestBackup(); Unit }
     private val resetIterator = suspend { iteratorAlreadyRunning = false }
 
     private val jobMarkers = listOf(sendLoginLink, sendBackupCsv, true) // last true is the job that sets [iteratorAlreadyRunning] to false

@@ -96,9 +96,11 @@ object Cloud {
         Client.getInstance().use{ client ->
             ServerFunctions.confirmEmail(client, confirmationString).also {
                 Log.d("confirmEmail", "$it")
-                if (it == CloudFunctionResults.OK) {
-                    Preferences.emailVerified = true
-                    sendPendingEmailJobs()
+                when(it) {
+                    CloudFunctionResults.OK -> {
+                        Preferences.emailVerified = true
+                        sendPendingEmailJobs()
+                    }
                 }
             }
         }
@@ -110,7 +112,17 @@ object Cloud {
      */
     suspend fun requestLoginLinkMail(): CloudFunctionResults = withContext(Dispatchers.IO) {
         Client.getInstance().use { client ->
-            ServerFunctions.requestLoginLinkMail(client)
+            ServerFunctions.requestLoginLinkMail(client).also{
+                when(it){
+                    CloudFunctionResults.OK -> {
+                        Preferences.emailJobsWaiting.sendLoginLink = false
+                    }
+                    CloudFunctionResults.EMAIL_DOES_NOT_MATCH -> {
+                        Preferences.emailVerified = false // error dialogs etc will be handled by calling function
+                        Preferences.emailJobsWaiting.sendLoginLink = true
+                    }
+                }
+            }
         }
     }
 
@@ -120,7 +132,6 @@ object Cloud {
      */
     suspend fun sendPendingEmailJobs(){
         Preferences.emailJobsWaiting.forEach {
-            Log.d("sendPendingEmailJobs", "running!")
             it()
         }
     }
@@ -185,10 +196,20 @@ object Cloud {
         }
     }
 
-    suspend fun requestBackup(): Boolean? = withContext(Dispatchers.IO) {
+    suspend fun requestBackup(): CloudFunctionResults? = withContext(Dispatchers.IO) {
         Client.getInstance().use {
             ServerFunctions.login(it)
-            ServerFunctions.requestBackup(it)
+            ServerFunctions.requestBackup(it).also{
+                when (it){
+                    CloudFunctionResults.OK -> {
+                        Preferences.emailJobsWaiting.sendBackupCsv = false
+                    }
+                    CloudFunctionResults.EMAIL_DOES_NOT_MATCH -> {
+                        Preferences.emailVerified = false
+                        Preferences.emailJobsWaiting.sendBackupCsv = true
+                    }
+                }
+            }
         }
     }
 

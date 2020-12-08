@@ -109,9 +109,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                         closeAndstartMainActivity()
                     }
                     PdfParserActivityEvents.NOT_A_KNOWN_ROSTER, PdfParserActivityEvents.NOT_A_KNOWN_LOGBOOK -> {
-                        Log.d("LALALA", "DEBUG POINT 1")
                         JoozdlogAlertDialog().show(activity){
-                            Log.d("LALALA", "DEBUG POINT 2")
                             titleResource = R.string.unknown_file_title
                             messageResource = R.string.unknown_file_message
                             setPositiveButton(android.R.string.ok){

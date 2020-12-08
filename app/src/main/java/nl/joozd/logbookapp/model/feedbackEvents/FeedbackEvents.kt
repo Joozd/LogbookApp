@@ -118,18 +118,16 @@ object FeedbackEvents {
 
     enum class NewUserActivityEvents:
         Event {
+        UNKNOWN_ERROR,
         NOT_IMPLEMENTED,
         SHOW_SIGN_IN_DIALOG,
         LOGGED_IN_AS, // as Preferences.username
         USER_EXISTS,
-        USER_EXISTS_PASSWORD_CORRECT,
-        PASSWORDS_DO_NOT_MATCH,
-        PASSWORD_DOES_NOT_MEET_STANDARDS,
-        PASSWORD_TOO_SHORT, // ie. empty password provided
         USERNAME_TOO_SHORT, // ie. empty username provided
         NO_INTERNET,
         WAITING_FOR_SERVER,
         SERVER_NOT_RESPONDING,
+        BAD_EMAIL,
         CALENDAR_PICKED,
         NEXT_PAGE,
         FINISHED

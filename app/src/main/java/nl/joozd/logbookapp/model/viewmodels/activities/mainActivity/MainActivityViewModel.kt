@@ -30,6 +30,7 @@ import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.export.JoozdlogExport
@@ -434,6 +435,11 @@ else{
     fun notifyActivityResumed() {
         GeneralRepository.synchTimeWithServer()
         flightRepository.syncIfNeeded()
+        if (Preferences.emailVerified){
+            Preferences.emailJobsWaiting.forEach {
+                viewModelScope.launch { it() }
+            }
+        }
     }
 
     fun deleteAndDisableCalendarImportUntillAfterThisFlight(flightId: Int) {
@@ -502,7 +508,12 @@ else{
                     }
                 }
                 "verify-email" -> {
-                    TODO("Send email verification to server. If server gives OK, set Preferences.emailVerified to true and execute any waiting emailJobs from Preferences.emailJobsWaiting")
+                    data.lastPathSegment?.replace("-", "/")?.let {
+                        viewModelScope.launch{
+                            Log.d("mainViewModel", "Sending $it")
+                            Cloud.confirmEmail(it)
+                        }
+                    }
                 }
             }
 

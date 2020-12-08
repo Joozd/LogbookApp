@@ -28,6 +28,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
+import kotlinx.android.synthetic.main.activity_new_user.*
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
@@ -141,11 +142,12 @@ class NewUserActivityPage2: JoozdlogFragment() {
                         setNotWaitingForServerLayout()
                         showCreateAccountServerError()
                     }
+                    NewUserActivityEvents.BAD_EMAIL -> showBadEmailDialog()
                     NewUserActivityEvents.LOGGED_IN_AS -> showPasswordLinkDialog()
                     NewUserActivityEvents.FINISHED -> viewModel.nextPage(PAGE_NUMBER)
+                    NewUserActivityEvents.UNKNOWN_ERROR -> toast (R.string.error) // should not happen
                 }
             }
-
         }.root
 
 
@@ -171,7 +173,6 @@ class NewUserActivityPage2: JoozdlogFragment() {
             viewModel.copyLoginLinkToClipboard()
             viewModel.nextPage(PAGE_NUMBER)
         }
-
     }
 
     /**
@@ -186,6 +187,18 @@ class NewUserActivityPage2: JoozdlogFragment() {
                 viewModel.nextPage(PAGE_NUMBER)
             }
         }
+
+    /**
+     * Dialog to be shown when trying to create an account when an invalid email address is entered. SHould not happen.
+     * TODO use string resources
+     */
+    private fun showBadEmailDialog() = JoozdlogAlertDialog().show(requireActivity()){
+        title = "Bad email address"
+        message = "Saved email address is invalid. Please fix it in Settings and retry"
+        setPositiveButton(android.R.string.ok) {
+            viewModel.nextPage(PAGE_NUMBER)
+        }
+    }
 
     private fun showCreateAccountNoInternetError() =
         JoozdlogAlertDialog().show(requireActivity()) {

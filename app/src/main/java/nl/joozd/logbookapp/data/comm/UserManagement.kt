@@ -23,6 +23,7 @@ import android.content.Intent
 import android.util.Log
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfBlank
 
@@ -43,9 +44,9 @@ object UserManagement {
      * @return false if username taken
      * @return null if server or connection error
      */
-    suspend fun createNewUser(username: String, password: String, email: String? = null): Boolean? {
-        return (if (email == null) Cloud.createNewUser(username, password) else Cloud.createNewUser(username, password, email)).also {
-            if (it == true) {
+    suspend fun createNewUser(username: String, password: String, email: String? = null): CloudFunctionResults {
+        return (if (email == null) Cloud.createNewUser(username.toLowerCase(), password) else Cloud.createNewUser(username, password, email)).also {
+            if (it == CloudFunctionResults.OK) {
                 Preferences.username = username
                 Preferences.password = password
                 Preferences.lastUpdateTime = -1

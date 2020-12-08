@@ -34,6 +34,7 @@ import nl.joozd.joozdlogcommon.serializing.longFromBytes
 import nl.joozd.joozdlogcommon.serializing.unwrapInt
 import nl.joozd.joozdlogcommon.serializing.wrap
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.ui.utils.toast
 import java.security.MessageDigest
 
@@ -200,21 +201,70 @@ object ServerFunctions {
     }
 
 
-    fun createNewAccount(client: Client, name: String, key: ByteArray): Boolean?{
+    /**
+     * Ask server to create a new account. Return codes below [createNewAccountWithEmail]
+     */
+    fun createNewAccount(client: Client, name: String, key: ByteArray): CloudFunctionResults{
         val payLoad = LoginData(name, key, BasicFlight.VERSION.version).serialize()
         client.sendRequest(JoozdlogCommsKeywords.NEW_ACCOUNT, payLoad)
         val result = client.readFromServer()
         Log.d(TAG, "Result was ${result?.toString(Charsets.UTF_8)}")
-        return result?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
+        return when (result?.toString(Charsets.UTF_8)){
+            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
+            JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS
+            JoozdlogCommsKeywords.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
+            null -> CloudFunctionResults.CLIENT_ERROR
+            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
+        }
     }
 
-    fun createNewAccountWithEmail(client: Client, name: String, key: ByteArray, email: String): Boolean?{
+
+    fun createNewAccountWithEmail(client: Client, name: String, key: ByteArray, email: String): CloudFunctionResults{
         val payLoad = LoginDataWithEmail(name, key, BasicFlight.VERSION.version, email).serialize()
         client.sendRequest(JoozdlogCommsKeywords.NEW_ACCOUNT_EMAIL, payLoad)
         val result = client.readFromServer()
         Log.d(TAG, "Result was ${result?.toString(Charsets.UTF_8)}")
-        return result?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
+        return when (result?.toString(Charsets.UTF_8)){
+            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
+            JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS
+            JoozdlogCommsKeywords.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
+            JoozdlogCommsKeywords.USER_ALREADY_EXISTS -> CloudFunctionResults.USER_ALREADY_EXISTS
+            null -> CloudFunctionResults.CLIENT_ERROR
+            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
+        }
     }
+
+    /**
+     * send an email confirmation string to server
+     */
+    fun confirmEmail(client: Client, confirmationString: String): CloudFunctionResults{
+        val payload = wrap(confirmationString)
+        if (client.sendRequest(JoozdlogCommsKeywords.CONFIRM_EMAIL, payload) < 0) return CloudFunctionResults.CLIENT_ERROR
+        val result = client.readFromServer()
+        return when(result?.toString(Charsets.UTF_8)){
+            null -> CloudFunctionResults.CLIENT_ERROR
+            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
+            JoozdlogCommsKeywords.EMAIL_NOT_KNOWN_OR_VERIFIED -> CloudFunctionResults.EMAIL_DOES_NOT_MATCH
+            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
+        }
+    }
+
+    fun requestLoginLinkMail(client: Client): CloudFunctionResults {
+        val n = Preferences.username
+        val k = Preferences.key
+        if (n == null || k == null) return CloudFunctionResults.NO_LOGIN_DATA
+        val payload = LoginDataWithEmail(n, k, BasicFlight.VERSION.version, Preferences.emailAddress).serialize()
+        client.sendRequest(JoozdlogCommsKeywords.REQUEST_LOGIN_LINK_MAIL, payload)
+        return when (client.readFromServer()?.toString(Charsets.UTF_8)) {
+            null -> CloudFunctionResults.CLIENT_ERROR
+            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
+            JoozdlogCommsKeywords.EMAIL_NOT_KNOWN_OR_VERIFIED -> CloudFunctionResults.EMAIL_DOES_NOT_MATCH
+            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
+        }
+    }
+
 
     /**
      * Change password on a logged-in account

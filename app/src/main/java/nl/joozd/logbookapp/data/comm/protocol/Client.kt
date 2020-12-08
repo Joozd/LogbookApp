@@ -71,6 +71,10 @@ class Client: Closeable, CoroutineScope {
         }
     }
 
+    /**
+     * Send data to server. On success, returns the amount of bytes sent, on failure returns a negative Integer
+     * TODO define return codes in [CloudFunctionResults]
+     */
     fun sendToServer(packet: Packet): Int {
         // Log.d("SendToServer:", packet.message.take(40).toByteArray().toString(Charsets.UTF_8))
         try {
@@ -195,7 +199,9 @@ class Client: Closeable, CoroutineScope {
      * @param extraData: A bytearray with extra data to be sent as part of this request
      */
     fun sendRequest(request: String, extraData: ByteArray? = null): Int =
-        sendToServer(Packet(wrap(request) + (extraData ?: ByteArray(0))))
+        sendToServer(Packet(wrap(request) + (extraData ?: ByteArray(0)))).also{
+            Log.d("request", request)
+        }
 
 
     /**

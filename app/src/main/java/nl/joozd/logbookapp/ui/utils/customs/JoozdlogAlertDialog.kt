@@ -43,7 +43,7 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
  * Same goes for [message] / [messageResource]
  * [setPositiveButton] / [setNegativeButton] / [setNeutralButton] for buttons
  */
-class JoozdlogAlertDialog(): JoozdlogFragment() {
+class JoozdlogAlertDialog: JoozdlogFragment() {
     var title: CharSequence? = null
     var message: CharSequence = "Dialog."
 
@@ -100,13 +100,10 @@ class JoozdlogAlertDialog(): JoozdlogFragment() {
     fun show(context: FragmentActivity, tag: String = "bla", block: JoozdlogAlertDialog.() -> Unit = {}): JoozdlogAlertDialog {
         // retainInstance = true // not too happy about this solution, but should work for now
         block()
-        Log.d("LALALA", "DEBUG POINT 3")
 
         context.supportFragmentManager.commit{
-            add(android.R.id.content,this@JoozdlogAlertDialog, tag)
-            Log.d("LALALA", "DEBUG POINT 4")
+            add(android.R.id.content,this@JoozdlogAlertDialog, JOOZDLOG_DIALOG_TAG)
         }
-        Log.d("LALALA", "DEBUG POINT 5")
         return this
     }
 
@@ -116,7 +113,6 @@ class JoozdlogAlertDialog(): JoozdlogFragment() {
 
     private fun getCorrectBinding(inflater: LayoutInflater, container: ViewGroup?) = if (_neutralButton == null && _bonusButton == null)
         DialogJoozdlogTwoButtonBinding.bind(inflater.inflate(R.layout.dialog_joozdlog_two_button, container, false) ).apply{
-            Log.d("LALALA", "DEBUG POINT 6")
             var forceOkButton = false
                 title()?.let { dialogTitle.text = title() } ?: run {
                     dialogTitle.visibility = View.GONE
@@ -129,7 +125,7 @@ class JoozdlogAlertDialog(): JoozdlogFragment() {
                  */
                 if (listOf(_positiveButton, _negativeButton, _bonusButton, _neutralButton).all{it == null}){
                     positiveButton.setText(android.R.string.ok)
-                    positiveButton.setOnClickListener { supportFragmentManager.popBackStack() }
+                    positiveButton.setOnClickListener { removeFragment() }
                     forceOkButton = true
                 }
 
@@ -137,7 +133,7 @@ class JoozdlogAlertDialog(): JoozdlogFragment() {
                     positiveButton.text = bd.text
                     positiveButton.setOnClickListener { v ->
                         bd.onClick?.onClick(v)
-                        supportFragmentManager.popBackStack()
+                        removeFragment()
                     }
                 }
 
@@ -145,7 +141,7 @@ class JoozdlogAlertDialog(): JoozdlogFragment() {
                     negativeButton.text = bd.text
                     negativeButton.setOnClickListener { v ->
                         bd.onClick?.onClick(v)
-                        supportFragmentManager.popBackStack()
+                        removeFragment()
                     }
                 }
 
@@ -166,7 +162,7 @@ class JoozdlogAlertDialog(): JoozdlogFragment() {
              */
             if (listOf(_positiveButton, _negativeButton, _bonusButton, _neutralButton).all{it == null}){
                 positiveButton.setText(android.R.string.ok)
-                positiveButton.setOnClickListener { supportFragmentManager.popBackStack() }
+                positiveButton.setOnClickListener { removeFragment() }
                 forceOkButton = true
             }
 
@@ -174,7 +170,7 @@ class JoozdlogAlertDialog(): JoozdlogFragment() {
                 positiveButton.text = bd.text
                 positiveButton.setOnClickListener { v ->
                     bd.onClick?.onClick(v)
-                    supportFragmentManager.popBackStack()
+                    removeFragment()
                 }
             }
 
@@ -182,21 +178,21 @@ class JoozdlogAlertDialog(): JoozdlogFragment() {
                 negativeButton.text = bd.text
                 negativeButton.setOnClickListener { v ->
                     bd.onClick?.onClick(v)
-                    supportFragmentManager.popBackStack()
+                    removeFragment()
                 }
             }
             _neutralButton?.let{bd ->
                 neutralButton.text = bd.text
                 neutralButton.setOnClickListener { v ->
                     bd.onClick?.onClick(v)
-                    supportFragmentManager.popBackStack()
+                    removeFragment()
                 }
             }
             _bonusButton?.let{ bd ->
                 bonusButton.text = bd.text
                 bonusButton.setOnClickListener { v ->
                     bd.onClick?.onClick(v)
-                    supportFragmentManager.popBackStack()
+                    removeFragment()
                 }
             }
 
@@ -211,6 +207,10 @@ class JoozdlogAlertDialog(): JoozdlogFragment() {
     private inner class ButtonDescriptor(val t: CharSequence?, val r: Int?, val onClick: View.OnClickListener?){
         val text: CharSequence
             get() = r?.let{ ctx.getString(it) } ?: t ?: ""
+    }
+
+    companion object{
+        const val JOOZDLOG_DIALOG_TAG = "JOOZDLOG_DIALOG_TAG"
     }
 
 }

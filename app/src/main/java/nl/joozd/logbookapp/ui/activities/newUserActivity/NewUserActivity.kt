@@ -111,9 +111,10 @@ class NewUserActivity : JoozdlogActivity() {
 
         override fun createFragment(position: Int): Fragment = when(position){
             0 -> NewUserActivityPage0()
-            1 -> NewUserActivityPage2()
-            2 -> NewUserActivityPage3()
-            3 -> NewUserActivityPage4()
+            1 -> NewUserActivityPage1()
+            2 -> NewUserActivityPage2()
+            3 -> NewUserActivityPage3()
+            4 -> NewUserActivityPage4()
             else -> Fragment().also{ Log.w(this::class.simpleName, "PageViewer asked to provide non-existing page")}
         }
     }

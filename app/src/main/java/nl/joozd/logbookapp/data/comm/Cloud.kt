@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.data.comm
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.joozdlogcommon.ConsensusData
@@ -31,9 +30,9 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.joozdlogcommon.exceptions.NotAuthorizedException
+import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.room.model.AircraftTypeConsensusData
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.room.model.toAircraftTypeConsensus
 import nl.joozd.logbookapp.data.utils.Encryption
 
 import java.time.Instant
@@ -63,7 +62,7 @@ object Cloud {
      * Creates a new user
      * Calling function should consider storing username and pasword in [Preferences]
      */
-    suspend fun createNewUser(name: String, key: ByteArray): Boolean? = withContext(Dispatchers.IO) {
+    suspend fun createNewUser(name: String, key: ByteArray): CloudFunctionResults = withContext(Dispatchers.IO) {
         Client.getInstance().use {
             ServerFunctions.createNewAccount(it, name, key)
         }
@@ -73,7 +72,7 @@ object Cloud {
      * Creates a new user
      * Calling function should consider storing username and pasword in [Preferences]
      */
-    suspend fun createNewUser(name: String, password: String): Boolean? = withContext(Dispatchers.IO) {
+    suspend fun createNewUser(name: String, password: String): CloudFunctionResults = withContext(Dispatchers.IO) {
         Client.getInstance().use {
             ServerFunctions.createNewAccount(it, name, Encryption.md5Hash(password))
         }
@@ -83,11 +82,49 @@ object Cloud {
      * Creates a new user
      * Calling function should consider storing username and pasword in [Preferences]
      */
-    suspend fun createNewUser(name: String, password: String, email: String): Boolean? = withContext(Dispatchers.IO) {
+    suspend fun createNewUser(name: String, password: String, email: String): CloudFunctionResults = withContext(Dispatchers.IO) {
         Client.getInstance().use {
             ServerFunctions.createNewAccountWithEmail(it, name, Encryption.md5Hash(password), email)
         }
     }
+
+    /**
+     * Confirm email address by sending hash to server
+     */
+    suspend fun confirmEmail(confirmationString: String): CloudFunctionResults = withContext(Dispatchers.IO) {
+        require (":" in confirmationString) { "A confirmationString must have a \':\' in it"}
+        Client.getInstance().use{ client ->
+            ServerFunctions.confirmEmail(client, confirmationString).also {
+                Log.d("confirmEmail", "$it")
+                if (it == CloudFunctionResults.OK) {
+                    Preferences.emailVerified = true
+                    sendPendingEmailJobs()
+                }
+            }
+        }
+    }
+
+    /**
+     * Request a login link.
+     * @return true if login link is emailed, false if someting else happened.
+     */
+    suspend fun requestLoginLinkMail(): CloudFunctionResults = withContext(Dispatchers.IO) {
+        Client.getInstance().use { client ->
+            ServerFunctions.requestLoginLinkMail(client)
+        }
+    }
+
+    /**
+     * Send pending email jobs to server, remove them from pending jobs when successful
+     * TODO make this an Iteration from EmailJobsWaiting
+     */
+    suspend fun sendPendingEmailJobs(){
+        Preferences.emailJobsWaiting.forEach {
+            Log.d("sendPendingEmailJobs", "running!")
+            it()
+        }
+    }
+
 
     /**
      * Changes a user's password

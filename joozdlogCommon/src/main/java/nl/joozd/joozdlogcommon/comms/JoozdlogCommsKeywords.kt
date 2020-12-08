@@ -31,13 +31,8 @@ object JoozdlogCommsKeywords {
     //protocol keywords
     const val HEADER = "JOOZDLOG"
     const val OK = "OK"
-    const val USER_ALREADY_EXISTS = "EXISTING_USER"
-    const val UNKNOWN_USER_OR_PASS = "UNKNOWN_USER_PASS_COMBO"
-    const val NOT_LOGGED_IN = "NOT_LOGGED_IN"
     const val SERVER_ERROR = "SERVER_ERROR "
     const val BAD_DATA_RECEIVED = "BAD_DATA_RECEIVED"
-    const val EMAIL_NOT_KNOWN_OR_VERIFIED = "EMAIL_NOT_KNOWN_OR_VERIFIED"
-    const val NOT_A_VALID_EMAIL_ADDRESS = "NOT_A_VALID_EMAIL_ADDRESS"
     const val NEXT_IS_COMPRESSED = "NEXT_IS_COMPRESSED"
     const val HELLO = "HELLO" // to be done before any communications with PROTOCOL_VERSION. Do this right after creating SSL connection.
 
@@ -45,14 +40,23 @@ object JoozdlogCommsKeywords {
     const val REQUEST_TIMESTAMP = "REQUEST_TIMESTAMP"
     const val REQUEST_BACKUP_MAIL = "REQUEST_BACKUP_MAIL"
 
+    //email keywords
+    const val SET_EMAIL = "SET_EMAIL"               // Sets email hash on server, can expect to receive an email on given address with a confirmation link
+    const val CONFIRM_EMAIL = "CONFIRM_EMAIL"       // confirm email hash - send wrapped confirmation string ("user:BASE64HASH") as extraData
+    const val REQUEST_LOGIN_LINK_MAIL = "REQUEST_LOGIN_LINK_MAIL"
+    const val EMAIL_NOT_KNOWN_OR_VERIFIED = "EMAIL_NOT_KNOWN_OR_VERIFIED"
+    const val NOT_A_VALID_EMAIL_ADDRESS = "NOT_A_VALID_EMAIL_ADDRESS"
+
+
     //account keywords
     const val LOGIN = "LOGIN"
     const val NEW_ACCOUNT = "NEW_ACCOUNT"
     const val NEW_ACCOUNT_EMAIL = "NEW_ACCOUNT_EMAIL"
-    const val SET_EMAIL = "SET_EMAIL"               // Sets email hash on server, can expect to receive an email on given address with a confirmation link
-    const val CONFIRM_EMAIL = "CONFIRM_EMAIL"       // confirm email hash
     const val CHANGE_PASSWORD = "CHANGE_PASSWORD" // will delete all saved files on server
     const val UPDATE_PASSWORD = "UPDATE_PASSWORD" // should be done after being logged in as it will recrypt all flights with new password
+    const val USER_ALREADY_EXISTS = "EXISTING_USER"
+    const val UNKNOWN_USER_OR_PASS = "UNKNOWN_USER_PASS_COMBO"
+    const val NOT_LOGGED_IN = "NOT_LOGGED_IN"
 
     //flights keywords
     const val SENDING_FLIGHTS = "SENDING_FLIGHTS"

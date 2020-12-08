@@ -19,9 +19,16 @@
 
 package nl.joozd.logbookapp.data.sharedPrefs
 
+import android.util.Log
+import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.extensions.mask
 
-class EmailJobsWaiting(var maskedValues: Int ) {
+
+/**
+ * Keeps track of which email jobs are to be executed once email is confirmed
+ */
+class EmailJobsWaiting(var maskedValues: Int ): Iterable<suspend () -> Unit> {
     var sendLoginLink: Boolean
         get() = maskedValues and SEND_LOGIN_LINK != 0
         set(loginLinkWaiting){
@@ -42,8 +49,49 @@ class EmailJobsWaiting(var maskedValues: Int ) {
         Preferences._emailJobsWaiting = maskedValues
     }
 
+    /**
+     * Values for use in Iterator
+     */
+    private val runSendLoginLink = suspend { if (Cloud.requestLoginLinkMail() == CloudFunctionResults.OK) sendLoginLink = false }
+    private val runSendBackupCsv = suspend { if (Cloud.requestBackup() == true) sendBackupCsv = false }
+    private val resetIterator = suspend { iteratorAlreadyRunning = false }
+
+    private val jobMarkers = listOf(sendLoginLink, sendBackupCsv, true) // last true is the job that sets [iteratorAlreadyRunning] to false
+    private val possibleJobs = listOf(runSendLoginLink, runSendBackupCsv, resetIterator)
+    init{
+        require (jobMarkers.size == possibleJobs.size) { "DO NOT ADD JOBS WITHOUT MARKERS OR SCREW UP THEIR ORDER!!!!1"}
+    }
+
+    private var iteratorAlreadyRunning = false
+
     companion object{
         const val SEND_LOGIN_LINK: Int = 0x1
         const val SEND_BACKUP_CSV: Int = 0x2
+    }
+
+    /**
+     * Returns an iterator over the elements of this object.
+     */
+    override fun iterator(): Iterator<suspend () -> Unit> = if (!iteratorAlreadyRunning) {
+        object : Iterator<suspend () -> Unit> {
+
+
+            private val openJobs = possibleJobs.filterIndexed { index, _ -> jobMarkers[index] }
+            private var pointer = 0
+
+            override fun hasNext(): Boolean = pointer < openJobs.size
+
+            override fun next(): suspend () -> Unit =
+                openJobs[pointer++].also{
+                    Log.d("emailJobs","running job #$pointer")
+                }
+
+        }
+    } else object: Iterator<suspend () -> Unit>{
+        init{
+            Log.w("EmailJobsWaiting", "Do not run two EmailJobsWaiting iterators at the same time. Second one is redirected to an empty Iterator.")
+        }
+        override fun hasNext(): Boolean  = false
+        override fun next(): suspend () -> Unit = {}
     }
 }

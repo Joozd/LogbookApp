@@ -128,12 +128,8 @@ class MainActivity : JoozdlogActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
-
-
-
         setTheme(R.style.AppTheme)
+
         ActivityMainNewBinding.inflate(layoutInflater).apply {
             setSupportActionBarWithReturn(mainToolbar)?.apply {
                 // can do stuff with toolbar here

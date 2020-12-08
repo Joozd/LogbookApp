@@ -39,7 +39,9 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.CalendarScraper
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.comm.InternetStatus
+import nl.joozd.logbookapp.data.comm.ServerFunctions
 import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
@@ -128,7 +130,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      */
     fun nextPage(pageNumber: Int){
         feedback(NewUserActivityEvents.NEXT_PAGE).apply{
-            putInt(pageNumber)
+            putInt(pageNumber + 1)
         }
     }
 
@@ -151,23 +153,26 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     var email2 = Preferences.emailAddress
 
     fun okClickedPage1(){
+        Log.d("okClickedPage1()", "email1: $email1, email2: $email2")
         if (email1 != email2) feedback(FeedbackEvents.GeneralEvents.ERROR, _page1Feedback).putInt(3)
-        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(FeedbackEvents.GeneralEvents.ERROR, _page1Feedback).putInt(4)
-        Preferences.emailAddress = email1
-        Preferences.backupFromCloud = true
-        feedback(FeedbackEvents.GeneralEvents.DONE, _page1Feedback)
+        else {
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(FeedbackEvents.GeneralEvents.ERROR, _page1Feedback).putInt(4)
+            Preferences.emailAddress = email1
+            Preferences.backupFromCloud = true
+            feedback(FeedbackEvents.GeneralEvents.DONE, _page1Feedback)
+        }
     }
 
     fun updateEmail(it: String){
         if(!android.util.Patterns.EMAIL_ADDRESS.matcher(it.trim()).matches())
-            feedback(FeedbackEvents.GeneralEvents.ERROR).putString("Not an email address").putInt(1) // TODO make other errors as well
+            feedback(FeedbackEvents.GeneralEvents.ERROR, _page1Feedback).putString("Not an email address").putInt(1) // TODO make other errors as well
         email1 = it.trim()
     }
 
     fun updateEmail2(it: String){
         when {
             it.trim() != email1 ->
-                feedback(FeedbackEvents.GeneralEvents.ERROR).putString("Does not match").putInt(2) // TODO make other errors as well
+                feedback(FeedbackEvents.GeneralEvents.ERROR, _page1Feedback).putString("Does not match").putInt(2) // TODO make other errors as well
             else -> {
                 email2 = it.trim()
 
@@ -213,13 +218,17 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
                     feedback(NewUserActivityEvents.WAITING_FOR_SERVER, _page2Feedback)
                     viewModelScope.launch {
                         val pass1 = generatePassword(16)
-                        when (UserManagement.createNewUser(username, pass1, email?.toString())) { // UserManagement will call the correct Cloud function
-                            true -> {
+                        when (UserManagement.createNewUser(username, pass1, email)) { // UserManagement will call the correct Cloud function
+                            CloudFunctionResults.OK -> {
                                 feedback(NewUserActivityEvents.LOGGED_IN_AS, _page2Feedback)
                                 Preferences.emailJobsWaiting.sendLoginLink = true
                             }
-                            null -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
-                            false -> feedback(NewUserActivityEvents.USER_EXISTS, _page2Feedback)
+                            CloudFunctionResults.CLIENT_ERROR -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
+                            CloudFunctionResults.SERVER_ERROR -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
+                            CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS -> feedback(NewUserActivityEvents.BAD_EMAIL, _page2Feedback)
+                            CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
+                            CloudFunctionResults.USER_ALREADY_EXISTS -> feedback(NewUserActivityEvents.USER_EXISTS, _page2Feedback)
+                            else -> feedback(NewUserActivityEvents.UNKNOWN_ERROR, _page2Feedback)
                         }
                     }
                 }

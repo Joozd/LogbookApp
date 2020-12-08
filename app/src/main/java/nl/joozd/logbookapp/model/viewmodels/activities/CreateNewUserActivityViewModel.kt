@@ -19,6 +19,9 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.SharedPreferences
 import android.text.Editable
 import android.util.Log
@@ -26,11 +29,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.InternetStatus
+import nl.joozd.logbookapp.data.comm.ServerFunctions
 import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.CreateNewUserActivityEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.utils.checkPasswordSafety
 import nl.joozd.logbookapp.utils.generatePassword
@@ -63,20 +70,38 @@ class CreateNewUserActivityViewModel: JoozdlogActivityViewModel() {
         Log.d("signUpClicked", "user: $username")
         Preferences.useCloud = true
         when {
-            InternetStatus.internetAvailable != true -> feedback(CreateNewUserActivityEvents.NO_INTERNET)
-            username.isBlank() -> feedback(CreateNewUserActivityEvents.USERNAME_TOO_SHORT)
+            InternetStatus.internetAvailable != true -> feedback(NewUserActivityEvents.NO_INTERNET)
+            username.isBlank() -> feedback(NewUserActivityEvents.USERNAME_TOO_SHORT)
             else -> { // passwords match, are good enough, username not empty and internet looks OK
-                feedback(CreateNewUserActivityEvents.WAITING_FOR_SERVER)
+                feedback(NewUserActivityEvents.WAITING_FOR_SERVER)
                 viewModelScope.launch {
-                    when (UserManagement.createNewUser(username, generatePassword(16))) {
-                        true -> {
-                            FlightRepository.getInstance().syncIfNeeded()
-                            feedback(CreateNewUserActivityEvents.FINISHED)
+                    val email = Preferences.emailAddress.takeIf { it.isNotEmpty() }
+                    when (UserManagement.createNewUser(username, generatePassword(16), email)) { // UserManagement will call the correct Cloud function
+                        CloudFunctionResults.OK -> {
+                            feedback(NewUserActivityEvents.LOGGED_IN_AS)
+                            Preferences.emailJobsWaiting.sendLoginLink = true
                         }
-                        null -> feedback(CreateNewUserActivityEvents.SERVER_NOT_RESPONDING)
-                        false -> feedback(CreateNewUserActivityEvents.USER_EXISTS)
+                        CloudFunctionResults.CLIENT_ERROR -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING)
+                        CloudFunctionResults.SERVER_ERROR -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING)
+                        CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS -> feedback(NewUserActivityEvents.BAD_EMAIL)
+                        CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING)
+                        CloudFunctionResults.USER_ALREADY_EXISTS -> feedback(NewUserActivityEvents.USER_EXISTS)
+                        else -> feedback(NewUserActivityEvents.UNKNOWN_ERROR)
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Copy a login link to clipboard (assuming logged in, else do nothing)
+     */
+    fun copyLoginLinkToClipboard(){
+        UserManagement.generateLoginLink()?.let { loginLink ->
+            with(App.instance) {
+                (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
+                    ClipData.newPlainText(getString(R.string.login_link), loginLink)
+                )
             }
         }
     }

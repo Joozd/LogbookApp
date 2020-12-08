@@ -20,12 +20,14 @@
 package nl.joozd.logbookapp.ui.activities.newUserActivity
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityNewUserPage1Binding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
@@ -37,6 +39,9 @@ class NewUserActivityPage1: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         ActivityNewUserPage1Binding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_1, container, false)).apply {
+            emailAddressEditText.setText (Preferences.emailAddress)
+            emailAddress2EditText.setText (Preferences.emailAddress)
+
             emailAddressEditText.onTextChanged {
                 emailAddressLayout.error = ""
             }
@@ -60,10 +65,13 @@ class NewUserActivityPage1: Fragment() {
                     }
             }
 
-            viewModel.feedbackEvent.observe(viewLifecycleOwner){
+            viewModel.page1Feedback.observe(viewLifecycleOwner){
+                Log.d("rreceived", "$it")
                 when (it.getEvent()){
                     FeedbackEvents.GeneralEvents.DONE -> viewModel.nextPage(PAGE_NUMBER)
                     FeedbackEvents.GeneralEvents.ERROR -> {
+                        toast("${it.getString()}")
+
                         when(it.getInt()){
                             1 -> emailAddressLayout.error = it.getString()
                             2 -> emailAddress2Layout.error = it.getString()
@@ -76,8 +84,11 @@ class NewUserActivityPage1: Fragment() {
 
 
             continueTextView.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
+                it.requestFocus()
                 viewModel.okClickedPage1()
             }
+
 
 
 

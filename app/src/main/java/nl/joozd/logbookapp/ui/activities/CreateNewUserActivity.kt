@@ -26,14 +26,17 @@ import android.util.Log
 import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.fragment.app.commit
+import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityCreateNewUserBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.CreateNewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.CreateNewUserActivityViewModel
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
+import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivityPage2
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast
 
 class CreateNewUserActivity : JoozdlogActivity() {
@@ -94,7 +97,7 @@ class CreateNewUserActivity : JoozdlogActivity() {
                 if (Preferences.acceptedCloudSyncTerms)
                     viewModel.signUpClicked(userNameEditText.text.toString())
                 else {
-                    JoozdlogAlertDialogV1(activity).show {
+                    JoozdlogAlertDialog().show(activity) {
                         messageResource = R.string.must_accept_terms
                         setPositiveButton(android.R.string.ok)
                     }
@@ -115,16 +118,23 @@ class CreateNewUserActivity : JoozdlogActivity() {
 
             viewModel.feedbackEvent.observe(activity) {
                 Log.d("Event!", "${it.type}")
-                when(it.getEvent()){
-                    CreateNewUserActivityEvents.USER_EXISTS -> showUserExistsError()
-                    CreateNewUserActivityEvents.USERNAME_TOO_SHORT -> showUsernameCannotBeEmptyError()
-                    CreateNewUserActivityEvents.NO_INTERNET -> showCreateAccountNoInternetError()
-                    CreateNewUserActivityEvents.WAITING_FOR_SERVER -> this.setWaitingForServerLayout()
-                    CreateNewUserActivityEvents.SERVER_NOT_RESPONDING -> {
+                when (it.getEvent()) {
+                    NewUserActivityEvents.NOT_IMPLEMENTED -> {
+                        toast("Not implemented!")
+                    }
+                    NewUserActivityEvents.USER_EXISTS -> showUserExistsError()
+
+                    NewUserActivityEvents.USERNAME_TOO_SHORT -> showUsernameCannotBeEmptyError()
+                    NewUserActivityEvents.NO_INTERNET -> showCreateAccountNoInternetError()
+                    NewUserActivityEvents.WAITING_FOR_SERVER -> setWaitingForServerLayout()
+                    NewUserActivityEvents.SERVER_NOT_RESPONDING -> {
                         setNotWaitingForServerLayout()
                         showCreateAccountServerError()
                     }
-                    CreateNewUserActivityEvents.FINISHED -> exportLoginLink()
+                    NewUserActivityEvents.BAD_EMAIL -> showBadEmailDialog()
+                    NewUserActivityEvents.LOGGED_IN_AS -> showPasswordLinkDialog()
+                    NewUserActivityEvents.FINISHED -> finish()
+                    NewUserActivityEvents.UNKNOWN_ERROR -> toast (R.string.error) // should not happen
                 }
             }
 
@@ -144,17 +154,17 @@ class CreateNewUserActivity : JoozdlogActivity() {
      *******************************************************************************************/
 
     private fun showCreateAccountServerError() =
-        JoozdlogAlertDialogV1(activity).apply {
+        JoozdlogAlertDialog().show(activity) {
             titleResource = R.string.no_internet
             messageResource = R.string.no_server_create_account
             setPositiveButton(R.string._continue) {
                 viewModel.dontUseCloud()
                 finish()
             }
-        }.show()
+        }
 
     private fun ActivityCreateNewUserBinding.showCreateAccountNoInternetError() =
-        JoozdlogAlertDialogV1(activity).show {
+        JoozdlogAlertDialog().show(activity) {
             titleResource = R.string.no_internet
             messageResource = R.string.no_internet_create_account
             setPositiveButton(R.string.skip) {
@@ -180,6 +190,19 @@ class CreateNewUserActivity : JoozdlogActivity() {
         userNameEditText.requestFocus()
         usernameTextInputLayout.error = getString(R.string.username_already_taken)
     }
+
+
+    /**
+     * Dialog to be shown when trying to create an account when an invalid email address is entered. SHould not happen.
+     * TODO use string resources
+     */
+    private fun showBadEmailDialog() = JoozdlogAlertDialog().show(activity){
+        title = "Bad email address"
+        message = "Saved email address is invalid. Please fix it in Settings and retry"
+        setPositiveButton(android.R.string.ok) {
+            finish()
+        }
+    }
         /*
         JoozdlogAlertDialog(activity).show {
             titleResource = R.string.username_already_taken
@@ -196,6 +219,16 @@ class CreateNewUserActivity : JoozdlogActivity() {
                 startActivity(Intent.createChooser(it, getString(R.string.send_using)))
             }
         } ?: toast("NewUserActivity error 1: No login stored")
+    }
+
+    private fun showPasswordLinkDialog() =  JoozdlogAlertDialog().show(activity) {
+
+        title = App.instance.getString(R.string.created_account, UserManagement.username)
+        messageResource = R.string.create_login_link_hint
+        setPositiveButton(android.R.string.ok) {
+            viewModel.copyLoginLinkToClipboard()
+            finish()
+        }
     }
 
 

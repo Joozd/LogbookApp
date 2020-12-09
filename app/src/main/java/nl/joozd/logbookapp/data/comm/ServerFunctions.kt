@@ -21,8 +21,6 @@ package nl.joozd.logbookapp.data.comm
 
 import android.util.Base64
 import android.util.Log
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.*
 import nl.joozd.logbookapp.data.comm.protocol.Client
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -33,9 +31,7 @@ import nl.joozd.joozdlogcommon.serializing.*
 import nl.joozd.joozdlogcommon.serializing.longFromBytes
 import nl.joozd.joozdlogcommon.serializing.unwrapInt
 import nl.joozd.joozdlogcommon.serializing.wrap
-import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
-import nl.joozd.logbookapp.ui.utils.toast
 import java.security.MessageDigest
 
 object ServerFunctions {
@@ -204,7 +200,7 @@ object ServerFunctions {
 
 
     /**
-     * Ask server to create a new account. Return codes below [createNewAccountWithEmail]
+     * Ask server to create a new account.
      */
     fun createNewAccount(client: Client, name: String, key: ByteArray): CloudFunctionResults{
         val payLoad = LoginData(name, key, BasicFlight.VERSION.version).serialize()
@@ -221,6 +217,9 @@ object ServerFunctions {
     }
 
 
+    /**
+     * Ask server to create a new account. Server will send a confirmation email.
+     */
     fun createNewAccountWithEmail(client: Client, name: String, key: ByteArray, email: String): CloudFunctionResults{
         val payLoad = LoginDataWithEmail(name, key, BasicFlight.VERSION.version, email).serialize()
         client.sendRequest(JoozdlogCommsKeywords.NEW_ACCOUNT_EMAIL, payLoad)
@@ -237,13 +236,28 @@ object ServerFunctions {
     }
 
     /**
+     * Send new email address to server
+     */
+    fun sendNewEmailData(client: Client, emailToSend: String): CloudFunctionResults =
+        generateLoginDataWithEmail(email = emailToSend)?.let{loginData ->
+            if (client.sendRequest(JoozdlogCommsKeywords.SET_EMAIL, loginData.serialize()) < 0) CloudFunctionResults.CLIENT_ERROR
+            else when(client.readFromServer()?.toString(Charsets.UTF_8)) {
+                JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
+                JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS
+                JoozdlogCommsKeywords.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
+                null -> CloudFunctionResults.CLIENT_ERROR
+                else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
+            }
+        } ?: CloudFunctionResults.NO_LOGIN_DATA
+
+
+    /**
      * send an email confirmation string to server
      */
     fun confirmEmail(client: Client, confirmationString: String): CloudFunctionResults{
         val payload = wrap(confirmationString)
         if (client.sendRequest(JoozdlogCommsKeywords.CONFIRM_EMAIL, payload) < 0) return CloudFunctionResults.CLIENT_ERROR
-        val result = client.readFromServer()
-        return when(result?.toString(Charsets.UTF_8)){
+        return when(client.readFromServer()?.toString(Charsets.UTF_8)){
             null -> CloudFunctionResults.CLIENT_ERROR
             JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
             JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
@@ -252,6 +266,9 @@ object ServerFunctions {
         }
     }
 
+    /**
+     * Request an email with a login link from the server
+     */
     fun requestLoginLinkMail(client: Client): CloudFunctionResults {
         val n = Preferences.username
         val k = Preferences.key
@@ -351,6 +368,13 @@ object ServerFunctions {
     private fun makeKey(password: String): ByteArray = with (MessageDigest.getInstance("MD5")) {
         update(password.toByteArray())
         digest()
+    }
+
+    private fun generateLoginDataWithEmail(username: String? = null, key: ByteArray? = null, email: String? = null): LoginDataWithEmail?{
+        val n = username ?: Preferences.username
+        val k = key ?: Preferences.key
+        return if (n == null || k == null)  null else
+        LoginDataWithEmail(n, k, BasicFlight.VERSION.version, email ?: Preferences.emailAddress)
     }
 /*
     fun sendTestMail(client: Client): Boolean{

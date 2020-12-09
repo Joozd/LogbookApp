@@ -56,7 +56,7 @@
     <string name="email_for_login">Email address for login link</string>
     <string name="email">Email address</string>
     <string name="email_repeat">Repeat Email address</string>
-    <string name="email_reason">Your email address will not be stored outside your phone.</string>
+    <string name="email_reason">Please enter your email for backup and account recovery purposes.\nYour email address will not be stored outside your phone.</string>
     <string name="autovalue">Auto Values</string>
     <string name="takeoff">Takeoff</string>
     <string name="day">day</string>
@@ -284,6 +284,7 @@
     <string name="create_account">Create new account</string>
     <string name="you_are_signed_in_as">You are signed in as <![CDATA[<b>%1$s</b>]]>.</string>
     <string name="you_are_not_signed_in">Your login credentials arer no longer valid. You can use your login link, or make a new account in the Settings menu.</string>
+    <string name="no_email_provided">No email address provided</string>
     <string name="you_need_to_be_signed_in">You need to be signed in before you can perform this action.</string>
     <string name="i_accept_terms">I accept the terms and conditions</string>
     <string name="must_accept_terms">You must accept the terms and conditions to use Cloud Sync</string>
@@ -317,6 +318,8 @@
     <string name="mark_incomplete_without_pic">Name needs to be set</string>
     <string name="mark_incomplete_without_pic_description">If no names are set on a completed flight, flight will be marked as incomplete</string>
     <string name="signed_in_as"><![CDATA[<b>Signed in as</b><br><small>%1$s</small>&nbsp;]]></string>
+    <string name="email_button_text_verified"><![CDATA[<b>Email address</b><br><small>%1$s</small>&nbsp;]]></string>
+    <string name="email_button_text_not_verified"><![CDATA[<b>Email address</b><br><small>%1$s (not verified)</small>&nbsp;]]></string>
     <string name="not_signed_in">Not signed in</string>
     <string name="standard_augmented_time"><![CDATA[<b>Augmented Crew takeoff/landing time</b><br><small>%1$s minutes</small>&nbsp;]]></string>
     <string name="backup_interval_time"><![CDATA[<b>Remind me to make a backup every</b><br><small>%1$s</small>&nbsp;]]></string>
@@ -330,8 +333,8 @@
     <string name="pick_backup_interval">Pick backup interval</string>
     <string name="augmented_crew_time_explanation">In case of an augmented crew (3 or more pilots), Joozdlog calculates the time that can be logged for copilots by subtracting this amount of time for each takeoff and landing, allocating the remaining time evenly over the pilots, then adds this time again for every takeoff/landing performed in the pilot\'s seat.</string>
 
-    <string name="change_password">Change Login Credentials</string>
-    <string name="create_login_link">Create a login link</string>
+    <string name="change_password">Change Login Link</string>
+    <string name="create_login_link">Copy login link</string>
     <string name="login_link_created">Login link copied to clipboard!</string>
     <string name="login_link">Joozdlog Login Link</string>
     <string name="create_login_link_explanation">This will create a login link that you can paste in your favorite app (email, sms, notepad, anywhere). If you click that link, it will try to log you in with the username/password currently set on this device.</string>

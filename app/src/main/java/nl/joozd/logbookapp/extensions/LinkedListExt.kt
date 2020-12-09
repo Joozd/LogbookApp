@@ -27,7 +27,6 @@ import java.util.*
  *
  */
 fun <E> LinkedList<E>.popFirst(n: Int): List<E> {
-    val origList = this
     return when {
         n >= size -> this.toList().also{ this.clear() }
         n == 0 -> emptyList()

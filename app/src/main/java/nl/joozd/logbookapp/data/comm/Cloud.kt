@@ -88,6 +88,13 @@ object Cloud {
         }
     }
 
+    suspend fun sendNewEmailAddress(): CloudFunctionResults = withContext(Dispatchers.IO) {
+        Client.getInstance().use { client ->
+            ServerFunctions.sendNewEmailData(client, Preferences.emailAddress)
+        }
+    }
+
+
     /**
      * Confirm email address by sending hash to server
      */
@@ -144,7 +151,9 @@ object Cloud {
     suspend fun changePassword(newPassword: String, email: String?): Boolean? = withContext(Dispatchers.IO) {
         Client.getInstance().use {client ->
             ServerFunctions.login(client)?.let{
-                if (!it) return@withContext it
+                if (!it) return@withContext it.also{
+                    Log.w("changePassword","Incorrect login credentials given")
+                }
             }
             ServerFunctions.changePassword(client, Encryption.md5Hash(newPassword), email ?: "")
         }

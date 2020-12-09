@@ -33,6 +33,7 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
@@ -79,19 +80,24 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
         }
         val password = generatePassword(16)
         Log.d("submitClicked()", "pass1: $password")
+        Log.d("Internet", "${InternetStatus.internetAvailable}")
         when {
             InternetStatus.internetAvailable != true -> feedback(ChangePasswordEvents.NO_INTERNET)
             else -> { // passwords match, are good enough, username not empty and internet looks OK
+                Log.d("LALALALALAL" ,"HUPSAKEE RAAAAR -1")
                 feedback(ChangePasswordEvents.WAITING_FOR_SERVER)
+                Log.d("LALALALALAL" ,"HUPSAKEE 1")
                 viewModelScope.launch {
+                    Log.d("LALALALALAL" ,"HUPSAKEE 2")
                     when (UserManagement.changePassword(password, email?.toString())){
-                        UserManagement.ReturnCodes.SUCCESS -> {
+                        CloudFunctionResults.OK -> {
                             sendPasswordLinksToClipboard(UserManagement.generateLoginLink())
                             feedback(ChangePasswordEvents.FINISHED)
                         }
-                        UserManagement.ReturnCodes.NO_PASSWORD, UserManagement.ReturnCodes.NO_USERNAME -> feedback(ChangePasswordEvents.NOT_LOGGED_IN).also {Log.d("XXXXXX", "1")}
-                        UserManagement.ReturnCodes.WRONG_CREDENTIALS -> feedback(ChangePasswordEvents.LOGIN_INCORRECT).also {Log.d("XXXXXX", "2")}
-                        UserManagement.ReturnCodes.CONNECTION_ERROR -> feedback(ChangePasswordEvents.SERVER_NOT_RESPONDING)
+                        CloudFunctionResults.NO_LOGIN_DATA -> feedback(ChangePasswordEvents.NOT_LOGGED_IN).also {Log.d("XXXXXX", "1")}
+                        CloudFunctionResults.UNKNOWN_USER_OR_PASS -> feedback(ChangePasswordEvents.LOGIN_INCORRECT).also {Log.d("XXXXXX", "2")}
+                        CloudFunctionResults.CLIENT_ERROR -> feedback(ChangePasswordEvents.SERVER_NOT_RESPONDING)
+                        else -> feedback(ChangePasswordEvents.NOT_IMPLEMENTED)
                     }
                 }
             }

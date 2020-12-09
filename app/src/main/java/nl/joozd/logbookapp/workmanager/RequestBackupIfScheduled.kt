@@ -27,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.extensions.minus
@@ -51,11 +52,11 @@ class RequestBackupIfScheduled(appContext: Context, workerParams: WorkerParamete
         if (!Preferences.backupFromCloud || !backupNeeded()) Result.success() // If backup not needed, this (checking if it is needed) is all we do.
         else {
             when (Cloud.requestBackup()) {
-                true -> Result.success().also{
+                CloudFunctionResults.OK -> Result.success().also{
                     Preferences.mostRecentBackup = Instant.now().epochSecond
                 }
-                null -> Result.retry()
-                false -> Result.failure()
+                null, CloudFunctionResults.CLIENT_ERROR -> Result.retry()
+                else -> Result.failure()
             }
         }
     }

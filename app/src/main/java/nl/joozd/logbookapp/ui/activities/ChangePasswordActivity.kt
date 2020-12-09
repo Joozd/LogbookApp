@@ -34,7 +34,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEve
 import nl.joozd.logbookapp.model.viewmodels.activities.ChangePasswordActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.LoginDialog
 import nl.joozd.logbookapp.ui.dialogs.WaitingForSomethingDialog
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
 
@@ -133,7 +133,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
      */
     private fun checkInternet(internetAvailable: Boolean){
         if (!internetAvailable){
-            JoozdlogAlertDialogV1(this).show(tag = NO_INTERNET_DIALOG_TAG){
+            JoozdlogAlertDialog().show(this, tag = NO_INTERNET_DIALOG_TAG){
                 titleResource = R.string.no_internet
                 messageResource = R.string.need_internet
                 setPositiveButton(android.R.string.ok){
@@ -142,7 +142,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
             }
         }
         else{
-            (supportFragmentManager.findFragmentByTag(NO_INTERNET_DIALOG_TAG) as JoozdlogAlertDialogV1?)?.dismiss()
+            (supportFragmentManager.findFragmentByTag(NO_INTERNET_DIALOG_TAG) as JoozdlogAlertDialog?)?.dismiss()
         }
     }
 
@@ -151,7 +151,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
      */
     private fun signInIfNeeded(){
         if (!UserManagement.signedIn){
-            JoozdlogAlertDialogV1(this).show{
+            JoozdlogAlertDialog().show(this){
                 titleResource = R.string.you_are_not_signed_in
                 messageResource = R.string.you_need_to_be_signed_in
                 setPositiveButton(R.string.signIn){
@@ -189,7 +189,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
     /**
      * This should not happen as another dialog is already looking at that
      */
-    private fun showNoInternetError() = JoozdlogAlertDialogV1(this).show{
+    private fun showNoInternetError() = JoozdlogAlertDialog().show(activity){
         titleResource = R.string.no_internet
         messageResource = R.string.need_internet
         setPositiveButton(android.R.string.cancel){
@@ -197,7 +197,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
         }
     }
 
-    private fun showServerDownError() = JoozdlogAlertDialogV1(this).show{
+    private fun showServerDownError() = JoozdlogAlertDialog().show(activity){
         titleResource = R.string.server_problem
         messageResource = R.string.server_problem_message
         setPositiveButton(android.R.string.cancel){
@@ -205,7 +205,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
         }
     }
 
-    private fun showIncorrectLoginError() = JoozdlogAlertDialogV1(activity).show{
+    private fun showIncorrectLoginError() = JoozdlogAlertDialog().show(activity){
         titleResource = R.string.login_error
         messageResource = R.string.login_error_message
         setPositiveButton(R.string.create_account){
@@ -216,7 +216,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
         }
     }
 
-    private fun showCopiedDialog() = JoozdlogAlertDialogV1(activity).show{
+    private fun showCopiedDialog() = JoozdlogAlertDialog().show(activity){
         titleResource = R.string.changed_password
         messageResource = R.string.changed_password_message
         setPositiveButton(android.R.string.ok) { finish() }
@@ -232,7 +232,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
      * Negative button will close the dialog.
      */
     private fun noEmailDialog(f: () -> Unit) =
-        JoozdlogAlertDialogV1(this).show {
+        JoozdlogAlertDialog().show(activity) {
             titleResource = R.string.username_already_taken
             messageResource = R.string.no_email_text
             setPositiveButton(R.string.i_dont_care){

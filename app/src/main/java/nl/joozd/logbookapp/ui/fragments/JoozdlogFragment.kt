@@ -73,7 +73,7 @@ open class JoozdlogFragment: Fragment(),  CoroutineScope by MainScope() {
 
     protected fun removeFragment() = supportFragmentManager.commit { remove(fragment) }
 
-    protected fun closeFragment() = supportFragmentManager.popBackStack()
+    protected open fun closeFragment() = supportFragmentManager.popBackStack()
 
     /**
      * Disable the "back" button so you cannot close a fragment by pressing it

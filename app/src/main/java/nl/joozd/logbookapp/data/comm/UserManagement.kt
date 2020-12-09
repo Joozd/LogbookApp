@@ -63,14 +63,14 @@ object UserManagement {
      * Then, saves new password, and changes that on server.
      * If anything goes wrong between saving new pass and setting it on server, user should be able to log in with previous loginlink.
      */
-    suspend fun changePassword(newPassword: String, email: String? = null): Int {
+    suspend fun changePassword(newPassword: String, email: String? = null): CloudFunctionResults {
         // Check if username/pass set
-        Preferences.username ?: return ReturnCodes.NO_USERNAME
-        Preferences.password ?: return ReturnCodes.NO_PASSWORD
+        Preferences.username ?: return CloudFunctionResults.NO_LOGIN_DATA
+        Preferences.password ?: return CloudFunctionResults.NO_LOGIN_DATA
 
         if (Cloud.checkUser().also {Log.d("XXXXXX", "checkUser gave $it")}
             != true
-        ) return ReturnCodes.WRONG_CREDENTIALS
+        ) return CloudFunctionResults.NO_LOGIN_DATA
 
 
         Preferences.newPassword = newPassword
@@ -78,10 +78,10 @@ object UserManagement {
             true -> {
                 Preferences.password = newPassword
                 Preferences.newPassword = ""
-                ReturnCodes.SUCCESS
+                CloudFunctionResults.OK
             }
-            false -> ReturnCodes.WRONG_CREDENTIALS
-            null -> ReturnCodes.CONNECTION_ERROR
+            false -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
+            null -> CloudFunctionResults.CLIENT_ERROR
         }
     }
 

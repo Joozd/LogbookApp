@@ -42,7 +42,7 @@ import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
-import nl.joozd.logbookapp.ui.dialogs.CloudBackupDialog
+import nl.joozd.logbookapp.ui.dialogs.EmailDialog
 import nl.joozd.logbookapp.ui.dialogs.NumberPickerDialog
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
@@ -173,6 +173,10 @@ class SettingsActivity : JoozdlogActivity() {
 
             youAreSignedInAsButton.setOnClickListener {
                 viewModel.copyLoginLinkToClipboard()
+            }
+
+            emailAddressButton.setOnClickListener {
+                showEmailDialog()
             }
 
             changePasswordButton.setOnClickListener {
@@ -320,6 +324,10 @@ class SettingsActivity : JoozdlogActivity() {
                 setLoggedInInfo(it)
             }
 
+            viewModel.emailData.observe(activity) {
+                setEmailInfo(it.first, it.second)
+            }
+
             viewModel.calendarDisabled.observe(activity) {
                 if (it)
                     showCalendarDisabled()
@@ -396,6 +404,7 @@ class SettingsActivity : JoozdlogActivity() {
      */
     private fun ActivitySettingsBinding.hideCloudSyncItems(){
         youAreSignedInAsButton.visibility=View.GONE
+        emailAddressButton.visibility=View.GONE
         lastSynchedTimeTextView.visibility=View.GONE
         changePasswordButton.visibility=View.GONE
         loginLinkButton.visibility = View.GONE
@@ -404,6 +413,7 @@ class SettingsActivity : JoozdlogActivity() {
     }
     private fun ActivitySettingsBinding.showCloudSyncItems(){
         youAreSignedInAsButton.visibility=View.VISIBLE
+        emailAddressButton.visibility=View.VISIBLE
         lastSynchedTimeTextView.visibility=View.VISIBLE
         changePasswordButton.visibility=View.VISIBLE
         val showLoginLinkButton = if (Preferences.username == null) View.GONE else View.VISIBLE
@@ -417,6 +427,11 @@ class SettingsActivity : JoozdlogActivity() {
         val showLoginLinkButton = if (name == null) View.GONE else View.VISIBLE
         loginLinkButton.visibility = showLoginLinkButton
         loginLinkExplanationImageView.visibility = showLoginLinkButton
+    }
+
+    private fun ActivitySettingsBinding.setEmailInfo(emailAddress: String?, verified: Boolean){
+        emailAddressButton.text = if (verified) getStringWithMakeup(R.string.email_button_text_verified, emailAddress ?: getString(R.string.no_email_provided))
+            else getStringWithMakeup(R.string.email_button_text_not_verified, emailAddress ?: getString(R.string.no_email_provided))
     }
 
     private fun ActivitySettingsBinding.showCalendarDisabled(){
@@ -466,12 +481,17 @@ class SettingsActivity : JoozdlogActivity() {
     }
 
     private fun toggleBackupFromCloudWithDialogIfNeeded(){
-        if(Preferences.backupFromCloud) Preferences.backupFromCloud = false
-        else {
-            supportFragmentManager.commit {
-                add(R.id.settingsActivityLayout, CloudBackupDialog(), null)
-                addToBackStack(null)
-            }
+        when{
+            Preferences.backupFromCloud -> Preferences.backupFromCloud = false
+            viewModel.emailAddress.value == null -> showEmailDialog() { Preferences.backupFromCloud = true }
+            else -> Preferences.backupFromCloud = true
+        }
+    }
+
+    private fun showEmailDialog(extra: () -> Unit = {}) {
+        supportFragmentManager.commit {
+            add(R.id.settingsActivityLayout, EmailDialog(extra), null)
+            addToBackStack(null)
         }
     }
 

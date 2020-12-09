@@ -33,7 +33,6 @@ fun EditText.removeTrailingDigits(){
     while (currentText.dropLast(trailingDigits).last().isDigit()) trailingDigits++
     //We now know how many digits this EditText's text ends with (spoiler: it's [trailingDigits]
 
-    val start = currentText.length - trailingDigits
     setText(text.toString().dropLast(trailingDigits))
     //text.delete(text.length-trailingDigits, text.length)
 }

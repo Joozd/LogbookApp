@@ -19,20 +19,35 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
+import android.util.Log
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
-class CloudBackupDialogViewModel: JoozdlogDialogViewModel() {
+class EmailDialogViewModel: JoozdlogDialogViewModel() {
     var email1 = Preferences.emailAddress
     var email2 = Preferences.emailAddress
+    var onComplete: () -> Unit = {}
 
     fun okClicked(){
-        if (email1 != email2) feedback(GeneralEvents.ERROR).putInt(3)
-        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(GeneralEvents.ERROR).putInt(4)
-        Preferences.emailAddress = email1
-        Preferences.backupFromCloud = true
-        feedback(GeneralEvents.DONE)
+        if (email1 != email2) feedback(GeneralEvents.ERROR).putInt(3).also{ Log.d("EmailDialogViewModel", "Error 3")}
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(GeneralEvents.ERROR).putInt(4).also{ Log.d("EmailDialogViewModel", "Error 4")}
+        Log.d("EmailDialogViewModel", "Looks OK! - $email1 / $email2 (${Preferences.emailAddress})")
+        if (Preferences.emailAddress != email1) {
+            Preferences.emailAddress = email1
+            Preferences.emailVerified = false
+            viewModelScope.launch {
+                when (Cloud.sendNewEmailAddress()){
+                    CloudFunctionResults.OK -> feedback(GeneralEvents.DONE)
+                    else -> feedback(GeneralEvents.ERROR).putInt(5).also{ Log.d("EmailDialogViewModel", "Error 5")}
+                }
+            }
+        }
+
     }
 
     fun updateEmail(it: String){

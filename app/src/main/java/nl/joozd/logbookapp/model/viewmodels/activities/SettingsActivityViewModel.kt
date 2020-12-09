@@ -26,11 +26,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.annotation.RequiresPermission
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -75,6 +72,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _updateLargerFilesOverWifiOnly = MutableLiveData(Preferences.updateLargerFilesOverWifiOnly)
 
     private val _username = MutableLiveData(Preferences.username) // <String?>
+    private val _emailAddress = MutableLiveData(Preferences.emailAddress)
+    private val _emailVerified = MutableLiveData(Preferences.emailVerified)
+
     private val _calendarDisabledUntil = MutableLiveData(Preferences.calendarDisabledUntil) //  <Long>
 
     private val _settingsUseIataSelectorTextResource = MutableLiveData<Int>()
@@ -82,6 +82,11 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _pickedCalendar = MutableLiveData<JoozdCalendar>()
 
     private val _uriToShare = MutableLiveData<Uri>()
+    private val _emailData = MediatorLiveData<Pair<String?, Boolean>>().apply{
+        addSource(_emailAddress) { value = it.takeIf{it.isNotBlank()} to Preferences.emailVerified}
+        addSource(_emailVerified) { value = Preferences.emailAddress.takeIf{it.isNotBlank()} to Preferences.emailVerified}
+    }
+
 
     // This is not used at the moment but it's there when we need it. Just set [settingsCalendarTypeSpinner] visibility to VISIBLE in SettingsActivity
     // search for tag #SETTHISIFNEEDED1
@@ -134,6 +139,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
             Preferences::picNameNeedsToBeSet.name -> _picNameNeedsToBeSet.value = Preferences.picNameNeedsToBeSet
 
             Preferences::updateLargerFilesOverWifiOnly.name -> _updateLargerFilesOverWifiOnly.value = Preferences.updateLargerFilesOverWifiOnly
+
+            Preferences::emailAddress.name -> _emailAddress.value = Preferences.emailAddress
+
+            Preferences::emailVerified.name -> _emailVerified.value = Preferences.emailVerified
 
 
 
@@ -206,6 +215,14 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val username: LiveData<String?>
         get() = _username
+
+    val emailAddress = Transformations.map(_emailAddress) { it.takeIf{it.isNotBlank()}}
+
+    val emailVerified: LiveData<Boolean>
+        get() = _emailVerified
+
+    val emailData: LiveData<Pair<String?, Boolean>>
+        get() = _emailData
 
     val calendarDisabled: LiveData<Boolean> = Transformations.map(_calendarDisabledUntil) {
         it > Instant.now().epochSecond

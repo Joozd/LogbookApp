@@ -98,13 +98,16 @@ class JoozdlogAlertDialog: JoozdlogFragment() {
     }
 
     fun show(context: FragmentActivity, tag: String = "bla", block: JoozdlogAlertDialog.() -> Unit = {}): JoozdlogAlertDialog {
-        // retainInstance = true // not too happy about this solution, but should work for now
-        block()
+        this.block()
 
         context.supportFragmentManager.commit{
             add(android.R.id.content,this@JoozdlogAlertDialog, JOOZDLOG_DIALOG_TAG)
         }
         return this
+    }
+
+    fun dismiss(){
+        closeFragment()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =

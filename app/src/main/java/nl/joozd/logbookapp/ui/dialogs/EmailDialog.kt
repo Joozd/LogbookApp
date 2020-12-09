@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.ui.dialogs
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -27,16 +28,23 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.databinding.DialogCloudBackupBinding
+import nl.joozd.logbookapp.databinding.DialogEmailAddressBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
-import nl.joozd.logbookapp.model.viewmodels.dialogs.CloudBackupDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.dialogs.EmailDialogViewModel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
 
-class CloudBackupDialog: JoozdlogFragment() {
-    private val viewModel: CloudBackupDialogViewModel by viewModels()
+class EmailDialog(): JoozdlogFragment() {
+    /**
+     * [extra] will be executed on successfully entering an email address
+     */
+    constructor(extra: () -> Unit) : this() {
+        onComplete = extra
+    }
+    private var onComplete: (() -> Unit)? = null
+    private val viewModel: EmailDialogViewModel by viewModels()
 
     private val okButtonListener = View.OnClickListener{
         activity?.currentFocus?.clearFocus()
@@ -45,7 +53,7 @@ class CloudBackupDialog: JoozdlogFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        DialogCloudBackupBinding.bind(inflater.inflate(R.layout.dialog_cloud_backup, container, false)).apply{
+        DialogEmailAddressBinding.bind(inflater.inflate(R.layout.dialog_email_address, container, false)).apply{
             aboutDialogTopHalf.joozdLogSetBackgroundColor()
 
             emailAddressEditText.setText(viewModel.email1)
@@ -87,20 +95,28 @@ class CloudBackupDialog: JoozdlogFragment() {
 
             viewModel.feedbackEvent.observe(viewLifecycleOwner){
                 when (it.getEvent()){
-                    GeneralEvents.DONE -> closeFragment()
+                    GeneralEvents.DONE -> {
+                        viewModel.onComplete()
+                        closeFragment()
+                    }
                     GeneralEvents.ERROR -> {
                         when(it.getInt()){
                             1 -> emailAddressLayout.error = it.getString()
                             2 -> emailAddress2Layout.error = it.getString()
                             3 -> toast("ERROR 3: Bad match")
                             4 -> toast("ERROR 4: Not an email")
+                            5 -> toast ("ERROR 5: emailDialog error 5") // TODO make more specific errors
                         }
-
                     }
                 }
             }
 
         }.root
+
+    override fun onAttach(context: Context) {
+        onComplete?.let {viewModel.onComplete = it }
+        super.onAttach(context)
+    }
 
     /**
      * Only use for OK button

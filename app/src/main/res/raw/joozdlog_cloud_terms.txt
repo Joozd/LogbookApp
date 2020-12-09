@@ -29,12 +29,13 @@ Use the backup function provided.
 - I don't knowingly collect any data other than some diagnostics for my server.
 I don't know who you are, and I cannot read your logbook.
 Everything you have on my server is encrypted with your password, that I cannot see or change.
-Your IP address and logins will be logged somewhere though.
+Your IP address and logins will be logged with a timestamp.
+Your email address might end up in a debug logfile by accident but I will remove them as soon as I am done.
 
 - Communication between app and server uses SSL encryption, the same kind your bank uses.
 
 - Maybe if my server gets hacked, somebody could intercept your flight data if you connect to it.
-(Not your stored data, that is encrypted. Nor your password, that's hashed.)
+(Not your stored data or your password, those are encrypted)
 
 - If you want to know exactly how it works, you can. This program is open source. See [about] in the menu.
 

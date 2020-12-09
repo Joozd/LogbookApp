@@ -115,18 +115,6 @@ var TextView.textColor: Long
 
 fun View.setBackgroundColor(c: Long) = this.setBackgroundColor(c.toInt())
 
-fun EditText.onFocusChange(v: View, hasFocus: Boolean){
-    if (hasFocus){
-        this.hint = this.text
-        this.setText("")
-    }
-    else{
-        if (this.text.toString() == "") {
-            this.setText(this.hint)
-        }
-    }
-}
-
 fun EditText.onTextChanged(text: (String) -> Unit) {
     this.addTextChangedListener(object : TextWatcher {
         override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {

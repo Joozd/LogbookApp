@@ -109,8 +109,12 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                         }
 
                         SupportedTypes.JOOZDLOG_CSV_BACKUP -> uri?.getInputStream()?.use {
-                            feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
-                            parseCsv(JoozdlogParser.ofInputStream(it))
+                            // TODO This is a temporary fix. Importing a large backup CSV while logbook already filled causes app to hang.
+                            if (flightRepository.getAllFlights().filter {!it.isPlanned}.isNotEmpty()) feedback(PdfParserActivityEvents.BACKUP_ONLY_ON_NEW_INSTALL)
+                            else {
+                                feedback(PdfParserActivityEvents.IMPORTING_LOGBOOK)
+                                parseCsv(JoozdlogParser.ofInputStream(it))
+                            }
                         }
 
                         SupportedTypes.UNSUPPORTED_PDF, SupportedTypes.UNSUPPORTED_CSV -> {

@@ -100,6 +100,9 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                         longToast("${failedFlights?.size} failed to import!!!!!!1")
                         //TODO make this better
                     }
+                    PdfParserActivityEvents.BACKUP_ONLY_ON_NEW_INSTALL -> {
+                        showBackupOnlyOnNewInstallDialog()
+                    }
 
 
 
@@ -199,6 +202,13 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
         tabLayout.visibility = View.GONE
         viewPager.visibility = View.GONE
     }
+
+    private fun showBackupOnlyOnNewInstallDialog() = JoozdlogAlertDialog().show(activity){
+        titleResource = R.string.error
+        messageResource = R.string.backup_only_on_new_install
+        setPositiveButton(android.R.string.ok) { closeAndstartMainActivity() }
+    }
+
 
     private inner class ScreenSlidePagerAdapter(fa: FragmentActivity, private var availablePages: Int) : FragmentStateAdapter(fa) {
         override fun getItemCount(): Int = availablePages

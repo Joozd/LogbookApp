@@ -262,6 +262,8 @@
     -->
 
     <string name="calendar_update_active">You are loading a roster file, but calendar sync is enabled. Do you want to disable calendar sync until end of this roster?</string>
+    <string name="backup_only_on_new_install">Due to reasons, a backup can only be loaded onto a fresh install (or at least an install with no unplanned flights in it). This is on the list to be fixed in a future update. Please remove and reinstall app and try again.</string>
+
 
 
 

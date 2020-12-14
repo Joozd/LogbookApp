@@ -36,6 +36,7 @@ import kotlinx.android.synthetic.main.dialog_about.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.LayoutEditFlightFragmentBinding
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
@@ -49,6 +50,7 @@ import nl.joozd.logbookapp.ui.dialogs.airportPicker.DestPicker
 import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
+import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 
 class EditFlightFragment: JoozdlogFragment(){
     private val viewModel: NewEditFlightFragmentViewModel by viewModels()
@@ -57,8 +59,8 @@ class EditFlightFragment: JoozdlogFragment(){
      * Will define all listeners etc, and set initial
      */
     @ExperimentalCoroutinesApi
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        with (LayoutEditFlightFragmentBinding.bind(inflater.inflate(R.layout.layout_edit_flight_fragment, container, false))) {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        LayoutEditFlightFragmentBinding.bind(inflater.inflate(R.layout.layout_edit_flight_fragment, container, false)).apply {
             (flightInfoText.background as GradientDrawable).colorFilter = PorterDuffColorFilter(
                 requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
                 PorterDuff.Mode.SRC_IN
@@ -529,10 +531,12 @@ class EditFlightFragment: JoozdlogFragment(){
                 activity?.currentFocus?.clearFocus()
                 viewModel.saveAndClose()
             }
-            return root
-        } // end of binding.apply()
-
-    } // end of onCreateView
+        }.root.also{
+            //Do other things that do not apply to the Binding
+            if (Preferences.editFlightFragmentWelcomeMessageShouldBeDisplayed)
+                showWelcomeMessage()
+        }
+    // end of onCreateView
 
     /**************************************************************************
      * private worker functions:
@@ -603,6 +607,14 @@ class EditFlightFragment: JoozdlogFragment(){
             addToBackStack(null)
         }
         return true
+    }
+
+    private fun showWelcomeMessage() = JoozdlogAlertDialog().show(requireActivity()){
+        titleResource = R.string.edit_flight_welcome_title
+        messageResource = R.string.edit_flight_welcome_message
+        setPositiveButton(android.R.string.ok){
+            Preferences.editFlightFragmentWelcomeMessageShouldBeDisplayed = false
+        }
     }
 }
 

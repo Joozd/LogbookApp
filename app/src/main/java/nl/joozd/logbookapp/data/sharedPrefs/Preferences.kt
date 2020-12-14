@@ -119,10 +119,6 @@ object Preferences {
 
     var lastUpdateTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
 
-    var lastCalendarCheckTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
-
-    var calendarDisabledUntil: Long by JoozdLogSharedPrefs(sharedPref, 0)
-
     var serverTimeOffset: Long by JoozdLogSharedPrefs(sharedPref, 0)
 
     var airportUpdateTimestamp: Long by JoozdLogSharedPrefs(sharedPref, -1)
@@ -152,6 +148,8 @@ object Preferences {
     var updateLargerFilesOverWifiOnly: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
     var newUserActivityFinished: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+
+    var editFlightFragmentWelcomeMessageShouldBeDisplayed: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
 
     /***********************
@@ -185,6 +183,10 @@ object Preferences {
      * Get planned flights from calendar?
      */
     var getFlightsFromCalendar: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+
+    var lastCalendarCheckTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
+
+    var calendarDisabledUntil: Long by JoozdLogSharedPrefs(sharedPref, 0)
 
     /**
      * CalendarSync days into the future:

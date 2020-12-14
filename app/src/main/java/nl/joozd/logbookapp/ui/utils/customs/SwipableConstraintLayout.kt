@@ -29,7 +29,9 @@ import androidx.recyclerview.widget.RecyclerView
 import nl.joozd.logbookapp.extensions.setBackgroundColor
 import kotlin.math.abs
 
-
+/**
+ * I have a feeling this is what causes performance issues with newer ConstraintLayout
+ */
 class SwipableConstraintLayout(ctx: Context, attributes: AttributeSet): ConstraintLayout(ctx, attributes) {
     companion object{
         private const val TAG = "SwipableConstraintLayout"

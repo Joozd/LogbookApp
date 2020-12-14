@@ -57,6 +57,7 @@ data class DisplayFlight(
     val sim: Boolean = false,
     val planned: Boolean = false
 ){
+    val aircraftTextMerged = listOf(registration, type).filter{it.isNotBlank()}.joinToString(" - ")
 
     /**
      * Returns false if any of the checked data points is not filled

@@ -25,12 +25,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
 import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.item_flight.*
-import kotlinx.android.synthetic.main.item_sim.*
+
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.ItemFlightCardBinding
+import nl.joozd.logbookapp.databinding.ItemSimBinding
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
-import nl.joozd.logbookapp.model.dataclasses.Flight
 
 /**
  * Adapter for RecyclerView for displaying Flights in JoozdLog
@@ -46,23 +46,25 @@ class FlightsAdapter(
 
     class SimViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
         fun bindItem(flight: DisplayFlight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
-            with(flight){
-                simLayout.setColorAccordingstatus(planned)
-                simDateDayText.text = dateDay
-                simDateMonthYearText.text = monthAndYear
-                simNamesText.text = names
-                simAircraftTypeText.text = type
-                simRemarksText.text = remarks
-                simTotalTimeText.text = simTime
-                simTakeoffLandingsText.text = takeoffsAndLandings
+            ItemSimBinding.bind(containerView).apply {
+                with(flight) {
+                    simLayout.setColorAccordingstatus(planned)
+                    simDateDayText.text = dateDay
+                    simDateMonthYearText.text = monthAndYear
+                    simNamesText.text = names
+                    simAircraftTypeText.text = type
+                    simRemarksText.text = remarks
+                    simTotalTimeText.text = simTime
+                    simTakeoffLandingsText.text = takeoffsAndLandings
 
-                simLayout.translationZ = 10f
-                simLayout.closeIfSwiped()
-                simLayout.setOnClickListener { onClick(flightID) }
-                simDeleteLayer.setOnClickListener {
-                    if (simLayout.isOpen) {
-                        simLayout.closeIfSwiped()
-                        onDelete(flightID)
+                    simLayout.translationZ = 10f
+                    simLayout.closeIfSwiped()
+                    simLayout.setOnClickListener { onClick(flightID) }
+                    simDeleteLayer.setOnClickListener {
+                        if (simLayout.isOpen) {
+                            simLayout.closeIfSwiped()
+                            onDelete(flightID)
+                        }
                     }
                 }
             }
@@ -70,41 +72,41 @@ class FlightsAdapter(
     }
     class FlightViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
         fun bindItem(flight: DisplayFlight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
+            ItemFlightCardBinding.bind(containerView).apply {
+                with(flight) {
+                    flightLayout.setColorAccordingstatus(planned, this.checkIfIncomplete())
+                    dateDayText.text = dateDay
+                    dateMonthYearText.text = monthAndYear
+                    namesText.text = names
+                    aircraftText.text = aircraftTextMerged
+                    remarksText.text = remarks
+                    flightNumberText.text = flightNumber
+                    origText.text = orig
+                    destText.text = dest
+                    timeOutText.text = timeOut
+                    totalTimeText.text = totalTime
+                    timeInText.text = timeIn
+                    takeoffLandingText.text = takeoffsAndLandings
 
-            with(flight) {
-                flightLayout.setColorAccordingstatus(planned, this.checkIfIncomplete())
-                dateDayText.text = dateDay
-                dateMonthYearText.text = monthAndYear
-                namesText.text = names
-                registrationText.text = registration
-                aircraftTypeText.text = type
-                remarksText.text = remarks
-                flightNumberText.text = flightNumber
-                origText.text = orig
-                destText.text = dest
-                timeOutText.text = timeOut
-                totalTimeText.text = totalTime
-                timeInText.text = timeIn
-                takeoffLandingText.text = takeoffsAndLandings
-
-                isAugmentedText.shouldBeVisible(augmented)
-                isIFRText.shouldBeVisible(ifr)
-                isDualText.shouldBeVisible(dual)
-                isInstructorText.shouldBeVisible(instructor)
-                isPicusText.shouldBeVisible(picus)
-                isPicText.shouldBeVisible(pic)
-                isPFText.shouldBeVisible(pf)
-                remarksText.shouldBeVisible(remarks.isNotEmpty())
-
+                    isAugmentedText.shouldBeVisible(augmented)
+                    isIFRText.shouldBeVisible(ifr)
+                    isDualText.shouldBeVisible(dual)
+                    isInstructorText.shouldBeVisible(instructor)
+                    isPicusText.shouldBeVisible(picus)
+                    isPicText.shouldBeVisible(pic)
+                    isPFText.shouldBeVisible(pf)
+                    remarksText.shouldBeVisible(remarks.isNotEmpty())
 
 
-                flightLayout.closeIfSwiped()
-                flightLayout.translationZ = 10f
-                flightLayout.setOnClickListener { onClick(flightID) }
-                deleteLayer.setOnClickListener {
-                    if (flightLayout.isOpen) {
-                        flightLayout.closeIfSwiped()
-                        onDelete(flightID)
+
+                    flightLayout.closeIfSwiped()
+                    flightLayout.translationZ = 10f
+                    flightLayout.setOnClickListener { onClick(flightID) }
+                    deleteLayer.setOnClickListener {
+                        if (flightLayout.isOpen) {
+                            flightLayout.closeIfSwiped()
+                            onDelete(flightID)
+                        }
                     }
                 }
             }

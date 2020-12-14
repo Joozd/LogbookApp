@@ -42,7 +42,9 @@
     <!--
     <androidx.constraintlayout.widget.ConstraintLayout
     -->
+
     <nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout
+
         android:id="@+id/flightLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -73,25 +75,7 @@
             app:layout_constraintStart_toStartOf="@+id/flightNumberText"
             tools:text="Remarks go here!" />
 
-        <TextView
-            android:id="@+id/registrationText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            android:background="#FFFFFF"
-            android:includeFontPadding="false"
-            android:textAlignment="textStart"
-            android:textColor="#CC000000"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toTopOf="@+id/remarksText"
-            app:layout_constraintStart_toEndOf="@+id/aircraftTypeText"
-            app:layout_constraintTop_toBottomOf="@+id/flightNumberText"
-            app:layout_goneMarginBottom="8dp"
-            tools:text="PH-EZE" />
-
-        <TextView
+    <TextView
             android:id="@+id/flightNumberText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -243,22 +227,22 @@
             app:layout_constraintTop_toTopOf="@+id/flightNumberText"
             tools:text="1/1" />
 
-        <TextView
-            android:id="@+id/namesText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:ellipsize="end"
-            android:includeFontPadding="false"
-            android:singleLine="true"
-            android:textAlignment="textEnd"
-            android:textColor="#CC000000"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="@+id/registrationText"
-            app:layout_constraintEnd_toEndOf="@+id/takeoffLandingText"
-            app:layout_constraintStart_toEndOf="@+id/registrationText"
-            app:layout_constraintTop_toTopOf="@+id/registrationText"
-            tools:text="Joost welle, Henk de Vries, ed en willem bever, je moeder" />
+    <TextView
+        android:id="@+id/namesText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:singleLine="true"
+        android:textAlignment="textEnd"
+        android:textColor="#CC000000"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/aircraftText"
+        app:layout_constraintEnd_toEndOf="@+id/takeoffLandingText"
+        app:layout_constraintStart_toEndOf="@+id/aircraftText"
+        app:layout_constraintTop_toTopOf="@+id/aircraftText"
+        tools:text="Joost welle, Henk de Vries, ed en willem bever, je moeder" />
 
         <TextView
             android:id="@+id/dateDayText"
@@ -279,17 +263,19 @@
             app:layout_constraintVertical_chainStyle="packed"
             tools:text="23" />
 
-        <TextView
-            android:id="@+id/aircraftTypeText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:includeFontPadding="false"
-            android:textColor="#CC000000"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="@+id/registrationText"
-            app:layout_constraintStart_toStartOf="@+id/origText"
-            app:layout_constraintTop_toTopOf="@+id/registrationText"
-            tools:text="PA28R-Arrow" />
+    <TextView
+        android:id="@+id/aircraftText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:includeFontPadding="false"
+        android:textColor="#CC000000"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/remarksText"
+        app:layout_constraintStart_toStartOf="@+id/origText"
+        app:layout_constraintTop_toBottomOf="@+id/flightNumberText"
+        tools:text="PH-CBN - PA28" />
 
         <TextView
             android:id="@+id/origText"

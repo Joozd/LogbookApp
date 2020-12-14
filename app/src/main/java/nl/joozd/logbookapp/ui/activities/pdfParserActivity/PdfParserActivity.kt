@@ -128,9 +128,9 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                                 Preferences.alwaysPostponeCalendarSync = true
                                 viewModel.saveFlights()
                             }
-                            setNegativeButton(android.R.string.ok) {
+                            setNegativeButton(android.R.string.ok) {    // Using "negative" button as positive so it gets placed the way I want to. Nothing negative about it.
                                 viewModel.disableCalendarUntilAfterLastFlight()
-                                viewModel.saveFlights(finish = false)
+                                viewModel.saveFlights(finish = false) // don't send ROSTER_SUCCESSFULLY_ADDED because
                             }
                             setNeutralButton(android.R.string.cancel) {
                                 startMainActivity(this@PdfParserActivity)
@@ -145,6 +145,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                                     closeAndstartMainActivity()
                                 }
                             }
+                        else closeAndstartMainActivity()
                     }
                     null -> {
                     }

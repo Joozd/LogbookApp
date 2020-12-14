@@ -138,12 +138,13 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                         }
                     }
                     PdfParserActivityEvents.CALENDAR_SYNC_PAUSED -> {
-                        JoozdlogAlertDialog().show(activity) {
-                            messageResource = R.string.you_can_start_calendar_sync_again
-                            setPositiveButton(android.R.string.ok) {
-                                closeAndstartMainActivity()
+                        if (!Preferences.alwaysPostponeCalendarSync)
+                            JoozdlogAlertDialog().show(activity) {
+                                messageResource = R.string.you_can_start_calendar_sync_again
+                                setPositiveButton(android.R.string.ok) {
+                                    closeAndstartMainActivity()
+                                }
                             }
-                        }
                     }
                     null -> {
                     }

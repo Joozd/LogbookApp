@@ -97,7 +97,7 @@ data class DisplayFlight(
             planned = f.isPlanned
         )
         private fun buildNames(vararg names: String): String{
-            val nn  = names.map{
+            val nn  = names.filter{it.isNotBlank()}.map{
                 if (';' in it) it.split(';').map{it.trim()} else listOf(it)
             }.flatten()
             return if (nn.size <=2) nn.joinToString(", ")

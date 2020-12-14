@@ -182,12 +182,8 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                 }
                 else
                 feedback(PdfParserActivityEvents.CALENDAR_SYNC_ENABLED)
-            } else {
-                ImportedFlightsCleaner(flightsToSave, roster.carrier).cleanFlights()?.let { fff ->
-                    flightRepository.saveFromRoster(fff, period = periodToSave)
-                    feedback(PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED)
-                }
-            }
+            } else
+                saveFlights(true)
         }
         return true
     }

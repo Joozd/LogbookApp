@@ -321,13 +321,17 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * and fixed flightIDs for new flights
      */
     fun saveFromRoster(rosteredFlights: List<Flight>, period: ClosedRange<Instant>? = null, sync: Boolean = true) = launch(NonCancellable) {
+        Log.d("saveFromRoster()", "rosteredFlights: $rosteredFlights")
         val highestID =
             getHighestIdAsync() // async, start looking for that while doing other stuff
         val sameFlights = getFlightsMatchingPlannedFlights(getAllFlights(), rosteredFlights)
+        Log.d("saveFromRoster()", "sameFlights: $sameFlights")
         val flightsToRemove =
             getFlightsOnDays(getAllFlights(), dateRange = period, flightsOnDays = rosteredFlights)
                 .filter { it.isPlanned && it !in sameFlights && it.timeOut > Instant.now().epochSecond }
+        Log.d("saveFromRoster()", "flightsToRemove: $flightsToRemove")
         val flightsToSave = getNonMatchingPlannedFlights(getAllFlights(), rosteredFlights)
+        Log.d("saveFromRoster()", "flightsToSave: $flightsToSave")
         delete(flightsToRemove)
         val lowestNewID = highestID.await() + 1
         save(flightsToSave.mapIndexed { index: Int, f: Flight ->

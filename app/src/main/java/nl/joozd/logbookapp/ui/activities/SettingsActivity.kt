@@ -313,7 +313,6 @@ class SettingsActivity : JoozdlogActivity() {
 
             viewModel.selectedCalendar.observe(activity) {
                 if (it != null) settingsCalendarPickerSpinner.setSelectionWithArrayAdapter(it.name)
-                Log.d(this::class.simpleName, "triggered AAAA, $it")
             }
 
             // viewModel.pickedCalendarType.observe(this, Observer {

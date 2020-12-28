@@ -244,4 +244,12 @@ object Preferences {
 
     var acceptedCloudSyncTerms: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
+    /**
+     * Small things being saved:
+     */
+
+    // If feedback could not be sent to server, save it for the next time
+    // TODO handle this with a worker
+    var feedbackWaiting: String by JoozdLogSharedPrefs(sharedPref, "")
+
 }

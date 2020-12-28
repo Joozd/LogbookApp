@@ -63,69 +63,6 @@ class MainActivity : JoozdlogActivity() {
     private var airportSyncProgressBar: JoozdlogProgressBar? = null
     private var flightsSyncProgressBar: JoozdlogProgressBar? = null
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.menu_settings -> {
-            startActivity(Intent(this, SettingsActivity::class.java))
-            true
-        }
-        R.id.menu_add_flight -> {
-            viewModel.menuSelectedAddFlight()
-            true
-        }
-        R.id.menu_total_times -> {
-            startActivity(Intent(this, TotalTimesActivity::class.java))
-            true
-        }
-        R.id.menu_balance_forward -> {
-            startActivity(Intent(this, BalanceForwardActivity::class.java))
-            true
-        }
-        R.id.app_bar_search -> {
-            viewModel.menuSelectedSearch()
-            true
-        }
-        R.id.menu_about -> {
-            viewModel.menuSelectedAboutDialog()
-            true
-        }
-        /*
-        R.id.menu_edit_aircraft -> {
-            viewModel.menuSelectedEditAircraft()
-            true
-        }
-        */
-        R.id.menu_export_pdf -> {
-            //viewModel.menuSelectedExportPDF()
-            startActivity(Intent(this, MakePdfActivity::class.java))
-            //TODO decide if this becomes a new activity or a fragment
-            true
-        }
-/*
-        R.id.menu_do_something -> {
-            viewModel.menuSelectedDoSomething()
-
-            true
-
-        }
-
-        R.id.menu_login -> {
-            startActivity(Intent(this, ChangePasswordActivity::class.java))
-            true
-        }
-        */
-        else -> false
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        viewModel.handleIntent(intent)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.AppTheme)
@@ -350,6 +287,69 @@ class MainActivity : JoozdlogActivity() {
 
             setContentView(root)
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        R.id.menu_settings -> {
+            startActivity(Intent(this, SettingsActivity::class.java))
+            true
+        }
+        R.id.menu_add_flight -> {
+            viewModel.menuSelectedAddFlight()
+            true
+        }
+        R.id.menu_total_times -> {
+            startActivity(Intent(this, TotalTimesActivity::class.java))
+            true
+        }
+        R.id.menu_balance_forward -> {
+            startActivity(Intent(this, BalanceForwardActivity::class.java))
+            true
+        }
+        R.id.app_bar_search -> {
+            viewModel.menuSelectedSearch()
+            true
+        }
+        R.id.menu_about -> {
+            viewModel.menuSelectedAboutDialog()
+            true
+        }
+        /*
+        R.id.menu_edit_aircraft -> {
+            viewModel.menuSelectedEditAircraft()
+            true
+        }
+        */
+        R.id.menu_export_pdf -> {
+            //viewModel.menuSelectedExportPDF()
+            startActivity(Intent(this, MakePdfActivity::class.java))
+            //TODO decide if this becomes a new activity or a fragment
+            true
+        }
+/*
+        R.id.menu_do_something -> {
+            viewModel.menuSelectedDoSomething()
+
+            true
+
+        }
+
+        R.id.menu_login -> {
+            startActivity(Intent(this, ChangePasswordActivity::class.java))
+            true
+        }
+        */
+        else -> false
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        viewModel.handleIntent(intent)
     }
 
     override fun onResume() {

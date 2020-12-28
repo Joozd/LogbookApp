@@ -19,5 +19,26 @@
 
 package nl.joozd.joozdlogcommon
 
-public class JoozdlogCommon {
+import nl.joozd.joozdlogcommon.serializing.JoozdlogSerializable
+import nl.joozd.joozdlogcommon.serializing.unwrap
+import nl.joozd.joozdlogcommon.serializing.wrap
+
+data class FeedbackData(val feedback: String, val contactInfo: String): JoozdlogSerializable {
+    override fun serialize(): ByteArray {
+        var serialized = ByteArray(0)
+        serialized += wrap(component1())
+        serialized += wrap(component2())
+
+        return serialized
+    }
+
+    companion object : JoozdlogSerializable.Creator {
+        override fun deserialize(source: ByteArray): FeedbackData {
+            val wraps = serializedToWraps(source)
+            return FeedbackData(
+                unwrap(wraps[0]),
+                unwrap(wraps[1])
+            )
+        }
+    }
 }

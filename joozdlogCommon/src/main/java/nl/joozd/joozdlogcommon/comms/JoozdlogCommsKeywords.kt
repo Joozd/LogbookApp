@@ -39,6 +39,7 @@ object JoozdlogCommsKeywords {
     //general keywords
     const val REQUEST_TIMESTAMP = "REQUEST_TIMESTAMP"
     const val REQUEST_BACKUP_MAIL = "REQUEST_BACKUP_MAIL"
+    const val SENDING_FEEDBACK = "SENDING_FEEDBACK"
 
     //email keywords
     const val SET_EMAIL = "SET_EMAIL"               // Sets email hash on server, can expect to receive an email on given address with a confirmation link

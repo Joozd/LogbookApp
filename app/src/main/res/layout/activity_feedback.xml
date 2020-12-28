@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~  JoozdLog Pilot's Logbook
+  ~  Copyright (c) 2020 Joost Welle
+  ~
+  ~      This program is free software: you can redistribute it and/or modify
+  ~      it under the terms of the GNU Affero General Public License as
+  ~      published by the Free Software Foundation, either version 3 of the
+  ~      License, or (at your option) any later version.
+  ~
+  ~      This program is distributed in the hope that it will be useful,
+  ~      but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~      GNU Affero General Public License for more details.
+  ~
+  ~      You should have received a copy of the GNU Affero General Public License
+  ~      along with this program.  If not, see https://www.gnu.org/licenses
+  ~
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.activities.FeedbackActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/feedback_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/feedback_explanation_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/feedback_explanation"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/feedback_toolbar" />
+
+    <TextView
+        android:id="@+id/known_issues_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/check_current_issues"
+        app:layout_constraintEnd_toStartOf="@+id/known_issues_button"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/feedback_explanation_text" />
+
+    <TextView
+        android:id="@+id/known_issues_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:padding="8dp"
+        android:text="@string/here"
+        android:textColor="?attr/android:textColorHighlight"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/known_issues_text"
+        app:layout_constraintTop_toBottomOf="@+id/feedback_explanation_text" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/feedback_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/rounded_corners_white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/known_issues_text">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/feedback_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:hint="@string/feedback"
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/contact_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/rounded_corners_white"
+        app:layout_constraintEnd_toEndOf="@+id/feedback_layout"
+        app:layout_constraintStart_toStartOf="@+id/feedback_layout"
+        app:layout_constraintTop_toBottomOf="@+id/feedback_layout">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/contact_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/contact_info_text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/contact_info_explanation_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/contact_info_explanation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/submit_button" />
+
+    <TextView
+        android:id="@+id/privacy_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/privacy"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/contact_info_explanation_text"
+        app:layout_constraintTop_toBottomOf="@+id/you_can_also_send_an_email_textview" />
+
+    <TextView
+        android:id="@+id/privacy_text_textview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/privacy_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/privacy_textview" />
+
+    <TextView
+        android:id="@+id/you_can_also_send_an_email_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="@string/you_can_also_send_an_email"
+        android:textColor="?attr/android:textColorHighlight"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/contact_info_explanation_text"
+        app:layout_constraintTop_toBottomOf="@+id/contact_info_explanation_text" />
+
+    <Button
+        android:id="@+id/submit_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/submit"
+        app:layout_constraintEnd_toEndOf="@+id/contact_layout"
+        app:layout_constraintStart_toStartOf="@+id/contact_layout"
+        app:layout_constraintTop_toBottomOf="@+id/contact_layout" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

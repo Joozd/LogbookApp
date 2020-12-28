@@ -103,6 +103,7 @@ object InternetStatus: CoroutineScope by MainScope() {
         get() = mutableInternetAvailable
 
     //If you need a snapshot
+    // gives null if no callback received from connectivityManager yet
     val internetAvailable: Boolean?
         get() = mutableInternetAvailable.value
 }

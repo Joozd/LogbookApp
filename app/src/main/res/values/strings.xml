@@ -148,7 +148,6 @@
     <string name="unknown_file_message">The file youare trying to import into Joozdlog is not supported yet. If you want it to be, please mail it to joozdlog@joozd.nl and if I feel like it I might support it in a future version.</string>
 
 
-
     <string name="total_time_too_large">Total time cannot be more than offblocks to on blocks</string>
     <string name="invalid_total_time">Could not parse total time</string>
 
@@ -185,7 +184,7 @@
     <string name="no_email_text">No working email address was entered. I recommend you enter your email so a login link can be sent. Your email will not be stored outside your phone and will not be used for anything else.</string>
     <string name="i_dont_care">I don\'t care</string>
     <string name="user_exists_password_correct">This username exists, and you have entered the correct password for it. If this is not you, please pick another username and a more secure password.</string>
-    <string name ="what_to_do_forgot_password">If your login is still working on this device, you can change it to something you catually can remember via the settings screen, or you can generate a login link.</string>
+    <string name="what_to_do_forgot_password">If your login is still working on this device, you can change it to something you catually can remember via the settings screen, or you can generate a login link.</string>
     <string name="use_this">Use this</string>
 
     <string name="calendar_sync_conflict">Calendar Sync conflict</string>
@@ -266,8 +265,6 @@
 
     <string name="calendar_update_active">You are loading a roster file, but calendar sync is enabled. Do you want to disable calendar sync until end of this roster?</string>
     <string name="backup_only_on_new_install">Due to reasons, a backup can only be loaded onto a fresh install (or at least an install with no unplanned flights in it). This is on the list to be fixed in a future update. Please remove and reinstall app and try again.</string>
-
-
 
 
     <string name="receivedIntent">Receiving data</string>
@@ -354,6 +351,20 @@
     <string name="backup_message_main_activity">You have not backed up your logbook for %1$s days.</string>
     <string name="cloud_backup_explanation">Send a periodic email to yourself from the cloud. Your email address is not saved on the server, so backups will be initiated from this device (and stop if you uninstall or kill the app, they should run with the app in the background).</string>
     <string name="new_user_email_reason">I suggest you enter your email address here. It is used to send you your login link, and you can use it to send yourself backups periodically. \nI will only store a one-way code to check if your email address has been verified. That code cannot be used to find any personal data such as your email address.</string>
+    <string name="feedback_explanation">You can give any feedback you have to Joozdlog here. I would especially be happy to read things that nag you when using the app, feature requests or compliments.</string>
+    <string name="check_current_issues">Check known issues/plans</string>
+    <string name="here">here</string>
+    <string name="feedback">Feedback</string>
+    <string name="contact_info_text">Optional contact info (phone/email/etc)</string>
+    <string name="contact_info_explanation">All feedback will be read, and I will do my best to answer but I might be too busy/lazy.</string>
+    <string name="privacy">Privacy</string>
+    <string name="privacy_text">All text entered in this screen will end up in an email to me and may be stored in my inbox untill I delete it manually. It will not be saved anywehere else, and nothing will be used for any other purpose than processing/answering your feedback.</string>
+    <string name="you_can_also_send_an_email">You can also send an email</string>
+    <string name="submit">Submit</string>
+    <string name="submit_feedback_qmk">Submit feedback?</string>
+    <string name="empty_feedback">Feedback is empty</string>
+    <string name="empty_feedback_message">You cannot submit empty feedback.</string>
+
 
 
 </resources>

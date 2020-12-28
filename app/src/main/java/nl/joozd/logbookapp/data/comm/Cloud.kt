@@ -24,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.joozdlogcommon.ConsensusData
+import nl.joozd.joozdlogcommon.FeedbackData
 import nl.joozd.joozdlogcommon.ForcedTypeData
 import nl.joozd.logbookapp.data.comm.protocol.Client
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -478,11 +479,11 @@ object Cloud {
     } finally {
         syncingFlights = false
     }
-/*
-    suspend fun sendTestMail(): Boolean =
-        Client.getInstance().use{
-            ServerFunctions.sendTestMail(it)
-        }
-*/
 
+    suspend fun sendFeedback(feedback: String, contactInfo: String): Boolean = withContext(Dispatchers.IO) {
+        Client.getInstance().use{ client ->
+            val feedbackData = FeedbackData(feedback, contactInfo)
+            ServerFunctions.sendFeedback(client, feedbackData)
+        }
+    }
 }

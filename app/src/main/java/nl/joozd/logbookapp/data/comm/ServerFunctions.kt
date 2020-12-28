@@ -349,6 +349,16 @@ object ServerFunctions {
         return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
     }
 
+
+    /**
+     * Send feedback to server
+     */
+
+    fun sendFeedback(client: Client, feedbackData: FeedbackData): Boolean{
+        client.sendRequest(JoozdlogCommsKeywords.SENDING_FEEDBACK, feedbackData.serialize())
+        return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
+    }
+
     /**
      * Run this at the end of a session to save server changes to disk and close connection
      */

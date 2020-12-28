@@ -53,28 +53,6 @@ class SettingsActivity : JoozdlogActivity() {
     private lateinit var mBinding: ActivitySettingsBinding
     val viewModel: SettingsActivityViewModel by viewModels()
 
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            CALENDAR_PERMISSION_REQUEST_CODE -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
-                    fillCalendarsList(mBinding)
-                else {
-                    //TODO make this a dialog, use R strings
-                    longToast("No permission for calendar access")
-                }
-                return
-            }
-            // Add other 'when' lines to check for other
-            // permissions this app might request.
-            else -> {
-                toast("DEBUG: warning 1")
-                // Ignore all other requests.
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.AppTheme)
@@ -358,6 +336,27 @@ class SettingsActivity : JoozdlogActivity() {
             setContentView(root)
         }
 
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            CALENDAR_PERMISSION_REQUEST_CODE -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
+                    fillCalendarsList(mBinding)
+                else {
+                    //TODO make this a dialog, use R strings
+                    longToast("No permission for calendar access")
+                }
+                return
+            }
+            // Add other 'when' lines to check for other
+            // permissions this app might request.
+            else -> {
+                toast("DEBUG: warning 1")
+                // Ignore all other requests.
+            }
+        }
     }
 
     override fun onResume() {

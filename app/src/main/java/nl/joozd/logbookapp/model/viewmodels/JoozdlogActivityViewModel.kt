@@ -19,11 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels
 
-import nl.joozd.logbookapp.App
-
 open class JoozdlogActivityViewModel: JoozdlogViewModel() {
 
-    //App context
-    // protected val context = App.instance.ctx
 
 }

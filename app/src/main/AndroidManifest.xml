@@ -6,13 +6,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.SEND" />
+
             <data android:mimeType="text/plain" />
         </intent>
     </queries>
-
 
     <application
         android:name=".App"
@@ -23,16 +24,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.activities.ChangePasswordActivity"/>
+        <activity android:name=".ui.activities.FeedbackActivity"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".ui.activities.ChangePasswordActivity" />
         <activity android:name=".ui.activities.MakePdfActivity" />
         <activity android:name=".ui.activities.CreateNewUserActivity" />
-        <activity android:name=".ui.activities.newUserActivity.NewUserActivity" />
+        <activity android:name=".ui.activities.newUserActivity.NewUserActivity"
+            android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".ui.activities.SettingsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
         </activity>
-
         <activity android:name=".ui.activities.totalTimesActivity.TotalTimesActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -48,7 +51,9 @@
             android:excludeFromRecents="true">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <action android:name="android.intent.action.VIEW" />
+
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:host="*" />
@@ -59,7 +64,9 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="application/pdf" />
                 <data android:mimeType="text/plain" />
                 <data android:mimeType="text/csv" />
@@ -72,10 +79,12 @@
             android:theme="@style/AppTheme.Launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -83,20 +92,18 @@
                     android:host="joozdlog.joozd.nl"
                     android:pathPrefix="/inject-key"
                     android:scheme="https" />
-
                 <data
                     android:host="joozdlog.joozd.nl"
                     android:pathPrefix="/verify-email"
                     android:scheme="https" />
-
             </intent-filter>
         </activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="nl.joozd.joozdlog.fileprovider"
-            android:grantUriPermissions="true"
-            android:exported="false">
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths" />

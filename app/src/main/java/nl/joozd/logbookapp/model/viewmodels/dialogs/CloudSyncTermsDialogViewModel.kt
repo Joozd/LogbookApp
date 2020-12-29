@@ -31,7 +31,7 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
 
 class CloudSyncTermsDialogViewModel: JoozdlogDialogViewModel() {
-    private val _text = MutableLiveData<String>(App.instance.resources.openRawResource(R.raw.joozdlog_cloud_terms).reader().readText())
+    private val _text = MutableLiveData(App.instance.resources.openRawResource(R.raw.joozdlog_cloud_terms).use { it.reader().readText() })
     private val _waitedLongEnough = MutableLiveData(false)
 
 

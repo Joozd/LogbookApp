@@ -19,13 +19,18 @@
 
 package nl.joozd.logbookapp.ui.activities
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
+import androidx.fragment.app.commit
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityFeedbackBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
 import nl.joozd.logbookapp.model.viewmodels.FeedbackActivityViewModel
+import nl.joozd.logbookapp.ui.dialogs.TextDisplayDialog
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast
 
@@ -38,7 +43,7 @@ class FeedbackActivity : JoozdlogActivity() {
         with (ActivityFeedbackBinding.inflate(layoutInflater)){
             setSupportActionBarWithReturn(feedbackToolbar)?.apply {
                 setDisplayHomeAsUpEnabled(true)
-                title = "PLACEHOLDER_TITLE"
+                title = getString(R.string.feedback)
             }
 
             //reset EditTexts to anything already entered there on recreate
@@ -53,6 +58,30 @@ class FeedbackActivity : JoozdlogActivity() {
 
             contactEditText.onTextChanged {
                 viewModel.updateContactText(it)
+            }
+
+            // load joozdlog_todo_list.txt in LiveData in viewModel and show it in a [TextDisplayDialog]
+            knownIssuesButton.setOnClickListener {
+                Log.d("DEBUG", "CHECKPOINT 1")
+                viewModel.loadKnownIssuesLiveData(R.raw.joozdlog_todo_list)
+                Log.d("DEBUG", "CHECKPOINT 2")
+                supportFragmentManager.commit {
+                    add(R.id.root_layout, TextDisplayDialog(R.string.joozdlog_todo_title, viewModel.knownIssuesLiveData), null)
+                    addToBackStack(null)
+                }
+            }
+
+            youCanAlsoSendAnEmailTextview.setOnClickListener {
+                Intent(Intent.ACTION_SENDTO).apply{
+                    type = "*/*"
+                    data = Uri.parse("mailto:")
+                    putExtra(Intent.EXTRA_EMAIL, arrayOf("joozdlog@joozd.nl"))
+                    putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback))
+                }.let{
+                    if (it.resolveActivity(packageManager) != null){
+                        startActivity(it)
+                    } else toast ("No email app found")
+                }
             }
 
             submitButton.setOnClickListener {

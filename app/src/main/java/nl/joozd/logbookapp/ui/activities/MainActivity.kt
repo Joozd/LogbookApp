@@ -315,6 +315,10 @@ class MainActivity : JoozdlogActivity() {
             viewModel.menuSelectedSearch()
             true
         }
+        R.id.menu_feedback -> {
+            startActivity(Intent(this, FeedbackActivity::class.java))
+            true
+        }
         R.id.menu_about -> {
             viewModel.menuSelectedAboutDialog()
             true

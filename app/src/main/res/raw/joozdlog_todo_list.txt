@@ -1,0 +1,78 @@
+JOOZDLOG TODO LIST
+
+BUGS:
+
+When "ALWAYS" selected, importing briefing sheets doesn't work anymore
+
+******************
+TODO BEFORE PUBLIC BETA:
+******************
+
+Voorpagina PDF
+
+Monthlies:
+conflict handling needs more testing. Minder lelijk maken ook
+
+*** Dit alleen nodig voor niet-KLC (1.0.1) ***
+Custom aircraft + upload naar server voor toevoegen aan lijst
+
+*****************
+EXTRA:
+*****************
+
+Backup kunnen laden als al vluchten in staan
+
+Forced types serialized type meegeven ipv alleen naam (ook op server dus)
+- nieuwe class maken, nieuwe request naar server, drop table on upgrade en maak nieuwe met nieuwe class
+
+ADS-B data?
+
+PICUS ook copilot loggen.
+
+Cleanup code for repositories
+
+Total times luekenigheidjes, graphs etc
+Cirkel
+
+Currencies
+
+Limits? Max times? Ruimte?
+
+Custom airports met lat/long/iata kunnen maken?
+
+Flightnr invullen - copy van laatste met dat nummer, afronden tijden op 5 min?
+Als er al iets stond, vragen wat wil
+
+Custom Currencies?
+
+Totals:
+- Totals graphs (day/month/year/moving avg/custom?)
+- times city visited?
+-graphs? Moving average? Moving last n days?
+
+Zoeken in MainActivity mag zorgen voor scrollen naar top?
+
+Sync nalopen ivm mogelijk nieuwere vluchten overschreven door oudere data op server na sync uit/aan zetten
+
+Currencies
+
+Dark mode
+
+Notification when doing background up/downloading
+
+Ical van Roel gebruiken als niet op apparaat :
+https://calendar.klm.com/crew/LONG_STRING_GOES_HERE
+
+Zie Roel watsap: battery usage
+
+*****************
+Server:
+*****************
+
+Tool om AircraftTypes te scrapen van Icao doc?
+
+Server LRU cache
+
+*****************
+Feedback
+*****************

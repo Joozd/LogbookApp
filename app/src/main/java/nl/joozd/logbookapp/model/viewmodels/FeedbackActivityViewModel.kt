@@ -19,8 +19,13 @@
 
 package nl.joozd.logbookapp.model.viewmodels
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -42,6 +47,17 @@ class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
     // + exposed getter
     val contactInfo
         get() = _contactInfo
+
+    private val _knownIssuesLiveData = MutableLiveData("")
+    val knownIssuesLiveData: LiveData<String>
+        get() = _knownIssuesLiveData
+    fun loadKnownIssuesLiveData(source: Int) = viewModelScope.launch(Dispatchers.IO) {
+        _knownIssuesLiveData.postValue(App.instance.resources.openRawResource(source).use{
+            it.reader().readText()
+        })
+    }
+
+
 
     fun updateFeedbackText(it: String){ _feedbackText = it }
     fun updateContactText(it: String){ _contactInfo = it }

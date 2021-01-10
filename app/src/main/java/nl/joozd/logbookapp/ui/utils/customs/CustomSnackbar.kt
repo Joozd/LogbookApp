@@ -24,36 +24,37 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.BaseTransientBottomBar
-import kotlinx.android.synthetic.main.view_snackbar_custom.view.*
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.ViewSnackbarCustomBinding
 import nl.joozd.logbookapp.extensions.findSuitableParent
 
 class CustomSnackbar(
     parent: ViewGroup,
     content: CustomSnackbarView
 ) : BaseTransientBottomBar<CustomSnackbar>(parent, content, content){
+    val binding = ViewSnackbarCustomBinding.bind(view)
 
     init {
-        getView().setBackgroundColor(ContextCompat.getColor(parent.context, android.R.color.transparent))
-        getView().setPadding(0, 0, 0, 0)
+        view.setBackgroundColor(ContextCompat.getColor(parent.context, android.R.color.transparent))
+        view.setPadding(0, 0, 0, 0)
         duration = 1000*5
     }
     fun setMessage(text: String): CustomSnackbar {
-        getView().message.text = text
+        binding.message.text = text
         return this
     }
 
     fun setMessage(resource: Int): CustomSnackbar {
-        getView().message.setText(resource)
+        binding.message.setText(resource)
         return this
     }
 
-    fun setActionText(text: String): Unit {
-        getView().undoTextView.text=text
+    fun setActionText(text: String) {
+        binding.undoTextView.text=text
     }
 
     fun setOnAction(f: (Any)->Unit ) {
-        getView().undoTextView.setOnClickListener(f)
+        binding.undoTextView.setOnClickListener(f)
     }
 
     fun setOnActionBarShown(f:() -> Unit){

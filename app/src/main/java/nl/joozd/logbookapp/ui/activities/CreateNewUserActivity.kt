@@ -33,10 +33,8 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityCreateNewUserBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.CreateNewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.CreateNewUserActivityViewModel
-import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivityPage2
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
+import nl.joozd.joozdutils.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast
 
 class CreateNewUserActivity : JoozdlogActivity() {

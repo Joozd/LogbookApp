@@ -31,7 +31,7 @@ import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
 import nl.joozd.logbookapp.model.viewmodels.FeedbackActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.TextDisplayDialog
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
+import nl.joozd.joozdutils.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast
 
 class FeedbackActivity : JoozdlogActivity() {

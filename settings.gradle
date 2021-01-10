@@ -17,7 +17,9 @@
  *
  */
 
+
 rootProject.name='LogbookApp'
 include ':app', ':klcrosterparser'
 include ':joozdlogCommon'
 include ':JoozdlogPdfDetector'
+include ':JoozdUtils'

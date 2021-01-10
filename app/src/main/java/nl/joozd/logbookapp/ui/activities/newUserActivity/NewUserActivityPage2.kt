@@ -28,7 +28,6 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
-import kotlinx.android.synthetic.main.activity_new_user.*
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
@@ -40,7 +39,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEv
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.CloudSyncTermsDialog
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialog
+import nl.joozd.joozdutils.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.toast
 import java.util.*
 

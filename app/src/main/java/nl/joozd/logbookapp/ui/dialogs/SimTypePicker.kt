@@ -30,8 +30,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.dialog_pick_aircraft_type.view.*
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.DialogPickSimTypeBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
@@ -42,8 +42,8 @@ import nl.joozd.logbookapp.ui.adapters.AircraftPickerAdapter
 class SimTypePicker: JoozdlogFragment(){
     private val viewModel: AircraftPickerViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.dialog_pick_sim_type, container, false).apply{
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        DialogPickSimTypeBinding.bind(inflater.inflate(R.layout.dialog_pick_sim_type, container, false)).apply{
             //set color of dialog head
             (aircraftPickerTopHalf?.background as GradientDrawable).colorFilter = PorterDuffColorFilter(requireActivity().getColorFromAttr(android.R.attr.colorPrimary), PorterDuff.Mode.SRC_IN) // set background color to bakground with rounded corners
 
@@ -104,8 +104,5 @@ class SimTypePicker: JoozdlogFragment(){
                 //Intentionally blank
             }
 
-        } // end of inflater.inflate(...).apply
-
-    } // end of onCreateView()
-
+        }.root // end of inflater.inflate(...).apply
 }

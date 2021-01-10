@@ -20,19 +20,22 @@
 package nl.joozd.logbookapp.ui.utils.customs
 
 
+import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.item_progressbar.view.*
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.ItemProgressbarBinding
 import nl.joozd.logbookapp.extensions.activity
 
 class JoozdlogProgressBar(private val target: ViewGroup) {
     private val activity = target.activity!!
-    private val progBarParent = activity.layoutInflater.inflate(R.layout.item_progressbar, target, false)
-    private val progressBar = progBarParent.progressBar
+    private val progBarBinding = ItemProgressbarBinding.bind(activity.layoutInflater.inflate(R.layout.item_progressbar, target, false))
+    private val progressBar = progBarBinding.progressBar
+    private val view: View
+        get() = progBarBinding.root
 
     var text: String
-        get() = progBarParent.progressBarText.text.toString()
-        set(t) {progBarParent.progressBarText.text = t}
+        get() = progBarBinding.progressBarText.text.toString()
+        set(t) {progBarBinding.progressBarText.text = t}
 
     var progress: Int
         get() = progressBar.progress
@@ -42,14 +45,14 @@ class JoozdlogProgressBar(private val target: ViewGroup) {
         get() = null
         set(color) {
             color?.let{
-                progBarParent.setBackgroundColor(it)
+                view.setBackgroundColor(it)
             }
         }
 
     fun show(): JoozdlogProgressBar {
-        target.addView(progBarParent)
+        target.addView(view)
         return this
     }
-    fun remove() = target.removeView(progBarParent)
+    fun remove() = target.removeView(view)
 
 }

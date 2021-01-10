@@ -20,7 +20,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-android-extensions'
+//apply plugin: 'kotlin-parcelize'
 
 android {
     compileSdkVersion 30
@@ -73,12 +73,6 @@ android {
             unitTests.returnDefaultValues = true
         }
     }
-
-
-
-androidExtensions {
-    experimental = true
-}
 
 
 dependencies {
@@ -147,6 +141,7 @@ dependencies {
     //Own classes
     implementation project(":joozdlogCommon")
     implementation project(":klcrosterparser")
+    implementation project(":JoozdUtils")
     implementation project(":JoozdlogPdfDetector")
 
 

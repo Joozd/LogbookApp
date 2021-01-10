@@ -23,9 +23,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.item_picker_dialog.*
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.ItemPickerDialogBinding
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
@@ -47,10 +46,13 @@ class SelectableStringAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItem(list[position])
-        holder.itemBackground.setOnClickListener {
-            itemClick(holder.nameTextView.text.toString())
+        with(holder.binding) {
+            itemBackground.setOnClickListener {
+                itemClick(nameTextView.text.toString())
+            }
+            itemBackground.setBackgroundColor(if (nameTextView.text.toString() == selectedEntry) color
+                ?: itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary) else 0x00000000)
         }
-        holder.itemBackground.setBackgroundColor(if (holder.nameTextView.text.toString() == selectedEntry) color?: holder.itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary) else 0x00000000 )
     }
 
     override fun getItemCount(): Int = list.size
@@ -78,12 +80,12 @@ class SelectableStringAdapter(
             notifyItemChanged(foundIndex)
     }
 
-    class ViewHolder(override val containerView: View) :
-        RecyclerView.ViewHolder(containerView),
-        LayoutContainer {
+    class ViewHolder(containerView: View) :
+        RecyclerView.ViewHolder(containerView) {
+        val binding = ItemPickerDialogBinding.bind(containerView)
 
         fun bindItem(name: String) {
-            nameTextView.text = name
+            binding.nameTextView.text = name
         }
     }
 }

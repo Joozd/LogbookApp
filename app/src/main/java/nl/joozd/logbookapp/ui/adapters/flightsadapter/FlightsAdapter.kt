@@ -24,7 +24,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
-import kotlinx.android.extensions.LayoutContainer
 
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ItemFlightCardBinding
@@ -44,9 +43,10 @@ class FlightsAdapter(
     var onDelete: (Int) -> Unit = {}
     var itemClick: (Int) -> Unit = {}
 
-    class SimViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
+    class SimViewHolder(containerView: View) : RecyclerView.ViewHolder(containerView) {
+        val binding = ItemSimBinding.bind(containerView)
         fun bindItem(flight: DisplayFlight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
-            ItemSimBinding.bind(containerView).apply {
+            with (binding) {
                 with(flight) {
                     simLayout.setColorAccordingstatus(planned)
                     simDateDayText.text = dateDay
@@ -70,9 +70,10 @@ class FlightsAdapter(
             }
         }
     }
-    class FlightViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
+    class FlightViewHolder(containerView: View) : RecyclerView.ViewHolder(containerView) {
+        val binding = ItemFlightCardBinding.bind(containerView)
         fun bindItem(flight: DisplayFlight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
-            ItemFlightCardBinding.bind(containerView).apply {
+            with (binding) {
                 with(flight) {
                     flightLayout.setColorAccordingstatus(planned, this.checkIfIncomplete())
                     dateDayText.text = dateDay

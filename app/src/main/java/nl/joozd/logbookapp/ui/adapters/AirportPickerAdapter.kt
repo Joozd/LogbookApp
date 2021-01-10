@@ -24,10 +24,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.item_airport_picker.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Airport
+import nl.joozd.logbookapp.databinding.ItemAirportPickerBinding
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.activity
 import nl.joozd.logbookapp.extensions.getColorFromAttr
@@ -39,44 +38,42 @@ class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerVi
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): APViewHolder {
         val view = LayoutInflater.from(parent.ctx).inflate(R.layout.item_airport_picker, parent, false)
-        return APViewHolder(view, this, itemClick)
+        return APViewHolder(view, itemClick)
     }
 
     override fun onBindViewHolder(holder: APViewHolder, position: Int) {
         val airport = airports[position]
         holder.bindAirport(airport)
-        val activity = holder.backgroundLayout.activity
-        activity?.let {
-            if (airport.ident == pickedAirport) {
-                holder.backgroundLayout.setBackgroundColor(it.getColorFromAttr(android.R.attr.colorPrimaryDark))
-                holder.identifier.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
-                holder.cityName.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
-            }
-            else{
-                holder.backgroundLayout.setBackgroundColor(0x00000000)
-                holder.identifier.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondary))
-                holder.cityName.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondary))
+        with (holder.binding) {
+            backgroundLayout.activity?.let {
+                if (airport.ident == pickedAirport) {
+                    backgroundLayout.setBackgroundColor(it.getColorFromAttr(android.R.attr.colorPrimaryDark))
+                    identifier.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
+                    cityName.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
+                } else {
+                    backgroundLayout.setBackgroundColor(0x00000000)
+                    identifier.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondary))
+                    cityName.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondary))
+                }
             }
         }
-
     }
 
     override fun getItemCount(): Int = airports.size
 
-    class APViewHolder(override val containerView: View, private val adapter: AirportPickerAdapter, private val itemClick: (Airport) -> Unit) :
-        RecyclerView.ViewHolder(containerView),
-        LayoutContainer {
+    class APViewHolder(containerView: View, private val itemClick: (Airport) -> Unit) :
+        RecyclerView.ViewHolder(containerView) {
+        val binding = ItemAirportPickerBinding.bind(containerView)
 
         @SuppressLint("SetTextI18n")
         fun bindAirport(airport: Airport) {
             with(airport) {
-                identifier.text = "$ident - $iata_code"
-                cityName.text = "$municipality  - $name"
+                binding.identifier.text = "$ident - $iata_code"
+                binding.cityName.text = "$municipality  - $name"
                 itemView.setOnClickListener {
                     itemClick(this)
                 }
             }
-
         }
     }
 

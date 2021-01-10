@@ -23,12 +23,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.item_picker_aircraft_type.*
-import kotlinx.android.synthetic.main.item_picker_dialog.itemBackground
-import kotlinx.android.synthetic.main.item_picker_dialog.nameTextView
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.ItemPickerAircraftTypeBinding
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
@@ -50,10 +47,13 @@ class AircraftPickerAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItem(list[position])
-        holder.itemBackground.setOnClickListener {
-            holder.ac?.let {itemClick(it)}
+        with(holder.binding) {
+            itemBackground.setOnClickListener {
+                holder.ac?.let { itemClick(it) }
+            }
+            itemBackground.setBackgroundColor(if (nameTextView.text.toString() == selectedEntry?.name) color
+                ?: itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary) else 0x00000000)
         }
-        holder.itemBackground.setBackgroundColor(if (holder.nameTextView.text.toString() == selectedEntry?.name) color?: holder.itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary) else 0x00000000 )
     }
 
     override fun getItemCount(): Int = list.size
@@ -81,16 +81,16 @@ class AircraftPickerAdapter(
             notifyItemChanged(foundIndex)
     }
 
-    class ViewHolder(override val containerView: View) :
-        RecyclerView.ViewHolder(containerView),
-        LayoutContainer {
+    class ViewHolder(containerView: View) :
+        RecyclerView.ViewHolder(containerView) {
+        val binding = ItemPickerAircraftTypeBinding.bind(containerView)
         private var aircraft: AircraftType? = null
         val ac: AircraftType?
             get() = aircraft
         fun bindItem(ac: AircraftType) {
             aircraft = ac
-            nameTextView.text = ac.name
-            typeTextView.text = ac.shortName
+            binding.nameTextView.text = ac.name
+            binding.typeTextView.text = ac.shortName
         }
     }
 }

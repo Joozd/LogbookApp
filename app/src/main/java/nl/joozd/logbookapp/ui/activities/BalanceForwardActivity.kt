@@ -26,7 +26,6 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.activity_balance_forward.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityBalanceForwardBinding
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
@@ -62,8 +61,14 @@ class BalanceForwardActivity : JoozdlogActivity() {
         super.onCreate(savedInstanceState)
 
         setTheme(R.style.AppTheme)
-        binding = ActivityBalanceForwardBinding.inflate(layoutInflater).apply{
-            addBalanceButton.setOnClickListener {
+        ActivityBalanceForwardBinding.inflate(layoutInflater).apply{
+
+            setSupportActionBarWithReturn(balanceForwardToolbar)?.apply {
+                setDisplayHomeAsUpEnabled(true)
+                title = resources.getString(R.string.balanceForward)
+
+
+                addBalanceButton.setOnClickListener {
                 showAddBalanceForwardDialog()
             }
 
@@ -79,10 +84,7 @@ class BalanceForwardActivity : JoozdlogActivity() {
             setContentView(root)
         }
 
-        setSupportActionBarWithReturn(balance_forward_toolbar)?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            title = resources.getString(R.string.balanceForward)
-        }
+}
 
 
         /**

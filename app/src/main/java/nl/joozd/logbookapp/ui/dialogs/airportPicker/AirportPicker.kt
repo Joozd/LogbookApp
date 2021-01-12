@@ -27,6 +27,7 @@ import android.view.ViewGroup
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.*
+import nl.joozd.joozdutils.JoozdlogAlertDialog
 
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogAirportsBinding
@@ -119,7 +120,7 @@ abstract class AirportPicker(): JoozdlogFragment() {
                         closeFragment()
                     }
                     AirportPickerEvents.CUSTOM_AIRPORT_NOT_EDITED -> {
-                        JoozdlogAlertDialogV1(requireActivity()).show {
+                        JoozdlogAlertDialog().show(requireActivity()) {
                             titleResource = R.string.warning
                             messageResource = R.string.custom_airport_caution_text // TODO remove TODO from string once no longer necessary
                             setPositiveButton(android.R.string.ok)
@@ -144,7 +145,7 @@ abstract class AirportPicker(): JoozdlogFragment() {
 
                 // if ((airportsSearchField.text?.toString() ?: "null").isBlank()) airportsSearchField.setText(it.ident)
                 airportPickerTitle.text =
-                    if (viewModel.workingOnOrig == true) getString(R.string.origin).toUpperCase(Locale.ROOT)
+                    if (workingOnOrig) getString(R.string.origin).toUpperCase(Locale.ROOT)
                     else getString(R.string.destination).toUpperCase(Locale.ROOT)
                 @SuppressLint("SetTextI18n")
                 icaoIataField.text = "${it.ident} - ${it.iata_code}"

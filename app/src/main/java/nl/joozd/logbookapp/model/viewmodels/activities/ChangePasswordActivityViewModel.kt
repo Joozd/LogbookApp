@@ -53,6 +53,9 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
                 _emailAddress.value = Preferences.emailAddress
         }
     }
+    init{
+        Preferences.getSharedPreferences().registerOnSharedPreferenceChangeListener (onSharedPrefsChangedListener)
+    }
 
 
 

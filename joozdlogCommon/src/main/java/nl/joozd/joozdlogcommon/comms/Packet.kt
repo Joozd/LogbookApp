@@ -30,9 +30,6 @@ import nl.joozd.joozdlogcommon.serializing.toByteArray
 class Packet() {
     companion object{
         const val HEADER = JoozdlogCommsKeywords.HEADER
-        fun of(completePacket: ByteArray){
-            error ("Not Implemented!")
-        }
     }
     private val header = HEADER.toByteArray(Charsets.UTF_8)
 

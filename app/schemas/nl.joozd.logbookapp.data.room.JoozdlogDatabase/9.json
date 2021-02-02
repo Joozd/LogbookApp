@@ -1,0 +1,526 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 9,
+    "identityHash": "39a2369a27736b565f5430f65e27b114",
+    "entities": [
+      {
+        "tableName": "FlightData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`flightID` INTEGER NOT NULL, `orig` TEXT NOT NULL, `dest` TEXT NOT NULL, `timeOut` INTEGER NOT NULL, `timeIn` INTEGER NOT NULL, `correctedTotalTime` INTEGER NOT NULL, `multiPilotTime` INTEGER NOT NULL, `nightTime` INTEGER NOT NULL, `ifrTime` INTEGER NOT NULL, `simTime` INTEGER NOT NULL, `aircraft` TEXT NOT NULL, `registration` TEXT NOT NULL, `name` TEXT NOT NULL, `name2` TEXT NOT NULL, `takeOffDay` INTEGER NOT NULL, `takeOffNight` INTEGER NOT NULL, `landingDay` INTEGER NOT NULL, `landingNight` INTEGER NOT NULL, `autoLand` INTEGER NOT NULL, `flightNumber` TEXT NOT NULL, `remarks` TEXT NOT NULL, `isPIC` INTEGER NOT NULL, `isPICUS` INTEGER NOT NULL, `isCoPilot` INTEGER NOT NULL, `isDual` INTEGER NOT NULL, `isInstructor` INTEGER NOT NULL, `isSim` INTEGER NOT NULL, `isPF` INTEGER NOT NULL, `isPlanned` INTEGER NOT NULL, `changed` INTEGER NOT NULL, `autoFill` INTEGER NOT NULL, `augmentedCrew` INTEGER NOT NULL, `DELETEFLAG` INTEGER NOT NULL, `timeStamp` INTEGER NOT NULL, `signature` TEXT NOT NULL, PRIMARY KEY(`flightID`))",
+        "fields": [
+          {
+            "fieldPath": "flightID",
+            "columnName": "flightID",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orig",
+            "columnName": "orig",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dest",
+            "columnName": "dest",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeOut",
+            "columnName": "timeOut",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeIn",
+            "columnName": "timeIn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "correctedTotalTime",
+            "columnName": "correctedTotalTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "multiPilotTime",
+            "columnName": "multiPilotTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nightTime",
+            "columnName": "nightTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ifrTime",
+            "columnName": "ifrTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "simTime",
+            "columnName": "simTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aircraft",
+            "columnName": "aircraft",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "registration",
+            "columnName": "registration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name2",
+            "columnName": "name2",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "takeOffDay",
+            "columnName": "takeOffDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "takeOffNight",
+            "columnName": "takeOffNight",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "landingDay",
+            "columnName": "landingDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "landingNight",
+            "columnName": "landingNight",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "autoLand",
+            "columnName": "autoLand",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flightNumber",
+            "columnName": "flightNumber",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remarks",
+            "columnName": "remarks",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPIC",
+            "columnName": "isPIC",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPICUS",
+            "columnName": "isPICUS",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCoPilot",
+            "columnName": "isCoPilot",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDual",
+            "columnName": "isDual",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isInstructor",
+            "columnName": "isInstructor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSim",
+            "columnName": "isSim",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPF",
+            "columnName": "isPF",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPlanned",
+            "columnName": "isPlanned",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "changed",
+            "columnName": "changed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "autoFill",
+            "columnName": "autoFill",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "augmentedCrew",
+            "columnName": "augmentedCrew",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "DELETEFLAG",
+            "columnName": "DELETEFLAG",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeStamp",
+            "columnName": "timeStamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "signature",
+            "columnName": "signature",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "flightID"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Airport",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `ident` TEXT NOT NULL, `type` TEXT NOT NULL, `name` TEXT NOT NULL, `latitude_deg` REAL NOT NULL, `longitude_deg` REAL NOT NULL, `elevation_ft` INTEGER NOT NULL, `municipality` TEXT NOT NULL, `iata_code` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ident",
+            "columnName": "ident",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude_deg",
+            "columnName": "latitude_deg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude_deg",
+            "columnName": "longitude_deg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elevation_ft",
+            "columnName": "elevation_ft",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "municipality",
+            "columnName": "municipality",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iata_code",
+            "columnName": "iata_code",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "AircraftTypeData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`name` TEXT NOT NULL, `shortName` TEXT NOT NULL, `multiPilot` INTEGER NOT NULL, `multiEngine` INTEGER NOT NULL, PRIMARY KEY(`name`))",
+        "fields": [
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shortName",
+            "columnName": "shortName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "multiPilot",
+            "columnName": "multiPilot",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "multiEngine",
+            "columnName": "multiEngine",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "name"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "AircraftRegistrationWithTypeData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`registration` TEXT NOT NULL, `serializedType` BLOB NOT NULL, `knownToServer` INTEGER NOT NULL, `serializedPreviousType` BLOB NOT NULL, PRIMARY KEY(`registration`))",
+        "fields": [
+          {
+            "fieldPath": "registration",
+            "columnName": "registration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serializedType",
+            "columnName": "serializedType",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "knownToServer",
+            "columnName": "knownToServer",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serializedPreviousType",
+            "columnName": "serializedPreviousType",
+            "affinity": "BLOB",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "registration"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "AircraftTypeConsensusData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`registration` TEXT NOT NULL, `serializedType` BLOB NOT NULL, PRIMARY KEY(`registration`))",
+        "fields": [
+          {
+            "fieldPath": "registration",
+            "columnName": "registration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serializedType",
+            "columnName": "serializedType",
+            "affinity": "BLOB",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "registration"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PreloadedRegistration",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`registration` TEXT NOT NULL, `type` TEXT NOT NULL, PRIMARY KEY(`registration`))",
+        "fields": [
+          {
+            "fieldPath": "registration",
+            "columnName": "registration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "registration"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "BalanceForward",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `logbookName` TEXT NOT NULL, `multiPilotTime` INTEGER NOT NULL, `aircraftTime` INTEGER NOT NULL, `landingDay` INTEGER NOT NULL, `landingNight` INTEGER NOT NULL, `nightTime` INTEGER NOT NULL, `ifrTime` INTEGER NOT NULL, `picTime` INTEGER NOT NULL, `copilotTime` INTEGER NOT NULL, `dualTime` INTEGER NOT NULL, `instructortime` INTEGER NOT NULL, `simTime` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "logbookName",
+            "columnName": "logbookName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "multiPilotTime",
+            "columnName": "multiPilotTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aircraftTime",
+            "columnName": "aircraftTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "landingDay",
+            "columnName": "landingDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "landingNight",
+            "columnName": "landingNight",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nightTime",
+            "columnName": "nightTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ifrTime",
+            "columnName": "ifrTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "picTime",
+            "columnName": "picTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "copilotTime",
+            "columnName": "copilotTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dualTime",
+            "columnName": "dualTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "instructortime",
+            "columnName": "instructortime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "simTime",
+            "columnName": "simTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '39a2369a27736b565f5430f65e27b114')"
+    ]
+  }
+}

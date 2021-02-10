@@ -32,6 +32,7 @@ import kotlin.math.abs
 /**
  * I have a feeling this is what causes performance issues with newer ConstraintLayout
  */
+@Deprecated("Will cause performance problems with ConstraintLayout 2.0")
 class SwipableConstraintLayout(ctx: Context, attributes: AttributeSet): ConstraintLayout(ctx, attributes) {
     companion object{
         private const val TAG = "SwipableConstraintLayout"

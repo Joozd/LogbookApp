@@ -273,6 +273,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         do{
             val exactMatches = flightRepository.findMatches(foundFlights, checkEntireDay = false, checkRegistrations = true)
             val conflicts = flightRepository.findConflicts(foundFlights)
+            TODO("BUG this loop keeps running because this line doesn't work")
             val flightsToAdjust = flightRepository.findMatches(foundFlights, true).filter {match -> match.first !in exactMatches.map{it.first}}.filter {it.first !in conflicts.map{c -> c.first}}
             val newFlights = flightRepository.findNewFlights(foundFlights)
 

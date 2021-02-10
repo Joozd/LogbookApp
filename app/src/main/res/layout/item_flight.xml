@@ -40,11 +40,9 @@
 
 
     <!--
-    <androidx.constraintlayout.widget.ConstraintLayout
-    -->
     <nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout
-
-
+    -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/flightLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -77,9 +75,8 @@
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp"
             android:background="#FFFFFF"
-            android:gravity="center_vertical"
+            android:gravity="start|center_vertical"
             android:includeFontPadding="false"
-            android:textAlignment="textStart"
             android:textColor="#CC000000"
             android:textSize="12sp"
             app:layout_constraintBottom_toTopOf="@+id/remarksText"
@@ -411,8 +408,9 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    </nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout>
-    <!--
-    </androidx.constraintlayout.widget.ConstraintLayout>
-    -->
+        <!--
+        </nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout>
+        -->
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

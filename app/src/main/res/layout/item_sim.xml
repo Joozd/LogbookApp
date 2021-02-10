@@ -37,9 +37,10 @@
         app:srcCompat="@android:drawable/ic_menu_delete" />
 
     <!--
-    <androidx.constraintlayout.widget.ConstraintLayout
-    -->
     <nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout
+    -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
 
         android:id="@+id/simLayout"
         android:layout_width="match_parent"
@@ -180,8 +181,10 @@
             app:layout_constraintTop_toBottomOf="@+id/simTotalTimeText"
             tools:text="1/1" />
 
-    </nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout>
+
         <!--
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        </nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout>
+
         -->
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

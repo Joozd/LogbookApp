@@ -30,11 +30,12 @@ import nl.joozd.logbookapp.databinding.ItemFlightCardBinding
 import nl.joozd.logbookapp.databinding.ItemSimBinding
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
+import nl.joozd.logbookapp.ui.utils.customs.Swiper
 
 /**
  * Adapter for RecyclerView for displaying Flights in JoozdLog
  * Needs
- * @param itemClick: Action to be performed onClick on an item
+ * [itemClick]: Action to be performed onClick on an item
  */
 class FlightsAdapter(
     var list: List<DisplayFlight> = emptyList()
@@ -46,8 +47,16 @@ class FlightsAdapter(
     class SimViewHolder(containerView: View) : RecyclerView.ViewHolder(containerView) {
         val binding = ItemSimBinding.bind(containerView)
         fun bindItem(flight: DisplayFlight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
-            with (binding) {
+            with(binding) {
                 with(flight) {
+                    Swiper(binding.simDeleteLayer).apply {
+                        simDeleteLayer.setOnClickListener {
+                            if (isOpen) {
+                                close()
+                                onDelete(flightID)
+                            }
+                        }
+                    }
                     simLayout.setColorAccordingstatus(planned)
                     simDateDayText.text = dateDay
                     simDateMonthYearText.text = monthAndYear
@@ -58,23 +67,26 @@ class FlightsAdapter(
                     simTakeoffLandingsText.text = takeoffsAndLandings
 
                     simLayout.translationZ = 10f
-                    simLayout.closeIfSwiped()
+
                     simLayout.setOnClickListener { onClick(flightID) }
-                    simDeleteLayer.setOnClickListener {
-                        if (simLayout.isOpen) {
-                            simLayout.closeIfSwiped()
-                            onDelete(flightID)
-                        }
-                    }
                 }
             }
         }
     }
+
     class FlightViewHolder(containerView: View) : RecyclerView.ViewHolder(containerView) {
         val binding = ItemFlightCardBinding.bind(containerView)
         fun bindItem(flight: DisplayFlight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
             with (binding) {
                 with(flight) {
+                    Swiper(binding.deleteLayer).apply {
+                        deleteLayer.setOnClickListener {
+                            if (isOpen) {
+                                close()
+                                onDelete(flightID)
+                            }
+                        }
+                    }
                     flightLayout.setColorAccordingstatus(planned, this.checkIfIncomplete())
                     dateDayText.text = dateDay
                     dateMonthYearText.text = monthAndYear
@@ -97,18 +109,8 @@ class FlightsAdapter(
                     isPicText.shouldBeVisible(pic)
                     isPFText.shouldBeVisible(pf)
                     remarksText.shouldBeVisible(remarks.isNotEmpty())
-
-
-
-                    flightLayout.closeIfSwiped()
                     flightLayout.translationZ = 10f
                     flightLayout.setOnClickListener { onClick(flightID) }
-                    deleteLayer.setOnClickListener {
-                        if (flightLayout.isOpen) {
-                            flightLayout.closeIfSwiped()
-                            onDelete(flightID)
-                        }
-                    }
                 }
             }
         }

@@ -35,7 +35,7 @@ import nl.joozd.joozdutils.databinding.DialogJoozdlogTwoButtonBinding
 
 /**
  * My own take on how to build an alert dialog.
- * use: JoozdlogAlertDialog(activity).show{
+ * use: JoozdlogAlertDialog().show(activity){
  *    // set buttons and texts here
  * }
  * [title] = title

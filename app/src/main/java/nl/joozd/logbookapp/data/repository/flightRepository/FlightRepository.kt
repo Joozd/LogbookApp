@@ -63,7 +63,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     private val _cachedFlights = MediatorLiveData<List<Flight>>().apply{
         // Fill it before first observer arrives so it is cached right away
-        launch(Dispatchers.Main) { // set value on main thread
+        launch { // set value on main thread
             value = withContext(dispatcher) { flightDao.requestValidFlights().map { it.toFlight() } }
             addSource(requestValidLiveFlightData()) { value = it }
         }
@@ -73,7 +73,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
     private val _allNames = MediatorLiveData<List<String>>().apply{
         addSource(_cachedFlights) {
-            launch(Dispatchers.Main) {
+            launch {
                 value = makeListOfNamesAsync(it)
             }
         }
@@ -83,7 +83,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
     private val _usedRegistrations= MediatorLiveData<List<String>>().apply{
         addSource(_cachedFlights){
-            launch (Dispatchers.Main){
+            launch{
                 value = makeListOfRegistrationsAsync(it)
             }
         }
@@ -107,7 +107,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * update cached data and delete from disk
      */
-    private fun deleteFlightHard(flight: Flight) = launch(Dispatchers.Main) {
+    private fun deleteFlightHard(flight: Flight) = launch {
         cachedFlightsList = ((cachedFlightsList
             ?: emptyList()).filter { it.flightID != flight.flightID }).sortedByDescending { it.timeOut }
         launch (dispatcher + NonCancellable) {
@@ -118,7 +118,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * update cached data and delete multiple flights from disk
      */
-    private fun deleteHard(flights: List<Flight>) = launch(Dispatchers.Main) {
+    private fun deleteHard(flights: List<Flight>) = launch {
         cachedFlightsList = ((cachedFlightsList
             ?: emptyList()).filter { it.flightID !in flights.map { f -> f.flightID } }).sortedByDescending { it.timeOut }
         launch (dispatcher + NonCancellable) {
@@ -196,11 +196,10 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     fun setWorkingFlight(f: WorkingFlight?){
         if (Looper.myLooper() != Looper.getMainLooper()) launch(Dispatchers.Main){
-            Log.d("setWorkingFlight", "setWorkingFlight called on a background thread, setting workingFlight async on main")
+            Log.w("setWorkingFlight", "setWorkingFlight called on a background thread, setting workingFlight async on main")
             _workingFlight.value = f
         }
         else _workingFlight.value = f
-
     }
 
 
@@ -255,9 +254,11 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * Empty whole database
      */
-    fun clearDB() = launch (dispatcher + NonCancellable){
-        launch(Dispatchers.Main) { cachedFlightsList = emptyList() }
-        flightDao.clearDb()
+    fun clearDB() = launch {
+        cachedFlightsList = emptyList()
+        launch(dispatcher + NonCancellable) {
+            flightDao.clearDb()
+        }
     }
 
 
@@ -283,7 +284,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * @param sync: Whether or not to sync to server after saving
      * @param notify: Whether or not to update [savedFlight]
      */
-    fun save(flight: Flight, sync: Boolean = true, notify: Boolean = false) = launch(Dispatchers.Main) {
+    fun save(flight: Flight, sync: Boolean = true, notify: Boolean = false) = launch {
         //update cached flights
         cachedFlightsList = ((cachedFlightsList?: emptyList()).filter { it.flightID != flight.flightID }
                 + listOf(flight).filter { !it.DELETEFLAG })
@@ -302,7 +303,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * update cached data and save to disk
      */
-    fun save(flights: List<Flight>, sync: Boolean = true) = launch(Dispatchers.Main) {
+    fun save(flights: List<Flight>, sync: Boolean = true) = launch {
         //update cached flights
         cachedFlightsList = ((cachedFlightsList ?: emptyList()).filter { it.flightID !in flights.map {it2 -> it2.flightID } }
                 + flights.filter { !it.DELETEFLAG })
@@ -374,7 +375,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
     fun setSyncProgress(progress: Int){
         require (progress in (-1..100)) {"Progress reported to setAirportSyncProgress not in range -1..100"}
-        launch (Dispatchers.Main) {
+        launch{
             _syncProgress.value = progress
         }
     }

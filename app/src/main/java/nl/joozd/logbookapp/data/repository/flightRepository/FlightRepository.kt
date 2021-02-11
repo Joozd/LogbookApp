@@ -61,41 +61,41 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     private val _workingFlight = MutableLiveData<WorkingFlight?>()
 
-
-    // TODO change this to MediatorLiveData
-    private val _cachedFlights = MutableLiveData<List<Flight>>()
-    init {
+    private val _cachedFlights = MediatorLiveData<List<Flight>>().apply{
         // Fill it before first observer arrives so it is cached right away
-        launch {
-            _cachedFlights.value = withContext(dispatcher){ flightDao.requestValidFlights().map {it.toFlight() }}
-            requestValidLiveFlightData().observeForever { _cachedFlights.value = it }
+        launch(Dispatchers.Main) { // set value on main thread
+            value = withContext(dispatcher) { flightDao.requestValidFlights().map { it.toFlight() } }
+            addSource(requestValidLiveFlightData()) { value = it }
         }
-
     }
     /**
-     * All names in those flights
+     * All names in flights
      */
-    private val _allNames = MediatorLiveData<List<String>>()
-    private val _usedRegistrations= MediatorLiveData<List<String>>()
-
-    init{
-        _allNames.addSource(_cachedFlights){
-            launch{
-                _allNames.value = makeListOfNamesAsync(it)
+    private val _allNames = MediatorLiveData<List<String>>().apply{
+        addSource(_cachedFlights) {
+            launch(Dispatchers.Main) {
+                value = makeListOfNamesAsync(it)
             }
         }
-
-        _usedRegistrations.addSource(_cachedFlights){
-            launch{
-                _usedRegistrations.value = makeListOfRegistrationsAsync(it)
+    }
+    /**
+     * All registrations in flights
+     */
+    private val _usedRegistrations= MediatorLiveData<List<String>>().apply{
+        addSource(_cachedFlights){
+            launch (Dispatchers.Main){
+                value = makeListOfRegistrationsAsync(it)
             }
         }
     }
 
+    /**
+     * NOTE: Set this on main thread. Using postValue can cause race conditions
+     */
     private var cachedFlightsList: List<Flight>?
         get() = _cachedFlights.value
         set(fff){
-            _cachedFlights.postValue(fff)
+            _cachedFlights.value = fff
         }
 
     private fun requestValidLiveFlightData() =
@@ -107,7 +107,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * update cached data and delete from disk
      */
-    private fun deleteFlightHard(flight: Flight) {
+    private fun deleteFlightHard(flight: Flight) = launch(Dispatchers.Main) {
         cachedFlightsList = ((cachedFlightsList
             ?: emptyList()).filter { it.flightID != flight.flightID }).sortedByDescending { it.timeOut }
         launch (dispatcher + NonCancellable) {
@@ -118,7 +118,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * update cached data and delete multiple flights from disk
      */
-    private fun deleteHard(flights: List<Flight>) {
+    private fun deleteHard(flights: List<Flight>) = launch(Dispatchers.Main) {
         cachedFlightsList = ((cachedFlightsList
             ?: emptyList()).filter { it.flightID !in flights.map { f -> f.flightID } }).sortedByDescending { it.timeOut }
         launch (dispatcher + NonCancellable) {
@@ -283,7 +283,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * @param sync: Whether or not to sync to server after saving
      * @param notify: Whether or not to update [savedFlight]
      */
-    fun save(flight: Flight, sync: Boolean = true, notify: Boolean = false) {
+    fun save(flight: Flight, sync: Boolean = true, notify: Boolean = false) = launch(Dispatchers.Main) {
         //update cached flights
         cachedFlightsList = ((cachedFlightsList?: emptyList()).filter { it.flightID != flight.flightID }
                 + listOf(flight).filter { !it.DELETEFLAG })
@@ -292,7 +292,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         launch (dispatcher + NonCancellable) {
             flightDao.insertFlights(flight.toModel())
             if (notify) launch(Dispatchers.Main) {
-
                 _savedFlight.value = SingleUseFlight(flight).also{
                     Log.d("FLightReposiroty.save()","Notifying!")
                 } }
@@ -303,7 +302,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * update cached data and save to disk
      */
-    fun save(flights: List<Flight>, sync: Boolean = true) {
+    fun save(flights: List<Flight>, sync: Boolean = true) = launch(Dispatchers.Main) {
         //update cached flights
         cachedFlightsList = ((cachedFlightsList ?: emptyList()).filter { it.flightID !in flights.map {it2 -> it2.flightID } }
                 + flights.filter { !it.DELETEFLAG })

@@ -56,6 +56,7 @@ import java.util.*
  * [aircraftTypesLiveData]: All aircraftTypes known in DB.
  * [aircraftListLiveData]: All aircraft known in DB
  * [aircraftMap]: All aircraft known in DB as [registration] to [Aircraft], also as LiveData
+ * TODO: Consensus data only to be uploaded to server, not downloaded. Checked consensus data will be added to forced types list on server.
  *
  */
 class AircraftRepository(

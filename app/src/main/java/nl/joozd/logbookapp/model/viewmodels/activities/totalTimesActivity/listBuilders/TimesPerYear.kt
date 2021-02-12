@@ -25,6 +25,7 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesListItem
+import java.time.LocalDateTime
 
 class TimesPerYear(flights: List<Flight>): TotalTimesList {
     /**
@@ -49,12 +50,15 @@ class TimesPerYear(flights: List<Flight>): TotalTimesList {
     override val autoOpen = false
 
 
-    private fun buildList(flights: List<Flight>): List<TotalTimesListItem>{
-        val yearsToTimes = flights.map{it.tOut().year}.distinct().map{ year ->
-            year to flights.filter{it.tOut().year == year}.sumBy{it.duration()}
+    private fun buildList(flights: List<Flight>): List<TotalTimesListItem> {
+        val yearsToTimes = flights.map { it.tOut().year }.distinct().map { year ->
+            year to flights.filter { it.tOut().year == year }.sumBy { it.duration() }
         }.toMap()
-        return yearsToTimes.keys.sorted().mapIndexed { index, year ->
-            TotalTimesListItem(year.toString(), minutesToHoursAndMinutesString(yearsToTimes[year] ?: -1), yearsToTimes[year] ?: -1, index)
+        return listOf(flights.filter { it.tOut() >= LocalDateTime.now().minusYears(1) }.sumBy { it.duration() }.let { rollingTime ->
+            TotalTimesListItem(App.instance.getString(R.string.last_12_months), minutesToHoursAndMinutesString(rollingTime), rollingTime, 0)
+        }) + yearsToTimes.keys.sorted().map { year ->
+            TotalTimesListItem(year.toString(), minutesToHoursAndMinutesString(yearsToTimes[year] ?: -1), yearsToTimes[year] ?: -1, 0)
         }
     }
+
 }

@@ -29,6 +29,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.extensions.replaceValueAt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders.TimesPerYear
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders.TotalTimes
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 
@@ -49,15 +50,17 @@ class TotalTimesViewModel: JoozdlogActivityViewModel() {
             val allFlights = async { flightRepository.getAllFlights().filter{ !it.isPlanned} }
             val allBalancesForward = async { balanceForwardRepository.getAll() }
             _allLists.value?.let{
+                val timesPerYear = async(Dispatchers.Default) { TimesPerYear(allFlights.await()) }
                 val totalTimes = async(Dispatchers.Default) { TotalTimes(allFlights.await(), allBalancesForward.await()) }
-                _allLists.value = it.replaceValueAt(0, totalTimes.await())
+                _allLists.value = _allLists.value!!.replaceValueAt(0, totalTimes.await())
+                _allLists.value = _allLists.value!!.replaceValueAt(1, timesPerYear.await())
             }
         }
 
     }
 
     companion object{
-        const val NUMBER_OF_LISTS = 1 // amount of expandable lists we will show
+        const val NUMBER_OF_LISTS = 2 // amount of expandable lists we will show
     }
 }
 

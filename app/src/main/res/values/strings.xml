@@ -97,6 +97,7 @@
     <string name="undo">Undo</string>
     <string name="newFlight">New Flight</string>
     <string name="registration">Registration</string>
+    <string name="registrations">Registrations</string>
     <string name="signature">Signature</string>
     <string name="pf">PF</string>
     <string name="sim">Sim</string>
@@ -118,6 +119,8 @@
     <string name="always">Always</string>
     <string name="warning">Warning</string>
     <string name="dismiss">Dismiss</string>
+
+    <string name="times_per_year">Times per year</string>
 
     <string name="login">Log In</string>
 

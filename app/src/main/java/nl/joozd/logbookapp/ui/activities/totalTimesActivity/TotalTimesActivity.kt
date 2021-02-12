@@ -26,6 +26,9 @@ import nl.joozd.logbookapp.databinding.ActivityTotalTimesBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.TotalTimesViewModel
 import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
 
+/**
+ * TODO: Animate expanding of lists
+ */
 
 class TotalTimesActivity : JoozdlogActivity() {
     val viewModel: TotalTimesViewModel by viewModels()
@@ -49,10 +52,12 @@ class TotalTimesActivity : JoozdlogActivity() {
 
             viewModel.allLists.observe(activity){ unfiltered ->
                 unfiltered.filterNotNull().also {
+                    println ("lists: ${it.size}")
                     totalTimesExpandableListAdapter.list = it
                     it.mapIndexed { i, ttl ->
                         if (ttl.autoOpen) totalTimesExListView.expandGroup(i)
                     }
+
                 }
 
 

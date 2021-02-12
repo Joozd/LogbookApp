@@ -47,20 +47,27 @@ class TotalTimesViewModel: JoozdlogActivityViewModel() {
 
     init{
         viewModelScope.launch{
+            //Get all flights and balances forward
             val allFlights = async { flightRepository.getAllFlights().filter{ !it.isPlanned} }
             val allBalancesForward = async { balanceForwardRepository.getAll() }
-            _allLists.value?.let{
-                val timesPerYear = async(Dispatchers.Default) { TimesPerYear(allFlights.await()) }
-                val totalTimes = async(Dispatchers.Default) { TotalTimes(allFlights.await(), allBalancesForward.await()) }
-                _allLists.value = _allLists.value!!.replaceValueAt(0, totalTimes.await())
-                _allLists.value = _allLists.value!!.replaceValueAt(1, timesPerYear.await())
-            }
+
+            // build lists
+            val timesPerYear = async(Dispatchers.Default) { TimesPerYear(allFlights.await()) }
+            val totalTimes = async(Dispatchers.Default) { TotalTimes(allFlights.await(), allBalancesForward.await()) }
+
+            //Add totals lists as they become available
+            _allLists.value = _allLists.value!!.replaceValueAt(POSITION_TOTALS, totalTimes.await())
+            _allLists.value = _allLists.value!!.replaceValueAt(POSITION_YEARS, timesPerYear.await())
+
         }
 
     }
 
     companion object{
+        //These values are used to make sure totals lists will appear in the same order every time.
         const val NUMBER_OF_LISTS = 2 // amount of expandable lists we will show
+        const val POSITION_TOTALS = 0
+        const val POSITION_YEARS = 1
     }
 }
 

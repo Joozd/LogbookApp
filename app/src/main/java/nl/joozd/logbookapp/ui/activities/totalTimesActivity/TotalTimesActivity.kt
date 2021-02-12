@@ -42,11 +42,17 @@ class TotalTimesActivity : JoozdlogActivity() {
          * UI related stuff goes in this block
          */
         ActivityTotalTimesBinding.inflate(layoutInflater).apply{
+
             setSupportActionBarWithReturn(totalTimesToolbar)?.apply {
                 setDisplayShowHomeEnabled(true)
                 setDisplayHomeAsUpEnabled(true)
                 title = getString(R.string.totalTimes)
             }
+
+            //TODO maybe ever change this to a RecyclerView implementation. Too tired now to think.
+            /**
+             * Adding extra Totals lists to this is done in [TotalTimesViewModel.allLists]
+             */
             val totalTimesExpandableListAdapter = TotalTimesExpandableListAdapter()
             totalTimesExListView.setAdapter(totalTimesExpandableListAdapter)
 
@@ -57,17 +63,9 @@ class TotalTimesActivity : JoozdlogActivity() {
                     it.mapIndexed { i, ttl ->
                         if (ttl.autoOpen) totalTimesExListView.expandGroup(i)
                     }
-
                 }
-
-
-
-
-
-
             }
             setContentView(root)
         }
     }
-
 }

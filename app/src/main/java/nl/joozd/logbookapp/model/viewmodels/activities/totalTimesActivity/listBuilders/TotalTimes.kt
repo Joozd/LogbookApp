@@ -71,12 +71,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
      */
     override val autoOpen = true
 
-
-
-
-
-
-        private fun buildList(flights: List<Flight>): List<TotalTimesListItem>{
+    private fun buildList(flights: List<Flight>): List<TotalTimesListItem>{
 
         Log.d("Here we go", "rop tjop tjop over de kop kom op 2")
         val categories = App.instance.resources.getStringArray(R.array.total_times_categories)

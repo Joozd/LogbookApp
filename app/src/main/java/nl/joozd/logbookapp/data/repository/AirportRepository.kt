@@ -45,63 +45,109 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
     //Mutex lock to make sure forced and scheduled workers don't interfere with each other
     private val lockedForWorker = Mutex()
 
-    private val _cachedAirports = MediatorLiveData<List<Airport>>()
-    init{
-        launch{
-            _cachedAirports.value=getAll(true)
-        }
-        _cachedAirports.addSource(getLive()){
-            _cachedAirports.value = it
+    private val _live = getLive()
+    /**
+     * All airports, cached and held in a LiveData
+     */
+    private val _cachedAirports = MediatorLiveData<List<Airport>>().apply{
+        launch{ value=getAll(true) }
+        addSource(_live){
+            value = it
             launch {
                 _icaoIataMap.value = getIcaoToIataMap(true)
             }
         }
     }
-    val liveAirports: LiveData<List<Airport>> =
-        Transformations.distinctUntilChanged(_cachedAirports)
 
-    private val _icaoIataMap = MediatorLiveData<Map<String, String>>()
-    init{
-        launch(Dispatchers.Main) { _icaoIataMap.value = getIcaoToIataMap(true) }
-        Log.d("XOXOXOXOXOXOXOX", "icaoIataMap is now size ${icaoIataMap.value?.size}")
-        _icaoIataMap.addSource(liveAirports) {
-            launch(Dispatchers.Main) {_icaoIataMap.value = getIcaoToIataMap() }
+
+    /**
+     * ICAO <-> IATA map, cached and held in a LiveData
+     */
+    private val _icaoIataMap = MediatorLiveData<Map<String, String>>().apply{
+        launch{ value = getIcaoToIataMap(true) }
+
+        addSource(_live) {
+            value = getIcaoToIataMap(it)
         }
     }
-    val icaoIataMap: LiveData<Map<String, String>>
-        get() = _icaoIataMap
 
-    private val _useIataAirports = MutableLiveData<Boolean>()
-    private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        // Log.d("AirportRepository", "key = $key")
-        if (key == Preferences::useIataAirports.name) _useIataAirports.value = Preferences.useIataAirports
-    }
-    init{
-        Preferences.getSharedPreferences().registerOnSharedPreferenceChangeListener (onSharedPrefsChangedListener)
-    }
-    val useIataAirports: LiveData<Boolean>
-        get() = _useIataAirports
 
+    /**
+     * 'use IATA' preference
+     * TODO this should be done in model layer, not here
+     */
+    private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
+
+
+    /**
+     * Get all Airports from cache or from disk
+     */
     private suspend fun getAll(forceReload: Boolean = false): List<Airport> = withContext(dispatcher) {
         if (forceReload) airportDao.requestAllAirports()
         else _cachedAirports.value ?: airportDao.requestAllAirports()
     }
 
-    suspend fun getIdents() = withContext(dispatcher) {
-        airportDao.requestAllIdents()
-    }
-
+    /**
+     * Get LiveData containing all airports on disk
+     */
     private fun getLive() =
         airportDao.requestLiveAirports()
 
+
+
+    /**
+     * Update on changed SharedPrefs
+     */
+    private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == Preferences::useIataAirports.name) _useIataAirports.value = Preferences.useIataAirports
+    }
+
+    init{
+        Preferences.getSharedPreferences().registerOnSharedPreferenceChangeListener (onSharedPrefsChangedListener)
+    }
+
+
+
+    /*******************************************************************************************************************
+     *  EXPOSED PARTS
+     *******************************************************************************************************************/
+
+    /**
+     * Exposed ICAO - ICTA map
+     */
+    val icaoIataMap: LiveData<Map<String, String>>
+        get() = _icaoIataMap
+
+    /**
+     * Exposed live Airports
+     */
+    val liveAirports: LiveData<List<Airport>> =
+        Transformations.distinctUntilChanged(_cachedAirports)
+
+    /**
+     * Exposed 'use IATA' preference
+     * TODO this should be done in model layer, not here
+     */
+    val useIataAirports: LiveData<Boolean>
+        get() = _useIataAirports
+
+    /**
+     * Save airports to disk. Does not replace entire DB but adds to it.
+     */
     fun save(airports: List<Airport>) = launch(dispatcher + NonCancellable) {
         airportDao.insertAirports(*airports.toTypedArray())
     }
 
+    /**
+     * Clear Airport DB
+     */
     fun clearDB() = launch(dispatcher + NonCancellable) {
             airportDao.clearDb()
     }
 
+    /**
+     * Save airports to disk. This does replace entire DB
+     */
     fun replaceDbWith(airports: List<Airport>){
         launch(dispatcher + NonCancellable) {
             clearDB().join()
@@ -165,6 +211,12 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
         else {
             _icaoIataMap.value ?: withContext (dispatcher){ getAll().map { a -> a.ident.toUpperCase(Locale.ROOT) to a.iata_code.toUpperCase(Locale.ROOT) }.toMap() }
     }
+
+    /**
+     * Non-suspend version that requires a list of airports to be provided
+     */
+    fun getIcaoToIataMap(airports: List<Airport>): Map<String, String> =
+            airports.map { a -> a.ident.toUpperCase(Locale.ROOT) to a.iata_code.toUpperCase(Locale.ROOT) }.toMap()
 
     fun getIcaoIataMapAsync() = async { getIcaoToIataMap()}
 

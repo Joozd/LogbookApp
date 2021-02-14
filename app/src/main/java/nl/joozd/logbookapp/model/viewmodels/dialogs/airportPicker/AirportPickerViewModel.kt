@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.conflate
 import nl.joozd.logbookapp.data.dataclasses.Airport
+import nl.joozd.logbookapp.extensions.nonNullLiveData
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
 //TODO make sure list gets filled straight away?
@@ -57,13 +58,10 @@ abstract class AirportPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(
     private var currentSearchJob: Job = Job()
 
     private val _airportsList = MutableLiveData<List<Airport>>()
-    val airportsList: LiveData<List<Airport>> = distinctUntilChanged(_airportsList)
+    val airportsList: LiveData<List<Airport>> = nonNullLiveData(distinctUntilChanged(_airportsList))
     init{
         _airportsList.value = airportRepository.liveAirports.value
     }
-
-
-
 
     val pickedAirport: LiveData<Airport>
         get() = pickedAirportMediator

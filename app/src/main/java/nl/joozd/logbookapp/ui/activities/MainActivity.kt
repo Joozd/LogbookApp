@@ -72,7 +72,9 @@ class MainActivity : JoozdlogActivity() {
                 // can do stuff with toolbar here
             }
 
-            //RecyclerView thingies
+            /**
+             * Flights List (RecyclerView) adapter initialization and onClick/onDelete
+             */
             val flightsAdapter = FlightsAdapter().apply {
                 onDelete = { id -> viewModel.deleteFlight(id) }
                 itemClick = { id -> viewModel.showFlight(id) }
@@ -84,7 +86,6 @@ class MainActivity : JoozdlogActivity() {
             /**
              * Fill spinner and set onSelected
              */
-
             ArrayAdapter.createFromResource(
                 activity,
                 R.array.search_options,
@@ -258,8 +259,8 @@ class MainActivity : JoozdlogActivity() {
                             commit { remove(it) }
                         }
                     }
-                    showFlight()
-                }
+                    showFlight().also { _ -> println("QQQQQQQQQQQQQQQQQQQ null: ${it == null}")}
+                } ?: showToolbar().also { _ -> println("QQQQQQQQQQQQQQQQQQQ null: ${it == null}")}
             }
 
             viewModel.savedflight.observe(activity) { suf ->
@@ -280,10 +281,12 @@ class MainActivity : JoozdlogActivity() {
             /*******************************************************************************************
              * Other listeners:
              *******************************************************************************************/
-
+/*
             supportFragmentManager.addOnBackStackChangedListener {
                 makeAddButtonAndToolbarVisibleOrNot()
             }
+
+ */
 
             setContentView(root)
         }
@@ -377,9 +380,7 @@ class MainActivity : JoozdlogActivity() {
     private fun ActivityMainNewBinding.showFlight(){
         viewModel.closeSearchField()
         snackbarShowing?.dismiss()
-        addButton.fadeOut()
-        // main_toolbar.hideAnimated()
-        mainToolbar.visibility = View.GONE
+        hideToolbar()
         val flightEditor = EditFlightFragment()
         supportFragmentManager.commit {
             add(R.id.mainActivityLayout, flightEditor, EDIT_FLIGHT_TAG)
@@ -390,8 +391,10 @@ class MainActivity : JoozdlogActivity() {
     /**
      * Checks if an EditFlightFragment is open and sets toolbar / addbutton visibiity accordingly
      * Actually checks if backstack is empty.
+     * TODO: BUG: This doesnt work if activity was recreated
      */
     private fun ActivityMainNewBinding.makeAddButtonAndToolbarVisibleOrNot(){
+        println("LALALALALALALALAA supportFragmentManager.backStackEntryCount = ${supportFragmentManager.backStackEntryCount}")
         if (supportFragmentManager.backStackEntryCount == 0) {
             mainToolbar.visibility = View.VISIBLE
             addButton.fadeIn()
@@ -400,6 +403,16 @@ class MainActivity : JoozdlogActivity() {
             mainToolbar.visibility = View.GONE
             addButton.fadeOut()
         }
+    }
+
+    private fun ActivityMainNewBinding.showToolbar(){
+        mainToolbar.visibility = View.VISIBLE
+        addButton.fadeIn()
+    }
+
+    private fun ActivityMainNewBinding.hideToolbar(){
+        mainToolbar.visibility = View.GONE
+        addButton.fadeOut()
     }
 
     //TODO make this something else. Password is no longer known to users.

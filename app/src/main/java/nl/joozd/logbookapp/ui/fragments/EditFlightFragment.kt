@@ -515,14 +515,12 @@ class EditFlightFragment: JoozdlogFragment(){
             //click on empty part == cancel
             flightInfoLayout.setOnClickListener {
                 //TODO fire some "undo cancel" SnackBar?
-                viewModel.notifyClosing()
-                closeFragment()
+                viewModel.close()
             }
 
             flightCancelButton2.setOnClickListener {
                 //TODO fire some "undo cancel" SnackBar?
-                viewModel.notifyClosing()
-                closeFragment()
+                viewModel.close()
             }
 
             flightSaveButton.setOnClickListener {

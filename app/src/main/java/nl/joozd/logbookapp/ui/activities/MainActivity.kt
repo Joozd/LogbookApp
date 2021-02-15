@@ -405,11 +405,17 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
+    /**
+     * Show toolbar and "add" button
+     */
     private fun ActivityMainNewBinding.showToolbar(){
         mainToolbar.visibility = View.VISIBLE
         addButton.fadeIn()
     }
 
+    /**
+     * hide toolbar and "add" button
+     */
     private fun ActivityMainNewBinding.hideToolbar(){
         mainToolbar.visibility = View.GONE
         addButton.fadeOut()

@@ -531,18 +531,10 @@ class AircraftRepository(
 
     /**
      * Searches for a match in order of priority in aircraftMap
-     * - Hits at end of registration first (ie. "XZ" hits PH-XZA before "XZ-PHK"
+     * @see [findSortedHitsForRegistration] for ordering
      */
     fun getBestHitForPartialRegistration(r: String): Aircraft? =
-        aircraftMap[r.findBestHitForRegistration(getSortedRegistrations())]
-        /*
-        r.toUpperCase(Locale.ROOT).let { reg ->
-
-        aircraftMap[reg]
-            ?: aircraftMap.mapKeys { it.key.filter{c -> c != '-' }}[reg]                // get "PH-EZA" when searching for "PHEZA"
-            ?: aircraftMap[reg.findBestHitForRegistration(getSortedRegistrations())]    // Build new list instead of cached value in MediatorLiveData for if it is not observed etc
-
-         */
+        aircraftMap[findBestHitForRegistration(r, getSortedRegistrations())]
 
     /**
      * Save aircraft to ACRWT Database

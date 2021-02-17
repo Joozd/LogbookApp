@@ -19,22 +19,15 @@
 
 package nl.joozd.logbookapp.data.repository.helpers
 
-import android.util.Log
 import java.util.*
 
-fun String.findBestHitForRegistration(registrations: Collection<String>): String? =
-    if (this.isBlank()) null else
-    findSortedHitsForRegistration(registrations).firstOrNull()
-
-    //we'll want to search from end to start. As soon as wel have one, we're good.
-    /*
-    do {
-        searchableRegs.firstOrNull { it.endsWith(this) }?.let {return it}
-        if (searchableRegs.none { this in it }) return null
-        searchableRegs = searchableRegs.map { it.dropLast(1) }.filter { it.isNotEmpty() }
-    } while (searchableRegs.none{it.endsWith(this)})
-     */
-
+/**
+ * Gets the first hit in [findSortedHitsForRegistration]
+ * Might make own implementation for slightly faster performance (it currently builds complete list but only needs first entry)
+ */
+fun findBestHitForRegistration(query: String, registrations: Collection<String>): String? =
+    if (query.isBlank()) null else
+    findSortedHitsForRegistration(query, registrations).firstOrNull()
 
 
 /**
@@ -49,18 +42,18 @@ fun String.findBestHitForRegistration(registrations: Collection<String>): String
  * - Partial match ignoring '-' ("HEZ -> PH-EZA")
  * @return List of registrations
  */
-fun String.findSortedHitsForRegistration(registrations: Collection<String>, caseSensitive: Boolean = false): List<String>{
-    val query = if (caseSensitive) this else this.toUpperCase(Locale.ROOT)
-    val searchableRegs = registrations.filter{it.length > length}.filter{reg -> query.filter{c -> c != '-'} in reg.filter{c -> c != '-'} }.let { rrr->
+fun findSortedHitsForRegistration(query: String, registrations: Collection<String>, caseSensitive: Boolean = false): List<String>{
+    val q = if (caseSensitive) query else query.toUpperCase(Locale.ROOT)
+    val searchableRegs = registrations.filter{it.length > q.length}.filter{reg -> q.filter{ c -> c != '-'} in reg.filter{ c -> c != '-'} }.let { rrr->
         if (caseSensitive) rrr else rrr.map { it.toUpperCase(Locale.ROOT) }
     }
-        return  (searchableRegs.filter {it == query} +
-                searchableRegs.filter{it.filter {c -> c != '-'} == query} +
-                searchableRegs.filter{it.endsWith((query))} +
-                searchableRegs.filter{'-' in it}.map {it.split('-')}.filter{it[1].startsWith(query)}.map{it.joinToString("-")} +
-                searchableRegs.filter{it.startsWith(query)} +
-                searchableRegs.filter{it.filter{c -> c != '-'}.startsWith(query)} +
-                searchableRegs.filter{query in it} +
-                searchableRegs.filter{query in it.filter{c -> c != '-'} }
+        return  (searchableRegs.filter {it == q} +
+                searchableRegs.filter{it.filter {c -> c != '-'} == q} +
+                searchableRegs.filter{it.endsWith((q))} +
+                searchableRegs.filter{'-' in it}.map {it.split('-')}.filter{it[1].startsWith(q)}.map{it.joinToString("-")} +
+                searchableRegs.filter{it.startsWith(q)} +
+                searchableRegs.filter{it.filter{c -> c != '-'}.startsWith(q)} +
+                searchableRegs.filter{q in it} +
+                searchableRegs.filter{q in it.filter{ c -> c != '-'} }
                 ).distinct()
 }

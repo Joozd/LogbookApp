@@ -66,7 +66,7 @@ class AircraftAutoCompleteAdapter(val context: Context, private val resource: In
          */
         override fun performFiltering(constraint: CharSequence?): FilterResults = FilterResults().apply{
             synchronized(this){
-                values = (if (constraint.isNullOrEmpty()) completeList else constraint.toString().findSortedHitsForRegistration(completeList)).also{
+                values = (if (constraint.isNullOrEmpty()) completeList else findSortedHitsForRegistration(constraint.toString(), completeList)).also{
                     outputList = it
                     count = it.size
                 }

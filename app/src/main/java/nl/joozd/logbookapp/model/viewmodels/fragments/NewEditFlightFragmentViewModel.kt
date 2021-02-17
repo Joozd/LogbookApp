@@ -31,6 +31,7 @@ import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinute
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.repository.helpers.findSortedHitsForRegistration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -117,7 +118,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     val isAutoValues
         get() = wf.isAutoValues
     val knownRegistrations
-        get() = flightRepository.usedRegistrations
+        get() = aircraftRepository.registrationsLiveData
 
     val title: LiveData<String>
         get() = _title
@@ -196,16 +197,15 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      */
     @Suppress("MemberVisibilityCanBePrivate")
     fun setRegAndType(regAndTypeString: String){
-        if (sim) wf.setAircraft(type = regAndTypeString)
-        else when{
-            regAndTypeString.isBlank() -> wf.setAircraft(Aircraft("")) // no reg and type if field is empty
-
-            "(" !in regAndTypeString -> viewModelScope.launch { // only registration entered
-                aircraftRepository.getBestHitForPartialRegistration(regAndTypeString)?.let{
+        when {
+            sim -> wf.setAircraft(type = regAndTypeString)                                 // simulator
+            regAndTypeString.isBlank() -> wf.setAircraft(Aircraft(""))          // no reg and type if field is empty
+            "(" !in regAndTypeString -> viewModelScope.launch {                            // only registration entered
+                aircraftRepository.getBestHitForPartialRegistration(regAndTypeString)?.let {
                     wf.setAircraft(it)
-                } ?: feedback(EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND).apply{
+                } ?: feedback(EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND).apply {
                     putString(regAndTypeString)
-                    }.also {
+                }.also {
                     wf.setAircraft(regAndTypeString)
                 }
             }
@@ -213,15 +213,14 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
             else -> { // If a ( or ) in [regAndTypeString] it will save exactly [reg] and [type] in [reg]([type]). Closing bracket is ignored. If no opening bracket, it is all reg.
                 val reg: String?
                 val type: String?
-                regAndTypeString.filter{ it != ')'}.split('(').let{
+                regAndTypeString.filter { it != ')' }.split('(').let {
                     reg = it.firstOrNull()
                     type = it.getOrNull(1)
                 }
                 wf.setAircraft(reg, type)
             }
-
-
         }
+
     }
 
     fun setRegAndType(regAndTypeEditable: Editable) = setRegAndType(regAndTypeEditable.toString())

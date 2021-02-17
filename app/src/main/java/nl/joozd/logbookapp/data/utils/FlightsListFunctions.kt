@@ -50,7 +50,9 @@ object FlightsListFunctions {
             .distinct().toList()
     }
 
-    suspend fun makeListOfRegistrationsAsync ( flights: List<Flight>) = withContext (Dispatchers.Default){
-        flights.map{it.registration}.distinct()
-    }
+    /**
+     * List of registrations sorted by most recent date used
+     */
+     fun makeListOfRegistrations (flights: List<Flight>) =
+        flights.sortedByDescending { it.timeOut }.map{it.registration}.distinct()
 }

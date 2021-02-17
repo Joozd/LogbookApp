@@ -47,6 +47,7 @@ fun String.findBestHitForRegistration(registrations: Collection<String>): String
  * - First part matches ignoring '-' ("PHE"-> "PH-EZA"
  * - Any part matches ("H-E" -> "PH-EZA")
  * - Partial match ignoring '-' ("HEZ -> PH-EZA")
+ * @return List of registrations
  */
 fun String.findSortedHitsForRegistration(registrations: Collection<String>, caseSensitive: Boolean = false): List<String>{
     val query = if (caseSensitive) this else this.toUpperCase(Locale.ROOT)

@@ -20,7 +20,6 @@
 package nl.joozd.logbookapp.data.repository
 
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.asLiveData
@@ -36,6 +35,7 @@ import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
+import nl.joozd.logbookapp.data.repository.helpers.findSortedHitsForRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.dao.AircraftTypeConsensusDao
 import nl.joozd.logbookapp.data.room.dao.AircraftTypeDao
@@ -46,7 +46,6 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 
 import nl.joozd.logbookapp.extensions.mostCommonOrNull
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.util.*
 
 
@@ -87,15 +86,24 @@ class AircraftRepository(
 
     /**
      * Map of all aircraft, with registration as key.
-     * Will be kept up-to-date by the same observeForever that makes sure above three are always observed (ie. always up-to-date and never null)
+     * Will be kept up-to-date by the same observeForever that makes sure [aircraftTypesLiveData], [aircraftListLiveData] and [aircraftMapLiveData] are always observed
+     * (ie. always up-to-date and never null, even when not observed)
      */
     var aircraftMap: Map<String, Aircraft> = emptyMap()
+
+    /**
+     * Registrations, ordered by priority
+     */
+    val registrationsLiveData: LiveData<List<String>>
+        get() = _sortedRegistrations
 
     val aircraftList: List<Aircraft>?
         get() = _aircraftListLiveData.value // null if not observed
 
     val aircraftTypes: List<AircraftType>?
         get() = _aircraftTypesLiveData.value // null if not observed
+
+
 
     /**
      * This just waits for [aircraftMapLiveData] to emit a value, then returns that
@@ -196,6 +204,19 @@ class AircraftRepository(
             source?.let { acList ->
                 value = acList.map { it.registration to it }.toMap()
             }
+        }
+    }
+
+    /**
+     * Sorted registrations:
+     * @see getSortedRegistrations
+     */
+    private val _sortedRegistrations = MediatorLiveData<List<String>>().apply{
+        addSource(aircraftListLiveData){ acList ->
+            value = getSortedRegistrations()
+        }
+        addSource(FlightRepository.getInstance().usedRegistrationsLiveData){
+            value = getSortedRegistrations()
         }
     }
 
@@ -473,6 +494,7 @@ class AircraftRepository(
     /********************************************************************************************
      * Public observables and functions
      ********************************************************************************************/
+
     /**
      * Will make a map of short names (UPPERCASE) to AircraftType
      */
@@ -498,18 +520,29 @@ class AircraftRepository(
     fun getAircraftTypeByShortName(shortName: String): AircraftType? =
         aircraftTypes?.firstOrNull{ it.shortName == shortName }
 
+    /**
+     * Sorted registrations:
+     * - First all used registrations from [FlightRepository], then all other regs as sorted in this repository
+     */
+    fun getSortedRegistrations(): List<String> =
+        FlightRepository.getInstance().usedRegistrations +
+        (aircraftListLiveData.value ?: emptyList()).map { ac -> ac.registration }
+        .distinct()
 
     /**
      * Searches for a match in order of priority in aircraftMap
      * - Hits at end of registration first (ie. "XZ" hits PH-XZA before "XZ-PHK"
      */
-    fun getBestHitForPartialRegistration(r: String): Aircraft? = r.toUpperCase(Locale.ROOT).let { reg ->
+    fun getBestHitForPartialRegistration(r: String): Aircraft? =
+        aircraftMap[r.findBestHitForRegistration(getSortedRegistrations())]
+        /*
+        r.toUpperCase(Locale.ROOT).let { reg ->
+
         aircraftMap[reg]
-            ?: aircraftMap.mapKeys { it.key.filter{c -> c != '-' }}[reg]          // get "PH-EZA" when searching for "PHEZA"
-            ?: aircraftMap[reg.findBestHitForRegistration(acrwtRegs)]
-            ?: aircraftMap[reg.findBestHitForRegistration(preloadedAircraftRegs)]
-            ?: aircraftMap[reg.findBestHitForRegistration(consensusRegs)]
-    }
+            ?: aircraftMap.mapKeys { it.key.filter{c -> c != '-' }}[reg]                // get "PH-EZA" when searching for "PHEZA"
+            ?: aircraftMap[reg.findBestHitForRegistration(getSortedRegistrations())]    // Build new list instead of cached value in MediatorLiveData for if it is not observed etc
+
+         */
 
     /**
      * Save aircraft to ACRWT Database

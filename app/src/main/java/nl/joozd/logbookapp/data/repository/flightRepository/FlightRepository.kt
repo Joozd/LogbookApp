@@ -37,7 +37,7 @@ import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAsWithMargins
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightOnSameDay
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfRegistrationsAsync
+import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfRegistrations
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.checkPermission
@@ -83,9 +83,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
     private val _usedRegistrations= MediatorLiveData<List<String>>().apply{
         addSource(_cachedFlights){
-            launch{
-                value = makeListOfRegistrationsAsync(it)
-            }
+            value = makeListOfRegistrations(it)
         }
     }
 
@@ -184,11 +182,18 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     val allNames: LiveData<List<String>>
         get() = _allNames
 
-    val usedRegistrations: LiveData<List<String>>
+    val usedRegistrationsLiveData: LiveData<List<String>>
         get() = _usedRegistrations
+
     /********************************************************************************************
      * Vars and vals
      ********************************************************************************************/
+
+    /**
+     * All registrations used in all flights
+     */
+    val usedRegistrations: List<String>
+        get() = usedRegistrationsLiveData.value ?: makeListOfRegistrations(cachedFlightsList?: emptyList()) //  cachedFlightsList must be filled before accessing this
 
     /********************************************************************************************
      * Public functions

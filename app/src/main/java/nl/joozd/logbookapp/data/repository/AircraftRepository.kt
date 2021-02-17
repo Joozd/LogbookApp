@@ -54,7 +54,7 @@ import java.util.*
  * Public parts
  * [aircraftTypesLiveData]: All aircraftTypes known in DB.
  * [aircraftListLiveData]: All aircraft known in DB
- * [aircraftMap]: All aircraft known in DB as [registration] to [Aircraft], also as LiveData
+ * [aircraftMap]: All aircraft known in DB as [Aircraft.registration] to [Aircraft], also as LiveData
  * TODO: Consensus data only to be uploaded to server, not downloaded. Checked consensus data will be added to forced types list on server.
  *
  */
@@ -97,16 +97,21 @@ class AircraftRepository(
     val registrationsLiveData: LiveData<List<String>>
         get() = _sortedRegistrations
 
+    /**
+     * List of all known aircraft, null if [aircraftListLiveData] is not observed (it is always observed)
+     */
     val aircraftList: List<Aircraft>?
-        get() = _aircraftListLiveData.value // null if not observed
+        get() = aircraftListLiveData.value // null if not observed
 
+    /**
+     * List of all known aircraft types, null if [aircraftTypesLiveData] is not observed (it is always observed)
+     */
     val aircraftTypes: List<AircraftType>?
-        get() = _aircraftTypesLiveData.value // null if not observed
-
+        get() = aircraftTypesLiveData.value // null if not observed
 
 
     /**
-     * This just waits for [aircraftMapLiveData] to emit a value, then returns that
+     * Gets a map of all aircraft even when [aircraftListLiveData] is not ready yet
      */
     suspend fun requireMap(): Map<String, Aircraft> =
         if (aircraftMap.isNotEmpty()) aircraftMap
@@ -240,6 +245,9 @@ class AircraftRepository(
         when (key) {
             Preferences::consensusOptIn.name -> launch { _aircraftListLiveData.value = consensusLiveData.value?.let { updateAircraftListWithNewConsensus(it) } }
         }
+    }
+    init{
+        Preferences.getSharedPreferences().registerOnSharedPreferenceChangeListener (onSharedPrefsChangedListener)
     }
 
     /********************************************************************************************
@@ -410,6 +418,7 @@ class AircraftRepository(
         }
         if(consensusCache.isEmpty()){
             val consensus = consensusLiveData.value ?: aircraftTypeConsensusDao.getAllConsensusData().map{consensusData -> consensusData.toAircraftTypeConsensus().toAircraft()}
+            fillers.add(fillConsensusCacheAsync(consensus))
         }
         fillers.awaitAll()
         mergeCaches()

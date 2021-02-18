@@ -20,9 +20,10 @@
 package nl.joozd.logbookapp.data.parseSharedFiles.interfaces
 
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import java.io.Closeable
 import java.time.Instant
 
-interface MonthlyOverview {
+interface MonthlyOverview: Closeable {
     /**
      * true if this seems to be a valid monthly overview (gross error check)
      */
@@ -31,10 +32,10 @@ interface MonthlyOverview {
     /**
      * List of flights in this Monthly Overview (to be cleaned)
      */
-    val flights: List<Flight>?
+    val flights: List<Flight>
 
     /**
      * Period that this Monthly Overview applies to
      */
-    val period: ClosedRange<Instant>?
+    val period: ClosedRange<Instant>
 }

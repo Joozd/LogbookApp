@@ -56,6 +56,7 @@ object FeedbackEvents {
         CALENDAR_SYNC_ENABLED,
         CALENDAR_SYNC_PAUSED,
         FILE_NOT_FOUND,
+        UNSUPPORTED_FILE,
         NOT_A_KNOWN_ROSTER,
         NOT_A_KNOWN_LOGBOOK,
         SOME_FLIGHTS_FAILED_TO_IMPORT,

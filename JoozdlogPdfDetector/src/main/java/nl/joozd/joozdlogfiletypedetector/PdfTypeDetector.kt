@@ -43,7 +43,7 @@ class PdfTypeDetector(inputStream: InputStream): FileTypeDetector {
     /**
      * Returns the type of PDF found, or UNSUPPORTED
      */
-    private fun getType(firstPage: String): SupportedTypes {
+    private fun getType(firstPage: String): SupportedTypes.SupportedType {
         val lines = firstPage.split('\n')
         return when {
             match(lines, TypeIdentifiers.KLC_ROSTER) -> SupportedTypes.KLC_ROSTER

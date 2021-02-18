@@ -29,7 +29,6 @@ import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.extensions.atEndOfDay
 import nl.joozd.logbookapp.extensions.atStartOfDay
-import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.io.InputStream
 import java.time.*
@@ -60,8 +59,8 @@ class KlcCheckinSheet(roster: String?): Roster {
 
     private val sheetAsText: String? = roster
 
-    private fun makeFlightsList(): List<Flight>? {
-        if (!isValid) return null
+    private fun makeFlightsList(): List<Flight> {
+        if (!isValid) return emptyList()
         val lines = sheetAsText!!.split('\n').map{it.trim()}
         val startOfFlightLines = lines.indexOf(START_OF_FLIGHTS)+1
         val flightLines = lines.drop(startOfFlightLines).take(lines.indexOf(END_OF_FLIGHTS) - startOfFlightLines)
@@ -81,7 +80,9 @@ class KlcCheckinSheet(roster: String?): Roster {
         val tIn = (LocalDateTime.of(date, LocalTime.parse(words[TIME_IN],timeFormat)).toInstant(ZoneOffset.UTC).epochSecond).let{
             if (it > tOut) it else it + ONE_DAY
         }
-        val registration = aircraftRegex.find(line)?.groupValues?.get(1) ?: ""
+        val registration = aircraftRegex.find(line)?.groupValues?.get(1)?.let{
+            it.take(2) + "-" + it.drop(2) // change "PHEZP"to "PH-EZP" to match forced types from server
+        } ?: ""
         return Flight(-1, flightNumber = words[FLIGHTNUMBER], orig = words[ORIG], dest = words[DEST], timeOut = tOut, timeIn = tIn, registration = registration)
     }
 
@@ -217,20 +218,20 @@ class KlcCheckinSheet(roster: String?): Roster {
      * Identifier of the carrier.
      * See companion object.
      */
-    override val carrier: String?
+    override val carrier: String
         get() = Roster.KLC_CHECKIN_SHEET
 
     /**
      * true if the data provided to this parser seems to be valid
      */
     override val isValid: Boolean
-        get() = sheetAsText != null && CHECK_LINE_1 in sheetAsText!! && START_OF_FLIGHTS in sheetAsText!! && END_OF_FLIGHTS in sheetAsText!!
+        get() = sheetAsText != null && CHECK_LINE_1 in sheetAsText && START_OF_FLIGHTS in sheetAsText && END_OF_FLIGHTS in sheetAsText
 
     /**
      * List of all flights in this roster.
      * Airports can be ICAO or IATA format
      */
-    override val flights: List<Flight>? by lazy {
+    override val flights: List<Flight> by lazy {
         makeFlightsList()
     }
 
@@ -238,13 +239,20 @@ class KlcCheckinSheet(roster: String?): Roster {
      * The period covered by this roster
      * Should start at start of day and end at end of day
      */
-    override val period: ClosedRange<Instant>? by lazy{
-        val startEpochSecond = flights?.minByOrNull { it.timeOut }?.timeOut
-        val lastEpochSecond = flights?.maxByOrNull { it.timeIn }?.timeIn
-        if (startEpochSecond == null || lastEpochSecond == null) null
+    override val period: ClosedRange<Instant> by lazy{
+        val startEpochSecond = flights.minByOrNull { it.timeOut }?.timeOut
+        val lastEpochSecond = flights.maxByOrNull { it.timeIn }?.timeIn
+        if (startEpochSecond == null || lastEpochSecond == null) (Instant.EPOCH..Instant.EPOCH)
         else {
             (Instant.ofEpochSecond(startEpochSecond).atStartOfDay() .. Instant.ofEpochSecond(lastEpochSecond).atEndOfDay())
         }
+    }
+
+    /**
+     * This Roster doesn't keep an inputStream open.
+     */
+    override fun close() {
+        // Intentionally left blank
     }
 
 

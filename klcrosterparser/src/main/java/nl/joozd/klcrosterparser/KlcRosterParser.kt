@@ -24,6 +24,7 @@ import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
 import org.threeten.bp.*
 import org.threeten.bp.format.DateTimeFormatter
+import java.io.Closeable
 import java.io.InputStream
 import java.util.*
 
@@ -33,7 +34,7 @@ import java.util.*
  * @param inputStream: Inputstream holding a PDF file containing a KLC roster.
  */
 
-class KlcRosterParser(inputStream: InputStream) {
+class KlcRosterParser(private val inputStream: InputStream): Closeable {
     companion object{
         private const val endOfHeaderMarker = "date H duty R dep arr AC info date H duty R dep arr AC info date H duty R dep arr AC info"
         private const val dateRangeStartMarker = "Period: "
@@ -446,6 +447,10 @@ class KlcRosterParser(inputStream: InputStream) {
 
         //return either the only numbers in it, or the second group (as first will be flightnumber)
         return if (lineAsWords.size == 1) lineAsWords[0].toInt() else lineAsWords[1].toInt()
+    }
+
+    override fun close() {
+        inputStream.close()
     }
 
 }

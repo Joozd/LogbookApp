@@ -36,6 +36,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.utils.TimestampMaker
+import nl.joozd.logbookapp.utils.reversed
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.lang.Exception
 import java.util.*
@@ -218,7 +219,8 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
     fun getIcaoToIataMap(airports: List<Airport>): Map<String, String> =
             airports.map { a -> a.ident.toUpperCase(Locale.ROOT) to a.iata_code.toUpperCase(Locale.ROOT) }.toMap()
 
-    fun getIcaoIataMapAsync() = async { getIcaoToIataMap()}
+    fun getIcaoIataMapAsync() = async(Dispatchers.IO) { getIcaoToIataMap() }
+    fun getIataIcaoMapAsync() = async(Dispatchers.IO) { getIcaoToIataMap().reversed() }
 
 
     /**

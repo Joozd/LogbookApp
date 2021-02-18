@@ -19,36 +19,68 @@
 
 package nl.joozd.logbookapp.data.parseSharedFiles.interfaces
 
+import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedRoster
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import java.io.Closeable
 import java.time.Instant
 /**
  *a Roster to be used for parsing anything into flights
+ * This must contain:
+ * - A marker [isValid] stating if data is valid
+ * - Carrier ID [carrier] (using ID from [Companion])
+ * - The [period] this Roster covers
+ * - a list [flights] of [Flight] objects:
+ *      - Airports can be ICAO or IATA format
+ *      - ID and Timestamp will be changed, so any placeholder value will do
+ *      - Aircraft registrations and types will be looked up later, fill any COMPLETE data you have.
+ *          So "PH-EZP" or "PHEZP" are OK, "EZP" is not as this might lead to ambiguous results.
+ *
+ * Post-processing (not done in Roster but in whatever uses the Roster) should include:
+ *  - Changing IATA to ICAO identifiers
+ *  - Checking if registration is known, also searching for versions with/without spaces and/or hyphens and changing to known reg + type if found.
+ *
+ * Repository should take care of:
+ *  - flightID
+ *  - TimeStamp
  */
-interface Roster {
+interface Roster: Closeable {
+    /**
+     * true if the data provided to this parser seems to be valid
+     */
+    val isValid: Boolean
+
+    val isInvalid
+        get() = !isValid
+
     /**
      * Identifier of the carrier.
      * See companion object.
      */
     val carrier: String?
 
+
     /**
-     * true if the data provided to this parser seems to be valid
+     * The period covered by this roster.
+     * Should start at start of day and end at end of day
      */
-    val isValid: Boolean
+    val period: ClosedRange<Instant>
+    //fun getFlights(icaoIataMap: Map<String, String>?): List<Flight>
+
+
 
     /**
      * List of all flights in this roster.
      * Airports can be ICAO or IATA format
      * Flights will be cleaned later, so flight ID and timestamp are not necessary.
      */
-    val flights: List<Flight>?
+    val flights: List<Flight>
 
     /**
-     * The period covered by this roster.
-     * Should start at start of day and end at end of day
+     * Cast this to a [ProcessedRoster] data class
      */
-    val period: ClosedRange<Instant>?
-    //fun getFlights(icaoIataMap: Map<String, String>?): List<Flight>
+    fun toProcessedRoster(): ProcessedRoster = ProcessedRoster(isValid, carrier, period, flights)
+
+
 
     companion object{
         const val KLC = "KLC"

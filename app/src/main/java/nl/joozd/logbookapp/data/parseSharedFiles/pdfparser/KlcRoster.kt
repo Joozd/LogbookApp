@@ -27,6 +27,7 @@ import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.reversed
+import java.io.Closeable
 import java.io.InputStream
 import java.time.Instant
 
@@ -35,7 +36,7 @@ import java.time.Instant
  * Will transfor a KLC PDF roster into flights
  * Flights need to be cleaned before use.
  */
-class KlcRoster(inputStream: InputStream): Roster {
+class KlcRoster(val inputStream: InputStream): Roster {
 
     /*********************************************************************************************
      * Private parts
@@ -112,6 +113,10 @@ class KlcRoster(inputStream: InputStream): Roster {
     }
 
     override val period = (Instant.ofEpochSecond(roster.period!!.start)..Instant.ofEpochSecond(roster.period!!.endInclusive))
+
+    override fun close() {
+        roster.close()
+    }
 
 }
 

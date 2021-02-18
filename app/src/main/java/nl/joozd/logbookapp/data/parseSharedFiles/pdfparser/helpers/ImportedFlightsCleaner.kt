@@ -40,6 +40,7 @@ import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.TwilightCalculator
 import nl.joozd.logbookapp.utils.reversed
 
+@Deprecated("ViewModel has postProcess function")
 class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private val carrier: String? = null): CoroutineScope by MainScope() {
     private val airportRepository = AirportRepository.getInstance()
     private val aircraftRepository = AircraftRepository.getInstance()
@@ -66,7 +67,7 @@ class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private va
 
             val cleanOrig = iataIcaoMap[orig] ?: orig
             val cleanDest = iataIcaoMap[dest] ?: dest
-            val bestHitRegistration = registration.findBestHitForRegistration(acMap.keys) // null if no hit found
+            val bestHitRegistration = findBestHitForRegistration(registration, acMap.keys) // null if no hit found
             val cleanRegistation = bestHitRegistration ?: completeRegistration(registration)
             val cleanType = bestHitRegistration?.let {acMap[it]?.type?.shortName} ?: f.aircraftType
             val nightTime = if (autoFill) twilightCalculator.minutesOfNight(airportRepository.getAirportByIcaoIdentOrNull(cleanOrig), airportRepository.getAirportByIcaoIdentOrNull(cleanDest), timeOut, timeIn) else 0

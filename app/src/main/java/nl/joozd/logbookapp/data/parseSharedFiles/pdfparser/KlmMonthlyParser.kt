@@ -38,7 +38,7 @@ import java.time.format.DateTimeFormatter
  * Will create 2 man flights for CP and FO, 3 man flight for SO
  * All flights are assumed IFR, and as PNF
  */
-class KlmMonthlyParser(inputStream: InputStream): MonthlyOverview {
+class KlmMonthlyParser(private val inputStream: InputStream): MonthlyOverview {
 
     /**
      * regexes
@@ -72,11 +72,11 @@ class KlmMonthlyParser(inputStream: InputStream): MonthlyOverview {
         val start = LocalDate.parse(results[1], formatter)
         val end = LocalDate.parse(results[2], formatter)
         (start.toInstant()..end.plusDays(1).toInstant())
-    }
+    } ?: Instant.EPOCH..Instant.EPOCH.also { _dataSeemsValid = false} // bogus data, [validMonthlyOverview] will be false
 
     //1day    2flightnr    3reg          (4c/i) 5out   6orig   Dtime   7Func    8dest  Dtime  9in  ignore rest of line
     private fun makeFlight(result: MatchResult): Flight? = result.groupValues.let{values ->
-        if (!_dataSeemsValid || period == null) return null
+        if (!_dataSeemsValid) return null
         val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
         val day = values[1].toInt()
@@ -88,7 +88,7 @@ class KlmMonthlyParser(inputStream: InputStream): MonthlyOverview {
         val orig = values[6]
         val dest = values[8]
 
-        val date = period!!.start.toLocalDate().withDayOfMonth(day)
+        val date = period.start.toLocalDate().withDayOfMonth(day)
         val tOut = LocalDateTime.of(date, timeOut).toInstant(ZoneOffset.UTC).epochSecond
         val tIn = LocalDateTime.of(date, timeIn).toInstant(ZoneOffset.UTC).epochSecond.let{
             if (it > tOut) it else it + ONE_DAY
@@ -114,17 +114,21 @@ class KlmMonthlyParser(inputStream: InputStream): MonthlyOverview {
     /**
      * List of flights in this Monthly Overview (to be cleaned)
      */
-    override val flights: List<Flight>?
+    override val flights: List<Flight>
         get() =
-            if (!_dataSeemsValid) null
+            if (!_dataSeemsValid) emptyList()
             else makeFlights().toList()
 
 
     /**
      * Period that this Monthly Overview applies to
      */
-    override val period: ClosedRange<Instant>? by lazy {
+    override val period: ClosedRange<Instant> by lazy {
         makePeriod()
+    }
+
+    override fun close() {
+        inputStream.close()
     }
 
 

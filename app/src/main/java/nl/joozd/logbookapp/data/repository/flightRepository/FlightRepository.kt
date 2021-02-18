@@ -33,6 +33,8 @@ import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfNamesAsync
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.CalendarFlightUpdater
 import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.parseSharedFiles.extensions.postProcess
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAsWithMargins
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightOnSameDay
@@ -43,6 +45,7 @@ import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.checkPermission
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.time.Instant
+import java.util.*
 
 //TODO reorder this and make direct DB functions private
 //TODO make cloud functions originate from here and do their DB work here, not in [Cloud]
@@ -131,6 +134,11 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         if (!Cloud.syncingFlights)
             JoozdlogWorkersHub.synchronizeFlights(delay = true)
     }
+
+    /**
+     * Returns all flights in DB which start in [period]
+     */
+    private suspend fun getFlightsOnDays(period: ClosedRange<Instant>) = getFlightsOnDays(getAllFlights(), period)
 
     private val _syncProgress = MutableLiveData<Int>(-1)
 
@@ -285,20 +293,24 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     /**
      * update cached data and save to disk
+     * This will update Flight.timeStamp
      * @param flight: Flight to save
      * @param sync: Whether or not to sync to server after saving
      * @param notify: Whether or not to update [savedFlight]
      */
-    fun save(flight: Flight, sync: Boolean = true, notify: Boolean = false) = launch {
+    fun save(flight: Flight, sync: Boolean = true, notify: Boolean = false, updateIDs: Boolean = false) = launch {
+        //assign available FlightID if requested
+        val f = if (updateIDs) flight.copy(flightID = lowestFreeFlightID(), timeStamp = TimestampMaker.nowForSycPurposes) else flight.copy (timeStamp = TimestampMaker.nowForSycPurposes)
+
         //update cached flights
-        cachedFlightsList = ((cachedFlightsList?: emptyList()).filter { it.flightID != flight.flightID }
-                + listOf(flight).filter { !it.DELETEFLAG })
+        cachedFlightsList = ((cachedFlightsList?: emptyList()).filter { it.flightID != f.flightID }
+                + listOf(f).filter { !it.DELETEFLAG })
             .sortedByDescending { it.timeOut }
         //Save flight to disk
         launch (dispatcher + NonCancellable) {
-            flightDao.insertFlights(flight.toModel())
+            flightDao.insertFlights(f.toModel())
             if (notify) launch(Dispatchers.Main) {
-                _savedFlight.value = SingleUseFlight(flight).also{
+                _savedFlight.value = SingleUseFlight(f).also{
                     Log.d("FLightReposiroty.save()","Notifying!")
                 } }
             if (sync) syncAfterChange()
@@ -307,24 +319,30 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     /**
      * update cached data and save to disk
+     * @see [save]
      */
-    fun save(flights: List<Flight>, sync: Boolean = true) = launch {
+    fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean = false) = launch {
+        //assign available FlightIDs if requested
+        val ff = if (updateIDs) flights.mapIndexed { index, flight -> flight.copy(flightID = lowestFreeFlightID() + index, timeStamp = TimestampMaker.nowForSycPurposes) } else flights.map { it.copy (timeStamp = TimestampMaker.nowForSycPurposes) }
+
         //update cached flights
-        cachedFlightsList = ((cachedFlightsList ?: emptyList()).filter { it.flightID !in flights.map {it2 -> it2.flightID } }
-                + flights.filter { !it.DELETEFLAG })
+        cachedFlightsList = ((cachedFlightsList ?: emptyList()).filter { it.flightID !in ff.map { it2 -> it2.flightID } }
+                + ff.filter { !it.DELETEFLAG })
             .sortedByDescending { it.timeOut }
         //Save flights to disk
         launch (dispatcher + NonCancellable) {
-            flightDao.insertFlights(*(flights.map { it.toModel() }.toTypedArray()))
-            Log.d("Saved", "Saved ${flights.size} flights!")
+            flightDao.insertFlights(*(ff.map { it.toModel() }.toTypedArray()))
+            Log.d("Saved", "Saved ${ff.size} flights!")
             if (sync) syncAfterChange()
         }
     }
 
+    /*
     /**
      * SaveFromRoster will remove flights on days that new planned flights are added (ignoring those that are the same)
      * and fixed flightIDs for new flights
      */
+    @Deprecated("use [saveRoster]")
     fun saveFromRoster(rosteredFlights: List<Flight>, period: ClosedRange<Instant>? = null, sync: Boolean = true) = launch(NonCancellable) {
         Log.d("saveFromRoster()", "rosteredFlights: $rosteredFlights")
         val highestID =
@@ -340,10 +358,29 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         delete(flightsToRemove)
         val lowestNewID = highestID.await() + 1
         save(flightsToSave.mapIndexed { index: Int, f: Flight ->
-            f.copy(flightID = lowestNewID + index)
+            f.copy(flightID = lowestNewID + index, timeStamp = TimestampMaker.nowForSycPurposes)
         }, sync)
     }
+    */
 
+    /**
+     * Save flights from a Roster
+     * It will remove saved flights in [roster].period if they are not the same as any flights in [roster].flights
+     * It will save flights in [roster].flights that are not the same as any that are already saved in DB.
+     */
+    suspend fun saveRoster(roster: Roster) = withContext(Dispatchers.IO + NonCancellable){
+        require(roster.isValid) { "Cannot parse an invalid roster! You should have checked this!" }
+        val rosterFlights = roster.flights
+        val flightsInPeriod = getFlightsOnDays(roster.period)
+        // Save all flights that are not also in DB
+        val flightsToSave = rosterFlights.filter {rosteredFlight -> flightsInPeriod.none { it.isSameFlightAs(rosteredFlight) }}
+
+        // delete all flights that are not also in roster and that are isPlanned
+        val flightsToDelete = flightsInPeriod.filter { savedFlight -> rosterFlights.none { it.isSameFlightAs(savedFlight) } && savedFlight.isPlanned }
+
+        delete(flightsToDelete, false) // sync will happen after saving
+        save(flightsToSave, sync = true, updateIDs = true)
+    }
 
     /**
      * Sync functions:
@@ -365,8 +402,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             if ((needsCalendarSync || needsServerSync) && Preferences.getFlightsFromCalendar) {
                 if (checkPermission(Manifest.permission.READ_CALENDAR)) {
                     val calendar = CalendarFlightUpdater()
-                    calendar.getFlights()?.let {
-                        saveFromRoster(it, calendar.period)
+                    calendar.getRoster()?.let {
+                        saveRoster(it.postProcess())
                     }
                 }
             }
@@ -414,7 +451,18 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             } ?: flightDao.getMostRecentCompleted()?.toFlight()
         }
 
+    /**
+     * Gets highest used FlightID or 0 if no flights in DB
+     */
     fun getHighestIdAsync() = async(dispatcher) { flightDao.highestId() ?: 0 }
+
+
+    /**
+     * Gets the lowest free FlightID
+     */
+    suspend fun lowestFreeFlightID(): Int = withContext(Dispatchers.IO){
+        cachedFlightsList?.maxByOrNull { it.flightID }?.flightID ?: getHighestIdAsync().await()
+    }
 
     fun iAmACaptainAsync() =  async(dispatcher) {
         getMostRecentFlightAsync().await()?.isPIC == true
@@ -472,30 +520,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /********************************************************************************************
      * Interfaces:
      ********************************************************************************************/
-/*
 
-//spielerij
-
-    /**
-     * OnSavesListeners will run when notifyFlightSaved() is called
-     */
-
-    // Will hold all listeners. No duplicates as it is a Set
-    private val onSavedListeners = emptySet<WeakReference<OnSavedListener>>().toMutableSet()
-
-    /**
-     * Calling object must hold a reference to [listener] or it will be garbage collected.
-     */
-    fun addOnSaveListener(listener: OnSavedListener): Boolean = onSavedListeners.add(WeakReference(listener))
-
-    fun removeOnSaveListener(listener: OnSavedListener): Boolean = onSavedListeners.remove(WeakReference(listener))
-
-    interface OnSavedListener{
-        fun onSaved(f: Flight)
-    }
-
-
- */
     /********************************************************************************************
      * Companion object:
      ********************************************************************************************/

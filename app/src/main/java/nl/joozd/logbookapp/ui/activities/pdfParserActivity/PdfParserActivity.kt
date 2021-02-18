@@ -44,11 +44,8 @@ import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
 /**
  * PdfParserActivity does the following:
  * - Get an intent with a PDF file
- * - read that PDF file
- * - Decide what type it is (KLC Roster, Lufthansa Monthly Overview, etc)
- * - parse that type
- * - do whatever needs to be done with parsed data (insert roster from planned, check flights from monthlies etc)
- * - Fixes conflicts when importing Monthlies
+ * - Send that intent to ViewModel
+ * - Get result from Viewmodel and display feedback to user
  * - launch MainActivity
  */
 class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {

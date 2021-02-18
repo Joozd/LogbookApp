@@ -25,6 +25,7 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
 import nl.joozd.logbookapp.data.calendar.dataclasses.SupportedCalendarTypes
 import nl.joozd.logbookapp.data.calendar.parsers.KlmKlcCalendarFlightsParser
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -45,19 +46,28 @@ class CalendarFlightUpdater {
 
     val period = (startCutoff..Instant.now().plus(Duration.ofDays(Preferences.calendarSyncAmountOfDays)))
 
+
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
+    @Deprecated("Deprecated, use getRoster")
     suspend fun getFlights(): List<Flight>?{
-        val icaoIataMapAsync = AirportRepository.getInstance().getIcaoIataMapAsync()
         val activeCalendar = calendarScraper.getCalendarsList()?.firstOrNull { it.name == Preferences.selectedCalendar }
         val foundEvents: List<JoozdCalendarEvent> = activeCalendar?.let{
             calendarScraper.getEventsBetween(it, period.start, period.endInclusive)
         } ?: return null
-        return KlmKlcCalendarFlightsParser(foundEvents, icaoIataMapAsync.await()).flights
+        return KlmKlcCalendarFlightsParser(foundEvents).flights
         /* This for when no longer one regex fits all
         when(Preferences.calendarType){
             SupportedCalendarTypes.KLM_CREWCALENDAR -> KlmKlcCalendarFlightsParser(foundEvents).getFlights(icaoIataMapAsync.await())
             else -> emptyList()
         }
         */
+    }
+    @RequiresPermission(Manifest.permission.READ_CALENDAR)
+    suspend fun getRoster(): Roster? {
+        val activeCalendar = calendarScraper.getCalendarsList()?.firstOrNull { it.name == Preferences.selectedCalendar }
+        val foundEvents: List<JoozdCalendarEvent> = activeCalendar?.let{
+            calendarScraper.getEventsBetween(it, period.start, period.endInclusive)
+        } ?: return null
+        return KlmKlcCalendarFlightsParser(foundEvents)
     }
 }

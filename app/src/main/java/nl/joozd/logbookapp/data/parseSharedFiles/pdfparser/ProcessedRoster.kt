@@ -1,6 +1,6 @@
 /*
  *  JoozdLog Pilot's Logbook
- *  Copyright (c) 2020 Joost Welle
+ *  Copyright (c) 2021 Joost Welle
  *
  *      This program is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU Affero General Public License as
@@ -17,15 +17,18 @@
  *
  */
 
-package nl.joozd.joozdlogfiletypedetector.interfaces
+package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
 
-import nl.joozd.joozdlogfiletypedetector.SupportedTypes
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
+import nl.joozd.logbookapp.model.dataclasses.Flight
+import java.time.Instant
 
-interface FileTypeDetector {
-    val seemsValid: Boolean
-    val seemsInvalid: Boolean
-        get() = !seemsValid
-    val typeOfFile: SupportedTypes.SupportedType
-    val debugData: String
-
+/**
+ * Model class for processed data from any [Roster] source.
+ * This class can be given to repository for saving/replacing data
+ */
+data class ProcessedRoster(override val isValid: Boolean, override val carrier: String?, override val period: ClosedRange<Instant>, override val flights: List<Flight>): Roster{
+    override fun close() {
+        // Intentionally left blank
+    }
 }

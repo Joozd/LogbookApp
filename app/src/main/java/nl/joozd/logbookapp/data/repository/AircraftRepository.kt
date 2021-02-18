@@ -88,6 +88,7 @@ class AircraftRepository(
      * Map of all aircraft, with registration as key.
      * Will be kept up-to-date by the same observeForever that makes sure [aircraftTypesLiveData], [aircraftListLiveData] and [aircraftMapLiveData] are always observed
      * (ie. always up-to-date and never null, even when not observed)
+     * If you need to make sure it is filled (in case you might use it before data is loaded from DB), use [requireMap]
      */
     var aircraftMap: Map<String, Aircraft> = emptyMap()
 
@@ -115,7 +116,9 @@ class AircraftRepository(
      */
     suspend fun requireMap(): Map<String, Aircraft> =
         if (aircraftMap.isNotEmpty()) aircraftMap
-        else getFullAircraftList().map{it.registration to it}.toMap()
+        else getFullAircraftList().map{it.registration to it}.toMap().also{
+            aircraftMap = it
+        }
 
     /**
      * Get ACRWT data from Dao (for SyncAircraftWorker)
@@ -515,12 +518,15 @@ class AircraftRepository(
      * Get aircraft from registration, with or without '-'.
      * @return found flight, null if [reg] is null or nothing found.
      */
-    fun getAircraftFromRegistration(reg: String?): Aircraft? =
-        if (reg == null) null else
+    suspend fun getAircraftFromRegistration(reg: String?): Aircraft? = when {
+        reg == null -> null
         // use [reg] if it contains at least one '-', if it doesn't try to match it to a knownRegistration minus the '-'
-        (if ("-" in reg) reg else aircraftMap.keys.firstOrNull { r -> r.filter{it != '-'} == reg } ?: reg ).let {
-            aircraftMap[it.toUpperCase(Locale.ROOT)]
+        "-" in reg -> requireMap()[reg.toUpperCase(Locale.ROOT)]
+        else -> { requireMap().keys.firstOrNull { it.filter{ c -> c !in "- "} == reg}?.let{
+            requireMap()[it]
+            }
         }
+    }
 
 
     fun getAircraftType(typeName: String): AircraftType? =

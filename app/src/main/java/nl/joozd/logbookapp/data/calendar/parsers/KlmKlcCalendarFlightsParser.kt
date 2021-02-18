@@ -34,7 +34,7 @@ import java.time.ZoneOffset
  * suggested use: KlmCrewCalendarFlightsParser(listOfEvents).getFlights(icaoIataMap)
  */
 
-class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, val icaoIataMap: Map<String, String>?):
+class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>):
     Roster {
     init{
         Log.d(this::class.simpleName, "Got ${events.size} events")
@@ -42,8 +42,8 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, val icaoIata
     private val flightEvents = events.filter {flightRegEx.containsMatchIn(it.eventType)}.also{
         Log.d(this::class.simpleName, "Got ${it.size} flight events")
     }
-    private val allFlightsWithIataAirportNames = flightEvents.map{event ->
-        flightRegEx.find(event.description)?.let {data ->
+    override val flights = flightEvents.mapNotNull { event ->
+        flightRegEx.find(event.description)?.let { data ->
             Flight(
                 -1,
                 orig = data.orig(),
@@ -56,20 +56,12 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, val icaoIata
                 isPlanned = true
             )
         }
-    }.filterNotNull()
+    }
 
     private fun MatchResult.flightNumber() = (groups[FLIGHTNUMBER]?.value ?: error ("ERROR 0003 NO FLIGHTNUMBER"))
     private fun MatchResult.orig() = (groups[ORIG]?.value ?: error ("ERROR 0004 NO ORIG"))
     private fun MatchResult.dest() = (groups[DEST]?.value ?: error ("ERROR 0005 NO DEST"))
 
-
-    private fun buildFlights(): List<Flight>{
-        val iataIcaoMap = icaoIataMap?.reversed() ?: emptyMap<String, String>()
-        return allFlightsWithIataAirportNames.map {it.copy (orig = iataIcaoMap[it.orig] ?: it.orig, dest = iataIcaoMap[it.dest] ?: it.dest )}
-    }
-
-    override val flights: List<Flight>?
-        get() = buildFlights()
 
     /**
      * Identifier of the carrier.
@@ -82,12 +74,16 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, val icaoIata
 
     override val period: ClosedRange<Instant> // if no flights: (0..1)
         get() {
-            val start = allFlightsWithIataAirportNames.minByOrNull { it.timeOut }?.tOut()?.toLocalDate()
+            val start = flights.minByOrNull { it.timeOut }?.tOut()?.toLocalDate()
                 ?.atStartOfDay()?.toInstant(ZoneOffset.UTC) ?: Instant.ofEpochSecond(0)
-            val end = allFlightsWithIataAirportNames.maxByOrNull { it.timeIn }?.tIn()?.toLocalDate()?.plusDays(1)
+            val end = flights.maxByOrNull { it.timeIn }?.tIn()?.toLocalDate()?.plusDays(1)
                 ?.atStartOfDay()?.toInstant(ZoneOffset.UTC) ?: start.plusSeconds(1)
             return(start..end)
         }
+
+    override fun close() {
+        // intentionally left blank
+    }
 
     companion object{
         const val FLIGHT_EVENT_IDENTIFIER = "FLIGHT"

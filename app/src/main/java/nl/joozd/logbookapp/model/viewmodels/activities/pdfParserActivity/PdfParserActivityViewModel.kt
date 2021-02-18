@@ -30,27 +30,36 @@ import nl.joozd.joozdlogfiletypedetector.CsvTypeDetector
 import nl.joozd.joozdlogfiletypedetector.PdfTypeDetector
 import nl.joozd.joozdlogfiletypedetector.SupportedTypes
 import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.JoozdlogParser
-import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.LogTenProParser
+import nl.joozd.logbookapp.data.parseSharedFiles.extensions.postProcess
 import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.MccPilotLogCsvParser
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.MonthlyOverview
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcCheckinSheet
+import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcMonthlyParser
+import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcRoster
+import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlmMonthlyParser
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcRoster
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcMonthlyParser
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlmMonthlyParser
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.helpers.ImportedFlightsCleaner
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.extensions.*
-import nl.joozd.logbookapp.ui.utils.toast
+import nl.joozd.logbookapp.utils.TimestampMaker
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.time.Instant
+
+/**
+ * This viewmodel does:
+ * - Receive an intent with a PDF file through [runOnce] (this prevents rerunning on recreating activity)
+ * - read that PDF file
+ * - Decide what type it is (KLC Roster, Lufthansa Monthly Overview, etc)
+ * - parse that type
+ * - do whatever needs to be done with parsed data (insert roster from planned, check flights from monthlies etc)
+ * - Fixes conflicts when importing Monthlies
+ */
 
 
 
@@ -63,6 +72,107 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     private var periodToSave: ClosedRange<Instant>? = null
     private var foundFlights: List<Flight>? = null
 
+    //Iata to Icao map, for use in Post-Processing
+    private val iataIcaoMapAsync = airportRepository.getIataIcaoMapAsync()
+
+    /**
+     * TODO: WIP Restructure this. It has become spaghetti.
+     */
+
+    /**
+     * This will perform the work that we want to do:
+     * - read PDF file
+     * - Check Type
+     * - Parse that type
+     * - Do what needs boeing done with parsed data
+     * - TODO fix conflicts with incoming completed flights
+     */
+    private suspend fun run() = withContext(Dispatchers.IO) {
+        intent?.let {
+
+            val uri = (it.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri ?: it.data)
+            val typeDetector = getTypeDetector(uri) ?: run{
+                feedback(PdfParserActivityEvents.FILE_NOT_FOUND) // TODO handle this in Activity
+                return@withContext /* END HERE */
+            }
+
+            /*
+             * Catch bad data:
+             */
+            if (typeDetector.seemsInvalid || typeDetector.typeOfFile is SupportedTypes.Unsupported) {
+                feedback(PdfParserActivityEvents.UNSUPPORTED_FILE) // TODO handle this in Activity
+                return@withContext  /* END HERE */
+            }
+            /*
+             * We now have a supported file.
+             * What happens next: Depending on if this is a roster or
+             */
+            typeDetector.typeOfFile.let { type ->
+                when (type) {
+                    is SupportedTypes.PlannedFlights -> parseRoster(type, uri)
+
+                    is SupportedTypes.CompletedFlights -> parseCompletedFlights(type, uri)
+
+                    is SupportedTypes.CompleteLogbook -> {
+                        TODO("Handle complete logbook imports")
+                    }
+                    else -> {
+                        feedback(PdfParserActivityEvents.ERROR).putString("Error -1: This should not happen.")
+                        return@withContext
+                    }
+
+                }
+            }
+        }
+    }
+
+    /**
+     * Parse a Roster, and pass it on to Repository for saving
+     * Will provide feedback to Activity through [feedback]
+     */
+    private suspend fun parseRoster(type: SupportedTypes.PlannedFlights, uri: Uri?) {
+        getParser(type, uri)?.let{ roster ->
+            if (roster.isInvalid) {
+                feedback(PdfParserActivityEvents.UNSUPPORTED_FILE)
+                return
+            }
+            val processedRoster = roster.use{ r -> r.postProcess() } // this will close the original Roster's InputStream
+
+            // Check if calendar sync enabled for this. If so, end this function. It can be restarted from activity.
+            if (checkCalendarSync(processedRoster.period)){
+                feedback(PdfParserActivityEvents.CALENDAR_SYNC_ENABLED)
+                return
+            }
+            flightRepository.saveRoster(processedRoster)
+        } ?: run{
+            feedback(PdfParserActivityEvents.FILE_NOT_FOUND)
+            return
+        }
+    }
+
+    /**
+     * Parse a CompletedFlights file (eg a Monthly Overview), and pass it on to Repository for saving
+     * Will provide feedback to Activity through [feedback]
+     */
+    private suspend fun parseCompletedFlights(type: SupportedTypes.CompletedFlights, uri: Uri?) {
+        getParser(type, uri)?.let { monthly ->
+            TODO("Handle completed flights")
+        } ?: run{
+            feedback(PdfParserActivityEvents.FILE_NOT_FOUND) // TODO handle this in Activity
+            return
+        }
+    }
+
+    private suspend fun parseCompleteLogbook(type: SupportedTypes.CompleteLogbook, uri: Uri?) {
+        getParser(type, uri)?.let { completeLogbook ->
+            TODO("Handle completed flights")
+        } ?: run{
+            feedback(PdfParserActivityEvents.FILE_NOT_FOUND) // TODO handle this in Activity
+            return
+        }
+    }
+
+    /*
     private fun run() {
         intent?.let {
             viewModelScope.launch {
@@ -129,12 +239,15 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             }
         } ?: feedback(PdfParserActivityEvents.FILE_NOT_FOUND)
     }
+    */
 
-
+    /**
+     * Get inpustream from Uri and handle exceptions
+     */
     private fun Uri.getInputStream(): InputStream? = try {
         /*
          * Get the content resolver instance for this context, and use it
-         * to get a ParcelFileDescriptor for the file.
+         * to get an InputStream
          */
         App.instance.contentResolver.openInputStream(this)
     } catch (e: FileNotFoundException) {
@@ -143,6 +256,9 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         null
     }
 
+    /**
+     * Gets a FileTypeDetector which has some metadata about fileType
+     */
     private fun getTypeDetector(uri: Uri?): FileTypeDetector? {
         uri?.getInputStream()?.use { inputStream ->
             val mimeType = App.instance.contentResolver.getType(uri) ?: "NONE"
@@ -157,16 +273,63 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                 }
             }
             return if (detector?.seemsValid != true) null else detector
-        } ?: feedback(PdfParserActivityEvents.ERROR).apply{
-            putString("Error 3 YOLO")
         }
         return null
     }
+
+    /**
+     * Get correct parser for this Planned Flights file.
+     * Rosters keep an opened inputstream so should be closed after using.
+     * @return null when bad input data, [Roster] otherwise
+     */
+    private suspend fun getParser(type: SupportedTypes.PlannedFlights, uri: Uri?): Roster? =
+        uri?.getInputStream()?.let{ inputStream ->
+            when(type){
+                SupportedTypes.KLC_ROSTER ->  KlcRoster(inputStream)
+                SupportedTypes.KLC_CHECKIN_SHEET -> inputStream.use { KlcCheckinSheet.ofInputStream(it) }
+                SupportedTypes.KLM_ICA_ROSTER -> {
+                    feedback(PdfParserActivityEvents.UNSUPPORTED_FILE).putString("Sorry, KLM Roster Not supported atm, use ical calendar")
+                    null
+                }
+                else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -1: This should not happen.") }
+            }
+        }
+
+    /**
+     * Get correct parser for this Planned Flights file.
+     * Rosters keep an opened inputstream so should be closed after using.
+     * @return null when bad input data, [MonthlyOverview] otherwise
+     */
+    private fun getParser(type: SupportedTypes.CompletedFlights, uri: Uri?): MonthlyOverview? =
+        uri?.getInputStream()?.let{ inputStream ->
+            when(type){
+                SupportedTypes.KLC_MONTHLY ->  KlcMonthlyParser(inputStream)
+                SupportedTypes.KLM_ICA_MONTHLY -> KlmMonthlyParser(inputStream)
+                else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -1: This should not happen.") }
+            }
+        }
+
+    /**
+     * Get correct parser for this Planned Flights file.
+     * Rosters keep an opened inputstream so should be closed after using.
+     * @return null when bad input data, [MonthlyOverview] otherwise
+     */
+    private suspend fun getParser(type: SupportedTypes.CompleteLogbook, uri: Uri?): ImportedLogbook? =
+        uri?.getInputStream()?.let{ inputStream ->
+            when(type){
+                SupportedTypes.JOOZDLOG_CSV_BACKUP -> TODO("get Parser")
+                SupportedTypes.LOGTEN_PRO_LOGBOOK -> TODO("get Parser")
+                SupportedTypes.MCC_PILOT_LOG_LOGBOOK -> inputStream.use { MccPilotLogCsvParser.ofInputStream(it) }
+                else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -1: This should not happen.") }
+            }
+        }
+
 
     /*********************************************************************************************
      * Parser functions. This work can (should) be done async in NonCancelable coroutine
      *********************************************************************************************/
 
+    /*
     private fun parseRoster(roster: Roster): Boolean{
         if (!roster.isValid) return false
         viewModelScope.launch (Dispatchers.IO + NonCancellable) {
@@ -187,6 +350,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         }
         return true
     }
+    */
 
     private suspend fun parseMonthly(monthlyOverview: MonthlyOverview) = with(monthlyOverview){
         if (!validMonthlyOverview){
@@ -208,6 +372,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Saves flights from roster, does check if CalendarSync is enabled
      */
+    /*
     private fun saveFlightsFromRoster(finish: Boolean = true){
         if (flightsToSave == null){
             feedback(PdfParserActivityEvents.ERROR).apply{
@@ -227,6 +392,9 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             }
         }
     }
+    */
+
+    private fun checkCalendarSync(period: ClosedRange<Instant>) = Preferences.getFlightsFromCalendar && (Preferences.calendarDisabledUntil < periodToSave?.endInclusive?.epochSecond ?: -1)
 
 
     private suspend fun parseCsv(parser: ImportedLogbook) = withContext(Dispatchers.Default) {
@@ -267,6 +435,8 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
+    //TODO: This will have to go
+    @Deprecated("This will be replaced")
     private suspend fun processFlights(foundFlights: List<Flight>, addChronoMessageIfWanted: Boolean = true): Boolean {
         var adjustments = 0
         var newCount = 0
@@ -349,14 +519,21 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         get() = _parsedChronoData
 
 
+    /**
+     * Only runs if [intent] is null
+     */
     fun runOnce(newIntent: Intent){
         if (intent == null){
-            intent = newIntent.also{
-                Log.d("INTENT", "$it")
-            }
-            Log.d("INTENT", "echt heus eerlijk $intent")
-            run()
+            intent = newIntent
+            viewModelScope.launch { run() }
         }
+    }
+
+    /**
+     * Only call this from feedback handlers when run() is finished
+     */
+    fun runAgain(){
+        viewModelScope.launch { run() }
     }
 
     fun disableCalendarImport(){
@@ -378,9 +555,11 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         feedback (PdfParserActivityEvents.CALENDAR_SYNC_PAUSED)
     }
 
+    /*
     fun saveFlights(finish: Boolean = true){
         viewModelScope.launch(Dispatchers.IO + NonCancellable) {  saveFlightsFromRoster(finish) }
     }
+    */
 
     fun fixConflict(number: Int?){
         if (number == null) return
@@ -409,5 +588,4 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
 
         const val FAILED_IMPORTS_TAG = "FAILED_IMPORTS_TAG"
     }
-
 }

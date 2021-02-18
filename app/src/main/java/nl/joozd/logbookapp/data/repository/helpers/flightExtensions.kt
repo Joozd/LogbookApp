@@ -37,6 +37,9 @@ fun Flight.prepareForSave(): Flight{
 fun Flight.isSamedPlannedFlightAs(f: Flight) =
     isSameFlightAs(f) && isPlanned
 
+/**
+ * Checks if two flights are the same physical flight (ie the same orig to same dest at the same time with the same flightnumber)
+ */
 fun Flight.isSameFlightAs(f: Flight) =
     orig == f.orig
         && dest == f.dest

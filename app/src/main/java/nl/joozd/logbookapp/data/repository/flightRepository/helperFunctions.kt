@@ -19,29 +19,29 @@
 
 package nl.joozd.logbookapp.data.repository.flightRepository
 
-import android.util.Range
 import nl.joozd.logbookapp.data.repository.helpers.isSamedPlannedFlightAs
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.Instant
 import java.time.ZoneOffset
 
 /**
- * Gets all flight from [allFlights] that either :
- * - start between earliest out and latest in in [flightsOnDays]
- * - start between earliest out and latest in in dateRange
+ * Gets all flight from [allFlights] that start between earliest out and latest in in [flightsOnDays]
  */
-fun getFlightsOnDays(allFlights: List<Flight>, flightsOnDays: List<Flight>? = null, dateRange: ClosedRange<Instant>? = null): List<Flight>{
-    val period: ClosedRange<Long> = when {
-        dateRange != null -> (dateRange.start.epochSecond .. dateRange.endInclusive.epochSecond)
-        flightsOnDays != null -> {
-            val earliestIn = flightsOnDays.minBy { it.timeOut }?.tOut()?.toLocalDate()?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.epochSecond ?: 0L
-            val latestOut = flightsOnDays.maxBy { it.timeIn }?.tIn()?.toLocalDate()?.atStartOfDay()?.plusDays(1)?.toInstant(ZoneOffset.UTC)?.epochSecond ?: 0L ?: 0L
-            (earliestIn..latestOut)
-        }
-        else -> (0L..0L)
-    }
+fun getFlightsOnDays(allFlights: List<Flight>, flightsOnDays: List<Flight>): List<Flight>{
+    val earliestIn = flightsOnDays.minByOrNull { it.timeOut }?.tOut()?.toLocalDate()?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.epochSecond ?: 0L
+    val latestOut = flightsOnDays.maxByOrNull { it.timeIn }?.tIn()?.toLocalDate()?.atStartOfDay()?.plusDays(1)?.toInstant(ZoneOffset.UTC)?.epochSecond ?: 0L
+    val period = (earliestIn..latestOut)
     return allFlights.filter { it.timeOut in period }
 }
+
+/**
+ * Gets all flight from [allFlights] that  start between earliest out and latest in in dateRange
+ */
+fun getFlightsOnDays(allFlights: List<Flight>, dateRange: ClosedRange<Instant>): List<Flight>{
+    val period: ClosedRange<Long> =(dateRange.start.epochSecond .. dateRange.endInclusive.epochSecond)
+    return allFlights.filter { it.timeOut in period }
+}
+
 
 /**
  * Gets a list of flights from [allFlights] that are the same as one or more in [plannedFlights]

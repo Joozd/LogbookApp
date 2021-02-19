@@ -51,8 +51,15 @@ class FeedbackEvent(val type: FeedbackEvents.Event) {
     }
     fun getString(): String? = extraData.getString(STRING)
 
+    fun putLong(value: Long): FeedbackEvent{
+        extraData.putLong(LONG, value)
+        return this
+    }
+    fun getLong(): Long = extraData.getLong(LONG)
+
     companion object{
         const val INTEGER = "INTEGER_EXTRA_DATA_FOR_FEEDBACK"
+        const val LONG = "LONG_EXTRA_DATA_FOR_FEEDBACK"
         const val STRING = "STRING_EXTRA_DATA_FOR_FEEDBACK"
     }
 }

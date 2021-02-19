@@ -182,7 +182,7 @@ object Preferences {
     /**
      * Get planned flights from calendar?
      */
-    var getFlightsFromCalendar: Boolean by JoozdLogSharedPrefs(sharedPref, false)
+    var useCalendarSync: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
     var lastCalendarCheckTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
 

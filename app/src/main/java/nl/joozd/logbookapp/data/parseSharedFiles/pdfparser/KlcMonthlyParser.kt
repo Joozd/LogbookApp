@@ -32,8 +32,8 @@ import java.time.format.DateTimeFormatter
 /**
  * Takes an InputStream of a KLC Monthly Overview and does things with that
  * public accessible:
- * [validMonthlyOverview] = true if this seems to be working
- * [flights] = List<Flight>, or null if ![validMonthlyOverview]
+ * [isValid] = true if this seems to be working
+ * [flights] = List<Flight>, or null if ![isValid]
  * NOTE: Registrations are currently not correct on Montly Overviews (just last 3 letters), it will return them like that.
  * NOTE: ID's are always -1
  */
@@ -102,7 +102,7 @@ class KlcMonthlyParser(private val inputStream: InputStream): CompletedFlights {
      * Makes a period from midnight start of Overview to midnight after end of overview
      */
     private fun makePeriod(): ClosedRange<Instant>{
-        if (!validMonthlyOverview) return (Instant.EPOCH..Instant.EPOCH).also{ _dataSeemsValid = false}
+        if (!isValid) return (Instant.EPOCH..Instant.EPOCH).also{ _dataSeemsValid = false}
         val format = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         return dateRegEx.findAll(periodLine).map{LocalDate.parse(it.value, format)}.let{
             it.first().atStartOfDay().toInstant(ZoneOffset.UTC)..it.last().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
@@ -133,11 +133,11 @@ class KlcMonthlyParser(private val inputStream: InputStream): CompletedFlights {
     /*********************************************************************************************
      * Public values
      *********************************************************************************************/
-    override val validMonthlyOverview: Boolean
+    override val isValid: Boolean
         get() = _dataSeemsValid
 
     override val flights: List<Flight>
-    get() = if (!validMonthlyOverview) emptyList()
+    get() = if (!isValid) emptyList()
         else buildFlightsList()
 
     override val period

@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.ui.activities.pdfParserActivity
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -71,7 +72,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
              * Observers:
              ****************************************************************************************/
 
-            viewModel.feedbackEvent.observe(activity, Observer {
+            viewModel.feedbackEvent.observe(activity) {
                 when (it.getEvent()) {
                     PdfParserActivityEvents.NOT_IMPLEMENTED -> {
                         toast("Not supported yet")
@@ -83,19 +84,15 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                     }
 
                     PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED -> {
-                        longToast("YAAAAY it worked!")
+                        longToast("YAAAAY it worked  (Roster)")
                         closeAndstartMainActivity()
                     }
                     PdfParserActivityEvents.CHRONO_SUCCESSFULLY_ADDED -> {
-                        showChronoDialog(it.extraData)
+                        longToast("YAAAAY it worked (Chrono)")
+                        closeAndstartMainActivity()
                     }
                     PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND -> {
-                        showChronoConflictFixer(this)
-                    }
-                    PdfParserActivityEvents.SOME_FLIGHTS_FAILED_TO_IMPORT ->{
-                        val failedFlights = it.extraData.getStringArrayList(PdfParserActivityViewModel.FAILED_IMPORTS_TAG)
-                        longToast("${failedFlights?.size} failed to import!!!!!!1")
-                        //TODO make this better
+                        showChronoConflictDialog(it.getInt())
                     }
                     PdfParserActivityEvents.BACKUP_ONLY_ON_NEW_INSTALL -> {
                         showBackupOnlyOnNewInstallDialog()
@@ -120,17 +117,17 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                     PdfParserActivityEvents.CALENDAR_SYNC_ENABLED -> {
                         JoozdlogAlertDialog().show(activity) {
                             messageResource = R.string.calendar_update_active
-                            setPositiveButton(R.string.always) {
-                                viewModel.disableCalendarUntilAfterLastFlight()
+                            setPositiveButton(R.string.always) { _ ->
+                                viewModel.disableCalendarSync(it.getLong())
                                 Preferences.alwaysPostponeCalendarSync = true
-                                viewModel.saveFlights()
+                                viewModel.runAgain()
                             }
-                            setNegativeButton(android.R.string.ok) {    // Using "negative" button as positive so it gets placed the way I want to. Nothing negative about it.
-                                viewModel.disableCalendarUntilAfterLastFlight()
-                                viewModel.saveFlights(finish = false) // don't send ROSTER_SUCCESSFULLY_ADDED because
+                            setNegativeButton(android.R.string.ok) {  _ ->  // Using "negative" button as positive so it gets placed the way I want to. Nothing negative about it.
+                                viewModel.disableCalendarSync(it.getLong())
+                                viewModel.runAgain()
                             }
                             setNeutralButton(android.R.string.cancel) {
-                                startMainActivity(this@PdfParserActivity)
+                                closeAndstartMainActivity()
                             }
                         }
                     }
@@ -153,7 +150,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                     }
 
                 }
-            })
+            }
 
             setContentView(root)
         }
@@ -164,57 +161,15 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
         cancel()
     }
 
-    private fun showChronoDialog(extraData: Bundle){
-        //TODO use resources
-        JoozdlogAlertDialogV1(activity).apply {
-            val total =
-                extraData.getInt(PdfParserActivityViewModel.TOTAL_FLIGHTS_IN_CHRONO)
-            val new = extraData.getInt(PdfParserActivityViewModel.NEW_FLIGHTS)
-            val changed =
-                extraData.getInt(PdfParserActivityViewModel.ADJUSTED_FLIGHTS)
-            title = "Successfully added chrono"
-            message =
-                "flights in Chrono: $total\nadded new flights: $new\nUpdated flights: $changed"
-            setPositiveButton(android.R.string.ok) {
-                closeAndstartMainActivity()
-            }
-        }.show()
-    }
-
-    private fun showChronoConflictFixer(binding: ActivityPdfParserBinding) = with (binding) {
-        pdfParserProgressBar.visibility = View.GONE
-        pdfParserStatusTextView.visibility = View.GONE
-        tabLayout.visibility = View.VISIBLE
-        viewPager.apply{
-            visibility=View.VISIBLE
-            adapter = ScreenSlidePagerAdapter(activity, viewModel.parsedChronoData?.conflicts?.size ?: 0)
-            setPageTransformer(DepthPageTransformer(TRANSFORMER_MIN_SCALE))
-            TabLayoutMediator(binding.tabLayout, this) { _, _ ->
-                // empty for now
-            }.attach()
-        }
-    }
-
-    private fun hideChronoConflictfixer(binding: ActivityPdfParserBinding) = with (binding) {
-        pdfParserProgressBar.visibility = View.VISIBLE
-        pdfParserStatusTextView.visibility = View.VISIBLE
-        tabLayout.visibility = View.GONE
-        viewPager.visibility = View.GONE
+    private fun showChronoConflictDialog(conflicts: Int) {
+        toast("showChronoConflictDialog: $conflicts")
+        closeAndstartMainActivity()
     }
 
     private fun showBackupOnlyOnNewInstallDialog() = JoozdlogAlertDialog().show(activity){
         titleResource = R.string.error
         messageResource = R.string.backup_only_on_new_install
         setPositiveButton(android.R.string.ok) { closeAndstartMainActivity() }
-    }
-
-
-    private inner class ScreenSlidePagerAdapter(fa: FragmentActivity, private var availablePages: Int) : FragmentStateAdapter(fa) {
-        override fun getItemCount(): Int = availablePages
-
-        override fun createFragment(position: Int): Fragment = ChronoConflictSolverFragment().apply{
-            assignPageNumber(position)
-        }
     }
 
     companion object {

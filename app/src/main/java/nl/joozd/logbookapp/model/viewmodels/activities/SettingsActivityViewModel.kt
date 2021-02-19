@@ -60,7 +60,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _consensusOptIn = MutableLiveData(Preferences.consensusOptIn)
     private val _picNameNeedsToBeSet = MutableLiveData(Preferences.picNameNeedsToBeSet)
     private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
-    private val _getFlightsFromCalendar = MutableLiveData(Preferences.getFlightsFromCalendar)
+    private val _getFlightsFromCalendar = MutableLiveData(Preferences.useCalendarSync)
     private val _alwaysPostponeCalendarSync = MutableLiveData(Preferences.alwaysPostponeCalendarSync)
     private val _useCloudSync = MutableLiveData(Preferences.useCloud)
     private val _getNamesFromRosters = MutableLiveData(Preferences.getNamesFromRosters)
@@ -101,8 +101,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
                         if (it) R.string.useIataAirports else R.string.useIcaoAirports
                 }
 
-            Preferences::getFlightsFromCalendar.name ->
-                _getFlightsFromCalendar.value = Preferences.getFlightsFromCalendar
+            Preferences::useCalendarSync.name ->
+                _getFlightsFromCalendar.value = Preferences.useCalendarSync
 
             Preferences::alwaysPostponeCalendarSync.name ->
                 _alwaysPostponeCalendarSync.value = Preferences.alwaysPostponeCalendarSync
@@ -259,9 +259,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     }
 
     fun setGetFlightsFromCalendar(it: Boolean) {
-        if (it && !Preferences.getFlightsFromCalendar) // if it is switched on from being off
+        if (it && !Preferences.useCalendarSync) // if it is switched on from being off
             Preferences.calendarDisabledUntil = 0
-        Preferences.getFlightsFromCalendar = it
+        Preferences.useCalendarSync = it
     }
 
     fun setAutoPostponeCalendarSync(it: Boolean){

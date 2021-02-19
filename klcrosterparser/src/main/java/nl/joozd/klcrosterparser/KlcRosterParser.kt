@@ -307,7 +307,7 @@ class KlcRosterParser(private val inputStream: InputStream): Closeable {
                         val numbers = checkOutRegex.find(line)!!.value.filter{it in "0123456789 "}.trim().replace("\\s+".toRegex(), " ").split(" ")
                         val time = numbers[0].toInt()
                         val endTime = LocalDateTime.of(activeDate, LocalTime.of(time/100, time%100)).atZone(ZoneOffset.UTC).toInstant()
-                        val startTime = todaysEvents.maxBy { it.end }?.end ?: endTime.minusSeconds(defaultCheckoutTimeInSeconds)
+                        val startTime = todaysEvents.maxByOrNull { it.end }?.end ?: endTime.minusSeconds(defaultCheckoutTimeInSeconds)
                         val extraMessage = line.slice(line.indexOf("[")..line.indexOf("]"))
 
                         todaysEvents.add(KlcRosterEvent(Activities.CHECKOUT, startTime, endTime, line))

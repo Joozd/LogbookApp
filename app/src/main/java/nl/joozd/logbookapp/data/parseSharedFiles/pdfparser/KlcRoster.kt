@@ -26,8 +26,6 @@ import nl.joozd.klcrosterparser.KlcRosterParser
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
-import nl.joozd.logbookapp.utils.reversed
-import java.io.Closeable
 import java.io.InputStream
 import java.time.Instant
 
@@ -36,7 +34,7 @@ import java.time.Instant
  * Will transfor a KLC PDF roster into flights
  * Flights need to be cleaned before use.
  */
-class KlcRoster(val inputStream: InputStream): Roster {
+class KlcRoster(private val inputStream: InputStream): Roster {
 
     /*********************************************************************************************
      * Private parts
@@ -106,7 +104,7 @@ class KlcRoster(val inputStream: InputStream): Roster {
      * @param icaoIataMap: map that holds icao names as keys and iata names as values
      * @return list of flights (flightIDs are -1)
      */
-    override val flights: List<Flight>?
+    override val flights: List<Flight>
     get() {
         Log.d("KLC Roster Parser", "found ${flightsToPlan.size} flights")
         return flightsToPlan + simsToPlan

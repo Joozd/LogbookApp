@@ -35,6 +35,7 @@ import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.repository.GeneralRepository
+import nl.joozd.logbookapp.data.repository.helpers.overlaps
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.*
 // import nl.joozd.logbookapp.extensions.*
@@ -45,7 +46,6 @@ import nl.joozd.logbookapp.model.helpers.FlightConflichtChecker
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.utils.CoroutineTimerTask
-import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.time.*
 import java.util.*
@@ -60,8 +60,10 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     private val rawFlights
         get() = flightRepository.liveFlights.value ?: emptyList()
+
+    // TODO do this work in adapter instead of on all flights that are never shown
     private val flightsList
-        get() = searchFlights(rawFlights).map { DisplayFlight.of(it, icaoIataMap, Preferences.useIataAirports) }.also { setSearchFieldHint(it.size) }
+        get() = flightsToDisplayFlightsWithErrorCheck(searchFlights(rawFlights)).also { setSearchFieldHint(it.size) }
 
     private val _backupInterval: LiveData<Int> = Preferences.backupIntervalLiveData
 
@@ -200,6 +202,15 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         return (Instant.now() - mostRecentBackup > Duration.ofDays(Preferences.backupInterval.toLong())).also{
             if (it) feedback(MainActivityEvents.BACKUP_NEEDED)
         }
+    }
+
+    /**
+     * Mark overlapping flights as markAsError
+     */
+    private fun flightsToDisplayFlightsWithErrorCheck(fff: List<Flight>): List<DisplayFlight> = fff.mapIndexed { index, f ->
+        val previous = fff.getOrNull(index-1)
+        val next = fff.getOrNull(index+1)
+        DisplayFlight.of(f, icaoIataMap, Preferences.useIataAirports, error = f.overlaps(previous) || f.overlaps(next))
     }
 
     /*********************************************************************************************
@@ -374,7 +385,7 @@ else{
                 when (it?.isPlanned) {
                     null -> feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
                     true -> {
-                        if (Preferences.getFlightsFromCalendar && it.timeOut > Preferences.calendarDisabledUntil && it.timeOut > Instant.now().epochSecond)
+                        if (Preferences.useCalendarSync && it.timeOut > Preferences.calendarDisabledUntil && it.timeOut > Instant.now().epochSecond)
                             feedback(MainActivityEvents.TRYING_TO_DELETE_CALENDAR_FLIGHT).apply {
                                 extraData.putInt(MainActivityFeedbackExtraData.FLIGHT_ID, id)
                             }
@@ -453,7 +464,7 @@ else{
     }
 
     fun disableCalendarImport() {
-        Preferences.getFlightsFromCalendar = false
+        Preferences.useCalendarSync = false
     }
 
     /*********************************************************************************************

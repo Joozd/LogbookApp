@@ -42,6 +42,7 @@
       <module name="LogbookApp.app" target="1.8" />
       <module name="LogbookApp.joozdlogCommon" target="1.8" />
       <module name="LogbookApp.JoozdUtils" target="1.8" />
+      <module name="LogbookApp.klcrosterparser" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -39,7 +39,6 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.CalendarScraper
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.comm.InternetStatus
-import nl.joozd.logbookapp.data.comm.ServerFunctions
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -269,13 +268,13 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     fun calendarPicked(index: Int) {
         _foundCalendars.value?.get(index)?.let {
             Preferences.selectedCalendar = it.name
-            Preferences.getFlightsFromCalendar = true
+            Preferences.useCalendarSync = true
             feedback(NewUserActivityEvents.CALENDAR_PICKED, _page3Feedback)
         }
     }
 
     fun noCalendarSelected(){
-        Preferences.getFlightsFromCalendar = false
+        Preferences.useCalendarSync = false
     }
 
     /*******************************************************************************************

@@ -19,7 +19,10 @@
 
 package nl.joozd.logbookapp.data.repository.helpers
 
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.atEndOfDay
+import nl.joozd.logbookapp.extensions.nullIfEmpty
+import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import java.time.*
@@ -49,13 +52,16 @@ fun Flight.isSameFlightAs(f: Flight) =
 
 /**
  * Checks if flights are the same, times may be off by max [margin] seconds
+ * This is to be used when entering flights from Monthly Overviews, to detect flights with slightly incorrect times
  */
-    fun Flight.isSameFlightAsWithMargins(f: Flight, margin: Long) =
+    fun Flight.isSameCompletedFlight(f: Flight, margin: Long) =
     orig == f.orig
             && dest == f.dest
             && timeOut in (f.timeOut-margin .. f.timeOut+margin)
             && timeIn in (f.timeIn-margin .. f.timeIn+margin)
-            && hasSameflightNumberAs(f)
+
+    fun Flight.isSameCompletedFlight(f: Flight) = isSameCompletedFlight(f, Preferences.maxChronoAdjustment * 60L)
+
 
 /**
  * Checks if flights are the same
@@ -67,4 +73,36 @@ fun Flight.isSameFlightOnSameDay(f: Flight) =
             && tOut().toLocalDate() == f.tOut().toLocalDate()
             && hasSameflightNumberAs(f)
 
+/**
+ * true if this flights time in or out are between other flights time in and out
+ * returns false if other is null
+ */
+fun Flight.overlaps(other: Flight?): Boolean {
+    if (other == null) return false
+    val range = other.timeOut..other.timeIn
+    return timeOut in range || timeIn in range
+}
+
+/**
+ * Merge data into other flight, if filled
+ *  - Flight number
+ *  - time out (not overwritten if 0)
+ *  - time in (not overwritten if 0)
+ *  - Registration
+ *  - Aircraft Type
+ *  - isPlanned flag if not planned
+ */
+fun Flight.mergeInto(other: Flight) = other.copy(
+    flightNumber = flightNumber.nullIfEmpty() ?: other.flightNumber,
+    timeOut = timeOut.nullIfZero() ?: other.timeOut,
+    timeIn = timeIn.nullIfZero() ?: other.timeIn,
+    registration = registration.nullIfEmpty() ?: other.registration,
+    aircraftType = aircraftType.nullIfEmpty() ?: other.aircraftType,
+    isPlanned = isPlanned && other.isPlanned
+)
+
+
 fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.toUpperCase(Locale.ROOT).trim() == other.flightNumber.toUpperCase(Locale.ROOT).trim()
+
+
+fun Flight.shortString() = "$flightID: ${tOut()} $orig-$dest / $registration"

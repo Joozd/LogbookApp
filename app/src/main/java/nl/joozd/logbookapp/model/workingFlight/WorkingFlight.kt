@@ -221,7 +221,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * otherwise it will get it from registration
      * If that doesn't fetch a type, it sets type to null
      */
-    private fun setAircraftFromFlight(f: Flight) {
+    private suspend fun setAircraftFromFlight(f: Flight) {
         mAircraft =
             AircraftRepository.getInstance().getAircraftTypeByShortName(f.aircraftType)?.let {
                 Aircraft(registration = f.registration, type = it, source = Aircraft.FLIGHT)
@@ -236,7 +236,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     private suspend fun getAirport(id: String): Airport? =
         AirportRepository.getInstance().getAirportByIcaoIdentOrNull(id)
 
-    private fun getAircraftByRegistration(reg: String) =
+    private suspend fun getAircraftByRegistration(reg: String) =
         AircraftRepository.getInstance().getAircraftFromRegistration(reg)
 
     /**

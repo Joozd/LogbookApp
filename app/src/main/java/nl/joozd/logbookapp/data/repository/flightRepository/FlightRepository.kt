@@ -25,6 +25,8 @@ import android.util.Log
 import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.dao.FlightDao
@@ -34,10 +36,9 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.CalendarFlightUpdater
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.parseSharedFiles.extensions.postProcess
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
-import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
-import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAsWithMargins
-import nl.joozd.logbookapp.data.repository.helpers.isSameFlightOnSameDay
+import nl.joozd.logbookapp.data.repository.helpers.*
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfRegistrations
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
@@ -55,6 +56,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * Private parts:
      ********************************************************************************************/
 
+    private val saveMutex = Mutex()
 
 
     private var undeleteFlight: Flight? = null
@@ -112,7 +114,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         cachedFlightsList = ((cachedFlightsList
             ?: emptyList()).filter { it.flightID != flight.flightID }).sortedByDescending { it.timeOut }
         launch (dispatcher + NonCancellable) {
-            flightDao.delete(flight.toModel())
+            saveMutex.withLock {
+                flightDao.delete(flight.toModel())
+            }
         }
     }
 
@@ -123,7 +127,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         cachedFlightsList = ((cachedFlightsList
             ?: emptyList()).filter { it.flightID !in flights.map { f -> f.flightID } }).sortedByDescending { it.timeOut }
         launch (dispatcher + NonCancellable) {
-            flightDao.deleteMultipleByID(flights.map { it.flightID })
+            saveMutex.withLock {
+                flightDao.deleteMultipleByID(flights.map { it.flightID })
+            }
         }
     }
 
@@ -138,7 +144,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * Returns all flights in DB which start in [period]
      */
-    private suspend fun getFlightsOnDays(period: ClosedRange<Instant>) = getFlightsOnDays(getAllFlights(), period)
+    private suspend fun getFlightsOnDays(period: ClosedRange<Instant>, extraDays: Int = 0) =
+        getFlightsOnDays(getAllFlights(), (period.start.minusSeconds(86400L*extraDays)..period.endInclusive.plusSeconds(86400L*extraDays)))
 
     private val _syncProgress = MutableLiveData<Int>(-1)
 
@@ -299,21 +306,26 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * @param notify: Whether or not to update [savedFlight]
      */
     fun save(flight: Flight, sync: Boolean = true, notify: Boolean = false, updateIDs: Boolean = false) = launch {
-        //assign available FlightID if requested
-        val f = if (updateIDs) flight.copy(flightID = lowestFreeFlightID(), timeStamp = TimestampMaker.nowForSycPurposes) else flight.copy (timeStamp = TimestampMaker.nowForSycPurposes)
+        saveMutex.withLock {
+            //assign available FlightID if requested
+            val f = if (updateIDs) flight.copy(flightID = lowestFreeFlightID(), timeStamp = TimestampMaker.nowForSycPurposes) else flight.copy(timeStamp = TimestampMaker.nowForSycPurposes)
 
-        //update cached flights
-        cachedFlightsList = ((cachedFlightsList?: emptyList()).filter { it.flightID != f.flightID }
-                + listOf(f).filter { !it.DELETEFLAG })
-            .sortedByDescending { it.timeOut }
-        //Save flight to disk
-        launch (dispatcher + NonCancellable) {
-            flightDao.insertFlights(f.toModel())
-            if (notify) launch(Dispatchers.Main) {
-                _savedFlight.value = SingleUseFlight(f).also{
-                    Log.d("FLightReposiroty.save()","Notifying!")
-                } }
-            if (sync) syncAfterChange()
+            //update cached flights
+            cachedFlightsList = ((cachedFlightsList ?: emptyList()).filter { it.flightID != f.flightID }
+                    + listOf(f).filter { !it.DELETEFLAG })
+                .sortedByDescending { it.timeOut }
+
+            //Save flight to disk
+            //This part is not locked (it will suspend and @withLock will end before this finishes), but the lock should keep the cache up-to-date.
+            launch(dispatcher + NonCancellable) {
+                flightDao.insertFlights(f.toModel())
+                if (notify) launch(Dispatchers.Main) {
+                    _savedFlight.value = SingleUseFlight(f).also {
+                        Log.d("FLightReposiroty.save()", "Notifying!")
+                    }
+                }
+                if (sync) syncAfterChange()
+            }
         }
     }
 
@@ -322,18 +334,23 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * @see [save]
      */
     fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean = false) = launch {
-        //assign available FlightIDs if requested
-        val ff = if (updateIDs) flights.mapIndexed { index, flight -> flight.copy(flightID = lowestFreeFlightID() + index, timeStamp = TimestampMaker.nowForSycPurposes) } else flights.map { it.copy (timeStamp = TimestampMaker.nowForSycPurposes) }
+        saveMutex.withLock {
+            //assign available FlightIDs if requested
+            val ff = if (updateIDs) flights.mapIndexed { index, flight -> flight.copy(flightID = lowestFreeFlightID() + index, timeStamp = TimestampMaker.nowForSycPurposes) } else flights.map {
+                it.copy(timeStamp = TimestampMaker.nowForSycPurposes)
+            }
 
-        //update cached flights
-        cachedFlightsList = ((cachedFlightsList ?: emptyList()).filter { it.flightID !in ff.map { it2 -> it2.flightID } }
-                + ff.filter { !it.DELETEFLAG })
-            .sortedByDescending { it.timeOut }
-        //Save flights to disk
-        launch (dispatcher + NonCancellable) {
-            flightDao.insertFlights(*(ff.map { it.toModel() }.toTypedArray()))
-            Log.d("Saved", "Saved ${ff.size} flights!")
-            if (sync) syncAfterChange()
+            //update cached flights
+            cachedFlightsList = ((cachedFlightsList ?: emptyList()).filter { it.flightID !in ff.map { it2 -> it2.flightID } }
+                    + ff.filter { !it.DELETEFLAG })
+                .sortedByDescending { it.timeOut }
+            //Save flights to disk
+            launch(dispatcher + NonCancellable) {
+                flightDao.insertFlights(*(ff.map { it.toModel() }.toTypedArray()))
+                Log.d("Saved", "Saved ${ff.size} flights!")
+                Log.d("Saved", ff.joinToString("\n") { it.shortString() })
+                if (sync) syncAfterChange()
+            }
         }
     }
 
@@ -383,6 +400,44 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     }
 
     /**
+     * Save flights from a [CompletedFlights] object
+     * It will save flights in [completedFlights] or update flights already saved that are the same with updated data
+     * updated data can be:
+     *  - Flight number
+     *  - time out
+     *  - time in
+     *  - Registration
+     *  - Aircraft Type
+     * @return the amount of conflicts found (doesn't handle conflicts, only detects them)
+     */
+    suspend fun saveCompletedFlights(completedFlights: CompletedFlights): Int = withContext(Dispatchers.IO + NonCancellable){
+        require(completedFlights.isValid) { "Cannot parse an invalid roster! You should have checked this!" }
+        val importFlights = completedFlights.flights
+        val flightsInPeriod = getFlightsOnDays(completedFlights.period)
+
+        val conflicts = flightsInPeriod.filter { savedFlight -> importFlights.none { it.isSameCompletedFlight(savedFlight) } && importFlights.any { it.overlaps(savedFlight) } }
+        println("I FOUND ${conflicts.size} CONFLICTING FLIGHTS: $conflicts")
+        val newFlights = importFlights.filter { importFlight ->flightsInPeriod.none { it.isSameCompletedFlight(importFlight) }}
+        val flightsToUpdate = flightsInPeriod.filter { savedFlight -> importFlights.any { it.isSameCompletedFlight(savedFlight) }}
+        println("I FOUND ${flightsToUpdate.size} FLIGHTS TO UPDATE: ${flightsToUpdate.map{it.shortString() +"\n"}}")
+
+        // Update known flights, ignore flights that will not change:
+        val updatedFlights = flightsToUpdate.mapNotNull{ oldFlight ->
+            val importingFlight = importFlights.first{ it.isSameCompletedFlight(oldFlight)}
+            if (importingFlight.isSameFlightAs(oldFlight))
+                null
+            else importingFlight.mergeInto(oldFlight)
+        }
+        println("I FOUND ${updatedFlights.size} FLIGHTS TO UPDATE: ${updatedFlights.joinToString("\n") { it.toString() }}")
+
+        // Save new flights
+        save(newFlights, updateIDs = true, sync = false)
+        save(updatedFlights, updateIDs = false, sync = true)
+
+        return@withContext conflicts.size
+    }
+
+    /**
      * Sync functions:
      */
 
@@ -399,7 +454,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                         || getFlightsChangedAfter(Preferences.lastUpdateTime).isNotEmpty()
             val needsCalendarSync =
                 TimestampMaker.nowForSycPurposes - Preferences.lastCalendarCheckTime > MIN_CALENDAR_CHECK_INTERVAL
-            if ((needsCalendarSync || needsServerSync) && Preferences.getFlightsFromCalendar) {
+            if ((needsCalendarSync || needsServerSync) && Preferences.useCalendarSync) {
                 if (checkPermission(Manifest.permission.READ_CALENDAR)) {
                     val calendar = CalendarFlightUpdater()
                     calendar.getRoster()?.let {
@@ -461,7 +516,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * Gets the lowest free FlightID
      */
     suspend fun lowestFreeFlightID(): Int = withContext(Dispatchers.IO){
-        cachedFlightsList?.maxByOrNull { it.flightID }?.flightID ?: getHighestIdAsync().await()
+        (cachedFlightsList?.maxByOrNull { it.flightID }?.flightID ?: getHighestIdAsync().await())
     }
 
     fun iAmACaptainAsync() =  async(dispatcher) {
@@ -477,7 +532,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         val unknownNewFlights = flightsToCheck.filter { f ->
             allFlights.none {
                 if (allowMargins)
-                    it.isSameFlightAsWithMargins(f, Preferences.maxChronoAdjustment * 60L)
+                    it.isSameCompletedFlight(f, Preferences.maxChronoAdjustment * 60L)
                 else it.isSameFlightAs(f)
             }
         }

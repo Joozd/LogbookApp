@@ -55,7 +55,8 @@ data class DisplayFlight(
     val pf: Boolean = false,
     val instructor: Boolean = false,
     val sim: Boolean = false,
-    val planned: Boolean = false
+    val planned: Boolean = false,
+    val markAsError: Boolean = false // Marked as error when creating a list of these when it has overlapping times with previous or next
 ){
     val aircraftTextMerged = listOf(registration, type).filter{it.isNotBlank()}.joinToString(" - ")
 
@@ -71,7 +72,7 @@ data class DisplayFlight(
 
 
     companion object{
-        fun of(f: Flight, icaoIataMap: Map<String, String>, useIATA: Boolean) = DisplayFlight(
+        fun of(f: Flight, icaoIataMap: Map<String, String>, useIATA: Boolean, error: Boolean) = DisplayFlight(
             flightID = f.flightID,
             orig = if (useIATA) icaoIataMap[f.orig]?.nullIfEmpty() ?: f.orig else f.orig,
             dest = if (useIATA) icaoIataMap[f.dest]?.nullIfEmpty() ?: f.dest else f.dest,
@@ -95,7 +96,8 @@ data class DisplayFlight(
             pf = f.isPF,
             instructor = f.isInstructor,
             sim = f.isSim,
-            planned = f.isPlanned
+            planned = f.isPlanned,
+            markAsError = error
         )
         private fun buildNames(vararg names: String): String{
             val nn  = names.filter{it.isNotBlank()}.map{

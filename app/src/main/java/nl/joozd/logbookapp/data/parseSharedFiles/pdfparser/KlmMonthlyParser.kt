@@ -23,7 +23,7 @@ import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.MonthlyOverview
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
 import nl.joozd.logbookapp.extensions.toInstant
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -38,7 +38,7 @@ import java.time.format.DateTimeFormatter
  * Will create 2 man flights for CP and FO, 3 man flight for SO
  * All flights are assumed IFR, and as PNF
  */
-class KlmMonthlyParser(private val inputStream: InputStream): MonthlyOverview {
+class KlmMonthlyParser(private val inputStream: InputStream): CompletedFlights {
 
     /**
      * regexes
@@ -108,7 +108,7 @@ class KlmMonthlyParser(private val inputStream: InputStream): MonthlyOverview {
     /**
      * true if this seems to be a valid monthly overview (gross error check)
      */
-    override val validMonthlyOverview: Boolean
+    override val isValid: Boolean
         get() = _dataSeemsValid
 
     /**

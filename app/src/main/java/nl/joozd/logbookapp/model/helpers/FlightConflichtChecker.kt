@@ -37,7 +37,7 @@ object FlightConflichtChecker {
      */
     fun checkConflictingWithCalendarSync(originalFlight: Flight?, changedFlight: Flight): Long {
         return when {
-            !Preferences.getFlightsFromCalendar -> 0L                                                                           // not using calendar sync
+            !Preferences.useCalendarSync -> 0L                                                                           // not using calendar sync
             Preferences.calendarDisabledUntil >= maxOf(originalFlight?.timeIn ?: 0, changedFlight.timeIn) -> 0L              // not using calendar sync for flight being edited
             !changedFlight.prepareForSave().isPlanned -> 0L                                                                     // not planned, no problem
             originalFlight?.isSamedPlannedFlightAs(changedFlight.prepareForSave()) == true -> 0L                                // editing a planned flight in a way that doesn't break sync

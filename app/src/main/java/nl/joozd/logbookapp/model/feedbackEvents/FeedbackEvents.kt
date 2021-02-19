@@ -59,8 +59,6 @@ object FeedbackEvents {
         UNSUPPORTED_FILE,
         NOT_A_KNOWN_ROSTER,
         NOT_A_KNOWN_LOGBOOK,
-        SOME_FLIGHTS_FAILED_TO_IMPORT,
-        BACKUP_ONLY_ON_NEW_INSTALL,
         ERROR
     }
 

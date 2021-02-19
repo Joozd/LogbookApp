@@ -55,8 +55,6 @@ import java.time.Instant
  * - do whatever needs to be done with parsed data (insert roster from planned, check flights from monthlies etc)
  * - Fixes conflicts when importing Monthlies
  */
-
-
 class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     private var intent: Intent? = null
 
@@ -86,7 +84,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
 
             /*
              * We now have a supported file.
-             * What happens next: Depending on if this is a roster or
+             * What happens next: Depending on if this is a roster or something else, start the respective function
              */
             typeDetector.typeOfFile.let { type ->
                 when (type) {
@@ -100,7 +98,6 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                         feedback(PdfParserActivityEvents.ERROR).putString("Error -1: This should not happen.")
                         return@withContext
                     }
-
                 }
             }
         }
@@ -182,10 +179,6 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      * Get inpustream from Uri and handle exceptions
      */
     private fun Uri.getInputStream(): InputStream? = try {
-        /*
-         * Get the content resolver instance for this context, and use it
-         * to get an InputStream
-         */
         App.instance.contentResolver.openInputStream(this)
     } catch (e: FileNotFoundException) {
         e.printStackTrace()
@@ -228,7 +221,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                     feedback(PdfParserActivityEvents.UNSUPPORTED_FILE).putString("Sorry, KLM Roster Not supported atm, use ical calendar")
                     null
                 }
-                else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -1: This should not happen.") }
+                else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -2: This should not happen.") }
             }
         }
 
@@ -242,7 +235,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             when(type){
                 SupportedTypes.KLC_MONTHLY ->  KlcMonthlyParser(inputStream)
                 SupportedTypes.KLM_ICA_MONTHLY -> KlmMonthlyParser(inputStream)
-                else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -1: This should not happen.") }
+                else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -3: This should not happen.") }
             }
         }
 
@@ -257,7 +250,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                 SupportedTypes.JOOZDLOG_CSV_BACKUP -> TODO("get Parser")
                 SupportedTypes.LOGTEN_PRO_LOGBOOK -> TODO("get Parser")
                 SupportedTypes.MCC_PILOT_LOG_LOGBOOK -> inputStream.use { MccPilotLogCsvParser.ofInputStream(it) }
-                else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -1: This should not happen.") }
+                else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -4: This should not happen.") }
             }
         }
 

@@ -94,9 +94,6 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                     PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND -> {
                         showChronoConflictDialog(it.getInt())
                     }
-                    PdfParserActivityEvents.BACKUP_ONLY_ON_NEW_INSTALL -> {
-                        showBackupOnlyOnNewInstallDialog()
-                    }
 
 
 
@@ -148,7 +145,6 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                         startMainActivity(activity)
                         finish()
                     }
-
                 }
             }
 
@@ -164,17 +160,6 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
     private fun showChronoConflictDialog(conflicts: Int) {
         toast("showChronoConflictDialog: $conflicts")
         closeAndstartMainActivity()
-    }
-
-    private fun showBackupOnlyOnNewInstallDialog() = JoozdlogAlertDialog().show(activity){
-        titleResource = R.string.error
-        messageResource = R.string.backup_only_on_new_install
-        setPositiveButton(android.R.string.ok) { closeAndstartMainActivity() }
-    }
-
-    companion object {
-        const val TAG = "PdfParserActivity"
-        private const val TRANSFORMER_MIN_SCALE = 0.75f
     }
 }
 

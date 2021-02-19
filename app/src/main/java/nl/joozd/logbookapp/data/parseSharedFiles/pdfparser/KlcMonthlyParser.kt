@@ -24,7 +24,7 @@ import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
 import java.io.InputStream
 import nl.joozd.joozdlogfiletypedetector.TypeIdentifiers.KLC_MONTHLY
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.MonthlyOverview
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -37,8 +37,7 @@ import java.time.format.DateTimeFormatter
  * NOTE: Registrations are currently not correct on Montly Overviews (just last 3 letters), it will return them like that.
  * NOTE: ID's are always -1
  */
-class KlcMonthlyParser(inputStream: InputStream): MonthlyOverview {
-
+class KlcMonthlyParser(private val inputStream: InputStream): CompletedFlights {
     /*********************************************************************************************
      * Private parts: constructor and variables
      *********************************************************************************************/
@@ -102,8 +101,8 @@ class KlcMonthlyParser(inputStream: InputStream): MonthlyOverview {
     /**
      * Makes a period from midnight start of Overview to midnight after end of overview
      */
-    private fun makePeriod(): ClosedRange<Instant>?{
-        if (!validMonthlyOverview) return null
+    private fun makePeriod(): ClosedRange<Instant>{
+        if (!validMonthlyOverview) return (Instant.EPOCH..Instant.EPOCH).also{ _dataSeemsValid = false}
         val format = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         return dateRegEx.findAll(periodLine).map{LocalDate.parse(it.value, format)}.let{
             it.first().atStartOfDay().toInstant(ZoneOffset.UTC)..it.last().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
@@ -122,7 +121,7 @@ class KlcMonthlyParser(inputStream: InputStream): MonthlyOverview {
     private fun MatchResult.timeIn() = LocalTime.parse(groups[TIME_IN]?.value ?: error ("ERROR 0001 NO TIME_IN"), timeFormatter)
     private fun MatchResult.orig() = (groups[ORIG]?.value ?: error ("ERROR 0004 NO ORIG"))
     private fun MatchResult.dest() = (groups[DEST]?.value ?: error ("ERROR 0005 NO DEST"))
-    private fun MatchResult.reg() = (groups[REGISTRATION]?.value ?: error ("ERROR 0005 NO REGISTRATION"))
+    private fun MatchResult.reg() = (groups[REGISTRATION]?.value?.let { "PH-$it" } ?: error ("ERROR 0005 NO REGISTRATION"))
     /*
     // Not used ATM
     private fun MatchResult.totalTime(): Duration {
@@ -137,12 +136,16 @@ class KlcMonthlyParser(inputStream: InputStream): MonthlyOverview {
     override val validMonthlyOverview: Boolean
         get() = _dataSeemsValid
 
-    override val flights: List<Flight>?
-    get() = if (!validMonthlyOverview) null
+    override val flights: List<Flight>
+    get() = if (!validMonthlyOverview) emptyList()
         else buildFlightsList()
 
     override val period
         get() = makePeriod()
+
+    override fun close() {
+        inputStream.close()
+    }
 
     /*********************************************************************************************
      *Companion object

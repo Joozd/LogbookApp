@@ -177,9 +177,12 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.setAddNamesFromRoster(isChecked)
             }
 
+            /*
+            //NOT IMPLEMENTED
             addRemarksToChronoUpdatesSwitch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.setShowOldTimesOnChronoUpdate(isChecked)
             }
+            */
 
             augmentedCrewButton.setOnClickListener { showAugmentedTimesNumberPicker() }
 
@@ -276,9 +279,12 @@ class SettingsActivity : JoozdlogActivity() {
             }
 
 
+            /*
+            //NOT IMPLEMENTED
             viewModel.showOldTimesOnChronoUpdate.observe(activity) {
                 addRemarksToChronoUpdatesSwitch.isChecked = it
             }
+            */
 
             viewModel.foundCalendars.observe(activity) {
                 @Suppress("UNCHECKED_CAST")
@@ -542,19 +548,17 @@ class SettingsActivity : JoozdlogActivity() {
             Preferences.backupInterval = pickedNumber
         }
 
-        override val formatter = NumberPicker.Formatter{ when (it) {
-            0 -> App.instance.getString(R.string.never)
-            1 -> App.instance.getString(R.string.day)
-            else -> App.instance.getStringWithMakeup(R.string.n_days, it.toString()).toString()
+        override val formatter = NumberPicker.Formatter{
+            when (it) {
+                0 -> App.instance.getString(R.string.never)
+                1 -> App.instance.getString(R.string.day)
+                else -> App.instance.getStringWithMakeup(R.string.n_days, it.toString()).toString()
+            }
         }
-        }
-
-
     }
 
     companion object{
         private const val CALENDAR_PERMISSION_REQUEST_CODE = 1
-        private const val CALENDAR_PERMISSION_TEMP_CODE = 2
         private const val CSV_MIME_TYPE = "text/csv"
     }
 }

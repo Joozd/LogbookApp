@@ -64,7 +64,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _alwaysPostponeCalendarSync = MutableLiveData(Preferences.alwaysPostponeCalendarSync)
     private val _useCloudSync = MutableLiveData(Preferences.useCloud)
     private val _getNamesFromRosters = MutableLiveData(Preferences.getNamesFromRosters)
-    private val _showOldTimesOnChronoUpdate = MutableLiveData(Preferences.showOldTimesOnChronoUpdate)
+
+    // Not implemented
+    // private val _showOldTimesOnChronoUpdate = MutableLiveData(Preferences.showOldTimesOnChronoUpdate)
+
     private val _standardTakeoffLandingTimes = MutableLiveData(Preferences.standardTakeoffLandingTimes)
     private val _lastUpdateTime = MutableLiveData(makeTimeString(Preferences.lastUpdateTime))
     private val _backupInterval = MutableLiveData(Preferences.backupInterval)
@@ -122,8 +125,11 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
             Preferences::getNamesFromRosters.name ->
                 _getNamesFromRosters.value = Preferences.getNamesFromRosters
 
+            /*
+            // Not implemented
             Preferences::showOldTimesOnChronoUpdate.name ->
                 _showOldTimesOnChronoUpdate.value = Preferences.showOldTimesOnChronoUpdate
+            */
 
             Preferences::standardTakeoffLandingTimes.name ->
                 _standardTakeoffLandingTimes.value = Preferences.standardTakeoffLandingTimes
@@ -180,8 +186,11 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     val getNamesFromRosters: LiveData<Boolean>
         get() = _getNamesFromRosters
 
+    /*
+    // Not implemented
     val showOldTimesOnChronoUpdate: LiveData<Boolean>
         get() = _showOldTimesOnChronoUpdate
+    */
 
     val standardTakeoffLandingTimes: LiveData<Int>
         get() = _standardTakeoffLandingTimes
@@ -272,9 +281,12 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         Preferences.getNamesFromRosters = it
     }
 
+    /*
+    // Not implemented
     fun setShowOldTimesOnChronoUpdate(it: Boolean) {
         Preferences.showOldTimesOnChronoUpdate = it
     }
+    */
 
     fun useCloudSyncToggled(){
         Preferences.useCloud = !Preferences.useCloud
@@ -304,11 +316,6 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
             Preferences.selectedCalendar = it.name
             flightRepository.syncIfNeeded()
         }
-    }
-
-    // This is not used at the moment but it's there when we need it. Just set [settingsCalendarTypeSpinner] visibility to VISIBLE in SettingsActivity
-    fun calendarTypePicked(index: Int){
-        Preferences.calendarType = index
     }
 
     fun dontPostponeCalendarSync(){

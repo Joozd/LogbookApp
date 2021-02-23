@@ -79,6 +79,10 @@
         <item name="android:textColorPrimary">@color/white</item>
     </style>
 
+    <style parent = "AppTheme" name="SettingsActivityItem">
+
+    </style>
+
 
 
 </resources>

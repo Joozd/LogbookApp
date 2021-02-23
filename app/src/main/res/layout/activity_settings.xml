@@ -731,7 +731,8 @@
                     app:layout_constraintTop_toTopOf="parent"
                     tools:visibility="visible" />
 
-                <androidx.appcompat.widget.SwitchCompat
+                <!-- Next not implemented ATM -->
+                <!--androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/addRemarksToChronoUpdatesSwitch"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -742,7 +743,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/addNamesFromRosterSwitch"
-                    tools:visibility="visible" />
+                    tools:visibility="visible" /-->
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <View

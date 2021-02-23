@@ -59,17 +59,8 @@
 
             <TextView
                 android:id="@+id/loggingPreferencesTitleTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:hapticFeedbackEnabled="false"
-                android:padding="8dp"
+                style="@style/SettingsActivityHeader"
                 android:text="@string/loggings_preferences"
-                android:textColor="?attr/android:textColor"
-                android:textSize="20sp"
-                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -78,13 +69,8 @@
 
             <TextView
                 android:id="@+id/loggingPrefsDescriptionTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                style="@style/SettingsActivityDescriptionText"
                 android:text="@string/loggings_prefs_description"
-                android:textColor="?attr/android:textColorTertiary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/loggingPreferencesTitleTextView"
@@ -107,14 +93,10 @@
                 tools:visibility="gone">
 
 
+                <!-- Text set programmatically -->
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/settingsUseIataSelector"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:hapticFeedbackEnabled="false"
-                    android:padding="16dp"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
+                    style="@style/SettingsActivitySwitch"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -124,12 +106,8 @@
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/settingsUseConsensusOptIn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
+                    style="@style/SettingsActivitySwitch"
                     android:text="@string/use_consensus_data"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -138,26 +116,17 @@
 
                 <TextView
                     android:id="@+id/consensusDescription"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
+                    style="@style/SettingsActivityDescriptionText"
                     android:text="@string/consensus_description"
-                    android:textColor="?attr/android:textColorTertiary"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/settingsUseConsensusOptIn"
                     app:layout_constraintTop_toBottomOf="@+id/settingsUseConsensusOptIn"
                     tools:visibility="visible" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/settingsMarkInclompleteWithoutPicSwitch"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:padding="16dp"
+                    style="@style/SettingsActivitySwitch"
                     android:text="@string/mark_incomplete_without_pic"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -166,29 +135,18 @@
 
                 <TextView
                     android:id="@+id/markInclompleteWithoutPicText"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
+                    style="@style/SettingsActivityDescriptionText"
                     android:text="@string/mark_incomplete_without_pic_description"
-                    android:textColor="?attr/android:textColorTertiary"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/settingsMarkInclompleteWithoutPicSwitch"
                     app:layout_constraintTop_toBottomOf="@+id/settingsMarkInclompleteWithoutPicSwitch"
                     tools:visibility="visible" />
 
 
                 <Button
                     android:id="@+id/augmentedCrewButton"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:elevation="0dp"
-                    android:padding="16dp"
+                    style="@style/SettingsActivityButton"
                     android:text="@string/standard_augmented_time"
-                    android:textAlignment="textStart"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/markInclompleteWithoutPicText"
@@ -243,10 +201,7 @@
 
             <View
                 android:id="@+id/lineBetweenLoggingBackup"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginTop="16dp"
-                android:background="#c0c0c0"
+                style="@style/SettingsActivityLine"
                 app:layout_constraintEnd_toEndOf="@+id/loggingPreferencesTitleTextView"
                 app:layout_constraintStart_toStartOf="@+id/loggingPreferencesTitleTextView"
                 app:layout_constraintTop_toBottomOf="@+id/loggingPreferencesLayout"
@@ -254,16 +209,8 @@
 
             <TextView
                 android:id="@+id/backupPreferencesTitleTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:padding="8dp"
+                style="@style/SettingsActivityHeader"
                 android:text="@string/backup_preferences"
-                android:textColor="?attr/android:textColor"
-                android:textSize="20sp"
-                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -272,13 +219,8 @@
 
             <TextView
                 android:id="@+id/backupPrefsDescriptionTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                style="@style/SettingsActivityDescriptionText"
                 android:text="@string/backup_prefs_description"
-                android:textColor="?attr/android:textColorTertiary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/backupPreferencesTitleTextView"
@@ -296,20 +238,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
+                tools:visibility="visible"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/backupPrefsDescriptionTextView">
 
                 <Button
                     android:id="@+id/backupIntervalButton"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:elevation="0dp"
-                    android:padding="16dp"
+                    style="@style/SettingsActivityButton"
                     android:text="@string/backup_interval_time"
-                    android:textAlignment="textStart"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -318,12 +254,8 @@
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/backupFromCloudSwitch"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
+                    style="@style/SettingsActivitySwitch"
                     android:text="@string/backup_from_cloud"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/backupIntervalButton"
@@ -331,30 +263,18 @@
 
                 <TextView
                     android:id="@+id/backupFromCloudDescription"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginEnd="16dp"
+                    style="@style/SettingsActivityDescriptionText"
                     android:text="@string/backup_cloud_description"
-                    android:textColor="?attr/android:textColorTertiary"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/backupFromCloudSwitch"
                     app:layout_constraintTop_toBottomOf="@+id/backupFromCloudSwitch"
                     tools:visibility="visible" />
 
                 <Button
                     android:id="@+id/backupNowButton"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:elevation="0dp"
-                    android:padding="16dp"
+                    style="@style/SettingsActivityButton"
                     android:text="@string/backup_now"
                     android:textAlignment="textStart"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/backupFromCloudDescription"
@@ -363,10 +283,7 @@
 
             <View
                 android:id="@+id/lineBetweenBackupCalendar"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginTop="16dp"
-                android:background="#c0c0c0"
+                style="@style/SettingsActivityLine"
                 app:layout_constraintEnd_toEndOf="@+id/backupPreferencesTitleTextView"
                 app:layout_constraintStart_toStartOf="@+id/backupPreferencesTitleTextView"
                 app:layout_constraintTop_toBottomOf="@+id/backupPreferencesLayout"
@@ -374,16 +291,8 @@
 
             <TextView
                 android:id="@+id/calendarSyncTitleTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:padding="8dp"
+                style="@style/SettingsActivityHeader"
                 android:text="@string/calendar_sync_settings"
-                android:textColor="?attr/android:textColor"
-                android:textSize="20sp"
-                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/lineBetweenBackupCalendar"
@@ -392,13 +301,8 @@
 
             <TextView
                 android:id="@+id/syncDescriptionTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                style="@style/SettingsActivityDescriptionText"
                 android:text="@string/getPlannedflightsFromCalendar"
-                android:textColor="?attr/android:textColorTertiary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/calendarSyncTitleTextView"
@@ -421,12 +325,8 @@
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/settingsGetFlightsFromCalendarSelector"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
+                    style="@style/SettingsActivitySwitch"
                     android:text="@string/calendarSync"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -444,12 +344,8 @@
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/autoPostponeCalendarSyncSelector"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
+                    style="@style/SettingsActivitySwitch"
                     android:text="@string/always_postpone_calendar_sync"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/settingsCalendarPickerSpinner"
@@ -458,23 +354,17 @@
 
                 <TextView
                     android:id="@+id/calendarSyncPostponedTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintStart_toStartOf="parent"
+                    style="@style/SettingsActivitySubText"
+                    app:layout_constraintStart_toStartOf="@+id/autoPostponeCalendarSyncSelector"
                     app:layout_constraintTop_toBottomOf="@+id/autoPostponeCalendarSyncSelector"
                     tools:text="@string/disabled_until"
                     tools:visibility="visible" />
 
                 <TextView
                     android:id="@+id/dontPostponeTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
+                    style="@style/SettingsActivityHyperLink"
                     android:text="@string/enable_now"
-                    android:textColor="?attr/colorAccent"
-                    android:textStyle="bold"
+                    android:layout_marginEnd="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/calendarSyncPostponedTextView"
                     tools:visibility="visible" />
@@ -482,10 +372,7 @@
 
             <View
                 android:id="@+id/lineBetweenCalendarCloud"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginTop="16dp"
-                android:background="#c0c0c0"
+                style="@style/SettingsActivityLine"
                 app:layout_constraintEnd_toEndOf="@+id/calendarSyncTitleTextView"
                 app:layout_constraintStart_toStartOf="@+id/calendarSyncTitleTextView"
                 app:layout_constraintTop_toBottomOf="@+id/syncPreferencesLayout"
@@ -493,16 +380,8 @@
 
             <TextView
                 android:id="@+id/cloudSynctitleTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:padding="8dp"
+                style="@style/SettingsActivityHeader"
                 android:text="@string/cloud_sync_title"
-                android:textColor="?attr/android:textColor"
-                android:textSize="20sp"
-                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -512,13 +391,8 @@
 
             <TextView
                 android:id="@+id/cloudDescriptionTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                style="@style/SettingsActivityDescriptionText"
                 android:text="@string/sync_flights_across_devices"
-                android:textColor="?attr/android:textColorTertiary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/cloudSynctitleTextView"
@@ -541,12 +415,8 @@
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/useCloudSyncSwitch"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
+                    style="@style/SettingsActivitySwitch"
                     android:text="@string/use_cloud_sync"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -554,29 +424,16 @@
 
                 <TextView
                     android:id="@+id/lastSynchedTimeTextView"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
+                    style="@style/SettingsActivitySubText"
                     android:text="@string/last_synched_at"
-                    android:textColor="?attr/android:textColorTertiary"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/useCloudSyncSwitch"
                     app:layout_constraintTop_toBottomOf="@+id/useCloudSyncSwitch"
                     tools:visibility="visible" />
 
-
                 <Button
                     android:id="@+id/youAreSignedInAsButton"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:elevation="0dp"
-                    android:padding="16dp"
+                    style="@style/SettingsActivityButton"
                     android:text="@string/signed_in_as"
-                    android:textAlignment="textStart"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/lastSynchedTimeTextView"
@@ -584,15 +441,8 @@
 
                 <Button
                     android:id="@+id/emailAddressButton"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:elevation="0dp"
-                    android:padding="16dp"
+                    style="@style/SettingsActivityButton"
                     android:text="@string/signed_in_as"
-                    android:textAlignment="textStart"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/youAreSignedInAsButton"
@@ -600,16 +450,9 @@
 
                 <Button
                     android:id="@+id/changePasswordButton"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:elevation="0dp"
-                    android:padding="16dp"
+                    style="@style/SettingsActivityButton"
                     android:text="@string/change_password"
                     android:textAlignment="textStart"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/emailAddressButton"
@@ -617,16 +460,9 @@
 
                 <Button
                     android:id="@+id/loginLinkButton"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:elevation="0dp"
-                    android:padding="16dp"
+                    style="@style/SettingsActivityButton"
                     android:text="@string/create_login_link"
                     android:textAlignment="textStart"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/changePasswordButton"
@@ -648,12 +484,8 @@
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/useWifiForLargeFilesSwitch"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
+                    style="@style/SettingsActivitySwitch"
                     android:text="@string/use_wifi_for_large_files"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/loginLinkButton"
@@ -662,10 +494,7 @@
 
             <View
                 android:id="@+id/lineBetweenCloudPdf"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginTop="16dp"
-                android:background="#c0c0c0"
+                style="@style/SettingsActivityLine"
                 app:layout_constraintEnd_toEndOf="@+id/cloudSynctitleTextView"
                 app:layout_constraintStart_toStartOf="@+id/cloudSynctitleTextView"
                 app:layout_constraintTop_toBottomOf="@+id/cloudPreferencesLayout"
@@ -673,16 +502,8 @@
 
             <TextView
                 android:id="@+id/monthlyOverviewSettingsTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:padding="8dp"
+                style="@style/SettingsActivityHeader"
                 android:text="@string/import_settings"
-                android:textColor="?attr/android:textColor"
-                android:textSize="20sp"
-                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/lineBetweenCloudPdf"
@@ -690,13 +511,8 @@
 
             <TextView
                 android:id="@+id/pdfDescriptionTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                style="@style/SettingsActivityDescriptionText"
                 android:text="@string/monthly_overview_explanation"
-                android:textColor="?attr/android:textColorTertiary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/monthlyOverviewSettingsTitle"
@@ -720,18 +536,14 @@
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/addNamesFromRosterSwitch"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
+                    style="@style/SettingsActivitySwitch"
                     android:text="@string/add_names_from_rosters"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:visibility="visible" />
 
-                <!-- Next not implemented ATM -->
+                <!-- Next not implemented at the moment -->
                 <!--androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/addRemarksToChronoUpdatesSwitch"
                     android:layout_width="0dp"
@@ -748,10 +560,7 @@
 
             <View
                 android:id="@+id/linePdfLogging"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginTop="16dp"
-                android:background="#c0c0c0"
+                style="@style/SettingsActivityLine"
                 app:layout_constraintEnd_toEndOf="@+id/monthlyOverviewSettingsTitle"
                 app:layout_constraintStart_toStartOf="@+id/monthlyOverviewSettingsTitle"
                 app:layout_constraintTop_toBottomOf="@+id/pdfPreferencesLayout"

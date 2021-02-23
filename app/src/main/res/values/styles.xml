@@ -79,10 +79,66 @@
         <item name="android:textColorPrimary">@color/white</item>
     </style>
 
-    <style parent = "AppTheme" name="SettingsActivityItem">
-
+    <style name="SeparatorLine" parent="AppTheme">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/grey</item>
     </style>
 
+
+    <style name="SettingsActivityItem" parent="AppTheme">
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="SettingsActivityHeader" parent="SettingsActivityItem">
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:textColor">?android:attr/textColor</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="SettingsActivitySwitch" parent="SettingsActivityItem">
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="SettingsActivityDescriptionText" parent="SettingsActivityItem">
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
+    </style>
+
+    <style name="SettingsActivitySubText" parent="SettingsActivityItem">
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">0dp</item>
+    </style>
+
+    <style name="SettingsActivityHyperLink" parent="SettingsActivitySubText">
+        <item name="android:textColor">?android:attr/colorAccent</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="SettingsActivityButton" parent="@style/Widget.AppCompat.Button.Borderless">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:elevation">0dp</item>
+        <item name="android:textAlignment">textStart</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="SettingsActivityLine" parent="SeparatorLine">
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
 
 
 </resources>

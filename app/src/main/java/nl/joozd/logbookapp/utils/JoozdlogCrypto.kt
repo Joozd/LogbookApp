@@ -31,8 +31,6 @@ fun generatePassword(length: Int): String{
     val highestReadable = 0x7e.toByte()
     val utf8Chars = (lowestReadable..highestReadable)
 
-    val random = SecureRandom()
-
     val keyBytes = emptyList<Byte>().toMutableList()
 
     do{

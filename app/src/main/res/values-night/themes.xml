@@ -3,19 +3,25 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">#AED6F1</item>
-        <item name="colorPrimaryDark">#85C1E9</item>
-        <item name="colorPrimaryBackground">#F0FAFF</item>
-        <item name="colorTextViewBackground">#FFFFFFFF</item>
-        <item name="colorAccent">#0000E0</item>
+        <item name="colorPrimary">#488AB6</item>
+        <item name="colorPrimaryDark">#1C5A83</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <item name="colorSecondaryBackground">#000000</item>
+        <item name="colorTextViewBackground">#FF202020</item>
+        <item name="colorAccent">?attr/colorPrimary</item>
+
+        <item name="android:colorBackground">#202020</item>
+
         <item name="textColorWarning">#80BB0000</item>
         <item name="android:textColor">#FF000000</item>
-        <item name="android:textColorSecondary">#CC000000</item> <!-- #CC3F51B5 -->
-        <item name="android:actionBarStyle">@style/MyActionBar</item>
-        <item name="android:textColorTertiary">#80000000</item>
+        <item name="android:textColorPrimary">#C0FFFFFF</item>
+        <item name="android:textColorSecondary">#CCFFFFFF</item> <!-- #CC3F51B5 -->
+        <item name="android:actionBarStyle">@style/ToolBar</item>
+        <item name="android:textColorTertiary">#80FFFFFF</item>
         <item name="android:textColorHighlight">#CC3F51B5</item>
         <item name="android:textColorPrimaryInverse">@color/white</item>
-        <item name="android:textColorSecondaryInverse">@color/white</item>
+        <item name="android:textColorSecondaryInverse">#D0000000</item>
         <item name="android:colorButtonNormal">#FFA0A0A0</item>
     </style>
 </resources>

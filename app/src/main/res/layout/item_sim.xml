@@ -36,12 +36,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_delete" />
 
-    <!--
-    <nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout
-    -->
-
     <androidx.constraintlayout.widget.ConstraintLayout
-
         android:id="@+id/simLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -49,9 +44,9 @@
         android:layout_marginTop="4dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="4dp"
-        android:background="@drawable/rounded_corners_white"
+        android:background="@drawable/rounded_corners_textviewbackground"
         android:clickable="true"
-
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -59,15 +54,9 @@
 
         <TextView
             android:id="@+id/simDateDayText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/FlightListDateDay"
             android:layout_marginStart="8dp"
-            android:includeFontPadding="false"
             tools:text="23"
-            android:textAlignment="center"
-            android:textColor="#CC000000"
-            android:textSize="48sp"
-            android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/simText"
             app:layout_constraintBottom_toTopOf="@+id/simDateMonthYearText"
             app:layout_constraintStart_toStartOf="parent"
@@ -76,14 +65,8 @@
 
         <TextView
             android:id="@+id/simDateMonthYearText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:includeFontPadding="false"
+            style="@style/FlightListDateMonthYear"
             tools:text="AUG. 2019"
-            android:textAlignment="center"
-            android:textColor="#CC000000"
-            android:textSize="10sp"
-            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/simDateDayText"
             app:layout_constraintStart_toStartOf="@+id/simDateDayText"
@@ -91,27 +74,17 @@
 
         <TextView
             android:id="@+id/simText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/FlightListAirport"
             android:layout_marginStart="80dp"
             android:layout_marginTop="4dp"
-            android:includeFontPadding="false"
             android:text="@string/simluator"
-            android:textAllCaps="true"
-            android:textColor="#CC000000"
-            android:textSize="30sp"
-            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/simAircraftTypeText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            style="@style/FlightListNarrow"
             android:layout_marginEnd="16dp"
-            android:includeFontPadding="false"
-            android:textColor="#CC000000"
-            android:textSize="12sp"
             app:layout_constraintBottom_toTopOf="@+id/simTotalTimeText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -119,17 +92,10 @@
 
         <TextView
             android:id="@+id/simRemarksText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            style="@style/FlightListBold"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="8dp"
             android:ellipsize="end"
-            android:singleLine="true"
-            android:textAlignment="textStart"
-            android:textColor="#CC000000"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/simNamesText"
             app:layout_constraintStart_toStartOf="@+id/simText"
@@ -138,16 +104,10 @@
 
         <TextView
             android:id="@+id/simNamesText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            style="@style/FlightListNarrow"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:ellipsize="end"
-            android:includeFontPadding="false"
-            android:singleLine="true"
-            android:textAlignment="textStart"
-            android:textColor="#CC000000"
-            android:textSize="12sp"
             app:layout_constraintEnd_toStartOf="@+id/simTotalTimeText"
             app:layout_constraintStart_toStartOf="@+id/simText"
             app:layout_constraintTop_toBottomOf="@+id/simText"
@@ -155,14 +115,9 @@
 
         <TextView
             android:id="@+id/simTotalTimeText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            style="@style/FlightListBold"
             android:layout_marginEnd="16dp"
             android:includeFontPadding="false"
-            android:textAlignment="center"
-            android:textColor="#CC000000"
-            android:textSize="12sp"
-            android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/simTakeoffLandingsText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/simAircraftTypeText"
@@ -170,21 +125,11 @@
 
         <TextView
             android:id="@+id/simTakeoffLandingsText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            style="@style/FlightListNarrow"
             android:layout_marginEnd="16dp"
-            android:includeFontPadding="false"
-            android:textColor="#CC000000"
-            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/simTotalTimeText"
             tools:text="1/1" />
-
-
-        <!--
-        </nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout>
-
-        -->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

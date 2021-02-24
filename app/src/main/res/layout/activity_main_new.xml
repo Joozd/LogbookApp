@@ -29,14 +29,13 @@
     tools:context=".ui.activities.MainActivity">
 
     <androidx.appcompat.widget.Toolbar
+        style="@style/ToolBar"
         android:id="@+id/main_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
         android:elevation="4dp"
-        android:theme="@style/MyActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.ActionBar" />
+        app:popupTheme="@style/AppTheme" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/searchField"
@@ -88,7 +87,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:animateLayoutChanges="true"
-        android:background="?attr/colorPrimaryBackground"
+        android:background="?attr/colorSecondaryBackground"
         app:layout_constraintBottom_toTopOf="@id/progressBarField"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -98,8 +97,9 @@
             android:id="@+id/backup_reminder_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/rounded_corners_white"
             android:elevation="8dp"
-            android:background="@drawable/rounded_corners_white">
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/backup_message"
@@ -107,10 +107,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:textColor="?android:attr/textColorSecondary"
-                tools:text="@string/backup_message_main_activity"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@string/backup_message_main_activity" />
 
             <TextView
                 android:id="@+id/backup_button"
@@ -120,13 +120,13 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
                 android:padding="4dp"
+                android:text="@string/backup_now"
                 android:textAllCaps="true"
                 android:textColor="?android:attr/textColorHighlight"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/backup_message"
-                android:text="@string/backup_now" />
+                app:layout_constraintTop_toBottomOf="@id/backup_message" />
 
             <TextView
                 android:id="@+id/dont_backup_button"
@@ -136,13 +136,13 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:padding="4dp"
+                android:text="@string/dismiss"
                 android:textAllCaps="true"
                 android:textColor="?android:attr/textColorHighlight"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/backup_message"
-                android:text="@string/dismiss" />
+                app:layout_constraintTop_toBottomOf="@id/backup_message" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

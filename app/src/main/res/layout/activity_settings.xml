@@ -28,12 +28,9 @@
     tools:context=".ui.activities.SettingsActivity">
 
     <androidx.appcompat.widget.Toolbar
+        style="@style/ToolBar"
         android:id="@+id/settingsToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
         android:elevation="4dp"
-        android:theme="@style/MyActionBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -175,7 +172,7 @@
                     android:layout_marginBottom="24dp"
                     android:padding="4dp"
                     android:visibility="gone"
-                    app:cardBackgroundColor="?attr/colorPrimaryBackground"
+                    app:cardBackgroundColor="?attr/colorSecondaryBackground"
                     app:cardCornerRadius="5dp"
                     app:cardElevation="4dp"
                     app:layout_constrainedWidth="true"
@@ -238,7 +235,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                tools:visibility="visible"
+
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/backupPrefsDescriptionTextView">
 
@@ -320,6 +317,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
+                tools:visibility="visible"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/syncDescriptionTextView">
 
@@ -332,15 +330,29 @@
                     app:layout_constraintTop_toTopOf="parent"
                     tools:visibility="visible" />
 
-                <Spinner
-                    android:id="@+id/settingsCalendarPickerSpinner"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
+                <FrameLayout
+                    style="@style/SpinnerFrameStyle"
+                    android:id="@+id/settingsCalendarPickerSpinnerLayout"
+
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/settingsGetFlightsFromCalendarSelector"
-                    tools:visibility="visible" />
+                    app:layout_constraintTop_toBottomOf="@+id/settingsGetFlightsFromCalendarSelector">
+
+                    <Spinner
+                        android:id="@+id/settingsCalendarPickerSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:paddingBottom="4dp"
+                        tools:visibility="visible" />
+
+
+                </FrameLayout>
+
+
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/autoPostponeCalendarSyncSelector"
@@ -348,7 +360,7 @@
                     android:text="@string/always_postpone_calendar_sync"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/settingsCalendarPickerSpinner"
+                    app:layout_constraintTop_toBottomOf="@+id/settingsCalendarPickerSpinnerLayout"
                     tools:visibility="visible" />
 
 
@@ -575,7 +587,7 @@
                 android:layout_marginBottom="24dp"
                 android:padding="4dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="?attr/colorPrimaryBackground"
+                app:cardBackgroundColor="?attr/colorSecondaryBackground"
                 app:cardCornerRadius="5dp"
                 app:cardElevation="4dp"
                 app:layout_constrainedWidth="true"

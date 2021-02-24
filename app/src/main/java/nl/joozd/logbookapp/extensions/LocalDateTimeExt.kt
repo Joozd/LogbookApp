@@ -45,7 +45,7 @@ fun LocalDateTime.toLogbookDate() = this.format(dateFormatterTwoDigitYear)
 fun LocalDateTime.toDateStringLocalized() = this.format(dateFormatterLocalized)
 fun LocalDateTime.toTimeString() = this.format(timeFormatter)
 fun LocalDateTime.toTimeStringLocalized() = this.format(timeFormatterLocalized)
-fun LocalDateTime.toMonthYear() = this.format(monthYearFormatter)
+fun LocalDateTime.toMonthYear() = this.format(monthYearFormatter).filter {it != '.'} // I don't want "MRT. 2020" but "MRT 2020"
 fun LocalDateTime.noColon() = this.format(timeFormatterNoColon)
 
 fun String.makeLocalDate(): LocalDate = LocalDate.parse(this, dateFormatter)

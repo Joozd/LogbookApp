@@ -26,7 +26,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
 fun ViewGroup.setColorAccordingstatus(planned: Boolean, warning: Boolean = false){
-    val normalColor = context.getColorFromAttr(android.R.attr.textColorSecondary)
+    val normalColor = context.getColorFromAttr(android.R.attr.textColorPrimary)
     val plannedColor = context.getColorFromAttr(android.R.attr.textColorHighlight)
     val warningColor = context.getColorFromAttr(R.attr.textColorWarning)
     val colorToSet =  when{

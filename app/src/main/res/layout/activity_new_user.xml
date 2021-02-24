@@ -24,7 +24,7 @@
     android:id="@+id/newUserActivityLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/colorPrimaryBackground"
+    android:background="?attr/colorSecondaryBackground"
     tools:context=".ui.activities.newUserActivity.NewUserActivity">
 
     <ScrollView

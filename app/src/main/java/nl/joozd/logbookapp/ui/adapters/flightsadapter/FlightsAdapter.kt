@@ -149,7 +149,10 @@ class FlightsAdapter(
         const val SIM = 2
     }
 
+    /**
+     * For popup update
+     */
     override fun onChange(position: Int): CharSequence {
-        return with (list[position]) { "$dateDay $monthAndYear"}
+        return with (list[position]) { monthAndYear}
     }
 }

@@ -25,13 +25,15 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".ui.activities.FeedbackActivity"
+            android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".ui.activities.ChangePasswordActivity" />
         <activity android:name=".ui.activities.MakePdfActivity" />
         <activity android:name=".ui.activities.CreateNewUserActivity" />
         <activity android:name=".ui.activities.newUserActivity.NewUserActivity"
             android:windowSoftInputMode="adjustResize"/>
-        <activity android:name=".ui.activities.SettingsActivity">
+        <activity android:name=".ui.activities.SettingsActivity"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
@@ -48,7 +50,8 @@
         </activity>
         <activity
             android:name=".ui.activities.pdfParserActivity.PdfParserActivity"
-            android:excludeFromRecents="true">
+            android:excludeFromRecents="true"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
@@ -76,7 +79,7 @@
         <activity
             android:name=".ui.activities.MainActivity"
             android:launchMode="singleTask"
-            android:theme="@style/AppTheme.Launcher">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

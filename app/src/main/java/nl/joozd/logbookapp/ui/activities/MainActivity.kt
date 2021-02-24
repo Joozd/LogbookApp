@@ -85,6 +85,7 @@ class MainActivity : JoozdlogActivity() {
 
             /**
              * Fill spinner and set onSelected
+             * for search field
              */
             ArrayAdapter.createFromResource(
                 activity,
@@ -259,8 +260,8 @@ class MainActivity : JoozdlogActivity() {
                             commit { remove(it) }
                         }
                     }
-                    showFlight().also { _ -> println("QQQQQQQQQQQQQQQQQQQ null: ${it == null}")}
-                } ?: showToolbar().also { _ -> println("QQQQQQQQQQQQQQQQQQQ null: ${it == null}")}
+                    showFlight()
+                } ?: showToolbar()
             }
 
             viewModel.savedflight.observe(activity) { suf ->
@@ -277,17 +278,6 @@ class MainActivity : JoozdlogActivity() {
                     }
                 }
             }
-
-            /*******************************************************************************************
-             * Other listeners:
-             *******************************************************************************************/
-/*
-            supportFragmentManager.addOnBackStackChangedListener {
-                makeAddButtonAndToolbarVisibleOrNot()
-            }
-
- */
-
             setContentView(root)
         }
     }

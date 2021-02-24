@@ -74,7 +74,7 @@ class SettingsActivity : JoozdlogActivity() {
                 arrayListOf<String>()
             ).apply {
                 // Specify the layout to use when the list of choices appears
-                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                setDropDownViewResource(R.layout.spinner_dropdown_item)
             }.also { adapter ->
                 // Apply the adapter to the spinner
                 settingsCalendarPickerSpinner.adapter = adapter
@@ -254,7 +254,7 @@ class SettingsActivity : JoozdlogActivity() {
             viewModel.getFlightsFromCalendar.observe(activity) {
                 settingsGetFlightsFromCalendarSelector.isChecked = it
                 if (it)
-                    fillCalendarsList(this)
+                    fillCalendarsList()
                 else {
                     settingsCalendarPickerSpinner.visibility = View.GONE
                     // settingsCalendarTypeSpinner.visibility = View.GONE
@@ -348,8 +348,9 @@ class SettingsActivity : JoozdlogActivity() {
         when (requestCode) {
             CALENDAR_PERMISSION_REQUEST_CODE -> {
                 // If request is cancelled, the result arrays are empty.
+                //todo do this through ViewModel so we can get rid of [mBinding]
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
-                    fillCalendarsList(mBinding)
+                    mBinding.fillCalendarsList()
                 else {
                     //TODO make this a dialog, use R strings
                     longToast("No permission for calendar access")
@@ -365,29 +366,28 @@ class SettingsActivity : JoozdlogActivity() {
         }
     }
 
+    //TODO make this happen in viewModel through observer and get rid of [mBinding]
     override fun onResume() {
         super.onResume()
         mBinding.setLoggedInInfo(Preferences.username)
     }
 
-    private fun fillCalendarsList(binding: ActivitySettingsBinding){
-        with (binding) {
-            Log.d(this::class.simpleName, "started fillCalendarsList()")
-            if (!checkPermission(Manifest.permission.READ_CALENDAR)) {
-                ActivityCompat.requestPermissions(
-                    activity,
-                    arrayOf(Manifest.permission.READ_CALENDAR),
-                    CALENDAR_PERMISSION_REQUEST_CODE
-                )
-                settingsCalendarPickerSpinner.visibility = View.GONE
-                // settingsCalendarTypeSpinner.visibility = View.GONE
-            } else {
-                settingsCalendarPickerSpinner.visibility = View.VISIBLE
-                // Not used at the moment but it's there when we need it
-                // TAG: #SETTHISIFNEEDED1
-                // settingsCalendarTypeSpinner.visibility = View.VISIBLE
-                viewModel.fillCalendarsList()
-            }
+    private fun ActivitySettingsBinding.fillCalendarsList(){
+        Log.d(this::class.simpleName, "started fillCalendarsList()")
+        if (!checkPermission(Manifest.permission.READ_CALENDAR)) {
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf(Manifest.permission.READ_CALENDAR),
+                CALENDAR_PERMISSION_REQUEST_CODE
+            )
+            settingsCalendarPickerSpinner.visibility = View.GONE
+            // settingsCalendarTypeSpinner.visibility = View.GONE
+        } else {
+            settingsCalendarPickerSpinner.visibility = View.VISIBLE
+            // Not used at the moment but it's there when we need it
+            // TAG: #SETTHISIFNEEDED1
+            // settingsCalendarTypeSpinner.visibility = View.VISIBLE
+            viewModel.fillCalendarsList()
         }
     }
 

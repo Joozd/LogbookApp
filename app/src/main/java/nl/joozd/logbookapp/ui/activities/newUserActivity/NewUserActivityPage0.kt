@@ -34,19 +34,12 @@ class NewUserActivityPage0: Fragment() {
     val viewModel: NewUserActivityViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val binding = ActivityNewUserPage0Binding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_0, container, false))
-
-        /*******************************************************************************************
-         * OnClickedListeners
-         *******************************************************************************************/
-
-        with(binding){
+        ActivityNewUserPage0Binding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_0, container, false)).apply {
             continueTextView.setOnClickListener {
                 viewModel.nextPage(PAGE_NUMBER)
             }
+            return root
         }
-
-        return binding.root
     }
 
     companion object{

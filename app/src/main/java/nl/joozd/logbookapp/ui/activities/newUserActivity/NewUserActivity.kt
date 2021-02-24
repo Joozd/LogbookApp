@@ -39,67 +39,69 @@ import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
 class NewUserActivity : JoozdlogActivity() {
     val viewModel: NewUserActivityViewModel by viewModels()
 
-    private lateinit var viewPager: ViewPager2
+    private lateinit var mViewPager: ViewPager2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setTheme(R.style.AppTheme)
-        val binding = ActivityNewUserBinding.inflate(layoutInflater)
+        ActivityNewUserBinding.inflate(layoutInflater).apply {
 
-        /*******************************************************************************************
-         * setup viewPager
-         *******************************************************************************************/
+            /*******************************************************************************************
+             * setup viewPager
+             *******************************************************************************************/
 
-        viewPager = binding.viewPager.apply{
-            adapter = ScreenSlidePagerAdapter(this@NewUserActivity, viewModel.openPagesState ?: 1)
-            setPageTransformer(DepthPageTransformer(TRANSFORMER_MIN_SCALE))
-            TabLayoutMediator(binding.tabLayout, this) { _, _ ->
-                // empty for now
-            }.attach()
-            currentItem = viewModel.lastOpenPageState ?: 0
-        }
+            mViewPager = viewPager.apply {
+                adapter = ScreenSlidePagerAdapter(this@NewUserActivity, viewModel.openPagesState ?: 1)
+                setPageTransformer(DepthPageTransformer(TRANSFORMER_MIN_SCALE))
+                TabLayoutMediator(tabLayout, this) { _, _ ->
+                    // empty for now
+                }.attach()
+                currentItem = viewModel.lastOpenPageState ?: 0
+            }
 
 
-        /*******************************************************************************************
-         * Observers:
-         *******************************************************************************************/
+            /*******************************************************************************************
+             * Observers:
+             *******************************************************************************************/
 
-        /**
-         * Event observers:
-         */
+            /**
+             * Event observers:
+             */
 
-        viewModel.feedbackEvent.observe(this) {
-            when(it.getEvent()){
-                NewUserActivityEvents.FINISHED -> closeAndstartMainActivity()
-                NewUserActivityEvents.NEXT_PAGE -> {
-                    it.getInt().let{nextPage ->
-                        viewModel.openPagesState = maxOf(viewModel.openPagesState ?: 1, nextPage + 1)
-                        (viewPager.adapter as ScreenSlidePagerAdapter).openPages(nextPage+1)
-                        viewPager.apply {
-                            adapter = adapter
-                            TabLayoutMediator(binding.tabLayout, this) { _, _ ->
-                                // empty for now
-                            }.attach()
+            viewModel.feedbackEvent.observe(activity) {
+                when (it.getEvent()) {
+                    NewUserActivityEvents.FINISHED -> closeAndstartMainActivity()
+                    NewUserActivityEvents.NEXT_PAGE -> {
+                        it.getInt().let { nextPage ->
+                            viewModel.openPagesState = maxOf(viewModel.openPagesState ?: 1, nextPage + 1)
+                            (viewPager.adapter as ScreenSlidePagerAdapter).openPages(nextPage + 1)
+                            viewPager.apply {
+                                adapter = adapter
+                                TabLayoutMediator(tabLayout, this) { _, _ ->
+                                    // empty for now
+                                }.attach()
+                            }
+                            viewPager.currentItem = nextPage
                         }
-                        viewPager.currentItem = nextPage
                     }
                 }
             }
+            setContentView(root)
         }
 
-        setContentView(binding.root)
+
 
     }
 
     override fun onStop() {
         super.onStop()
-        viewModel.lastOpenPageState = viewPager.currentItem
+        viewModel.lastOpenPageState = mViewPager.currentItem
     }
 
     override fun onBackPressed() {
         // select previous step if > 0
-        viewPager.currentItem = viewPager.currentItem.minusOneWithFloor(0)
+        mViewPager.currentItem = mViewPager.currentItem.minusOneWithFloor(0)
     }
 
     private inner class ScreenSlidePagerAdapter(fa: FragmentActivity, private var availablePages: Int) : FragmentStateAdapter(fa) {

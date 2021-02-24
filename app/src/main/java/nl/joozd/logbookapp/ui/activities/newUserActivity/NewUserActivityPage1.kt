@@ -34,10 +34,11 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.utils.toast
 
+// TODO disable CONTINUE button untill two valid email adresses have been entered. Improve logic behind that icm viewModel
 class NewUserActivityPage1: Fragment() {
     val viewModel: NewUserActivityViewModel by activityViewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPage1Binding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_1, container, false)).apply {
             emailAddressEditText.setText (Preferences.emailAddress)
             emailAddress2EditText.setText (Preferences.emailAddress)
@@ -52,7 +53,6 @@ class NewUserActivityPage1: Fragment() {
                         viewModel.updateEmail(it)
                     }
             }
-
 
             emailAddress2EditText.onTextChanged {
                 emailAddress2Layout.error = ""

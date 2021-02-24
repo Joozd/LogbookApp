@@ -20,45 +20,53 @@
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
     <TextView
         android:id="@+id/page_1_header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/HeaderText"
         android:layout_marginTop="32dp"
         android:text="@string/email"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/textView4"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/textView4"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        style="@style/SecondaryTextCentered"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:text="@string/new_user_email_reason"
+        app:layout_constraintBottom_toTopOf="@+id/emailAddressLayout"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/page_1_header" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/emailAddressLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        style="@style/InputLayout"
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
-        android:background="@drawable/rounded_corners_white"
         app:errorEnabled="true"
+        app:layout_constraintBottom_toTopOf="@+id/emailAddress2Layout"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView4">
 
@@ -69,57 +77,57 @@
             android:autofillHints=".AUTOFILL_HINT_EMAIL_ADDRESS"
             android:hint="@string/email"
             android:inputType="textEmailAddress"
-            android:singleLine="true" />
+            android:singleLine="true">
+            <requestFocus/>
+        </com.google.android.material.textfield.TextInputEditText>
 
     </com.google.android.material.textfield.TextInputLayout>
 
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/emailAddress2Layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        android:background="@drawable/rounded_corners_white"
-        app:errorEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/emailAddressLayout">
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/emailAddress2Layout"
+                style="@style/InputLayout"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="32dp"
+                app:errorEnabled="true"
+                app:layout_constraintBottom_toTopOf="@+id/skipTextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_default="spread"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/emailAddressLayout">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/emailAddress2EditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:autofillHints=".AUTOFILL_HINT_EMAIL_ADDRESS"
-            android:hint="@string/email_repeat"
-            android:inputType="textEmailAddress"
-            android:singleLine="true" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/emailAddress2EditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=".AUTOFILL_HINT_EMAIL_ADDRESS"
+                    android:hint="@string/email_repeat"
+                    android:inputType="textEmailAddress"
+                    android:singleLine="true" />
 
-    </com.google.android.material.textfield.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:id="@+id/emailReasonTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/email_reason"
-        app:layout_constraintEnd_toEndOf="@+id/emailAddressLayout"
-        app:layout_constraintStart_toStartOf="@+id/emailAddressLayout"
-        app:layout_constraintTop_toBottomOf="@+id/emailAddress2Layout" />
+            <TextView
+                android:id="@+id/continueTextView"
+                style="@style/DialogButtonText"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/_continue"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-    <TextView
-        android:id="@+id/continueTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="32dp"
-        android:padding="8dp"
-        android:paddingStart="24dp"
-        android:text="@string/_continue"
-        android:textAllCaps="true"
-        android:textColor="@color/design_default_color_primary_dark"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/emailReasonTextView" />
+            <TextView
+                android:id="@+id/skipTextView"
+                style="@style/DialogButtonText"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/skip"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

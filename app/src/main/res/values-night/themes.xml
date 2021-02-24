@@ -1,7 +1,7 @@
 <!-- TODO: Make night theme colors -->
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">#488AB6</item>
         <item name="colorPrimaryDark">#1C5A83</item>
@@ -15,8 +15,8 @@
 
         <item name="textColorWarning">#80BB0000</item>
         <item name="android:textColor">#FF000000</item>
-        <item name="android:textColorPrimary">#C0FFFFFF</item>
-        <item name="android:textColorSecondary">#CCFFFFFF</item> <!-- #CC3F51B5 -->
+        <item name="android:textColorPrimary">#E0FFFFFF</item>
+        <item name="android:textColorSecondary">#C0FFFFFF</item> <!-- #CC3F51B5 -->
         <item name="android:actionBarStyle">@style/ToolBar</item>
         <item name="android:textColorTertiary">#80FFFFFF</item>
         <item name="android:textColorHighlight">#CC3F51B5</item>

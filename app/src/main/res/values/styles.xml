@@ -81,6 +81,8 @@
 
     <style name="HeaderText" parent="PrimaryText">
         <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAlignment">center</item>
     </style>
 
     <style name="SecondaryText" parent="AppTheme">
@@ -88,9 +90,14 @@
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
     </style>
+    <style name="SecondaryTextHyperLink" parent="SecondaryText">
+        <item name="android:textColor">?android:attr/colorAccent</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 
     <style name="SecondaryTextCentered" parent="SecondaryText">
         <item name="android:textAlignment">center</item>
+        <item name="android:padding">8dp</item>
     </style>
 
     <style name="DialogButtonText" parent="AppTheme">
@@ -139,6 +146,11 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:background">?attr/colorSecondaryBackground</item>
+    </style>
+
+    <style name="InputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
     <!-- FlightsList styles -->

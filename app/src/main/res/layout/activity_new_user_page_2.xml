@@ -21,154 +21,132 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    style="@style/NewUserActivityLayout"
     tools:context=".ui.activities.newUserActivity.NewUserActivity">
 
-    <TextView
-        android:id="@+id/page_2_header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="@string/newUserActivityHeader"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/page_2_explanation"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="24dp"
-        android:text="@string/cloud_explanation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/page_2_header" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/usernameTextInputLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        android:background="@drawable/rounded_corners_white"
-        app:errorEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/page_2_explanation">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/userNameEditText"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/username"
-            android:inputType="textNoSuggestions|text"
-            android:singleLine="true" />
-
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_height="wrap_content">
 
 
-    <CheckBox
-        android:id="@+id/tcCheckbox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/i_accept_terms"
-        app:layout_constraintStart_toStartOf="@+id/usernameTextInputLayout"
-        app:layout_constraintTop_toBottomOf="@+id/usernameTextInputLayout" />
+            <TextView
+                android:id="@+id/page_2_header"
+                style="@style/HeaderText"
+                android:layout_marginTop="32dp"
+                android:text="@string/newUserActivityHeader"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/signUpButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        android:layout_weight="1"
-        android:background="@drawable/rounded_corners_white"
-        android:gravity="center"
-        android:padding="6dp"
-        android:text="@string/create_account"
-        android:textAllCaps="true"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tcCheckbox" />
+            <TextView
+                android:id="@+id/page_2_explanation"
+                style="@style/SecondaryTextCentered"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="24dp"
+                android:text="@string/cloud_explanation"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/page_2_header" />
 
-    <TextView
-        android:id="@+id/youAreSignedInAsTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:text="@string/you_are_signed_in_as"
-        android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signUpButton" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/usernameTextInputLayout"
+                style="@style/InputLayout"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="32dp"
+                app:errorEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/page_2_explanation">
 
-    <TextView
-        android:id="@+id/signOutTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingStart="6dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="18dp"
-        android:paddingBottom="6dp"
-        android:text="@string/signOut"
-        android:textColor="@color/design_default_color_primary_dark"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/youAreSignedInAsTextView"
-        app:layout_constraintStart_toEndOf="@+id/youAreSignedInAsTextView"
-        app:layout_constraintTop_toTopOf="@+id/youAreSignedInAsTextView" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/userNameEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/username"
+                    android:inputType="textNoSuggestions|text"
+                    android:singleLine="true" />
 
-    <TextView
-        android:id="@+id/dontWantCloudSyncTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:text="@string/dontWantCloudSync"
-        android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signUpButton" />
-
-    <TextView
-        android:id="@+id/skipThisStepTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingStart="6dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="18dp"
-        android:paddingBottom="6dp"
-        android:text="@string/skipThisStep"
-        android:textColor="@color/design_default_color_primary_dark"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/dontWantCloudSyncTextView"
-        app:layout_constraintStart_toEndOf="@+id/dontWantCloudSyncTextView"
-        app:layout_constraintTop_toTopOf="@+id/dontWantCloudSyncTextView" />
-
-    <TextView
-        android:id="@+id/continueTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="74dp"
-        android:layout_marginEnd="32dp"
-        android:padding="8dp"
-        android:paddingStart="24dp"
-        android:text="@string/_continue"
-        android:textAllCaps="true"
-        android:textColor="@color/design_default_color_primary_dark"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signUpButton" />
+            </com.google.android.material.textfield.TextInputLayout>
 
 
+            <CheckBox
+                android:id="@+id/tcCheckbox"
+                style="@style/SecondaryText"
+                android:layout_marginTop="16dp"
+                android:text="@string/i_accept_terms"
+                app:layout_constraintStart_toStartOf="@+id/usernameTextInputLayout"
+                app:layout_constraintTop_toBottomOf="@+id/usernameTextInputLayout" />
+
+            <!-- TODO make this a button -->
+            <TextView
+                android:id="@+id/signUpButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="64dp"
+                android:layout_weight="1"
+                android:background="@drawable/rounded_corners_white"
+                android:gravity="center"
+                android:padding="6dp"
+                android:text="@string/create_account"
+                android:textAllCaps="true"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/skipThisStepTextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tcCheckbox" />
+
+            <TextView
+                android:id="@+id/youAreSignedInAsTextView"
+                style="@style/SecondaryText"
+                android:layout_marginStart="32dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/you_are_signed_in_as"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@+id/continueTextView"
+                app:layout_constraintHeight_default="spread"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/signOutTextView"
+                style="@style/DialogButtonText"
+                android:paddingStart="6dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="18dp"
+                android:paddingBottom="6dp"
+                android:text="@string/signOut"
+                app:layout_constraintBottom_toBottomOf="@+id/youAreSignedInAsTextView"
+                app:layout_constraintStart_toEndOf="@+id/youAreSignedInAsTextView"
+                app:layout_constraintTop_toTopOf="@+id/youAreSignedInAsTextView" />
+
+            <TextView
+                android:id="@+id/skipThisStepTextView"
+                style="@style/DialogButtonText"
+                android:layout_marginStart="32dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/skip"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/continueTextView"
+                style="@style/DialogButtonText"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/_continue"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -248,7 +248,6 @@ class NewUserActivityPage2: JoozdlogFragment() {
         signUpButton.visibility = ifLoggedOut
         tcCheckbox.visibility = ifLoggedOut
 
-        dontWantCloudSyncTextView.visibility = ifLoggedOut
         skipThisStepTextView.visibility = ifLoggedOut
 
         youAreSignedInAsTextView.visibility = ifLoggedIn

@@ -17,7 +17,11 @@
  *
  */
 
+@file:Suppress("unused")
+
 package nl.joozd.joozdlogcommon.serializing
+
+import kotlin.reflect.KClass
 
 /**
 *  toByteArray extensions (and back)
@@ -236,7 +240,7 @@ fun pairIntLongFromBytes(bytes: ByteArray): Pair<Int, Long> {
  */
 
 inline fun <reified T> List<T>.toByteArray(): ByteArray {
-    val supportedSingleValues = setOf(
+    val supportedSingleValues: Set<KClass<*>> = setOf(
         Long::class,
         Int::class,
         Short::class,
@@ -252,7 +256,6 @@ inline fun <reified T> List<T>.toByteArray(): ByteArray {
         T::class in supportedSingleValues -> packList(this.map { it.castedToByteArray() })
         T::class == ByteArray::class -> packList(this.map { it as ByteArray })
         T::class == Byte::class -> {
-            val size = this.size
             ByteArray(this.size) {this[it] as Byte}
         }
         else -> error("${T::class} not supported")
@@ -475,7 +478,7 @@ inline fun <reified K, reified V>unwrapMap(bytes:ByteArray): Map<K, V>{
     val size = getWrappedListLength(bytes)
     val bytesNeeded = bytes[0] - MAP_BASIC_VALUE
     require(bytes.size == size) { "unwrapMap(): ByteArray length doesn't match declared length - ${bytes.size} != ${1 + bytesNeeded + size}" } //  descriptor+lengthBytes+String
-    return mapFromBytes<K, V>(bytes.drop(1 + bytesNeeded).toByteArray())
+    return mapFromBytes(bytes.drop(1 + bytesNeeded).toByteArray())
 }
 
 inline fun <reified T> unwrap(bytes: ByteArray): T {
@@ -499,54 +502,52 @@ inline fun <reified T> unwrap(bytes: ByteArray): T {
  */
 fun checkType(bytes: ByteArray): Byte {
     require(bytes.isNotEmpty()) { "checkType(): Empty ByteArray" }
-    val type = bytes[0]
-    return when {
-        type == LONG -> {
+    return when (val type = bytes[0]) {
+        LONG -> {
             require(bytes.size == SIZE_WRAPPED_LONG) { "checkType(): Descriptor says LONG but size doesn't match" }
             type
         }
-        type == INT -> {
+        INT -> {
             require(bytes.size == SIZE_WRAPPED_INT) { "checkType(): Descriptor says INT but size doesn't match" }
             type
         }
-        type == SHORT -> {
+        SHORT -> {
             require(bytes.size == SIZE_WRAPPED_SHORT) { "checkType(): Descriptor says SHORT but size doesn't match" }
             type
         }
-        type == CHAR -> {
+        CHAR -> {
             require(bytes.size == SIZE_WRAPPED_CHAR) { "checkType(): Descriptor says CHAR but size doesn't match" }
             type
         }
-        type == FLOAT -> {
+        FLOAT -> {
             require(bytes.size == SIZE_WRAPPED_FLOAT) { "checkType(): Descriptor says FLOAT but size doesn't match" }
             type
         }
-        type == DOUBLE -> {
+        DOUBLE -> {
             require(bytes.size == SIZE_WRAPPED_DOUBLE) { "checkType(): Descriptor says DOUBLE but size doesn't match" }
             type
         }
-        type == BOOLEAN -> {
+        BOOLEAN -> {
             require(bytes.size == SIZE_WRAPPED_BOOLEAN) { "checkType(): Descriptor says BOOLEAN but size doesn't match" }
             type
         }
-        type in (MAP..MAP+4) -> {
+        in (MAP..MAP+4) -> {
             require(bytes.size > 5) { "checkType(): Type says MAP but not enough Bytes for that" } // Needs a descriptor and a size byte (can be empty string)
             MAP
         }
-        type in (STRING..STRING+4) -> {
+        in (STRING..STRING+4) -> {
             require(bytes.size > 1) { "checkType(): Type says STRING but not enough Bytes for that" } // Needs a descriptor and a size byte (can be empty string)
             STRING
         }
-        type in (LIST..LIST+4) -> {
+        in (LIST..LIST+4) -> {
             require(bytes.size > 1) { "checkType(): Type says LIST but not enough Bytes for that" } // Needs a descriptor and a size byte (can be empty string)
             LIST
         }
-        type in (BYTEARRAY..BYTEARRAY + 4) -> {
+        in (BYTEARRAY..BYTEARRAY + 4) -> {
             require(bytes.size > 1) { "checkType(): Type says BYTEARRAY but not enough Bytes for that" } // Needs a descriptor and a size byte (can be empty string)
             //require (checkWrapLength(bytes))                   { "checkType(): Descriptor says ${checkWrapLength(bytes)} bytes but actual size is ${bytes.size}"}
             BYTEARRAY
         }
-
         else -> error("invalid descriptor Byte: $type")
     }
 }
@@ -558,7 +559,7 @@ private fun checkType(bytes: List<Byte>) =
 /**
  * Will return the type that is at the front of a serialized ByteArray
  * eg. LONG or STRING etc
- * @param bb: a stream of wraps
+ * @param bytes: a stream of wraps
  * @return the type of wrap at the start of the stream
  */
 fun nextType(bytes: ByteArray): Byte = when {

@@ -20,58 +20,63 @@
 package nl.joozd.logbookapp.ui.activities.newUserActivity
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.databinding.ActivityNewUserPage1Binding
+import nl.joozd.logbookapp.databinding.ActivityNewUserPageEmailBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.utils.toast
 
 // TODO disable CONTINUE button untill two valid email adresses have been entered. Improve logic behind that icm viewModel
-class NewUserActivityPage1: Fragment() {
+class NewUserActivityEmailPage: Fragment() {
     val viewModel: NewUserActivityViewModel by activityViewModels()
 
+    val pageNumber = NewUserActivityViewModel.PAGE_EMAIL
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        ActivityNewUserPage1Binding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_1, container, false)).apply {
-            emailAddressEditText.setText (Preferences.emailAddress)
-            emailAddress2EditText.setText (Preferences.emailAddress)
+        ActivityNewUserPageEmailBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_email, container, false)).apply {
+            emailAddressEditText.setText (viewModel.email1)
+            emailAddress2EditText.setText (viewModel.email2)
 
             emailAddressEditText.onTextChanged {
                 emailAddressLayout.error = ""
-            }
-
-            emailAddressEditText.setOnFocusChangeListener { _, hasFocus ->
-                if(!hasFocus)
-                    emailAddressEditText.text?.toString()?.let {
-                        viewModel.updateEmail(it)
-                    }
+                viewModel.page1InputChanged(it, emailAddress2EditText.text.toString())
             }
 
             emailAddress2EditText.onTextChanged {
                 emailAddress2Layout.error = ""
+                viewModel.page1InputChanged(emailAddressEditText.text.toString(), it)
             }
 
-            emailAddress2EditText.setOnFocusChangeListener { _, hasFocus ->
-                if(!hasFocus)
-                    emailAddress2EditText.text?.toString()?.let {
-                        viewModel.updateEmail2(it)
-                    }
+            emailAddressEditText.setOnFocusChangeListener { view, hasFocus ->
+                if (!hasFocus) viewModel.checkEmail1()
             }
 
-            viewModel.page1Feedback.observe(viewLifecycleOwner){
-                Log.d("rreceived", "$it")
+            /**
+             * If emails match and are OK, enable CONTINUE button, else set CONTINUE button to show error
+             */
+            viewModel.emailsMatch.observe(viewLifecycleOwner){
+                viewModel.makeContinueActive(pageNumber, it)
+            }
+
+
+
+            /**
+             * Observe feedback from viewModel
+             */
+            viewModel.getFeedbackChannel(pageNumber).observe(viewLifecycleOwner){
                 when (it.getEvent()){
-                    FeedbackEvents.GeneralEvents.DONE -> viewModel.nextPage(PAGE_NUMBER)
+                    NewUserActivityEvents.BAD_EMAIL -> emailAddressLayout.error = getString(R.string.not_an_email_address)
+                    NewUserActivityEvents.EMAILS_DO_NOT_MATCH -> emailAddress2Layout.error = getString(R.string.does_not_match)
+
                     FeedbackEvents.GeneralEvents.ERROR -> {
                         toast("${it.getString()}")
-
                         when(it.getInt()){
                             1 -> emailAddressLayout.error = it.getString()
                             2 -> emailAddress2Layout.error = it.getString()
@@ -79,23 +84,14 @@ class NewUserActivityPage1: Fragment() {
                             4 -> toast("ERROR 4: Not an email")
                         }
                     }
+
+                    NewUserActivityEvents.CLEAR_PAGE -> {
+                        emailAddressEditText.setText (viewModel.email1)
+                        emailAddress2EditText.setText (viewModel.email2)
+                    }
                 }
             }
 
-
-            continueTextView.setOnClickListener {
-                activity?.currentFocus?.clearFocus()
-                it.requestFocus()
-                viewModel.okClickedPage1()
-            }
-
-
-
-
         }.root
-
-
-    companion object{
-        private const val PAGE_NUMBER = 1
-    }
+    // end of onCreateView
 }

@@ -98,10 +98,10 @@
 
 
         <!-- "previous" button enabled (onClick works and style is [textStyle] instead of [textStyleDisabled]. Default is true. -->
-        <attr name="previousButtonEnabled" format="reference"/>
+        <attr name="previousButtonEnabled" format="boolean"/>
 
         <!-- "next" button enabled (onClick works and style is [textStyle] instead of [textStyleDisabled]. Default is true. -->
-        <attr name="nextButtonEnabled" format="reference"/>
+        <attr name="nextButtonEnabled" format="boolean"/>
 
         <!-- style for "previous and "next" text, default True -->
         <attr name="textAllCaps" />

@@ -39,6 +39,10 @@ class FeedbackEvent(val type: FeedbackEvents.Event) {
     }
     val extraData = Bundle()
 
+
+    /**
+     * Functions to put an anonymous value into FeedbackEvent
+     */
     fun putInt(value: Int): FeedbackEvent{
         extraData.putInt(INTEGER, value)
         return this
@@ -57,9 +61,16 @@ class FeedbackEvent(val type: FeedbackEvents.Event) {
     }
     fun getLong(): Long = extraData.getLong(LONG)
 
+    fun putBoolean(value: Boolean): FeedbackEvent{
+        extraData.putBoolean(BOOLEAN, value)
+        return this
+    }
+    fun getBoolean(): Boolean = extraData.getBoolean(BOOLEAN)
+
     companion object{
         const val INTEGER = "INTEGER_EXTRA_DATA_FOR_FEEDBACK"
         const val LONG = "LONG_EXTRA_DATA_FOR_FEEDBACK"
         const val STRING = "STRING_EXTRA_DATA_FOR_FEEDBACK"
+        const val BOOLEAN = "BOOLEAN_EXTRA_DATA_FOR_FEEDBACK"
     }
 }

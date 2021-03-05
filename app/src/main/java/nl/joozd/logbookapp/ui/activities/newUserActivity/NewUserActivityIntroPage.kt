@@ -26,23 +26,19 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.databinding.ActivityNewUserPage0Binding
+import nl.joozd.logbookapp.databinding.ActivityNewUserPageIntroBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 
-
-class NewUserActivityPage0: Fragment() {
+/**
+ * Page 0 is just a basic introduction saying welcome to the new user
+ */
+class NewUserActivityIntroPage: Fragment() {
     val viewModel: NewUserActivityViewModel by activityViewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        ActivityNewUserPage0Binding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_0, container, false)).apply {
-            continueTextView.setOnClickListener {
-                viewModel.nextPage(PAGE_NUMBER)
-            }
-            return root
-        }
-    }
+    val pageNumber = NewUserActivityViewModel.PAGE_INTRO
 
-    companion object{
-        private const val PAGE_NUMBER = 0
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        ActivityNewUserPageIntroBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_intro, container, false)).apply {
+        //intentionally blank
+    }.root
 }

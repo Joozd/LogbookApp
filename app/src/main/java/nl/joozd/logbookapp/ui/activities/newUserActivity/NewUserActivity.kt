@@ -20,7 +20,6 @@
 package nl.joozd.logbookapp.ui.activities.newUserActivity
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -74,22 +73,9 @@ class NewUserActivity : JoozdlogActivity() {
             viewModel.feedbackEvent.observe(activity) {
                 when (it.getEvent()) {
                     NewUserActivityEvents.FINISHED -> closeAndstartMainActivity()
-                    NewUserActivityEvents.NEXT_PAGE -> {
-                        it.getInt().let { nextPage ->
-                            viewModel.openPagesState = maxOf(viewModel.openPagesState ?: 1, nextPage + 1)
-                            (viewPager.adapter as ScreenSlidePagerAdapter).openPages(nextPage + 1)
-                            viewPager.apply {
-                                adapter = adapter
-                                /*
-                                TabLayoutMediator(tabLayout, this) { _, _ ->
-                                    // empty for now
-                                }.attach()
+                    NewUserActivityEvents.NEXT_PAGE -> viewPager.currentItem++
 
-                                 */
-                            }
-                            viewPager.currentItem = nextPage
-                        }
-                    }
+                    NewUserActivityEvents.UPDATE_NAVBAR -> navigationBar.notifyDataChanged()
                 }
             }
             setContentView(root)
@@ -114,12 +100,15 @@ class NewUserActivity : JoozdlogActivity() {
         override fun getItemCount(): Int = availablePages
 
         override fun createFragment(position: Int): Fragment = when(position){
-            0 -> NewUserActivityPage0()
-            1 -> NewUserActivityPage1()
-            2 -> NewUserActivityPage2()
+            /**
+             * This order must match the order in [NewUserActivityViewModel.Companion]
+             */
+            0 -> NewUserActivityIntroPage()
+            1 -> NewUserActivityEmailPage()
+            2 -> NewUserActivityCloudPage()
             3 -> NewUserActivityPage3()
             4 -> NewUserActivityPage4()
-            else -> Fragment().also{ Log.w(this::class.simpleName, "PageViewer asked to provide non-existing page")}
+            else -> error("ScreenSlidePagerAdapter asked to provide non-existing page")
         }
 
         /**
@@ -134,8 +123,9 @@ class NewUserActivity : JoozdlogActivity() {
          * OnClickListener for the left button. Null for default action.
          * In this case: SKIP
          */
-        override fun previousButtonOnClick(position: Int) = { vp: ViewPager2 ->
-            vp.currentItem += 1
+        override fun previousButtonOnClick(position: Int): (ViewPager2) -> Unit = {
+            // Delegate this to [viewModel] who will send feedback to [activity] so it will do things with [ViewPager] if needed
+            viewModel.skipClicked(position)
         }
 
         /**
@@ -149,7 +139,12 @@ class NewUserActivity : JoozdlogActivity() {
         /**
          * * OnClickListener for the right button. Null for default action.
          */
-        override fun nextButtonOnClick(position: Int): (ViewPager2) -> Unit = { viewModel.continueClicked(position) }
+        override fun nextButtonOnClick(position: Int): (ViewPager2) -> Unit = {
+            // Delegate this to [viewModel] who will send feedback to [activity] so it will do things with [ViewPager] if needed
+            viewModel.continueClicked(position)
+        }
+
+        override fun nextButtonEnabled(position: Int): Boolean? = viewModel.nextButtonEnabled(position)
     }
 
     companion object{

@@ -64,10 +64,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        app:textStyle="@style/DialogButtonText"
         app:dotsAnimationDuration="200"
         app:layout_constraintBottom_toBottomOf="@+id/viewPager"
-        app:textPadding="8dp">
+        app:textPadding="8dp"
+        app:textStyle="@style/DialogButtonText"
+        app:textStyleDisabled="@style/DialogButtonTextDisabled">
 
     </nl.joozd.logbookapp.ui.utils.customs.viewpagernavigatorbar.ViewPager2NavigatorBar>
 

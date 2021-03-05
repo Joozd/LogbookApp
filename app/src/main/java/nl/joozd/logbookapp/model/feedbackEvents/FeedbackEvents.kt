@@ -120,7 +120,7 @@ object FeedbackEvents {
         Event {
         UNKNOWN_ERROR,
         NOT_IMPLEMENTED,
-        SHOW_SIGN_IN_DIALOG,
+        UPDATE_NAVBAR,
         LOGGED_IN_AS, // as Preferences.username
         USER_EXISTS,
         USERNAME_TOO_SHORT, // ie. empty username provided
@@ -130,6 +130,7 @@ object FeedbackEvents {
         BAD_EMAIL,
         EMAILS_DO_NOT_MATCH,
         CALENDAR_PICKED,
+        CLEAR_PAGE,
         NEXT_PAGE,
         FINISHED
     }

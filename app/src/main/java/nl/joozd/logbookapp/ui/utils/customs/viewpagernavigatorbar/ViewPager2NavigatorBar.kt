@@ -22,11 +22,9 @@ package nl.joozd.logbookapp.ui.utils.customs.viewpagernavigatorbar
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.children
 import androidx.viewpager2.widget.ViewPager2
 import nl.joozd.logbookapp.R
 import kotlin.reflect.KProperty
@@ -207,12 +205,9 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
     //The progress dots.
     private var dots: Dots? = null
 
-
     private val onPageChangedCallback = object: ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
-            dots?.activateDot(position)
-            previousButton?.update(adapter?.previousButtonText(position) ?: textPrevious, makeOnButtonClickedListener (adapter?.previousButtonOnClick(position))?: onPreviousClicked)
-            nextButton?.update(adapter?.nextButtonText(position) ?: textPrevious, makeOnButtonClickedListener(adapter?.nextButtonOnClick(position)) ?: onPreviousClicked)
+            loadPage(position)
         }
     }
 
@@ -240,12 +235,23 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
         attachedViewPager2 = viewPager2
         viewPager2.registerOnPageChangeCallback(onPageChangedCallback)
         adapter = viewPager2.adapter.takeIf { it is Adapter } as Adapter
+        adapter?.let { a->
+            val position = viewPager2.currentItem
+            a.previousButtonEnabled(position)?.let { previousEnabled = it }
+            a.nextButtonEnabled(position)?.let { nextEnabled = it }
 
-        val position = viewPager2.currentItem
-        previousButton?.update(adapter?.previousButtonText(position) ?: textPrevious, makeOnButtonClickedListener (adapter?.previousButtonOnClick(position))?: onPreviousClicked)
-        nextButton?.update(adapter?.nextButtonText(position) ?: textPrevious, makeOnButtonClickedListener(adapter?.nextButtonOnClick(position)) ?: onPreviousClicked)
+            previousButton?.update(a.previousButtonText(position) ?: textPrevious, makeOnButtonClickedListener(a.previousButtonOnClick(position)) ?: onPreviousClicked, previousEnabled)
+            nextButton?.update(a.nextButtonText(position) ?: textPrevious, makeOnButtonClickedListener(a.nextButtonOnClick(position)) ?: onPreviousClicked, previousEnabled)
+        }
         amountOfDots = viewPager2.adapter!!.itemCount
         return this
+    }
+
+    /**
+     * Let the navigation bar know that data to be displayed has changed and should be redrawn or updated.
+     */
+    fun notifyDataChanged(){
+        loadPage(attachedViewPager2!!.currentItem)
     }
 
     /**
@@ -276,8 +282,7 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
         // previous button
         previousButton = createTextView(textPrevious).apply {
             isAllCaps = textAllCaps
-            textStylePrevious?.let { setTextAppearance(it)
-            println("text appearance set! $it")}
+            textStylePrevious?.let { setTextAppearance(it) }
             setOnClickListener {
                 onPreviousClicked?.onButtonClicked(attachedViewPager2!!)
             }
@@ -323,8 +328,7 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
         // previous button
         previousButton = createTextView(textPrevious).apply {
             isAllCaps = textAllCaps
-            textStylePrevious?.let { setTextAppearance(it)
-                println("text appearance set! $it")}
+            textStylePrevious?.let { setTextAppearance(it) }
             setOnClickListener {
                 onPreviousClicked?.onButtonClicked(attachedViewPager2!!)
             }
@@ -350,20 +354,15 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
     private fun createConstraints() = with(ConstraintSet()){
         clone(layout)
 
-        println("PrevButton: ${previousButton?.id}")
-
         connect(previousButton!!.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
         connect(previousButton!!.id, ConstraintSet.TOP,  ConstraintSet.PARENT_ID, ConstraintSet.TOP)
         connect(previousButton!!.id, ConstraintSet.BOTTOM,  ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
-
-        println("dots: ${dots?.id}")
 
         connect(dots!!.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
         connect(dots!!.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
         connect(dots!!.id, ConstraintSet.TOP,  ConstraintSet.PARENT_ID, ConstraintSet.TOP)
         connect(dots!!.id, ConstraintSet.BOTTOM,  ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
 
-        println("nextButton: ${nextButton?.id}")
         connect(nextButton!!.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
         connect(nextButton!!.id, ConstraintSet.TOP,  ConstraintSet.PARENT_ID, ConstraintSet.TOP)
         connect(nextButton!!.id, ConstraintSet.BOTTOM,  ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
@@ -394,16 +393,27 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
         id = generateViewId()
     }
 
-    private fun TextView.update(newText: String? = null, newListener: OnButtonClickedListener? = null){
+    private fun TextView.update(newText: String? = null, newListener: OnButtonClickedListener? = null, enabled: Boolean){
         newText?.let{
             visibility = if (it.isEmpty()) View.INVISIBLE else View.VISIBLE
             text = newText
         }
         newListener?.let{l ->
-            setOnClickListener {
-                l.onButtonClicked(attachedViewPager2!!)
-            }
+            if (enabled) {
+                setOnClickListener {
+                    l.onButtonClicked(attachedViewPager2!!)
+                }
+            } else setOnClickListener { /* do nothing */ }
         }
+        (if (enabled) textStyle else textStyleDisabled)?.let{
+            setTextAppearance(it)
+        }
+    }
+
+    private fun enablePrevious(enabled: Boolean){
+        if (enabled)
+            textStylePrevious?.let { previousButton?.setTextAppearance(it) }
+
     }
 
     /****************************************************************************************
@@ -440,14 +450,40 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
             textPaddingTop = getDimensionPixelSize(R.styleable.ViewPager2NavigatorBar_textPaddingTop, textPadding)          // defaults to [textPadding]
             textPaddingBottom = getDimensionPixelSize(R.styleable.ViewPager2NavigatorBar_textPaddingBottom, textPadding)    // defaults to [textPadding]
 
+            previousEnabled = getBoolean(R.styleable.ViewPager2NavigatorBar_previousButtonEnabled, previousEnabled)
+            nextEnabled = getBoolean(R.styleable.ViewPager2NavigatorBar_nextButtonEnabled, previousEnabled)
+
             //aaaand we're done with this TypedArray
             recycle()
         }
         initialized = true
         createLayout()
-        println("AAAAAAAAAAAAAAAAAAAbanaan123-1")
     }
 
+    /**
+     * Set all data for page at [position]
+     */
+    private fun loadPage(position: Int){
+        println("Loading page $position")
+        dots?.activateDot(position)
+        adapter?.let { a ->
+            a.previousButtonEnabled(position)?.let { previousEnabled = it }
+            a.nextButtonEnabled(position)?.let { nextEnabled = it }
+            previousButton?.update(a.previousButtonText(position) ?: textPrevious, makeOnButtonClickedListener(a.previousButtonOnClick(position)) ?: onPreviousClicked, previousEnabled)
+            nextButton?.update(a.nextButtonText(position) ?: textPrevious, makeOnButtonClickedListener(a.nextButtonOnClick(position)) ?: onPreviousClicked, nextEnabled)
+        }
+    }
+
+    /**
+     * Helper function to make a function into an [OnButtonClickedListener]
+     */
+    private fun makeOnButtonClickedListener(f: ((ViewPager2) -> Unit)?) = f?.let {
+        object : OnButtonClickedListener {
+            override fun onButtonClicked(viewPager: ViewPager2) {
+                it(viewPager)
+            }
+        }
+    }
 
     /****************************************************************************************
      * Interfaces
@@ -457,37 +493,47 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
         fun onButtonClicked(viewPager: ViewPager2)
     }
 
-    private fun makeOnButtonClickedListener(f: ((ViewPager2) -> Unit)?) = f?.let {
-        object : OnButtonClickedListener {
-            override fun onButtonClicked(viewPager: ViewPager2) {
-                it(viewPager)
-            }
-        }
-    }
+
 
     /**
      * You can implement [ViewPager2NavigatorBar.Adapter] in your ViewPager2's adapter to make different naavigation button behaviours per page.
      */
     interface Adapter {
         /**
-         * Text for the left button. Null for default text, empty string for hidden button.
+         * Text for the left button.
+         * Empty string for hidden button.
+         * If null or not implemented, will use [textPrevious]
          */
-        fun previousButtonText(position: Int): String?
+        fun previousButtonText(position: Int): String? = null
 
         /**
          * OnClickListener for the left button. Null for default action.
          */
-        fun previousButtonOnClick(position: Int): (ViewPager2) -> Unit
+        fun previousButtonOnClick(position: Int): ((ViewPager2) -> Unit)? = null
 
         /**
-         * Text for the right button. Null for default text, empty string for hidden button.
+         * if true, button is enabled when navigating to this page, if false, it is disabled.
+         * If not implemented it stays the way it was on previous page.
          */
-        fun nextButtonText(position: Int): String?
+        fun previousButtonEnabled(position: Int): Boolean? = null
+
+        /**
+         * Text for the right button.
+         * Empty string for hidden button.
+         * If null or not implemented, will use [textNext]
+         */
+        fun nextButtonText(position: Int): String? = null
 
         /**
          * * OnClickListener for the right button. Null for default action.
          */
-        fun nextButtonOnClick(position: Int): (ViewPager2) -> Unit
+        fun nextButtonOnClick(position: Int): ((ViewPager2) -> Unit)? = null
+
+        /**
+         * if true, button is enabled when navigating to this page, if false, it is disabled.
+         * If not implemented it stays the way it was on previous page.
+         */
+        fun nextButtonEnabled(position: Int): Boolean? = null
     }
 
 
@@ -507,10 +553,7 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
 
         operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
             v = value
-            println("BANAAN456 $v")
-            if (initialized) recreateText().also{
-                println("Recreating text BANAAN123-1 $v")
-            }
+            if (initialized) recreateText()
         }
     }
 
@@ -526,11 +569,7 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
 
         operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
             v = value
-            println("BANAAN789 $v")
-            println("initialized: $initialized")
-            if (initialized) recreateDots().also{
-                println("BANAAN246")
-            }
+            if (initialized) recreateDots()
         }
     }
 

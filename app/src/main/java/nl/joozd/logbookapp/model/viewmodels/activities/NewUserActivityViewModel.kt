@@ -49,6 +49,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEv
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.utils.generatePassword
+import java.util.*
 
 class NewUserActivityViewModel: JoozdlogActivityViewModel() {
 
@@ -59,6 +60,16 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     private val internetAvailable: LiveData<Boolean> = InternetStatus.internetAvailableLiveData
 
     private val _feedbackChannels = Array(FEEDBACK_CHANNELS) { MutableLiveData<FeedbackEvent>() }
+
+    /**
+     * List of pages corresponging to if their "continue" button is activated
+     */
+    private val nextButtonEnabledList = Array(5){
+        when(it){
+            0, 4 -> true
+            else -> false
+        }
+    }
 
     /*
     private val _page1Feedback = MutableLiveData<FeedbackEvent>()
@@ -134,8 +145,37 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * Shared functions
      *******************************************************************************************/
 
-    fun continueClicked(page: Int){
-        toast("Continue clicked on page (page)")
+    /**
+     * Tells Activity to make "Continue" button active
+     */
+    fun makeContinueActive(pageNumber: Int, isActive: Boolean){
+        nextButtonEnabledList[pageNumber] = isActive
+        feedback(NewUserActivityEvents.UPDATE_NAVBAR).putBoolean(isActive)
+    }
+
+    fun nextButtonEnabled(position: Int) = nextButtonEnabledList[position]
+
+    fun continueClicked(position: Int) {
+        when(position){
+            0 -> feedback(NewUserActivityEvents.NEXT_PAGE)
+            1 -> toast ("Continue clicked  for email page")
+            2 -> toast ("Continue clicked  for cloud page")
+            3 -> toast ("Continue clicked  for calendar page")
+            4 -> toast ("Done clicked. This should save all data.")
+        }
+
+    }
+
+    fun skipClicked(position: Int){
+        when(position){
+            1 -> { // skip email page -> make email1 and 2 empty
+                email1 = ""
+                email2 = ""
+                feedback(NewUserActivityEvents.CLEAR_PAGE, PAGE_EMAIL)
+                feedback(NewUserActivityEvents.NEXT_PAGE)
+            }
+            else -> feedback(NewUserActivityEvents.NEXT_PAGE)
+        }
     }
 
     fun getFeedbackChannel(channel: Int): LiveData<FeedbackEvent>{
@@ -173,7 +213,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     }
 
     /*******************************************************************************************
-     * Page1 functions
+     * Page1 functions (PAGE_EMAIL)
      *******************************************************************************************/
 
 
@@ -182,57 +222,27 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     var email2 = Preferences.emailAddress
         private set
 
-    fun okClickedPage1(){
-        Log.d("okClickedPage1()", "email1: $email1, email2: $email2")
-        if (email1 != email2) feedback(FeedbackEvents.GeneralEvents.ERROR, 1).putString("ERROR NUA1")
-        else {
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(FeedbackEvents.GeneralEvents.ERROR, 1).putString("ERROR NUA2")
-            if (email1 != Preferences.emailAddress) {
-                Preferences.emailAddress = email1
-                Preferences.emailVerified = false
-
-                // THIS IS TO BE DONE AFTER USERNAME KNOWN
-                // applicationScope.launch { Cloud.sendNewEmailAddress() } // this might live longer than the viewModel so is done in larger scope
-
-                Preferences.backupFromCloud = true
-            }
-            feedback(FeedbackEvents.GeneralEvents.DONE, 1)
-        }
-    }
-
-    fun showErrorPage1() = when {
-        !android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches() -> feedback(NewUserActivityEvents.BAD_EMAIL, 1)
-        email1 != email2 -> feedback(NewUserActivityEvents.EMAILS_DO_NOT_MATCH, 1)
-        else -> feedback(FeedbackEvents.GeneralEvents.ERROR, 1).putString(("Unhandled error"))
-    }
-
     fun page1InputChanged(input1: String, input2: String){
-        email1 = input1.trim()
-        email2 = input2.trim()
+        email1 = input1.toLowerCase(Locale.ROOT).trim()
+        email2 = input2.toLowerCase(Locale.ROOT).trim()
         checkEmails()
     }
 
-    fun updateEmail(it: String){
-        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(it.trim()).matches())
-            feedback(FeedbackEvents.GeneralEvents.ERROR, 1).putString("Not an email address").putInt(1) // TODO make other errors as well
-        email1 = it.trim()
+    fun checkEmail1(){
+        if (email1.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches())
+            feedback(NewUserActivityEvents.BAD_EMAIL, PAGE_EMAIL)
     }
 
-    fun updateEmail2(it: String){
-        when {
-            it.trim() != email1 ->
-                feedback(FeedbackEvents.GeneralEvents.ERROR, 1).putString("Does not match").putInt(2) // TODO make other errors as well
-            else -> {
-                email2 = it.trim()
-
-            }
-        }
-    }
-
+    /**
+     * Check if emails are valid and matching, if so, enable continue button
+     */
     private fun checkEmails(): Boolean =
         (email1 == email2 && android.util.Patterns.EMAIL_ADDRESS.matcher(email2).matches()).also{
-            _emailsMatch.value = it
+            if (nextButtonEnabledList[PAGE_EMAIL] != it)
+                makeContinueActive(PAGE_EMAIL, it)
     }
+
+
 
 
     /*******************************************************************************************
@@ -354,6 +364,10 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     var lastOpenPageState: Int? = null
 
     companion object{
+        const val PAGE_INTRO = 0
+        const val PAGE_EMAIL = 1
+        const val PAGE_CLOUD = 2
+
         private const val FEEDBACK_CHANNELS = 10
         private const val INITIAL_OPEN_PAGES = 5
     }

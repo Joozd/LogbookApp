@@ -26,6 +26,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.text.Editable
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -46,6 +47,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
+import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.utils.generatePassword
 
 class NewUserActivityViewModel: JoozdlogActivityViewModel() {
@@ -56,14 +58,31 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
 
     private val internetAvailable: LiveData<Boolean> = InternetStatus.internetAvailableLiveData
 
+    private val _feedbackChannels = Array(FEEDBACK_CHANNELS) { MutableLiveData<FeedbackEvent>() }
+
+    /*
     private val _page1Feedback = MutableLiveData<FeedbackEvent>()
     private val _page2Feedback = MutableLiveData<FeedbackEvent>()
     private val _page3Feedback = MutableLiveData<FeedbackEvent>()
+    */
 
     private val calendarScraper = CalendarScraper(context)
 
+
+    /**
+     * Mutable Livedata (private)
+     */
+
+    //page 1:
+    private val _emailsMatch = MutableLiveData(false)
+
+
     private val _username = MutableLiveData(Preferences.username)
-    private val _emailAddress = MutableLiveData(Preferences.emailAddress)
+
+
+
+
+
     private val _acceptTerms = MutableLiveData(Preferences.acceptedCloudSyncTerms)
     private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
 
@@ -79,7 +98,6 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
             Preferences::usernameResource.name -> _username.value = Preferences.username
             Preferences::acceptedCloudSyncTerms.name -> _acceptTerms . value = Preferences . acceptedCloudSyncTerms
             Preferences::useIataAirports.name -> _useIataAirports.value = Preferences.useIataAirports
-            Preferences::emailAddress.name -> _emailAddress.value = Preferences.emailAddress
         }
     }
     init{
@@ -91,20 +109,12 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * Observables
      *******************************************************************************************/
 
-    val page1Feedback: LiveData<FeedbackEvent>
-        get() = _page1Feedback
-
-    val page2Feedback: LiveData<FeedbackEvent>
-        get() = _page2Feedback
-
-    val page3Feedback: LiveData<FeedbackEvent>
-        get() = _page3Feedback
+    //page 1:
+    val emailsMatch: LiveData<Boolean>
+        get() = Transformations.distinctUntilChanged(_emailsMatch)
 
     val username: LiveData<String?>
         get() = _username
-
-    val emailAddress: LiveData<String>
-        get() = _emailAddress
 
     val acceptTerms: LiveData<Boolean>
         get() = _acceptTerms
@@ -123,6 +133,15 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     /*******************************************************************************************
      * Shared functions
      *******************************************************************************************/
+
+    fun continueClicked(page: Int){
+        toast("Continue clicked on page (page)")
+    }
+
+    fun getFeedbackChannel(channel: Int): LiveData<FeedbackEvent>{
+        require (channel in 0 until FEEDBACK_CHANNELS) { "channel must be between 0 and $FEEDBACK_CHANNELS (NewUserActivityViewModel.Companion.FEEDBACK_CHANNELS)"}
+        return _feedbackChannels[channel]
+    }
 
     /**
      * @param pageNumber: Number of the page requesting the next page do be displayed
@@ -143,35 +162,66 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         flightRepository.syncIfNeeded()
     }
 
+    /**
+     * Send feedback to specific channel
+     * @param event: a [FeedbackEvents.Event]
+     * @param channel: channel to send to, must be in (0 until [FEEDBACK_CHANNELS])
+     */
+    fun feedback(event: FeedbackEvents.Event, channel: Int): FeedbackEvent {
+        require (channel in 0 until FEEDBACK_CHANNELS) { "channel must be between 0 and $FEEDBACK_CHANNELS (NewUserActivityViewModel.Companion.FEEDBACK_CHANNELS)"}
+        return feedback(event, _feedbackChannels[channel])
+    }
+
     /*******************************************************************************************
      * Page1 functions
      *******************************************************************************************/
 
 
     var email1 = Preferences.emailAddress
+        private set
     var email2 = Preferences.emailAddress
+        private set
 
     fun okClickedPage1(){
         Log.d("okClickedPage1()", "email1: $email1, email2: $email2")
-        if (email1 != email2) feedback(FeedbackEvents.GeneralEvents.ERROR, _page1Feedback).putInt(3)
+        if (email1 != email2) feedback(FeedbackEvents.GeneralEvents.ERROR, 1).putString("ERROR NUA1")
         else {
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(FeedbackEvents.GeneralEvents.ERROR, _page1Feedback).putInt(4)
-            Preferences.emailAddress = email1
-            Preferences.backupFromCloud = true
-            feedback(FeedbackEvents.GeneralEvents.DONE, _page1Feedback)
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(FeedbackEvents.GeneralEvents.ERROR, 1).putString("ERROR NUA2")
+            if (email1 != Preferences.emailAddress) {
+                Preferences.emailAddress = email1
+                Preferences.emailVerified = false
+
+                // THIS IS TO BE DONE AFTER USERNAME KNOWN
+                // applicationScope.launch { Cloud.sendNewEmailAddress() } // this might live longer than the viewModel so is done in larger scope
+
+                Preferences.backupFromCloud = true
+            }
+            feedback(FeedbackEvents.GeneralEvents.DONE, 1)
         }
+    }
+
+    fun showErrorPage1() = when {
+        !android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches() -> feedback(NewUserActivityEvents.BAD_EMAIL, 1)
+        email1 != email2 -> feedback(NewUserActivityEvents.EMAILS_DO_NOT_MATCH, 1)
+        else -> feedback(FeedbackEvents.GeneralEvents.ERROR, 1).putString(("Unhandled error"))
+    }
+
+    fun page1InputChanged(input1: String, input2: String){
+        email1 = input1.trim()
+        email2 = input2.trim()
+        checkEmails()
     }
 
     fun updateEmail(it: String){
         if(!android.util.Patterns.EMAIL_ADDRESS.matcher(it.trim()).matches())
-            feedback(FeedbackEvents.GeneralEvents.ERROR, _page1Feedback).putString("Not an email address").putInt(1) // TODO make other errors as well
+            feedback(FeedbackEvents.GeneralEvents.ERROR, 1).putString("Not an email address").putInt(1) // TODO make other errors as well
         email1 = it.trim()
     }
 
     fun updateEmail2(it: String){
         when {
             it.trim() != email1 ->
-                feedback(FeedbackEvents.GeneralEvents.ERROR, _page1Feedback).putString("Does not match").putInt(2) // TODO make other errors as well
+                feedback(FeedbackEvents.GeneralEvents.ERROR, 1).putString("Does not match").putInt(2) // TODO make other errors as well
             else -> {
                 email2 = it.trim()
 
@@ -179,13 +229,10 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
-    fun checkSame1(s: String): Boolean =
-        (s.trim() == email2 && android.util.Patterns.EMAIL_ADDRESS.matcher(email2).matches())
-
-    fun checkSame2(s: String): Boolean =
-        (s.trim() == email1 && android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()).also{
-            email2 = s
-        }
+    private fun checkEmails(): Boolean =
+        (email1 == email2 && android.util.Patterns.EMAIL_ADDRESS.matcher(email2).matches()).also{
+            _emailsMatch.value = it
+    }
 
 
     /*******************************************************************************************
@@ -210,24 +257,24 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
             Log.d("signUpClicked", "user: $username")
             Preferences.useCloud = true
             when {
-                internetAvailable.value != true -> feedback(NewUserActivityEvents.NO_INTERNET, _page2Feedback)
-                username.isBlank() -> feedback(NewUserActivityEvents.USERNAME_TOO_SHORT, _page2Feedback)
+                internetAvailable.value != true -> feedback(NewUserActivityEvents.NO_INTERNET, 2)
+                username.isBlank() -> feedback(NewUserActivityEvents.USERNAME_TOO_SHORT, 2)
                 else -> { // username not empty and internet looks OK
                     val email = Preferences.emailAddress.takeIf { it.isNotEmpty() }
-                    feedback(NewUserActivityEvents.WAITING_FOR_SERVER, _page2Feedback)
+                    feedback(NewUserActivityEvents.WAITING_FOR_SERVER, 2)
                     viewModelScope.launch {
                         val pass1 = generatePassword(16)
                         when (UserManagement.createNewUser(username, pass1, email)) { // UserManagement will call the correct Cloud function
                             CloudFunctionResults.OK -> {
-                                feedback(NewUserActivityEvents.LOGGED_IN_AS, _page2Feedback)
+                                feedback(NewUserActivityEvents.LOGGED_IN_AS, 2)
                                 Preferences.emailJobsWaiting.sendLoginLink = true
                             }
-                            CloudFunctionResults.CLIENT_ERROR -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
-                            CloudFunctionResults.SERVER_ERROR -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
-                            CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS -> feedback(NewUserActivityEvents.BAD_EMAIL, _page2Feedback)
-                            CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, _page2Feedback)
-                            CloudFunctionResults.USER_ALREADY_EXISTS -> feedback(NewUserActivityEvents.USER_EXISTS, _page2Feedback)
-                            else -> feedback(NewUserActivityEvents.UNKNOWN_ERROR, _page2Feedback)
+                            CloudFunctionResults.CLIENT_ERROR -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, 2)
+                            CloudFunctionResults.SERVER_ERROR -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, 2)
+                            CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS -> feedback(NewUserActivityEvents.BAD_EMAIL, 2)
+                            CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, 2)
+                            CloudFunctionResults.USER_ALREADY_EXISTS -> feedback(NewUserActivityEvents.USER_EXISTS, 2)
+                            else -> feedback(NewUserActivityEvents.UNKNOWN_ERROR, 2)
                         }
                     }
                 }
@@ -260,8 +307,9 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
     fun fillCalendarsList() {
         viewModelScope.launch {
-            _foundCalendars.value =
-                withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }
+            withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }.let {
+                _foundCalendars.value = it
+            }
         }
     }
 
@@ -269,7 +317,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         _foundCalendars.value?.get(index)?.let {
             Preferences.selectedCalendar = it.name
             Preferences.useCalendarSync = true
-            feedback(NewUserActivityEvents.CALENDAR_PICKED, _page3Feedback)
+            feedback(NewUserActivityEvents.CALENDAR_PICKED, 1)
         }
     }
 
@@ -306,6 +354,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     var lastOpenPageState: Int? = null
 
     companion object{
-        private const val INITIAL_OPEN_PAGES = 4
+        private const val FEEDBACK_CHANNELS = 10
+        private const val INITIAL_OPEN_PAGES = 5
     }
 }

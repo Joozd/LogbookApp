@@ -24,30 +24,51 @@
     android:id="@+id/newUserActivityLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSecondaryBackground"
     tools:context=".ui.activities.newUserActivity.NewUserActivity">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/tabLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
     </androidx.viewpager2.widget.ViewPager2>
 
-    <com.google.android.material.tabs.TabLayout
+    <!--com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:background="@android:color/transparent"
+        android:clickable="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:tabBackground="@drawable/tab_selector"
         app:tabGravity="center"
-        app:tabIndicatorHeight="0dp" />
+        app:tabIndicatorHeight="0dp" /-->
+
+    <View
+        android:id="@+id/dividerLine"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="?attr/colorPrimaryDark"
+        app:layout_constraintBottom_toTopOf="@+id/navigationBar" />
+
+    <nl.joozd.logbookapp.ui.utils.customs.viewpagernavigatorbar.ViewPager2NavigatorBar
+        android:id="@+id/navigationBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        app:textStyle="@style/DialogButtonText"
+        app:dotsAnimationDuration="200"
+        app:layout_constraintBottom_toBottomOf="@+id/viewPager"
+        app:textPadding="8dp">
+
+    </nl.joozd.logbookapp.ui.utils.customs.viewpagernavigatorbar.ViewPager2NavigatorBar>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

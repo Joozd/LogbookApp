@@ -128,6 +128,7 @@ object FeedbackEvents {
         WAITING_FOR_SERVER,
         SERVER_NOT_RESPONDING,
         BAD_EMAIL,
+        EMAILS_DO_NOT_MATCH,
         CALENDAR_PICKED,
         NEXT_PAGE,
         FINISHED

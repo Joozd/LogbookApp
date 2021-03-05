@@ -37,11 +37,10 @@ open class JoozdlogViewModel: ViewModel() {
     protected val flightRepository = FlightRepository.getInstance()
     protected val aircraftRepository = AircraftRepository.getInstance()
     protected val airportRepository = AirportRepository.getInstance()
-    /*
-    @Deprecated("workingFlightRepository is being deprecated")
-    protected val workingFlightRepository = WorkingFlightRepository.getInstance()
-    */
     protected val balanceForwardRepository = BalanceForwardRepository.getInstance()
+
+    protected val applicationScope
+        get() = App.instance.applicationScope
 
     private val _feedbackEvent = MutableLiveData<FeedbackEvent>()
     val feedbackEvent: LiveData<FeedbackEvent>

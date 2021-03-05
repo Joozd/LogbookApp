@@ -24,6 +24,7 @@ import android.app.Application
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
@@ -35,6 +36,8 @@ class App : Application(){
     }
 
     val ctx: Context by lazy {applicationContext}
+
+    val applicationScope = CoroutineScope(SupervisorJob())
 
     override fun onCreate() {
         super.onCreate()

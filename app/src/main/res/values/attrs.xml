@@ -28,6 +28,120 @@
         <attr name="metaButtonBarButtonStyle" format="reference"/>
     </declare-styleable>
 
+
+
+    <!-- ViewPager2NavigatorBar multi-used attrs-->
+
+    <!-- The diameter of a Dot when inactive. Default is 6dp-->
+    <attr name="dotsInactiveDiameter" format="dimension"/>
+
+    <!-- The diameter of a Dot when active.  Default is 9dp -->
+    <attr name="dotsActiveDiameter" format="dimension"/>
+
+    <!-- Spacing between dots.  Default is 9dp -->
+    <attr name="dotsSpacing" format="dimension"/>
+
+    <!-- The color of a Dot when inactive. Defaults to ?attr/android:textColorSecondary. -->
+    <attr name="dotsInactiveColor" format="color"/>
+
+    <!-- The color of a Dot when active. Defaults to ?attr/colorAccent. -->
+    <attr name="dotsActiveColor" format="color"/>
+
+    <!-- The amount of time to use when animating a dot between active and inactive, measured in milliseconds. -->
+    <attr name="dotsAnimationDuration" format="integer"/>
+
+
+    <declare-styleable name="Dots">
+        <!-- The diameter of a Dot when inactive. Default is 6dp-->
+        <attr name="dotsInactiveDiameter" />
+
+        <!-- The diameter of a Dot when active.  Default is 9dp -->
+        <attr name="dotsActiveDiameter"/>
+
+        <!-- Spacing between dots.  Default is 9dp -->
+        <attr name="dotsSpacing"/>
+
+        <!-- The color of a Dot when inactive. Defaults to ?attr/android:textColorSecondary. -->
+        <attr name="dotsInactiveColor"/>
+
+        <!-- The color of a Dot when active. Defaults to ?attr/colorAccent. -->
+        <attr name="dotsActiveColor"/>
+
+        <!-- The amount of time to use when animating a dot between active and inactive, measured in milliseconds. -->
+        <attr name="dotsAnimationDuration"/>
+    </declare-styleable>
+
+    <declare-styleable name="ViewPager2NavigatorBar">
+        <!-- The text to be shown as "previous", default is "<" -->
+        <attr name="textPrevious" format="string"/>
+
+        <!-- The text to be shown as "next", default is ">" -->
+        <attr name="textNext" format="string"/>
+
+        <!-- style for "previous and "next" text -->
+        <attr name="textStyle" format="reference"/>
+
+        <!-- style for "previous" text. Overrides [textStyle] -->
+        <attr name="textStylePrevious" format="reference"/>
+
+        <!-- style for "next" text. Overrides [textStyle] -->
+        <attr name="textStyleNext" format="reference"/>
+
+        <!-- style for "next" text when disabled -->
+        <attr name="textStyleDisabled" format="reference"/>
+
+        <!-- style for "previous" text when disabled -->
+        <attr name="textStylePreviousDisabled" format="reference"/>
+
+        <!-- style for "previous and "next" text when disabled -->
+        <attr name="textStyleNextDisabled" format="reference"/>
+
+
+        <!-- "previous" button enabled (onClick works and style is [textStyle] instead of [textStyleDisabled]. Default is true. -->
+        <attr name="previousButtonEnabled" format="reference"/>
+
+        <!-- "next" button enabled (onClick works and style is [textStyle] instead of [textStyleDisabled]. Default is true. -->
+        <attr name="nextButtonEnabled" format="reference"/>
+
+        <!-- style for "previous and "next" text, default True -->
+        <attr name="textAllCaps" />
+
+        <!-- Default padding on previous and next text buttons, default is 0dp -->
+        <attr name="textPadding" format="dimension"/>
+
+        <!-- Default start padding on previous and next text buttons, default is 0dp -->
+        <attr name="textPaddingStart" format="dimension"/>
+
+        <!-- Default end padding on previous and next text buttons, default is 0dp -->
+        <attr name="textPaddingEnd" format="dimension"/>
+
+        <!-- Default top padding on previous and next text buttons, default is 0dp -->
+        <attr name="textPaddingTop" format="dimension"/>
+
+        <!-- Default bottom padding on previous and next text buttons, default is 0dp -->
+        <attr name="textPaddingBottom" format="dimension"/>
+
+        <!-- The diameter of a Dot when inactive. Default is 6dp-->
+        <attr name="dotsInactiveDiameter" />
+
+        <!-- The diameter of a Dot when active.  Default is 9dp -->
+        <attr name="dotsActiveDiameter"/>
+
+        <!-- Spacing between dots.  Default is 9dp -->
+        <attr name="dotsSpacing"/>
+
+        <!-- The color of a Dot when inactive. Defaults to ?attr/android:textColorSecondary. -->
+        <attr name="dotsInactiveColor"/>
+
+        <!-- The color of a Dot when active. Defaults to ?attr/colorAccent. -->
+        <attr name="dotsActiveColor"/>
+
+        <!-- The amount of time to use when animating a dot between active and inactive, measured in milliseconds. -->
+        <attr name="dotsAnimationDuration"/>
+
+
+    </declare-styleable>
+
     <attr name="colorSecondaryBackground" format="reference|color" />
     <attr name="colorTextViewBackground" format="reference|color" />
     <attr name="textColorWarning" format="reference|color" />

@@ -55,6 +55,7 @@
     <string name="username">Username</string>
     <string name="email_for_login">Email address for login link</string>
     <string name="email">Email address</string>
+    <string name="not_an_email_address">Not an email address</string>
     <string name="email_repeat">Repeat Email address</string>
     <string name="email_reason">Please enter your email for backup and account recovery purposes.\nYour email address will not be stored outside your phone.</string>
     <string name="autovalue">Auto Values</string>
@@ -176,7 +177,7 @@
     <string name="no_internet_login">Cannot connect to server. Login data has been stored but not checked with server.</string>
     <string name="password_cannot_be_empty">Password cannot be empty</string>
     <string name="username_cannot_be_empty">Username cannot be empty</string>
-    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="does_not_match">Does not match</string>
     <string name="wrong_username_password">Wrong username or password</string>
     <string name="pass_requirements">Password requirements</string>
     <string name="password_requirements">At least 6 characters, two of which are not the same.</string>

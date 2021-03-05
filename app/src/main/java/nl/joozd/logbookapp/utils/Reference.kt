@@ -1,6 +1,6 @@
 /*
  *  JoozdLog Pilot's Logbook
- *  Copyright (c) 2020 Joost Welle
+ *  Copyright (c) 2021 Joost Welle
  *
  *      This program is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU Affero General Public License as
@@ -17,8 +17,6 @@
  *
  */
 
-package nl.joozd.logbookapp.model.viewmodels
+package nl.joozd.logbookapp.utils
 
-open class JoozdlogActivityViewModel: JoozdlogViewModel() {
-
-}
+class Reference<T>(var value: T)

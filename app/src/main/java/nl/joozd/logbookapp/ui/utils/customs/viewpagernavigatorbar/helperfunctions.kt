@@ -1,6 +1,6 @@
 /*
  *  JoozdLog Pilot's Logbook
- *  Copyright (c) 2020 Joost Welle
+ *  Copyright (c) 2021 Joost Welle
  *
  *      This program is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU Affero General Public License as
@@ -17,8 +17,18 @@
  *
  */
 
-package nl.joozd.logbookapp.model.viewmodels
+package nl.joozd.logbookapp.ui.utils.customs.viewpagernavigatorbar
 
-open class JoozdlogActivityViewModel: JoozdlogViewModel() {
+import android.util.TypedValue
+import android.view.View
+import androidx.annotation.AttrRes
 
+fun View.getAttribute(@AttrRes attribute: Int) = with(TypedValue()){
+    context.theme.resolveAttribute(attribute, this, true)
+    data
 }
+
+/**
+ * Convert DP to pixels and vice versa
+ */
+fun View.dpToPixels(dp: Int) = (dp * resources.displayMetrics.density).toInt()

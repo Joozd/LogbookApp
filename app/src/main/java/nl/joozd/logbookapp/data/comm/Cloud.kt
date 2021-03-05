@@ -89,6 +89,11 @@ object Cloud {
         }
     }
 
+    /**
+     * Send new email address to server.
+     * Server will TODO
+     * TODO describe what will happen
+     */
     suspend fun sendNewEmailAddress(): CloudFunctionResults = withContext(Dispatchers.IO) {
         Client.getInstance().use { client ->
             ServerFunctions.sendNewEmailData(client, Preferences.emailAddress)

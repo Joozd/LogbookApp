@@ -28,7 +28,7 @@ android {
 
     defaultConfig {
         applicationId "nl.joozd.logbookapp"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 30
         versionCode 28
         versionName "JoozdLog 0.6"

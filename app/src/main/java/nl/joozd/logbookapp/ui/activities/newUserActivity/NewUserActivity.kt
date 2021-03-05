@@ -24,16 +24,15 @@ import android.util.Log
 import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.tabs.TabLayoutMediator
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityNewUserBinding
 import nl.joozd.logbookapp.extensions.minusOneWithFloor
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
+import nl.joozd.logbookapp.ui.utils.customs.viewpagernavigatorbar.ViewPager2NavigatorBar
 import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
 
 class NewUserActivity : JoozdlogActivity() {
@@ -54,9 +53,12 @@ class NewUserActivity : JoozdlogActivity() {
             mViewPager = viewPager.apply {
                 adapter = ScreenSlidePagerAdapter(this@NewUserActivity, viewModel.openPagesState ?: 1)
                 setPageTransformer(DepthPageTransformer(TRANSFORMER_MIN_SCALE))
+                navigationBar.attach(this)
+                /*
                 TabLayoutMediator(tabLayout, this) { _, _ ->
                     // empty for now
                 }.attach()
+                */
                 currentItem = viewModel.lastOpenPageState ?: 0
             }
 
@@ -78,9 +80,12 @@ class NewUserActivity : JoozdlogActivity() {
                             (viewPager.adapter as ScreenSlidePagerAdapter).openPages(nextPage + 1)
                             viewPager.apply {
                                 adapter = adapter
+                                /*
                                 TabLayoutMediator(tabLayout, this) { _, _ ->
                                     // empty for now
                                 }.attach()
+
+                                 */
                             }
                             viewPager.currentItem = nextPage
                         }
@@ -89,9 +94,6 @@ class NewUserActivity : JoozdlogActivity() {
             }
             setContentView(root)
         }
-
-
-
     }
 
     override fun onStop() {
@@ -104,7 +106,7 @@ class NewUserActivity : JoozdlogActivity() {
         mViewPager.currentItem = mViewPager.currentItem.minusOneWithFloor(0)
     }
 
-    private inner class ScreenSlidePagerAdapter(fa: FragmentActivity, private var availablePages: Int) : FragmentStateAdapter(fa) {
+    private inner class ScreenSlidePagerAdapter(fa: FragmentActivity, private var availablePages: Int) : FragmentStateAdapter(fa), ViewPager2NavigatorBar.Adapter {
 
         fun openPages(newHighest: Int){
             availablePages = maxOf(availablePages, newHighest)
@@ -119,7 +121,37 @@ class NewUserActivity : JoozdlogActivity() {
             4 -> NewUserActivityPage4()
             else -> Fragment().also{ Log.w(this::class.simpleName, "PageViewer asked to provide non-existing page")}
         }
+
+        /**
+         * Text for the left button. Null for default text, empty string for hidden button.
+         */
+        override fun previousButtonText(position: Int): String = when(position){
+            4 -> ""
+            else -> getString(R.string.skip)
+        }
+
+        /**
+         * OnClickListener for the left button. Null for default action.
+         * In this case: SKIP
+         */
+        override fun previousButtonOnClick(position: Int) = { vp: ViewPager2 ->
+            vp.currentItem += 1
+        }
+
+        /**
+         * Text for the right button. Null for default text, empty string for hidden button.
+         */
+        override fun nextButtonText(position: Int): String = when(position){
+            4 -> getString(R.string.done)
+            else -> getString(R.string._continue)
+        }
+
+        /**
+         * * OnClickListener for the right button. Null for default action.
+         */
+        override fun nextButtonOnClick(position: Int): (ViewPager2) -> Unit = { viewModel.continueClicked(position) }
     }
+
     companion object{
         private const val TRANSFORMER_MIN_SCALE = 0.75f
     }

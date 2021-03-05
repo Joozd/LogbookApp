@@ -25,6 +25,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
@@ -59,7 +60,7 @@ class EmailDialog(): JoozdlogFragment() {
             emailAddressEditText.setText(viewModel.email1)
             emailAddress2EditText.setText(viewModel.email2)
 
-            emailAddressEditText.onTextChanged { text ->
+            (emailAddressEditText as EditText).onTextChanged { text ->
                 emailAddressLayout.error = ""
                 enableOkButton(okButton, viewModel.checkSame1(text))
             }
@@ -72,7 +73,7 @@ class EmailDialog(): JoozdlogFragment() {
             }
 
 
-            emailAddress2EditText.onTextChanged { text ->
+            (emailAddress2EditText as EditText).onTextChanged { text ->
                 emailAddress2Layout.error = ""
                 enableOkButton(okButton, viewModel.checkSame2(text))
             }

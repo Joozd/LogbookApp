@@ -66,6 +66,7 @@ class NewUserActivityCloudPage: JoozdlogFragment() {
              */
             viewModel.useCloudCheckboxStatus.observe(viewLifecycleOwner){
                 useCloudCheckbox.isChecked = it
+                if (it) viewModel.setNextButtonEnabled(pageNumber, true) // if checkbox checked, 'CONTINUE' is enabled, it will stay that way if it is unchecked again.
             }
 
             viewModel.getFeedbackChannel(pageNumber).observe(viewLifecycleOwner) {

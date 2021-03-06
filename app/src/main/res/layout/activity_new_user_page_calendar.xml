@@ -23,8 +23,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/NewUserActivityLayout"
     tools:context=".ui.activities.newUserActivity.NewUserActivity">
-
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -34,61 +32,92 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-
             <TextView
-                android:id="@+id/page_2_header"
+                android:id="@+id/page_calendar_header"
                 style="@style/HeaderText"
+                android:text="@string/calendar_import"
+                app:layout_constraintBottom_toTopOf="@+id/descriptionLine1"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/newUserActivityHeader"
-                app:layout_constraintBottom_toTopOf="@+id/page_2_explanation"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.33"
                 app:layout_constraintVertical_chainStyle="packed" />
 
+
             <TextView
-                android:id="@+id/page_2_explanation"
+                android:id="@+id/descriptionLine1"
                 style="@style/SecondaryTextCentered"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/cloud_explanation"
-                app:layout_constraintBottom_toTopOf="@+id/use_cloud_checkbox"
+                android:layout_marginTop="16dp"
+                android:text="@string/calendar_import_description_line1"
+                app:layout_constraintBottom_toTopOf="@+id/descriptionLine2"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/page_2_header" />
+                app:layout_constraintTop_toBottomOf="@+id/page_calendar_header" />
+
+            <TextView
+                android:id="@+id/descriptionLine2"
+                style="@style/SecondaryTextCentered"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:text="@string/calendar_import_description_line2"
+                app:layout_constraintBottom_toTopOf="@+id/descriptionLine3"
+                app:layout_constraintTop_toBottomOf="@+id/descriptionLine1"
+                tools:layout_editor_absoluteX="32dp" />
+
+            <TextView
+                android:id="@+id/descriptionLine3"
+                style="@style/SecondaryTextCentered"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:text="@string/calendar_import_description_line3"
+                app:layout_constraintBottom_toTopOf="@+id/useCalendarImportSwitch"
+                app:layout_constraintTop_toBottomOf="@+id/descriptionLine2"
+                tools:layout_editor_absoluteX="32dp" />
 
             <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/use_cloud_checkbox"
+                android:id="@+id/useCalendarImportSwitch"
                 style="@style/SettingsActivitySwitch"
+                android:text="@string/use_calendar_import"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/use_cloud_sync"
-                app:layout_constraintBottom_toTopOf="@+id/textView6"
-
+                android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/page_2_explanation" />
+                app:layout_constraintBottom_toTopOf="@+id/calendarPickerSpinnerLayout"
+                app:layout_constraintTop_toBottomOf="@+id/descriptionLine3"
+                tools:layout_editor_absoluteX="32dp" />
 
-            <TextView
-                android:id="@+id/textView6"
-                style="@style/SecondaryTextCentered"
+            <FrameLayout
+                android:id="@+id/calendarPickerSpinnerLayout"
+                style="@style/SpinnerFrameStyle"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/already_have_account"
                 app:layout_constraintBottom_toBottomOf="parent"
-
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/use_cloud_checkbox" />
+                android:visibility="invisible"
+                app:layout_constraintTop_toBottomOf="@+id/useCalendarImportSwitch">
 
-            <!-- TODO make this a button -->
-
+                <Spinner
+                    android:id="@+id/calendarPickerSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:paddingBottom="4dp"
+                    tools:layout_editor_absoluteX="32dp"/>
+            </FrameLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

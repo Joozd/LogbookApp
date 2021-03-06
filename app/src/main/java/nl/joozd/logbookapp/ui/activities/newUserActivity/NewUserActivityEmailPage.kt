@@ -46,25 +46,18 @@ class NewUserActivityEmailPage: Fragment() {
 
             emailAddressEditText.onTextChanged {
                 emailAddressLayout.error = ""
-                viewModel.page1InputChanged(it, emailAddress2EditText.text.toString())
+                viewModel.emailInputChanged(it, emailAddress2EditText.text.toString())
             }
 
             emailAddress2EditText.onTextChanged {
                 emailAddress2Layout.error = ""
-                viewModel.page1InputChanged(emailAddressEditText.text.toString(), it)
+                viewModel.emailInputChanged(emailAddressEditText.text.toString(), it)
+                viewModel.checkEmail2Delayed()
             }
 
             emailAddressEditText.setOnFocusChangeListener { view, hasFocus ->
                 if (!hasFocus) viewModel.checkEmail1()
             }
-
-            /**
-             * If emails match and are OK, enable CONTINUE button, else set CONTINUE button to show error
-             */
-            viewModel.emailsMatch.observe(viewLifecycleOwner){
-                viewModel.makeContinueActive(pageNumber, it)
-            }
-
 
 
             /**

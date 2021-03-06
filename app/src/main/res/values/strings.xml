@@ -216,10 +216,17 @@
     -->
     <string name="welcome_message">hallon aub!(grgr)\n\nWelcome to Joozdlog Early Access.\n\nThe next few screens will allow you to set some preferences and make a Cloud account if you want to.!\n\nIf you have any feedback or bugreports, the main menu has a Feedback function.\n\nEnjoy!</string>
     <string name="cloud_explanation" tools:ignore="Typos">Sync your data to the cloud!\nThis is not a backup, read terms&amp;conditions.\nInactive accounts can be removed.</string>
+    <string name="read_terms_conditions">Read Terms&amp;Conditions</string>
+    <string name="accept_terms_conditions">Accept Terms&amp;Conditions</string>
+    <string name="already_have_account">If you already have a cloud account, you can leave this unchecked and use your login link after all settings are done!</string>
+
     <string name="you_can_set_settings_in_settings">If you want to adjust any more settings, take a look at the Settings menu after you click "done"!</string>
 
     <string name="edit_flight_welcome_title">Edit Flight</string>
     <string name="edit_flight_welcome_message">You can edit your flights here. The triangles are buttons, click them to see what they do!\nYou can long-press any field to see if it offers any help.</string>
+
+    <string name="need_permission">Permission needed.</string>
+    <string name="need_permission_calendar">Joozdlog needs permission to access calendars if you want it to access your calendars.</string>
 
     <!--
     - Strings for help when long-pressing things
@@ -304,7 +311,7 @@
     <string name="calendar_import_description_line3">Apart from these entries, none of your calendar contents are being saved or transmitted.</string>
     <string name="do_you_want_to_enable_this">Do you want to enable this?</string>
     <string name="use_calendar_import">Use Calendar Import</string>
-    <string name="use_cloud_sync">Use Cloud Sync</string>
+    <string name="use_cloud_sync">Accept Terms and Use Cloud Sync</string>
     <string name="use_wifi_for_large_files">Only use WiFi for larger files</string>
 
     <string name="cloud_sync_title">Cloud Sync</string>

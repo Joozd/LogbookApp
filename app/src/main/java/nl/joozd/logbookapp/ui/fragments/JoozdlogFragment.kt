@@ -24,6 +24,7 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.view.View
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
@@ -80,5 +81,10 @@ open class JoozdlogFragment: Fragment(),  CoroutineScope by MainScope() {
      */
     protected fun disableBackPressed() = requireActivity().onBackPressedDispatcher.addCallback(this) {
             // With blank your fragment BackPressed will be disabled.
+    }
+
+    protected fun recreate(){
+        supportFragmentManager.commit{ detach(fragment) }
+        supportFragmentManager.commit{ attach(fragment) }
     }
 }

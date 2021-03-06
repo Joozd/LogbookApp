@@ -20,35 +20,20 @@
 package nl.joozd.logbookapp.model.viewmodels.activities
 
 import android.Manifest
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.SharedPreferences
-import android.text.Editable
-import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresPermission
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.App
+import androidx.lifecycle.*
+import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.CalendarScraper
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
-import nl.joozd.logbookapp.data.comm.InternetStatus
-import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.ui.utils.toast
-import nl.joozd.logbookapp.utils.generatePassword
+import java.lang.ref.PhantomReference
 import java.util.*
 
 class NewUserActivityViewModel: JoozdlogActivityViewModel() {
@@ -57,57 +42,60 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * Private parts
      *******************************************************************************************/
 
-    private val internetAvailable: LiveData<Boolean> = InternetStatus.internetAvailableLiveData
-
-    private val _feedbackChannels = Array(FEEDBACK_CHANNELS) { MutableLiveData<FeedbackEvent>() }
-
     /**
-     * List of pages corresponging to if their "continue" button is activated
+     * Helper classes/objects/etc
      */
-    private val nextButtonEnabledList = Array(5){
-        when(it){
-            0, 4 -> true
-            else -> false
-        }
-    }
-
-    /*
-    private val _page1Feedback = MutableLiveData<FeedbackEvent>()
-    private val _page2Feedback = MutableLiveData<FeedbackEvent>()
-    private val _page3Feedback = MutableLiveData<FeedbackEvent>()
-    */
 
     private val calendarScraper = CalendarScraper(context)
 
+    /**
+     * Feedback channels, every page should observe it's channel if feedback is needed
+     */
+    private val _feedbackChannels = Array(FEEDBACK_CHANNELS) { MutableLiveData<FeedbackEvent>() }
+
+    /**
+     * List of pages vs if their "continue" button is activated
+     */
+    private val continueButtonEnabledList = Array(5){
+        when(it){
+            PAGE_EMAIL, PAGE_CLOUD, PAGE_CALENDAR -> false
+            else -> true
+        }
+    }
 
     /**
      * Mutable Livedata (private)
      */
 
-    //page 1:
-    private val _emailsMatch = MutableLiveData(false)
+    //Use Cloud, used on PAGE_CLOUD
+    private val _useCloudCheckboxStatus = MutableLiveData(Preferences.useCloud)
 
+    //list of all found calendars on device, used on PAGE_CALENDAR
+    private val _foundCalendars = MutableLiveData<List<JoozdCalendar>?>()
 
-    private val _username = MutableLiveData(Preferences.username)
-
-
-
-
-
-    private val _acceptTerms = MutableLiveData(Preferences.acceptedCloudSyncTerms)
+    //Use IATA airports instead of ICAO, used on PAGE_FINAL
     private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
 
-    private val _foundCalendars = MutableLiveData<List<JoozdCalendar>>()
-
-    private fun getString(resID: Int) = App.instance.getString(resID)
 
 
+    /**
+     * Coroutine Jobs:
+     */
+    // Job that holds [waitAndCheckMatchingEmails]
+    private var checkEmailMatchingJob: Job? = null
+        set(it){
+            field?.cancel(null)
+            field = it
+        }
 
+
+    /**
+     * Listen to changes in [Preferences]
+     */
     private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         // Log.d("AirportRepository", "key = $key")
         when(key) {
-            Preferences::usernameResource.name -> _username.value = Preferences.username
-            Preferences::acceptedCloudSyncTerms.name -> _acceptTerms . value = Preferences . acceptedCloudSyncTerms
+            Preferences::useCloud.name -> _useCloudCheckboxStatus.value = Preferences.useCloud
             Preferences::useIataAirports.name -> _useIataAirports.value = Preferences.useIataAirports
         }
     }
@@ -115,31 +103,35 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         Preferences.getSharedPreferences().registerOnSharedPreferenceChangeListener (onSharedPrefsChangedListener)
     }
 
+    /*******************************************************************************************
+     * Public parts
+     *******************************************************************************************/
 
     /*******************************************************************************************
      * Observables
      *******************************************************************************************/
 
-    //page 1:
-    val emailsMatch: LiveData<Boolean>
-        get() = Transformations.distinctUntilChanged(_emailsMatch)
+    //used on PAGE_CLOUD
+    val useCloudCheckboxStatus: LiveData<Boolean>
+        get() = _useCloudCheckboxStatus
 
-    val username: LiveData<String?>
-        get() = _username
+    // used on PAGE_CALENDAR
+    // null if no calendars are to be shown
+    val foundCalendars = Transformations.map(_foundCalendars) {it?.map{ c -> c.name} }
 
-    val acceptTerms: LiveData<Boolean>
-        get() = _acceptTerms
 
+    //used on PAGE_FINAL
     val useIataAirports: LiveData<Boolean>
         get() = _useIataAirports
 
 
-    val foundCalendars = Transformations.map(_foundCalendars) {it.map{ c -> c.name} }
-
-
     /*******************************************************************************************
-     * Public functions
+     * NewUserActivity functions / variables
      *******************************************************************************************/
+    /**
+     * Keeps track of which page is open in case of activity recreations
+     */
+    var lastOpenPageState: Int? = null
 
     /*******************************************************************************************
      * Shared functions
@@ -148,20 +140,34 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Tells Activity to make "Continue" button active
      */
-    fun makeContinueActive(pageNumber: Int, isActive: Boolean){
-        nextButtonEnabledList[pageNumber] = isActive
+    fun setNextButtonEnabled(pageNumber: Int, isActive: Boolean){
+        continueButtonEnabledList[pageNumber] = isActive
         feedback(NewUserActivityEvents.UPDATE_NAVBAR).putBoolean(isActive)
     }
 
-    fun nextButtonEnabled(position: Int) = nextButtonEnabledList[position]
+    /**
+     * @return true if continue button should be enabled for page [position]
+     */
+    fun isContinueButtonEnabled(position: Int) = continueButtonEnabledList[position]
+
+    /**
+     * @return [R.string.skip] if skip button should be enabled for page [position], empty string (which will remove button) if not.
+     */
+    fun skipButtonText(position: Int) = if (continueButtonEnabledList[position]) "" else getString(R.string.skip)
 
     fun continueClicked(position: Int) {
         when(position){
-            0 -> feedback(NewUserActivityEvents.NEXT_PAGE)
-            1 -> toast ("Continue clicked  for email page")
-            2 -> toast ("Continue clicked  for cloud page")
-            3 -> toast ("Continue clicked  for calendar page")
-            4 -> toast ("Done clicked. This should save all data.")
+            PAGE_INTRO -> feedback(NewUserActivityEvents.NEXT_PAGE)
+            PAGE_EMAIL -> {
+                emailPageContinueClicked()
+                feedback(NewUserActivityEvents.NEXT_PAGE)
+            }
+            PAGE_CLOUD -> feedback(NewUserActivityEvents.NEXT_PAGE)
+            PAGE_CALENDAR -> feedback(NewUserActivityEvents.NEXT_PAGE)
+            PAGE_FINAL -> {
+                finalPageDoneClicked()
+                toast("Done clicked. This should save all data.")
+            }
         }
 
     }
@@ -213,109 +219,95 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     }
 
     /*******************************************************************************************
-     * Page1 functions (PAGE_EMAIL)
+     * [PAGE_EMAIL] functions / variables
      *******************************************************************************************/
 
-
-    var email1 = Preferences.emailAddress
+    var email1 = Preferences.emailAddress.also{
+        if (it.isNotEmpty()) continueButtonEnabledList[PAGE_EMAIL] = true // if email already set, user can click 'continue' instead of skip.
+    }
         private set
     var email2 = Preferences.emailAddress
         private set
 
-    fun page1InputChanged(input1: String, input2: String){
+    /**
+     * Update [email1] and/or [email2]
+     */
+    fun emailInputChanged(input1: String, input2: String){
         email1 = input1.toLowerCase(Locale.ROOT).trim()
         email2 = input2.toLowerCase(Locale.ROOT).trim()
         checkEmails()
     }
 
+    fun checkEmail2Delayed(){
+        checkEmailMatchingJob = viewModelScope.launch {
+            waitAndCheckMatchingEmails()
+        }
+    }
+
+    /**
+     * Wait [DELAY_CHECK_EMAIL2] millis and run [checkEmail2]
+     */
+    private suspend fun waitAndCheckMatchingEmails(){
+        println("waitAndCheckMatchingEmails: STARTING")
+        delay(DELAY_CHECK_EMAIL2) // delay checks for cancel
+        checkEmail2()
+        println("waitAndCheckMatchingEmails: DONE")
+    }
+
+
+    /**
+     * Check if email1 is a correct email format
+     */
     fun checkEmail1(){
         if (email1.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches())
             feedback(NewUserActivityEvents.BAD_EMAIL, PAGE_EMAIL)
     }
 
     /**
+     * Check if email1 is a correct email format
+     */
+    // Can be made public if needed
+    private fun checkEmail2(){
+        if (email1 != email2 && email2.isNotEmpty())
+            feedback(NewUserActivityEvents.EMAILS_DO_NOT_MATCH, PAGE_EMAIL)
+    }
+
+
+    /**
      * Check if emails are valid and matching, if so, enable continue button
      */
     private fun checkEmails(): Boolean =
         (email1 == email2 && android.util.Patterns.EMAIL_ADDRESS.matcher(email2).matches()).also{
-            if (nextButtonEnabledList[PAGE_EMAIL] != it)
-                makeContinueActive(PAGE_EMAIL, it)
+            if (continueButtonEnabledList[PAGE_EMAIL] != it)
+                setNextButtonEnabled(PAGE_EMAIL, it)
     }
 
-
-
-
-    /*******************************************************************************************
-     * Page2 functions
-     *******************************************************************************************/
-
-    /**
-     * Sign out user, send that as feedback
-     */
-    fun signOutClicked(){
-        Log.d("NewUserActivity", "Sign out clicked!")
-        Preferences.username = null
-        Preferences.password = ""
-        _username.value = null
-    }
-
-    //TODO document this
-    // TODO finish this in Fragment
-    // TODO needs a way to handle time when server is busy (in Fragment)
-    fun signUpClicked(usernameEditable: Editable?) {
-        usernameEditable?.toString()?.let { username ->
-            Log.d("signUpClicked", "user: $username")
-            Preferences.useCloud = true
-            when {
-                internetAvailable.value != true -> feedback(NewUserActivityEvents.NO_INTERNET, 2)
-                username.isBlank() -> feedback(NewUserActivityEvents.USERNAME_TOO_SHORT, 2)
-                else -> { // username not empty and internet looks OK
-                    val email = Preferences.emailAddress.takeIf { it.isNotEmpty() }
-                    feedback(NewUserActivityEvents.WAITING_FOR_SERVER, 2)
-                    viewModelScope.launch {
-                        val pass1 = generatePassword(16)
-                        when (UserManagement.createNewUser(username, pass1, email)) { // UserManagement will call the correct Cloud function
-                            CloudFunctionResults.OK -> {
-                                feedback(NewUserActivityEvents.LOGGED_IN_AS, 2)
-                                Preferences.emailJobsWaiting.sendLoginLink = true
-                            }
-                            CloudFunctionResults.CLIENT_ERROR -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, 2)
-                            CloudFunctionResults.SERVER_ERROR -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, 2)
-                            CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS -> feedback(NewUserActivityEvents.BAD_EMAIL, 2)
-                            CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER -> feedback(NewUserActivityEvents.SERVER_NOT_RESPONDING, 2)
-                            CloudFunctionResults.USER_ALREADY_EXISTS -> feedback(NewUserActivityEvents.USER_EXISTS, 2)
-                            else -> feedback(NewUserActivityEvents.UNKNOWN_ERROR, 2)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Copy a login link to clipboard (assuming logged in, else do nothing)
-     */
-    fun copyLoginLinkToClipboard(){
-        UserManagement.generateLoginLink()?.let { loginLink ->
-            with(App.instance) {
-                (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
-                    ClipData.newPlainText(getString(R.string.login_link), loginLink)
-                )
-            }
-        }
-    }
-
-
-    fun dontUseCloud(){
-        Preferences.useCloud = false
+    private fun emailPageContinueClicked() {
+        Preferences.emailAddress = email1
     }
 
     /*******************************************************************************************
-     * Page3 functions
+     * [PAGE_CLOUD] functions
      *******************************************************************************************/
+
+    fun useCloudCheckboxClicked(){
+        if (Preferences.acceptedCloudSyncTerms)
+            Preferences.useCloud = !Preferences.useCloud
+        else feedback(NewUserActivityEvents.SHOW_TERMS_DIALOG, PAGE_CLOUD)
+    }
+
+    /*******************************************************************************************
+     * [PAGE_CALENDAR] functions
+     *******************************************************************************************/
+
+    fun disableCalendarSync(){
+        Preferences.useCalendarSync = false
+        _foundCalendars.value = null //
+    }
 
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
     fun fillCalendarsList() {
+        println("DIKKEBANAAN")
         viewModelScope.launch {
             withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }.let {
                 _foundCalendars.value = it
@@ -326,21 +318,28 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     fun calendarPicked(index: Int) {
         _foundCalendars.value?.get(index)?.let {
             Preferences.selectedCalendar = it.name
-            Preferences.useCalendarSync = true
-            feedback(NewUserActivityEvents.CALENDAR_PICKED, 1)
+            setNextButtonEnabled(PAGE_CALENDAR, true)
         }
     }
 
-    fun noCalendarSelected(){
-        Preferences.useCalendarSync = false
-    }
-
     /*******************************************************************************************
-     * Page 4 functions
+     * [PAGE_FINAL] functions
      *******************************************************************************************/
 
-    fun icaoIataToggle(){
-        Preferences.useIataAirports = !Preferences.useIataAirports
+    fun setUseIataAirports(useIata: Boolean) {
+        Preferences.useIataAirports = useIata
+    }
+
+    fun setConsensusOptIn(optIn: Boolean){
+        Preferences.consensusOptIn = optIn
+    }
+
+    /**
+     * Save all stuff that needs saving, and set up everything for first use
+     */
+    fun finalPageDoneClicked(){
+        Preferences.lastUpdateTime=0                                    // force update upon loading MainActivity if cloud is in use
+        if (checkEmails()) Preferences.emailAddress = email1            // save email if matching valid emails were entered in both fields but swiped instead of continue pressed
     }
 
 
@@ -357,18 +356,19 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * Instance states
      *******************************************************************************************/
 
-    //page 2 editTexts
-    var userNameState: Editable? = null
-
-    var openPagesState: Int = INITIAL_OPEN_PAGES
-    var lastOpenPageState: Int? = null
-
     companion object{
         const val PAGE_INTRO = 0
         const val PAGE_EMAIL = 1
         const val PAGE_CLOUD = 2
+        const val PAGE_CALENDAR = 3
+        const val PAGE_FINAL = 4
+
+        const val NUMBER_OF_PAGES = 5
 
         private const val FEEDBACK_CHANNELS = 10
-        private const val INITIAL_OPEN_PAGES = 5
+
+        // PAGE_EMAIL constants
+        private const val DELAY_CHECK_EMAIL2 = 1500L // ms
+
     }
 }

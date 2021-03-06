@@ -58,7 +58,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <CheckBox
-        android:id="@+id/tcCheckbox"
+        android:id="@+id/use_cloud_checkbox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -85,6 +85,6 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tcCheckbox" />
+        app:layout_constraintTop_toBottomOf="@+id/use_cloud_checkbox" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

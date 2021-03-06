@@ -29,7 +29,7 @@
         <item name="colorTextViewBackground">#FFFFFFFF</item>
         <item name="colorAccent">#0000E0</item>
         <item name="textColorWarning">#80BB0000</item>
-        <item name="android:textColor">#FF000000</item>
+        <item name="android:textColor">#DD000000</item>
         <item name="android:textColorPrimary">#CC000000</item>
         <item name="android:textColorSecondary">#CC000000</item> <!-- #CC3F51B5 -->
         <item name="android:actionBarStyle">@style/ToolBar</item>

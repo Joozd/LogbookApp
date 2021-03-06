@@ -68,4 +68,6 @@ open class JoozdlogViewModel: ViewModel() {
             Log.d("Feedback2", "event: $event, feedbackEvent: $feedbackEvent")
             viewModelScope.launch(Dispatchers.Main) { feedbackEvent.value = it }
         }
+
+    protected fun getString(resID: Int) = context.getString(resID)
 }

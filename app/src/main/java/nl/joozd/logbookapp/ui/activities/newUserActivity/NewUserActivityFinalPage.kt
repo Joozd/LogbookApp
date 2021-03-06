@@ -27,32 +27,43 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.databinding.ActivityNewUserPage4Binding
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.databinding.ActivityNewUserPageFinalBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
 
+/**
+ * TODO: This page will save data that might not have been saved yet:
+ * TODO: - Email address if still set and not the same as [Preferences.emailAddress] must be set
+ * TODO: - Start a sync with server
+ * TODO:     * Sync should check for username entered, if not request a new username from server. User cannot pick own name anymore as that didn't make sense anyway.
+ * TODO: User cannot pick own username. Only thing to do here is accept terms (nested scrollview) and a switch stating that we want an account.
+ * TODO: This will set [Preferences.useCloud] to true. If that is set to true but username is [Preferences.USERNAME_NOT_SET], Cloud will request a new username from server.
+ * TODO With that username, it will make an account, check email, and if checked, send a login link to that email for recovery purposes.
+ */
+class NewUserActivityFinalPage: Fragment() {
+    val pageNumber = NewUserActivityViewModel.PAGE_FINAL
 
-class NewUserActivityPage4: Fragment() {
     private val viewModel: NewUserActivityViewModel by activityViewModels()
+
+    //TODO don't use this
     private val settingsViewmodel: SettingsActivityViewModel by viewModels() // this handles settings changes pretty well :)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        ActivityNewUserPage4Binding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_4, container, false)).apply {
+        ActivityNewUserPageFinalBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_final, container, false)).apply {
+            icaoIataSwitch.isChecked = Preferences.useIataAirports
+            consensusSwitch.isChecked = Preferences.consensusOptIn
 
             /*******************************************************************************************
              * OnClickListeners
              *******************************************************************************************/
 
-            doneButton.setOnClickListener {
-                viewModel.done()
-            }
             icaoIataSwitch.setOnCheckedChangeListener { _, isChecked ->
-                settingsViewmodel.setUseIataAirports(isChecked)
+                viewModel.setUseIataAirports(isChecked)
             }
             consensusSwitch.setOnCheckedChangeListener { _, isChecked ->
-                settingsViewmodel.setConsensusOptIn(isChecked)
+                viewModel.setConsensusOptIn(isChecked)
             }
-
 
             /*******************************************************************************************
              * Observers
@@ -62,19 +73,5 @@ class NewUserActivityPage4: Fragment() {
                 icaoIataSwitch.isChecked = useIata
                 // icaoIataSwitch.text = requireActivity().getString(if (useIata) R.string.useIataAirports else R.string.useIcaoAirports)
             }
-
-            settingsViewmodel.useIataAirports.observe(viewLifecycleOwner){
-                icaoIataSwitch.isChecked = it
-            }
-
-            settingsViewmodel.consensusOptIn.observe(viewLifecycleOwner){
-                consensusSwitch.isChecked = it
-            }
-
         }.root
-
-
-    companion object{
-        private const val PAGE_NUMBER = 4
-    }
 }

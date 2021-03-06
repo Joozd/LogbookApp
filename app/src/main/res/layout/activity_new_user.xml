@@ -30,7 +30,7 @@
         android:id="@+id/viewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/dividerLine"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -65,7 +65,7 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         app:dotsAnimationDuration="200"
-        app:layout_constraintBottom_toBottomOf="@+id/viewPager"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:textPadding="8dp"
         app:textStyle="@style/DialogButtonText"
         app:textStyleDisabled="@style/DialogButtonTextDisabled">

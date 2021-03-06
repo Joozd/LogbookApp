@@ -42,6 +42,7 @@ class NewUserActivity : JoozdlogActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         setTheme(R.style.AppTheme)
         ActivityNewUserBinding.inflate(layoutInflater).apply {
 
@@ -50,7 +51,7 @@ class NewUserActivity : JoozdlogActivity() {
              *******************************************************************************************/
 
             mViewPager = viewPager.apply {
-                adapter = ScreenSlidePagerAdapter(this@NewUserActivity, viewModel.openPagesState ?: 1)
+                adapter = ScreenSlidePagerAdapter(this@NewUserActivity)
                 setPageTransformer(DepthPageTransformer(TRANSFORMER_MIN_SCALE))
                 navigationBar.attach(this)
                 /*
@@ -92,12 +93,9 @@ class NewUserActivity : JoozdlogActivity() {
         mViewPager.currentItem = mViewPager.currentItem.minusOneWithFloor(0)
     }
 
-    private inner class ScreenSlidePagerAdapter(fa: FragmentActivity, private var availablePages: Int) : FragmentStateAdapter(fa), ViewPager2NavigatorBar.Adapter {
+    private inner class ScreenSlidePagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa), ViewPager2NavigatorBar.Adapter {
 
-        fun openPages(newHighest: Int){
-            availablePages = maxOf(availablePages, newHighest)
-        }
-        override fun getItemCount(): Int = availablePages
+        override fun getItemCount(): Int =  NewUserActivityViewModel.NUMBER_OF_PAGES
 
         override fun createFragment(position: Int): Fragment = when(position){
             /**
@@ -106,18 +104,15 @@ class NewUserActivity : JoozdlogActivity() {
             0 -> NewUserActivityIntroPage()
             1 -> NewUserActivityEmailPage()
             2 -> NewUserActivityCloudPage()
-            3 -> NewUserActivityPage3()
-            4 -> NewUserActivityPage4()
+            3 -> NewUserActivityCalendarPage()
+            4 -> NewUserActivityFinalPage()
             else -> error("ScreenSlidePagerAdapter asked to provide non-existing page")
         }
 
         /**
          * Text for the left button. Null for default text, empty string for hidden button.
          */
-        override fun previousButtonText(position: Int): String = when(position){
-            4 -> ""
-            else -> getString(R.string.skip)
-        }
+        override fun previousButtonText(position: Int): String = viewModel.skipButtonText(position)
 
         /**
          * OnClickListener for the left button. Null for default action.
@@ -137,14 +132,25 @@ class NewUserActivity : JoozdlogActivity() {
         }
 
         /**
-         * * OnClickListener for the right button. Null for default action.
+         * OnClickListener for the right button. Null for default action.
          */
         override fun nextButtonOnClick(position: Int): (ViewPager2) -> Unit = {
             // Delegate this to [viewModel] who will send feedback to [activity] so it will do things with [ViewPager] if needed
             viewModel.continueClicked(position)
         }
 
-        override fun nextButtonEnabled(position: Int): Boolean? = viewModel.nextButtonEnabled(position)
+        /**
+         * if true, button is enabled when navigating to this page, if false, it is disabled.
+         * If not implemented it stays the way it was on previous page.
+         */
+        override fun nextButtonEnabled(position: Int): Boolean? = viewModel.isContinueButtonEnabled(position)
+
+        /**
+         * Keep track of which page is open so in case of activity recreation (eg rotation) we will continue on that page
+         */
+        override fun onPageChanged(position: Int) {
+            viewModel.lastOpenPageState = position
+        }
     }
 
     companion object{

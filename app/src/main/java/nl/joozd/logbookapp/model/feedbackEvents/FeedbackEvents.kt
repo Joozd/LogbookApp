@@ -121,14 +121,9 @@ object FeedbackEvents {
         UNKNOWN_ERROR,
         NOT_IMPLEMENTED,
         UPDATE_NAVBAR,
-        LOGGED_IN_AS, // as Preferences.username
-        USER_EXISTS,
-        USERNAME_TOO_SHORT, // ie. empty username provided
-        NO_INTERNET,
-        WAITING_FOR_SERVER,
-        SERVER_NOT_RESPONDING,
         BAD_EMAIL,
         EMAILS_DO_NOT_MATCH,
+        SHOW_TERMS_DIALOG,
         CALENDAR_PICKED,
         CLEAR_PAGE,
         NEXT_PAGE,

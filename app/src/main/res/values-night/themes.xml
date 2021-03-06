@@ -14,7 +14,7 @@
         <item name="android:colorBackground">#202020</item>
 
         <item name="textColorWarning">#80BB0000</item>
-        <item name="android:textColor">#FF000000</item>
+        <item name="android:textColor">#D0000000</item>
         <item name="android:textColorPrimary">#E0FFFFFF</item>
         <item name="android:textColorSecondary">#C0FFFFFF</item> <!-- #CC3F51B5 -->
         <item name="android:actionBarStyle">@style/ToolBar</item>

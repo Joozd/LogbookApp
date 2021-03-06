@@ -534,6 +534,11 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
          * If not implemented it stays the way it was on previous page.
          */
         fun nextButtonEnabled(position: Int): Boolean? = null
+
+        /**
+         * This runs whenever a page is changed.
+         */
+        fun onPageChanged(position: Int): Unit = Unit
     }
 
 

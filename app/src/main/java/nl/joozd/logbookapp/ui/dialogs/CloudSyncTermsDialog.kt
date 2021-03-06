@@ -48,11 +48,10 @@ class CloudSyncTermsDialog: JoozdlogFragment() {
                 } // else { //Not at bottom }
             }
 
-
-
             iAcceptTextView.apply {
                 setOnClickListener {
                     Preferences.acceptedCloudSyncTerms = true
+                    Preferences.useCloud = true
                     closeFragment()
                 }
                 val clickable = viewModel.waitedLongEnough.value ?: false

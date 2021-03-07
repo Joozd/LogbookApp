@@ -19,23 +19,19 @@
 
 package nl.joozd.logbookapp.data.comm.protocol
 
-import nl.joozd.logbookapp.data.comm.ServerFunctions.createNewAccount
-import nl.joozd.logbookapp.data.comm.ServerFunctions.createNewAccountWithEmail
-
 enum class CloudFunctionResults {
     /**
      * Return codes for Joozdlog Cloud functions.
      * All values are randomly chosen and do not need to be in order. Might as well be an enum class.
      */
     OK,
+    NO_INTERNET,
     NOT_A_VALID_EMAIL_ADDRESS,
     SERVER_ERROR,
     CLIENT_ERROR,
     DATA_ERROR,
     USER_ALREADY_EXISTS,
-
     UNKNOWN_REPLY_FROM_SERVER,
-
     UNKNOWN_USER_OR_PASS,
     EMAIL_DOES_NOT_MATCH,
     NO_LOGIN_DATA

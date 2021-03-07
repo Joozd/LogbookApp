@@ -49,27 +49,26 @@ object Preferences {
      * cannot delegate as that doesn't support null
      */
 
-    private const val USERNAME_NOT_SET = "USERNAME_NOT_SET"
+    const val USERNAME_NOT_SET = "USERNAME_NOT_SET"
     var usernameResource: String by JoozdLogSharedPrefs(sharedPref, USERNAME_NOT_SET)
     var username: String?
         get() = if (usernameResource == USERNAME_NOT_SET) null else usernameResource
         set(it) {
-            usernameResource = it?.toLowerCase(Locale.ROOT) ?: USERNAME_NOT_SET
+            usernameResource = it ?: USERNAME_NOT_SET
             Log.d("Preferences", "Name set to $it")
         }
-    //TODO NOTE THIS MAY BREAK MY ACCOUNT
 
     /**
      * password is the users password, hashed to 128 bits
-     * @get will return a base64 encoded 128 bit hash, use _key_ for reading the key
-     * @set will save an MD5 hash to sharedPrefs. This hash will be used to encrypt on server
+     * @get will return a base64 encoded 128 bit hash, use _key_ for reading the key as bytes
+     * @set will save a (base64 encoded) 128 bit MD5 hash to sharedPrefs. This hash will be used to encrypt on server
      */
     private const val PASSWORD_SHAREDPREF_KEY = "passwordSharedPrefKey" // saved as md5 hash, cannot retrieve password!
     var password: String?
         get() = sharedPref.getString(PASSWORD_SHAREDPREF_KEY,null)
         set(v) = if (v==null) {
             with(sharedPref.edit()) {
-                putString(PASSWORD_SHAREDPREF_KEY, v)
+                putString(PASSWORD_SHAREDPREF_KEY, null)
                 apply()
             }
         } else {

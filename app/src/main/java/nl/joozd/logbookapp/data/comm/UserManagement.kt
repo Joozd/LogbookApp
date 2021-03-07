@@ -26,6 +26,8 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfBlank
+import nl.joozd.logbookapp.extensions.nullIfEmpty
+import nl.joozd.logbookapp.utils.generatePassword
 
 object UserManagement {
     val signedIn: Boolean
@@ -34,26 +36,50 @@ object UserManagement {
     val username
         get() = Preferences.username
 
-    // This is used to check if loginActivity got returned to after a new user was just
-    // successfully created and it can close right away
-    var justCreatedNewUser: Boolean = false
-
     /**
      * Create a new user on server
-     * @return true if success
-     * @return false if username taken
-     * @return null if server or connection error
+     * This will definitely invalidate current login data
+     *
+     * If user successfully created, it will set email if applicable
+     *
+     * @return @see [Cloud.createNewUser]
      */
-    suspend fun createNewUser(username: String, password: String, email: String? = null): CloudFunctionResults {
-        return (if (email == null) Cloud.createNewUser(username.toLowerCase(), password) else Cloud.createNewUser(username, password, email)).also {
+    private suspend fun createNewUser(username: String, password: String, email: String? = null): CloudFunctionResults {
+        Preferences.username = username
+        Preferences.password = password
+        return Cloud.createNewUser(username, Preferences.key!!).also {
+            Log.d("CreateNewUser()", "Created new user with key ${Preferences.key?.toList()}")
             if (it == CloudFunctionResults.OK) {
-                Preferences.username = username
-                Preferences.password = password
+                //if email set, send it to server
+                email?.let { Cloud.sendNewEmailAddress() }
                 Preferences.lastUpdateTime = -1
                 Preferences.useCloud = true
                 Log.d("CreateNewUser()", "created username: $username, password: $password, email: $email")
                 Log.d("CreateNewUser()", "check: ${Preferences.username}, password: ${Preferences.password}")
-            } else Log.d("CreateNewUser()", "Cloud.createNewUser returned $it")
+            } else {
+                Log.d("CreateNewUser()", "Cloud.createNewUser returned $it")
+                Preferences.username = Preferences.USERNAME_NOT_SET
+                Preferences.password = null
+            }
+        }
+    }
+
+    /**
+     * Call this when a new Cloud username/password is needed.
+     * - Asks a username from server
+     * - generates a password
+     * - creates a new user on server through [createNewUser]
+     * In the very unlikely scenario of username being generated twice the same and other user who had this was faster, retry recursively
+     * @return [CloudFunctionResults.NO_INTERNET] if no internet connection, else @see [Cloud.createNewUser]
+     */
+    suspend fun newLoginDataNeeded(): CloudFunctionResults{
+        if (InternetStatus.internetAvailable == false) return CloudFunctionResults.NO_INTERNET
+        val newUsername = Cloud.requestUsername() ?: return CloudFunctionResults.CLIENT_ERROR
+        val password = generatePassword(16)
+        Log.d("UserManagement", "username: $newUsername")
+        Log.d("UserManagement", "password: $password")
+        return createNewUser(newUsername, password, Preferences.emailAddress.nullIfEmpty()).let{
+            if (it == CloudFunctionResults.USER_ALREADY_EXISTS) newLoginDataNeeded() else it
         }
     }
 
@@ -122,16 +148,6 @@ object UserManagement {
      * @return false if username taken
      * @return null if server or connection error
      */
-    suspend fun login(username: String, password: String): Boolean? {
-        return Cloud.checkUser(username, password).also {
-            if (it == true) {
-                Preferences.username = username
-                Preferences.password = password
-                Preferences.useCloud = true
-                Preferences.lastUpdateTime = -1
-            }
-        }
-    }
 
     suspend fun loginFromLink(loginPassPair: Pair<String, String>): Boolean? {
         return Cloud.checkUserFromLink(loginPassPair.first, loginPassPair.second).also {
@@ -163,14 +179,6 @@ object UserManagement {
             putExtra(Intent.EXTRA_SUBJECT, EMAIL_SUBJECT)
             putExtra(Intent.EXTRA_TEXT, text)
         }
-    }
-
-    object ReturnCodes {
-        const val SUCCESS = 0
-        const val CONNECTION_ERROR = -999
-        const val WRONG_CREDENTIALS = 1
-        const val NO_USERNAME = 2
-        const val NO_PASSWORD = 3
     }
 
     private const val EMAIL_LINK_PLACEHOLDER = "[INSERT_LINK_HERE]"

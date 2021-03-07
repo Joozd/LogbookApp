@@ -62,6 +62,7 @@ object Cloud {
     /**
      * Creates a new user
      * Calling function should consider storing username and pasword in [Preferences]
+     * @return @see [ServerFunctions.createNewAccount]
      */
     suspend fun createNewUser(name: String, key: ByteArray): CloudFunctionResults = withContext(Dispatchers.IO) {
         Client.getInstance().use {
@@ -80,14 +81,10 @@ object Cloud {
     }
 
     /**
-     * Creates a new user
-     * Calling function should consider storing username and pasword in [Preferences]
+     * Requests a new username from server
      */
-    suspend fun createNewUser(name: String, password: String, email: String): CloudFunctionResults = withContext(Dispatchers.IO) {
-        Client.getInstance().use {
-            ServerFunctions.createNewAccountWithEmail(it, name, Encryption.md5Hash(password), email)
-        }
-    }
+    suspend fun requestUsername(): String? =
+        Client.getInstance().use { ServerFunctions.requestUsername(it) }
 
     /**
      * Send new email address to server.

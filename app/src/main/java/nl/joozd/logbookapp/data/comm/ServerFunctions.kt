@@ -143,8 +143,8 @@ object ServerFunctions {
      * @return true is success, false if username/pass incorrect, null if connection problem
      */
     fun login(client: Client): Boolean?{
+        Log.d("Serverfunctions.login", "username: ${Preferences.username}, key: ${Preferences.key?.toList()}")
         if (Preferences.username == null || Preferences.key == null) {
-            Log.d("Serverfunctions.login", "username: ${Preferences.username}, keySize: ${Preferences.key?.size}")
             return false
         }
         //payLoad is LoginData.serialize()
@@ -198,9 +198,19 @@ object ServerFunctions {
         }
     }
 
+    /**
+     * Request a username from server. This should get a bare string as reply, which will be the username to return.
+     * Will return username, or null if client error
+     */
+    fun requestUsername(client: Client): String?{
+        client.sendRequest(JoozdlogCommsKeywords.REQUEST_NEW_USERNAME)
+        return client.readFromServer()?.toString(Charsets.UTF_8)
+    }
 
     /**
      * Ask server to create a new account.
+     * @param name: Username
+     * @param key: Key
      */
     fun createNewAccount(client: Client, name: String, key: ByteArray): CloudFunctionResults{
         val payLoad = LoginData(name, key, BasicFlight.VERSION.version).serialize()
@@ -211,25 +221,6 @@ object ServerFunctions {
             JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
             JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS
             JoozdlogCommsKeywords.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
-            null -> CloudFunctionResults.CLIENT_ERROR
-            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
-        }
-    }
-
-
-    /**
-     * Ask server to create a new account. Server will send a confirmation email.
-     */
-    fun createNewAccountWithEmail(client: Client, name: String, key: ByteArray, email: String): CloudFunctionResults{
-        val payLoad = LoginDataWithEmail(name, key, BasicFlight.VERSION.version, email).serialize()
-        client.sendRequest(JoozdlogCommsKeywords.NEW_ACCOUNT_EMAIL, payLoad)
-        val result = client.readFromServer()
-        Log.d(TAG, "Result was ${result?.toString(Charsets.UTF_8)}")
-        return when (result?.toString(Charsets.UTF_8)){
-            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-            JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS
-            JoozdlogCommsKeywords.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
-            JoozdlogCommsKeywords.USER_ALREADY_EXISTS -> CloudFunctionResults.USER_ALREADY_EXISTS
             null -> CloudFunctionResults.CLIENT_ERROR
             else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
         }

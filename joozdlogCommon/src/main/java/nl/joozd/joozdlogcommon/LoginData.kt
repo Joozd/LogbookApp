@@ -23,6 +23,12 @@ import nl.joozd.joozdlogcommon.serializing.JoozdlogSerializable
 import nl.joozd.joozdlogcommon.serializing.unwrap
 import nl.joozd.joozdlogcommon.serializing.wrap
 
+/**
+ * @param userName: Username (a string, example: "joozd" or "Bsdligfh3456"
+ * @param password: decryption key. ByteArray, expected to be 16 bytes
+ * @param basicFlightVersion: Version number of [BasicFlight] to use
+ */
+
 @Suppress("ArrayInDataClass")
 data class LoginData(val userName: String, val password: ByteArray, val basicFlightVersion: Int): JoozdlogSerializable {
     override fun serialize(): ByteArray {

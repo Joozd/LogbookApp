@@ -75,7 +75,6 @@ class NewUserActivity : JoozdlogActivity() {
                 when (it.getEvent()) {
                     NewUserActivityEvents.FINISHED -> closeAndstartMainActivity()
                     NewUserActivityEvents.NEXT_PAGE -> viewPager.currentItem++
-
                     NewUserActivityEvents.UPDATE_NAVBAR -> navigationBar.notifyDataChanged()
                 }
             }

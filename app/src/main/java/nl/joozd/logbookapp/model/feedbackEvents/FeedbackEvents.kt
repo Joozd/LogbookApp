@@ -118,13 +118,11 @@ object FeedbackEvents {
 
     enum class NewUserActivityEvents:
         Event {
-        UNKNOWN_ERROR,
         NOT_IMPLEMENTED,
         UPDATE_NAVBAR,
         BAD_EMAIL,
         EMAILS_DO_NOT_MATCH,
         SHOW_TERMS_DIALOG,
-        CALENDAR_PICKED,
         CLEAR_PAGE,
         NEXT_PAGE,
         FINISHED

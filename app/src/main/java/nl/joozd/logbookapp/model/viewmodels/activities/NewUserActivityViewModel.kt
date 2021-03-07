@@ -32,8 +32,6 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.ui.utils.toast
-import java.lang.ref.PhantomReference
 import java.util.*
 
 class NewUserActivityViewModel: JoozdlogActivityViewModel() {
@@ -166,7 +164,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
             PAGE_CALENDAR -> feedback(NewUserActivityEvents.NEXT_PAGE)
             PAGE_FINAL -> {
                 finalPageDoneClicked()
-                toast("Done clicked. This should save all data.")
+                feedback(NewUserActivityEvents.FINISHED)
             }
         }
 
@@ -337,9 +335,10 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Save all stuff that needs saving, and set up everything for first use
      */
-    fun finalPageDoneClicked(){
+    private fun finalPageDoneClicked(){
         Preferences.lastUpdateTime=0                                    // force update upon loading MainActivity if cloud is in use
         if (checkEmails()) Preferences.emailAddress = email1            // save email if matching valid emails were entered in both fields but swiped instead of continue pressed
+        Preferences.newUserActivityFinished = true
     }
 
 

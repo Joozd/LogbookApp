@@ -444,17 +444,19 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     /**
      * This does two things:
-     * first, it updates
-     * TODO fix this documentation
+     * first, it checks if a server and/or calendar update is needed.
+     * If needed, updates calendar (only planned flights)     *
+     * If needed, synchs with server (no planned flights)
+     *      Server Sync will create an account on server if [Preferences.username] is empty
      */
     fun syncIfNeeded(){
         launch {
             val needsServerSync =
-                TimestampMaker.nowForSycPurposes - Preferences.lastUpdateTime > MIN_SYNC_INTERVAL
-                        || getFlightsChangedAfter(Preferences.lastUpdateTime).isNotEmpty()
+                TimestampMaker.nowForSycPurposes - Preferences.lastUpdateTime > MIN_SYNC_INTERVAL   // interval for checking remote changes has passed
+                        || getFlightsChangedAfter(Preferences.lastUpdateTime).isNotEmpty()          // OR local changes since last sync
             val needsCalendarSync =
                 TimestampMaker.nowForSycPurposes - Preferences.lastCalendarCheckTime > MIN_CALENDAR_CHECK_INTERVAL
-            if ((needsCalendarSync || needsServerSync) && Preferences.useCalendarSync) {
+            if (needsCalendarSync && Preferences.useCalendarSync) {
                 if (checkPermission(Manifest.permission.READ_CALENDAR)) {
                     val calendar = CalendarFlightUpdater()
                     calendar.getRoster()?.let {
@@ -462,7 +464,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                     }
                 }
             }
-            if (needsServerSync)
+            if (needsServerSync && Preferences.useCloud)
                 JoozdlogWorkersHub.synchronizeFlights(delay = false)
         }
     }

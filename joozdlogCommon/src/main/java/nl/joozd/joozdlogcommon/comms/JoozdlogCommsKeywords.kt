@@ -51,9 +51,8 @@ object JoozdlogCommsKeywords {
 
     //account keywords
     const val LOGIN = "LOGIN"
+    const val REQUEST_NEW_USERNAME = "REQUEST_NEW_USERNAME"
     const val NEW_ACCOUNT = "NEW_ACCOUNT"
-    const val NEW_ACCOUNT_EMAIL = "NEW_ACCOUNT_EMAIL"
-    const val CHANGE_PASSWORD = "CHANGE_PASSWORD" // will delete all saved files on server
     const val UPDATE_PASSWORD = "UPDATE_PASSWORD" // should be done after being logged in as it will recrypt all flights with new password
     const val USER_ALREADY_EXISTS = "EXISTING_USER"
     const val UNKNOWN_USER_OR_PASS = "UNKNOWN_USER_PASS_COMBO"

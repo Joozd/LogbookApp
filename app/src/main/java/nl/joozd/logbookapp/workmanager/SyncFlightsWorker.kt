@@ -26,6 +26,8 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 
@@ -44,6 +46,8 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
         Log.d("SyncFlightsWorker", "Started")
         withContext(Dispatchers.IO) {
             val flightsRepository = FlightRepository.getInstance()
+            if (makeNewLoginDataIfNeeded() != CloudFunctionResults.OK) return@withContext Result.retry()
+
             when(val result = Cloud.syncAllFlights(flightsRepository) { processDownloadProgress(it) }) {
                 null -> Result.retry()
                 -1L -> Result.failure()
@@ -62,4 +66,12 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
     private fun processDownloadProgress(p: Int){
         progress = p*99/100
     }
+
+    /**
+     * Make new login data if needed
+     * @return [CloudFunctionResults.OK] if not needed or success, something else if failure
+     */
+    private suspend fun makeNewLoginDataIfNeeded(): CloudFunctionResults =
+        if (Preferences.username == null) UserManagement.newLoginDataNeeded()
+        else CloudFunctionResults.OK
 }

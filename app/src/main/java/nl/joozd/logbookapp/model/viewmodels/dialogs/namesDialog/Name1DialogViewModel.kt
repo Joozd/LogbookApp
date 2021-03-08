@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog
 
-import androidx.lifecycle.LiveData
 import nl.joozd.logbookapp.R
 
 class Name1DialogViewModel: NamesDialogViewModel() {
@@ -31,7 +30,7 @@ class Name1DialogViewModel: NamesDialogViewModel() {
     /**
      * One string with all names we are working on now, separated by '\n'
      */
-    override val currentNames = workingFlight.name
+    override val currentNames = workingFlight.nameLiveData
 
     /**
      * Add a selected name to the list of names, or replace name if only one name allowed

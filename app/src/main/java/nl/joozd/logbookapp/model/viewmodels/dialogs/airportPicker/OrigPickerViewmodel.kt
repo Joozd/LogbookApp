@@ -19,30 +19,36 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.joozd.logbookapp.data.dataclasses.Airport
 
-@ExperimentalCoroutinesApi
 class OrigPickerViewmodel: AirportPickerViewModel(){
     init{
-        pickedAirportMediator.addSource(workingFlight.origin) { ap ->
+        pickedAirportMediator.addSource(workingFlight.originLiveData) { ap ->
             pickedAirportMediator.value = ap
         }
     }
 
-    override fun pickAirport(airport: Airport) = workingFlight.setOrig(airport)
+    override fun pickAirport(airport: Airport) {
+        workingFlight.setOrig(airport)
+        Unit
+    }
 
-
-    override fun setCustomAirport(airport: String) = workingFlight.setOrig(airport)
+    override fun setCustomAirport(airport: String) {
+        workingFlight.setOrig(airport)
+        Unit
+    }
 
     /**
      * The airport that is set in [workingFlight] when viewmodel is initialized
      */
-    override val initialAirport: Airport? = workingFlight.origin.value
+    override val initialAirport: Airport? = workingFlight.originLiveData.value
 
     /**
      * Set [initialAirport] back to [workingFlight]
      */
-    override fun undo() = workingFlight.setOrig(initialAirport)
+    override fun undo() {
+        workingFlight.setOrig(initialAirport)
+        Unit
+    }
 
 }

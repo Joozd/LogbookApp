@@ -24,7 +24,7 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFl
 
 class SignatureDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     private val wf = flightRepository.wf
-    private var _signature: String = wf.signature.value ?: ""
+    private var _signature: String = wf.signatureLiveData.value ?: ""
     val signature: String
         get() = _signature
 

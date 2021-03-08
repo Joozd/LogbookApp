@@ -33,22 +33,22 @@ class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     val augmentedCrew
         get() = workingFlight.crew
     val pic
-        get() = workingFlight.isPic
+        get() = workingFlight.isPicLiveData
     val coPilot
-        get() = workingFlight.isCopilot
+        get() = workingFlight.isCopilotLiveData
     val dual
-        get() = workingFlight.isDual
+        get() = workingFlight.isDualLiveData
     val instructor
-        get() = workingFlight.isInstructor
+        get() = workingFlight.isInstructorLiveData
 
-    val totalTime = Transformations.map(workingFlight.duration) {
+    val totalTime = Transformations.map(workingFlight.durationLiveData) {
         minutesToHoursAndMinutesString(it.toMinutes())
     }
 
 
-    val ifrTime = Transformations.map(workingFlight.ifrTime) { minutesToHoursAndMinutesString(it) }
+    val ifrTime = Transformations.map(workingFlight.ifrTimeLiveData) { minutesToHoursAndMinutesString(it) }
 
-    val nightTime = Transformations.map(workingFlight.nightTime){minutesToHoursAndMinutesString(it)}
+    val nightTime = Transformations.map(workingFlight.nightTimeLiveData){minutesToHoursAndMinutesString(it)}
 
     /**
      * Set IFR time to time parsed from [enteredTime], only if
@@ -58,9 +58,9 @@ class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     fun setIfrTime(enteredTime: String) =
         hoursAndMinutesStringToInt(enteredTime).let { ifrMinutes ->
             when {
-                workingFlight.duration.value == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
+                workingFlight.durationLiveData.value == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
                 ifrMinutes == null -> feedback(TimePickerEvents.INVALID_IFR_TIME) // previous time can be found in ifrTime.value
-                ifrMinutes > workingFlight.duration.value!!.toMinutes() -> feedback(TimePickerEvents.IFR_TIME_GREATER_THAN_DURATION).putInt(ifrMinutes)
+                ifrMinutes > workingFlight.durationLiveData.value!!.toMinutes() -> feedback(TimePickerEvents.IFR_TIME_GREATER_THAN_DURATION).putInt(ifrMinutes)
                 else -> workingFlight.setIfrTime(ifrMinutes)
             }
         }
@@ -73,9 +73,9 @@ class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     fun setNightTime(enteredTime: String){
         hoursAndMinutesStringToInt(enteredTime).let{
             when{
-                workingFlight.duration.value == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
+                workingFlight.durationLiveData.value == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
                 it == null -> feedback(TimePickerEvents.INVALID_NIGHT_TIME) // previous time can be found in ifrTime.value
-                it > workingFlight.duration.value!!.toMinutes() -> feedback(TimePickerEvents.NIGHT_TIME_GREATER_THAN_DURATION)
+                it > workingFlight.durationLiveData.value!!.toMinutes() -> feedback(TimePickerEvents.NIGHT_TIME_GREATER_THAN_DURATION)
                 else -> workingFlight.setNightTime(it)
             }
         }
@@ -89,10 +89,10 @@ class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     fun setTotalTimeOfFlight(enteredTime: String){
         hoursAndMinutesStringToInt(enteredTime).let{
             when{
-                workingFlight.duration.value == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
+                workingFlight.durationLiveData.value == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
                 enteredTime.isBlank() -> workingFlight.setCorrectedTotalTime(0)
                 it == null -> feedback(TimePickerEvents.INVALID_TOTAL_TIME) // previous time can be found in ifrTime.value
-                it > workingFlight.duration.value!!.toMinutes() -> feedback(TimePickerEvents.TOTAL_TIME_GREATER_THAN_DURATION)
+                it > workingFlight.durationLiveData.value!!.toMinutes() -> feedback(TimePickerEvents.TOTAL_TIME_GREATER_THAN_DURATION)
                 else -> workingFlight.setCorrectedTotalTime(it)
             }
         }
@@ -103,7 +103,7 @@ class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
     fun togglePic(force: Boolean? = null){
-        workingFlight.setIsPic(force ?: workingFlight.isPic.value == false)
+        workingFlight.setIsPic(force ?: workingFlight.isPicLiveData.value == false)
     }
 
     /**
@@ -112,7 +112,7 @@ class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
      * If Aircraft or isPic is changed, this will automatically be set again
      */
     fun toggleCopilot(force: Boolean? = null){
-        workingFlight.setIsCopilot(force ?: workingFlight.isCopilot.value == false)
+        workingFlight.setIsCopilot(force ?: workingFlight.isCopilotLiveData.value == false)
     }
 
     /**
@@ -120,14 +120,14 @@ class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
     fun toggleDual(force: Boolean? = null){
-        workingFlight.setIsDual(force ?: workingFlight.isDual.value == false)
+        workingFlight.setIsDual(force ?: workingFlight.isDualLiveData.value == false)
     }
 
     /**
      * Set instructor
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
-    fun toggleInstructor(force: Boolean? = null) = workingFlight.setIsInstructor ( force ?: workingFlight.isInstructor.value == false)
+    fun toggleInstructor(force: Boolean? = null) = workingFlight.setIsInstructor ( force ?: workingFlight.isInstructorLiveData.value == false)
 
     /**
      * Undo all changes made in this dialog

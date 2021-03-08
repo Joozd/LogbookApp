@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.model.viewmodels.fragments
 
 import android.text.Editable
 import androidx.lifecycle.*
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -31,7 +32,6 @@ import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinute
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.repository.helpers.findSortedHitsForRegistration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -56,8 +56,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      */
 
     val _aircraft = MediatorLiveData<String>().apply{
-        addSource(wf.aircraft) {ac -> value = (if (sim) ac?.type?.shortName else ac?.toString()) ?: NO_DATA_STRING}
-        addSource (wf.isSim) { sim -> value = (if (sim) wf.aircraft.value?.type?.shortName else wf.aircraft.value?.toString()) ?: NO_DATA_STRING}
+        addSource(wf.aircraftLiveData) { ac -> value = (if (sim) ac?.type?.shortName else ac?.toString()) ?: NO_DATA_STRING}
+        addSource (wf.isSimLiveData) { sim -> value = (if (sim) wf.aircraftLiveData.value?.type?.shortName else wf.aircraftLiveData.value?.toString()) ?: NO_DATA_STRING}
     }
 
     //Transformations.map(wf.aircraft)
@@ -66,57 +66,57 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      */
     // this will cause nullpointerexception if not set
     // However, fragment should only be
-    val date = Transformations.map(wf.date){ it.toDateString() ?: NO_DATA_STRING }
+    val date = Transformations.map(wf.dateLiveData){ it.toDateString() ?: NO_DATA_STRING }
     val localDate
-            get() = wf.date.value
+            get() = wf.dateLiveData.value
     val flightNumber
-            get() = wf.flightNumber
-    val origin = Transformations.map(wf.origin) { getAirportString(it)}
-    val destination = Transformations.map(wf.destination) { getAirportString(it)}
-    val originIsValid = Transformations.map(wf.origin){ it != null && it.latitude_deg != 0.0 && it.longitude_deg != 0.0}
-    val destinationIsValid = Transformations.map(wf.destination){ it != null && it.latitude_deg != 0.0 && it.longitude_deg != 0.0}
-    val timeOut = Transformations.map(wf.timeOut) { it.toTimeString()}
-    val timeIn = Transformations.map(wf.timeIn) { it.toTimeString()}
-    val landings = Transformations.map(wf.takeoffLandings){it.toString()}
+            get() = wf.flightNumberLiveData
+    val origin = Transformations.map(wf.originLiveData) { getAirportString(it)}
+    val destination = Transformations.map(wf.destinationLiveData) { getAirportString(it)}
+    val originIsValid = Transformations.map(wf.originLiveData){ it != null && it.latitude_deg != 0.0 && it.longitude_deg != 0.0}
+    val destinationIsValid = Transformations.map(wf.destinationLiveData){ it != null && it.latitude_deg != 0.0 && it.longitude_deg != 0.0}
+    val timeOut = Transformations.map(wf.timeOutLiveData) { it.toTimeString()}
+    val timeIn = Transformations.map(wf.timeInLiveData) { it.toTimeString()}
+    val landings = Transformations.map(wf.takeoffLandingsLiveData){it.toString()}
     val aircraft: LiveData<String>
         get() = _aircraft
     val name
-        get() = wf.name
+        get() = wf.nameLiveData
     val name2
-        get() = wf.name2
+        get() = wf.name2LiveData
     val allNames
         get() = flightRepository.allNames
     val remarks
-        get() = wf.remarks
+        get() = wf.remarksLiveData
     val ifrTime
-        get() = wf.ifrTime
+        get() = wf.ifrTimeLiveData
     val simTime
-        get() = wf.simTime
+        get() = wf.simTimeLiveData
     val nightTime
-        get() = wf.nightTime
+        get() = wf.nightTimeLiveData
     val multiPilotTime
-        get() = wf.multiPilotTime
+        get() = wf.multiPilotTimeLiveData
     val isSim
-        get() = wf.isSim
+        get() = wf.isSimLiveData
     val sim: Boolean    // val to check if flight is sim
         get()= isSim.value ?: false
 
     val isSigned
-        get() = wf.isSigned
+        get() = wf.isSignedLiveData
     val signature: String
-        get() = wf.signature.value ?: ""
+        get() = wf.signatureLiveData.value ?: ""
     val isDual
-        get() = wf.isDual
+        get() = wf.isDualLiveData
     val isInstructor
-        get() = wf.isInstructor
+        get() = wf.isInstructorLiveData
     val isIfr
-        get() = wf.isIfr
+        get() = wf.isIfrLiveData
     val isPic
-        get() = wf.isPic
+        get() = wf.isPicLiveData
     val isPF
-        get() = wf.isPF
+        get() = wf.isPFLiveData
     val isAutoValues
-        get() = wf.isAutoValues
+        get() = wf.isAutoValuesLiveData
     val knownRegistrations
         get() = aircraftRepository.registrationsLiveData
 
@@ -141,9 +141,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      */
     fun setFlightNumber(newFlightNumber: Editable?){
         newFlightNumber?.toString()?.let{
-            if (it != (wf.flightNumber.value ?: "").removeTrailingDigits())
+            if (it != (wf.flightNumberLiveData.value ?: "").removeTrailingDigits())
                 wf.setFlightNumber(it)
-            else wf.setFlightNumber(wf.flightNumber.value ?: "")
+            else wf.setFlightNumber(wf.flightNumberLiveData.value ?: "")
         }
     }
 
@@ -285,13 +285,13 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Set dual
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
-    fun toggleDual(force: Boolean? = null) = wf.setIsDual ( force ?: wf.isDual.value == false)
+    fun toggleDual(force: Boolean? = null) = wf.setIsDual ( force ?: wf.isDualLiveData.value == false)
 
     /**
      * Set instructor
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
-    fun toggleInstructor(force: Boolean? = null) = wf.setIsInstructor ( force ?: wf.isInstructor.value == false)
+    fun toggleInstructor(force: Boolean? = null) = wf.setIsInstructor ( force ?: wf.isInstructorLiveData.value == false)
 
     /**
      * Set IFR
@@ -299,7 +299,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
     fun toggleIfr(force: Boolean? = null){
-        wf.setIsIfr(force ?: wf.isIfr.value == false)
+        wf.setIsIfr(force ?: wf.isIfrLiveData.value == false)
     }
 
     /**
@@ -307,7 +307,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
     fun togglePic(force: Boolean? = null){
-        wf.setIsPic(force ?: wf.isPic.value == false)
+        wf.setIsPic(force ?: wf.isPicLiveData.value == false)
     }
 
     /**
@@ -316,9 +316,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
     fun togglePF(force: Boolean? = null){
-        val newValue = force ?: wf.isPF.value == false
+        val newValue = force ?: wf.isPFLiveData.value == false
         wf.setIsPF(newValue)
-        if (wf.isAutoValues.value == true) {
+        if (wf.isAutoValuesLiveData.value == true) {
             wf.takeoff = newValue.toInt() // Boolean.toInt() is 1 if true or 0 if false
             wf.landing = newValue.toInt()
         }
@@ -326,23 +326,38 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     //If this is true, if autoValues is off, the only reason for that is [checkAutovaluesForUnknownAirport] set it to off.
     //If checkAutovaluesForUnknownAirport decides it's ok again,  autoValues can be set to on again
-    private var autoValuesOnlyOffBecauseOfUnknownAirport: Boolean = wf.isAutoValues.value == true
+    private var autoValuesOnlyOffBecauseOfUnknownAirport: Boolean = wf.isAutoValuesLiveData.value == true
     /**
      * Will set autovalues to "soft-off" if not both airports known
      */
     fun checkAutovaluesForUnknownAirport(){
-        val allAirportsKnown = originIsValid.value == true && destinationIsValid.value == true
-        // I AM HERE
+        val unknownAirportFound = originIsValid.value == false || destinationIsValid.value == false
+        println("BOTERHAM ${originIsValid.value} / ${destinationIsValid.value} - av is ${wf.isAutoValuesLiveData.value}")
+        if (!unknownAirportFound && autoValuesOnlyOffBecauseOfUnknownAirport){              // autovalues off because unknown airports, but all airports known
+            toggleAutoValues(true)                                                // force autoValues on
+            autoValuesOnlyOffBecauseOfUnknownAirport = false                            // it is not off so this should be false
+        }
+        if (unknownAirportFound && wf.mIsAutovalues){                        // autovalues wants to be on, but unknown airports prevet that
+            autoValuesOnlyOffBecauseOfUnknownAirport = true                             // We switch off Autovalues for this reason
+            toggleAutoValues(false)                                               // force autoValues off. If airports are all known again, calling this function again will reset it to on
+            println("BANAAAAAAAN")
+        }
     }
 
     /**
-     * Toggle auto values. Used by "autoValues" checkbox without parameter
-     * Used by [autovaluesOffBecauseUnknownAirport] with parameter
+     * Toggle auto values.
+     * Used by "autoValues" checkbox without parameter
+     * Used by [checkAutovaluesForUnknownAirport] with parameter
      */
     fun toggleAutoValues(force: Boolean? = null){
-        val newValue = force ?: wf.isAutoValues.value == false
-        wf.setAutoValues(newValue)
-
+        val newValue = force ?: (!wf.mIsAutovalues)
+        viewModelScope.launch {
+            val j: Job = wf.setAutoValues(newValue)
+            j.join()
+            if (force == null) { // set fr0m checkbox,
+                checkAutovaluesForUnknownAirport() // check airports known to see if we can set it to on
+            }
+        }
     }
 
     /**

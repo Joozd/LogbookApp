@@ -32,7 +32,7 @@ import java.util.*
  * Viewmodel for [AircraftPicker] and [SimTypePicker] fragments
  */
 class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
-    private val undoAircraft = workingFlight.aircraft.value
+    private val undoAircraft = workingFlight.aircraftLiveData.value
     private val _typesSearchString = MutableLiveData("")
     private val typesSearchString
         get() = _typesSearchString.value ?: ""
@@ -49,7 +49,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
 
 
     // Active aircraft in [workingFligght] or a placeholder [Aircraft] while workingFlight is loading data
-    val selectedAircraft = workingFlight.aircraft.map { it ?: Aircraft("...")}
+    val selectedAircraft = workingFlight.aircraftLiveData.map { it ?: Aircraft("...")}
 
     val aircraftTypes: LiveData<List<AircraftType>>
         get() = _aircraftTypes

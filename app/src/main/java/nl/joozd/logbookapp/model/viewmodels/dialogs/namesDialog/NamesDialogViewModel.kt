@@ -55,7 +55,7 @@ abstract class NamesDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() 
         set(n) { _manualName.value = n }
 
     private val takenNames: List<String>
-        get() = workingFlight.allNamesList.value ?: emptyList()
+        get() = workingFlight.allNamesListLiveData.value ?: emptyList()
 
     /**
      * One string with all names we are working on now, separated by '\n'
@@ -77,7 +77,7 @@ abstract class NamesDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() 
             _allNames.value = filterNames((flightRepository.allNames.value ?: emptyList()))
         }
         //workingFlight.allNames is a List<String> of all names used in currentFlight
-        _allNames.addSource(workingFlight.allNamesList){
+        _allNames.addSource(workingFlight.allNamesListLiveData){
             _allNames.value = filterNames((flightRepository.allNames.value ?: emptyList()))
         }
     }

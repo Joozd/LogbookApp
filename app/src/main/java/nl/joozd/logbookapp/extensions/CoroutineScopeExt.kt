@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.extensions
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlin.coroutines.CoroutineContext
@@ -27,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Launches a coroutine in the current scope with all Mutex locks in place
  */
-fun <T> CoroutineScope.launchWithLocks(vararg mutex: Mutex, block: suspend () -> T ) {
+fun <T> CoroutineScope.launchWithLocks(vararg mutex: Mutex, block: suspend () -> T ): Job =
     launch{
         mutex.forEach{
             it.lock()
@@ -41,7 +42,7 @@ fun <T> CoroutineScope.launchWithLocks(vararg mutex: Mutex, block: suspend () ->
             }
         }
     }
-}
+
 
 /**
  * Launches a coroutine with the given CoroutineContext with all Mutex locks in place

@@ -94,7 +94,9 @@ class EditFlightFragment: JoozdlogFragment(){
 
 
             viewModel.originIsValid.observe(viewLifecycleOwner) { isValid ->
-
+                viewModel.checkAutovaluesForUnknownAirport()
+                val drawable = if (isValid) null else ContextCompat.getDrawable(App.instance, R.drawable.ic_error_outline_20px)
+                flightOrigField.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
             }
             /*
             viewModel.originIsValid.observe(viewLifecycleOwner) { checked ->
@@ -110,12 +112,9 @@ class EditFlightFragment: JoozdlogFragment(){
             viewModel.destination.observe(viewLifecycleOwner) {
                 flightDestField.setTextIfNotFocused(it)
             }
-            viewModel.destinationIsValid.observe(viewLifecycleOwner) { checked ->
-                val drawable: Drawable? = when(checked){
-                    true -> ContextCompat.getDrawable(App.instance, R.drawable.ic_check_circle_outline_20px)
-                    false -> ContextCompat.getDrawable(App.instance, R.drawable.ic_error_outline_20px)
-                    null -> null
-                }
+            viewModel.destinationIsValid.observe(viewLifecycleOwner) { isValid ->
+                viewModel.checkAutovaluesForUnknownAirport()
+                val drawable = if (isValid) null else ContextCompat.getDrawable(App.instance, R.drawable.ic_error_outline_20px)
                 flightDestField.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
             }
 
@@ -172,6 +171,7 @@ class EditFlightFragment: JoozdlogFragment(){
             viewModel.isPic.observe(viewLifecycleOwner) { active -> picSelector.showIfActive(active) }
             viewModel.isPF.observe(viewLifecycleOwner) { active -> pfSelector.showIfActive(active) }
             viewModel.isAutoValues.observe(viewLifecycleOwner) { active ->
+                println("Autofill is $active")
                 autoFillCheckBox.isChecked = active
             }
 

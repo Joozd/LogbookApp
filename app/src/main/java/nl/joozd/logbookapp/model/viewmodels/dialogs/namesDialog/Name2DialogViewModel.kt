@@ -20,8 +20,6 @@
 package nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.map
 import nl.joozd.logbookapp.R
 
@@ -37,20 +35,20 @@ class Name2DialogViewModel: NamesDialogViewModel() {
     /**
      * One string with all names we are working on now, separated by '\n'
      */
-    override val currentNames = workingFlight.name2List.map{ it.joinToString("\n")}
+    override val currentNames = workingFlight.name2ListLiveData.map{ it.joinToString("\n")}
 
     /**
      * Add a selected name to the list of names, or replace name if only one name allowed
      */
     override fun addName(name: String) {
-        workingFlight.setNames2List(workingFlight.name2List.value!! + name)
+        workingFlight.setNames2List(workingFlight.name2ListLiveData.value!! + name)
     }
 
     /**
      * Remove the last name from the list. If no names left, set names to [""]
      */
     override fun removeLastName() {
-        workingFlight.setNames2List(workingFlight.name2List.value!!.dropLast(1))
+        workingFlight.setNames2List(workingFlight.name2ListLiveData.value!!.dropLast(1))
     }
 
     /**

@@ -109,93 +109,117 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     val crew = ObservableCrew()
 
     /**
-     * private vars for getting/setting mutable livedata
-     * These will not launch couroutines for looking up/setting aditional data, only to be used private
+     * vars for getting/setting mutable livedata
+     * These will not launch couroutines for looking up/setting aditional data.
      */
-    private val mDate: LocalDate
-        get() = date.value!!
+    val mDate: LocalDate
+        get() = dateLiveData.value!!
 
-    private var mFlightNumber: String by ShowInLiveData(_flightNumber)
+    var mFlightNumber: String by ShowInLiveData(_flightNumber)
+        private set
+
 
     /**
      * Don't set this to null, Only nullable because first use is async.
      */
-    private var mOrigin: Airport? by ShowInLiveDataNullable(_origin) { require(it != null) { "Don't set mOrigin to null" } }
+    var mOrigin: Airport? by ShowInLiveDataNullable(_origin) { require(it != null) { "Don't set mOrigin to null" } }
+        private set
 
     /**
      * Don't set this to null, Only nullable because first use is async.
      */
-    private var mDestination: Airport? by ShowInLiveDataNullable(_destination) { require(it != null) { "Don't set mDestination to null" } }
+    var mDestination: Airport? by ShowInLiveDataNullable(_destination) { require(it != null) { "Don't set mDestination to null" } }
+        private set
 
-    private var mTimeOut: Instant by ShowInLiveData(_timeOut) { twilightCalculator = TwilightCalculator(it) }
+    var mTimeOut: Instant by ShowInLiveData(_timeOut) { twilightCalculator = TwilightCalculator(it) }
+        private set
 
-    private var mTimeIn: Instant by ShowInLiveData(_timeIn)
+    var mTimeIn: Instant by ShowInLiveData(_timeIn)
+        private set
 
-    private var mCorrectedTotalTime: Int by ShowInLiveData(_correctedTotalTime)
+    var mCorrectedTotalTime: Int by ShowInLiveData(_correctedTotalTime)
+        private set
 
-    private var mMultiPilotTime: Int by ShowInLiveData(_multiPilotTime)
+    var mMultiPilotTime: Int by ShowInLiveData(_multiPilotTime)
+        private set
 
-    private var mNightTime: Int by ShowInLiveData(_nightTime)
+    var mNightTime: Int by ShowInLiveData(_nightTime)
+        private set
 
-    private var mIfrTime: Int by ShowInLiveData(_ifrTime)
+    var mIfrTime: Int by ShowInLiveData(_ifrTime)
+        private set
 
-    private var mIsIfr: Boolean by ShowInLiveData(_isIfr)
+    var mIsIfr: Boolean by ShowInLiveData(_isIfr)
+        private set
 
-    private var mSimTime: Int by ShowInLiveData(_simTime)
+    var mSimTime: Int by ShowInLiveData(_simTime)
+        private set
 
-    private var mAircraft: Aircraft? by ShowInLiveDataNullable(_aircraft)
+    var mAircraft: Aircraft? by ShowInLiveDataNullable(_aircraft)
+        private set
 
     // this needs to be set on main thread or it will cause concurrency problems
-    private var mTakeoffLandings: TakeoffLandings by ShowInLiveData(_takeoffLanding)
+    var mTakeoffLandings: TakeoffLandings by ShowInLiveData(_takeoffLanding)
+        private set
 
-    private var mName: String by ShowInLiveData(_name)
+    var mName: String by ShowInLiveData(_name)
+        private set
 
-    private var mName2: String by ShowInLiveData(_name2)
+    var mName2: String by ShowInLiveData(_name2)
+        private set
 
-    private var mName2List: List<String>
+    var mName2List: List<String>
         get() = mName2.split(";")
-        set(namesList) {
+        private set(namesList) {
             mName2 = namesList.joinToString(";")
         }
 
     //Not sure what to do with this. Keeping it the way it is for now (setting value directly on main)
     //Only used in MediatorLivedata itself atm so OK if it stays that way
-    private var mAllNamesList: List<String>
-        get() = allNamesList.value ?: emptyList()
-        set(namesList) {
+    var mAllNamesList: List<String>
+        get() = allNamesListLiveData.value ?: emptyList()
+        private set(namesList) {
             _allNamesList.value = namesList
         }
 
-    private var mRemarks: String by ShowInLiveData(_remarks)
+    var mRemarks: String by ShowInLiveData(_remarks)
+        private set
 
-    private var mSignature: String by ShowInLiveData(_signature)
+    var mSignature: String by ShowInLiveData(_signature)
+        private set
 
     //another weird one.
-    private var mAugmentedCrew: Crew
+    var mAugmentedCrew: Crew
         get() = crew
-        set(it) = crew.clone(it)
+        private set(it) = crew.clone(it)
 
-    private var mIsSim: Boolean by ShowInLiveData(_isSim)
+    var mIsSim: Boolean by ShowInLiveData(_isSim)
+        private set
 
-    private var mIsDual: Boolean by ShowInLiveData(_isDual)
+    var mIsDual: Boolean by ShowInLiveData(_isDual)
+        private set
 
-    private var mIsInstructor: Boolean by ShowInLiveData(_isInstructor)
+    var mIsInstructor: Boolean by ShowInLiveData(_isInstructor)
+        private set
 
-    private var mIsPic: Boolean by ShowInLiveData(_isPic)
+    var mIsPic: Boolean by ShowInLiveData(_isPic)
+        private set
 
-    private var mIsPF: Boolean by ShowInLiveData(_isPF)
+    var mIsPF: Boolean by ShowInLiveData(_isPF)
+        private set
 
-    private var mIsAutovalues: Boolean by ShowInLiveData(_isAutoValues)
+    var mIsAutovalues: Boolean by ShowInLiveData(_isAutoValues)
+        private set
 
     //Custom getter. I might thing about this if it becomes a problem.
-    private var mIsCopilot: Boolean
-        get() = _isCopilot.value ?: isPic.value == false && _aircraft.value?.type?.multiPilot == true // generate value if _isCopilot hasn't been observed yet
-        set(it) = _isCopilot.setOnMainIfAble(it)
+    var mIsCopilot: Boolean
+        get() = _isCopilot.value ?: isPicLiveData.value == false && _aircraft.value?.type?.multiPilot == true // generate value if _isCopilot hasn't been observed yet
+        private set(it) = _isCopilot.setOnMainIfAble(it)
 
     //MediatorLiveData. Leave alone for now.
-    private var mDuration: Duration
+    var mDuration: Duration
         get() = _duration.value ?: correctedDuration() // generate value if _duration hasn't been observed yet
-        set(it) = _duration.setOnMainIfAble(it)
+        private set(it) = _duration.setOnMainIfAble(it)
 
 
     /**
@@ -410,17 +434,17 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     }
 
     /**
-     * Sets [origin] to the [Airport] of which that is the [Airport.ident] (ICAO code)
-     * If not found, sets [origin] to Airport(ident = orig)
-     * if found and [isAutoValues], calculates night time
+     * Sets [originLiveData] to the [Airport] of which that is the [Airport.ident] (ICAO code)
+     * If not found, sets [originLiveData] to Airport(ident = orig)
+     * if found and [isAutoValuesLiveData], calculates night time
      */
     fun setOrig(orig: String) = launchWithLocks(origMutex, nightTimeMutex) {
         setOriginFromId(AirportRepository.getInstance().searchAirportOnce(orig)?.ident ?: orig)
     }
 
     /**
-     * Sets [origin] to [orig]
-     * if found and [isAutoValues], calculates night time
+     * Sets [originLiveData] to [orig]
+     * if found and [isAutoValuesLiveData], calculates night time
      * Can be null but shouldn't
      */
     fun setOrig(orig: Airport?) = launchWithLocks(origMutex, nightTimeMutex) {
@@ -432,17 +456,17 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     }
 
     /**
-     * Sets [origin] to the [Airport] of which that is the [Airport.ident] (ICAO code)
-     * If not found, sets [origin] to to Airport(ident = dest)
-     * if found and [isAutoValues], calculates night time
+     * Sets [originLiveData] to the [Airport] of which that is the [Airport.ident] (ICAO code)
+     * If not found, sets [originLiveData] to to Airport(ident = dest)
+     * if found and [isAutoValuesLiveData], calculates night time
      */
     fun setDest(dest: String) = launchWithLocks(destMutex, nightTimeMutex) {
         setDestFromId(AirportRepository.getInstance().searchAirportOnce(dest)?.ident ?: dest)
     }
 
     /**
-     * Sets [destination] to [dest]
-     * if found and [isAutoValues], calculates night time
+     * Sets [destinationLiveData] to [dest]
+     * if found and [isAutoValuesLiveData], calculates night time
      * Can be null but shouldn't
      */
     fun setDest(dest: Airport?) = launchWithLocks(destMutex, nightTimeMutex) {
@@ -573,7 +597,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * Set Aircraft
      * If both reg and type set, sets registration and type accordingly
      * If only reg set, looks for type, if none found leaves that at null
-     * If only type set (ie. when [isSim]) sets type to correct type, or a blank placeholder type which will set [AircraftType.shortName] in [Flight.aircraftType] when saved.
+     * If only type set (ie. when [isSimLiveData]) sets type to correct type, or a blank placeholder type which will set [AircraftType.shortName] in [Flight.aircraftType] when saved.
      * If [mIsAutovalues], it also sets multiPilotTime
      */
     fun setAircraft(registration: String? = null, type: String? = null) =
@@ -737,7 +761,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     /**
      * sets isAutovalues. Does things when switched to on.
      */
-    fun setAutoValues(autovalues: Boolean) =
+    fun setAutoValues(autovalues: Boolean): Job =
         launchWithLocks(ifrTimeMutex, multiPilotMutex, nightTimeMutex, takeoffLandingMutex) {
             mIsAutovalues = autovalues
             if (autovalues) {
@@ -799,89 +823,89 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * Exposed LiveData
      * Things that are filled async can be null, rest cannot. (will cause nullpointerexception)
      */
-    val flightNumber: LiveData<String>
+    val flightNumberLiveData: LiveData<String>
         get() = _flightNumber
 
-    val origin: LiveData<Airport?>
+    val originLiveData: LiveData<Airport?>
         get() = _origin
 
-    val destination: LiveData<Airport?>
+    val destinationLiveData: LiveData<Airport?>
         get() = _destination
 
-    val timeOut: LiveData<Instant>
+    val timeOutLiveData: LiveData<Instant>
         get() = _timeOut
 
-    val date: LiveData<LocalDate> = Transformations.map(_timeOut) { it!!.toLocalDate() }
+    val dateLiveData: LiveData<LocalDate> = Transformations.map(_timeOut) { it!!.toLocalDate() }
 
-    val timeIn: LiveData<Instant>
+    val timeInLiveData: LiveData<Instant>
         get() = _timeIn
 
-    val correctedTotalTime: LiveData<Int>
+    val correctedTotalTimeLiveData: LiveData<Int>
         get() = _correctedTotalTime
 
-    val multiPilotTime: LiveData<Int>
+    val multiPilotTimeLiveData: LiveData<Int>
         get() = _multiPilotTime
 
-    val nightTime: LiveData<Int>
+    val nightTimeLiveData: LiveData<Int>
         get() = _nightTime
 
-    val ifrTime: LiveData<Int>
+    val ifrTimeLiveData: LiveData<Int>
         get() = _ifrTime
 
-    val isIfr: LiveData<Boolean>
+    val isIfrLiveData: LiveData<Boolean>
         get() = _isIfr
 
-    val simTime: LiveData<Int>
+    val simTimeLiveData: LiveData<Int>
         get() = _simTime
 
-    val aircraft: LiveData<Aircraft?>
+    val aircraftLiveData: LiveData<Aircraft?>
         get() = _aircraft
 
-    val takeoffLandings: LiveData<TakeoffLandings>
+    val takeoffLandingsLiveData: LiveData<TakeoffLandings>
         get() = _takeoffLanding
 
-    val name: LiveData<String>
+    val nameLiveData: LiveData<String>
         get() = _name
 
-    val name2: LiveData<String>
+    val name2LiveData: LiveData<String>
         get() = _name2
 
-    val name2List: LiveData<List<String>> =
+    val name2ListLiveData: LiveData<List<String>> =
         Transformations.map(_name2) { it?.split(";") ?: emptyList() }
 
-    val allNamesList: LiveData<List<String>>
+    val allNamesListLiveData: LiveData<List<String>>
         get() = _allNamesList
 
-    val remarks: LiveData<String>
+    val remarksLiveData: LiveData<String>
         get() = _remarks
 
-    val signature: LiveData<String>
+    val signatureLiveData: LiveData<String>
         get() = _signature
 
-    val isSigned: LiveData<Boolean> = Transformations.map(_signature) { it.isNotBlank() }
+    val isSignedLiveData: LiveData<Boolean> = Transformations.map(_signature) { it.isNotBlank() }
 
-    val isSim: LiveData<Boolean>
+    val isSimLiveData: LiveData<Boolean>
         get() = _isSim
 
-    val isDual: LiveData<Boolean>
+    val isDualLiveData: LiveData<Boolean>
         get() = _isDual
 
-    val isInstructor: LiveData<Boolean>
+    val isInstructorLiveData: LiveData<Boolean>
         get() = _isInstructor
 
-    val isPic: LiveData<Boolean>
+    val isPicLiveData: LiveData<Boolean>
         get() = _isPic
 
-    val isPF: LiveData<Boolean>
+    val isPFLiveData: LiveData<Boolean>
         get() = _isPF
 
-    val isAutoValues: LiveData<Boolean>
+    val isAutoValuesLiveData: LiveData<Boolean>
         get() = _isAutoValues
 
-    val isCopilot: LiveData<Boolean>
+    val isCopilotLiveData: LiveData<Boolean>
         get() = _isCopilot
 
-    val duration: LiveData<Duration>
+    val durationLiveData: LiveData<Duration>
         get() = _duration
 
     /**
@@ -988,7 +1012,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
             _isCopilot.value = (!isPic && _aircraft.value?.type?.multiPilot == true)
         }
         _isCopilot.addSource(_aircraft){ac ->
-            _isCopilot.value = (isPic.value == false && ac?.type?.multiPilot == true)
+            _isCopilot.value = (isPicLiveData.value == false && ac?.type?.multiPilot == true)
         }
 
         _duration.addSource(_timeIn) { mDuration = correctedDuration() }
@@ -997,8 +1021,8 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         _duration.addSource(_isPic) { mDuration = correctedDuration() }
         _duration.addSource(_correctedTotalTime) { mDuration = correctedDuration() }
 
-        _allNamesList.addSource(_name) { mAllNamesList = (name2List.value ?: emptyList<String>() + mName).distinct() } // null catcher because name2List might not be observed yet
-        _allNamesList.addSource(name2List) { mAllNamesList = (mName2List + mName).distinct() }
+        _allNamesList.addSource(_name) { mAllNamesList = (name2ListLiveData.value ?: emptyList<String>() + mName).distinct() } // null catcher because name2List might not be observed yet
+        _allNamesList.addSource(name2ListLiveData) { mAllNamesList = (mName2List + mName).distinct() }
 
         //Set all data
         setFromFlight(flight)

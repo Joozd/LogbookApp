@@ -23,14 +23,14 @@ import androidx.lifecycle.Transformations
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
 class LandingsDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
-    private val undoLandings = workingFlight.takeoffLandings.value!!
-    private val undoAutoValues = workingFlight.isAutoValues.value!!
+    private val undoLandings = workingFlight.takeoffLandingsLiveData.value!!
+    private val undoAutoValues = workingFlight.isAutoValuesLiveData.value!!
 
-    val toDay = Transformations.map(workingFlight.takeoffLandings){ it.takeoffDay }
-    val toNight = Transformations.map(workingFlight.takeoffLandings){ it.takeoffNight }
-    val ldgDay = Transformations.map(workingFlight.takeoffLandings){ it.landingDay }
-    val ldgNight = Transformations.map(workingFlight.takeoffLandings){ it.landingNight }
-    val autoland = Transformations.map(workingFlight.takeoffLandings){ it.autoLand }
+    val toDay = Transformations.map(workingFlight.takeoffLandingsLiveData){ it.takeoffDay }
+    val toNight = Transformations.map(workingFlight.takeoffLandingsLiveData){ it.takeoffNight }
+    val ldgDay = Transformations.map(workingFlight.takeoffLandingsLiveData){ it.landingDay }
+    val ldgNight = Transformations.map(workingFlight.takeoffLandingsLiveData){ it.landingNight }
+    val autoland = Transformations.map(workingFlight.takeoffLandingsLiveData){ it.autoLand }
 
 
     /**

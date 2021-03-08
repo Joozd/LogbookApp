@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~  JoozdLog Pilot's Logbook
-  ~  Copyright (c) 2020 Joost Welle
+  ~  Copyright (c) 2021 Joost Welle
   ~
   ~      This program is free software: you can redistribute it and/or modify
   ~      it under the terms of the GNU Affero General Public License as
@@ -18,9 +18,18 @@
   ~
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="?attr/colorTextViewBackground"/>
+<resources>
 
+    <style name="EditFlightEditText" parent="AppTheme">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:importantForAutofill">no</item> <!-- in v26\styles.xml -->
+        <item name="android:imeOptions">actionNext</item>
+        <item name="android:padding">10dp</item>
 
-    <corners android:bottomRightRadius="3dp" android:bottomLeftRadius="3dp"/>
-</shape>
+    </style>
+</resources>

@@ -324,8 +324,25 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         }
     }
 
+    //If this is true, if autoValues is off, the only reason for that is [checkAutovaluesForUnknownAirport] set it to off.
+    //If checkAutovaluesForUnknownAirport decides it's ok again,  autoValues can be set to on again
+    private var autoValuesOnlyOffBecauseOfUnknownAirport: Boolean = wf.isAutoValues.value == true
+    /**
+     * Will set autovalues to "soft-off" if not both airports known
+     */
+    fun checkAutovaluesForUnknownAirport(){
+        val allAirportsKnown = originIsValid.value == true && destinationIsValid.value == true
+        // I AM HERE
+    }
+
+    /**
+     * Toggle auto values. Used by "autoValues" checkbox without parameter
+     * Used by [autovaluesOffBecauseUnknownAirport] with parameter
+     */
     fun toggleAutoValues(force: Boolean? = null){
-        wf.setAutoValues(force ?: wf.isAutoValues.value == false)
+        val newValue = force ?: wf.isAutoValues.value == false
+        wf.setAutoValues(newValue)
+
     }
 
     /**

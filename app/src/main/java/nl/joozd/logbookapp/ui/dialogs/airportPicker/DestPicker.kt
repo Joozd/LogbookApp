@@ -27,7 +27,7 @@ import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.DestPickerView
 /**
  * Airport picker that works on Destination
  */
-@ExperimentalCoroutinesApi
+//@ExperimentalCoroutinesApi
 class DestPicker: AirportPicker() {
     override val workingOnOrig = false
     override val viewModel: DestPickerViewModel by viewModels()

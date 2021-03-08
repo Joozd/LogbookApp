@@ -49,7 +49,7 @@ import kotlin.math.abs
  * This will set correct value in ViewModel, recreation will call constructor without params
  * but viewModel will persist.
  */
-@ExperimentalCoroutinesApi
+//@ExperimentalCoroutinesApi
 abstract class AirportPicker(): JoozdlogFragment() {
     protected abstract val workingOnOrig: Boolean // this must be set before first-time attachment
     protected abstract val viewModel: AirportPickerViewModel

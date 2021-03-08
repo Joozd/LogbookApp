@@ -32,7 +32,7 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFl
 //TODO make sure list gets filled straight away?
 //TODO sort airportsList based on ICAO/IATA prefs?
 
-@ExperimentalCoroutinesApi
+//@ExperimentalCoroutinesApi
 abstract class AirportPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     /**
      * MediatorLiveData for kepping track of which airport is picked.

@@ -27,6 +27,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.NumberPicker
+import android.widget.TextView
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -41,10 +42,11 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
 
 open class TimePicker: JoozdlogFragment() {
-    companion object{
-        private val paddedMinutes = IntArray(60) {it}.map{v -> v.toString().padStart(2,'0')}.toTypedArray()
-        private val paddedHours = IntArray(24) {it}.map{v -> v.toString().padStart(2,'0')}.toTypedArray()
+    companion object {
+        private val paddedMinutes = IntArray(60) { it }.map { v -> v.toString().padStart(2, '0') }.toTypedArray()
+        private val paddedHours = IntArray(24) { it }.map { v -> v.toString().padStart(2, '0') }.toTypedArray()
     }
+
     private val viewModel: TimePickerViewModel by viewModels()
 
     // variable to store previous text on any selected field
@@ -52,11 +54,9 @@ open class TimePicker: JoozdlogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val binding = DialogTimesInOutBinding.bind(inflater.inflate(R.layout.dialog_times_in_out, container, false))
-        with (binding) {
+        with(binding) {
             //Set dialog title background color
             timesDialogTopHalf.joozdLogSetBackgroundColor()
-
-
 
 
             /***************************************************************************************
@@ -159,11 +159,11 @@ open class TimePicker: JoozdlogFragment() {
                 }
             })
 
-            viewModel.totalTime.observe(viewLifecycleOwner) { ttofText.setText(it)}
+            viewModel.totalTime.observe(viewLifecycleOwner) { ttofText.setText(it) }
 
             viewModel.ifrTime.observe(viewLifecycleOwner) { ifrTimeText.setText(it) }
 
-            viewModel.nightTime.observe(viewLifecycleOwner) { nightTimeText.setText(it)}
+            viewModel.nightTime.observe(viewLifecycleOwner) { nightTimeText.setText(it) }
 
             viewModel.augmentedCrew.crewSize.observe(viewLifecycleOwner) {
                 augmentedTextView.showIfActive(it > 2)
@@ -194,16 +194,15 @@ open class TimePicker: JoozdlogFragment() {
      * Sets layout to sim
      */
 
-    private fun NumberPicker.setSpinnervaluesForMinutes(){
+    private fun NumberPicker.setSpinnervaluesForMinutes() {
         minValue = 0
         maxValue = 59
         displayedValues = paddedMinutes
     }
-    private fun NumberPicker.setSpinnervaluesForHours(){
+
+    private fun NumberPicker.setSpinnervaluesForHours() {
         minValue = 0
         maxValue = 23
         displayedValues = paddedHours
     }
-
-    private fun timeFromMinutes(minutes: Int): String = "${minutes/60}:${(minutes%60).toString().padStart(2,'0')}"
 }

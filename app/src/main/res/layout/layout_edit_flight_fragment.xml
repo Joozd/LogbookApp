@@ -19,43 +19,35 @@
   -->
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                             xmlns:app="http://schemas.android.com/apk/res-auto"
-                                             android:layout_width="match_parent"
-                                             android:layout_height="match_parent"
-                                             xmlns:tools="http://schemas.android.com/tools"
-                                             android:id="@+id/flightEditorLayout">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/editFlightFragmentBackground"
+    android:background="?attr/colorDialogBackgroundFilter"
+    tools:context=".ui.activities.MainActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" android:id="@+id/flightInfoLayout"
-            android:visibility="visible" app:layout_constraintTop_toTopOf="parent"
-            android:background="#60000000">
+    <ScrollView
+        android:id="@+id/flightBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/flightBox"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="#FF000000"
-            android:elevation="8dp"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_height="wrap_content">
+
 
             <TextView
                 android:id="@+id/flightInfoText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/top_corners"
-                android:gravity="center_vertical"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/top_corners_primarybackgrounddark"
+                android:gravity="center"
                 android:text="@string/add_flight"
-                android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -63,632 +55,423 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ScrollView
-                android:id="@+id/scrollView2"
+            <View
+                android:id="@+id/editFlightBottomBackground"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:scrollIndicators="none"
-                android:scrollbarSize="0dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/bottom_corners"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/flightInfoText" />
+
+
+            <ImageView
+                android:id="@+id/flightDateSelector"
+                style="@style/LSK"
+                app:layout_constraintBottom_toBottomOf="@+id/flightDateWrapper"
+                app:layout_constraintEnd_toStartOf="@+id/flightDateWrapper"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/flightDateWrapper"
+                app:srcCompat="@drawable/lsk_button" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flightDateWrapper"
+                style="@style/EditFlightInputLayout"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toStartOf="@+id/flightFlightNumberWrapper"
+                app:layout_constraintStart_toEndOf="@+id/flightDateSelector"
                 app:layout_constraintTop_toBottomOf="@+id/flightInfoText">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/flightInfoDataLayout"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/flightDateField"
+                    style="@style/EditFlightEditText"
+                    android:focusable="false"
+                    android:hint="@string/dateHint"
+                    android:includeFontPadding="true"
+                    android:inputType="date"
+                    android:nextFocusForward="@id/flightFlightNumberField"
+                    tools:text="1 Jan. 2020" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flightFlightNumberWrapper"
+                style="@style/EditFlightInputLayout"
+                android:layout_marginStart="4dp"
+                app:layout_constraintEnd_toStartOf="@+id/flightFlightNumberSelector"
+                app:layout_constraintStart_toEndOf="@+id/flightDateWrapper"
+                app:layout_constraintTop_toTopOf="@+id/flightDateWrapper">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/flightFlightNumberField"
+                    style="@style/EditFlightEditText"
+                    android:hint="@string/flightNumberHint"
+                    android:inputType="textVisiblePassword|textNoSuggestions|textCapCharacters"
+                    android:nextFocusForward="@id/flightOrigField"
+                    tools:text="KL1234" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/flightFlightNumberSelector"
+                style="@style/LSK"
+                app:layout_constraintBottom_toBottomOf="@+id/flightDateWrapper"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/flightFlightNumberWrapper"
+                app:layout_constraintTop_toTopOf="@+id/flightDateWrapper"
+                app:srcCompat="@drawable/lsk_button" />
+
+            <ImageView
+                android:id="@+id/flightOrigSelector"
+                style="@style/LSK"
+                app:layout_constraintBottom_toBottomOf="@+id/flightOrigWrapper"
+                app:layout_constraintEnd_toStartOf="@+id/flightOrigWrapper"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/flightOrigWrapper"
+                app:srcCompat="@drawable/lsk_button" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flightOrigWrapper"
+                style="@style/EditFlightInputLayoutVerticalSpaced"
+                app:layout_constraintEnd_toStartOf="@+id/flightDestWrapper"
+                app:layout_constraintStart_toEndOf="@+id/flightOrigSelector"
+                app:layout_constraintTop_toBottomOf="@+id/flightDateWrapper">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/flightOrigField"
+                    style="@style/EditFlightEditTextBold"
+                    android:hint="@string/origin"
+                    android:inputType="textNoSuggestions|textCapCharacters"
+                    android:nextFocusForward="@id/flightDestField"
+                    android:selectAllOnFocus="true"
+                    tools:text="EHAM" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flightDestWrapper"
+                style="@style/EditFlightInputLayout"
+                android:layout_marginStart="4dp"
+                app:layout_constraintEnd_toStartOf="@+id/flightDestSelector"
+                app:layout_constraintStart_toEndOf="@+id/flightOrigWrapper"
+                app:layout_constraintTop_toTopOf="@+id/flightOrigWrapper">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/flightDestField"
+                    style="@style/EditFlightEditTextBold"
+                    android:hint="@string/destination"
+                    android:inputType="textNoSuggestions|textCapCharacters"
+                    android:nextFocusForward="@id/flighttOutStringField"
+                    android:selectAllOnFocus="true"
+                    android:textStyle="bold"
+                    tools:text="EDDC" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/flightDestSelector"
+                style="@style/LSK"
+                app:layout_constraintBottom_toBottomOf="@+id/flightOrigWrapper"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/flightDestWrapper"
+                app:layout_constraintTop_toTopOf="@+id/flightOrigWrapper"
+                app:srcCompat="@drawable/lsk_button" />
+
+            <ImageView
+                android:id="@+id/flighttOutSelector"
+                style="@style/LSK"
+                app:layout_constraintBottom_toBottomOf="@+id/flighttOutStringWrapper"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/flighttOutStringWrapper"
+                app:srcCompat="@drawable/lsk_button" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flightSimTimeWrapper"
+                style="@style/InputLayout"
+                android:visibility="gone"
+                app:layout_constraintEnd_toStartOf="@+id/flighttInSelector"
+                app:layout_constraintStart_toEndOf="@+id/flighttOutSelector"
+                app:layout_constraintTop_toBottomOf="@+id/flightOrigWrapper">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/flightSimTimeField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bottom_corners">
+                    android:ems="10"
+                    android:hint="@string/simtTime"
+                    android:imeOptions="actionNext"
+                    android:importantForAutofill="no"
+                    android:includeFontPadding="false"
+                    android:inputType="time"
+                    android:nextFocusForward="@id/flightAircraftField"
+                    android:selectAllOnFocus="true"
+                    android:textAlignment="center"
+                    tools:text="12:34" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                    <ImageView
-                        android:id="@+id/flightDateSelector"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:alpha="0.9"
-                        android:rotation="90"
-                        app:layout_constraintBottom_toBottomOf="@+id/flightDateWrapper"
-                        app:layout_constraintEnd_toStartOf="@+id/flightDateWrapper"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/flightDateWrapper"
-                        app:srcCompat="@drawable/triangle" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flighttOutStringWrapper"
+                style="@style/EditFlightInputLayoutVerticalSpaced"
+                app:layout_constraintEnd_toStartOf="@+id/flighttInStringWrapper"
+                app:layout_constraintStart_toEndOf="@+id/flighttOutSelector"
+                app:layout_constraintTop_toBottomOf="@+id/flightOrigWrapper">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flightDateWrapper"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flightFlightNumberWrapper"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightDateSelector"
-                        app:layout_constraintTop_toTopOf="parent">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/flighttOutStringField"
+                    style="@style/EditFlightEditText"
+                    android:hint="@string/timeOut"
+                    android:inputType="time"
+                    android:nextFocusForward="@id/flighttInStringField"
+                    android:selectAllOnFocus="true"
+                    tools:text="12:34" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/flightDateField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:focusable="false"
-                            android:hint="@string/dateHint"
-                            android:imeOptions="actionNext"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="date"
-                            android:nextFocusForward="@id/flightFlightNumberField"
-                            android:textAlignment="center" />
-                    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flighttInStringWrapper"
+                style="@style/EditFlightInputLayout"
+                android:layout_marginStart="4dp"
+                app:layout_constraintEnd_toStartOf="@+id/flighttInSelector"
+                app:layout_constraintStart_toEndOf="@+id/flighttOutStringWrapper"
+                app:layout_constraintTop_toTopOf="@+id/flighttOutStringWrapper">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flightFlightNumberWrapper"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flightFlightNumberSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightDateWrapper"
-                        app:layout_constraintTop_toTopOf="@+id/flightDateWrapper">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/flighttInStringField"
+                    style="@style/EditFlightEditText"
+                    android:hint="@string/timeIn"
+                    android:inputType="time"
+                    android:nextFocusForward="@id/flightAircraftField"
+                    android:selectAllOnFocus="true"
+                    android:textAlignment="center"
+                    tools:text="12:34" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/flightFlightNumberField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:hint="@string/flightNumberHint"
-                            android:imeOptions="actionNext"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="textVisiblePassword|textNoSuggestions|textCapCharacters"
-                            android:nextFocusForward="@id/flightOrigField"
-                            android:textAlignment="center" />
-                    </com.google.android.material.textfield.TextInputLayout>
+            <ImageView
+                android:id="@+id/flighttInSelector"
+                style="@style/LSK"
+                app:layout_constraintBottom_toBottomOf="@+id/flighttOutStringWrapper"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/flighttOutStringWrapper"
+                app:srcCompat="@drawable/lsk_button" />
 
-                    <ImageView
-                        android:id="@+id/flightFlightNumberSelector"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:alpha="0.9"
-                        android:rotation="270"
-                        app:layout_constraintBottom_toBottomOf="@+id/flightDateWrapper"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightFlightNumberWrapper"
-                        app:layout_constraintTop_toTopOf="@+id/flightDateWrapper"
-                        app:srcCompat="@drawable/triangle" />
+            <ImageView
+                android:id="@+id/flightAcRegSelector"
+                style="@style/LSK"
+                app:layout_constraintBottom_toBottomOf="@+id/flightAircraftWrapper"
+                app:layout_constraintEnd_toStartOf="@+id/flightAircraftWrapper"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/flightAircraftWrapper"
+                app:srcCompat="@drawable/lsk_button" />
 
-                    <ImageView
-                        android:id="@+id/flightOrigSelector"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:alpha="0.9"
-                        android:rotation="90"
-                        app:layout_constraintBottom_toBottomOf="@+id/flightOrigWrapper"
-                        app:layout_constraintEnd_toStartOf="@+id/flightOrigWrapper"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/flightOrigWrapper"
-                        app:srcCompat="@drawable/triangle" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flightAircraftWrapper"
+                style="@style/EditFlightInputLayoutVerticalSpaced"
+                app:layout_constraintEnd_toStartOf="@+id/flightTakeoffLandingWrapper"
+                app:layout_constraintStart_toEndOf="@+id/flightAcRegSelector"
+                app:layout_constraintTop_toBottomOf="@+id/flighttOutStringWrapper">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flightOrigWrapper"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flightDestWrapper"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightOrigSelector"
-                        app:layout_constraintTop_toBottomOf="@+id/flightDateWrapper">
+                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                    android:id="@+id/flightAircraftField"
+                    style="@style/EditFlightEditText"
+                    android:hint="@string/aircraft"
+                    android:inputType="textNoSuggestions|textCapCharacters"
+                    android:nextFocusForward="@id/flightNameField"
+                    android:selectAllOnFocus="true"
+                    tools:text="PH-NXA" />
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/flightOrigField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:drawablePadding="-20dp"
-                            android:ems="10"
-                            android:hint="@string/origin"
-                            android:imeOptions="actionNext"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="textNoSuggestions|textCapCharacters"
-                            android:nextFocusForward="@id/flightDestField"
-                            android:selectAllOnFocus="true"
-                            android:textAlignment="center"
-                            android:textStyle="bold"
-                            tools:text="EHAM" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flightTakeoffLandingWrapper"
+                style="@style/EditFlightInputLayout"
+                android:layout_marginStart="4dp"
+                app:layout_constraintEnd_toStartOf="@+id/flightTakeoffLandingSelector"
+                app:layout_constraintStart_toEndOf="@+id/flightAircraftWrapper"
+                app:layout_constraintTop_toTopOf="@+id/flightAircraftWrapper">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flightDestWrapper"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flightDestSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightOrigWrapper"
-                        app:layout_constraintTop_toTopOf="@+id/flightOrigWrapper">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/flightTakeoffLandingField"
+                    style="@style/EditFlightEditText"
+                    android:digits="AND/1234567890"
+                    android:hint="@string/takeoffs_landings"
+                    android:inputType="number|textCapCharacters"
+                    android:nextFocusForward="@id/flightNameField"
+                    android:selectAllOnFocus="true"
+                    tools:text="1/1" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/flightDestField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:drawablePadding="-20dp"
-                            android:ems="10"
-                            android:hint="@string/destination"
-                            android:imeOptions="actionNext"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="textNoSuggestions|textCapCharacters"
-                            android:nextFocusForward="@id/flighttOutStringField"
-                            android:selectAllOnFocus="true"
-                            android:textAlignment="center"
-                            android:textStyle="bold"
-                            tools:text="EDDC" />
-                    </com.google.android.material.textfield.TextInputLayout>
+            <ImageView
+                android:id="@+id/flightTakeoffLandingSelector"
+                style="@style/LSK"
+                app:layout_constraintBottom_toBottomOf="@+id/flightAircraftWrapper"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/flightTakeoffLandingWrapper"
+                app:layout_constraintTop_toTopOf="@+id/flightAircraftWrapper"
+                app:srcCompat="@drawable/lsk_button" />
 
-                    <ImageView
-                        android:id="@+id/flightDestSelector"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:alpha="0.9"
-                        android:rotation="270"
-                        app:layout_constraintBottom_toBottomOf="@+id/flightOrigWrapper"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightDestWrapper"
-                        app:layout_constraintTop_toTopOf="@+id/flightOrigWrapper"
-                        app:srcCompat="@drawable/triangle" />
+            <ImageView
+                android:id="@+id/flightNameSelector"
+                style="@style/LSK"
+                app:layout_constraintBottom_toBottomOf="@+id/flightNameWrapper"
+                app:layout_constraintEnd_toStartOf="@+id/flightNameWrapper"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/flightNameWrapper"
+                app:srcCompat="@drawable/lsk_button" />
 
-                    <ImageView
-                        android:id="@+id/flighttOutSelector"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:alpha="0.9"
-                        android:rotation="90"
-                        app:layout_constraintBottom_toBottomOf="@+id/flighttOutStringWrapper"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/flighttOutStringWrapper"
-                        app:srcCompat="@drawable/triangle" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flightNameWrapper"
+                style="@style/EditFlightInputLayoutVerticalSpaced"
+                app:layout_constraintEnd_toStartOf="@+id/flightName2Wrapper"
+                app:layout_constraintStart_toEndOf="@+id/flightNameSelector"
+                app:layout_constraintTop_toBottomOf="@+id/flightAircraftWrapper">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flightSimTimeWrapper"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-
-                        android:layout_marginTop="4dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flighttInSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flighttOutSelector"
-                        app:layout_constraintTop_toBottomOf="@+id/flightOrigWrapper">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/flightSimTimeField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:hint="@string/simtTime"
-                            android:imeOptions="actionNext"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="time"
-                            android:nextFocusForward="@id/flightAircraftField"
-                            android:selectAllOnFocus="true"
-                            android:textAlignment="center"
-                            tools:text="12:34" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flighttOutStringWrapper"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-
-                        android:layout_marginTop="4dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flighttInStringWrapper"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flighttOutSelector"
-                        app:layout_constraintTop_toBottomOf="@+id/flightOrigWrapper">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/flighttOutStringField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:hint="@string/timeOut"
-                            android:imeOptions="actionNext"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="time"
-                            android:nextFocusForward="@id/flighttInStringField"
-                            android:selectAllOnFocus="true"
-                            android:textAlignment="center"
-                            tools:text="12:34" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flighttInStringWrapper"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flighttInSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flighttOutStringWrapper"
-                        app:layout_constraintTop_toTopOf="@+id/flighttOutStringWrapper">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/flighttInStringField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:hint="@string/timeIn"
-                            android:imeOptions="actionNext"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="time"
-                            android:nextFocusForward="@id/flightAircraftField"
-                            android:selectAllOnFocus="true"
-                            android:textAlignment="center"
-                            tools:text="12:34" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <ImageView
-                        android:id="@+id/flighttInSelector"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:alpha="0.9"
-                        android:rotation="270"
-                        app:layout_constraintBottom_toBottomOf="@+id/flighttOutStringWrapper"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/flighttOutStringWrapper"
-                        app:srcCompat="@drawable/triangle" />
-
-                    <ImageView
-                        android:id="@+id/flightAcRegSelector"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:alpha="0.9"
-                        android:rotation="90"
-                        app:layout_constraintBottom_toBottomOf="@+id/flightAircraftWrapper"
-                        app:layout_constraintEnd_toStartOf="@+id/flightAircraftWrapper"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/flightAircraftWrapper"
-                        app:srcCompat="@drawable/triangle" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flightAircraftWrapper"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flightTakeoffLandingWrapper"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightAcRegSelector"
-                        app:layout_constraintTop_toBottomOf="@+id/flighttOutStringWrapper">
-
-                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                            android:id="@+id/flightAircraftField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:hint="@string/aircraft"
-                            android:imeOptions="actionNext"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="textNoSuggestions|textCapCharacters"
-                            android:nextFocusForward="@id/flightNameField"
-                            android:selectAllOnFocus="true"
-                            android:textAlignment="center"
-                            android:textSize="16sp" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flightTakeoffLandingWrapper"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flightTakeoffLandingSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightAircraftWrapper"
-                        app:layout_constraintTop_toTopOf="@+id/flightAircraftWrapper">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/flightTakeoffLandingField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:digits="AND/1234567890"
-                            android:ems="10"
-                            android:hint="@string/takeoffs_landings"
-                            android:imeOptions="actionNext"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="number|textCapCharacters"
-                            android:nextFocusForward="@id/flightNameField"
-                            android:selectAllOnFocus="true"
-                            android:textAlignment="center"
-                            android:textSize="16sp" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <ImageView
-                        android:id="@+id/flightTakeoffLandingSelector"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:alpha="0.9"
-                        android:rotation="270"
-                        app:layout_constraintBottom_toBottomOf="@+id/flightAircraftWrapper"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightTakeoffLandingWrapper"
-                        app:layout_constraintTop_toTopOf="@+id/flightAircraftWrapper"
-                        app:srcCompat="@drawable/triangle" />
-
-                    <ImageView
-                        android:id="@+id/flightNameSelector"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:alpha="0.9"
-                        android:rotation="90"
-                        app:layout_constraintBottom_toBottomOf="@+id/flightNameWrapper"
-                        app:layout_constraintEnd_toStartOf="@+id/flightNameWrapper"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/flightNameWrapper"
-                        app:srcCompat="@drawable/triangle" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flightNameWrapper"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flightName2Wrapper"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightNameSelector"
-                        app:layout_constraintTop_toBottomOf="@+id/flightAircraftWrapper">
-
-                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                            android:id="@+id/flightNameField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:hint="@string/namePic"
-                            android:imeOptions="actionNext"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="textPersonName"
-                            android:nextFocusForward="@id/flightName2Field"
-                            android:selectAllOnFocus="true"
-                            android:textAlignment="center"
-                            android:textSize="16sp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                    android:id="@+id/flightNameField"
+                    style="@style/EditFlightEditText"
+                    android:hint="@string/namePic"
+                    android:inputType="textPersonName"
+                    android:nextFocusForward="@id/flightName2Field"
+                    android:selectAllOnFocus="true"
+                    tools:text="SELF" />
+            </com.google.android.material.textfield.TextInputLayout>
 
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flightName2Wrapper"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flightName2Selector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightNameWrapper"
-                        app:layout_constraintTop_toTopOf="@+id/flightNameWrapper">
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flightName2Wrapper"
+                style="@style/EditFlightInputLayout"
+                android:layout_marginStart="4dp"
+                app:layout_constraintEnd_toStartOf="@+id/flightName2Selector"
+                app:layout_constraintStart_toEndOf="@+id/flightNameWrapper"
+                app:layout_constraintTop_toTopOf="@+id/flightNameWrapper">
 
-                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                            android:id="@+id/flightName2Field"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:hint="@string/namePilot2"
-                            android:imeOptions="actionNext"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="textPersonName"
-                            android:nextFocusForward="@id/flightRemarksField"
-                            android:selectAllOnFocus="true"
-                            android:textAlignment="center"
-                            android:textSize="16sp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                    android:id="@+id/flightName2Field"
+                    style="@style/EditFlightEditText"
+                    android:hint="@string/namePilot2"
+                    android:inputType="textPersonName"
+                    android:nextFocusForward="@id/flightRemarksField"
+                    android:selectAllOnFocus="true"
+                    tools:text="de Broer van Henk de Vries" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                    <ImageView
-                        android:id="@+id/flightName2Selector"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:alpha="0.9"
-                        android:focusable="true"
-                        android:rotation="270"
-                        app:layout_constraintBottom_toBottomOf="@+id/flightNameWrapper"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightName2Wrapper"
-                        app:layout_constraintTop_toTopOf="@+id/flightNameWrapper"
-                        app:srcCompat="@drawable/triangle" />
+            <ImageView
+                android:id="@+id/flightName2Selector"
+                style="@style/LSK"
+                app:layout_constraintBottom_toBottomOf="@+id/flightNameWrapper"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/flightName2Wrapper"
+                app:layout_constraintTop_toTopOf="@+id/flightNameWrapper"
+                app:srcCompat="@drawable/lsk_button" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/flightRemarksLayout"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:background="@drawable/rounded_corners_white"
-                        app:layout_constraintEnd_toStartOf="@+id/flightName2Selector"
-                        app:layout_constraintStart_toStartOf="@+id/flightNameWrapper"
-                        app:layout_constraintTop_toBottomOf="@+id/flightNameWrapper">
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/flightRemarksLayout"
+                style="@style/EditFlightInputLayoutVerticalSpaced"
+                app:layout_constraintEnd_toStartOf="@+id/flightName2Selector"
+                app:layout_constraintStart_toEndOf="@+id/flightNameSelector"
+                app:layout_constraintTop_toBottomOf="@+id/flightNameWrapper">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/flightRemarksField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/remarks"
-                            android:imeOptions="actionDone"
-                            android:importantForAutofill="no"
-                            android:includeFontPadding="false"
-                            android:inputType="text"
-                            android:selectAllOnFocus="true"
-                            android:textSize="16sp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/flightRemarksField"
+                    style="@style/EditFlightEditText"
+                    android:hint="@string/remarks"
+                    android:imeOptions="actionDone"
+                    android:inputType="text"
+                    android:selectAllOnFocus="true"
+                    tools:text="Hier had uw advertnetie kunnen staan!" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                    <CheckBox
-                        android:id="@+id/autoFillCheckBox"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="16dp"
-                        android:text="@string/autovalue"
-                        android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/simSelector" />
+            <TextView
+                android:id="@+id/simSelector"
+                style="@style/SelectorStyleInactive"
+                android:layout_marginTop="8dp"
+                android:text="@string/sim"
+                app:layout_constraintEnd_toStartOf="@+id/signSelector"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/flightRemarksLayout" />
 
-                    <TextView
-                        android:id="@+id/flightSaveButton"
-                        android:layout_width="100dp"
-                        android:layout_height="30dp"
-                        android:layout_marginBottom="16dp"
-                        android:gravity="center_vertical"
-                        android:text="@string/save"
-                        android:textAlignment="center"
-                        android:textAllCaps="true"
-                        android:textColor="?attr/colorAccent"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/flightCancelButton2"
-                        app:layout_constraintTop_toTopOf="@+id/autoFillCheckBox" />
+            <TextView
+                android:id="@+id/signSelector"
+                style="@style/SelectorStyleInactive"
+                android:text="@string/sign"
+                app:layout_constraintBottom_toBottomOf="@+id/simSelector"
+                app:layout_constraintEnd_toStartOf="@+id/dualSelector"
+                app:layout_constraintStart_toEndOf="@+id/simSelector"
+                app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
-                    <TextView
-                        android:id="@+id/signSelector"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.5"
-                        android:paddingLeft="4dp"
-                        android:paddingRight="4dp"
-                        android:text="@string/sign"
-                        android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
-                        app:layout_constraintEnd_toStartOf="@+id/dualSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/simSelector"
-                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
+            <TextView
+                android:id="@+id/dualSelector"
+                style="@style/SelectorStyleInactive"
+                android:text="@string/dualString"
+                app:layout_constraintBottom_toBottomOf="@+id/simSelector"
+                app:layout_constraintEnd_toStartOf="@+id/instructorSelector"
+                app:layout_constraintStart_toEndOf="@+id/signSelector"
+                app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
-                    <TextView
-                        android:id="@+id/simSelector"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:alpha="0.5"
-                        android:paddingLeft="4dp"
-                        android:paddingRight="4dp"
-                        android:text="@string/sim"
-                        android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintEnd_toStartOf="@+id/signSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/flightRemarksLayout" />
+            <TextView
+                android:id="@+id/instructorSelector"
+                style="@style/SelectorStyleInactive"
+                android:text="@string/instructorString"
+                app:layout_constraintBottom_toBottomOf="@+id/simSelector"
+                app:layout_constraintEnd_toStartOf="@+id/ifrSelector"
+                app:layout_constraintStart_toEndOf="@+id/dualSelector"
+                app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
-                    <TextView
-                        android:id="@+id/instructorSelector"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.5"
-                        android:paddingLeft="4dp"
-                        android:paddingRight="4dp"
-                        android:text="@string/instructorString"
-                        android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
-                        app:layout_constraintEnd_toStartOf="@+id/ifrSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/dualSelector"
-                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
+            <TextView
+                android:id="@+id/ifrSelector"
+                style="@style/SelectorStyleInactive"
+                android:text="@string/ifrString"
+                app:layout_constraintBottom_toBottomOf="@+id/simSelector"
+                app:layout_constraintEnd_toStartOf="@+id/picSelector"
+                app:layout_constraintStart_toEndOf="@+id/instructorSelector"
+                app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
-                    <TextView
-                        android:id="@+id/dualSelector"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.5"
-                        android:paddingLeft="4dp"
-                        android:paddingRight="4dp"
-                        android:text="@string/dualString"
-                        android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
-                        app:layout_constraintEnd_toStartOf="@+id/instructorSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/signSelector"
-                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
+            <TextView
+                android:id="@+id/picSelector"
+                style="@style/SelectorStyleInactive"
+                android:text="@string/pic"
+                app:layout_constraintBottom_toBottomOf="@+id/simSelector"
+                app:layout_constraintEnd_toStartOf="@+id/pfSelector"
+                app:layout_constraintStart_toEndOf="@+id/ifrSelector"
+                app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
-                    <TextView
-                        android:id="@+id/picSelector"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.5"
-                        android:paddingLeft="4dp"
-                        android:paddingRight="4dp"
-                        android:text="@string/pic"
-                        android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
-                        app:layout_constraintEnd_toStartOf="@+id/pfSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/ifrSelector"
-                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
+            <TextView
+                android:id="@+id/pfSelector"
+                style="@style/SelectorStyleInactive"
+                android:text="@string/pf"
+                app:layout_constraintBottom_toBottomOf="@+id/simSelector"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/picSelector"
+                app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
-                    <TextView
-                        android:id="@+id/pfSelector"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.5"
-                        android:paddingLeft="4dp"
-                        android:paddingRight="4dp"
-                        android:text="@string/pf"
-                        android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/picSelector"
-                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
+            <CheckBox
+                android:id="@+id/autoFillCheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/autovalue"
+                android:textColor="?android:attr/textColorSecondary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/simSelector" />
 
-                    <TextView
-                        android:id="@+id/flightCancelButton2"
-                        android:layout_width="100dp"
-                        android:layout_height="30dp"
-                        android:layout_marginBottom="16dp"
-                        android:gravity="center_vertical"
-                        android:text="@android:string/cancel"
-                        android:textAlignment="center"
-                        android:textAllCaps="true"
-                        android:textColor="?attr/colorAccent"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/flightSaveButton"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/autoFillCheckBox"
-                        app:layout_constraintTop_toTopOf="@+id/autoFillCheckBox"
-                        app:layout_constraintVertical_bias="1.0" />
+            <TextView
+                android:id="@+id/flightCancelButton2"
+                style="@style/DialogButtonText"
+                android:text="@android:string/cancel"
+                app:layout_constraintBottom_toBottomOf="@+id/autoFillCheckBox"
+                app:layout_constraintEnd_toStartOf="@+id/flightSaveButton"
+                app:layout_constraintStart_toEndOf="@+id/autoFillCheckBox"
+                app:layout_constraintTop_toTopOf="@+id/autoFillCheckBox" />
 
-                    <TextView
-                        android:id="@+id/ifrSelector"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.5"
-                        android:paddingLeft="4dp"
-                        android:paddingRight="4dp"
-                        android:text="ifr"
-                        android:textAllCaps="true"
-                        android:textColor="?attr/android:textColorSecondary"
-                        app:layout_constraintBottom_toBottomOf="@+id/simSelector"
-                        app:layout_constraintEnd_toStartOf="@+id/picSelector"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/instructorSelector"
-                        app:layout_constraintTop_toTopOf="@+id/simSelector" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </ScrollView>
+            <TextView
+                android:id="@+id/flightSaveButton"
+                style="@style/DialogButtonText"
+                android:text="@string/save"
+                app:layout_constraintBottom_toBottomOf="@+id/flightCancelButton2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/flightCancelButton2"
+                app:layout_constraintTop_toTopOf="@+id/flightCancelButton2" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,6 +29,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
@@ -57,7 +58,7 @@ class EditFlightFragment: JoozdlogFragment(){
     /**
      * Will define all listeners etc, and set initial
      */
-    @ExperimentalCoroutinesApi
+    //@ExperimentalCoroutinesApi
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         LayoutEditFlightFragmentBinding.bind(inflater.inflate(R.layout.layout_edit_flight_fragment, container, false)).apply {
             (flightInfoText.background as GradientDrawable).colorFilter = PorterDuffColorFilter(
@@ -91,6 +92,11 @@ class EditFlightFragment: JoozdlogFragment(){
                 flightOrigField.setTextIfNotFocused(it)
             }
 
+
+            viewModel.originIsValid.observe(viewLifecycleOwner) { isValid ->
+
+            }
+            /*
             viewModel.originIsValid.observe(viewLifecycleOwner) { checked ->
                 val drawable: Drawable? = when(checked){
                     true -> ContextCompat.getDrawable(App.instance, R.drawable.ic_check_circle_outline_20px)
@@ -99,6 +105,7 @@ class EditFlightFragment: JoozdlogFragment(){
                 }
                 flightOrigField.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
             }
+            */
 
             viewModel.destination.observe(viewLifecycleOwner) {
                 flightDestField.setTextIfNotFocused(it)
@@ -513,7 +520,7 @@ class EditFlightFragment: JoozdlogFragment(){
              * Always call onCloseListener?.run()
              */
             //click on empty part == cancel
-            flightInfoLayout.setOnClickListener {
+            editFlightFragmentBackground.setOnClickListener {
                 //TODO fire some "undo cancel" SnackBar?
                 viewModel.close()
             }
@@ -543,7 +550,6 @@ class EditFlightFragment: JoozdlogFragment(){
 
     /**
      * Switch layout for edit_flight View to sim
-     * @param binding: LayoutEditFlightFragmentBinding to change layout on
      */
     private fun LayoutEditFlightFragmentBinding.makeSimLayout() {
         //flighttOutStringWrapper.hint=getString(R.string.simtTime)
@@ -572,7 +578,6 @@ class EditFlightFragment: JoozdlogFragment(){
 
     /**
      * Switch layout for edit_flight View to normal
-     * @param binding: LayoutEditFlightFragmentBinding to change layout on
      */
     private fun LayoutEditFlightFragmentBinding.makeNormalLayout() {
         // v.autoFillCheckBox.isEnabled = viewModel.workingFlight.value?.autoFill ?: 0 > 0

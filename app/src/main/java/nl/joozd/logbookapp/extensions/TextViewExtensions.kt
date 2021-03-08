@@ -31,7 +31,7 @@ fun TextView.showIfActive(active: Boolean){
 fun TextView.showAsActive(){
     this.alpha=1.0F
     this.setTypeface(null, Typeface.BOLD)
-    this.setBackgroundResource(R.drawable.rounded_corners_white)
+    this.setBackgroundResource(R.drawable.rounded_corners_primarybackground)
 }
 
 fun TextView.showAsInactive(){

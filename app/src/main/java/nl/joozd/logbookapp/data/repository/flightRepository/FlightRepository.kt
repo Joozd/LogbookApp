@@ -179,6 +179,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     val wf
         get() = workingFlight.value!! // shortcut.
 
+    fun getWorkingFlight(): WorkingFlight = workingFlight.value ?: error ("WorkingFlight not initialized")
+
     /**
      * saved flight set through [notifyFlightSaved]
      */

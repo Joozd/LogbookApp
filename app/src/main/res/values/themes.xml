@@ -29,6 +29,7 @@
         <item name="colorSecondaryBackground">#F0FAFF</item>
         <item name="colorTextViewBackground">#FFFFFFFF</item>
         <item name="colorAccent">#0000E0</item>
+        <item name="colorOnAccent">#FFFFFF</item>
         <item name="textColorWarning">#80BB0000</item>
         <item name="android:textColor">#DD000000</item>
         <item name="android:textColorPrimary">#CC000000</item>

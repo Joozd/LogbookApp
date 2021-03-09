@@ -144,6 +144,8 @@
 
 
 
+
+    <attr name="colorOnAccent" format="reference|color" />
     <attr name="colorDialogBackground" format="reference|color" />
     <attr name="colorDialogBackgroundFilter" format="reference|color" />
     <attr name="colorSecondaryBackground" format="reference|color" />

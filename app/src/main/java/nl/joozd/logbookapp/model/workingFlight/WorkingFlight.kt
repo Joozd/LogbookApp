@@ -112,8 +112,8 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * vars for getting/setting mutable livedata
      * These will not launch couroutines for looking up/setting aditional data.
      */
-    val mDate: LocalDate
-        get() = dateLiveData.value!!
+    val mDate: LocalDate?
+        get() = dateLiveData.value
 
     var mFlightNumber: String by ShowInLiveData(_flightNumber)
         private set

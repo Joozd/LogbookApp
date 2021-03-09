@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
 import android.text.Editable
+import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -38,7 +39,7 @@ import java.time.format.DateTimeFormatter
 
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
-    private val wf = flightRepository.workingFlight.value!!
+    private val wf = flightRepository.getWorkingFlight()
 
     private val _title = MutableLiveData<String>(context.getString(if(wf.newFlight) R.string.add_flight else R.string.edit_flight))
 
@@ -68,7 +69,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     // However, fragment should only be
     val date = Transformations.map(wf.dateLiveData){ it.toDateString() ?: NO_DATA_STRING }
     val localDate
-            get() = wf.dateLiveData.value
+            get() = wf.mDate
     val flightNumber
             get() = wf.flightNumberLiveData
     val origin = Transformations.map(wf.originLiveData) { getAirportString(it)}
@@ -132,8 +133,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Set date
      * @param newDate: Date as [LocalDate]
      */
-    fun setDate(newDate: LocalDate){
-        wf.setDate(newDate)
+    fun setDate(newDate: LocalDate?){
+        newDate?.let { wf.setDate(it) }
+            ?: Log.w(this::class.simpleName, "setDate() trying to set date as null")
     }
 
     /**

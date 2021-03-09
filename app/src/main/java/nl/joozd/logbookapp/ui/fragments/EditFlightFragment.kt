@@ -19,9 +19,9 @@
 
 package nl.joozd.logbookapp.ui.fragments
 
+import nl.joozd.logbookapp.ui.dialogs.LocalDatepickerDialog
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
@@ -29,11 +29,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.joozd.joozdutils.JoozdlogAlertDialog
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
@@ -51,6 +49,7 @@ import nl.joozd.logbookapp.ui.dialogs.airportPicker.DestPicker
 import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
+import java.time.LocalDate
 
 class EditFlightFragment: JoozdlogFragment(){
     private val viewModel: NewEditFlightFragmentViewModel by viewModels()
@@ -353,7 +352,12 @@ class EditFlightFragment: JoozdlogFragment(){
              */
             val dateOnClickListener = View.OnClickListener {
                 activity?.currentFocus?.clearFocus()
-                DatePickerFragment().show(supportFragmentManager, "datePicker")
+                supportFragmentManager.commit {
+                    add(R.id.mainActivityLayout,
+                        LocalDatepickerDialog().apply { selectedDate=viewModel.localDate },
+                        "datePicker")
+                    addToBackStack(null)
+                }
             }
 
             /**
@@ -619,6 +623,3 @@ class EditFlightFragment: JoozdlogFragment(){
         }
     }
 }
-
-
-

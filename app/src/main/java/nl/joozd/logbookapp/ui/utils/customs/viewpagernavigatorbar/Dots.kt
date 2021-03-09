@@ -22,12 +22,9 @@ package nl.joozd.logbookapp.ui.utils.customs.viewpagernavigatorbar
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Color
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
 import android.util.AttributeSet
-import android.view.Gravity
-import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -39,11 +36,13 @@ import nl.joozd.logbookapp.ui.utils.fractionAnimator
  * A line of dots, one of which can be active.
  * WIP.
  */
+@Suppress("MemberVisibilityCanBePrivate")
 class Dots(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int, private val amountOfDots: Int = 0, private var activeDot: Int? = null): ConstraintLayout(context, attrs, defStyleAttr, defStyleRes) {
     //secondary constructors:
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0, amountOfDots: Int = 0, activeDot: Int? = null):  this(context, attrs, defStyleAttr, 0, amountOfDots)
-    constructor(context: Context, attrs: AttributeSet?, amountOfDots: Int = 0, activeDot: Int? = null):                         this(context, attrs, 0, 0, amountOfDots)
-    constructor(context: Context, amountOfDots: Int = 0, activeDot: Int? = null):                                               this(context, null, 0, 0, amountOfDots)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0):  this(context, attrs, defStyleAttr, 0, 0,null)
+    constructor(context: Context, attrs: AttributeSet?):                         this(context, attrs, 0, 0, 0, null)
+    constructor(context: Context, amountOfDots: Int = 0, activeDot: Int? = 0):   this(context, null, 0, 0, amountOfDots)
+    constructor(context: Context):                                               this(context, null, 0, 0)
 
     private var initialized = true
     /**

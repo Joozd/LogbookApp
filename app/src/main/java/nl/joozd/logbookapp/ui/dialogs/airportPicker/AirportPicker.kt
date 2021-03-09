@@ -26,7 +26,6 @@ import android.view.View
 import android.view.ViewGroup
 
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.coroutines.*
 import nl.joozd.joozdutils.JoozdlogAlertDialog
 
 import nl.joozd.logbookapp.R
@@ -39,7 +38,6 @@ import nl.joozd.logbookapp.ui.adapters.AirportPickerAdapter
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.AirportPickerEvents
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
 
 import java.util.*
 import kotlin.math.abs
@@ -50,15 +48,13 @@ import kotlin.math.abs
  * but viewModel will persist.
  */
 //@ExperimentalCoroutinesApi
-abstract class AirportPicker(): JoozdlogFragment() {
+abstract class AirportPicker: JoozdlogFragment() {
     protected abstract val workingOnOrig: Boolean // this must be set before first-time attachment
     protected abstract val viewModel: AirportPickerViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return DialogAirportsBinding.bind(inflater.inflate(R.layout.dialog_airports, container, false)).apply {
             //Set background color for title bar
-            airportsDialogTopHalf.joozdLogSetBackgroundColor()
-
             /**
              * Initialize recyclerView and it's stuff
              */
@@ -92,9 +88,10 @@ abstract class AirportPicker(): JoozdlogFragment() {
              * Save/cancel functions
              */
             //no action is misclicked on window
-            airportPickerDialogLayout.setOnClickListener { }
+            headerLayout.setOnClickListener { }
+            bodyLayout.setOnClickListener {  }
 
-            airportPickerLayout.setOnClickListener {
+            airportPickerDialogBackground.setOnClickListener {
                 viewModel.undo()
                 closeFragment()
             }
@@ -149,6 +146,7 @@ abstract class AirportPicker(): JoozdlogFragment() {
                     else getString(R.string.destination).toUpperCase(Locale.ROOT)
                 @SuppressLint("SetTextI18n")
                 icaoIataField.text = "${it.ident} - ${it.iata_code}"
+                if (airportsSearchField.text?.isBlank() == true) airportsSearchField.setText(it.ident)
                 @SuppressLint("SetTextI18n")
                 cityAirportNameField.text = "${it.municipality} - ${it.name}"
                 val latString = latToString(it.latitude_deg)

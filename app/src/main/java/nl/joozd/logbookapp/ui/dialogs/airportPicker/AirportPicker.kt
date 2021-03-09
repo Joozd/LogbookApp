@@ -52,8 +52,8 @@ abstract class AirportPicker: JoozdlogFragment() {
     protected abstract val workingOnOrig: Boolean // this must be set before first-time attachment
     protected abstract val viewModel: AirportPickerViewModel
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return DialogAirportsBinding.bind(inflater.inflate(R.layout.dialog_airports, container, false)).apply {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        DialogAirportsBinding.bind(inflater.inflate(R.layout.dialog_airports, container, false)).apply {
             //Set background color for title bar
             /**
              * Initialize recyclerView and it's stuff
@@ -158,7 +158,7 @@ abstract class AirportPicker: JoozdlogFragment() {
                 altitudeField.text = getString(R.string.alt_with_placeholder, it.elevation_ft.toString()) // "alt: ${it.elevation_ft}\'"
             }
         }.root
-    }
+
 
     private fun latToString(latitude: Double): String =
         abs(latitude).toString(2,3) + if (latitude > 0) "N" else "S"

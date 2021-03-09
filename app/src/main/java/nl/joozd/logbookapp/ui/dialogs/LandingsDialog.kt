@@ -51,31 +51,32 @@ class LandingsDialog: JoozdlogFragment() {
             /**
              * observers
              */
-            landingsDialogViewModel.toDay.observe(viewLifecycleOwner, Observer{
+            landingsDialogViewModel.toDay.observe(viewLifecycleOwner) {
                 toDayField.setText(it.toString())
-            })
-            landingsDialogViewModel.toNight.observe(viewLifecycleOwner, Observer{
+            }
+            landingsDialogViewModel.toNight.observe(viewLifecycleOwner) {
                 toNightField.setText(it.toString())
-            })
-            landingsDialogViewModel.ldgDay.observe(viewLifecycleOwner, Observer{
+            }
+            landingsDialogViewModel.ldgDay.observe(viewLifecycleOwner ){
                 ldgDayField.setText(it.toString())
-            })
-            landingsDialogViewModel.ldgNight.observe(viewLifecycleOwner, Observer{
+            }
+            landingsDialogViewModel.ldgNight.observe(viewLifecycleOwner) {
                 ldgNightField.setText(it.toString())
-            })
-            landingsDialogViewModel.autoland.observe(viewLifecycleOwner, Observer{
+            }
+            landingsDialogViewModel.autoland.observe(viewLifecycleOwner){
                 autolandField.setText(it.toString())
-            })
+            }
 
             //catch clicks on empty parts of dialog
-            landingCardsWrapper.setOnClickListener {  }
+            headerLayout.setOnClickListener {  }
+            bodyLayout.setOnClickListener {  }
 
             //set cancel functions
             cancelTextButton.setOnClickListener {
                 landingsDialogViewModel.undo()
                 closeFragment()
             }
-            landingPickerBackground.setOnClickListener {
+            landingsDialogBackground.setOnClickListener {
                 landingsDialogViewModel.undo()
                 closeFragment()
             }

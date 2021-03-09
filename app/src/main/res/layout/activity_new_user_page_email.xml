@@ -37,7 +37,7 @@
 
             <TextView
                 android:id="@+id/page_1_header"
-                style="@style/HeaderText"
+                style="@style/HeaderText.Bold"
                 android:text="@string/email"
                 app:layout_constraintBottom_toTopOf="@+id/textView4"
                 app:layout_constraintHorizontal_bias="0.5"

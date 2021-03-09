@@ -19,381 +19,292 @@
   -->
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                             xmlns:app="http://schemas.android.com/apk/res-auto"
-                                             xmlns:tools="http://schemas.android.com/tools"
-                                             android:layout_width="match_parent"
-                                             android:layout_height="match_parent" android:background="#60000000"
-                                             android:id="@+id/landingPickerBackground">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/DialogBackground"
+    android:id="@+id/landingsDialogBackground"
+    tools:context=".ui.activities.MainActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/landingCardsWrapper"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="32dp"
-            android:background="#00000000"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/takeoffCard"
+            android:padding="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/headerLayout"
+                style="@style/DialogHeaderLayout"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/rounded_corners"
+                app:layout_constraintBottom_toTopOf="@+id/bodyLayout"
+                app:layout_constraintEnd_toEndOf="@+id/bodyLayout"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/bodyLayout"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed">
+
+                <TextView
+                    android:id="@+id/airportPickerTitle"
+                    style="@style/DialogHeaderText"
+                    android:text="@string/takeoffs_landings"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/bodyLayout"
+            style="@style/DialogBodyLayout"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/headerLayout">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/takeoffCard"
+                style="@style/EditFlightDialogDataBox.Padded"
                 app:layout_constraintEnd_toEndOf="@+id/landingCard"
                 app:layout_constraintStart_toStartOf="@+id/landingCard"
                 app:layout_constraintTop_toTopOf="parent">
 
-            <ImageButton
-                    android:id="@+id/toDayUpButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:background="#00000000"
-                    app:layout_constraintBottom_toBottomOf="@+id/toDayField"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/toDayField"
-                    app:srcCompat="@drawable/plus_vector_black" />
-
-            <TextView
+                <TextView
                     android:id="@+id/textView8"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
+                    style="@style/HeaderText.Bold.AllCaps"
                     android:text="@string/takeoff"
-                    android:textAllCaps="true"
-                    android:textColor="?attr/android:textColorSecondary"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView9" />
-
-            <EditText
-                    android:id="@+id/toNightField"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/rounded_corners_white"
-                    android:clickable="false"
-                    android:elevation="4dp"
-                    android:ems="10"
-                    android:inputType="number"
-                    android:padding="4dp"
-                    android:textAlignment="center"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/textView12"
-                    app:layout_constraintStart_toStartOf="@+id/toDayField" />
-
-            <EditText
-                    android:id="@+id/toDayField"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/rounded_corners_white"
-                    android:clickable="false"
-                    android:elevation="4dp"
-                    android:ems="10"
-                    android:inputType="number"
-                    android:padding="4dp"
-                    android:textAlignment="center"
-                    app:layout_constraintEnd_toStartOf="@+id/toDayUpButton"
                     app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageButton
-                    android:id="@+id/toNightDownButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:background="#00000000"
-                    app:layout_constraintBottom_toBottomOf="@+id/toNightField"
-                    app:layout_constraintEnd_toStartOf="@+id/toNightField"
-                    app:layout_constraintTop_toTopOf="@+id/toNightField"
-                    app:srcCompat="@drawable/minus_vector_black" />
-
-            <TextView
-                    android:id="@+id/textView12"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="20dp"
-                    android:text="@string/night"
-                    android:textColor="?attr/android:textColorSecondary"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/toNightDownButton"
-                    app:layout_constraintTop_toBottomOf="@+id/textView8" />
-
-            <ImageButton
-                    android:id="@+id/toDayDownButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:background="#00000000"
-                    app:layout_constraintBottom_toBottomOf="@+id/toDayField"
-                    app:layout_constraintEnd_toStartOf="@+id/toDayField"
-                    app:layout_constraintTop_toTopOf="@+id/toDayField"
-                    app:srcCompat="@drawable/minus_vector_black" />
-
-            <TextView
+                <TextView
                     android:id="@+id/textView9"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    style="@style/SecondaryText"
                     android:layout_marginEnd="8dp"
                     android:text="@string/day"
-                    android:textColor="?attr/android:textColorSecondary"
+                    app:layout_constraintBottom_toBottomOf="@+id/toDayDownButton"
                     app:layout_constraintEnd_toStartOf="@+id/toDayDownButton"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="@+id/toDayDownButton" />
 
-            <ImageButton
+                <ImageButton
+                    android:id="@+id/toDayDownButton"
+                    style="@style/PlusMinusButton"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintEnd_toStartOf="@+id/toDayField"
+                    app:layout_constraintTop_toTopOf="@+id/toDayUpButton"
+                    app:srcCompat="@drawable/minus_button" />
+
+                <EditText
+                    android:id="@+id/toDayField"
+                    style="@style/NumberBox"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/toDayUpButton"
+                    app:layout_constraintEnd_toStartOf="@+id/toDayUpButton"
+                    app:layout_constraintTop_toTopOf="@+id/toDayUpButton" />
+
+                <ImageButton
+                    android:id="@+id/toDayUpButton"
+                    style="@style/PlusMinusButton"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/plus_button" />
+
+                <TextView
+                    android:id="@+id/textView12"
+                    style="@style/SecondaryText"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/night"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/toNightDownButton"
+                    app:layout_constraintTop_toTopOf="@+id/toNightDownButton" />
+
+                <ImageButton
+                    android:id="@+id/toNightDownButton"
+                    style="@style/PlusMinusButton"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintEnd_toStartOf="@+id/toNightField"
+                    app:layout_constraintTop_toTopOf="@+id/toNightUpButton"
+                    app:srcCompat="@drawable/minus_button" />
+
+                <EditText
+                    android:id="@+id/toNightField"
+                    style="@style/NumberBox"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/toNightUpButton"
+                    app:layout_constraintEnd_toStartOf="@+id/toNightUpButton"
+                    app:layout_constraintTop_toTopOf="@+id/toNightUpButton" />
+
+                <ImageButton
                     android:id="@+id/toNightUpButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="#00000000"
-                    app:layout_constraintBottom_toBottomOf="@+id/toNightField"
-                    app:layout_constraintStart_toEndOf="@+id/toNightField"
-                    app:layout_constraintTop_toTopOf="@+id/toNightDownButton"
-                    app:layout_constraintVertical_bias="0.0"
-                    app:srcCompat="@drawable/plus_vector_black" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                    style="@style/PlusMinusButton"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/toDayUpButton"
+                    app:srcCompat="@drawable/plus_button" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/landingCard"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                style="@style/EditFlightDialogDataBox.Padded"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/rounded_corners"
                 app:layout_constraintEnd_toEndOf="@+id/autolandCard"
                 app:layout_constraintStart_toStartOf="@+id/autolandCard"
                 app:layout_constraintTop_toBottomOf="@+id/takeoffCard">
 
-            <ImageButton
-                    android:id="@+id/ldgDayDownButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:background="#00000000"
-                    app:layout_constraintBottom_toBottomOf="@+id/ldgDayField"
-                    app:layout_constraintEnd_toStartOf="@+id/ldgDayField"
-                    app:layout_constraintTop_toTopOf="@+id/ldgDayField"
-                    app:srcCompat="@drawable/minus_vector_black" />
-
-            <EditText
-                    android:id="@+id/ldgDayField"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/rounded_corners_white"
-                    android:clickable="false"
-                    android:elevation="4dp"
-                    android:ems="10"
-                    android:inputType="number"
-                    android:padding="4dp"
-                    android:textAlignment="center"
-                    app:layout_constraintEnd_toStartOf="@+id/ldgDayUpButton"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageButton
-                    android:id="@+id/ldgDayUpButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:background="#00000000"
-                    app:layout_constraintBottom_toBottomOf="@+id/ldgDayField"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/ldgDayField"
-                    app:srcCompat="@drawable/plus_vector_black" />
-
-            <EditText
-                    android:id="@+id/ldgNightField"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/rounded_corners_white"
-                    android:clickable="false"
-                    android:elevation="4dp"
-                    android:ems="10"
-                    android:inputType="number"
-                    android:padding="4dp"
-                    android:textAlignment="center"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/textView17"
-                    app:layout_constraintStart_toStartOf="@+id/ldgDayField" />
-
-            <ImageButton
-                    android:id="@+id/ldgNightUpButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="#00000000"
-                    app:layout_constraintBottom_toBottomOf="@+id/ldgNightField"
-                    app:layout_constraintStart_toStartOf="@+id/ldgDayUpButton"
-                    app:layout_constraintTop_toTopOf="@+id/ldgNightField"
-                    app:srcCompat="@drawable/plus_vector_black" />
-
-            <ImageButton
-                    android:id="@+id/ldgNightDownButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:background="#00000000"
-                    app:layout_constraintBottom_toBottomOf="@+id/ldgNightField"
-                    app:layout_constraintEnd_toStartOf="@+id/ldgNightField"
-                    app:layout_constraintTop_toTopOf="@+id/ldgNightField"
-                    app:srcCompat="@drawable/minus_vector_black" />
-
-            <TextView
-                    android:id="@+id/textView17"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="20dp"
-                    android:text="@string/night"
-                    android:textColor="?attr/android:textColorSecondary"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/ldgNightDownButton"
-                    app:layout_constraintTop_toBottomOf="@+id/textView14" />
-
-            <TextView
-                    android:id="@+id/textView16"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/day"
-                    android:textColor="?attr/android:textColorSecondary"
-                    app:layout_constraintEnd_toStartOf="@+id/ldgDayDownButton"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
+                <TextView
                     android:id="@+id/textView14"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
+                    style="@style/HeaderText.Bold.AllCaps"
                     android:text="@string/landing"
-                    android:textAllCaps="true"
-                    android:textColor="?attr/android:textColorSecondary"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView16" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/textView16"
+                    style="@style/SecondaryText"
+                    android:text="@string/day"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/ldgDayDownButton"
+                    app:layout_constraintEnd_toStartOf="@+id/ldgDayDownButton"
+                    app:layout_constraintTop_toTopOf="@+id/ldgDayDownButton" />
+
+                <ImageButton
+                    android:id="@+id/ldgDayDownButton"
+                    style="@style/PlusMinusButton"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintEnd_toStartOf="@+id/ldgDayField"
+                    app:layout_constraintTop_toTopOf="@+id/ldgDayUpButton"
+                    app:srcCompat="@drawable/minus_button" />
+
+                <EditText
+                    android:id="@+id/ldgDayField"
+                    style="@style/NumberBox"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/ldgDayUpButton"
+                    app:layout_constraintEnd_toStartOf="@+id/ldgDayUpButton"
+                    app:layout_constraintTop_toTopOf="@+id/ldgDayUpButton" />
+
+                <ImageButton
+                    android:id="@+id/ldgDayUpButton"
+                    style="@style/PlusMinusButton"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/plus_button" />
+
+                <ImageButton
+                    android:id="@+id/ldgNightDownButton"
+                    style="@style/PlusMinusButton"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintEnd_toStartOf="@+id/ldgNightField"
+                    app:layout_constraintTop_toTopOf="@+id/ldgNightUpButton"
+                    app:srcCompat="@drawable/minus_button" />
+
+                <EditText
+                    android:id="@+id/ldgNightField"
+                    style="@style/NumberBox"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/ldgNightUpButton"
+                    app:layout_constraintEnd_toStartOf="@+id/ldgNightUpButton"
+                    app:layout_constraintTop_toTopOf="@+id/ldgNightUpButton" />
+
+                <ImageButton
+                    android:id="@+id/ldgNightUpButton"
+                    style="@style/PlusMinusButton"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ldgDayUpButton"
+                    app:srcCompat="@drawable/plus_button" />
+
+
+
+                <TextView
+                    android:id="@+id/textView17"
+                    style="@style/SecondaryText"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/night"
+                    app:layout_constraintBottom_toBottomOf="@+id/ldgNightDownButton"
+                    app:layout_constraintEnd_toStartOf="@+id/ldgNightDownButton"
+                    app:layout_constraintTop_toTopOf="@+id/ldgNightDownButton" />
+
+
+
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/autolandCard"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/rounded_corners"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/landingCard">
+            android:id="@+id/autolandCard"
+            style="@style/EditFlightDialogDataBox.Padded"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/landingCard">
 
             <ImageButton
-                    android:id="@+id/autolandDownButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:background="#00000000"
-                    app:layout_constraintBottom_toBottomOf="@+id/autolandField"
-                    app:layout_constraintEnd_toStartOf="@+id/autolandField"
-                    app:layout_constraintTop_toTopOf="@+id/autolandField"
-                    app:srcCompat="@drawable/minus_vector_black" />
+                android:id="@+id/autolandDownButton"
+                style="@style/PlusMinusButton"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintBottom_toBottomOf="@+id/autolandField"
+                app:layout_constraintEnd_toStartOf="@+id/autolandField"
+                app:layout_constraintTop_toTopOf="@+id/autolandUpButton"
+                app:srcCompat="@drawable/minus_button" />
 
             <EditText
-                    android:id="@+id/autolandField"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/rounded_corners_white"
-                    android:clickable="false"
-                    android:elevation="4dp"
-                    android:ems="10"
-                    android:inputType="number"
-                    android:padding="4dp"
-                    android:textAlignment="center"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/autolandUpButton"
-                    app:layout_constraintTop_toTopOf="parent" />
+                android:id="@+id/autolandField"
+                style="@style/NumberBox"
+                android:layout_marginEnd="8dp"
+
+                app:layout_constraintBottom_toBottomOf="@+id/autolandUpButton"
+                app:layout_constraintEnd_toStartOf="@+id/autolandUpButton"
+                app:layout_constraintTop_toTopOf="@+id/autolandUpButton" />
 
             <TextView
-                    android:id="@+id/textView22"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/autoland"
-                    android:textAllCaps="true"
-                    android:textColor="?attr/android:textColorSecondary"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@+id/autolandField"
-                    app:layout_constraintEnd_toStartOf="@+id/autolandDownButton"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/autolandField" />
+                android:id="@+id/textView22"
+                style="@style/HeaderText.Bold.AllCaps"
+                android:text="@string/autoland"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
-                    android:id="@+id/autolandUpButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:background="#00000000"
-                    app:layout_constraintBottom_toBottomOf="@+id/autolandField"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/autolandField"
-                    app:srcCompat="@drawable/plus_vector_black" />
+                android:id="@+id/autolandUpButton"
+                style="@style/PlusMinusButton"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/plus_button" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/okCancelLayout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/rounded_corners"
+
+            <TextView
+                android:id="@+id/saveTextButon"
+                style="@style/DialogButtonText"
+                android:layout_marginTop="24dp"
+                android:text="@android:string/ok"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/autolandCard"
-                app:layout_constraintStart_toStartOf="@+id/autolandCard"
-                app:layout_constraintTop_toBottomOf="@+id/autolandCard">
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/autolandCard" />
 
             <TextView
-                    android:id="@+id/saveTextButon"
-                    android:layout_width="100dp"
-                    android:layout_height="32dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:gravity="center_horizontal|center_vertical"
-                    android:text="@android:string/ok"
-                    android:textAlignment="center"
-                    android:textColor="?attr/colorAccent"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                    android:id="@+id/cancelTextButton"
-                    android:layout_width="100dp"
-                    android:layout_height="32dp"
-                    android:layout_marginStart="8dp"
-                    android:gravity="center_horizontal|center_vertical"
-                    android:text="@android:string/cancel"
-                    android:textAlignment="center"
-                    android:textAllCaps="true"
-                    android:textColor="?attr/colorAccent"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@+id/saveTextButon"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/saveTextButon" />
+                android:id="@+id/cancelTextButton"
+                style="@style/DialogButtonText"
+                android:text="@android:string/cancel"
+                android:textAlignment="center"
+                app:layout_constraintBottom_toBottomOf="@+id/saveTextButon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/saveTextButon" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

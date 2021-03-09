@@ -35,7 +35,7 @@
 
             <TextView
                 android:id="@+id/textView3"
-                style="@style/HeaderText"
+                style="@style/HeaderText.Bold"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:text="@string/almost_done"

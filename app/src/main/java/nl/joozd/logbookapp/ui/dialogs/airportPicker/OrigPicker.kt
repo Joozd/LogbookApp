@@ -26,7 +26,6 @@ import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.OrigPickerView
 /**
  * Airport picker that works on Origin
  */
-@ExperimentalCoroutinesApi
 class OrigPicker: AirportPicker() {
     override val workingOnOrig = true
     override val viewModel: OrigPickerViewmodel by viewModels()

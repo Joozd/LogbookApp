@@ -49,12 +49,10 @@ class AircraftPicker: JoozdlogFragment(){
     private val viewModel: AircraftPickerViewModel by viewModels()
     var presetEnteredRegistration: String? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val binding = DialogPickAircraftTypeBinding.bind(inflater.inflate(R.layout.dialog_pick_aircraft_type, container, false)).apply{
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        DialogPickAircraftTypeBinding.bind(inflater.inflate(R.layout.dialog_pick_aircraft_type, container, false)).apply{
             //set color of dialog head
-            aircraftPickerTopHalf.joozdLogSetBackgroundColor()
-
-            val typesPickerAdapter = AircraftPickerAdapter() {
+            val typesPickerAdapter = AircraftPickerAdapter {
                 Log.d(this::class.simpleName, "clicked on $it")
                 viewModel.selectAircraftType(it)
             }.also {
@@ -95,9 +93,11 @@ class AircraftPicker: JoozdlogFragment(){
  */
 
             viewModel.selectedAircraft.observe(viewLifecycleOwner){
-                pickedAircraftText.text = it.registration.nullIfBlank() ?: getString(R.string.aircraft)
+                pickedAircraftText.text = it.registration.nullIfBlank()?.also{
+                    if (!regFieldActive) registrationField.setText(it)
+                } ?: getString(R.string.aircraft)
                 typeDescriptionTextView.text = it.type?.name ?: "" // set type text to found type or to empty string
-                typesPickerAdapter.selectActiveItem(it.type)
+                typesPickerAdapter.selectActiveItem(it.type).also { println("MY SPOON IS TOO BIG")}
 
                 val errorText = registrationFieldLayout.findViewById<TextView>(R.id.textinput_error).apply{
                     visibility=View.VISIBLE
@@ -157,7 +157,7 @@ class AircraftPicker: JoozdlogFragment(){
                 closeFragment()
             }
 
-            aircraftPickerLayout.setOnClickListener {
+            aircraftPickerDialogBackground.setOnClickListener {
                 viewModel.undo()
                 closeFragment()
             }
@@ -171,16 +171,15 @@ class AircraftPicker: JoozdlogFragment(){
                 viewModel.saveAircraftToRepository()
                 closeFragment()
             }
-            aircraftPickerDialogBox.setOnClickListener {
-                //Intentionally blank
-            }
+
+            //empty listeners to catch clicks
+            headerLayout.setOnClickListener { }
+            bodyLayout.setOnClickListener { }
 
             //set preset values if found:
             presetEnteredRegistration?.let{
                 registrationField.setText(it)
             }
-        } // end of inflater.inflate(...).apply
-        return binding.root
-
-    } // end of onCreateView()
+        }.root // end of inflater.inflate(...).apply
+     // end of onCreateView()
 }

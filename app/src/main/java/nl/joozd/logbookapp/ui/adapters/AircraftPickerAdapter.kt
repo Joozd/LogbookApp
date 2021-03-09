@@ -38,15 +38,27 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
  * itemLayout must have a field named [itemBackground]
  */
 class AircraftPickerAdapter(
-    var list: List<AircraftType> = emptyList(),
+    private var l: List<AircraftType> = emptyList(),
     var color: Int? = null,
     private val itemLayout: Int = R.layout.item_picker_aircraft_type,
     private val itemClick: (AircraftType) -> Unit
 ): RecyclerView.Adapter<AircraftPickerAdapter.ViewHolder>() {
+    var list: List<AircraftType>
+        get() = l
+        set(it){
+            l = it
+            selectActiveItem(selectedEntry) // nudge active item so it'll scroll to it
+        }
+
     private var selectedEntry: AircraftType? = null
+    private var mRecylerView: RecyclerView? = null
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        mRecylerView = recyclerView
+    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(list[position])
+        holder.bindItem(l[position])
         with(holder.binding) {
             itemBackground.setOnClickListener {
                 holder.ac?.let { itemClick(it) }
@@ -56,7 +68,7 @@ class AircraftPickerAdapter(
         }
     }
 
-    override fun getItemCount(): Int = list.size
+    override fun getItemCount(): Int = l.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.ctx).inflate(itemLayout, parent, false)
@@ -72,13 +84,17 @@ class AircraftPickerAdapter(
      * Select [activeItem] as ative item, or select nothing as active if null
      */
     fun selectActiveItem(activeItem: AircraftType?) {
-        val previousIndex = list.indexOf(selectedEntry)
-        val foundIndex = list.indexOf(activeItem)
+        val previousIndex = l.indexOf(selectedEntry)
+        val foundIndex = l.indexOf(activeItem)
+        println("BANANA $foundIndex on $mRecylerView")
         selectedEntry = activeItem
         if (previousIndex >= 0)
             notifyItemChanged(previousIndex)
-        if (foundIndex >= 0) // if activeItem not found (because it is null, for example), don't notify an invalid item as changed
+        if (foundIndex >= 0) { // if activeItem not found (because it is null, for example), don't notify an invalid item as changed
             notifyItemChanged(foundIndex)
+            mRecylerView?.scrollToPosition(foundIndex)
+            println("trying to scroll to $foundIndex on $mRecylerView")
+        }
     }
 
     class ViewHolder(containerView: View) :

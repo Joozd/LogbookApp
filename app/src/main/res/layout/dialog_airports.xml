@@ -95,11 +95,9 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/airportsPickerList"
-                android:layout_width="0dp"
+                style="@style/EditFlightDialogDataBox"
                 android:layout_height="200dp"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/rounded_corners_secondarybackground"
-                android:elevation="9dp"
                 app:layout_constraintEnd_toEndOf="@+id/setCurrentTextButton"
                 app:layout_constraintStart_toStartOf="@+id/textInputLayout16"
                 app:layout_constraintTop_toBottomOf="@+id/textInputLayout16" />
@@ -115,12 +113,9 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                style="@style/EditFlightDialogDataBox"
                 android:layout_marginTop="8dp"
                 android:padding="8dp"
-                android:background="@drawable/rounded_corners_secondarybackground"
-                android:elevation="9dp"
                 app:layout_constraintEnd_toEndOf="@+id/airportsPickerList"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/airportsPickerList"

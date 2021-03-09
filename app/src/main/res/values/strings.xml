@@ -30,6 +30,7 @@
     <string name="name">Name</string>
     <string name="aircraft">Aircraft</string>
     <string name="search">Search</string>
+    <string name="search_type">Search Type</string>
     <string name="_continue">Continue</string>
     <string name="skip">Skip</string>
     <string name="retry">Retry</string>

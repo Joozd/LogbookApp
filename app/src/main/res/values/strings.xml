@@ -259,6 +259,7 @@
     <string name="addBalanceForward">Add Balance Forward</string>
     <string name="logbookName">Name of old logbook</string>
     <string name="multipilotTime">Multipilot time</string>
+    <string name="totalTime">Total time</string>
     <string name="totalTimeOfFlight">Total time of flight</string>
     <string name="landingDay">Day ldg</string>
     <string name="landingNight">Night ldg</string>

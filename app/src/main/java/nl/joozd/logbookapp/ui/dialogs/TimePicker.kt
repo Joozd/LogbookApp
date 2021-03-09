@@ -26,11 +26,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.NumberPicker
-import android.widget.TextView
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.R
 
 import nl.joozd.logbookapp.databinding.DialogTimesInOutBinding
@@ -42,22 +39,12 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
 
 open class TimePicker: JoozdlogFragment() {
-    companion object {
-        private val paddedMinutes = IntArray(60) { it }.map { v -> v.toString().padStart(2, '0') }.toTypedArray()
-        private val paddedHours = IntArray(24) { it }.map { v -> v.toString().padStart(2, '0') }.toTypedArray()
-    }
-
     private val viewModel: TimePickerViewModel by viewModels()
 
     // variable to store previous text on any selected field
-    private var previousText: String = ""
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val binding = DialogTimesInOutBinding.bind(inflater.inflate(R.layout.dialog_times_in_out, container, false))
-        with(binding) {
-            //Set dialog title background color
-            timesDialogTopHalf.joozdLogSetBackgroundColor()
-
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        DialogTimesInOutBinding.bind(inflater.inflate(R.layout.dialog_times_in_out, container, false)).apply{
 
             /***************************************************************************************
              * onFocusChangedListeners for EditTexts
@@ -112,12 +99,12 @@ open class TimePicker: JoozdlogFragment() {
             /**
              * Hide softKeyboard on pressing Enter
              */
-            ifrTimeText.setOnEditorActionListener { thisview, actionId, _ ->
+            ifrTimeText.setOnEditorActionListener { v, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     val imm: InputMethodManager =
-                        thisview.ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(thisview.windowToken, 0)
-                    thisview.clearFocus()
+                        v.ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(v.windowToken, 0)
+                    v.clearFocus()
                 }
                 true
             }
@@ -126,7 +113,7 @@ open class TimePicker: JoozdlogFragment() {
             /**
              * If cancelled or clicked outside dialog, undo changes and close Fragment
              */
-            timesDialogBackground.setOnClickListener {
+            timePickerDialogBackground.setOnClickListener {
                 viewModel.undo()
                 closeFragment()
             }
@@ -143,21 +130,22 @@ open class TimePicker: JoozdlogFragment() {
             }
 
             //empty onClickListener to block clicks on lower layers
-            timesDialogLayout.setOnClickListener { }
+            headerLayout.setOnClickListener { }
+            bodyLayout.setOnClickListener { }
 
 
             /**
              * observers:
              */
 
-            viewModel.feedbackEvent.observe(viewLifecycleOwner, Observer {
+            viewModel.feedbackEvent.observe(viewLifecycleOwner) {
                 when (it.getEvent()) {
                     TimePickerEvents.NOT_IMPLEMENTED -> context?.toast("Not implemented")
                     TimePickerEvents.TOTAL_TIME_GREATER_THAN_DURATION -> context?.toast(R.string.total_time_too_large)
                     TimePickerEvents.INVALID_TOTAL_TIME -> context?.toast(R.string.invalid_total_time)
                     //TODO handle other events
                 }
-            })
+            }
 
             viewModel.totalTime.observe(viewLifecycleOwner) { ttofText.setText(it) }
 
@@ -181,18 +169,11 @@ open class TimePicker: JoozdlogFragment() {
             viewModel.instructor.observe(viewLifecycleOwner) {
                 instructorTextView.showIfActive(it)
             }
-        }
+        }.root
 
-
-        return binding.root
-
-
-    }
-
-
-    /**
-     * Sets layout to sim
-     */
+    /*
+    private val paddedMinutes = IntArray(60) { it }.map { v -> v.toString().padStart(2, '0') }.toTypedArray()
+    private val paddedHours = IntArray(24) { it }.map { v -> v.toString().padStart(2, '0') }.toTypedArray()
 
     private fun NumberPicker.setSpinnervaluesForMinutes() {
         minValue = 0
@@ -204,5 +185,10 @@ open class TimePicker: JoozdlogFragment() {
         minValue = 0
         maxValue = 23
         displayedValues = paddedHours
+    }
+    */
+
+    companion object {
+
     }
 }

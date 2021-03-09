@@ -383,7 +383,8 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/sim"
                 app:layout_constraintEnd_toStartOf="@+id/signSelector"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="@+id/flightRemarksLayout"
                 app:layout_constraintTop_toBottomOf="@+id/flightRemarksLayout" />
 
             <TextView
@@ -436,7 +437,7 @@
                 style="@style/SelectorStyleInactive"
                 android:text="@string/pf"
                 app:layout_constraintBottom_toBottomOf="@+id/simSelector"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/flightRemarksLayout"
                 app:layout_constraintStart_toEndOf="@+id/picSelector"
                 app:layout_constraintTop_toTopOf="@+id/simSelector" />
 

@@ -19,12 +19,10 @@
 
 package nl.joozd.logbookapp.ui.fragments
 
-import android.R
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
-import android.os.Build
 import android.view.View
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
@@ -34,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
 /**
@@ -58,6 +57,7 @@ open class JoozdlogFragment: Fragment(),  CoroutineScope by MainScope() {
         cancel()
     }
 
+    @Deprecated("Use styled background", ReplaceWith("style=\"@style/DialogBodyLayout\""))
     protected fun View.joozdLogSetBackgroundColor(color: Int = requireActivity().getColorFromAttr(R.attr.colorPrimary)){
         (this.background as GradientDrawable).colorFilter = PorterDuffColorFilter( color, PorterDuff.Mode.SRC_IN)
     }

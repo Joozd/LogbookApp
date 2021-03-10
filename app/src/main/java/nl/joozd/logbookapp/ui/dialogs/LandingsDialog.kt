@@ -24,16 +24,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.databinding.PickerLandingsBinding
+import nl.joozd.logbookapp.databinding.DialogLandingsBinding
 import nl.joozd.logbookapp.model.viewmodels.dialogs.LandingsDialogViewModel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
 class LandingsDialog: JoozdlogFragment() {
     private val landingsDialogViewModel: LandingsDialogViewModel by viewModels()
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        PickerLandingsBinding.bind(inflater.inflate(R.layout.picker_landings, container, false)).apply{
+        DialogLandingsBinding.bind(inflater.inflate(R.layout.dialog_landings, container, false)).apply{
 
             toDayUpButton.setOnClickListener { landingsDialogViewModel.toDayUpButtonClick() }
             toNightUpButton.setOnClickListener { landingsDialogViewModel.toNightUpButtonClick() }

@@ -19,145 +19,169 @@
   -->
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/augmentedCrewDialogBackground"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/DialogBackground"
+    android:id="@+id/augmentedCrewDialogBackground"
+    tools:context=".ui.activities.MainActivity">
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#60000000">
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="32dp"
-            android:background="@drawable/rounded_corners"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:padding="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-                android:id="@+id/crewSizeText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:text="@string/crewSize"
-                android:textColor="?attr/android:textColorSecondary"
-                app:layout_constraintBottom_toBottomOf="@+id/crewSizeEditText"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/crewSizeEditText" />
-
-        <ImageButton
-                android:id="@+id/crewDownButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:background="#00000000"
-                app:layout_constraintBottom_toBottomOf="@+id/crewUpButton"
-                app:layout_constraintEnd_toStartOf="@+id/crewSizeEditText"
-                app:srcCompat="@drawable/minus_vector_black" />
-
-        <EditText
-            android:id="@+id/crewSizeEditText"
-            android:layout_width="30dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/rounded_corners_white"
-            android:clickable="false"
-            android:elevation="4dp"
-            android:ems="10"
-            android:focusable="false"
-            android:inputType="number"
-            android:padding="4dp"
-            android:textAlignment="center"
-            app:layout_constraintBottom_toBottomOf="@+id/crewUpButton"
-            app:layout_constraintEnd_toStartOf="@+id/crewUpButton"
-            app:layout_constraintTop_toTopOf="@+id/crewUpButton" />
-
-        <ImageButton
-                android:id="@+id/crewUpButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="#00000000"
-                app:layout_constraintBottom_toBottomOf="@+id/toDayField"
-                app:layout_constraintEnd_toEndOf="parent"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/headerLayout"
+                style="@style/DialogHeaderLayout"
+                android:layout_width="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/bodyLayout"
+                app:layout_constraintEnd_toEndOf="@+id/bodyLayout"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/bodyLayout"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/plus_vector_black" />
+                app:layout_constraintVertical_chainStyle="packed">
+                <TextView
+                    android:id="@+id/textView"
+                    style="@style/DialogHeaderText"
+                    android:text="@string/augmentedCrew"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        <CheckBox
-                android:id="@+id/didTakeoffCheckbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/takeoffInSeat"
-                app:layout_constraintEnd_toStartOf="@+id/didLandingCheckbox"
-                app:layout_constraintStart_toStartOf="@+id/crewSizeText"
-                app:layout_constraintTop_toTopOf="@+id/didLandingCheckbox" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <CheckBox
-                android:id="@+id/didLandingCheckbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/landingInSeat"
-                app:layout_constraintEnd_toEndOf="@+id/crewUpButton"
-                app:layout_constraintTop_toBottomOf="@+id/crewUpButton" />
-
-        <TextView
-                android:id="@+id/timeForTakeoffLandingText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/timeForTakeoffLanding"
-                android:textColor="?attr/android:textColorSecondary"
-                app:layout_constraintBottom_toBottomOf="@+id/timeForTakeoffLandingEditText"
-                app:layout_constraintStart_toStartOf="@+id/crewSizeText"
-                app:layout_constraintTop_toTopOf="@+id/timeForTakeoffLandingEditText" />
-
-        <EditText
-                android:id="@+id/timeForTakeoffLandingEditText"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="24dp"
-                android:background="@drawable/rounded_corners_white"
-                android:ems="10"
-                android:inputType="number"
-                app:layout_constraintBottom_toTopOf="@+id/cancelCrewDialogButton"
-                app:layout_constraintEnd_toEndOf="@+id/didLandingCheckbox"
-                app:layout_constraintTop_toBottomOf="@+id/didLandingCheckbox" />
-
-        <TextView
-                android:id="@+id/cancelCrewDialogButton"
-                android:layout_width="100dp"
-                android:layout_height="32dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginBottom="24dp"
-                android:gravity="center_horizontal|center_vertical"
-                android:text="@android:string/cancel"
-                android:textAlignment="center"
-                android:textAllCaps="true"
-                android:textColor="?attr/colorAccent"
-                android:textStyle="bold"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/bodyLayout"
+                style="@style/DialogBodyLayout"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/headerLayout">
 
-        <TextView
-                android:id="@+id/saveCrewDialogButon"
-                android:layout_width="100dp"
-                android:layout_height="32dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginBottom="24dp"
-                android:gravity="center_horizontal|center_vertical"
-                android:text="@android:string/ok"
-                android:textAlignment="center"
-                android:textColor="?attr/colorAccent"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/crewSizeText"
+                    style="@style/SecondaryText"
+                    android:text="@string/crewSize"
+                    app:layout_constraintBottom_toBottomOf="@+id/crewSizeEditText"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/crewSizeEditText" />
+
+                <ImageButton
+                    android:id="@+id/crewDownButton"
+                    style="@style/PlusMinusButton"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/crewUpButton"
+                    app:layout_constraintEnd_toStartOf="@+id/crewSizeEditText"
+                    app:srcCompat="@drawable/minus_button" />
+
+                <EditText
+                    android:id="@+id/crewSizeEditText"
+                    style="@style/NumberBox.secondaryBackground"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/crewUpButton"
+                    app:layout_constraintEnd_toStartOf="@+id/crewUpButton"
+                    app:layout_constraintTop_toTopOf="@+id/crewUpButton" />
+
+                <ImageButton
+                    android:id="@+id/crewUpButton"
+                    style="@style/PlusMinusButton"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/plus_button" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/checkboxesLayout"
+                    style="@style/OutlinedBox.Titled"
+
+                    android:layout_marginTop="16dp"
+
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/crewDownButton">
+
+                    <TextView
+                        android:id="@+id/boxTitle"
+                        style="@style/OutlinedBoxTitle"
+                        android:layout_marginStart="16dp"
+                        android:text="@string/takeoff_landing_in_seat"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+
+                    <CheckBox
+                        android:id="@+id/didTakeoffCheckbox"
+                        style="@style/EditFlightCheckBox"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/takeoff"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.0" />
+
+                    <CheckBox
+                        android:id="@+id/didLandingCheckbox"
+                        style="@style/EditFlightCheckBox"
+                        android:layout_marginEnd="8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/landing"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/didTakeoffCheckbox" />
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/timeForTakeoffLandingEditTextLayout"
+                    style="@style/EditFlightInputLayout"
+                    android:layout_marginTop="16dp"
+                    android:hint="@string/timeForTakeoffLanding"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/checkboxesLayout">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/timeForTakeoffLandingEditText"
+                        style="@style/EditFlightEditText"
+                        android:inputType="time"
+                        android:nextFocusForward="@id/nightTimeText"
+                        android:selectAllOnFocus="true"
+                        tools:text="0:30" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/saveCrewDialogButon"
+                    style="@style/DialogButtonText"
+                    android:layout_marginTop="24dp"
+                    android:text="@android:string/ok"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/timeForTakeoffLandingEditTextLayout" />
+
+                <TextView
+                    android:id="@+id/cancelCrewDialogButton"
+                    style="@style/DialogButtonText"
+                    android:text="@android:string/cancel"
+                    android:textAlignment="center"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/saveCrewDialogButon" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

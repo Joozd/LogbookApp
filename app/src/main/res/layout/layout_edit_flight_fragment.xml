@@ -443,15 +443,17 @@
 
             <CheckBox
                 android:id="@+id/autoFillCheckBox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/EditFlightCheckBox"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
                 android:text="@string/autovalue"
-                android:textColor="?android:attr/textColorSecondary"
+
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/flightCancelButton2"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="@+id/flightInfoText"
                 app:layout_constraintTop_toBottomOf="@+id/simSelector" />
 
             <TextView
@@ -459,16 +461,22 @@
                 style="@style/DialogButtonText"
                 android:text="@android:string/cancel"
                 app:layout_constraintBottom_toBottomOf="@+id/autoFillCheckBox"
+
+
                 app:layout_constraintEnd_toStartOf="@+id/flightSaveButton"
+                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/autoFillCheckBox"
                 app:layout_constraintTop_toTopOf="@+id/autoFillCheckBox" />
 
             <TextView
                 android:id="@+id/flightSaveButton"
                 style="@style/DialogButtonText"
+                android:layout_marginEnd="16dp"
                 android:text="@string/save"
                 app:layout_constraintBottom_toBottomOf="@+id/flightCancelButton2"
-                app:layout_constraintEnd_toEndOf="parent"
+
+                app:layout_constraintEnd_toEndOf="@+id/flightInfoText"
+                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/flightCancelButton2"
                 app:layout_constraintTop_toTopOf="@+id/flightCancelButton2" />
         </androidx.constraintlayout.widget.ConstraintLayout>

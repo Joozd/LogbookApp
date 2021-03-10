@@ -19,20 +19,15 @@
 
 package nl.joozd.logbookapp.ui.dialogs
 
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogPickSimTypeBinding
-import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AircraftPickerViewModel
@@ -42,11 +37,8 @@ import nl.joozd.logbookapp.ui.adapters.AircraftPickerAdapter
 class SimTypePicker: JoozdlogFragment(){
     private val viewModel: AircraftPickerViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogPickSimTypeBinding.bind(inflater.inflate(R.layout.dialog_pick_sim_type, container, false)).apply{
-            //set color of dialog head
-            (aircraftPickerTopHalf?.background as GradientDrawable).colorFilter = PorterDuffColorFilter(requireActivity().getColorFromAttr(android.R.attr.colorPrimary), PorterDuff.Mode.SRC_IN) // set background color to bakground with rounded corners
-
             val typesPickerAdapter = AircraftPickerAdapter {
                 Log.d(this::class.simpleName, "clicked on $it")
                 viewModel.selectAircraftType(it)
@@ -72,11 +64,11 @@ class SimTypePicker: JoozdlogFragment(){
                 typesPickerRecyclerView.scrollToPosition(typesPickerAdapter.list.indexOf(it))
             }
 
-            viewModel.selectedAircraft.observe(viewLifecycleOwner, Observer{
+            viewModel.selectedAircraft.observe(viewLifecycleOwner) {
                 it.type?.let{t ->
                     typeDescriptionTextView.text = t.shortName
                 }
-            })
+            }
 
             viewModel.aircraftTypes.observe(viewLifecycleOwner) {
                 Log.d(this::class.simpleName, "updating list with ${it.size} items")
@@ -100,9 +92,10 @@ class SimTypePicker: JoozdlogFragment(){
             aircraftPickerSave.setOnClickListener {
                 closeFragment()
             }
-            aircraftPickerDialogBox.setOnClickListener {
-                //Intentionally blank
-            }
+
+            //catch clicks on empty layout
+            headerLayout.setOnClickListener { }
+            bodyLayout.setOnClickListener { }
 
         }.root // end of inflater.inflate(...).apply
 }

@@ -27,117 +27,126 @@
     android:layout_height="match_parent"
     tools:context=".ui.activities.MainActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/headerLayout"
-        style="@style/DialogHeaderLayout"
-
-        android:layout_width="0dp"
-
-        android:layout_marginTop="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/bodyLayout"
-        app:layout_constraintEnd_toEndOf="@+id/bodyLayout"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/bodyLayout"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed">
-
-
-        <TextView
-            android:id="@+id/dayText"
-            style="@style/DialogHeaderSubText"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Woensdag" />
-
-        <TextView
-            android:id="@+id/dateText"
-            style="@style/DialogHeaderText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/dayText"
-            tools:layout_editor_absoluteY="16dp"
-            tools:text="27 november" />
-
-        <TextView
-            android:id="@+id/yearText"
-            style="@style/DialogHeaderSubText"
-            tools:text="1980"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/dateText" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bodyLayout"
-        style="@style/DialogBodyLayout"
-        android:layout_width="wrap_content"
+    <ScrollView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="16dp"
+        android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/headerLayout">
-
-        <TextView
-            android:id="@+id/prevMonth"
-            style="@style/DialogClickableText"
-            android:text="&lt;"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/monthText"
-            style="@style/DialogClickableText"
-            android:layout_width="wrap_content"
-            app:layout_constraintEnd_toStartOf="@+id/nextMonth"
-            app:layout_constraintStart_toEndOf="@+id/prevMonth"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="November 1980" />
-
-        <TextView
-            android:id="@+id/nextMonth"
-            style="@style/DialogClickableText"
-            android:text="&gt;"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/daysLayout"
-            android:layout_width="210dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/monthText">
+            android:padding="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/headerLayout"
+                style="@style/DialogHeaderLayout"
+                android:layout_width="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/bodyLayout"
+                app:layout_constraintEnd_toEndOf="@+id/bodyLayout"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/bodyLayout"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed">
+
+                <TextView
+                    android:id="@+id/dayText"
+                    style="@style/DialogHeaderSubText"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Woensdag" />
+
+                <TextView
+                    android:id="@+id/dateText"
+                    style="@style/DialogHeaderText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/dayText"
+                    tools:layout_editor_absoluteY="16dp"
+                    tools:text="27 november" />
+
+                <TextView
+                    android:id="@+id/yearText"
+                    style="@style/DialogHeaderSubText"
+                    tools:text="1980"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/dateText" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/bodyLayout"
+                style="@style/DialogBodyLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/headerLayout">
+
+                <TextView
+                    android:id="@+id/prevMonth"
+                    style="@style/DialogClickableText"
+                    android:text="&lt;"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:id="@+id/monthText"
+                    style="@style/DialogClickableText"
+                    android:layout_width="wrap_content"
+                    app:layout_constraintEnd_toStartOf="@+id/nextMonth"
+                    app:layout_constraintStart_toEndOf="@+id/prevMonth"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="November 1980" />
+
+                <TextView
+                    android:id="@+id/nextMonth"
+                    style="@style/DialogClickableText"
+                    android:text="&gt;"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="HardcodedText" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/daysLayout"
+                    android:layout_width="210dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/monthText" />
+
+                <TextView
+                    android:id="@+id/cancelButton"
+                    style="@style/DialogButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@android:string/cancel"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/daysLayout" />
+
+                <TextView
+                    android:id="@+id/continueButton"
+                    style="@style/DialogButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@android:string/ok"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/cancelButton" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <TextView
-            android:id="@+id/cancelButton"
-            style="@style/DialogButtonText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@android:string/cancel"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/daysLayout" />
-
-        <TextView
-            android:id="@+id/continueButton"
-            style="@style/DialogButtonText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@android:string/ok"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/cancelButton" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

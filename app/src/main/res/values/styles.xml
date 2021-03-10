@@ -204,6 +204,7 @@
         <item name="android:paddingEnd">16dp</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
+        <item name="android:gravity">center</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
     </style>
@@ -288,6 +289,14 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="EditFlightCheckBox" parent="SecondaryText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+    </style>
+
+
     <style name="DataBox" parent="AppTheme">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
@@ -303,6 +312,28 @@
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">1dp</item>
     </style>
+
+
+    <style name="OutlinedBox" parent="AppTheme">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <!-- this needs a textview with style OutlinedBoxTitle as title-->
+    <style name="OutlinedBox.Titled">
+        <item name="android:background">@drawable/background_box_title_padding</item>
+    </style>
+
+    <style name="OutlinedBoxTitle" parent="AppTheme">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">?attr/colorTextViewBackground</item>
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
+        <item name="android:paddingStart">2dp</item>
+        <item name="android:paddingEnd">2dp</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
 
     <style name="Line.colorPrimary">
         <item name="android:background">?attr/colorPrimary</item>
@@ -326,10 +357,15 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@drawable/rounded_corners_textviewbackground</item>
         <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
         <item name="android:elevation">4dp</item>
         <item name="android:padding">4dp</item>
         <item name="android:gravity">center</item>
         <item name="android:inputType">number</item>
+    </style>
+
+    <style name="NumberBox.secondaryBackground">
+        <item name="android:background">@drawable/rounded_corners_secondarybackground</item>
     </style>
 
     <!-- style for selectors like "sim" or "instructor" in editFlightFragment -->

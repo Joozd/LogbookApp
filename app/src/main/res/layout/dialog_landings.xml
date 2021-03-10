@@ -95,10 +95,10 @@
                 <ImageButton
                     android:id="@+id/toDayDownButton"
                     style="@style/PlusMinusButton"
+                    app:srcCompat="@drawable/minus_button"
                     android:layout_marginEnd="8dp"
                     app:layout_constraintEnd_toStartOf="@+id/toDayField"
-                    app:layout_constraintTop_toTopOf="@+id/toDayUpButton"
-                    app:srcCompat="@drawable/minus_button" />
+                    app:layout_constraintTop_toTopOf="@+id/toDayUpButton" />
 
                 <EditText
                     android:id="@+id/toDayField"

@@ -90,8 +90,8 @@
     <string name="augmentedCrew">Augmented crew</string>
     <string name="crewSize">Crew Size</string>
     <string name="landingInSeat">Landing in seat</string>
-    <string name="takeoffInSeat">Takeoff in seat</string>
-    <string name="timeForTakeoffLanding">Time for takeoff/landing</string>
+    <string name="takeoff_landing_in_seat">Takeoff or landing in seat</string>
+    <string name="timeForTakeoffLanding">Minutes for takeoff/landing</string>
     <string name="dual">DUAL</string>
     <string name="augmented">Augmented</string>
     <string name="savedFlight">Saved flight</string>

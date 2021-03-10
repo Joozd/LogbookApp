@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import android.text.Editable
+import android.util.Log
 import androidx.lifecycle.Transformations
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -60,7 +61,11 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
      * Else, will set it to whatever is entered.
      * Needs to be able to do Editable.toInt() or will throw exception.
      */
-    fun setTakeoffLandingTime(time: Editable) {
+    fun setTakeoffLandingTime(time: Editable?) {
+        if (time == null){
+            val w = Log.w("setTakeOffLanding()", "called with null reference for time, ignoring.")
+            return
+        }
         if (time.isBlank()) setTakeoffLandingTime(Preferences.standardTakeoffLandingTimes)
         else {
             Preferences.standardTakeoffLandingTimes = time.toInt()

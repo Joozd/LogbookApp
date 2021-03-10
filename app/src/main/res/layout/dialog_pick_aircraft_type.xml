@@ -74,7 +74,6 @@
                 android:layout_marginEnd="32dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/headerLayout">
 
@@ -97,16 +96,12 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/typesPickerRecyclerView"
-                    style="@style/EditFlightDialogDataBox"
+                    style="@style/DataBox"
                     android:layout_height="200dp"
                     android:layout_marginTop="8dp"
-
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/registrationFieldLayout">
-
-                </androidx.recyclerview.widget.RecyclerView>
+                    app:layout_constraintTop_toBottomOf="@+id/registrationFieldLayout" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/searchFieldLayout"

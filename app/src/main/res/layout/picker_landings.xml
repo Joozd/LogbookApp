@@ -70,7 +70,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/takeoffCard"
-                style="@style/EditFlightDialogDataBox.Padded"
+                style="@style/DataBox.Padded"
                 app:layout_constraintEnd_toEndOf="@+id/landingCard"
                 app:layout_constraintStart_toStartOf="@+id/landingCard"
                 app:layout_constraintTop_toTopOf="parent">
@@ -154,7 +154,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/landingCard"
-                style="@style/EditFlightDialogDataBox.Padded"
+                style="@style/DataBox.Padded"
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="@+id/autolandCard"
                 app:layout_constraintStart_toStartOf="@+id/autolandCard"
@@ -244,7 +244,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/autolandCard"
-            style="@style/EditFlightDialogDataBox.Padded"
+            style="@style/DataBox.Padded"
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

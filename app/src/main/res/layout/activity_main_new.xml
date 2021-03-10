@@ -38,9 +38,11 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/searchField"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/rounded_corners"
+        style="@style/DataBox"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="0dp"
         tools:visibility="visible"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
@@ -49,15 +51,11 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/mainSearchBoxLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            style="@style/EditFlightInputLayout"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/rounded_corners_white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/searchTypeSpinner"
+            app:layout_constraintEnd_toStartOf="@+id/searchTypeSpinnerFrame"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -69,16 +67,27 @@
                 android:hint="@string/search" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <Spinner
-            android:id="@+id/searchTypeSpinner"
-            style="@style/SpinnerAsEditText"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:padding="2dp"
+        <FrameLayout
+            style="@style/SpinnerFrameStyle.TextBackground"
+            android:id="@+id/searchTypeSpinnerFrame"
+            android:layout_marginStart="16dp"
             app:layout_constraintBottom_toBottomOf="@+id/mainSearchBoxLayout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/mainSearchBoxLayout" />
+            app:layout_constraintTop_toTopOf="@+id/mainSearchBoxLayout">
+
+            <Spinner
+                android:id="@+id/searchTypeSpinner"
+                android:layout_width="84dp"
+                android:layout_height="wrap_content"
+                android:padding="2dp" />
+
+        </FrameLayout>
+        <View
+            style="@style/Line.colorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -94,10 +103,9 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/backup_reminder_layout"
+            style="@style/DataBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/rounded_corners_white"
-            android:elevation="8dp"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
@@ -142,6 +150,12 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/backup_message" />
+
+            <View
+                style="@style/Line.colorPrimary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

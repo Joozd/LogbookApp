@@ -95,7 +95,7 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/airportsPickerList"
-                style="@style/EditFlightDialogDataBox"
+                style="@style/DataBox"
                 android:layout_height="200dp"
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="@+id/setCurrentTextButton"
@@ -113,7 +113,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout"
-                style="@style/EditFlightDialogDataBox"
+                style="@style/DataBox"
                 android:layout_marginTop="8dp"
                 android:padding="8dp"
                 app:layout_constraintEnd_toEndOf="@+id/airportsPickerList"

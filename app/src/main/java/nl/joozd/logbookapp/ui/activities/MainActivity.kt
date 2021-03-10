@@ -383,7 +383,6 @@ class MainActivity : JoozdlogActivity() {
      * TODO: BUG: This doesnt work if activity was recreated
      */
     private fun ActivityMainNewBinding.makeAddButtonAndToolbarVisibleOrNot(){
-        println("LALALALALALALALAA supportFragmentManager.backStackEntryCount = ${supportFragmentManager.backStackEntryCount}")
         if (supportFragmentManager.backStackEntryCount == 0) {
             mainToolbar.visibility = View.VISIBLE
             addButton.fadeIn()
@@ -432,10 +431,6 @@ class MainActivity : JoozdlogActivity() {
             backgroundColor = getColorFromAttr(android.R.attr.colorPrimary)
             progress = initialProgress
         }
-    }
-
-    private fun showNotLoggedInDialog(){
-
     }
 
     private fun showDeletePlannedCalendarFlightDialog(id: Int){
@@ -545,7 +540,6 @@ class MainActivity : JoozdlogActivity() {
 
 
     companion object{
-        const val TAG = "MainActivity"
         const val EDIT_FLIGHT_TAG = "EDIT_FLIGHT_TAG"
         const val PLANNED_FLIGHTS_IN_SIGHT = 3
 

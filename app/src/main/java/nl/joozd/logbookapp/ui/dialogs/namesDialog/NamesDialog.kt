@@ -23,7 +23,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogNamesBinding
@@ -45,10 +44,8 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
      */
     abstract val viewModel: NamesDialogViewModel
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         DialogNamesBinding.bind(inflater.inflate(R.layout.dialog_names, container, false)).apply{
-            //set color of top part
-            namesDialogTopHalf.joozdLogSetBackgroundColor()
 
             //initialize RecyclerView
             val namesPickerAdapter = SelectableStringAdapter { name ->
@@ -90,43 +87,38 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
                 viewModel.undo()
                 closeFragment()
             }
-            editAircraftLayout.setOnClickListener {
+            namesDialogBackground.setOnClickListener {
                 viewModel.undo()
                 closeFragment()
             }
 
             //catch clicks on empty parts of this dialog
-            editAircraftDialogLayout.setOnClickListener {  }
+            headerLayout.setOnClickListener {  }
+            bodyLayout.setOnClickListener {  }
 
             /**
              * observers:
              */
 
-            viewModel.addSearchFieldNameButtonTextResource.observe(viewLifecycleOwner, Observer{
+            viewModel.addSearchFieldNameButtonTextResource.observe(viewLifecycleOwner) {
                 addSearchFieldNameButton.text = getString(it)
-            })
-            viewModel.addSelectedNameButtonTextResource.observe(viewLifecycleOwner, Observer{
+            }
+            viewModel.addSelectedNameButtonTextResource.observe(viewLifecycleOwner) {
                 addSelectedNameButton.text = getString(it)
-            })
-            viewModel.removeLastButonTextResource.observe(viewLifecycleOwner, Observer{
+            }
+            viewModel.removeLastButonTextResource.observe(viewLifecycleOwner){
                 removeLastButon.text = getString(it)
-            })
+            }
 
-            viewModel.allNames.observe(viewLifecycleOwner, Observer {
+            viewModel.allNames.observe(viewLifecycleOwner) {
                 namesPickerAdapter.updateList(it)
-            })
-            viewModel.selectedName.observe(viewLifecycleOwner, Observer {
+            }
+            viewModel.selectedName.observe(viewLifecycleOwner) {
                 namesPickerAdapter.selectActiveItem(it)
-            })
-            viewModel.currentNames.observe(viewLifecycleOwner, Observer{
+            }
+            viewModel.currentNames.observe(viewLifecycleOwner) {
                 selectedNames.text = it
-            })
+            }
 
-            return root
-        }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-    }
+        }.root
 }

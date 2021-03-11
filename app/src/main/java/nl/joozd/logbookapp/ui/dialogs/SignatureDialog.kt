@@ -44,8 +44,8 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 class SignatureDialog: JoozdlogFragment() {
     private val viewModel: SignatureDialogViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        with (DialogSignatureBinding.bind(inflater.inflate(R.layout.dialog_signature, container, false))) {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        DialogSignatureBinding.bind(inflater.inflate(R.layout.dialog_signature, container, false)).apply {
 
             signaturePad.setOnSignedListener(object : SignaturePad.OnSignedListener {
                 override fun onStartSigning() {/* Event triggered when the pad is touched */}
@@ -80,18 +80,19 @@ class SignatureDialog: JoozdlogFragment() {
                 viewModel.undo()
                 closeFragment()
             }
-            backgroundLayout.setOnClickListener {
+            signatureBackground.setOnClickListener {
                 viewModel.undo()
                 closeFragment()
             }
             saveTextView.setOnClickListener {
                 closeFragment()
             }
-            signLayout.setOnClickListener { }
 
-            return root
-        }
-    }
+            headerLayout.setOnClickListener { }
+            bodyLayout.setOnClickListener { }
+
+        }.root
+
 
     private fun DialogSignatureBinding.setBoxVisibility() {
         if (viewModel.signature.isNotBlank()) {

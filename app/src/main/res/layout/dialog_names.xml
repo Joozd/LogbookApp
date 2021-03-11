@@ -21,45 +21,31 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#60000000"
-    android:fitsSystemWindows="true"
-    android:id="@+id/editAircraftLayout">
+    style="@style/DialogBackground"
+    android:id="@+id/namesDialogBackground"
+    tools:context=".ui.activities.MainActivity">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollIndicators="none"
-        android:scrollbarSize="0dp"
+        android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/editAircraftDialogLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="32dp"
-            android:elevation="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
         <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/namesDialogTopHalf"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:background="@drawable/top_corners"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+            android:padding="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/headerLayout"
+                style="@style/DialogHeaderLayout"
+                android:layout_width="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/bodyLayout"
+                app:layout_constraintEnd_toEndOf="@+id/bodyLayout"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/bodyLayout"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed">
 
             <TextView
                     android:id="@+id/airportPickerTitle"
@@ -77,128 +63,105 @@
                     app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/editAircraftDialogDataLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="128dp"
-            android:background="@drawable/bottom_corners"
-            android:elevation="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/namesDialogTopHalf">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout16"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/rounded_corners_white"
-                app:layout_constraintEnd_toStartOf="@+id/addSearchFieldNameButton"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/bodyLayout"
+                style="@style/DialogBodyLayout"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/headerLayout">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/namesSearchField"
-                    android:layout_width="match_parent"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout16"
+                    style="@style/EditFlightInputLayout"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toStartOf="@+id/addSearchFieldNameButton"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/namesSearchField"
+                        style="@style/EditFlightEditText"
+                        android:digits="0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM ./!@#$%^&amp;&quot;*():&lt;&gt;?~"
+                        android:hint="@string/anyName"
+                        android:inputType="textPersonName" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Button
+                    android:id="@+id/addSearchFieldNameButton"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:digits="0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM ./!@#$%^&amp;&quot;*():&lt;&gt;?~"
-                    android:hint="@string/anyName"
-                    android:includeFontPadding="false"
-                    android:inputType="textPersonName" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginStart="8dp"
+                    android:text="@string/addThis"
+                    app:layout_constraintBottom_toBottomOf="@+id/textInputLayout16"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/textInputLayout16"
+                    app:layout_constraintTop_toTopOf="@+id/textInputLayout16" />
 
-            <Button
-                android:id="@+id/addSearchFieldNameButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/addThis"
-                app:layout_constraintBottom_toBottomOf="@+id/textInputLayout16"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textInputLayout16" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/namesPickerList"
+                    style="@style/DataBox"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout16" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/namesPickerList"
-                android:layout_width="0dp"
-                android:layout_height="200dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/rounded_corners_white"
-                android:elevation="9dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout16" />
+                <Button
+                    android:id="@+id/addSelectedNameButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/addThis"
+                    app:layout_constraintEnd_toEndOf="@+id/namesPickerList"
+                    app:layout_constraintTop_toBottomOf="@+id/namesPickerList" />
 
-            <TextView
-                android:id="@+id/selectedNames"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/rounded_corners_white"
-                android:clickable="false"
-                android:elevation="3dp"
-                android:ems="10"
-                android:padding="4dp"
-                android:textColor="?attr/android:textColorSecondary"
-                android:textSize="14sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/addSelectedNameButton" />
+                <Button
+                    android:id="@+id/removeLastButon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/remove"
+                    app:layout_constraintBottom_toBottomOf="@+id/addSelectedNameButton"
+                    app:layout_constraintStart_toStartOf="@+id/namesPickerList"
+                    app:layout_constraintTop_toTopOf="@+id/addSelectedNameButton" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/selectedNamesLLayout"
+                    style="@style/DataBox.Padded"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/addSelectedNameButton">
+
+                    <TextView
+                        android:id="@+id/selectedNames"
+                        style="@style/SecondaryText"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:Text="Henk de Vries" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
                 android:id="@+id/cancelTextView"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="32dp"
-                android:gravity="center"
+                style="@style/DialogButtonText"
                 android:text="@android:string/cancel"
-                android:textAllCaps="true"
-                android:textColor="?attr/colorAccent"
-                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@+id/saveTextView"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/saveTextView" />
 
             <TextView
                 android:id="@+id/saveTextView"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="32dp"
-                android:layout_marginBottom="16dp"
-                android:gravity="center"
+                style="@style/DialogButtonText"
+                android:layout_marginTop="24dp"
                 android:text="@android:string/ok"
-                android:textAllCaps="true"
-                android:textColor="?attr/colorAccent"
-                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/selectedNames" />
+                app:layout_constraintTop_toBottomOf="@+id/selectedNamesLLayout" />
 
-            <Button
-                android:id="@+id/addSelectedNameButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/addThis"
-                app:layout_constraintEnd_toEndOf="@+id/namesPickerList"
-                app:layout_constraintTop_toBottomOf="@+id/namesPickerList" />
 
-            <Button
-                android:id="@+id/removeLastButon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/remove"
-                app:layout_constraintBottom_toBottomOf="@+id/addSelectedNameButton"
-                app:layout_constraintStart_toStartOf="@+id/namesPickerList"
-                app:layout_constraintTop_toTopOf="@+id/addSelectedNameButton" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

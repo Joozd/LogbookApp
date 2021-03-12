@@ -21,383 +21,316 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/backgroundLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#60000000">
+    style="@style/DialogBackground"
+    android:id="@+id/addBalanceForwardDialogBackground"
+    tools:context=".ui.activities.MainActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="32dp"
-        android:background="@drawable/rounded_corners"
+        android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/flightInfoText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/top_corners"
-            android:gravity="center_vertical"
-            android:text="@string/addBalanceForward"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout2"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:padding="8dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/flightInfoText">
+            android:layout_height="wrap_content">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/logbookNameText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/logbookName"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="text"
-                android:nextFocusForward="@id/multiPilotTimeEditText"
-                android:selectAllOnFocus="true"
-                android:text="@string/paperLogbook"
-                android:textAlignment="textStart" />
-        </com.google.android.material.textfield.TextInputLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/headerLayout"
+                style="@style/DialogHeaderLayout"
+                android:layout_width="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/bodyLayout"
+                app:layout_constraintEnd_toEndOf="@+id/bodyLayout"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/bodyLayout"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout3"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toStartOf="@+id/textInputLayout4"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout2">
+                <TextView
+                    android:id="@+id/flightInfoText"
+                    style="@style/DialogHeaderText"
+                    android:text="@string/addBalanceForward"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/multiPilotTimeEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/multipilotTime"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="time"
-                android:nextFocusForward="@id/totalTimeOfFlightEditText"
-                android:selectAllOnFocus="true"
-                android:textAlignment="textStart"
-                tools:text="0:00" />
-        </com.google.android.material.textfield.TextInputLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout4"
-            android:layout_width="163dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/textInputLayout3"
-            app:layout_constraintTop_toTopOf="@+id/textInputLayout3">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/bodyLayout"
+                style="@style/DialogBodyLayout"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/headerLayout">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/totalTimeOfFlightEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/totalTimeOfFlight"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="time"
-                android:nextFocusForward="@id/landingDayText"
-                android:selectAllOnFocus="true"
-                android:textAlignment="textStart"
-                tools:text="0:00" />
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/logbookNameLayout"
+                    style="@style/EditFlightInputLayout"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout8"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toStartOf="@+id/textInputLayout7"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="@+id/textInputLayout3"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout3">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/logbookNameText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/logbookName"
+                        android:inputType="textCapWords"
+                        android:nextFocusForward="@id/landingDayText"
+                        android:selectAllOnFocus="true"
+                        android:text="@string/paperLogbook" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/landingDayText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/landingDay"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="number"
-                android:nextFocusForward="@id/landingNightText"
-                android:selectAllOnFocus="true"
-                android:textAlignment="textStart"
-                tools:text="0" />
-        </com.google.android.material.textfield.TextInputLayout>
+                <TextView
+                    android:id="@+id/landingText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/landings"
+                    app:layout_constraintEnd_toEndOf="@+id/textInputLayout7"
+                    app:layout_constraintStart_toStartOf="@+id/landingDayLayout"
+                    app:layout_constraintTop_toBottomOf="@+id/logbookNameLayout" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout7"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toEndOf="@+id/textInputLayout3"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/textInputLayout8"
-            app:layout_constraintTop_toTopOf="@+id/textInputLayout8">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/landingDayLayout"
+                    style="@style/EditFlightInputLayout"
+                    android:layout_marginEnd="2dp"
+                    app:layout_constraintEnd_toStartOf="@+id/leftGuideLine"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/landingText">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/landingNightText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/landingNight"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="number"
-                android:nextFocusForward="@id/nightTimeText"
-                android:selectAllOnFocus="true"
-                android:textAlignment="textStart"
-                tools:text="0" />
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/landingDayText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/day"
+                        android:inputType="number"
+                        android:nextFocusForward="@id/landingNightText"
+                        android:selectAllOnFocus="true"
+                        tools:text="0" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout10"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toEndOf="@+id/textInputLayout4"
-            app:layout_constraintStart_toEndOf="@+id/textInputLayout7"
-            app:layout_constraintTop_toTopOf="@+id/textInputLayout8">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout7"
+                    style="@style/EditFlightInputLayout"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
+                    app:layout_constraintEnd_toStartOf="@+id/centerGuideLine"
+                    app:layout_constraintStart_toStartOf="@+id/leftGuideLine"
+                    app:layout_constraintTop_toTopOf="@+id/landingDayLayout">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/nightTimeText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/nightTime"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="time"
-                android:nextFocusForward="@id/ifrTimeText"
-                android:selectAllOnFocus="true"
-                android:textAlignment="textStart"
-                tools:text="0:00" />
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/landingNightText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/night"
+                        android:inputType="number"
+                        android:nextFocusForward="@id/totalTimeOfFlightEditText"
+                        android:selectAllOnFocus="true"
+                        tools:text="0" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout6"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toEndOf="@+id/textInputLayout14"
-            app:layout_constraintStart_toEndOf="@+id/textInputLayout13"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout14">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/nightTimeLayout"
+                    style="@style/EditFlightInputLayout"
+                    android:layout_marginStart="2dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/centerGuideLine"
+                    app:layout_constraintTop_toTopOf="@+id/landingDayLayout">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/simulatorTimeEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/simtTime"
-                android:imeOptions="actionDone"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="number"
-                android:selectAllOnFocus="true"
-                android:textAlignment="textStart"
-                tools:text="0:00" />
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/totalTimeOfFlightEditText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/totalTimeOfFlight"
+                        android:inputType="time"
+                        android:nextFocusForward="@id/multiPilotTimeEditText"
+                        android:selectAllOnFocus="true"
+                        tools:text="0:00" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout11"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toEndOf="@+id/textInputLayout9"
-            app:layout_constraintStart_toStartOf="@+id/textInputLayout9"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout9">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/multiPilotLayout"
+                    style="@style/EditFlightInputLayout.VerticalSpacing"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="2dp"
+                    app:layout_constraintEnd_toStartOf="@+id/centerGuideLine"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/landingDayLayout">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/copilotText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/copilot"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="time"
-                android:nextFocusForward="@id/dualText"
-                android:selectAllOnFocus="true"
-                android:textAlignment="textStart"
-                tools:text="0:00" />
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/multiPilotTimeEditText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/multipilotTime"
+                        android:inputType="time"
+                        android:nextFocusForward="@id/nightTimeText"
+                        android:selectAllOnFocus="true"
+                        tools:text="0:00" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout12"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toEndOf="@+id/textInputLayout10"
-            app:layout_constraintStart_toEndOf="@+id/textInputLayout9"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout10">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout4"
+                    style="@style/EditFlightInputLayout"
+                    android:layout_marginStart="2dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/centerGuideLine"
+                    app:layout_constraintTop_toTopOf="@+id/multiPilotLayout">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/picText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/picIncludingPicus"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="time"
-                android:nextFocusForward="@id/copilotText"
-                android:selectAllOnFocus="true"
-                android:textAlignment="textStart"
-                tools:text="0:00" />
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/nightTimeText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/nightTime"
+                        android:inputType="time"
+                        android:nextFocusForward="@id/ifrTimeText"
+                        android:selectAllOnFocus="true"
+                        tools:text="0:00" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout14"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toEndOf="@+id/textInputLayout12"
-            app:layout_constraintStart_toEndOf="@+id/textInputLayout11"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout12">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/ifrLayout"
+                    style="@style/EditFlightInputLayout.VerticalSpacing"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="2dp"
+                    app:layout_constraintEnd_toStartOf="@+id/centerGuideLine"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/multiPilotLayout">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/dualText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/dualString"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="time"
-                android:nextFocusForward="@id/instructorText"
-                android:selectAllOnFocus="true"
-                android:textAlignment="textStart"
-                tools:text="0:00" />
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/ifrTimeText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/ifrTime"
+                        android:inputType="time"
+                        android:nextFocusForward="@id/picText"
+                        android:selectAllOnFocus="true"
+                        tools:text="0:00" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout13"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toEndOf="@+id/textInputLayout11"
-            app:layout_constraintStart_toStartOf="@+id/textInputLayout11"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout11">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout12"
+                    style="@style/EditFlightInputLayout"
+                    android:layout_marginStart="2dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/centerGuideLine"
+                    app:layout_constraintTop_toTopOf="@+id/ifrLayout">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/instructorText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/instructorString"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="time"
-                android:nextFocusForward="@id/simulatorTimeEditText"
-                android:selectAllOnFocus="true"
-                android:textAlignment="textStart"
-                tools:text="0:00" />
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/picText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/picIncludingPicus"
+                        android:inputType="time"
+                        android:nextFocusForward="@id/copilotText"
+                        android:selectAllOnFocus="true"
+                        tools:text="0:00" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout9"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/rounded_corners_white"
-            app:layout_constraintEnd_toEndOf="@+id/textInputLayout7"
-            app:layout_constraintStart_toStartOf="@+id/textInputLayout8"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout8">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout11"
+                    style="@style/EditFlightInputLayout.VerticalSpacing"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="2dp"
+                    app:layout_constraintEnd_toStartOf="@+id/centerGuideLine"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ifrLayout">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/ifrTimeText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/ifrTime"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="time"
-                android:nextFocusForward="@id/picText"
-                android:selectAllOnFocus="true"
-                android:textAlignment="textStart"
-                tools:text="0:00" />
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/copilotText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/copilot"
+                        android:inputType="time"
+                        android:nextFocusForward="@id/dualText"
+                        android:selectAllOnFocus="true"
+                        tools:text="0:00" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/cancelBalanceForwardDialogButton"
-            android:layout_width="100dp"
-            android:layout_height="30dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp"
-            android:gravity="center_vertical"
-            android:text="@android:string/cancel"
-            android:textAlignment="center"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorAccent"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/saveBalanceForwardDialogButton"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout13" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout14"
+                    style="@style/EditFlightInputLayout"
+                    android:layout_marginStart="2dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/centerGuideLine"
+                    app:layout_constraintTop_toTopOf="@+id/textInputLayout11">
 
-        <TextView
-            android:id="@+id/saveBalanceForwardDialogButton"
-            android:layout_width="100dp"
-            android:layout_height="30dp"
-            android:gravity="center_vertical"
-            android:text="@android:string/ok"
-            android:textAlignment="center"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorAccent"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/cancelBalanceForwardDialogButton"
-            app:layout_constraintTop_toTopOf="@+id/cancelBalanceForwardDialogButton" />
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dualText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/dualString"
+                        android:inputType="time"
+                        android:nextFocusForward="@id/instructorText"
+                        android:selectAllOnFocus="true"
+                        tools:text="0:00" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout13"
+                    style="@style/EditFlightInputLayout.VerticalSpacing"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="2dp"
+                    app:layout_constraintEnd_toStartOf="@+id/centerGuideLine"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout11">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/instructorText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/instructorString"
+                        android:inputType="time"
+                        android:nextFocusForward="@id/simulatorTimeEditText"
+                        android:selectAllOnFocus="true"
+                        tools:text="0:00" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout6"
+                    style="@style/EditFlightInputLayout"
+                    android:layout_marginStart="2dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/centerGuideLine"
+                    app:layout_constraintTop_toTopOf="@+id/textInputLayout13">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/simulatorTimeEditText"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/simtTime"
+                        android:inputType="number"
+                        android:selectAllOnFocus="true"
+                        tools:text="0:00" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/cancelBalanceForwardDialogButton"
+                    style="@style/DialogButtonText"
+                    android:layout_marginTop="32dp"
+                    android:text="@android:string/cancel"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout13" />
+
+                <TextView
+                    android:id="@+id/saveBalanceForwardDialogButton"
+                    style="@style/DialogButtonText"
+                    android:text="@android:string/ok"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/cancelBalanceForwardDialogButton" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/centerGuideLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.5" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/leftGuideLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.25" />
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

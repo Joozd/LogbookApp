@@ -72,7 +72,7 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/ttofTextInputLayout"
-                    style="@style/EditFlightInputLayout"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing"
                     android:layout_marginEnd="4dp"
                     app:layout_constraintEnd_toStartOf="@+id/nightTimeLayout"
                     app:layout_constraintStart_toStartOf="parent"
@@ -89,7 +89,7 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/nightTimeLayout"
-                    style="@style/EditFlightInputLayout"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing"
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="4dp"
                     app:layout_constraintEnd_toStartOf="@+id/ifrTimeLayout"
@@ -107,7 +107,7 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/ifrTimeLayout"
-                    style="@style/EditFlightInputLayout"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing"
                     android:layout_marginStart="4dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/nightTimeLayout"

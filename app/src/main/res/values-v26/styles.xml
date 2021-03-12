@@ -29,6 +29,7 @@
         <item name="android:importantForAutofill">no</item> <!-- in v26\styles.xml -->
         <item name="android:imeOptions">actionNext</item>
         <item name="android:padding">10dp</item>
-
+        <item name="android:paddingBottom">0dp</item>
+        <item name="singleLine">true</item>
     </style>
 </resources>

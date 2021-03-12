@@ -25,7 +25,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import nl.joozd.joozdlogcommon.BalanceForward
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogAddBalanceForwardBinding
@@ -41,10 +40,8 @@ class AddBalanceForwardDialog: JoozdlogFragment() {
     private val bf: BalanceForward
         get() = viewModel.workingBalanceForward
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return DialogAddBalanceForwardBinding.bind(layoutInflater.inflate(R.layout.dialog_add_balance_forward, container, false)).apply{
-
-            flightInfoText.joozdLogSetBackgroundColor()
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        DialogAddBalanceForwardBinding.bind(layoutInflater.inflate(R.layout.dialog_add_balance_forward, container, false)).apply{
 
             /**
              * FIll fields opon (re)-creation of Fragment:
@@ -108,7 +105,7 @@ class AddBalanceForwardDialog: JoozdlogFragment() {
                 false
             }
 
-            viewModel.feedbackEvent.observe(viewLifecycleOwner, Observer {
+            viewModel.feedbackEvent.observe(viewLifecycleOwner) {
                 when (it.getEvent()){
                     BalanceForwardDialogEvents.NUMBER_PARSE_ERROR -> toast ( "ERROR")
                     BalanceForwardDialogEvents.UPDATE_FIELDS -> fillFields()
@@ -116,7 +113,7 @@ class AddBalanceForwardDialog: JoozdlogFragment() {
                         closeFragment()
                     }
                 }
-            })
+            }
 
             cancelBalanceForwardDialogButton.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
@@ -128,7 +125,7 @@ class AddBalanceForwardDialog: JoozdlogFragment() {
                 viewModel.saveBalanceForward()
             }
 
-            backgroundLayout.setOnClickListener {
+            addBalanceForwardDialogBackground.setOnClickListener {
                 // Do nothing
             }
 
@@ -136,63 +133,56 @@ class AddBalanceForwardDialog: JoozdlogFragment() {
              * Observers
              *************************************************************************************/
 
-            viewModel.name.observe(viewLifecycleOwner, Observer {
+            viewModel.name.observe(viewLifecycleOwner){
                 logbookNameText.setText(it)
-            })
+            }
 
-            viewModel.multiPilot.observe(viewLifecycleOwner, Observer {
+            viewModel.multiPilot.observe(viewLifecycleOwner) {
                 multiPilotTimeEditText.setText(it)
-            })
+            }
 
-            viewModel.totalTimeOfFlight.observe(viewLifecycleOwner, Observer {
+            viewModel.totalTimeOfFlight.observe(viewLifecycleOwner) {
                 totalTimeOfFlightEditText.setText(it)
-            })
+            }
 
-            viewModel.landingDay.observe(viewLifecycleOwner, Observer {
+            viewModel.landingDay.observe(viewLifecycleOwner) {
                 landingDayText.setText(it)
-            })
+            }
 
-            viewModel.landingNight.observe(viewLifecycleOwner, Observer {
+            viewModel.landingNight.observe(viewLifecycleOwner) {
                 landingNightText.setText(it)
-            })
+            }
 
-            viewModel.nightTime.observe(viewLifecycleOwner, Observer {
+            viewModel.nightTime.observe(viewLifecycleOwner) {
                 nightTimeText.setText(it)
-            })
+            }
 
-            viewModel.ifrTime.observe(viewLifecycleOwner, Observer {
+            viewModel.ifrTime.observe(viewLifecycleOwner) {
                 ifrTimeText.setText(it)
-            })
+            }
 
-            viewModel.picTime.observe(viewLifecycleOwner, Observer {
+            viewModel.picTime.observe(viewLifecycleOwner) {
                 picText.setText(it)
-            })
+            }
 
-            viewModel.copilotTime.observe(viewLifecycleOwner, Observer {
+            viewModel.copilotTime.observe(viewLifecycleOwner) {
                 copilotText.setText(it)
-            })
+            }
 
-            viewModel.dualTime.observe(viewLifecycleOwner, Observer {
+            viewModel.dualTime.observe(viewLifecycleOwner) {
                 dualText.setText(it)
-            })
+            }
 
-            viewModel.instructorTime.observe(viewLifecycleOwner, Observer {
+            viewModel.instructorTime.observe(viewLifecycleOwner) {
                 instructorText.setText(it)
-            })
+            }
 
-            viewModel.simTime.observe(viewLifecycleOwner, Observer {
+            viewModel.simTime.observe(viewLifecycleOwner) {
                 simulatorTimeEditText.setText(it)
-            })
-
-
-
-
-
+            }
 
         }.root
 
-
-    }
 
 
     /*********************************************************************************************

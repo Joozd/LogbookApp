@@ -77,7 +77,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flightDateWrapper"
-                style="@style/EditFlightInputLayout"
+                style="@style/EditFlightInputLayout.HorizontalSpacing"
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toStartOf="@+id/flightFlightNumberWrapper"
                 app:layout_constraintStart_toEndOf="@+id/flightDateSelector"
@@ -96,7 +96,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flightFlightNumberWrapper"
-                style="@style/EditFlightInputLayout"
+                style="@style/EditFlightInputLayout.HorizontalSpacing"
                 android:layout_marginStart="4dp"
                 app:layout_constraintEnd_toStartOf="@+id/flightFlightNumberSelector"
                 app:layout_constraintStart_toEndOf="@+id/flightDateWrapper"
@@ -131,7 +131,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flightOrigWrapper"
-                style="@style/EditFlightInputLayout.VerticalSpaced"
+                style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
                 app:layout_constraintEnd_toStartOf="@+id/flightDestWrapper"
                 app:layout_constraintStart_toEndOf="@+id/flightOrigSelector"
                 app:layout_constraintTop_toBottomOf="@+id/flightDateWrapper">
@@ -149,7 +149,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flightDestWrapper"
-                style="@style/EditFlightInputLayout"
+                style="@style/EditFlightInputLayout.HorizontalSpacing"
                 android:layout_marginStart="4dp"
                 app:layout_constraintEnd_toStartOf="@+id/flightDestSelector"
                 app:layout_constraintStart_toEndOf="@+id/flightOrigWrapper"
@@ -185,7 +185,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flightSimTimeWrapper"
-                style="@style/EditFlightInputLayout.VerticalSpaced"
+                style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
                 android:visibility="gone"
                 app:layout_constraintEnd_toStartOf="@+id/flighttInSelector"
                 app:layout_constraintStart_toEndOf="@+id/flighttOutSelector"
@@ -203,7 +203,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flighttOutStringWrapper"
-                style="@style/EditFlightInputLayout.VerticalSpaced"
+                style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
                 app:layout_constraintEnd_toStartOf="@+id/flighttInStringWrapper"
                 app:layout_constraintStart_toEndOf="@+id/flighttOutSelector"
                 app:layout_constraintTop_toBottomOf="@+id/flightOrigWrapper">
@@ -220,7 +220,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flighttInStringWrapper"
-                style="@style/EditFlightInputLayout"
+                style="@style/EditFlightInputLayout.HorizontalSpacing"
                 android:layout_marginStart="4dp"
                 app:layout_constraintEnd_toStartOf="@+id/flighttInSelector"
                 app:layout_constraintStart_toEndOf="@+id/flighttOutStringWrapper"
@@ -256,7 +256,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flightAircraftWrapper"
-                style="@style/EditFlightInputLayout.VerticalSpaced"
+                style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
                 app:layout_goneMarginTop="4dp"
                 app:layout_constraintEnd_toStartOf="@+id/flightTakeoffLandingWrapper"
                 app:layout_constraintStart_toEndOf="@+id/flightAcRegSelector"
@@ -275,7 +275,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flightTakeoffLandingWrapper"
-                style="@style/EditFlightInputLayout"
+                style="@style/EditFlightInputLayout.HorizontalSpacing"
                 android:layout_marginStart="4dp"
                 app:layout_constraintEnd_toStartOf="@+id/flightTakeoffLandingSelector"
                 app:layout_constraintStart_toEndOf="@+id/flightAircraftWrapper"
@@ -312,7 +312,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flightNameWrapper"
-                style="@style/EditFlightInputLayout.VerticalSpaced"
+                style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
                 app:layout_constraintEnd_toStartOf="@+id/flightName2Wrapper"
                 app:layout_constraintStart_toEndOf="@+id/flightNameSelector"
                 app:layout_constraintTop_toBottomOf="@+id/flightAircraftWrapper">
@@ -330,7 +330,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flightName2Wrapper"
-                style="@style/EditFlightInputLayout.VerticalSpaced"
+                style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
                 android:layout_marginStart="4dp"
                 app:layout_constraintEnd_toStartOf="@+id/flightName2Selector"
                 app:layout_constraintStart_toEndOf="@+id/flightNameWrapper"
@@ -357,7 +357,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flightRemarksLayout"
-                style="@style/EditFlightInputLayout.VerticalSpaced"
+                style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
                 app:layout_constraintEnd_toStartOf="@+id/flightName2Selector"
                 app:layout_constraintStart_toEndOf="@+id/flightNameSelector"
                 app:layout_constraintTop_toBottomOf="@+id/flightName2Wrapper"> <!-- left one is GONE when in SimLayout -->

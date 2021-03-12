@@ -79,7 +79,7 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/registrationFieldLayout"
-                    style="@style/EditFlightInputLayout"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing"
                     android:hint="@string/registration"
                     app:errorEnabled="true"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -105,7 +105,7 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/searchFieldLayout"
-                    style="@style/EditFlightInputLayout"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing"
                     android:layout_marginTop="8dp"
                     app:layout_constraintBottom_toTopOf="@+id/aircraftPickerCancel"
                     app:layout_constraintEnd_toEndOf="parent"

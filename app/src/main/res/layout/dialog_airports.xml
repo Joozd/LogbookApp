@@ -71,7 +71,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayout16"
-                style="@style/EditFlightInputLayout"
+                style="@style/EditFlightInputLayout.HorizontalSpacing"
                 app:layout_constraintEnd_toStartOf="@+id/setCurrentTextButton"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">

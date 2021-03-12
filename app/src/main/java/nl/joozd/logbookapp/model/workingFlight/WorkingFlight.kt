@@ -1060,10 +1060,10 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
          */
         suspend fun createNew(): WorkingFlight {
             val repo = FlightRepository.getInstance()
-            val idAsync = repo.getHighestIdAsync()
-            val f = repo.getMostRecentFlightAsync().await()?.let { f ->
-                reverseFlight(f, idAsync.await() + 1)
-            } ?: Flight(idAsync.await() + 1)
+            val fAsync = repo.getMostRecentFlightAsync()
+            val f = fAsync.await()?.let { f ->
+                reverseFlight(f, repo.lowestFreeFlightID())
+            } ?: Flight(repo.lowestFreeFlightID())
             return withContext(Dispatchers.Main){WorkingFlight(f, newFlight = true)}
         }
     }

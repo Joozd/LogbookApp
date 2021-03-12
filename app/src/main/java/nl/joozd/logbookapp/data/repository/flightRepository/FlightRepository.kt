@@ -520,7 +520,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * Gets the lowest free FlightID
      */
     suspend fun lowestFreeFlightID(): Int = withContext(Dispatchers.IO){
-        (cachedFlightsList?.maxByOrNull { it.flightID }?.flightID ?: getHighestIdAsync().await())
+        (cachedFlightsList?.maxByOrNull { it.flightID }?.flightID ?: getHighestIdAsync().await()) + 1
     }
 
     fun iAmACaptainAsync() =  async(dispatcher) {

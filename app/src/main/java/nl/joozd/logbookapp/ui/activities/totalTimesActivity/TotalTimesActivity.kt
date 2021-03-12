@@ -36,8 +36,6 @@ class TotalTimesActivity : JoozdlogActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setTheme(R.style.AppTheme)
-
         /**
          * UI related stuff goes in this block
          */

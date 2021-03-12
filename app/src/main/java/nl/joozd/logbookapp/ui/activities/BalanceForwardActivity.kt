@@ -59,8 +59,6 @@ class BalanceForwardActivity : JoozdlogActivity() {
 //        TODO("get confirmation on delete and undo SnackBar")
 
         super.onCreate(savedInstanceState)
-
-        setTheme(R.style.AppTheme)
         ActivityBalanceForwardBinding.inflate(layoutInflater).apply{
 
             setSupportActionBarWithReturn(balanceForwardToolbar)?.apply {

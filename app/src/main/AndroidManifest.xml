@@ -39,15 +39,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
         </activity>
-        <activity android:name=".ui.activities.totalTimesActivity.TotalTimesActivity">
+        <activity android:name=".ui.activities.totalTimesActivity.TotalTimesActivity"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
         </activity>
-        <activity android:name=".ui.activities.BalanceForwardActivity">
+        <activity android:name=".ui.activities.BalanceForwardActivity"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
+
         </activity>
         <activity
             android:name=".ui.activities.pdfParserActivity.PdfParserActivity"

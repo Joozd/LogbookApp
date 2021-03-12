@@ -70,9 +70,10 @@
 
     <style name="ToolBar">
         <item name="android:theme">@style/ToolBarTheme</item>
-        <item name="android:background">?attr/colorPrimary</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="android:elevation">4dp</item>
     </style>item
 
     <style name="MenuItemStyle" parent="AppTheme">

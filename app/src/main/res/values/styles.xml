@@ -269,7 +269,7 @@
         <item name="android:layout_marginEnd">4dp</item>
     </style>
 
-    <style name="EditFlightInputLayoutVerticalSpaced" parent="EditFlightInputLayout">
+    <style name="EditFlightInputLayout.VerticalSpaced">
         <item name="android:layout_marginTop">8dp</item>
     </style>
 

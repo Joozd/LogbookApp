@@ -30,6 +30,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.core.content.ContextCompat
+import androidx.core.view.marginTop
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import nl.joozd.joozdutils.JoozdlogAlertDialog
@@ -559,7 +560,7 @@ class EditFlightFragment: JoozdlogFragment(){
         //flighttOutStringWrapper.hint=getString(R.string.simtTime)
         //flighttOutStringField.hint=getString(R.string.simtTime)
         flightSimTimeWrapper.visibility = View.VISIBLE
-        flightAircraftWrapper.constrainTopToBottom(flightSimTimeWrapper, "4dp")
+        flightAircraftWrapper.constrainTopToBottom(flightSimTimeWrapper, flightSimTimeWrapper.marginTop) // clone flightSimTimeWrapper's top margin as somehow dp to pixels seems to not work
         flighttOutSelector.constrainToCenterVertical(flightSimTimeWrapper)
         flighttInSelector.constrainToCenterVertical(flightSimTimeWrapper)
         flighttOutStringWrapper.visibility = View.GONE
@@ -567,6 +568,7 @@ class EditFlightFragment: JoozdlogFragment(){
         autoFillCheckBox.isEnabled = false
         flighttInStringWrapper.visibility=View.GONE
         flightFlightNumberWrapper.visibility=View.GONE
+        flightNameWrapper.visibility=View.GONE
         dualSelector.visibility=View.GONE
         instructorSelector.visibility=View.GONE
         ifrSelector.visibility=View.GONE
@@ -587,11 +589,12 @@ class EditFlightFragment: JoozdlogFragment(){
         // v.autoFillCheckBox.isEnabled = viewModel.workingFlight.value?.autoFill ?: 0 > 0
         flightSimTimeWrapper.visibility = View.GONE
         flighttOutStringWrapper.visibility = View.VISIBLE
-        flightAircraftWrapper.constrainTopToBottom(flighttOutStringWrapper, "4dp")
+        flightAircraftWrapper.constrainTopToBottom(flighttOutStringWrapper, flighttOutStringWrapper.marginTop) // clone flighttOutStringWrapper's top margin as somehow dp to pixels seems to not work
         flighttOutSelector.constrainToCenterVertical(flighttOutStringWrapper)
         flighttInSelector.constrainToCenterVertical(flighttOutStringWrapper)
         flighttInStringWrapper.visibility = View.VISIBLE
         flightFlightNumberWrapper.visibility = View.VISIBLE
+        flightNameWrapper.visibility=View.VISIBLE
         dualSelector.visibility = View.VISIBLE
         instructorSelector.visibility = View.VISIBLE
         ifrSelector.visibility = View.VISIBLE

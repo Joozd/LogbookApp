@@ -77,7 +77,6 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInputLayout16"
                     style="@style/EditFlightInputLayout"
-                    android:layout_marginTop="8dp"
                     app:layout_constraintEnd_toStartOf="@+id/addSearchFieldNameButton"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
@@ -138,6 +137,7 @@
                     <TextView
                         android:id="@+id/selectedNames"
                         style="@style/SecondaryText"
+                        android:gravity="center"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"

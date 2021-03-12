@@ -69,12 +69,15 @@
     </style>
 
     <style name="ToolBar">
-        <item name="android:theme">@style/ToolBar</item>
+        <item name="android:theme">@style/ToolBarTheme</item>
+        <item name="android:background">?attr/colorPrimary</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>
-        <item name="android:textColorPrimary">?attr/colorOnPrimary</item>
-        <item name="android:textColorSecondary">?attr/colorOnPrimary</item>
-        <item name="android:background">?attr/colorPrimary</item>
+    </style>item
+
+    <style name="MenuItemStyle" parent="AppTheme">
+        <item name="android:textAppearance">@style/SecondaryText</item>
+        <item name="background">?attr/colorTextViewBackground</item>
     </style>
 
     <style name="appearance_aircraft_local" parent="@android:style/TextAppearance">

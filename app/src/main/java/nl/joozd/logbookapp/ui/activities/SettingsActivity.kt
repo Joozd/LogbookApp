@@ -70,7 +70,7 @@ class SettingsActivity : JoozdlogActivity() {
 
             ArrayAdapter(
                 activity,
-                R.layout.spinner_item,
+                android.R.layout.simple_spinner_item,
                 arrayListOf<String>()
             ).apply {
                 // Specify the layout to use when the list of choices appears
@@ -344,7 +344,11 @@ class SettingsActivity : JoozdlogActivity() {
 
     }
 
+    /**
+     * TODO use newer interface for this using registerForActivityResult()
+     */
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             CALENDAR_PERMISSION_REQUEST_CODE -> {
                 // If request is cancelled, the result arrays are empty.

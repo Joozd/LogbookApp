@@ -19,7 +19,7 @@
   -->
 
 <resources>
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">#AED6F1</item>
         <item name="colorPrimaryDark">#85C1E9</item>
@@ -40,5 +40,11 @@
         <item name="android:textColorPrimaryInverse">@color/white</item>
         <item name="android:textColorSecondaryInverse">#D0000000</item>
         <item name="android:colorButtonNormal">#FFA0A0A0</item>
+    </style>
+
+    <style name="ToolBarTheme" parent="AppTheme">
+        <item name="android:textColorPrimary">?attr/colorOnPrimary</item>
+        <item name="android:textColorSecondary">?attr/colorOnPrimary</item>
+        <item name="colorControlNormal">?attr/colorOnPrimary</item>
     </style>
 </resources>

@@ -31,6 +31,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.viewModels
+import androidx.core.view.forEach
 import androidx.fragment.app.commit
 import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
@@ -279,6 +280,14 @@ class MainActivity : JoozdlogActivity() {
             }
             setContentView(root)
         }
+    }
+
+    /**
+     * I don't like having to do it this way, but "If it's stupid but it works, it's not stupid"
+     */
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

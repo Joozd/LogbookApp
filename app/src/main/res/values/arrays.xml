@@ -49,4 +49,13 @@
         <item>Night Landings</item>
     </string-array>
 
+    <!-- This array follows MODE_NIGHT_NO and MODE_NIGHT_YES.
+         index 0 should be changed to -1 for MODE_NIGHT_FOLLOW_SYSTEM -->
+    <string-array name="dark_mode_choices">
+        <item>Default</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+
+
 </resources>

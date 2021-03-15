@@ -68,6 +68,41 @@ class SettingsActivity : JoozdlogActivity() {
              * Populate spinners
              ****************************************************************************************/
 
+            /**
+             * Dark mode spinner
+             */
+            ArrayAdapter.createFromResource(
+                activity,
+                R.array.dark_mode_choices,
+                android.R.layout.simple_spinner_item
+            ).apply {
+                // Specify the layout to use when the list of choices appears
+                setDropDownViewResource(R.layout.spinner_dropdown_item)
+            }.also { a ->
+                // Apply the adapter to the spinner
+                darkModePickerSpinner.apply{
+                    adapter = a
+                    setSelection(viewModel.defaultNightMode)
+                }
+            }
+            darkModePickerSpinner.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        //mainSearchField.text = mainSearchField.text
+                        viewModel.darkmodePicked(position)
+                    }
+                }
+
+
+            /**
+             * Calendar picker spinner
+             */
             ArrayAdapter(
                 activity,
                 android.R.layout.simple_spinner_item,
@@ -75,9 +110,11 @@ class SettingsActivity : JoozdlogActivity() {
             ).apply {
                 // Specify the layout to use when the list of choices appears
                 setDropDownViewResource(R.layout.spinner_dropdown_item)
-            }.also { adapter ->
+            }.also { a ->
                 // Apply the adapter to the spinner
-                settingsCalendarPickerSpinner.adapter = adapter
+                settingsCalendarPickerSpinner.apply{
+                    adapter = a
+                }
             }
             settingsCalendarPickerSpinner.onItemSelectedListener =
                 object : AdapterView.OnItemSelectedListener {
@@ -92,6 +129,8 @@ class SettingsActivity : JoozdlogActivity() {
                         viewModel.calendarPicked(position)
                     }
                 }
+
+
             /****************************************************************************************
              * Expand or collapse groups of settings
              ****************************************************************************************/

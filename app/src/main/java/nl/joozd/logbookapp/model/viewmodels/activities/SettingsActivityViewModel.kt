@@ -26,6 +26,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.annotation.RequiresPermission
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +44,7 @@ import nl.joozd.logbookapp.extensions.toDateStringLocalized
 import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
+import nl.joozd.logbookapp.ui.utils.DarkModeHub
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.time.Instant
 import java.time.LocalDate
@@ -245,6 +247,11 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
 
 
+    val defaultNightMode
+        get() = AppCompatDelegate.getDefaultNightMode().takeIf{ it in (1..2)} ?: 0
+
+
+
     /*********************************************************************************************
      * Callable functions
      *********************************************************************************************/
@@ -253,6 +260,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         val dateString = LocalDate.now().toDateStringForFiles()
         //TODO make some kind of "working" animation on button
         _uriToShare.value = JoozdlogExport.shareCsvExport("joozdlog_backup_$dateString")
+    }
+
+    fun darkmodePicked(darkMode: Int){
+        DarkModeHub.setDarkMode(darkMode)
     }
 
     fun setUseIataAirports(useIata: Boolean) {
@@ -326,8 +337,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
     fun fillCalendarsList() {
         viewModelScope.launch {
-            _foundCalendars.value =
-                withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }
+            withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }?.let { _foundCalendars.value = it }
             _pickedCalendar.value = _foundCalendars.value?.firstOrNull {c -> c.name == Preferences.selectedCalendar}
         }
     }

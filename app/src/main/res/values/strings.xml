@@ -356,7 +356,7 @@
     <string name="create_login_link_explanation">This will create a login link that you can paste in your favorite app (email, sms, notepad, anywhere). If you click that link, it will try to log you in with the username/password currently set on this device.</string>
     <string name="change_password_explanation">You can use this screen to change your password when you think your login link might have been compromised. A new login link will be created for you to save in your favorite app.</string>
     <string name="new_password">New Password</string>
-    <string name="loggings_preferences">Logging Preferences</string>
+    <string name="loggings_preferences">General Preferences</string>
     <string name="backup_preferences">Backup Preferences</string>
     <string name="backup_prefs_description">You should periodically backup your logbook.</string>
 

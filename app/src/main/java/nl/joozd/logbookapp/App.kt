@@ -27,6 +27,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.ui.utils.DarkModeHub
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 
@@ -45,5 +46,8 @@ class App : Application(){
         JoozdlogWorkersHub.periodicGetAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
         JoozdlogWorkersHub.periodicSynchronizeAircraftTypes(Preferences.updateLargerFilesOverWifiOnly)
         JoozdlogWorkersHub.periodicBackupFromServer()
+
+        // Set dark mode preference from Preferences
+        DarkModeHub.setDarkMode()
     }
 }

@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
 import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import nl.joozd.logbookapp.R
@@ -154,6 +155,8 @@ object Preferences {
     /***********************
      *   UI preferences:   *
      **********************/
+
+    var darkMode: Int by JoozdLogSharedPrefs(sharedPref, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
     /**
      * Use ICAO or Iata? True = IATA, false ICAO

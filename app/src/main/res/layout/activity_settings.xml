@@ -87,17 +87,47 @@
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/loggingPrefsDescriptionTextView"
-                tools:visibility="gone">
+                tools:visibility="visible">
 
 
                 <!-- Text set programmatically -->
+
+                <TextView
+                    android:id="@+id/useDarkModeText"
+                    style="@style/SettingsActivitySwitch"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toStartOf="@+id/darkModePickerLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Use Dark mode" />
+
+                <FrameLayout
+                    android:id="@+id/darkModePickerLayout"
+                    style="@style/SpinnerFrameStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/useDarkModeText"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/useDarkModeText">
+
+                    <Spinner
+                        android:id="@+id/darkModePickerSpinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:paddingBottom="4dp"
+                        tools:visibility="visible" />
+
+
+                </FrameLayout>
+
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/settingsUseIataSelector"
                     style="@style/SettingsActivitySwitch"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/useDarkModeText"
                     tools:text="Use ICAO airport identifiers"
                     tools:visibility="visible" />
 
@@ -178,8 +208,7 @@
                     app:layout_constrainedWidth="true"
                     app:layout_constraintBottom_toBottomOf="@+id/augmentedTakeoffTimeHintButton"
                     app:layout_constraintEnd_toEndOf="@+id/augmentedTakeoffTimeHintButton"
-                    app:layout_constraintStart_toStartOf="parent"
-                    tools:visibility="visible">
+                    app:layout_constraintStart_toStartOf="parent">
 
                     <TextView
                         android:id="@+id/popupWindowTextView"
@@ -189,8 +218,7 @@
                         android:gravity="center_horizontal"
                         android:padding="8dp"
                         android:text="@string/augmented_crew_time_explanation"
-                        android:textSize="14sp"
-                        tools:visibility="visible" />
+                        android:textSize="14sp" />
 
                 </androidx.cardview.widget.CardView>
 

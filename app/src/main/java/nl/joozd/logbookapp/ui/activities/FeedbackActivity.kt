@@ -66,7 +66,7 @@ class FeedbackActivity : JoozdlogActivity() {
                 viewModel.loadKnownIssuesLiveData(R.raw.joozdlog_todo_list)
                 Log.d("DEBUG", "CHECKPOINT 2")
                 supportFragmentManager.commit {
-                    add(R.id.root_layout, TextDisplayDialog(R.string.joozdlog_todo_title, viewModel.knownIssuesLiveData), null)
+                    add(R.id.layoutBelowToolbar, TextDisplayDialog(R.string.joozdlog_todo_title, viewModel.knownIssuesLiveData), null)
                     addToBackStack(null)
                 }
             }

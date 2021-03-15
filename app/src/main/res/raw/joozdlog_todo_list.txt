@@ -2,16 +2,24 @@ JOOZDLOG TODO LIST
 
 BUGS:
 
-When "ALWAYS" selected, importing briefing sheets doesn't work anymore
+SOMETIMES FLIGHTS ADDED THROUGH "NEW FLIGHT" ARE GETTING LOST ON NEXT SYNC.
+THIS MIGHT HAVE BEEN FIXED BUT MAYBE NOT. IF THIS HAPPENS TO YOU, PLEASE REPORT WHAT YOU DID BECAUSE I CANNOT REPRODUCE THIS AT WILL
+
+entering an invalid time (such as 1760) causes a crash
+
+Everything needs more testing.
 
 ******************
 TODO BEFORE PUBLIC BETA:
 ******************
 
-Voorpagina PDF
+Show a confirmation popup or something when email sucessfully verified.
+Do more work at email verifications (when, how often etc)
+
+Create a front page for PDF logbook
 
 Monthlies:
-conflict handling needs more testing. Minder lelijk maken ook
+conflict handling / updating of logged flights needs more testing.
 
 *** Dit alleen nodig voor niet-KLC (1.0.1) ***
 Custom aircraft + upload naar server voor toevoegen aan lijst

@@ -36,6 +36,7 @@
             android:padding="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/headerLayout"
                 style="@style/DialogHeaderLayout"
@@ -48,19 +49,13 @@
                 app:layout_constraintVertical_chainStyle="packed">
 
             <TextView
-                    android:id="@+id/airportPickerTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/pickNames"
-                    android:textSize="36sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                android:id="@+id/airportPickerTitle"
+                style="@style/DialogHeaderText"
+                android:text="@string/pickNames"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout

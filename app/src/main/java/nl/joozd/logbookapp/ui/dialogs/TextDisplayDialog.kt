@@ -31,16 +31,14 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
 /**
  * Fragment for displaying text
+ * If using LiveData for filling title/etxt, it will go stale on recreation and use last observed data.
  */
 class TextDisplayDialog() : JoozdlogFragment() {
     constructor(title: String = "", text: String = ""): this(){
         _text = text
         _title = title
     }
-    constructor(titleLiveData: LiveData<String>, textLiveData: LiveData<String>): this() {
-        _titleLiveData = titleLiveData
-        _textLiveData = textLiveData
-    }
+
     constructor(titleResource: Int, textLiveData: LiveData<String>): this(){
         _titleResource = titleResource
         _textLiveData = textLiveData
@@ -56,39 +54,45 @@ class TextDisplayDialog() : JoozdlogFragment() {
     private var _titleLiveData: LiveData<String>? = null
     private var _textLiveData: LiveData<String>? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = DialogTextDisplayBinding.bind(inflater.inflate(R.layout.dialog_text_display, container, false)).apply{
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        DialogTextDisplayBinding.bind(inflater.inflate(R.layout.dialog_text_display, container, false)).apply {
+            // Set title and text if constructor with ResID was used
+            _titleResource?.let {
+                _title = requireActivity().getString(it)
+            }
+            _textResource?.let {
+                _text = requireActivity().getString(it)
+            }
 
-        textDialogTopHalf.joozdLogSetBackgroundColor()
+            // Get title and text if recreated
+            savedInstanceState?.let { bundle ->
+                bundle.getString(TEXT_TAG)?.let { _text = it }
+                bundle.getString(TITLE_TAG)?.let { _title = it }
+            }
+            displayTextDialogTitle.text = _title
+            displayTextDialogTextview.text = _text
 
-        // Set title and text if constructor with ResID was used
-        _titleResource?.let{
-            _title = requireActivity().getString(it)
-        }
-        _textResource?.let{
-            _text = requireActivity().getString(it)
-        }
+            _titleLiveData?.observe(requireActivity()) {
+                displayTextDialogTitle.text = it
+                _title = it
+            }
+            _textLiveData?.observe(requireActivity()) {
+                displayTextDialogTextview.text = it
+                _text = it
+            }
 
-        // Get title and text if recreated
-        savedInstanceState?.let{ bundle ->
-            bundle.getString(TEXT_TAG)?.let {_text = it }
-            bundle.getString(TITLE_TAG)?.let { _title = it }
-        }
-        displayTextDialogTitle.text = _title
-        displayTextDialogTextview.text = _text
+            headerLayout.setOnClickListener {  } // catch clicks
+            bodyLayout.setOnClickListener {  } // catch clicks
 
-        _titleLiveData?.observe(requireActivity()){
-            displayTextDialogTitle.text = it
-        }
-        _textLiveData?.observe(requireActivity()){
-            displayTextDialogTextview.text = it
-        }
+            textDisplayDialogBackground.setOnClickListener {
+                requireActivity().supportFragmentManager.popBackStack()
+            }
 
-        rootLayout.setOnClickListener {  } // catch clicks
+            okButton.setOnClickListener {
+                requireActivity().supportFragmentManager.popBackStack()
+            }
+        }.root
 
-        okButton.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
-        }
-    }.root
 
     override fun onSaveInstanceState(outState: Bundle) {
         with(outState) {

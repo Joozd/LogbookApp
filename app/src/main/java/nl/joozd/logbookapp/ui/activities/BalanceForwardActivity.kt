@@ -59,7 +59,7 @@ class BalanceForwardActivity : JoozdlogActivity() {
 //        TODO("get confirmation on delete and undo SnackBar")
 
         super.onCreate(savedInstanceState)
-        ActivityBalanceForwardBinding.inflate(layoutInflater).apply{
+        with (ActivityBalanceForwardBinding.inflate(layoutInflater)){
 
             setSupportActionBarWithReturn(balanceForwardToolbar)?.apply {
                 setDisplayHomeAsUpEnabled(true)
@@ -70,7 +70,7 @@ class BalanceForwardActivity : JoozdlogActivity() {
                 showAddBalanceForwardDialog()
             }
 
-            val adapter = BalanceForwardAdapter().apply{
+            val adapter = BalanceForwardAdapter(this@BalanceForwardActivity).apply{
                 onDeleteClicked = {bf -> viewModel.delete(bf)}
                 onListItemClicked = {bf, item -> viewModel.itemClicked(bf, item)}
             }

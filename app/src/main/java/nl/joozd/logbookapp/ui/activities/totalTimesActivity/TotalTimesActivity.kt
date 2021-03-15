@@ -39,7 +39,7 @@ class TotalTimesActivity : JoozdlogActivity() {
         /**
          * UI related stuff goes in this block
          */
-        ActivityTotalTimesBinding.inflate(layoutInflater).apply{
+        with (ActivityTotalTimesBinding.inflate(layoutInflater)){
 
             setSupportActionBarWithReturn(totalTimesToolbar)?.apply {
                 setDisplayShowHomeEnabled(true)
@@ -51,7 +51,7 @@ class TotalTimesActivity : JoozdlogActivity() {
             /**
              * Adding extra Totals lists to this is done in [TotalTimesViewModel.allLists]
              */
-            val totalTimesExpandableListAdapter = TotalTimesExpandableListAdapter()
+            val totalTimesExpandableListAdapter = TotalTimesExpandableListAdapter(this@TotalTimesActivity)
             totalTimesExListView.setAdapter(totalTimesExpandableListAdapter)
 
             viewModel.allLists.observe(activity){ unfiltered ->

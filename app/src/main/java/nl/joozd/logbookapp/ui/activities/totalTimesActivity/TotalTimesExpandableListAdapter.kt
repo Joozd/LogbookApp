@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.ui.activities.totalTimesActivity
 
+import android.app.Activity
 import android.app.Service
 import android.util.Log
 import android.view.LayoutInflater
@@ -31,13 +32,13 @@ import nl.joozd.logbookapp.databinding.ListElementTotalsBinding
 import nl.joozd.logbookapp.databinding.ListGroupTotalsBinding
 
 
-class TotalTimesExpandableListAdapter(): BaseExpandableListAdapter() {
-    constructor(list: List<TotalTimesList>): this(){
+class TotalTimesExpandableListAdapter(private val activity: Activity): BaseExpandableListAdapter() {
+    constructor(activity: Activity, list: List<TotalTimesList>): this(activity){
         this.list = list.toMutableList()
     }
 
-    private val context = App.instance.ctx
-    private val inflater = context.getSystemService(Service.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    private val inflater
+        get() = activity.layoutInflater
 
     private var _list: MutableList<TotalTimesList> = emptyList<TotalTimesList>().toMutableList()
     private var sortTracker = IntArray(_list.size) { 0 }

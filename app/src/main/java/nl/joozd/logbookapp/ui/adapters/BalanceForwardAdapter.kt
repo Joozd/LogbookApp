@@ -19,21 +19,19 @@
 
 package nl.joozd.logbookapp.ui.adapters
 
-import android.app.Service
+import android.app.Activity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
 import nl.joozd.joozdlogcommon.BalanceForward
-import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ListElementTotalsBinding
 import nl.joozd.logbookapp.databinding.ListGroupBalanceForwardBinding
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 
-class BalanceForwardAdapter(private var list: List<BalanceForward> = emptyList()): BaseExpandableListAdapter() {
-    private val context = App.instance.ctx
-    private val layoutInflater = context.getSystemService(Service.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+class BalanceForwardAdapter(private val activity: Activity, private var list: List<BalanceForward> = emptyList()): BaseExpandableListAdapter() {
+    private val layoutInflater = activity.layoutInflater
 
     var onDeleteClicked: (balanceForward: BalanceForward) -> Unit = { }
     var onListItemClicked: (balanceForward: BalanceForward, itemID: Int) -> Unit = { _, _ -> }
@@ -191,7 +189,7 @@ class BalanceForwardAdapter(private var list: List<BalanceForward> = emptyList()
      */
     override fun getGroupCount(): Int = list.size
 
-    private fun BalanceForward.timesToStringPairs(): List<Pair<String, String>> = with (context) { listOf(
+    private fun BalanceForward.timesToStringPairs(): List<Pair<String, String>> = with (activity) { listOf(
         getString(R.string.multipilotTime) to minutesToHoursAndMinutesString(multiPilotTime),
         getString(R.string.totalTimeOfFlight) to minutesToHoursAndMinutesString(aircraftTime),
         getString(R.string.landingDay) to landingDay.toString(),

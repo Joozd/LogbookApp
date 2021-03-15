@@ -21,43 +21,33 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/ExpandableListItemLayout"
     android:id="@+id/elementLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <TextView
-            android:id="@+id/listElementNameTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            tools:text="listElementName"
-            android:textColor="?attr/android:textColorSecondary"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        android:id="@+id/listElementNameTextView"
+        style="@style/ExpandableListItemText"
+        tools:text="listElementName"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-            android:id="@+id/listElementValueTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            tools:text="listElementValue"
-            android:textColor="?attr/android:textColorSecondary"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/listElementNameTextView" />
+        android:id="@+id/listElementValueTextView"
+        style="@style/ExpandableListItemText.Bold"
+        tools:text="listElementValue"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/listElementNameTextView" />
 
     <View
         android:id="@+id/bottomLine"
         android:layout_width="0dp"
-        android:layout_height="1dp"
+        android:layout_height="1px"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:background="#c0c0c0"
+        android:background="#80808080"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

@@ -33,7 +33,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.marginTop
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import nl.joozd.joozdutils.JoozdlogAlertDialog
+import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -50,7 +50,6 @@ import nl.joozd.logbookapp.ui.dialogs.airportPicker.DestPicker
 import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
-import java.time.LocalDate
 
 class EditFlightFragment: JoozdlogFragment(){
     private val viewModel: NewEditFlightFragmentViewModel by viewModels()

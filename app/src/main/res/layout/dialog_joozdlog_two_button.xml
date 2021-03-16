@@ -93,7 +93,7 @@
             tools:text="OK" />
 
         <TextView
-            android:id="@+id/neutralButton"
+            android:id="@+id/negativeButton"
             style="@style/DialogButtonText"
             android:layout_width="0dp"
             android:layout_marginTop="16dp"

@@ -22,9 +22,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/background"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#60000000">
+    style="@style/DialogBackground"
+    tools:theme="@style/AppTheme">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/box"
@@ -34,50 +33,36 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
-        android:background="@drawable/rounded_corners"
+        android:background="@drawable/rounded_corners_textviewbackground"
+        android:elevation="8dp"
+        android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/topHalf"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/top_corners"
+        <TextView
+            android:id="@+id/dialogTitle"
+            style="@style/HeaderText"
+            android:textSize="24sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Title of Dialog" />
 
-            <TextView
-                android:id="@+id/dialogTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                tools:text="Title of Dialog"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/dialogMessage"
+            style="@style/SecondaryText"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/dialogTitle"
+            tools:text="This is the descriptionm of this dialog. Probably best to use this to make it clear what the buttons below hgere do, or just to pass on some information!" />
 
-            <TextView
-                android:id="@+id/dialogMessage"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginBottom="16dp"
-                tools:text="This is the descriptionm of this dialog. Probably best to use this to make it clear what the buttons below hgere do, or just to pass on some information!"
-                android:textAlignment="center"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/dialogTitle" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/right_guideline"
@@ -95,40 +80,29 @@
 
         <TextView
             android:id="@+id/bonusButton"
+            style="@style/DialogButtonText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
+
             android:layout_marginBottom="16dp"
-            android:gravity="center"
-            android:padding="6dp"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorAccent"
-            android:textSize="14sp"
-            android:textStyle="bold"
+            android:gravity="start|center_vertical"
             app:layout_constraintBottom_toTopOf="@+id/neutralButton"
             app:layout_constraintEnd_toStartOf="@+id/left_guideline"
-            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/topHalf"
+            app:layout_constraintTop_toBottomOf="@+id/dialogMessage"
+            app:layout_constraintVertical_chainStyle="spread_inside"
             tools:text="BONUS BUTTON" />
 
         <TextView
             android:id="@+id/neutralButton"
+            style="@style/DialogButtonText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="16dp"
-            android:gravity="center"
-            android:padding="6dp"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorAccent"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:visibility="visible"
+
+            android:gravity="start|center_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/left_guideline"
-            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/bonusButton"
             tools:text="CANCEL" />
@@ -136,37 +110,24 @@
 
         <TextView
             android:id="@+id/negativeButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            style="@style/DialogButtonText"
+            android:layout_width="149dp"
+
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:gravity="end"
-            android:padding="6dp"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorAccent"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:visibility="visible"
+            android:gravity="end|center_vertical"
             app:layout_constraintBottom_toTopOf="@+id/positiveButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="@+id/right_guideline"
-            app:layout_constraintTop_toBottomOf="@+id/topHalf"
+            app:layout_constraintTop_toBottomOf="@+id/dialogMessage"
+            app:layout_constraintVertical_chainStyle="spread_inside"
             tools:text="NO" />
 
         <TextView
             android:id="@+id/positiveButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:gravity="end"
-            android:padding="6dp"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorAccent"
-            android:textSize="14sp"
-            android:textStyle="bold"
+            style="@style/DialogButtonText"
+            android:layout_width="149dp"
+            android:gravity="end|center_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"

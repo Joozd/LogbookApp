@@ -19,16 +19,9 @@
 
 package nl.joozd.logbookapp.ui.activities.pdfParserActivity
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.activity.viewModels
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
-import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -36,11 +29,9 @@ import nl.joozd.logbookapp.databinding.ActivityPdfParserBinding
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
 import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
-import nl.joozd.joozdutils.JoozdlogAlertDialog
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
+import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
-import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
 
 /**
  * PdfParserActivity does the following:

@@ -34,7 +34,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEve
 import nl.joozd.logbookapp.model.viewmodels.activities.ChangePasswordActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.LoginDialog
 import nl.joozd.logbookapp.ui.dialogs.WaitingForSomethingDialog
-import nl.joozd.joozdutils.JoozdlogAlertDialog
+import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
 

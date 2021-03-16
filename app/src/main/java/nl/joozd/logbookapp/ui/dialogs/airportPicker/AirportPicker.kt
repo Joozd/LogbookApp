@@ -26,7 +26,7 @@ import android.view.View
 import android.view.ViewGroup
 
 import androidx.recyclerview.widget.LinearLayoutManager
-import nl.joozd.joozdutils.JoozdlogAlertDialog
+import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogAirportsBinding

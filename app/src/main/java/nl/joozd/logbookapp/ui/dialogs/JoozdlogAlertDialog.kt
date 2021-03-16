@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.joozdutils
+package nl.joozd.logbookapp.ui.dialogs
 
 
 import android.content.Context
@@ -29,8 +29,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
-import nl.joozd.joozdutils.databinding.DialogJoozdlogFourButtonBinding
-import nl.joozd.joozdutils.databinding.DialogJoozdlogTwoButtonBinding
+import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.DialogJoozdlogFourButtonBinding
+import nl.joozd.logbookapp.databinding.DialogJoozdlogTwoButtonBinding
 
 
 /**

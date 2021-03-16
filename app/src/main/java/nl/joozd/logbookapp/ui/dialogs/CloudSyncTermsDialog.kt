@@ -34,9 +34,9 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 class CloudSyncTermsDialog: JoozdlogFragment() {
     val viewModel: CloudSyncTermsDialogViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogCloudSyncTermsBinding.bind(inflater.inflate(R.layout.dialog_cloud_sync_terms, container, false)).apply {
-            acceptTermsBackground.setOnClickListener { } // catch clicks so they don't fall through
+            cloudSyncTermsDialogBackground.setOnClickListener { } // catch clicks so they don't fall through
 
             // termsTextView.movementMethod = ScrollingMovementMethod()
 

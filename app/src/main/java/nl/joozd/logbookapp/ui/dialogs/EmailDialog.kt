@@ -53,9 +53,8 @@ class EmailDialog(): JoozdlogFragment() {
         viewModel.okClicked()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogEmailAddressBinding.bind(inflater.inflate(R.layout.dialog_email_address, container, false)).apply{
-            aboutDialogTopHalf.joozdLogSetBackgroundColor()
 
             emailAddressEditText.setText(viewModel.email1)
             emailAddress2EditText.setText(viewModel.email2)
@@ -85,9 +84,10 @@ class EmailDialog(): JoozdlogFragment() {
                     }
             }
 
-            cloudBackupDialogBox.setOnClickListener{ } // do nothing, catch clicks
+            headerLayout.setOnClickListener{ } // do nothing, catch clicks
+            bodyLayout.setOnClickListener{ } // do nothing, catch clicks
 
-            cloudBackupDialogBackground.setOnClickListener { closeFragment() }
+            emailDialogBackground.setOnClickListener { closeFragment() }
 
 
             okButton.setOnClickListener(okButtonListener)

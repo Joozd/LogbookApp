@@ -22,7 +22,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/DialogBackground"
-    android:id="@+id/augmentedCrewDialogBackground"
+    android:id="@+id/emailDialogBackground"
     tools:theme="@style/AppTheme">
 
     <ScrollView

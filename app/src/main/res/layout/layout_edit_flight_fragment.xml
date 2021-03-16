@@ -23,7 +23,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/DialogBackground"
     android:id="@+id/editFlightFragmentBackground"
-    tools:context=".ui.activities.MainActivity">
+    tools:theme="@style/AppTheme">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -304,10 +304,10 @@
             <ImageView
                 android:id="@+id/flightNameSelector"
                 style="@style/LSK"
-                app:layout_constraintBottom_toBottomOf="@+id/flightNameWrapper"
+                app:layout_constraintTop_toTopOf="@+id/flightName2Wrapper"
+                app:layout_constraintBottom_toBottomOf="@+id/flightName2Wrapper"
                 app:layout_constraintEnd_toStartOf="@+id/flightNameWrapper"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/flightNameWrapper"
                 app:srcCompat="@drawable/lsk_button" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -349,10 +349,10 @@
             <ImageView
                 android:id="@+id/flightName2Selector"
                 style="@style/LSK"
-                app:layout_constraintBottom_toBottomOf="@+id/flightNameWrapper"
+                app:layout_constraintTop_toTopOf="@+id/flightName2Wrapper"
+                app:layout_constraintBottom_toBottomOf="@+id/flightName2Wrapper"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/flightName2Wrapper"
-                app:layout_constraintTop_toTopOf="@+id/flightNameWrapper"
                 app:srcCompat="@drawable/lsk_button" />
 
             <com.google.android.material.textfield.TextInputLayout

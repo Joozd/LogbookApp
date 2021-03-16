@@ -34,9 +34,8 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 class AboutDialog: JoozdlogFragment() {
     private val viewModel: AboutDialogViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogAboutBinding.bind(inflater.inflate(R.layout.dialog_about, container, false)).apply{
-            aboutDialogTopHalf.joozdLogSetBackgroundColor()
 
             aboutTextView.movementMethod = LinkMovementMethod.getInstance()
 
@@ -44,13 +43,14 @@ class AboutDialog: JoozdlogFragment() {
                 aboutTextView.text = HtmlCompat.fromHtml(it, HtmlCompat.FROM_HTML_MODE_COMPACT)
             }
 
-            aboutDialogBox.setOnClickListener {  } // do nothing
+            headerLayout.setOnClickListener {  } // do nothing
+            bodyLayout.setOnClickListener {  } // do nothing
 
             aboutDialogBackground.setOnClickListener { closeFragment() }
 
             okButton.setOnClickListener { closeFragment() }
 
-            return root
-        }
-    }
+
+        }.root
+
 }

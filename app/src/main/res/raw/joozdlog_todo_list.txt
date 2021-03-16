@@ -5,13 +5,11 @@ BUGS:
 SOMETIMES FLIGHTS ADDED THROUGH "NEW FLIGHT" ARE GETTING LOST ON NEXT SYNC.
 THIS MIGHT HAVE BEEN FIXED BUT MAYBE NOT. IF THIS HAPPENS TO YOU, PLEASE REPORT WHAT YOU DID BECAUSE I CANNOT REPRODUCE THIS AT WILL
 
-entering an invalid time (such as 1760) causes a crash
-
-Everything needs more testing.
-
 ******************
 TODO BEFORE PUBLIC BETA:
 ******************
+
+Everything needs more testing.
 
 Show a confirmation popup or something when email sucessfully verified.
 Do more work at email verifications (when, how often etc)

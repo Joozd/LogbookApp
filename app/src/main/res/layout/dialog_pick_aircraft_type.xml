@@ -23,7 +23,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/aircraftPickerDialogBackground"
     style="@style/DialogBackground"
-    tools:context=".ui.activities.MainActivity">
+    tools:theme="@style/AppTheme">
 
     <ScrollView
         android:layout_width="match_parent"

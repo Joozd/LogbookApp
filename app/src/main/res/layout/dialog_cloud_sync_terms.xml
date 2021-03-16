@@ -21,65 +21,58 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/acceptTermsBackground"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#60000000">
+    style="@style/DialogBackground"
+    android:id="@+id/cloudSyncTermsDialogBackground"
+    tools:theme="@style/AppTheme">
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="32dp"
+        android:id="@+id/headerLayout"
+        style="@style/DialogHeaderLayout"
+        android:layout_width="0dp"
         android:layout_marginTop="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/bodyLayout"
+        app:layout_constraintEnd_toEndOf="@+id/bodyLayout"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/bodyLayout"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed">
+
+        <TextView
+            android:id="@+id/textView"
+            style="@style/DialogHeaderText"
+            android:text="@string/cloud_sync_terms"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bodyLayout"
+        style="@style/DialogBodyLayout"
+        android:layout_height="0dp"
+        android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
-        android:background="@drawable/rounded_corners"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/headerLayout">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/termsConditionsDialogTopHalf"
+        <ScrollView
+            android:id="@+id/termsScrollView"
+            style="@style/DataBox.Padded"
             android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:background="@drawable/top_corners"
+            android:layout_height="0dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@+id/iAcceptTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="32dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/cloud_sync_terms"
-                android:textSize="30sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-        <ScrollView
-            android:id="@+id/termsScrollView"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/rounded_corners_white"
-            android:padding="8dp"
-            android:scrollbars="vertical"
-            app:layout_constraintBottom_toTopOf="@+id/iAcceptTextView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/termsConditionsDialogTopHalf">
             <TextView
                 android:id="@+id/termsTextView"
                 android:layout_width="match_parent"
@@ -91,33 +84,19 @@
 
         <TextView
             android:id="@+id/iAcceptTextView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
+            style="@style/DialogButtonText"
             android:layout_marginBottom="16dp"
             android:clickable="false"
-            android:padding="12dp"
+            android:gravity="end"
             android:text="@string/i_accept_terms"
-            android:textAlignment="textEnd"
-            android:textAllCaps="true"
-            android:textColor="?android:attr/colorAccent"
-            android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/cancelTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/cancelTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:padding="12dp"
+            style="@style/DialogButtonText"
             android:text="@android:string/cancel"
-            android:textAllCaps="true"
-            android:textColor="?android:attr/colorAccent"
-            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

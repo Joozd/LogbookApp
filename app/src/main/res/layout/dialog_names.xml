@@ -23,7 +23,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/DialogBackground"
     android:id="@+id/namesDialogBackground"
-    tools:context=".ui.activities.MainActivity">
+    tools:theme="@style/AppTheme">
 
     <ScrollView
         android:layout_width="match_parent"

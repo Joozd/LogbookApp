@@ -413,14 +413,17 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Any non-number characters are ignored (so you can use 12+34, 12:34, etc)
      * "34" will be 00:34
      * 12345 will be 12:34, same for 12:34:56
+     * 17:60 will be 18:00, 17:70 18:10
      * @param s: String to parse
      * @return Local Time parsed from [s]
      */
     private fun makeTimeFromTimeString(s: String): LocalTime =
-        LocalTime.parse(
-            s.filter{it.isDigit()}.padStart(4, '0').take(4),
-            DateTimeFormatter.ofPattern("HHmm")
-        )
+        s.filter{it.isDigit()}.padStart(4, '0').take(4).toInt().let{
+            val hours = it/100 + (it%100)/60    // hours is first two digits plus one if last two digits >= 60
+            val mins = (it%100)%60              // mins is last two digits % 60
+            LocalTime.of(hours, mins)
+        }
+
 
 
     companion object{

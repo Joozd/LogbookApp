@@ -57,7 +57,6 @@ class EditFlightFragment: JoozdlogFragment(){
     /**
      * Will define all listeners etc, and set initial
      */
-    //@ExperimentalCoroutinesApi
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         LayoutEditFlightFragmentBinding.bind(inflater.inflate(R.layout.layout_edit_flight_fragment, container, false)).apply {
             (flightInfoText.background as GradientDrawable).colorFilter = PorterDuffColorFilter(
@@ -97,16 +96,6 @@ class EditFlightFragment: JoozdlogFragment(){
                 val drawable = if (isValid) null else ContextCompat.getDrawable(App.instance, R.drawable.ic_error_outline_20px)
                 flightOrigField.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
             }
-            /*
-            viewModel.originIsValid.observe(viewLifecycleOwner) { checked ->
-                val drawable: Drawable? = when(checked){
-                    true -> ContextCompat.getDrawable(App.instance, R.drawable.ic_check_circle_outline_20px)
-                    false -> ContextCompat.getDrawable(App.instance, R.drawable.ic_error_outline_20px)
-                    null -> null
-                }
-                flightOrigField.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
-            }
-            */
 
             viewModel.destination.observe(viewLifecycleOwner) {
                 flightDestField.setTextIfNotFocused(it)
@@ -611,7 +600,7 @@ class EditFlightFragment: JoozdlogFragment(){
 
     private fun showHelpMessage(message: Int): Boolean{
         supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, MessageDialog.make(message))
+            add(R.id.editFlightFragmentBackground, MessageDialog.make(message))
             addToBackStack(null)
         }
         return true

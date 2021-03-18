@@ -27,15 +27,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/box"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        style="@style/DataBox.TextViewBackground.Padded"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginBottom="32dp"
-        android:padding="8dp"
-        android:elevation="8dp"
-        android:background="@drawable/rounded_corners_textviewbackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

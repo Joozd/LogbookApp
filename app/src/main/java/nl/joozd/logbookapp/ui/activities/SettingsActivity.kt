@@ -511,7 +511,7 @@ class SettingsActivity : JoozdlogActivity() {
 
     private fun showAugmentedTimesNumberPicker(){
         AugmentedNumberPicker().apply {
-            title="HALLON AUB GRGR"
+            title= App.instance.getString(R.string.timeForTakeoffLanding)
             wrapSelectorWheel = false
             maxValue = AugmentedNumberPicker.EIGHT_HOURS
             setValue(Preferences.standardTakeoffLandingTimes)

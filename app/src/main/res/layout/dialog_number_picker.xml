@@ -22,13 +22,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/background"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    style="@style/DialogBackground"
+    tools:theme="@style/AppTheme">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/rounded_corners_white"
+        style="@style/DataBox.Padded"
+        android:layout_width="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -36,11 +35,7 @@
 
         <TextView
             android:id="@+id/numberPickerTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            style="@style/HeaderText.Bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -60,16 +55,9 @@
 
         <TextView
             android:id="@+id/cancelTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
+            style="@style/DialogButtonText"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp"
-            android:padding="10dp"
             android:text="@android:string/cancel"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorAccent"
-            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/numberPicker" />
@@ -77,15 +65,11 @@
 
         <TextView
             android:id="@+id/saveTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:padding="10dp"
+            style="@style/DialogButtonText"
+            android:layout_marginStart="32dp"
             android:text="@android:string/ok"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorAccent"
-            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/cancelTextView"
             app:layout_constraintTop_toTopOf="@+id/cancelTextView" />
 
 

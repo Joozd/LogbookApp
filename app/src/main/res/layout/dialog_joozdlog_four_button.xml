@@ -27,15 +27,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/box"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        style="@style/DataBox.TextViewBackground.Padded"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginBottom="32dp"
-        android:background="@drawable/rounded_corners_textviewbackground"
-        android:elevation="8dp"
-        android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,9 +37,7 @@
 
         <TextView
             android:id="@+id/dialogTitle"
-            style="@style/HeaderText"
-            android:textSize="24sp"
-            android:textStyle="bold"
+            style="@style/HeaderText.Bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -62,7 +54,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/dialogTitle"
             tools:text="This is the descriptionm of this dialog. Probably best to use this to make it clear what the buttons below hgere do, or just to pass on some information!" />
-
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/right_guideline"
@@ -98,7 +89,6 @@
             android:id="@+id/neutralButton"
             style="@style/DialogButtonText"
             android:layout_width="0dp"
-
             android:gravity="start|center_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/left_guideline"
@@ -107,12 +97,10 @@
             app:layout_constraintTop_toBottomOf="@+id/bonusButton"
             tools:text="CANCEL" />
 
-
         <TextView
             android:id="@+id/negativeButton"
             style="@style/DialogButtonText"
-            android:layout_width="149dp"
-
+            android:layout_width="0dp"
             android:layout_marginTop="16dp"
             android:gravity="end|center_vertical"
             app:layout_constraintBottom_toTopOf="@+id/positiveButton"
@@ -126,7 +114,7 @@
         <TextView
             android:id="@+id/positiveButton"
             style="@style/DialogButtonText"
-            android:layout_width="149dp"
+            android:layout_width="0dp"
             android:gravity="end|center_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

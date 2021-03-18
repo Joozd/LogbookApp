@@ -146,7 +146,7 @@ abstract class NumberPickerDialog: DialogFragment() {
     /**
      * Override this to actually do something with the picked number
      */
-    abstract fun onNumberPicked(pickedNumber: Int): Unit
+    abstract fun onNumberPicked(pickedNumber: Int)
 
 
     companion object {

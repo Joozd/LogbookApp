@@ -379,7 +379,7 @@
     <string name="empty_feedback">Feedback is empty</string>
     <string name="empty_feedback_message">You cannot submit empty feedback.</string>
     <string name="joozdlog_todo_title">Issues / TODO</string>
-
+    <string name="use_dark_mode">Use Dark mode</string>
 
 
 </resources>

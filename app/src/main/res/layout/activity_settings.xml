@@ -96,10 +96,10 @@
                     android:id="@+id/useDarkModeText"
                     style="@style/SettingsActivitySwitch"
                     android:layout_height="wrap_content"
+                    android:text="@string/use_dark_mode"
                     app:layout_constraintEnd_toStartOf="@+id/darkModePickerLayout"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:text="Use Dark mode" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <FrameLayout
                     android:id="@+id/darkModePickerLayout"

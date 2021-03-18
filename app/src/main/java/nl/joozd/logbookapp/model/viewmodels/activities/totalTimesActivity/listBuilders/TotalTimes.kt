@@ -95,7 +95,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             )
         }
 
-        flights.sumBy{it.simTime}.let { t ->
+        flights.filter{it.isSim}.sumBy{it.simTime}.let { t ->
             list.add(
                 TotalTimesListItem(
                 categories[SIM_TIME_INDEX],

@@ -42,13 +42,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="TextView"
+        android:text="This activity doesn't have an interface yet"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pdfParserProgressBar"
-        tools:text="StatusText" />
+        app:layout_constraintTop_toBottomOf="@+id/pdfParserProgressBar" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"

@@ -43,12 +43,13 @@ fun Flight.isSamedPlannedFlightAs(f: Flight) =
 /**
  * Checks if two flights are the same physical flight (ie the same orig to same dest at the same time with the same flightnumber)
  */
-fun Flight.isSameFlightAs(f: Flight) =
-    orig == f.orig
-        && dest == f.dest
-        && timeOut == f.timeOut
-        && timeIn == f.timeIn
-        && hasSameflightNumberAs(f)
+fun Flight.isSameFlightAs(f: Flight) = (Preferences.maxChronoAdjustment * 60L).let { margin ->
+           orig == f.orig
+                && dest == f.dest
+                && timeOut in (f.timeOut - margin..f.timeOut + margin)
+                && timeIn in (f.timeIn - margin..f.timeIn + margin)
+                && hasSameflightNumberAs(f)
+}
 
 /**
  * Checks if flights are the same, times may be off by max [margin] seconds

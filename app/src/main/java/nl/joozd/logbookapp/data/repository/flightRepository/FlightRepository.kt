@@ -385,20 +385,30 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * Save flights from a Roster
      * It will remove saved flights in [roster].period if they are not the same as any flights in [roster].flights
+     * It will remove all current planned flights in period.
      * It will save flights in [roster].flights that are not the same as any that are already saved in DB.
+     * It will update all flights that are in both:
+     *      - Planned flights will always  get names and registrations from roster
+     *      - Completed flights will only get names and registrations of those respective fields are empty
      */
     suspend fun saveRoster(roster: Roster) = withContext(Dispatchers.IO + NonCancellable){
         require(roster.isValid) { "Cannot parse an invalid roster! You should have checked this!" }
         val rosterFlights = roster.flights
         val flightsInPeriod = getFlightsOnDays(roster.period)
         // Save all flights that are not also in DB
-        val flightsToSave = rosterFlights.filter {rosteredFlight -> flightsInPeriod.none { it.isSameFlightAs(rosteredFlight) }}
+        val flightsToSave = rosterFlights.filter {rosteredFlight -> flightsInPeriod.filter{ !it.isPlanned}.none { it.isSameFlightAs(rosteredFlight) }}
 
         // delete all flights that are not also in roster and that are isPlanned
-        val flightsToDelete = flightsInPeriod.filter { savedFlight -> rosterFlights.none { it.isSameFlightAs(savedFlight) } && savedFlight.isPlanned }
+        val flightsToDelete = flightsInPeriod.filter { savedFlight -> savedFlight.isPlanned }
+
+        val updatedFlights = updateFlightsWithRosterData(flightsInPeriod,
+                                                         rosterFlights.filter {it !in flightsToSave} // These are all flights that are also in DB
+        )
 
         delete(flightsToDelete, false) // sync will happen after saving
-        save(flightsToSave, sync = true, updateIDs = true)
+        save(flightsToSave, sync = false, updateIDs = true)
+        save(updatedFlights, sync = true, updateIDs = false)
+
     }
 
     /**

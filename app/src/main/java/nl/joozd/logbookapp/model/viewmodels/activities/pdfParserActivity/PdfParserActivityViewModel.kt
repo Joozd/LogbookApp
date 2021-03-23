@@ -115,7 +115,9 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             }
             val processedRoster = roster.use{ r -> r.postProcess() } // this will close the original Roster's InputStream
 
-            /** Check if calendar sync enabled for this. If so, end this function. It can be restarted from activity.
+            /**
+             * Check if calendar sync enabled for this.
+             * If so, disable it if [Preferences.alwaysPostponeCalendarSync], else end this function. It can be restarted from activity.
              * If calendar sync is enabled, CALENDAR_SYNC_ENABLED wil be sent to Activity, with the epochSecond of the end of the period.
              * Activity can decide to change CalendarSync through [disableCalendarSync] and run [runAgain] to try again.
              */
@@ -127,6 +129,10 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                     return
                 }
             }
+            /**
+             * Ask Repository to save this roster.
+             * @see flightRepository -> saveRoster
+             */
             flightRepository.saveRoster(processedRoster)
             feedback(PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED)
         } ?: run{

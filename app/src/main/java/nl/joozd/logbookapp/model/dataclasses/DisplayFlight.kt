@@ -86,7 +86,7 @@ data class DisplayFlight(
             type = f.aircraftType,
             names = buildNames(f.name, f.name2),
             takeoffsAndLandings = "${f.takeoffs()}/${f.landings()}",
-            flightNumber = f.flightNumber,
+            flightNumber = f.flightID.toString(),
             remarks = f.remarks,
             augmented = Crew.of(f.augmentedCrew).size > 2,
             ifr = f.ifrTime > 0,

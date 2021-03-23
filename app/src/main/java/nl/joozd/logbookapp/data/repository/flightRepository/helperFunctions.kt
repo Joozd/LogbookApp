@@ -19,7 +19,9 @@
 
 package nl.joozd.logbookapp.data.repository.flightRepository
 
+import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.data.repository.helpers.isSamedPlannedFlightAs
+import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.Instant
 import java.time.ZoneOffset
@@ -41,6 +43,44 @@ fun getFlightsOnDays(allFlights: List<Flight>, dateRange: ClosedRange<Instant>):
     val period: ClosedRange<Long> =(dateRange.start.epochSecond .. dateRange.endInclusive.epochSecond)
     return allFlights.filter { it.timeOut in period }
 }
+
+/**
+ * This function will take a list of roster flights and a list of saved flights and will return any saved flights that are updated.
+ * It will update saved flights as follows:
+ *      - First, it matches a rostered and a saved flight
+ *      - If saved flight is Planned, it will ALWAYS overwrite names and aircraft data from roster
+ *      - if saved flight is NOT Planned, it will ONLY overwrite names and aircraft data if it was empty.
+ * FlightIDs (and all other data) will stay as they were in saved flight, repository will take care of timestamp on saving.
+ */
+fun updateFlightsWithRosterData(currentFlights: List<Flight>, rosterFlights: List<Flight>): List<Flight> =
+    rosterFlights.map{ rf -> currentFlights.first { cf -> cf.isSameFlightAs(rf)} to rf} // make a list of currentFlight to rosterFlight Pairs. first is cf, second is rf.
+        .mapNotNull {
+            when {
+                // Flights are the same -> do nothing
+                it.first == it.second -> null
+
+                // Currentflight is planned -> use rostered flight
+                it.first.isPlanned -> it.second.let { rf -> it.first.copy(name = rf.name, name2 = rf.name2, registration = rf.registration, aircraftType = rf.aircraftType) }
+
+                // CurrentFlight is not planned, and both names and both aircraft fields are not blank -> do nothing
+                with (it.first) { listOf(name, name2, registration, aircraftType).all{ s -> s.isNotBlank()}} -> null
+
+                // Flights are not the same, not planned and not all
+                else -> it.second.let { rf ->
+                    println("BANAANAPPEL")
+                    with(it.first){
+                        copy(
+                            name = name.nullIfBlank() ?: rf.name,
+                            name2 = name2.nullIfBlank() ?: rf.name2,
+                            registration = registration.nullIfBlank() ?: rf.registration,
+                            aircraftType = aircraftType.nullIfBlank() ?: rf.aircraftType
+                        )
+                }
+            }
+        }
+    }.also{
+        println("BOTERHAM updateFlightsWithRosterData saving ${it.size} flights: ${it.joinToString("\n") { with (it) { "$flightID: $orig - $dest"}}}")
+        }
 
 
 /**

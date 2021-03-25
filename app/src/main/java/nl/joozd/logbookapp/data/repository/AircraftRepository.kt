@@ -108,7 +108,7 @@ class AircraftRepository(
      * List of all known aircraft types, null if [aircraftTypesLiveData] is not observed (it is always observed)
      */
     val aircraftTypes: List<AircraftType>?
-        get() = aircraftTypesLiveData.value // null if not observed
+        get() = aircraftTypesLiveData.value // null if not observed or not initialized yet (it is always observed)
 
 
     /**

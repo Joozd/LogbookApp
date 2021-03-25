@@ -124,6 +124,7 @@
 
     <string name="times_per_year">Times per year</string>
     <string name="last_12_months">Last 12 Months</string>
+    <string name="times_per_type">Times per type</string>
 
     <string name="login">Log In</string>
 

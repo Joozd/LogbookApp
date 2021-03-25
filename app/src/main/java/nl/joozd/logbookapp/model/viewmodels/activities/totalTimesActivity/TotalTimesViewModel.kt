@@ -29,6 +29,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.extensions.replaceValueAt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders.TimesPerType
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders.TimesPerYear
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders.TotalTimes
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
@@ -52,22 +53,23 @@ class TotalTimesViewModel: JoozdlogActivityViewModel() {
             val allBalancesForward = async { balanceForwardRepository.getAll() }
 
             // build lists
-            val timesPerYear = async(Dispatchers.Default) { TimesPerYear(allFlights.await()) }
             val totalTimes = async(Dispatchers.Default) { TotalTimes(allFlights.await(), allBalancesForward.await()) }
+            val timesPerYear = async(Dispatchers.Default) { TimesPerYear(allFlights.await()) }
+            val timesPerType = async(Dispatchers.Default) { TimesPerType(allFlights.await()) }
 
             //Add totals lists as they become available
             _allLists.value = _allLists.value!!.replaceValueAt(POSITION_TOTALS, totalTimes.await())
             _allLists.value = _allLists.value!!.replaceValueAt(POSITION_YEARS, timesPerYear.await())
-
+            _allLists.value = _allLists.value!!.replaceValueAt(POSITION_TYPES, timesPerType.await())
         }
-
     }
 
     companion object{
         //These values are used to make sure totals lists will appear in the same order every time.
-        const val NUMBER_OF_LISTS = 2 // amount of expandable lists we will show
+        const val NUMBER_OF_LISTS = 3 // amount of expandable lists we will show
         const val POSITION_TOTALS = 0
         const val POSITION_YEARS = 1
+        const val POSITION_TYPES = 2
     }
 }
 

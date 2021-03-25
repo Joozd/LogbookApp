@@ -34,6 +34,7 @@ import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.export.JoozdlogExport
+import nl.joozd.logbookapp.data.repository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.repository.helpers.overlaps
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -158,11 +159,10 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
 
     private fun searchAircraft(fff: List<Flight>) = fff.filter {
+        val ac = aircraftRepository.getAircraftTypeByShortName(it.aircraftType)
         query in it.registration.toUpperCase(Locale.ROOT)
-    }.also {
-        viewModelScope.launch {
-            //TODO make with async update from [aircraftRepository]
-        }
+                || ac?.shortName?.toUpperCase(Locale.ROOT)?.contains(query) ?: false
+                || ac?.name?.toUpperCase(Locale.ROOT)?.contains(query) ?: false
     }
 
     private fun searchNames(fff: List<Flight>) = fff.filter {

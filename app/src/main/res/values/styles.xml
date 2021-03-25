@@ -470,6 +470,10 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="FlightListNarrow.WrapContent" parent="FlightListStyle">
+        <item name="android:layout_width">wrap_content</item>
+    </style>
+
     <style name="FlightListBold.WrapContent" parent="FlightListBold">
         <item name="android:layout_width">wrap_content</item>
     </style>

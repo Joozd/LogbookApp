@@ -55,11 +55,11 @@
         android:background="@drawable/rounded_corners_textviewbackground"
         android:clickable="true"
 
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:focusable="true">
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/remarksText"
@@ -129,10 +129,10 @@
             style="@style/FlightListToggle"
             android:layout_marginEnd="12dp"
             android:text="@string/instructor"
-            tools:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/takeoffLandingText"
             app:layout_constraintEnd_toStartOf="@+id/isPicusText"
-            app:layout_constraintTop_toTopOf="@+id/takeoffLandingText" />
+            app:layout_constraintTop_toTopOf="@+id/takeoffLandingText"
+            tools:visibility="gone" />
 
         <TextView
             android:id="@+id/isPicText"
@@ -188,13 +188,13 @@
 
         <TextView
             android:id="@+id/aircraftText"
-            style="@style/FlightListNarrow"
+            style="@style/FlightListNarrow.WrapContent"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp"
-            app:layout_goneMarginBottom="8dp"
             app:layout_constraintBottom_toTopOf="@+id/remarksText"
             app:layout_constraintStart_toStartOf="@+id/origText"
             app:layout_constraintTop_toBottomOf="@+id/flightNumberText"
+            app:layout_goneMarginBottom="8dp"
             tools:text="PH-CBN - PA28" />
 
 
@@ -228,7 +228,7 @@
 
         <TextView
             android:id="@+id/arrow1"
-            style="@style/FlightListBold"
+            style="@style/FlightListBold.WrapContent"
             android:layout_marginStart="4dp"
             android:text="@string/arrowRight"
             app:layout_constraintBottom_toBottomOf="@+id/timeOutText"
@@ -239,7 +239,7 @@
 
         <TextView
             android:id="@+id/arrow2"
-            style="@style/FlightListBold"
+            style="@style/FlightListBold.WrapContent"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
             android:text="@string/arrowRight"
@@ -255,13 +255,14 @@
             android:layout_marginTop="2dp"
             app:layout_constraintEnd_toStartOf="@+id/arrow1"
             app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="@+id/origText"
             app:layout_constraintTop_toBottomOf="@+id/origText"
             tools:text="1140" />
 
         <TextView
             android:id="@+id/totalTimeText"
-            style="@style/FlightListNarrow"
+            style="@style/FlightListNarrow.WrapContent"
             android:layout_marginStart="4dp"
             app:layout_constraintBottom_toBottomOf="@+id/arrow1"
             app:layout_constraintEnd_toStartOf="@+id/arrow2"
@@ -274,6 +275,6 @@
         <!--
         </nl.joozd.logbookapp.ui.utils.customs.SwipableConstraintLayout>
         -->
-        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -97,8 +97,9 @@
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="ExpandableListItemText.Bold">
+    <style name="ExpandableListItemText.Value">
         <item name="android:textStyle">bold</item>
+        <item name="android:gravity">end</item>
     </style>
 
 

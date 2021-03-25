@@ -36,7 +36,7 @@
 
     <TextView
         android:id="@+id/listElementValueTextView"
-        style="@style/ExpandableListItemText.Bold"
+        style="@style/ExpandableListItemText.Value"
         tools:text="listElementValue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/listElementNameTextView" />

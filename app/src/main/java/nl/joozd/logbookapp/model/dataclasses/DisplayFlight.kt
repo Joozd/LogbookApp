@@ -84,7 +84,7 @@ data class DisplayFlight(
             simTime = minutesToHoursAndMinutesString(f.simTime),
             registration = f.registration,
             type = f.aircraftType,
-            names = buildNames(f.name, f.name2),
+            names = if (f.isSim) f.name2 else buildNames(f.name, f.name2),
             takeoffsAndLandings = "${f.takeoffs()}/${f.landings()}",
             flightNumber = f.flightNumber,
             remarks = f.remarks,

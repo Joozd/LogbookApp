@@ -30,6 +30,8 @@ import nl.joozd.joozdlogfiletypedetector.PdfTypeDetector
 import nl.joozd.joozdlogfiletypedetector.SupportedTypes
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.parseSharedFiles.extensions.postProcess
+import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.JoozdlogParser
+import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.LogTenProParser
 import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.MccPilotLogCsvParser
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
@@ -253,8 +255,8 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     private suspend fun getParser(type: SupportedTypes.CompleteLogbook, uri: Uri?): ImportedLogbook? =
         uri?.getInputStream()?.let{ inputStream ->
             when(type){
-                SupportedTypes.JOOZDLOG_CSV_BACKUP -> TODO("get Parser")
-                SupportedTypes.LOGTEN_PRO_LOGBOOK -> TODO("get Parser")
+                SupportedTypes.JOOZDLOG_CSV_BACKUP -> inputStream.use { JoozdlogParser.ofInputStream(it)}
+                SupportedTypes.LOGTEN_PRO_LOGBOOK -> inputStream.use { LogTenProParser.ofInputStream(it)}
                 SupportedTypes.MCC_PILOT_LOG_LOGBOOK -> inputStream.use { MccPilotLogCsvParser.ofInputStream(it) }
                 else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -4: This should not happen.") }
             }

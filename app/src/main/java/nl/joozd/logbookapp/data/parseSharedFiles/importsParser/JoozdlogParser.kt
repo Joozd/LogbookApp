@@ -38,7 +38,7 @@ class JoozdlogParser(private val lines: List<String>): ImportedLogbook {
      * List of flights
      * null means a line that failed to import but didn't break the other flights
      */
-    override val flights: List<Flight?>?
+    override val flights: List<Flight?>
         get() = FlightsRepositoryExporter.csvToFlights(lines)
 
     //TODO not fixing corrupt files atm

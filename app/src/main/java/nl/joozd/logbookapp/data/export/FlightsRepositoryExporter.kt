@@ -103,7 +103,6 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
          *  Read a csv with basicFlights to a list of Flights. Flight ID's will need to be assigned before saving.
          *  @param csvBasicFlights = list of lines each containing a csv encoded basicFlight
          */
-
         fun csvToFlights(csvBasicFlights: List<String>): List<Flight> = when (csvBasicFlights.first()){
             FIRST_LINE_V4 -> csvBasicFlights.drop(1).map{Flight(upgrade4to5(csvFlightToBasicFlightv4(it)))}
             FIRST_LINE_V5 -> csvBasicFlights.drop(1).map{Flight(csvFlightToBasicFlightv5(it))}
@@ -111,8 +110,9 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
         }
 
 
-
-
+        /**
+         * Convert a flight in CSV String format to a flight in [BasicFlight_version4] format
+         */
         private fun csvFlightToBasicFlightv4(csvFlight: String): BasicFlight_version4 = csvFlight.split(';').map{ it.replace('|', ';')}.let { v->
             require(BasicFlight_version4.VERSION.version == 4)
             BasicFlight_version4(

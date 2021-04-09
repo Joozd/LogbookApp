@@ -50,6 +50,7 @@ suspend fun Roster.postProcess(): ProcessedRoster {
 
         // result of lambda:
         flight.copy(
+            flightID = -1,
             orig = orig,
             dest = dest,
             registration = foundAircraft?.registration ?: flight.registration,

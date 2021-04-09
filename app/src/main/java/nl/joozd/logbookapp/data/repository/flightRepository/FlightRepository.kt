@@ -334,11 +334,17 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * update cached data and save to disk
      * @see [save]
+     * @updateIDs:
+     *      true: always make a new ID
+     *      false: never make a new ID
+     *      null (default): make a new ID if id <= 0
      */
-    fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean = false) = launch {
+    fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean? = null) = launch {
         saveMutex.withLock {
             //assign available FlightIDs if requested
-            val ff = if (updateIDs) flights.mapIndexed { index, flight -> flight.copy(flightID = lowestFreeFlightID() + index, timeStamp = TimestampMaker.nowForSycPurposes) } else flights.map {
+            val ff = if (updateIDs != false) flights.mapIndexed { index, flight ->
+                flight.copy(flightID = if (flight.flightID <= 0 || updateIDs == true) lowestFreeFlightID() + index else flight.flightID, timeStamp = TimestampMaker.nowForSycPurposes)
+            } else flights.map {
                 it.copy(timeStamp = TimestampMaker.nowForSycPurposes)
             }
 
@@ -395,20 +401,18 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         require(roster.isValid) { "Cannot parse an invalid roster! You should have checked this!" }
         val rosterFlights = roster.flights
         val flightsInPeriod = getFlightsOnDays(roster.period)
-        // Save all flights that are not also in DB
-        val flightsToSave = rosterFlights.filter {rosteredFlight -> flightsInPeriod.filter{ !it.isPlanned}.none { it.isSameFlightAs(rosteredFlight) }}
+
+        // Save all flights that are not also in DB, or if they are, have updated data
+        val newAndUpdatedFlights = rosterFlights.filter { rosteredFlight -> flightsInPeriod.filter{ !it.isPlanned}.none { it.isSameFlightWithSameInfo(rosteredFlight) }}
+        val newFlights = newAndUpdatedFlights.filter { rosteredFlight -> flightsInPeriod.filter{ !it.isPlanned}.none { it.isSameFlightAs(rosteredFlight) }}
+        val updatedFlights = updateFlightsWithRosterData(flightsInPeriod, newAndUpdatedFlights.filter{it !in newFlights})
+
 
         // delete all flights that are not also in roster and that are isPlanned
         val flightsToDelete = flightsInPeriod.filter { savedFlight -> savedFlight.isPlanned }
 
-        val updatedFlights = updateFlightsWithRosterData(flightsInPeriod,
-                                                         rosterFlights.filter {it !in flightsToSave} // These are all flights that are also in DB
-        )
-
         delete(flightsToDelete, false) // sync will happen after saving
-        save(flightsToSave, sync = false, updateIDs = true)
-        save(updatedFlights, sync = true, updateIDs = false)
-
+        save(newFlights + updatedFlights)
     }
 
     /**

@@ -52,6 +52,17 @@ fun Flight.isSameFlightAs(f: Flight) = (Preferences.maxChronoAdjustment * 60L).l
 }
 
 /**
+ * Check if flight is the same with [isSameFlightAs] but also check remarks, name, name2 and registration
+ */
+fun Flight.isSameFlightWithSameInfo(other: Flight) = isSameFlightAs(other) &&
+        (remarks.isEmpty() || remarks.equals(other.remarks, ignoreCase = true)) &&
+        (name.isEmpty() || name.equals(other.name, ignoreCase = true)) &&
+        (name2.isEmpty() || name2.equals(other.name2, ignoreCase = true)) &&
+        (registration.isEmpty() || registration.equals(other.registration, ignoreCase = true))
+
+
+
+/**
  * Checks if flights are the same, times may be off by max [margin] seconds
  * This is to be used when entering flights from Monthly Overviews, to detect flights with slightly incorrect times
  */

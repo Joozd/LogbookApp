@@ -46,41 +46,25 @@ fun getFlightsOnDays(allFlights: List<Flight>, dateRange: ClosedRange<Instant>):
 
 /**
  * This function will take a list of roster flights and a list of saved flights and will return any saved flights that are updated.
- * It will update saved flights as follows:
- *      - First, it matches a rostered and a saved flight
- *      - If saved flight is Planned, it will ALWAYS overwrite names and aircraft data from roster
- *      - if saved flight is NOT Planned, it will ONLY overwrite names and aircraft data if it was empty.
- * FlightIDs (and all other data) will stay as they were in saved flight, repository will take care of timestamp on saving.
+ * If no match is found for a rostered flight it is ignored
+ * If it is found it will take matching flight and overwrite any of these with non-empty value in rosteredflight:
+ * registration
+ * type
+ * name
+ * name2
+ * remarks
  */
-fun updateFlightsWithRosterData(currentFlights: List<Flight>, rosterFlights: List<Flight>): List<Flight> =
-    rosterFlights.map{ rf -> currentFlights.first { cf -> cf.isSameFlightAs(rf)} to rf} // make a list of currentFlight to rosterFlight Pairs. first is cf, second is rf.
-        .mapNotNull {
-            when {
-                // Flights are the same -> do nothing
-                it.first == it.second -> null
-
-                // Currentflight is planned -> use rostered flight
-                it.first.isPlanned -> it.second.let { rf -> it.first.copy(name = rf.name, name2 = rf.name2, registration = rf.registration, aircraftType = rf.aircraftType) }
-
-                // CurrentFlight is not planned, and both names and both aircraft fields are not blank -> do nothing
-                with (it.first) { listOf(name, name2, registration, aircraftType).all{ s -> s.isNotBlank()}} -> null
-
-                // Flights are not the same, not planned and not all
-                else -> it.second.let { rf ->
-                    println("BANAANAPPEL")
-                    with(it.first){
-                        copy(
-                            name = name.nullIfBlank() ?: rf.name,
-                            name2 = name2.nullIfBlank() ?: rf.name2,
-                            registration = registration.nullIfBlank() ?: rf.registration,
-                            aircraftType = aircraftType.nullIfBlank() ?: rf.aircraftType
-                        )
-                }
-            }
+fun updateFlightsWithRosterData(currentFlights: List<Flight>, rosterFlights: List<Flight>): List<Flight> = rosterFlights.map{ rf ->
+        currentFlights.firstOrNull { it.isSameFlightAs(rf) }?.let{ f->
+            f.copy(registration = rf.registration.nullIfBlank() ?: f.registration,
+                   aircraftType = rf.aircraftType.nullIfBlank() ?: f.aircraftType,
+                   name = rf.name.nullIfBlank() ?: f.name,
+                   name2 = rf.name2.nullIfBlank() ?: f.name2,
+                   remarks = rf.remarks.nullIfBlank() ?: f.remarks
+            )
         }
-    }.also{
-        println("BOTERHAM updateFlightsWithRosterData saving ${it.size} flights: ${it.joinToString("\n") { with (it) { "$flightID: $orig - $dest"}}}")
-        }
+    }.filterNotNull()
+
 
 
 /**

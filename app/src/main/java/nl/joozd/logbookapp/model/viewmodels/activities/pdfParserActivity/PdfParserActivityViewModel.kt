@@ -171,11 +171,18 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Parse a CompleteLogbook file (eg a LogTenPro .txt file), and pass it on to Repository for saving
      * Will provide feedback to Activity through [feedback]
+     * TODO check if this takes a long time and if so make a progress something
+     * TODO ask if this should replace or merge with current data if data is present
      */
     private suspend fun parseCompleteLogbook(type: SupportedTypes.CompleteLogbook, uri: Uri?) {
         getParser(type, uri)?.let { completeLogbook ->
             //TODO("Handle completelogbook")
-            feedback(PdfParserActivityEvents.NOT_IMPLEMENTED)
+            if (!completeLogbook.validImportedLogbook){
+                feedback(PdfParserActivityEvents.UNSUPPORTED_FILE)
+                return
+            }
+            flightRepository.saveCompletedFlights(completeLogbook.postProcess())
+            feedback(PdfParserActivityEvents.CHRONO_SUCCESSFULLY_ADDED)
         } ?: run{
             feedback(PdfParserActivityEvents.FILE_NOT_FOUND) // TODO handle this in Activity
             return

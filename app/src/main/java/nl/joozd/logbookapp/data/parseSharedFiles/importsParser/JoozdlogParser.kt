@@ -23,8 +23,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
+import nl.joozd.logbookapp.extensions.atEndOfDay
+import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.io.InputStream
+import java.time.Instant
+import java.time.ZoneOffset
 
 class JoozdlogParser(private val lines: List<String>): ImportedLogbook {
     override val needsCleaning = false
@@ -38,11 +42,21 @@ class JoozdlogParser(private val lines: List<String>): ImportedLogbook {
      * List of flights
      * null means a line that failed to import but didn't break the other flights
      */
-    override val flights: List<Flight?>
+    override val flights: List<Flight>
         get() = FlightsRepositoryExporter.csvToFlights(lines)
+    override val period: ClosedRange<Instant>
+        get() =
+            if (flights.isEmpty()) Instant.EPOCH..Instant.EPOCH
+            else Instant.ofEpochSecond(flights.first().timeOut).atStartOfDay(ZoneOffset.UTC)..Instant.ofEpochSecond(flights.last().timeIn).atEndOfDay(ZoneOffset.UTC)
+
+    override fun close() {
+        // intentionally blank
+    }
 
     //TODO not fixing corrupt files atm
     override val errorLines: List<String>? = null
+    override val isValid: Boolean
+        get() = validImportedLogbook
 
     companion object{
         suspend fun ofInputStream(inputstream: InputStream) = withContext(Dispatchers.IO) {

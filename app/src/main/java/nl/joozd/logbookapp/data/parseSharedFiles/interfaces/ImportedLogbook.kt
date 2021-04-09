@@ -21,21 +21,15 @@ package nl.joozd.logbookapp.data.parseSharedFiles.interfaces
 
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
-interface ImportedLogbook {
+interface ImportedLogbook: CompletedFlights {
     /**
      * Set to true if flights need cleaning (iata to icao, registrations matched to types,
      * night times calculated
-     * @see ImportedFlightsCleaner
+     * @see nl.joozd.logbookapp.data.parseSharedFiles.extensions.postProcess
      */
     val needsCleaning: Boolean
 
     val validImportedLogbook: Boolean
-
-    /**
-     * List of flights
-     * null means a line that failed to import but didn't break the other flights
-     */
-    val flights: List<Flight?>?
 
     val errorLines: List<String>?
 }

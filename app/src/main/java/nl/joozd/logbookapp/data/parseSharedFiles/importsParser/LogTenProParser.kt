@@ -23,9 +23,12 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
+import nl.joozd.logbookapp.extensions.atEndOfDay
+import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import java.io.InputStream
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneOffset
@@ -46,12 +49,21 @@ class LogTenProParser(private val lines: List<String>): ImportedLogbook {
      * List of flights
      * null means a line that failed to import but didn't break the other flights
      */
-    override val flights: List<Flight?>?
-        get() = buildFlights()
+    override val flights: List<Flight>
+        get() = buildFlights() ?: emptyList()
+    override val period: ClosedRange<Instant>
+        get() =
+            if (flights.isEmpty()) Instant.EPOCH..Instant.EPOCH
+            else Instant.ofEpochSecond(flights.first().timeOut).atStartOfDay(ZoneOffset.UTC)..Instant.ofEpochSecond(flights.last().timeIn).atEndOfDay(ZoneOffset.UTC)
 
-    override val errorLines: List<String>?
+    override fun close() {
+        //intentionally left blank
+    }
+
+    override val errorLines: List<String>
         get() = _errorLines
-
+    override val isValid: Boolean
+        get() = validImportedLogbook
 
     /**
      * Build a list of Flights from a list of Strings

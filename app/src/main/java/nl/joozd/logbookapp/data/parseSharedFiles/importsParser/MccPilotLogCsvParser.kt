@@ -23,12 +23,15 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
+import nl.joozd.logbookapp.extensions.atEndOfDay
+import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.extensions.makeLocalDateSmart
 import nl.joozd.logbookapp.extensions.makeLocalTime
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import java.io.InputStream
 import java.lang.Exception
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -54,8 +57,8 @@ class MccPilotLogCsvParser(private val csvLines: List<String>, private val lowes
 
     private val _errorLines = emptyList<String>().toMutableList()
 
-    private fun parseCSV(): List<Flight?>? = if (!_isValid) null else {
-        csvLines.drop(1).mapIndexed { index, line -> parseLine(line, index + lowestId) }
+    private fun parseCSV(): List<Flight>? = if (!_isValid) null else {
+        csvLines.drop(1).mapIndexed { index, line -> parseLine(line, index + lowestId) }.filterNotNull()
     }
 
     /**
@@ -152,11 +155,21 @@ class MccPilotLogCsvParser(private val csvLines: List<String>, private val lowes
     /**
      * Consider getting this async on a Dispatchers.Default coroutine in case of large logbooks
      */
-    override val flights: List<Flight?>?
-        get() = parseCSV()
+    override val flights: List<Flight>
+        get() = parseCSV() ?: emptyList()
+    override val period: ClosedRange<Instant>
+        get() =
+            if (flights.isEmpty()) Instant.EPOCH..Instant.EPOCH
+            else Instant.ofEpochSecond(flights.first().timeOut).atStartOfDay(ZoneOffset.UTC)..Instant.ofEpochSecond(flights.last().timeIn).atEndOfDay(ZoneOffset.UTC)
+
+    override fun close() {
+        /// intentionally left blank
+    }
 
     override val errorLines: List<String>
         get() = _errorLines
+    override val isValid: Boolean
+        get() = _isValid
 
 
     /*********************************************************************************************

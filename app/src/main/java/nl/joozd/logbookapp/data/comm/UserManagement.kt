@@ -148,7 +148,6 @@ object UserManagement {
      * @return false if username taken
      * @return null if server or connection error
      */
-
     suspend fun loginFromLink(loginPassPair: Pair<String, String>): Boolean? {
         return Cloud.checkUserFromLink(loginPassPair.first, loginPassPair.second).also {
             if (it == true) {
@@ -168,7 +167,7 @@ object UserManagement {
     }
 
     fun generateLoginLink(): String? = Preferences.username?.let {
-        "https://joozdlog.joozd.nl/inject-key/$it:${Preferences.password}"
+        "https://joozdlog.joozd.nl/inject-key/$it:${Preferences.password?.replace('/', '-')}"
     }
 
     fun generateLoginLinkIntent(): Intent? = generateLoginLink()?.let { link ->

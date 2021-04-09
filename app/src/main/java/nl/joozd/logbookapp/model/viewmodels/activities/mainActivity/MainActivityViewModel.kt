@@ -508,7 +508,7 @@ else{
                         Log.d("Uri", "lastPathSegment: $it")
 
                         //TODO needs sanity check
-                        val loginPass = it.split(":").let { lp ->
+                        val loginPass = it.replace('-', '/').split(":").let { lp ->
                             lp.first() to lp.last()
                         }
                         viewModelScope.launch {

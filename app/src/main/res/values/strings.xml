@@ -334,7 +334,7 @@
 
     <string name="mark_incomplete_without_pic">Name needs to be set</string>
     <string name="mark_incomplete_without_pic_description">If no names are set on a completed flight, flight will be marked as incomplete</string>
-    <string name="signed_in_as"><![CDATA[<b>Signed in as</b><br><small>%1$s</small>&nbsp;]]></string>
+    <string name="signed_in_as"><![CDATA[<b>Joozdlog Cloud ID</b><br><small>%1$s</small>&nbsp;]]></string>
     <string name="email_button_text_verified"><![CDATA[<b>Email address</b><br><small>%1$s</small>&nbsp;]]></string>
     <string name="email_button_text_not_verified"><![CDATA[<b>Email address</b><br><small>%1$s (not verified)</small>&nbsp;]]></string>
     <string name="not_signed_in">Not signed in</string>

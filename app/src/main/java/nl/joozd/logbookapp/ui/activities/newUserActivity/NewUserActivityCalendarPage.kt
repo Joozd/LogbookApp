@@ -68,7 +68,7 @@ class NewUserActivityCalendarPage: JoozdlogFragment() {
             /****************************************************************************************
              * initialize spinner
              ****************************************************************************************/
-            val spinnerAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, arrayListOf<String>()).apply {
+            val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, arrayListOf<String>()).apply {
                 // Specify the layout to use when the list of choices appears
                 setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             }.also { adapter ->

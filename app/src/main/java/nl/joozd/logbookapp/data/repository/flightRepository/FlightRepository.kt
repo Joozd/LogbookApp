@@ -182,7 +182,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     fun getWorkingFlight(): WorkingFlight = workingFlight.value ?: error ("WorkingFlight not initialized")
 
     /**
-     * saved flight set through [notifyFlightSaved]
+     * saved flight set through [save] when it has notify = true as parameter
      */
     val savedFlight: LiveData<SingleUseFlight>
         get() = _savedFlight
@@ -403,15 +403,21 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         val flightsInPeriod = getFlightsOnDays(roster.period)
 
         // Save all flights that are not also in DB, or if they are, have updated data
-        val newAndUpdatedFlights = rosterFlights.filter { rosteredFlight -> flightsInPeriod.filter{ !it.isPlanned}.none { it.isSameFlightWithSameInfo(rosteredFlight) }}
-        val newFlights = newAndUpdatedFlights.filter { rosteredFlight -> flightsInPeriod.filter{ !it.isPlanned}.none { it.isSameFlightAs(rosteredFlight) }}
+        val newAndUpdatedFlights = rosterFlights.filter { rosteredFlight -> flightsInPeriod.none { it.isSameFlightWithSameInfo(rosteredFlight) }}
+        val newFlights = newAndUpdatedFlights.filter { rosteredFlight -> flightsInPeriod.none { it.isSameFlightAs(rosteredFlight) }}
         val updatedFlights = updateFlightsWithRosterData(flightsInPeriod, newAndUpdatedFlights.filter{it !in newFlights})
+
+        //keep flights that are in calendar and that are not changed from roster but are in roster
+        val flightsToKeep = flightsInPeriod.filter { oldFlight -> rosterFlights.any {it.isSameFlightWithSameInfo(oldFlight)}}
 
 
         // delete all flights that are not also in roster and that are isPlanned
-        val flightsToDelete = flightsInPeriod.filter { savedFlight -> savedFlight.isPlanned }
+        val flightsToDelete = flightsInPeriod.filter { savedFlight -> savedFlight.isPlanned && savedFlight !in flightsToKeep}
 
         delete(flightsToDelete, false) // sync will happen after saving
+        Log.d("DEBUG", "flightsInPeriod: ${flightsInPeriod.size}")
+        Log.d("DEBUG", "New flights: ${newFlights.size}")
+        Log.d("DEBUG", "updated flights: ${updatedFlights.size}")
         save(newFlights + updatedFlights)
     }
 

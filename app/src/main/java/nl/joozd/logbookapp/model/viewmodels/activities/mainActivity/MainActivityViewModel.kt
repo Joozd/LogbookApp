@@ -30,6 +30,7 @@ import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.export.JoozdlogExport
@@ -554,8 +555,10 @@ else{
                     data.lastPathSegment?.replace("-", "/")?.let {
                         viewModelScope.launch{
                             Log.d("mainViewModel", "Sending $it")
-                            if (UserManagement.confirmEmail(it))
+                            if (UserManagement.confirmEmail(it)) {
+                                Cloud.requestLoginLinkMail()
                                 feedback(MainActivityEvents.EMAIL_VERIFIED)
+                            }
                             else _errorToShow.value = ScheduledErrors.currentErrors.firstOrNull()
                         }
                     }

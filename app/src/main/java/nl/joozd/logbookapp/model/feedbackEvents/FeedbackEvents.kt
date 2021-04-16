@@ -75,6 +75,7 @@ object FeedbackEvents {
         Event {
         LOGIN_LINK_COPIED,
         NOT_LOGGED_IN,
+        WANT_TO_CREATE_NEW_ACCOUNT_QMK,
         SIGNED_OUT
     }
 

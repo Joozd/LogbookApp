@@ -121,6 +121,8 @@
     <string name="always">Always</string>
     <string name="warning">Warning</string>
     <string name="dismiss">Dismiss</string>
+    <string name="tbd">TBD</string>
+
 
     <string name="times_per_year">Times per year</string>
     <string name="last_12_months">Last 12 Months</string>
@@ -299,6 +301,7 @@
     <string name="youCannotResetPassword">Don\'t forget to save your new login link!</string>
     <string name="use_old_link_if_failed_maybe">If something goes wrong and the new login link doesn\'t work (like when app gets killed halfway), you should be able to log in with the old link. So make sure you have that saved before continuing.</string>
     <string name="make_new_account">Make a new account</string>
+    <string name="make_new_account_question">You do not have valid login data. Do you want to create a new account?\nIf you have a valid login link, click \"NO\" and use your login link to log in.</string>
     <string name="skipThisStep">Skip this step</string>
     <string name="dontWantCloudSync">Don\'t want to use cloud sync?</string>
     <string name="create_account">Create new account</string>

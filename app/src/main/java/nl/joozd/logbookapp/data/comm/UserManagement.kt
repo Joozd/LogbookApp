@@ -34,7 +34,7 @@ import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 object UserManagement {
     val signedIn: Boolean
-        get() = Preferences.username != null
+        get() = Preferences.username != null && Errors.LOGIN_DATA_REJECTED_BY_SERVER !in ScheduledErrors.currentErrors
 
     val username
         get() = Preferences.username

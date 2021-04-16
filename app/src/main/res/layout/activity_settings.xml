@@ -87,7 +87,7 @@
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/loggingPrefsDescriptionTextView"
-                tools:visibility="visible">
+                tools:visibility="gone">
 
 
                 <!-- Text set programmatically -->
@@ -345,9 +345,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                tools:visibility="visible"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/syncDescriptionTextView">
+                app:layout_constraintTop_toBottomOf="@+id/syncDescriptionTextView"
+                tools:visibility="gone">
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/settingsGetFlightsFromCalendarSelector"
@@ -360,8 +360,8 @@
 
 
                 <FrameLayout
-                    style="@style/SpinnerFrameStyle"
                     android:id="@+id/settingsCalendarPickerSpinnerLayout"
+                    style="@style/SpinnerFrameStyle"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -378,7 +378,6 @@
 
 
                 </FrameLayout>
-
 
 
                 <androidx.appcompat.widget.SwitchCompat
@@ -402,8 +401,8 @@
                 <TextView
                     android:id="@+id/dontPostponeTextView"
                     style="@style/SettingsActivityHyperLink"
-                    android:text="@string/enable_now"
                     android:layout_marginEnd="16dp"
+                    android:text="@string/enable_now"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/calendarSyncPostponedTextView"
                     tools:visibility="visible" />
@@ -450,7 +449,8 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/cloudDescriptionTextView">
+                app:layout_constraintTop_toBottomOf="@+id/cloudDescriptionTextView"
+                tools:visibility="visible">
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/useCloudSyncSwitch"
@@ -571,7 +571,7 @@
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/pdfDescriptionTextView"
-                tools:visibility="visible">
+                tools:visibility="gone">
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/addNamesFromRosterSwitch"

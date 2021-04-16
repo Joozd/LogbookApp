@@ -154,10 +154,8 @@ class ChangePasswordActivity : JoozdlogActivity() {
                 titleResource = R.string.you_are_not_signed_in
                 messageResource = R.string.you_need_to_be_signed_in
                 setPositiveButton(R.string.signIn){
-                    supportFragmentManager.commit {
-                        add(R.id.mainActivityLayout, LoginDialog())
-                        addToBackStack(null)
-                    }
+                    toast("YEAH SORRY THIS DOESNT WORK ATM")
+                    TODO("Make this work")
                 }
                 setNegativeButton(android.R.string.cancel){
                     finish()

@@ -25,17 +25,32 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.DialogCloudSyncTermsBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.model.viewmodels.dialogs.CloudSyncTermsDialogViewModel
 import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
-class CloudSyncTermsDialog: JoozdlogFragment() {
+/**
+ * This dialog will show terms and conditions for Cloud.
+ * If OK clicked, it will set [Preferences.useCloud] and [Preferences.acceptedCloudSyncTerms] to true
+ */
+class CloudSyncTermsDialog(): JoozdlogFragment() {
+    constructor(sync: Boolean): this() {
+        syncOnClose = sync
+    }
+
     val viewModel: CloudSyncTermsDialogViewModel by viewModels()
+
+    /**
+     * If true, will request a sync as soon as terms are accepted
+     */
+    private var syncOnClose = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogCloudSyncTermsBinding.bind(inflater.inflate(R.layout.dialog_cloud_sync_terms, container, false)).apply {
+            syncOnClose = savedInstanceState?.getBoolean(SYNC_ON_OK) ?: false
             cloudSyncTermsDialogBackground.setOnClickListener { } // catch clicks so they don't fall through
 
             // termsTextView.movementMethod = ScrollingMovementMethod()
@@ -52,6 +67,7 @@ class CloudSyncTermsDialog: JoozdlogFragment() {
                 setOnClickListener {
                     Preferences.acceptedCloudSyncTerms = true
                     Preferences.useCloud = true
+                    if (syncOnClose) FlightRepository.getInstance().syncIfNeeded() // this will also cause worker to create login data if none present
                     closeFragment()
                 }
                 val clickable = viewModel.waitedLongEnough.value ?: false
@@ -78,4 +94,13 @@ class CloudSyncTermsDialog: JoozdlogFragment() {
                     iAcceptTextView.setTextColor(requireActivity().getColorFromAttr(android.R.attr.colorAccent))
             }
         }.root
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(SYNC_ON_OK, syncOnClose)
+    }
+
+    companion object{
+        private const val SYNC_ON_OK = "SYNC_ON_OK"
+    }
 }

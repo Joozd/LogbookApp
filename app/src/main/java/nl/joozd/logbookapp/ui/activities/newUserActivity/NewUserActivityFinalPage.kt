@@ -33,13 +33,7 @@ import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
 
 /**
- * TODO: This page will save data that might not have been saved yet:
- * TODO: - Email address if still set and not the same as [Preferences.emailAddress] must be set
- * TODO: - Start a sync with server
- * TODO:     * Sync should check for username entered, if not request a new username from server. User cannot pick own name anymore as that didn't make sense anyway.
- * TODO: User cannot pick own username. Only thing to do here is accept terms (nested scrollview) and a switch stating that we want an account.
- * TODO: This will set [Preferences.useCloud] to true. If that is set to true but username is [Preferences.USERNAME_NOT_SET], Cloud will request a new username from server.
- * TODO With that username, it will make an account, check email, and if checked, send a login link to that email for recovery purposes.
+ * Final puntjes op de i
  */
 class NewUserActivityFinalPage: Fragment() {
     val pageNumber = NewUserActivityViewModel.PAGE_FINAL

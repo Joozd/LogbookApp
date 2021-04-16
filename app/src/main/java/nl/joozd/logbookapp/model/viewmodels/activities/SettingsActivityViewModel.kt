@@ -300,7 +300,33 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     */
 
     fun useCloudSyncToggled(){
-        Preferences.useCloud = !Preferences.useCloud
+        when{
+            //toggle off if on
+            Preferences.useCloud -> Preferences.useCloud = false
+
+            //toggle on if toggled off but user was logged in before
+            //this will force a full resync. Device data will overwrite server data with same FlightID
+            UserManagement.signedIn -> {
+                Preferences.lastUpdateTime = 0
+                Preferences.useCloud = true
+                flightRepository.syncIfNeeded()
+            }
+
+            // Activity will take care of showing &Cs if needed
+            else -> {
+                Preferences.lastUpdateTime = 0
+                feedback(SettingsActivityEvents.WANT_TO_CREATE_NEW_ACCOUNT_QMK)
+            }
+        }
+    }
+
+    /**
+     * Wipes login data.
+     * Is Cloud is enabled, next time a synch is requested new login data will be made by worker
+     */
+    fun wipeLoginData(){
+        Preferences.username = null
+        Preferences.password = null
     }
 
     /**

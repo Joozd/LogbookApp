@@ -36,8 +36,8 @@ import nl.joozd.logbookapp.databinding.ActivityNewUserPageCloudBinding
 import nl.joozd.logbookapp.ui.utils.toast
 
 /**
- * Create new user!
-
+ * Preferences pertaining to cloud.
+ * If Cloud is enabled, sync worker will create a new account if needed.
  */
 class NewUserActivityCloudPage: JoozdlogFragment() {
     val viewModel: NewUserActivityViewModel by activityViewModels()

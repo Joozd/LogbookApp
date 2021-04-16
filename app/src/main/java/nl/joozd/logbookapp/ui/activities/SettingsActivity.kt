@@ -42,7 +42,9 @@ import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
+import nl.joozd.logbookapp.ui.dialogs.CloudSyncTermsDialog
 import nl.joozd.logbookapp.ui.dialogs.EmailDialog
+import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.dialogs.NumberPickerDialog
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
@@ -208,7 +210,7 @@ class SettingsActivity : JoozdlogActivity() {
                 showLoginLinkHint()
             }
 
-            useWifiForLargeFilesSwitch.setOnCheckedChangeListener { _, isChecked ->
+            useWifiForLargeFilesSwitch.setOnCheckedChangeListener { _, _ ->
                 viewModel.useWifiForLargeFilesToggled()
             }
 
@@ -255,6 +257,7 @@ class SettingsActivity : JoozdlogActivity() {
                         toast(R.string.login_link_created)
                     SettingsActivityEvents.NOT_LOGGED_IN ->
                         toast(R.string.error)
+                    SettingsActivityEvents.WANT_TO_CREATE_NEW_ACCOUNT_QMK -> showNewAccountDialog()
                 }
             }
 
@@ -434,6 +437,28 @@ class SettingsActivity : JoozdlogActivity() {
         }
     }
 
+    /**
+     * This dialog will ask viewModel to make a new account.
+     * If [Preferences.acceptedCloudSyncTerms] it will enable [Preferences.useCloud]
+     * if not, it will open a dialog that will allow user to accept terms and if so, sets those both to true.
+     */
+    private fun showNewAccountDialog(){
+        JoozdlogAlertDialog().show(activity){
+            titleResource = R.string.cloud_sync_title
+            messageResource = R.string.make_new_account_question
+            setNegativeButton(android.R.string.cancel)
+            setPositiveButton(android.R.string.ok){
+                if (Preferences.acceptedCloudSyncTerms)
+                    Preferences.useCloud = true
+                else supportFragmentManager.commit {
+                    viewModel.wipeLoginData()
+                    add(R.id.settingsActivityLayout, CloudSyncTermsDialog(sync = true)) // secondary constructor used, works on recreate
+                    addToBackStack(null)
+                }
+            }
+        }
+    }
+
     /***********************************************************************************************
      * Private functions for changing layout
      ***********************************************************************************************/
@@ -470,7 +495,7 @@ class SettingsActivity : JoozdlogActivity() {
     }
 
     private fun ActivitySettingsBinding.setLoggedInInfo(name: String?){
-        youAreSignedInAsButton.text = getStringWithMakeup(R.string.signed_in_as, name ?: getString(R.string.you_are_not_signed_in))
+        youAreSignedInAsButton.text = getStringWithMakeup(R.string.signed_in_as, name ?: getString(R.string.tbd))
         val showLoginLinkButton = if (name == null) View.GONE else View.VISIBLE
         loginLinkButton.visibility = showLoginLinkButton
         loginLinkExplanationImageView.visibility = showLoginLinkButton

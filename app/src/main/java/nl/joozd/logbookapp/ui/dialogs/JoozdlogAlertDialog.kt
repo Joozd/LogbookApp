@@ -40,7 +40,7 @@ import nl.joozd.logbookapp.databinding.DialogJoozdlogTwoButtonBinding
  *    // set buttons and texts here
  * }
  * [title] = title
- * [titleResource] = title, from recource.
+ * [titleResource] = title, from resource.
  * Same goes for [message] / [messageResource]
  * [setPositiveButton] / [setNegativeButton] / [setNeutralButton] for buttons
  */

@@ -36,6 +36,8 @@ import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.repository.helpers.overlaps
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
+import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -111,6 +113,12 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
             value = flightsList
         }
     }
+
+    /**
+     * Server Error to show
+     * Null if no errors present
+     */
+    private val _errorToShow = MutableLiveData(ScheduledErrors.currentErrors.firstOrNull())
 
 
 
@@ -248,6 +256,10 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     val showBackupNotice: LiveData<Boolean>
         get() = _showBackupNotice
 
+    //server error to show
+    val errorToShow: LiveData<Errors?>
+        get() = _errorToShow
+
     val backupUri: LiveData<Uri>
         get() = _backupUri
 
@@ -338,6 +350,21 @@ else{
         //TODO make some kind of "working" animation on button
         _backupUri.value = JoozdlogExport.shareCsvExport("joozdlog_backup_$dateString")
         Preferences.mostRecentBackup = Instant.now().epochSecond
+    }
+
+    fun emailErrorSeen(){
+        ScheduledErrors.clearError(Errors.EMAIL_CONFIRMATION_FAILED)
+    }
+
+    fun loginErrorSeen(){
+        Preferences.useCloud = false
+        Preferences.username = null
+        Preferences.password = null
+        ScheduledErrors.clearError(Errors.LOGIN_DATA_REJECTED_BY_SERVER)
+    }
+
+    fun serverErrorSeen(){
+        ScheduledErrors.clearError(Errors.SERVER_ERROR)
     }
 
 

@@ -35,6 +35,7 @@ import androidx.fragment.app.commit
 import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -45,6 +46,7 @@ import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivity
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesActivity
 import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.dialogs.AboutDialog
+import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.dialogs.LoginDialog
 import nl.joozd.logbookapp.ui.fragments.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.customs.CustomSnackbar
@@ -188,6 +190,15 @@ class MainActivity : JoozdlogActivity() {
 
             viewModel.searchFieldHint.observe(activity) {
                 mainSearchBoxLayout.hint = it ?: getString(R.string.search)
+            }
+
+            viewModel.errorToShow.observe(activity) {
+                when (it) {
+                    Errors.LOGIN_DATA_REJECTED_BY_SERVER -> showBadLoginDataDialog()
+                    Errors.EMAIL_CONFIRMATION_FAILED -> showBadEmailConfirmationDialog()
+                    Errors.SERVER_ERROR -> showRandomServerErrorDialog()
+                    // null -> do nothing
+                }
             }
 
             viewModel.feedbackEvent.observe(activity) {
@@ -492,6 +503,43 @@ class MainActivity : JoozdlogActivity() {
         }
 
     }
+
+    /**
+     * Shows dialog stating that login data have been rejected by server
+     * Will notify viewModel that OK has been clicked
+     */
+    private fun showBadLoginDataDialog(){
+        JoozdlogAlertDialog().show(activity){
+            titleResource = R.string.error
+            messageResource = R.string.wrong_username_password
+            setPositiveButton(android.R.string.ok){ viewModel.loginErrorSeen() }
+        }
+    }
+
+    /**
+     * Shows dialog stating that login data have been rejected by server
+     * Will notify viewModel that OK has been clicked
+     */
+    private fun showBadEmailConfirmationDialog(){
+        JoozdlogAlertDialog().show(activity){
+            titleResource = R.string.error
+            messageResource = R.string.email_data_rejected
+            setPositiveButton(android.R.string.ok){ viewModel.emailErrorSeen() }
+        }
+    }
+
+    /**
+     * Shows dialog stating that server did something wierd
+     * Will notify viewModel that OK has been clicked
+     */
+    private fun showRandomServerErrorDialog(){
+        JoozdlogAlertDialog().show(activity){
+            titleResource = R.string.error
+            messageResource = R.string.server_random_error
+            setPositiveButton(android.R.string.ok){ viewModel.serverErrorSeen() }
+        }
+    }
+
 
     private fun ActivityMainNewBinding.showSaveSnackbar(f: Flight? = null) {
         Log.d("showSaveSnackBar()", "started")

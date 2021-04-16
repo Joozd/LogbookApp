@@ -162,6 +162,7 @@
     <string name="need_internet">You need an internet connection for this.</string>
     <string name="server_problem">Cannot connect to server</string>
     <string name="server_problem_message">The server cannot be reached. It may be down, or your internet may have problems. Please try again later.</string>
+    <string name="server_random_error">The server cannot be reached. It may be down, or your internet may have problems. Please try again later.</string>
     <string name="login_error">Login Error</string>
     <string name="changed_password">Changed password</string>
     <string name="changed_password_message">Your password has changed. Please send your login link to yourself to make sure it is saved.</string>
@@ -180,7 +181,9 @@
     <string name="password_cannot_be_empty">Password cannot be empty</string>
     <string name="username_cannot_be_empty">Username cannot be empty</string>
     <string name="does_not_match">Does not match</string>
-    <string name="wrong_username_password">Wrong username or password</string>
+    <string name="wrong_username_password">The server has rejected your login data. Please create a new cloud account or find your working login link.</string>
+    <string name="email_data_rejected">The server has rejected your email confirmation data. Please check you clicked the link that goes with this account.</string>
+
     <string name="pass_requirements">Password requirements</string>
     <string name="password_requirements">At least 6 characters, two of which are not the same.</string>
 

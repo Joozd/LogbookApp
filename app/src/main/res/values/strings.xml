@@ -379,6 +379,10 @@
     <string name="privacy_text">All text entered in this screen will end up in an email to me and may be stored in my inbox until I delete it manually. It will not be saved anywehere else, and nothing will be used for any other purpose than processing/answering your feedback.</string>
     <string name="you_can_also_send_an_email">You can also send an email</string>
     <string name="email_verified">Email address verified!</string>
+    <string name="logged_in">Logged in to cloud!</string>
+    <string name="login_delayed">No server, will try again</string>
+
+
     <string name="submit">Submit</string>
     <string name="submit_feedback_qmk">Submit feedback?</string>
     <string name="empty_feedback">Feedback is empty</string>

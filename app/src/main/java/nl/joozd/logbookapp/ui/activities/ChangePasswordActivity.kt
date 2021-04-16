@@ -32,7 +32,6 @@ import nl.joozd.logbookapp.databinding.ActivityChangePasswordBinding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.ChangePasswordActivityViewModel
-import nl.joozd.logbookapp.ui.dialogs.LoginDialog
 import nl.joozd.logbookapp.ui.dialogs.WaitingForSomethingDialog
 import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.longToast

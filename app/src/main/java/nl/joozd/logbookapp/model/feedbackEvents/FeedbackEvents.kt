@@ -43,6 +43,8 @@ object FeedbackEvents {
         CALENDAR_SYNC_PAUSED,
         BACKUP_NEEDED,
         EMAIL_VERIFIED,
+        LOGGED_IN,
+        LOGIN_DELAYED_DUE_NO_SERVER,
         DONE,
         ERROR
     }

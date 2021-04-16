@@ -32,6 +32,9 @@ import nl.joozd.joozdlogcommon.serializing.longFromBytes
 import nl.joozd.joozdlogcommon.serializing.unwrapInt
 import nl.joozd.joozdlogcommon.serializing.wrap
 import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
+import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
+import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
+import java.nio.charset.Charset
 import java.security.MessageDigest
 
 object ServerFunctions {
@@ -150,7 +153,14 @@ object ServerFunctions {
         val payLoad = LoginData(Preferences.username!!, Preferences.key!!, BasicFlight.VERSION.version).serialize()
 
         client.sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
-        return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8))
+        return when (client.readFromServer()?.toString(Charsets.UTF_8)){
+            JoozdlogCommsKeywords.OK -> true
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> false.also{
+                ScheduledErrors.addError(Errors.LOGIN_DATA_REJECTED_BY_SERVER)
+            }
+            else -> null
+        }
+
     }
 
     /**

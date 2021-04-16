@@ -34,6 +34,8 @@ import nl.joozd.joozdlogcommon.exceptions.NotAuthorizedException
 import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.room.model.AircraftTypeConsensusData
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
+import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.data.utils.Encryption
 
 import java.time.Instant
@@ -192,8 +194,11 @@ object Cloud {
             ServerFunctions.testLoginFromLink(it, username, password)
         }) {
             1 -> true
-            2 -> false
+            2 -> false.also{
+                ScheduledErrors.addError(Errors.LOGIN_DATA_REJECTED_BY_SERVER)
+            }
             -998 -> {
+                ScheduledErrors.addError(Errors.SERVER_ERROR)
                 Log.w("Cloud", "Server gave unexpected response")
                 null
             }

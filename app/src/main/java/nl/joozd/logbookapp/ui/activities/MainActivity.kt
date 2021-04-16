@@ -47,7 +47,6 @@ import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesActivity
 import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.dialogs.AboutDialog
 import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
-import nl.joozd.logbookapp.ui.dialogs.LoginDialog
 import nl.joozd.logbookapp.ui.fragments.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.customs.CustomSnackbar
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
@@ -226,6 +225,9 @@ class MainActivity : JoozdlogActivity() {
                         showDeleteCompletedFlightDialog(it.extraData.getInt(MainActivityFeedbackExtraData.FLIGHT_ID))
                     MainActivityEvents.CALENDAR_SYNC_PAUSED -> showCalendarSyncRestartInfo()
                     MainActivityEvents.EMAIL_VERIFIED -> longToast(R.string.email_verified)
+                    MainActivityEvents.LOGGED_IN -> longToast(R.string.logged_in)
+                    MainActivityEvents.LOGIN_DELAYED_DUE_NO_SERVER -> longToast(R.string.login_delayed)
+
                     MainActivityEvents.BACKUP_NEEDED -> JoozdlogWorkersHub.periodicBackupFromServer(true) // If a backup should be made, try to do that through server
                     MainActivityEvents.SHOW_ABOUT_DIALOG -> showAboutDialog()
                     MainActivityEvents.DONE -> longToast(" Yay fixed!")
@@ -423,9 +425,10 @@ class MainActivity : JoozdlogActivity() {
 
     //TODO make this something else. Password is no longer known to users.
     private fun showLoginDialog(){
-        supportFragmentManager.commit{
-            add(R.id.mainActivityLayout, LoginDialog(), LOGIN_DIALOG_TAG)
-            addToBackStack(null)
+        JoozdlogAlertDialog().show(activity){
+            title = "Your login is farked"
+            message = "This will be something else one day. For now, use a working login link or create a new cloud login and resync to server"
+            setPositiveButton(android.R.string.ok)
         }
     }
 

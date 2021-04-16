@@ -528,17 +528,25 @@ else{
         if (action == ACTION_VIEW) {
             when(data?.pathSegments?.firstOrNull()){
                 "inject-key"-> {
-                    data.lastPathSegment?.let {
-                        Log.d("Uri", "lastPathSegment: $it")
+                    data.lastPathSegment?.let { lpString ->
+                        Log.d("Uri", "lastPathSegment: $lpString")
 
                         //TODO needs sanity check
-                        val loginPass = it.replace('-', '/').split(":").let { lp ->
+                        val loginPass = lpString.replace('-', '/').split(":").let { lp ->
                             lp.first() to lp.last()
                         }
                         viewModelScope.launch {
                             val result = UserManagement.loginFromLink(loginPass)
                             Log.d("LinkLogin", "result: $result")
-                            flightRepository.syncIfNeeded()
+                            if (result == null){
+                                Preferences.loginLinkStringWaiting = lpString
+                                JoozdlogWorkersHub.scheduleLoginAttempt()
+                                feedback(MainActivityEvents.LOGIN_DELAYED_DUE_NO_SERVER)
+                            }
+                            else {
+                                flightRepository.syncIfNeeded()
+                                feedback(MainActivityEvents.LOGGED_IN)
+                            }
                         }
                     }
                 }

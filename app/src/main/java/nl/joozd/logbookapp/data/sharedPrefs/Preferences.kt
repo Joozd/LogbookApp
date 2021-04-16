@@ -262,4 +262,9 @@ object Preferences {
      * Email confirmation string waiting for a network connection. Handled by [nl.joozd.logbookapp.workmanager.ConfirmEmailWorker]
      */
     var emailConfirmationStringWaiting: String by JoozdLogSharedPrefs(sharedPref, "")
+
+    /**
+     * Login link waiting for server to be available
+     */
+    var loginLinkStringWaiting: String by JoozdLogSharedPrefs(sharedPref, "")
 }

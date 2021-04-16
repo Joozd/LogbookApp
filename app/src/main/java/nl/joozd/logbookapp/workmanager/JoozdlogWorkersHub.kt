@@ -105,9 +105,27 @@ object JoozdlogWorkersHub {
         with(WorkManager.getInstance(App.instance)) {
             enqueueUniqueWork(CONFIRM_EMAIL, ExistingWorkPolicy.KEEP, task)
         }
-
     }
 
+
+    /**
+     * Schedule server login attempt
+     * If another worker is already doing this, that one will be kept and this will be ignored.
+     */
+    fun scheduleLoginAttempt(){
+        Log.d("scheduleLoginAttempt", "Scheduling a login attempt")
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+        val task = OneTimeWorkRequestBuilder<CloudLoginWorker>().apply{
+            setConstraints(constraints)
+            addTag(LOGIN_TO_CLOUD)
+        }.build()
+        with(WorkManager.getInstance(App.instance)) {
+            enqueueUniqueWork(LOGIN_TO_CLOUD, ExistingWorkPolicy.KEEP, task)
+        }
+    }
 
     /**
      * Gets airports from server and overwrites airportsDB if different.
@@ -192,6 +210,7 @@ object JoozdlogWorkersHub {
     private const val SYNC_TIME = "SYNC_TIME"
     private const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
     private const val CONFIRM_EMAIL = "CONFIRM_EMAIL"
+    private const val LOGIN_TO_CLOUD = "LOGIN_TO_CLOUD"
     private const val GET_AIRPORTS = "GET_AIRPORTS"
     private const val SYNC_AIRCRAFT_TYPES = "SYNC_AIRCRAFT_TYPES"
     private const val GET_BACKUP_EMAIL = "GET_BACKUP_EMAIL"

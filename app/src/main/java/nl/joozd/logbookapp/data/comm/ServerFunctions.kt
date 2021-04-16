@@ -143,7 +143,6 @@ object ServerFunctions {
      * @return true is success, false if username/pass incorrect, null if connection problem
      */
     fun login(client: Client): Boolean?{
-        Log.d("Serverfunctions.login", "username: ${Preferences.username}, key: ${Preferences.key?.toList()}")
         if (Preferences.username == null || Preferences.key == null) {
             return false
         }

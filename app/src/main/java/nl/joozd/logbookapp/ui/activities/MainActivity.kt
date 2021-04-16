@@ -221,18 +221,11 @@ class MainActivity : JoozdlogActivity() {
                     MainActivityEvents.DELETED_FLIGHT -> showDeleteSnackbar(this)
                     MainActivityEvents.FLIGHT_NOT_FOUND -> longToast("ERROR: Flight not found!")
                     MainActivityEvents.TRYING_TO_DELETE_CALENDAR_FLIGHT ->
-                        showDeletePlannedCalendarFlightDialog(
-                            it.extraData.getInt(
-                                MainActivityFeedbackExtraData.FLIGHT_ID
-                            )
-                        )
+                        showDeletePlannedCalendarFlightDialog(it.extraData.getInt(MainActivityFeedbackExtraData.FLIGHT_ID))
                     MainActivityEvents.TRYING_TO_DELETE_COMPLETED_FLIGHT ->
-                        showDeleteCompletedFlightDialog(
-                            it.extraData.getInt(
-                                MainActivityFeedbackExtraData.FLIGHT_ID
-                            )
-                        )
+                        showDeleteCompletedFlightDialog(it.extraData.getInt(MainActivityFeedbackExtraData.FLIGHT_ID))
                     MainActivityEvents.CALENDAR_SYNC_PAUSED -> showCalendarSyncRestartInfo()
+                    MainActivityEvents.EMAIL_VERIFIED -> longToast(R.string.email_verified)
                     MainActivityEvents.BACKUP_NEEDED -> JoozdlogWorkersHub.periodicBackupFromServer(true) // If a backup should be made, try to do that through server
                     MainActivityEvents.SHOW_ABOUT_DIALOG -> showAboutDialog()
                     MainActivityEvents.DONE -> longToast(" Yay fixed!")

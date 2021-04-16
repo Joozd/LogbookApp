@@ -42,6 +42,7 @@ object FeedbackEvents {
         CLOSE_SEARCH_FIELD,
         CALENDAR_SYNC_PAUSED,
         BACKUP_NEEDED,
+        EMAIL_VERIFIED,
         DONE,
         ERROR
     }

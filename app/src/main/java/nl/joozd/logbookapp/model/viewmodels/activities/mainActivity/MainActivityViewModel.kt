@@ -546,7 +546,9 @@ else{
                     data.lastPathSegment?.replace("-", "/")?.let {
                         viewModelScope.launch{
                             Log.d("mainViewModel", "Sending $it")
-                            UserManagement.confirmEmail(it)
+                            if (UserManagement.confirmEmail(it))
+                                feedback(MainActivityEvents.EMAIL_VERIFIED)
+                            else _errorToShow.value = ScheduledErrors.currentErrors.firstOrNull()
                         }
                     }
                 }

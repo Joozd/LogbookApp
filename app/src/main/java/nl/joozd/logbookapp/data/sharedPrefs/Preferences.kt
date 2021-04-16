@@ -150,6 +150,11 @@ object Preferences {
 
     var editFlightFragmentWelcomeMessageShouldBeDisplayed: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
+    /**
+     * Errors to be shown, bit flags. @see scheduleErrorNotification
+     */
+    var errorsToBeShown: Long by JoozdLogSharedPrefs(sharedPref, 0L)
+
 
     /***********************
      *   UI preferences:   *
@@ -253,4 +258,8 @@ object Preferences {
     // TODO handle this with a worker
     var feedbackWaiting: String by JoozdLogSharedPrefs(sharedPref, "")
 
+    /**
+     * Email confirmation string waiting for a network connection. Handled by [nl.joozd.logbookapp.workmanager.ConfirmEmailWorker]
+     */
+    var emailConfirmationStringWaiting: String by JoozdLogSharedPrefs(sharedPref, "")
 }

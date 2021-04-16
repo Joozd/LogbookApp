@@ -88,6 +88,26 @@ object JoozdlogWorkersHub {
         }
     }
 
+    /**
+     * Schedule an email confirmation
+     * If another worker is already doing this, that one will be kept and this will be ignored.
+     */
+    fun scheduleEmailConfirmation(){
+        Log.d("scheduleEmailConf...", "Scheduling an email confirmation")
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+        val task = OneTimeWorkRequestBuilder<ConfirmEmailWorker>().apply{
+            setConstraints(constraints)
+            addTag(CONFIRM_EMAIL)
+        }.build()
+        with(WorkManager.getInstance(App.instance)) {
+            enqueueUniqueWork(CONFIRM_EMAIL, ExistingWorkPolicy.KEEP, task)
+        }
+
+    }
+
 
     /**
      * Gets airports from server and overwrites airportsDB if different.
@@ -140,7 +160,6 @@ object JoozdlogWorkersHub {
 
     /**
      * Schedule a check whether server should send a backup email
-     *
      */
     fun periodicBackupFromServer(force: Boolean = false){
         Log.d("periodBackupFrmServer()", "added task to check for backup")
@@ -157,6 +176,8 @@ object JoozdlogWorkersHub {
         }
     }
 
+
+
     /**
      * Reschedule Aircraft and Airport updates
      */
@@ -170,6 +191,7 @@ object JoozdlogWorkersHub {
      */
     private const val SYNC_TIME = "SYNC_TIME"
     private const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
+    private const val CONFIRM_EMAIL = "CONFIRM_EMAIL"
     private const val GET_AIRPORTS = "GET_AIRPORTS"
     private const val SYNC_AIRCRAFT_TYPES = "SYNC_AIRCRAFT_TYPES"
     private const val GET_BACKUP_EMAIL = "GET_BACKUP_EMAIL"

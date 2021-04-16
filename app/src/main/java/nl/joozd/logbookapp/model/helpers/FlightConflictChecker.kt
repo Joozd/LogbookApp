@@ -25,7 +25,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.Instant
 
-object FlightConflichtChecker {
+object FlightConflictChecker {
     /**
      * This will check if changing a flight from [originalFlight] to [changedFlight] will create a conflict with Calendar Sync.
      * @param originalFlight The flight before saving, can be null (if this is a new flight)

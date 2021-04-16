@@ -31,7 +31,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.viewModels
-import androidx.core.view.forEach
 import androidx.fragment.app.commit
 import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
@@ -56,7 +55,7 @@ import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.time.Instant
 
-
+//TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {
     private val viewModel: MainActivityViewModel by viewModels()
 
@@ -445,7 +444,7 @@ class MainActivity : JoozdlogActivity() {
     private fun showDeletePlannedCalendarFlightDialog(id: Int){
         JoozdlogAlertDialogV1(this).show {
             messageResource = R.string.delete_calendar_flight
-            setPositiveButton(android.R.string.yes){
+            setPositiveButton(android.R.string.ok){
                 viewModel.disableCalendarImport()
                 viewModel.deleteFlight(id)
             }

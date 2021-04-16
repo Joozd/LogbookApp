@@ -25,9 +25,12 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
+import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.utils.generatePassword
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 object UserManagement {
     val signedIn: Boolean
@@ -182,6 +185,46 @@ object UserManagement {
             type = "text/plain"
             putExtra(Intent.EXTRA_SUBJECT, EMAIL_SUBJECT)
             putExtra(Intent.EXTRA_TEXT, text)
+        }
+    }
+
+    /**
+     * Confirm email confirmation string with server, or schedule that to happen as soon as server is online
+     * In case of failure, it will set failure flags in [ScheduledErrors]
+     * If the failure is that the server could not be reached, it will not set any errors but start a worker through [JoozdlogWorkersHub] which will recall this
+     *      function when a network connection is available
+     * @param confirmationString    the confirmation string as should have been received in confirmation email
+     *                              This will be sent to the server to verify
+     * @return true if success, false if fail.
+     */
+    suspend fun confirmEmail(confirmationString: String): Boolean{
+        //try to confirm email with server
+        return when (Cloud.confirmEmail(confirmationString)){
+            CloudFunctionResults.OK -> {
+                Preferences.emailVerified = true
+                Cloud.sendPendingEmailJobs()
+                true
+            }
+            CloudFunctionResults.CLIENT_ERROR -> {
+                JoozdlogWorkersHub.scheduleEmailConfirmation()
+                false
+            }
+            CloudFunctionResults.UNKNOWN_USER_OR_PASS -> {
+                ScheduledErrors.addError(Errors.LOGIN_DATA_REJECTED_BY_SERVER)
+                false
+            }
+            CloudFunctionResults.EMAIL_DOES_NOT_MATCH -> {
+                ScheduledErrors.addError(Errors.EMAIL_CONFIRMATION_FAILED)
+                false
+            }
+            CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER -> {
+                ScheduledErrors.addError(Errors.SERVER_ERROR)
+                false
+            }
+            else -> {
+                Log.w("confirmEmail", "Received unhandled response")
+                false
+            }
         }
     }
 

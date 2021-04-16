@@ -104,15 +104,7 @@ object Cloud {
     suspend fun confirmEmail(confirmationString: String): CloudFunctionResults = withContext(Dispatchers.IO) {
         require (":" in confirmationString) { "A confirmationString must have a \':\' in it"}
         Client.getInstance().use{ client ->
-            ServerFunctions.confirmEmail(client, confirmationString).also {
-                Log.d("confirmEmail", "$it")
-                when(it) {
-                    CloudFunctionResults.OK -> {
-                        Preferences.emailVerified = true
-                        sendPendingEmailJobs()
-                    }
-                }
-            }
+            ServerFunctions.confirmEmail(client, confirmationString)
         }
     }
 
@@ -131,6 +123,7 @@ object Cloud {
                         Preferences.emailVerified = false // error dialogs etc will be handled by calling function
                         Preferences.emailJobsWaiting.sendLoginLink = true
                     }
+                    else -> Log.w("requestLoginLinkMail()", "unhandled result $it")
                 }
             }
         }
@@ -208,10 +201,10 @@ object Cloud {
         }
     }
 
-    suspend fun requestBackup(): CloudFunctionResults? = withContext(Dispatchers.IO) {
-        Client.getInstance().use {
-            ServerFunctions.login(it)
-            ServerFunctions.requestBackup(it).also{
+    suspend fun requestBackup(): CloudFunctionResults = withContext(Dispatchers.IO) {
+        Client.getInstance().use {client ->
+            ServerFunctions.login(client)
+            ServerFunctions.requestBackup(client).also{
                 when (it){
                     CloudFunctionResults.OK -> {
                         Preferences.emailJobsWaiting.sendBackupCsv = false
@@ -220,6 +213,7 @@ object Cloud {
                         Preferences.emailVerified = false
                         Preferences.emailJobsWaiting.sendBackupCsv = true
                     }
+                    else -> Log.w("requestBackup()", "unhandled result $it")
                 }
             }
         }
@@ -251,9 +245,11 @@ object Cloud {
     /**
      * Gets AircraftTypeConsensus from server
      */
+    /*
     suspend fun getAircraftConsensus(listener: (Int) -> Unit = {}): List<AircraftTypeConsensusData> {
         TODO("Not Implemented")
     }
+    */
 
     /**
      * Send AircraftConsensus to server

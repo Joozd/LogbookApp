@@ -30,20 +30,17 @@ import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.export.JoozdlogExport
-import nl.joozd.logbookapp.data.repository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.repository.helpers.overlaps
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.*
-// import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
-import nl.joozd.logbookapp.model.helpers.FlightConflichtChecker
+import nl.joozd.logbookapp.model.helpers.FlightConflictChecker
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.utils.CoroutineTimerTask
@@ -420,13 +417,13 @@ else{
      * @return time (epochSecond) to disable calendarSync to if conflict, 0 if not
      */
     fun checkFlightConflictingWithCalendarSync(f: Flight): Long = if (f == flightRepository.undoSaveFlight) 0L
-    else FlightConflichtChecker.checkConflictingWithCalendarSync(flightRepository.undoSaveFlight, f)
+    else FlightConflictChecker.checkConflictingWithCalendarSync(flightRepository.undoSaveFlight, f)
 
 
     /**
      * Fixes a calendar sync conflict with edited flight by disabling calendar sync until after both flights.
      * @param f: Flight to check against FlightRepository.undoFlight. Will throw error if f == null.
-     * Call this function from an observer of [FlightRepository.savedFlight]
+     * Call this function from an observer of [nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository.savedFlight]
      */
     fun fixCalendarSyncConflictIfNeeded(f: Flight?, silent: Boolean = false) {
         if (f == null) return // no flight, no conflict
@@ -522,7 +519,7 @@ else{
                     data.lastPathSegment?.replace("-", "/")?.let {
                         viewModelScope.launch{
                             Log.d("mainViewModel", "Sending $it")
-                            Cloud.confirmEmail(it)
+                            UserManagement.confirmEmail(it)
                         }
                     }
                 }

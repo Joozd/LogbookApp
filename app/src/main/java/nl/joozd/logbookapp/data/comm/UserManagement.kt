@@ -40,18 +40,23 @@ object UserManagement {
      * Create a new user on server
      * This will definitely invalidate current login data
      *
-     * If user successfully created, it will set email if applicable
+     * If user successfully created, it will set email if one is entered in [Preferences.emailAddress]
      *
      * @return @see [Cloud.createNewUser]
      */
-    private suspend fun createNewUser(username: String, password: String, email: String? = null): CloudFunctionResults {
+    private suspend fun createNewUser(username: String, password: String): CloudFunctionResults {
         Preferences.username = username
         Preferences.password = password
+        val email = Preferences.emailAddress.nullIfBlank()
         return Cloud.createNewUser(username, Preferences.key!!).also {
             Log.d("CreateNewUser()", "Created new user with key ${Preferences.key?.toList()}")
             if (it == CloudFunctionResults.OK) {
                 //if email set, send it to server
-                email?.let { Cloud.sendNewEmailAddress() }
+                email?.let {
+                    Cloud.sendNewEmailAddress()
+                    //TODO handle replies from server: OK / NOT_A_VALID_EMAIL_ADDRESS / SERVER_ERROR / UNKNOWN_USER_OR_PASS / NO_LOGIN_DATA
+                    Log.d("CreateNewUser()", "Added email: $email")
+                }
                 Preferences.lastUpdateTime = -1
                 Preferences.useCloud = true
                 Log.d("CreateNewUser()", "created username: $username, password: $password, email: $email")
@@ -78,7 +83,7 @@ object UserManagement {
         val password = generatePassword(16)
         Log.d("UserManagement", "username: $newUsername")
         Log.d("UserManagement", "password: $password")
-        return createNewUser(newUsername, password, Preferences.emailAddress.nullIfEmpty()).let{
+        return createNewUser(newUsername, password).let{
             if (it == CloudFunctionResults.USER_ALREADY_EXISTS) newLoginDataNeeded() else it
         }
     }

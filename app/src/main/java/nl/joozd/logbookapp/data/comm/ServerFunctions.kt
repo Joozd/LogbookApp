@@ -227,12 +227,14 @@ object ServerFunctions {
 
     /**
      * Send new email address to server
+     * Server will send a confirmation mail if it worked.
      */
     fun sendNewEmailData(client: Client, emailToSend: String): CloudFunctionResults =
         generateLoginDataWithEmail(email = emailToSend)?.let{loginData ->
             if (client.sendRequest(JoozdlogCommsKeywords.SET_EMAIL, loginData.serialize()) < 0) CloudFunctionResults.CLIENT_ERROR
             else when(client.readFromServer()?.toString(Charsets.UTF_8)) {
                 JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
+                JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
                 JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS
                 JoozdlogCommsKeywords.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
                 null -> CloudFunctionResults.CLIENT_ERROR

@@ -30,7 +30,6 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.dataclasses.SupportedCalendarTypes
 import nl.joozd.logbookapp.data.utils.Encryption
-import java.util.*
 
 @Suppress("ObjectPropertyName")
 object Preferences {

@@ -20,11 +20,10 @@
 package nl.joozd.logbookapp.data.parseSharedFiles.extensions
 
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedCompleteFlights
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedRoster
 import nl.joozd.logbookapp.data.repository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.AirportRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 
 /**
  * Process Completed Flights:
@@ -35,7 +34,9 @@ import nl.joozd.logbookapp.data.repository.AirportRepository
  */
 suspend fun CompletedFlights.postProcess(): ProcessedCompleteFlights{
     val aircraftRepository = AircraftRepository.getInstance()
+    val mrfAsync = FlightRepository.getInstance().getMostRecentFlightAsync()
     val iataIcaoMap = AirportRepository.getInstance().getIataIcaoMapAsync().await()
+    val lastFlightWasIFR = mrfAsync.await()?.ifrTime ?: 1 > 0
     val newFlights = flights.map{ flight ->
         // In case airports are IATA format, switch them to ICAO.
         // I think there is no need to have that set by RosterParser as there is no overlap between (4 letter) ICAO and (3 letter) IATA codes.
@@ -55,6 +56,7 @@ suspend fun CompletedFlights.postProcess(): ProcessedCompleteFlights{
             dest = dest,
             registration = foundAircraft?.registration ?: flight.registration,
             aircraftType = foundAircraft?.type?.shortName ?: flight.aircraftType,
+            ifrTime = if (lastFlightWasIFR || flight.ifrTime > 0) flight.calculatedDuration else 0,
             isPlanned = false
         )
     }

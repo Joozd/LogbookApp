@@ -2,22 +2,21 @@ JOOZDLOG TODO LIST
 
 BUGS:
 
-SOMETIMES FLIGHTS ADDED THROUGH "NEW FLIGHT" ARE GETTING LOST ON NEXT SYNC.
-THIS MIGHT HAVE BEEN FIXED BUT MAYBE NOT. IF THIS HAPPENS TO YOU, PLEASE REPORT WHAT YOU DID BECAUSE I CANNOT REPRODUCE THIS AT WILL
 
 ******************
-TODO BEFORE PUBLIC BETA:
+TODO BEFORE 1.0:
 ******************
 
 Everything needs more testing.
 
-Show a confirmation popup or something when email sucessfully verified.
 Do more work at email verifications (when, how often etc)
 
 Create a front page for PDF logbook
 
 Monthlies:
 conflict handling / updating of logged flights needs more testing.
+
+Import activity needs a UI
 
 *** Dit alleen nodig voor niet-KLC (1.0.1) ***
 Custom aircraft + upload naar server voor toevoegen aan lijst
@@ -26,7 +25,7 @@ Custom aircraft + upload naar server voor toevoegen aan lijst
 EXTRA:
 *****************
 
-Backup kunnen laden als al vluchten in staan
+Importing a complete logbook should ask to merge or overwrite
 
 Forced types serialized type meegeven ipv alleen naam (ook op server dus)
 - nieuwe class maken, nieuwe request naar server, drop table on upgrade en maak nieuwe met nieuwe class
@@ -46,8 +45,7 @@ Limits? Max times? Ruimte?
 
 Custom airports met lat/long/iata kunnen maken?
 
-Flightnr invullen - copy van laatste met dat nummer, afronden tijden op 5 min?
-Als er al iets stond, vragen wat wil
+Do something with flightnumbers?
 
 Custom Currencies?
 
@@ -62,14 +60,10 @@ Sync nalopen ivm mogelijk nieuwere vluchten overschreven door oudere data op ser
 
 Currencies
 
-Dark mode
-
 Notification when doing background up/downloading
 
 Ical van Roel gebruiken als niet op apparaat :
 https://calendar.klm.com/crew/LONG_STRING_GOES_HERE
-
-Zie Roel watsap: battery usage
 
 *****************
 Server:

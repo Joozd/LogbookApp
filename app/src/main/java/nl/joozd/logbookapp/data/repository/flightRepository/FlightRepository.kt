@@ -446,7 +446,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         // Update known flights, ignore flights that will not change:
         val updatedFlights = flightsToUpdate.mapNotNull{ oldFlight ->
             val importingFlight = importFlights.first{ it.isSameCompletedFlight(oldFlight)}
-            if (importingFlight.isSameFlightAs(oldFlight))
+            if (importingFlight.isSameFlightAs(oldFlight, withMargins = false) || oldFlight.isPlanned)
                 null
             else importingFlight.mergeInto(oldFlight)
         }

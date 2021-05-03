@@ -424,7 +424,7 @@ object Cloud {
                         newLocalFlights.filter { it.flightID in takenIDs },
                         sync = false
                     )
-                    flightRepository.save(fixedNewLocalFlights, sync = false)
+                    flightRepository.save(fixedNewLocalFlights, sync = false, addToUndo = false)
 
                     fixedLocalFlights.addAll(fixedNewLocalFlights)
 
@@ -470,7 +470,7 @@ object Cloud {
                     //listsner from 85 to 100
 
                     flightRepository.save(flightsToSend.map { it.copy(unknownToServer = false) } + newFlightsFromServer,
-                        sync = false) // { listener(85 + it * 15 / 100) } // TODO Listsner not implemented
+                        sync = false, addToUndo = false) // { listener(85 + it * 15 / 100) } // TODO Listsner not implemented
 
 
                     // Profit!

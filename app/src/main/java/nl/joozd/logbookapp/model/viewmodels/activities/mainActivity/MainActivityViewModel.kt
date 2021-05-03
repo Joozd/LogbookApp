@@ -25,6 +25,7 @@ import android.content.Intent
 import android.content.Intent.ACTION_VIEW
 import android.net.Uri
 import android.util.Log
+import android.view.MenuItem
 import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
@@ -56,6 +57,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     /*********************************************************************************************
      * Private parts
      *********************************************************************************************/
+
     private val icaoIataMap
         get() = airportRepository.icaoIataMap.value ?: emptyMap()
 
@@ -251,9 +253,6 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     val workingFlight: LiveData<WorkingFlight?>
         get() = flightRepository.workingFlight
 
-    val savedflight
-        get() = flightRepository.savedFlight
-
     val showBackupNotice: LiveData<Boolean>
         get() = _showBackupNotice
 
@@ -263,6 +262,12 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     val backupUri: LiveData<Uri>
         get() = _backupUri
+
+    val undoAvailable
+        get() = flightRepository.undoAvailable
+
+    val redoAvailable
+        get() = flightRepository.redoAvailable
 
     /**
      * Exposed vals
@@ -310,13 +315,10 @@ else{
 
     fun menuSelectedAddFlight() = addFlight()
 
-    fun menuSelectedTotalTimes() {
-        feedback(MainActivityEvents.NOT_IMPLEMENTED)
-    }
+    fun undo() = flightRepository.undo()
 
-    fun menuSelectedBalanceForward() {
-        feedback(MainActivityEvents.NOT_IMPLEMENTED)
-    }
+
+    fun redo() = flightRepository.redo()
 
     fun menuSelectedSearch() {
         toggleSearchField()
@@ -387,17 +389,6 @@ else{
     }
 
     /**
-     * Undo saving of a flight bu reverting to its backed up state in FlightRepository
-     * If a [savedflight] was given and there is no flightRepository.undoSaveFlight, it is a new flight wchich will be deleted
-     */
-    fun undoSaveWorkingFlight(savedFlightToUndo: Flight? = null) = flightRepository.undoSaveFlight?.let { undoFlight ->
-        flightRepository.save(undoFlight)
-    }
-        ?: savedFlightToUndo?.let { savedFlight ->
-            flightRepository.delete(savedFlight)
-        } ?: feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
-
-    /**
      * Does one of three things:
      * - if the flight with flightID [id] is:
      *  * nonexistent:      feedback(FLIGHT_NOT_FOUND)
@@ -415,7 +406,8 @@ else{
                                 extraData.putInt(MainActivityFeedbackExtraData.FLIGHT_ID, id)
                             }
                         else {
-                            flightRepository.delete(it)
+                            flightRepository.delete(it, addToUndo = true)
+                            println("BANAAAAAN")
                             feedback(MainActivityEvents.DELETED_FLIGHT)
                         }
                     }
@@ -427,12 +419,7 @@ else{
         }
     }
 
-    fun deleteNotPlannedFlight(id: Int) = flightRepository.delete(id)
-
-    fun undoDeleteFlight() {
-        flightRepository.undeleteFlight()
-    }
-
+    fun deleteNotPlannedFlight(id: Int) = flightRepository.delete(id, addToUndo = true)
 
     /*********************************************************************************************
      * Functions related to saving/loading working flight
@@ -482,7 +469,7 @@ else{
         viewModelScope.launch {
             flightRepository.fetchFlightByID(flightId)?.let { flight ->
                 disableCalendarImportUntil(flight.timeIn)
-                flightRepository.delete(flight)
+                flightRepository.delete(flight, addToUndo = true)
                 feedback(MainActivityEvents.DELETED_FLIGHT)
             } ?: feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
         }

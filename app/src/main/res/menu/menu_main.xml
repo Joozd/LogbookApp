@@ -34,6 +34,18 @@
         app:showAsAction="ifRoom"
         />
     <item
+        android:id="@+id/menu_undo"
+        android:icon="@drawable/ic_add_white_48dp"
+        android:title="@string/undo"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_redo"
+        android:icon="@drawable/ic_add_white_48dp"
+        android:title="@string/redo"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/menu_export_pdf"
         android:icon="@android:drawable/ic_menu_save"
         android:title="@string/savePdf"

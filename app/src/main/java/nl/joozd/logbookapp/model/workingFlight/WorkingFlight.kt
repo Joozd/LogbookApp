@@ -810,7 +810,7 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         }
         flightToSave?.let { f ->
             with(FlightRepository.getInstance()) {
-                save(f.prepareForSave(), notify = true)
+                save(f.prepareForSave(), addToUndo = true)
                 undoSaveFlight = if (newFlight) null else originalFlight
 
                 closeWorkingFlight()

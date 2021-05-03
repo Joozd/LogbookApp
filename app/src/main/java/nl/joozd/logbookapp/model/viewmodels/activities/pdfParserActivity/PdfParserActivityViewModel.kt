@@ -135,7 +135,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
              * Ask Repository to save this roster.
              * @see flightRepository -> saveRoster
              */
-            flightRepository.saveRoster(processedRoster)
+            flightRepository.saveRoster(processedRoster, canUndo = true)
             feedback(PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED)
         } ?: run{
             feedback(PdfParserActivityEvents.FILE_NOT_FOUND)

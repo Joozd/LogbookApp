@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.data.repository.flightRepository
 
 import android.Manifest
+import android.app.usage.UsageEvents
 import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.*
@@ -58,11 +59,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     private val saveMutex = Mutex()
 
-
-    private var undeleteFlight: Flight? = null
-    private var undeleteFlights: List<Flight>? = null
-
-    private val _savedFlight = MutableLiveData<SingleUseFlight>()
+    private val undoTracker = UndoTracker()
 
     private val _workingFlight = MutableLiveData<WorkingFlight?>()
 
@@ -110,7 +107,11 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * update cached data and delete from disk
      */
-    private fun deleteFlightHard(flight: Flight) = launch {
+    private fun deleteFlightHard(flight: Flight, addToUndo: Boolean = false) = launch {
+        println("Hard-deleting flight. AddToUndo is $addToUndo")
+        if (addToUndo){
+            undoTracker.addDeleteEvent(flight)
+        }
         cachedFlightsList = ((cachedFlightsList
             ?: emptyList()).filter { it.flightID != flight.flightID }).sortedByDescending { it.timeOut }
         launch (dispatcher + NonCancellable) {
@@ -123,7 +124,10 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * update cached data and delete multiple flights from disk
      */
-    private fun deleteHard(flights: List<Flight>) = launch {
+    private fun deleteHard(flights: List<Flight>, addToUndo: Boolean = false) = launch {
+        if (addToUndo){
+            undoTracker.addDeleteEvent(flights)
+        }
         cachedFlightsList = ((cachedFlightsList
             ?: emptyList()).filter { it.flightID !in flights.map { f -> f.flightID } }).sortedByDescending { it.timeOut }
         launch (dispatcher + NonCancellable) {
@@ -181,12 +185,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     fun getWorkingFlight(): WorkingFlight = workingFlight.value ?: error ("WorkingFlight not initialized")
 
-    /**
-     * saved flight set through [save] when it has notify = true as parameter
-     */
-    val savedFlight: LiveData<SingleUseFlight>
-        get() = _savedFlight
-
     //list of valid flights (not soft-deleted ones)
     val liveFlights: LiveData<List<Flight>> = distinctUntilChanged(_cachedFlights)
 
@@ -201,6 +199,12 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     val usedRegistrationsLiveData: LiveData<List<String>>
         get() = _usedRegistrations
+
+    val undoAvailable: LiveData<Boolean>
+        get() = undoTracker.undoAvailable.distinctUntilChanged()
+
+    val redoAvailable: LiveData<Boolean>
+        get() = undoTracker.redoAvailable.distinctUntilChanged()
 
     /********************************************************************************************
      * Vars and vals
@@ -234,15 +238,15 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * Delete flight from disk if not known to server, else set DELETEFLAG to 1 and update timestamp
      * soft-delete will update cache through Dao observer
      */
-    fun delete(flight: Flight) {
-        undeleteFlight = flight
-        Log.d(this::class.simpleName, "Deleting flight $flight")
-        if (flight.unknownToServer) deleteFlightHard(flight).also{ Log.d(this::class.simpleName, "hard-deleted flight $flight")}
+    fun delete(flight: Flight, addToUndo: Boolean = false) {
+        Log.d(this::class.simpleName, "Deleting flight $flight. AddToUndo is $addToUndo")
+        if (flight.unknownToServer) deleteFlightHard(flight, addToUndo).also{ Log.d(this::class.simpleName, "hard-deleted flight $flight")}
         else save(
             flight.copy(
                 DELETEFLAG = true,
-                timeStamp = TimestampMaker.nowForSycPurposes
-            )
+                timeStamp = TimestampMaker.nowForSycPurposes,
+            ),
+            addToUndo = addToUndo
         ).also{ Log.d(this::class.simpleName, "soft-deleted flight $flight")}
     }
 
@@ -250,28 +254,22 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * Same but find it first by looking up it's ID
      */
-    fun delete(id: Int) {
+    fun delete(id: Int, addToUndo: Boolean = false) {
         launch(NonCancellable){
-            fetchFlightByID(id)?.let { delete (it)} ?: Log.w("FlightRepository", "delete(id: Int): No flight found with id $id")
+            fetchFlightByID(id)?.let { delete (it, addToUndo) } ?: Log.w("FlightRepository", "delete(id: Int): No flight found with id $id")
         }
     }
     /**
      * Same as deleteFlight, but with a list of multiple Flights
      */
-    fun delete(flights: List<Flight>, sync: Boolean = true) {
-        undeleteFlights = flights
-        deleteHard(flights.filter { it.unknownToServer })
+    fun delete(flights: List<Flight>, sync: Boolean = true, addToUndo: Boolean = false) {
+        deleteHard(flights.filter { it.unknownToServer }, addToUndo = addToUndo)
         save(flights.filter { !it.unknownToServer }.map { f ->
             f.copy(
-                DELETEFLAG = true,
-                timeStamp = TimestampMaker.nowForSycPurposes
+                DELETEFLAG = true
             )
-        }, sync)
+        }, sync, addToUndo = addToUndo)
     }
-
-    fun undeleteFlight() = undeleteFlight?.let {save(it) }
-
-    fun undeleteFlights() = undeleteFlights?.let { save(it) }
 
     /**
      * Empty whole database
@@ -301,16 +299,34 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     }
 
     /**
+     * Undo last undoable event if able
+     */
+    fun undo() = undoTracker.undo()
+
+    /**
+     * Redo last undoable event if able
+     */
+    fun redo() = undoTracker.redo()
+
+    /**
      * update cached data and save to disk
      * This will update Flight.timeStamp
      * @param flight: Flight to save
      * @param sync: Whether or not to sync to server after saving
      * @param notify: Whether or not to update [savedFlight]
+     * @param addToUndo: If this save action should be undoable
      */
-    fun save(flight: Flight, sync: Boolean = true, notify: Boolean = false, updateIDs: Boolean = false) = launch {
+    fun save(flight: Flight, sync: Boolean = true, updateIDs: Boolean = false, addToUndo: Boolean = false) = launch {
         saveMutex.withLock {
             //assign available FlightID if requested
             val f = if (updateIDs) flight.copy(flightID = lowestFreeFlightID(), timeStamp = TimestampMaker.nowForSycPurposes) else flight.copy(timeStamp = TimestampMaker.nowForSycPurposes)
+
+            // Add to undo if needed:
+            if (addToUndo){
+                undoTracker.addSaveEvent(f, fetchFlightByID(f.flightID))
+            }
+
+
 
             //update cached flights
             cachedFlightsList = ((cachedFlightsList ?: emptyList()).filter { it.flightID != f.flightID }
@@ -321,11 +337,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             //This part is not locked (it will suspend and @withLock will end before this finishes), but the lock should keep the cache up-to-date.
             launch(dispatcher + NonCancellable) {
                 flightDao.insertFlights(f.toModel())
-                if (notify) launch(Dispatchers.Main) {
-                    _savedFlight.value = SingleUseFlight(f).also {
-                        Log.d("FLightReposiroty.save()", "Notifying!")
-                    }
-                }
                 if (sync) syncAfterChange()
             }
         }
@@ -339,13 +350,18 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      *      false: never make a new ID
      *      null (default): make a new ID if id <= 0
      */
-    fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean? = null) = launch {
+    fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean? = null, addToUndo: Boolean = false) = launch {
         saveMutex.withLock {
             //assign available FlightIDs if requested
             val ff = if (updateIDs != false) flights.mapIndexed { index, flight ->
                 flight.copy(flightID = if (flight.flightID <= 0 || updateIDs == true) lowestFreeFlightID() + index else flight.flightID, timeStamp = TimestampMaker.nowForSycPurposes)
             } else flights.map {
                 it.copy(timeStamp = TimestampMaker.nowForSycPurposes)
+            }
+
+            // Add to undo if needed:
+            if (addToUndo){
+                undoTracker.addSaveEvent(ff, ff.mapNotNull{ f -> fetchFlightByID(f.flightID)})
             }
 
             //update cached flights
@@ -396,8 +412,10 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * It will update all flights that are in both:
      *      - Planned flights will always  get names and registrations from roster
      *      - Completed flights will only get names and registrations of those respective fields are empty
+     * @param canUndo: If true, an "undo" event will be created
+     *
      */
-    suspend fun saveRoster(roster: Roster) = withContext(Dispatchers.IO + NonCancellable){
+    suspend fun saveRoster(roster: Roster, canUndo: Boolean = false) = withContext(Dispatchers.IO + NonCancellable){
         require(roster.isValid) { "Cannot parse an invalid roster! You should have checked this!" }
         val rosterFlights = roster.flights
         val flightsInPeriod = getFlightsOnDays(roster.period)
@@ -413,12 +431,20 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
         // delete all flights that are not also in roster and that are isPlanned
         val flightsToDelete = flightsInPeriod.filter { savedFlight -> savedFlight.isPlanned && savedFlight !in flightsToKeep}
+        val flightsToSave = newFlights + updatedFlights
 
-        delete(flightsToDelete, false) // sync will happen after saving
+        if (canUndo){
+            val deleteEvent = DeleteEvent(flightsToDelete.filter {it.unknownToServer})
+            val softDeletedFlights = flightsToDelete.filter {!it.unknownToServer}
+            val saveEvent = SaveEvent(flightsToSave + softDeletedFlights.map{it.copy(DELETEFLAG = true)}, flightsToSave.mapNotNull{ f -> fetchFlightByID(f.flightID)} + softDeletedFlights)
+            launch (Dispatchers.Main) { undoTracker.addRosterImportEvent(RosterImportEvent(saveEvent, deleteEvent)) } // launch on main thread because of live data setters
+        }
+
+        delete(flightsToDelete, false, addToUndo = false) // sync will happen after saving
         Log.d("DEBUG", "flightsInPeriod: ${flightsInPeriod.size}")
         Log.d("DEBUG", "New flights: ${newFlights.size}")
         Log.d("DEBUG", "updated flights: ${updatedFlights.size}")
-        save(newFlights + updatedFlights)
+        save(flightsToSave, addToUndo = false)
     }
 
     /**
@@ -519,7 +545,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * Get all flights with a timestamp higher than or equal to [timeStamp]
      */
-    suspend fun getFlightsChangedAfter(timeStamp: Long) =
+    private suspend fun getFlightsChangedAfter(timeStamp: Long) =
         flightDao.getFLightsWithTimestampAfter(timeStamp).map{it.toFlight()}
 
 
@@ -533,7 +559,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * Gets highest used FlightID or 0 if no flights in DB
      */
-    fun getHighestIdAsync() = async(dispatcher) { flightDao.highestId() ?: 0 }
+    private fun getHighestIdAsync() = async(dispatcher) { flightDao.highestId() ?: 0 }
 
 
     /**
@@ -594,6 +620,172 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                 it.isSameFlightOnSameDay(f)
             else it.isSameFlightAs(f)
         }}
+    }
+
+
+    /********************************************************************************************
+     * Classes:
+     ********************************************************************************************/
+
+
+
+    /**
+     * This keeps track of changes that can be undone, and does the undoing
+     * Things that CAN be undone:
+     *      - User initiated things like editing, creating or deleting a flight
+     *      - User initiated imports from PdfParserActivity
+     * Things that CANNOT be undone:
+     *      - Server initiated actions, like syncing, or deleting SOFT_DELETED flights after sync.
+     *      TODO: Think about whether completed flights should ever be hard-deleted or only soft, for retrieval purposes
+     *
+     * Undo() will undo an action and move it onto [redoStack]
+     * Redo() will undo an undo and move the action back to [undoStack]
+     */
+    private inner class UndoTracker() {
+        val undoAvailable: LiveData<Boolean>
+            get() = _undoAvailable
+        val redoAvailable: LiveData<Boolean>
+            get() = _redoAvailable
+
+        private val _undoAvailable = MutableLiveData(false)
+        private val _redoAvailable = MutableLiveData(false)
+
+        // Stack of undo events
+        private val undoStack = mutableListOf<UndoableEvent>()
+
+        // Stack of redo events. Must be cleared when a new undo event is added
+        // Any undo event that is undone is added here so it can be redone
+        private val redoStack = mutableListOf<UndoableEvent>()
+
+        /**
+         * Add a SAVED_FLIGHT event to queue. This includes creating new and soft deletes.
+         * This will clear the REDO queue
+         * @param newFlights: List of flights saved
+         * @param oldFlights: List of flights as they were before saving
+         */
+        fun addSaveEvent(newFlights: List<Flight>, oldFlights: List<Flight>) {
+            pushUndoEvent(SaveEvent(newFlights, oldFlights))
+            clearRedoStack()
+        }
+
+        fun addSaveEvent(newFlight: Flight, oldFlight: Flight?) = addSaveEvent(listOf(newFlight), listOfNotNull(oldFlight))
+
+        /**
+         * Add a HARD DELETE event
+         */
+        fun addDeleteEvent(flights: List<Flight>){
+            pushUndoEvent(DeleteEvent(flights))
+        }
+        fun addDeleteEvent(flight: Flight) = addDeleteEvent(listOf(flight))
+
+        fun addRosterImportEvent(rosterImportEvent: RosterImportEvent){
+            pushUndoEvent(rosterImportEvent)
+        }
+
+        /**
+         * Undo top UndoableEvent in [undoStack]
+         * Add it to [redoStack]
+         * @param redoable: Put undone event on redo stack if true
+         */
+        fun undo(redoable: Boolean = true): Boolean{
+            return when (val event = popUndo()){
+                is DeleteEvent -> {
+                    save(event.oldFlights, addToUndo = false)
+                    pushRedoEvent(event)
+                    true
+                }
+                is SaveEvent -> {
+                    // delete flights that were newly created
+                    val newlyCreatedFlights = event.newFlights.filter { it.flightID !in event.oldFlights.map{old -> old.flightID}}
+                    deleteHard(newlyCreatedFlights, addToUndo = false)
+
+                    // save old version of flights that were changed
+                    save(event.oldFlights, addToUndo = false)
+                    pushRedoEvent(event)
+                    true
+                }
+                is RosterImportEvent -> {
+                    //put deletes and updates on undo stack
+                    pushUndoEvent(event.deleted)
+                    pushUndoEvent(event.saved)
+                    //undo deleting and saving
+                    undo(false)
+                    undo(false)
+                    pushRedoEvent(event)
+                    true
+                }
+                else -> {
+                    Log.w("Undo", "Invalid event: $event")
+                    false
+                }
+            }
+        }
+
+        fun redo(): Boolean{
+            if (redoStack.isEmpty()) return false
+            return when(val event = popRedo()){
+                is DeleteEvent -> {
+                    deleteHard(event.oldFlights, addToUndo = false) // this can put it back on undo stack, but doing it manually is faster than rebuilding the event
+                    pushUndoEvent(event)
+                    true
+                }
+                is SaveEvent -> {
+                    save(event.newFlights, addToUndo = false) // this can put it back on undo stack, but doing it manually is faster than rebuilding the event
+                    pushUndoEvent(event)
+                    true
+                }
+                else -> {
+                    Log.w("Redo", "Invalid event: $event")
+                    false
+                }
+            }
+        }
+
+        private fun clearRedoStack(){
+            redoStack.clear()
+            _redoAvailable.value = false
+        }
+
+        /**
+         * Remove last item from undo stack and return it.
+         * Also keeps [_undoAvailable] up-to-date
+         */
+        private fun popUndo(): UndoableEvent?{
+            val r = undoStack.removeLastOrNull()
+            if (undoStack.isEmpty())
+                    _undoAvailable.value = false
+            return r
+        }
+
+        /**
+         * Remove last item from redo stack and return it.
+         * Also keeps [_undoAvailable] up-to-date
+         */
+        private fun popRedo(): UndoableEvent?{
+            val r = redoStack.removeLastOrNull()
+            if (redoStack.isEmpty())
+                _redoAvailable.value = false
+            return r
+        }
+
+        /**
+         * Push an event onto redo stack.
+         * Keeps [_redoAvailable] op-to-date
+         */
+        fun pushRedoEvent(event: UndoableEvent){
+            redoStack.add(event)
+            _redoAvailable.value = redoStack.size > 0
+        }
+
+        /**
+         * Push an event onto undo stack.
+         * Keeps [_undoAvailable] op-to-date
+         */
+        fun pushUndoEvent(event: UndoableEvent){
+            undoStack.add(event)
+            clearRedoStack()
+            _undoAvailable.value = undoStack.size > 0
+        }
     }
 
     /********************************************************************************************

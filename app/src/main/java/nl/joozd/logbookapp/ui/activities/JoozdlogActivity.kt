@@ -25,6 +25,7 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
+import android.view.Menu
 import android.view.View
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +34,7 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
+
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true

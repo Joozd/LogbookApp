@@ -20,7 +20,6 @@
 package nl.joozd.logbookapp.data.repository.flightRepository
 
 import android.Manifest
-import android.app.usage.UsageEvents
 import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.*
@@ -313,7 +312,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * This will update Flight.timeStamp
      * @param flight: Flight to save
      * @param sync: Whether or not to sync to server after saving
-     * @param notify: Whether or not to update [savedFlight]
      * @param addToUndo: If this save action should be undoable
      */
     fun save(flight: Flight, sync: Boolean = true, updateIDs: Boolean = false, addToUndo: Boolean = false) = launch {

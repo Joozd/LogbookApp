@@ -163,7 +163,7 @@ class EditFlightFragment: JoozdlogFragment(){
                     else -> getString(R.string.dualInstructorString)
                 }
             }
-            //TODO observe Multipilot
+            viewModel.isMultiPilot.observe(viewLifecycleOwner){ active -> multiPilotSelector.showIfActive(active) }
             viewModel.isIfr.observe(viewLifecycleOwner) { active -> ifrSelector.showIfActive(active) }
             viewModel.isPic.observe(viewLifecycleOwner) { active -> picSelector.showIfActive(active) }
             viewModel.isPF.observe(viewLifecycleOwner) { active -> pfSelector.showIfActive(active) }
@@ -284,7 +284,9 @@ class EditFlightFragment: JoozdlogFragment(){
             dualInstructorSelector.setOnLongClickListener {
                 showHelpMessage(R.string.edit_flight_dual_instructor_help)
             }
-            //TODO multipilot onLongClick
+            multiPilotSelector.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_multipilot_help)
+            }
             ifrSelector.setOnLongClickListener {
                 showHelpMessage(R.string.edit_flight_ifr_help)
             }
@@ -332,7 +334,10 @@ class EditFlightFragment: JoozdlogFragment(){
                 viewModel.toggleDualInstructor()
             }
 
-            //TODO MP onclick
+            multiPilotSelector.setOnClickListener{
+                activity?.currentFocus?.clearFocus()
+                viewModel.toggleMultiPilot()
+            }
 
             ifrSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()

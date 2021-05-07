@@ -726,6 +726,13 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
     }
 
     /**
+     * Sets multipilot time time to 0 or to whole flight
+     */
+    fun setIsMultipilot(isMultipilot: Boolean) = launchWithLocks(multiPilotMutex) {
+        mMultiPilotTime = if (isMultipilot) mDuration.toMinutes().toInt() else 0
+    }
+
+    /**
      * Sets IFR time to 0 or to whole flight
      */
     fun setIsIfr(isIFR: Boolean) = launchWithLocks(ifrTimeMutex) {

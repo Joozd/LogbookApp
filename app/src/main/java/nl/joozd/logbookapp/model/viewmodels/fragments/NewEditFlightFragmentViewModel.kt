@@ -35,7 +35,6 @@ import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.R
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
@@ -343,6 +342,13 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         }
     }
 
+    /**
+     * Set multiPilot. If multipilot time was 0, [wf] sets multiPilotTime to mDuration.toMinutes().toInt()
+     */
+    fun toggleMultiPilot(force: Boolean? = null){
+        wf.setAutoValues(false)
+        wf.setIsMultipilot(force ?: wf.mMultiPilotTime == 0)
+    }
 
     /**
      * Set IFR

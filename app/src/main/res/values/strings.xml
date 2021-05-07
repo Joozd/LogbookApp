@@ -258,6 +258,7 @@
     <string name="edit_flight_dual_help">Select if this is a dual instruction flight.</string>
     <string name="edit_flight_dual_instructor_help">Select if you want to log this flight as DUAL or INSTRUCTOR.</string>
     <string name="edit_flight_instructor_help">Select if this you want to log this flight as instructor.</string>
+    <string name="edit_flight_multipilot_help">Select if this was a multi-pilot flight.\nAuto-set from aircraft type if AutoValues is on.</string>
     <string name="edit_flight_ifr_help">Select if this flight was conducted under IFR.</string>
     <string name="edit_flight_pic_help">Select if you are pilot in command or PICUS on this flight. There is no distinction between those in an EASA-FCL logbook.</string>
     <string name="edit_flight_pf_help">Select if you were pilot flying on this flight.</string>

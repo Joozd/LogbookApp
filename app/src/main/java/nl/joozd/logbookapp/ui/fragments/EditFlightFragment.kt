@@ -153,8 +153,17 @@ class EditFlightFragment: JoozdlogFragment(){
                 simSelector.showIfActive(active)
             }
 
-            viewModel.isDual.observe(viewLifecycleOwner) { active -> dualSelector.showIfActive(active) }
-            viewModel.isInstructor.observe(viewLifecycleOwner, { active -> instructorSelector.showIfActive(active) })
+            // viewModel.isDual.observe(viewLifecycleOwner) { active -> dualSelector.showIfActive(active) }
+            // viewModel.isInstructor.observe(viewLifecycleOwner, { active -> instructorSelector.showIfActive(active) })
+            viewModel.dualInstructor.observe(viewLifecycleOwner) { flag ->
+                dualInstructorSelector.showIfActive(flag != NewEditFlightFragmentViewModel.DUAL_INSTRUCTOR_FLAG_NONE)
+                dualInstructorSelector.text = when(flag){
+                    NewEditFlightFragmentViewModel.DUAL_INSTRUCTOR_FLAG_DUAL -> getString(R.string.dualString)
+                    NewEditFlightFragmentViewModel.DUAL_INSTRUCTOR_FLAG_INSTRUCTOR -> getString(R.string.instructorString)
+                    else -> getString(R.string.dualInstructorString)
+                }
+            }
+            //TODO observe Multipilot
             viewModel.isIfr.observe(viewLifecycleOwner) { active -> ifrSelector.showIfActive(active) }
             viewModel.isPic.observe(viewLifecycleOwner) { active -> picSelector.showIfActive(active) }
             viewModel.isPF.observe(viewLifecycleOwner) { active -> pfSelector.showIfActive(active) }
@@ -264,12 +273,18 @@ class EditFlightFragment: JoozdlogFragment(){
             signSelector.setOnLongClickListener {
                 showHelpMessage(R.string.edit_flight_sign_help)
             }
+            /*
             dualSelector.setOnLongClickListener {
                 showHelpMessage(R.string.edit_flight_dual_help)
             }
             instructorSelector.setOnLongClickListener {
                 showHelpMessage(R.string.edit_flight_instructor_help)
             }
+            */
+            dualInstructorSelector.setOnLongClickListener {
+                showHelpMessage(R.string.edit_flight_dual_instructor_help)
+            }
+            //TODO multipilot onLongClick
             ifrSelector.setOnLongClickListener {
                 showHelpMessage(R.string.edit_flight_ifr_help)
             }
@@ -301,6 +316,7 @@ class EditFlightFragment: JoozdlogFragment(){
                 viewModel.toggleSim()
             }
 
+            /*
             dualSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
                 viewModel.toggleDual()
@@ -310,6 +326,13 @@ class EditFlightFragment: JoozdlogFragment(){
                 activity?.currentFocus?.clearFocus()
                 viewModel.toggleInstructor()
             }
+            */
+            dualInstructorSelector.setOnClickListener {
+                activity?.currentFocus?.clearFocus()
+                viewModel.toggleDualInstructor()
+            }
+
+            //TODO MP onclick
 
             ifrSelector.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
@@ -557,8 +580,9 @@ class EditFlightFragment: JoozdlogFragment(){
         flighttInStringWrapper.visibility=View.GONE
         flightFlightNumberWrapper.visibility=View.GONE
         flightNameWrapper.visibility=View.GONE
-        dualSelector.visibility=View.GONE
-        instructorSelector.visibility=View.GONE
+        //dualSelector.visibility=View.GONE
+        //instructorSelector.visibility=View.GONE
+        dualInstructorSelector.visibility = View.GONE
         ifrSelector.visibility=View.GONE
         picSelector.visibility=View.GONE
         pfSelector.visibility=View.GONE
@@ -583,8 +607,9 @@ class EditFlightFragment: JoozdlogFragment(){
         flighttInStringWrapper.visibility = View.VISIBLE
         flightFlightNumberWrapper.visibility = View.VISIBLE
         flightNameWrapper.visibility=View.VISIBLE
-        dualSelector.visibility = View.VISIBLE
-        instructorSelector.visibility = View.VISIBLE
+        //dualSelector.visibility = View.VISIBLE
+        //instructorSelector.visibility = View.VISIBLE
+        dualInstructorSelector.visibility = View.VISIBLE
         ifrSelector.visibility = View.VISIBLE
         picSelector.visibility = View.VISIBLE
         pfSelector.visibility = View.VISIBLE

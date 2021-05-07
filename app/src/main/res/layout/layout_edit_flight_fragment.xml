@@ -387,26 +387,26 @@
                 style="@style/SelectorStyleInactive"
                 android:text="@string/sign"
                 app:layout_constraintBottom_toBottomOf="@+id/simSelector"
-                app:layout_constraintEnd_toStartOf="@+id/dualSelector"
+                app:layout_constraintEnd_toStartOf="@+id/dualInstructorSelector"
                 app:layout_constraintStart_toEndOf="@+id/simSelector"
                 app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
             <TextView
-                android:id="@+id/dualSelector"
+                android:id="@+id/dualInstructorSelector"
                 style="@style/SelectorStyleInactive"
-                android:text="@string/dualString"
+                android:text="@string/dualInstructorString"
                 app:layout_constraintBottom_toBottomOf="@+id/simSelector"
-                app:layout_constraintEnd_toStartOf="@+id/instructorSelector"
+                app:layout_constraintEnd_toStartOf="@+id/multiPilotSelector"
                 app:layout_constraintStart_toEndOf="@+id/signSelector"
                 app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
             <TextView
-                android:id="@+id/instructorSelector"
+                android:id="@+id/multiPilotSelector"
                 style="@style/SelectorStyleInactive"
-                android:text="@string/instructorString"
+                android:text="@string/mpString"
                 app:layout_constraintBottom_toBottomOf="@+id/simSelector"
                 app:layout_constraintEnd_toStartOf="@+id/ifrSelector"
-                app:layout_constraintStart_toEndOf="@+id/dualSelector"
+                app:layout_constraintStart_toEndOf="@+id/dualInstructorSelector"
                 app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
             <TextView
@@ -415,7 +415,7 @@
                 android:text="@string/ifrString"
                 app:layout_constraintBottom_toBottomOf="@+id/simSelector"
                 app:layout_constraintEnd_toStartOf="@+id/picSelector"
-                app:layout_constraintStart_toEndOf="@+id/instructorSelector"
+                app:layout_constraintStart_toEndOf="@+id/multiPilotSelector"
                 app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
             <TextView

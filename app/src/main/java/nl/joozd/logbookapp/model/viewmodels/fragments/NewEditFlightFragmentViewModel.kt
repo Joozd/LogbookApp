@@ -56,9 +56,27 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * MediatorLiveData
      */
 
-    val _aircraft = MediatorLiveData<String>().apply{
+    private val _aircraft = MediatorLiveData<String>().apply{
         addSource(wf.aircraftLiveData) { ac -> value = (if (sim) ac?.type?.shortName else ac?.toString()) ?: NO_DATA_STRING}
         addSource (wf.isSimLiveData) { sim -> value = (if (sim) wf.aircraftLiveData.value?.type?.shortName else wf.aircraftLiveData.value?.toString()) ?: NO_DATA_STRING}
+    }
+
+    private val _dualInstructor = MediatorLiveData<Int>().apply{
+        value = DUAL_INSTRUCTOR_FLAG_NONE
+        addSource(wf.isDualLiveData) {
+            isDual -> value = when {
+                isDual -> DUAL_INSTRUCTOR_FLAG_DUAL
+                wf.isInstructorLiveData.value == true -> DUAL_INSTRUCTOR_FLAG_INSTRUCTOR
+                else -> DUAL_INSTRUCTOR_FLAG_NONE
+            }
+        }
+        addSource(wf.isInstructorLiveData) {
+            isInstructor -> value = when {
+                isInstructor -> DUAL_INSTRUCTOR_FLAG_INSTRUCTOR
+                wf.isDualLiveData.value == true -> DUAL_INSTRUCTOR_FLAG_DUAL
+                else -> DUAL_INSTRUCTOR_FLAG_NONE
+            }
+        }
     }
 
     //Transformations.map(wf.aircraft)
@@ -106,10 +124,21 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         get() = wf.isSignedLiveData
     val signature: String
         get() = wf.signatureLiveData.value ?: ""
-    val isDual
+    /*val isDual
         get() = wf.isDualLiveData
     val isInstructor
         get() = wf.isInstructorLiveData
+    */
+    /**
+     * Livedata keeps track of if [wf] is logged as Dual, Instructor or neither.
+     */
+    val dualInstructor: LiveData<Int>
+        get() = _dualInstructor
+
+    /**
+     * emits true if wf.multipilotTime is not zero
+     */
+    val isMultiPilot = wf.multiPilotTimeLiveData.map { it > 0 }
     val isIfr
         get() = wf.isIfrLiveData
     val isPic
@@ -283,6 +312,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      */
     fun setSignature(signature: String) = wf.setSignature(signature)
 
+    /*
     /**
      * Set dual
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
@@ -294,6 +324,25 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
     fun toggleInstructor(force: Boolean? = null) = wf.setIsInstructor ( force ?: wf.isInstructorLiveData.value == false)
+    */
+
+    /**
+     * Toggle between Dual, Instructor and None.
+     */
+    fun toggleDualInstructor(){
+        when (dualInstructor.value){
+            DUAL_INSTRUCTOR_FLAG_NONE -> wf.setIsDual(true)
+            DUAL_INSTRUCTOR_FLAG_DUAL -> {
+                wf.setIsDual(false)
+                wf.setIsInstructor(true)
+            }
+            else -> {
+                wf.setIsDual(false)
+                wf.setIsInstructor(false)
+            }
+        }
+    }
+
 
     /**
      * Set IFR
@@ -428,6 +477,10 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     companion object{
         const val NO_DATA_STRING = "…"
+
+        const val DUAL_INSTRUCTOR_FLAG_NONE = 0
+        const val DUAL_INSTRUCTOR_FLAG_DUAL = 1
+        const val DUAL_INSTRUCTOR_FLAG_INSTRUCTOR = 2
     }
 
 }

@@ -50,7 +50,7 @@ class BalanceForwardRepository(private val balanceforwardDao: BalanceForwardDao,
         if (bf.id != -1) saveToDisk(bf)
         else {
             launch(dispatcher) {
-                val highestID = getAll().maxBy { it.id }?.id ?: -1
+                val highestID = getAll().maxByOrNull { it.id }?.id ?: -1
                 save(bf.copy(id = highestID + 1))
             }
         }

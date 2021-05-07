@@ -110,8 +110,8 @@ open class Crew(iCrewSize: Int = 2,
         require (!range.isEmpty()) { "cannot put an int in a range without elements"}
         return when {
             this in range -> this
-            this < range.min()!! -> range.min()!!
-            this > range.max()!! -> range.max()!!
+            this < range.minOrNull()!! -> range.minOrNull()!!
+            this > range.maxOrNull()!! -> range.maxOrNull()!!
             else -> error ("Value $this neither in our outside of $range...")
         }
     }

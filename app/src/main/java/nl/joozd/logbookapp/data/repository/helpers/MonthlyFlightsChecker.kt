@@ -29,8 +29,8 @@ import kotlin.math.absoluteValue
  * @param tolerance: Amount of minutes that can be updated without notice
  */
 class MonthlyFlightsChecker(private val allFlights: List<Flight>, private val monthlyFlights: List<Flight>, private val tolerance: Int) {
-    private val timeBracket = ((monthlyFlights.minBy{ it.timeOut }?.timeOut ?: 0) .. (monthlyFlights.maxBy{ it.timeIn }?.timeIn ?: 0))
-    private val originalFlights = allFlights.filter { !it.DELETEFLAG && (it.timeIn in timeBracket || it.timeOut in timeBracket || (it.timeOut < timeBracket.min()!! && it.timeIn > timeBracket.max()!!))}
+    private val timeBracket = ((monthlyFlights.minByOrNull { it.timeOut }?.timeOut ?: 0) .. (monthlyFlights.maxByOrNull { it.timeIn }?.timeIn ?: 0))
+    private val originalFlights = allFlights.filter { !it.DELETEFLAG && (it.timeIn in timeBracket || it.timeOut in timeBracket || (it.timeOut < timeBracket.minOrNull()!! && it.timeIn > timeBracket.maxOrNull()!!))}
 
     /**
      * List of Pairs [monthlyFlights] to all matching [allFlights]
@@ -83,7 +83,7 @@ class MonthlyFlightsChecker(private val allFlights: List<Flight>, private val mo
      */
     val newFlightsWithIDs: List<Flight>
         get() = run{
-            val highestID = (allFlights.maxBy { it.flightID }?.flightID ?: 0) + 1
+            val highestID = (allFlights.maxByOrNull { it.flightID }?.flightID ?: 0) + 1
             newFlights.mapIndexed { index: Int, flight: Flight -> flight.copy (flightID = highestID + index)}
         }
 
@@ -96,7 +96,7 @@ class MonthlyFlightsChecker(private val allFlights: List<Flight>, private val mo
         val d = (f.timeOut .. f.timeIn)
         return originalFlights.filter { it.timeOut in d
                 || it.timeIn in d
-                || (it.timeOut < d.min()!! && it.timeIn > d.max()!!)
+                || (it.timeOut < d.minOrNull()!! && it.timeIn > d.maxOrNull()!!)
         }
     }
 

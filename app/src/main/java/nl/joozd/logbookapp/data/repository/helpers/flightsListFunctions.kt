@@ -26,6 +26,6 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
  * In case no most recent not-planned flight found, it will return an empty flight with flightID -1 (that needs to be adjusted before saving)
  */
 fun mostRecentCompleteFlight(flights: List<Flight>?): Flight {
-    return flights?.filter{ !it.isSim }?.maxBy { if (!it.isPlanned && !it.DELETEFLAG) it.timeOut else 0 } ?: Flight.createEmpty()
+    return flights?.filter{ !it.isSim }?.maxByOrNull { if (!it.isPlanned && !it.DELETEFLAG) it.timeOut else 0 } ?: Flight.createEmpty()
 }
 

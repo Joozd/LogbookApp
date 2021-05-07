@@ -26,8 +26,8 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
  * @param rosterFlights: Flights from monthly overview to check [allFlights] against
  */
 class RosterFlightsChecker(private val allFlights: List<Flight>, private val rosterFlights: List<Flight>) {
-    private val timeBracket = ((rosterFlights.minBy{ it.timeOut }?.timeOut ?: 0) .. (rosterFlights.maxBy{ it.timeIn }?.timeIn ?: 0))
-    private val originalFlights = allFlights.filter { !it.DELETEFLAG && (it.timeIn in timeBracket || it.timeOut in timeBracket || (it.timeOut < timeBracket.min()!! && it.timeIn > timeBracket.max()!!))}
+    private val timeBracket = ((rosterFlights.minByOrNull { it.timeOut }?.timeOut ?: 0) .. (rosterFlights.maxByOrNull { it.timeIn }?.timeIn ?: 0))
+    private val originalFlights = allFlights.filter { !it.DELETEFLAG && (it.timeIn in timeBracket || it.timeOut in timeBracket || (it.timeOut < timeBracket.minOrNull()!! && it.timeIn > timeBracket.maxOrNull()!!))}
 
     private val overlapsList: List<Pair<Flight, List<Flight>>> = rosterFlights.map {f -> f to findOverlapping(f) }
 
@@ -40,7 +40,7 @@ class RosterFlightsChecker(private val allFlights: List<Flight>, private val ros
         val d = (f.timeOut .. f.timeIn)
         return originalFlights.filter { it.timeOut in d
                 || it.timeIn in d
-                || (it.timeOut < d.min()!! && it.timeIn > d.max()!!)
+                || (it.timeOut < d.minOrNull()!! && it.timeIn > d.maxOrNull()!!)
         }
     }
 
@@ -56,7 +56,7 @@ class RosterFlightsChecker(private val allFlights: List<Flight>, private val ros
      */
     val newFlightsWithIDs: List<Flight>
         get() = run{
-            val highestID = (allFlights.maxBy { it.flightID }?.flightID ?: 0) + 1
+            val highestID = (allFlights.maxByOrNull { it.flightID }?.flightID ?: 0) + 1
             newFlights.mapIndexed { index: Int, flight: Flight -> flight.copy (flightID = highestID + index)}
         }
 }

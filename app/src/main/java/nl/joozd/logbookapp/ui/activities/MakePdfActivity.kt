@@ -21,13 +21,10 @@ package nl.joozd.logbookapp.ui.activities
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.DocumentsContract
+import android.util.Log
 import android.view.View
-import androidx.annotation.RequiresApi
-import androidx.lifecycle.Observer
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import nl.joozd.logbookapp.databinding.ActivityMakePdfBinding
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MakePdfActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.MakePdfActivityViewModel
@@ -37,6 +34,9 @@ class MakePdfActivity : JoozdlogActivity() {
 
     private val viewModel = MakePdfActivityViewModel()
 
+    /*
+    Deprecated:
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
         super.onActivityResult(requestCode, resultCode, resultData)
         if (requestCode == CREATE_FILE
@@ -44,6 +44,19 @@ class MakePdfActivity : JoozdlogActivity() {
             // The result data contains a URI for the document or directory that
             // the user selected.
             resultData?.data?.also { uri ->
+                viewModel.useUri(uri)
+            }
+        }
+    }
+    */
+
+    private val resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            Log.d("MakePdfActivity", "RESULT_OK received")
+            // There are no request codes
+            // The result data contains a URI for the document or directory that
+            // the user selected.
+            result.data?.data?.also { uri ->
                 viewModel.useUri(uri)
             }
         }
@@ -74,7 +87,7 @@ class MakePdfActivity : JoozdlogActivity() {
              * Observers
              ***************************************************************************************/
 
-            viewModel.pdfLogbookReady.observe(activity, Observer {
+            viewModel.pdfLogbookReady.observe(activity) {
                 if (it) {
                     tempButton.visibility = View.VISIBLE
                     shareButton.visibility = View.INVISIBLE
@@ -83,18 +96,22 @@ class MakePdfActivity : JoozdlogActivity() {
                     tempButton.visibility = View.GONE
                     shareButton.visibility = View.GONE
                 }
+            }
 
-            })
-
-
-            viewModel.feedbackEvent.observe(activity, Observer {
+            viewModel.feedbackEvent.observe(activity) {
                 when (it.getEvent()){
+                    MakePdfActivityEvents.WRITING -> {
+                        writingTextView.visibility = View.VISIBLE
+                        writingProgressBar.visibility = View.VISIBLE
+                    }
+
                     MakePdfActivityEvents.FILE_CREATED -> {
+                        writingTextView.visibility = View.GONE
+                        writingProgressBar.visibility = View.GONE
                         shareButton.visibility = View.VISIBLE
                     }
                 }
-            })
-
+            }
 
             setContentView(root)
         }
@@ -112,7 +129,7 @@ class MakePdfActivity : JoozdlogActivity() {
             type = "application/pdf"
             putExtra(Intent.EXTRA_TITLE, "logbook.pdf")
         }
-        startActivityForResult(intent, CREATE_FILE)
+        resultLauncher.launch(intent)
     }
 
     private fun sendShareIntent(){
@@ -126,7 +143,6 @@ class MakePdfActivity : JoozdlogActivity() {
     }
 
     companion object{
-        const val CREATE_FILE = 1
         const val PDF_MIME_TYPE = "application/pdf"
     }
 }

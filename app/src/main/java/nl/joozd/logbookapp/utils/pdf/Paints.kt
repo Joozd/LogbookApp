@@ -47,7 +47,15 @@ object Paints {
         textSize=9f
     }
 
+
     val largeText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF000000.toInt()
+        textAlign = Paint.Align.LEFT
+        textSize = 11f
+        val x: Typeface? = null
+        typeface = Typeface.create(x, Typeface.BOLD)
+    }
+    val largeTextCentered = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFF000000.toInt()
         textAlign = Paint.Align.CENTER
         textSize = 11f

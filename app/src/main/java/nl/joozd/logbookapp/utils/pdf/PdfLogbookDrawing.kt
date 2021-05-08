@@ -23,15 +23,19 @@ import android.graphics.Canvas
 import android.graphics.RectF
 import com.caverock.androidsvg.PreserveAspectRatio
 import com.caverock.androidsvg.SVG
+import nl.joozd.logbookapp.data.dataclasses.LogbookNameInfo
 import nl.joozd.logbookapp.data.miscClasses.TotalsForward
 import nl.joozd.logbookapp.extensions.toLogbookDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.ui.utils.toast
 
 /**
  * This will take a [Canvas] as parameter and provides functions to draw on that canvas IN PLACE.
  * @param canvas: The canvas that will be drawn on
  */
 class PdfLogbookDrawing(private val canvas: Canvas) {
+    private val width = canvas.width.toFloat()
+    private val height = canvas.height.toFloat()
     /**
      * Fill the canvas with a front page for a logbook
      * TODO make this nicer. Maybe a logo or something.
@@ -40,18 +44,98 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
         //((textPaint.descent() + textPaint.ascent()) / 2) is the distance from the baseline to the center.
         canvas.drawText(
             "Joozdlog Pilot's Logbook",
-            canvas.width.toFloat() / 2,
-            canvas.height.toFloat() / 2 - (Paints.titlePageText.descent() + Paints.titlePageText.ascent()) / 2,
+            width / 2,
+            height / 2 - (Paints.titlePageText.descent() + Paints.titlePageText.ascent()) / 2,
             Paints.titlePageText
         )
     }
 
-    fun drawNamePage(canvas: Canvas, address: String) {
-        TODO("This will make the name/licence number  page of logbook as found in https://www.easa.europa.eu/sites/default/files/dfu/Part-FCL.pdf")
+    /**
+     * Make Name page. Should hold:
+     * - "PILOT LOGBOOK"
+     * - "Holder's name(s)"
+     * - "Holder's licence number"
+     */
+    fun drawNamePage(): PdfLogbookDrawing {
+        canvas.drawText(
+            "PILOT LOGBOOK",
+            width / 2,
+            PdfLogbookMakerValues.NAME_PAGE_TITLE_HEIGHT,
+            Paints.largeTextCentered
+        )
+        canvas.drawText(
+            NAME_PAGE_NAME_TEXT,
+            PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN,
+            PdfLogbookMakerValues.NAME_PAGE_NAME_HEIGHT,
+            Paints.largeText
+        )
+        canvas.drawText(
+            NAME_PAGE_LICENSE_TEXT,
+            PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN,
+            PdfLogbookMakerValues.NAME_PAGE_LICENSE_HEIGHT,
+            Paints.largeText
+        )
+
+        // draw lines from text to NAME_PAGE_HORIZONTAL_MARGIN before page end
+        canvas.drawLine(
+            PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN + Paints.largeTextCentered.measureText(NAME_PAGE_NAME_TEXT),
+            PdfLogbookMakerValues.NAME_PAGE_NAME_HEIGHT,
+            width - PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN,
+            PdfLogbookMakerValues.NAME_PAGE_NAME_HEIGHT,
+            Paints.thinLine
+        )
+        canvas.drawLine(
+            PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN + Paints.largeTextCentered.measureText(NAME_PAGE_LICENSE_TEXT),
+            PdfLogbookMakerValues.NAME_PAGE_LICENSE_HEIGHT,
+            width - PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN,
+            PdfLogbookMakerValues.NAME_PAGE_LICENSE_HEIGHT,
+            Paints.thinLine
+        )
+        return this
     }
 
-    fun drawAddressPage(canvas: Canvas, address: String) {
-        TODO("This will make the address page of logbook as found in https://www.easa.europa.eu/sites/default/files/dfu/Part-FCL.pdf")
+    /**
+     * Draw name/licence data on Name page
+     */
+    fun fillNamePage(nameInfo: LogbookNameInfo){
+        TODO("Not Implemented")
+    }
+
+    /**
+     * Draw address page
+     * Should hold:
+     * - "HOLDER’S ADDRESS:"
+     * - 4 empty lines
+     * Intentionally no space for address changes.
+     */
+    fun drawAddressPage() {
+        canvas.drawText(
+            "HOLDER’S ADDRESS:",
+            width / 2,
+            PdfLogbookMakerValues.ADDRESS_PAGE_TITLE_HEIGHT,
+            Paints.largeTextCentered
+        )
+
+        // box around address lines
+        canvas.drawRect(
+            PdfLogbookMakerValues.ADDRESS_PAGE_BOX_SIDE_MARGIN,
+            PdfLogbookMakerValues.ADDRESS_PAGE_BOX_TOP,
+            width - PdfLogbookMakerValues.ADDRESS_PAGE_BOX_SIDE_MARGIN,
+            PdfLogbookMakerValues.ADDRESS_PAGE_BOX_BOTTOM,
+            Paints.thickLine
+        )
+
+        //4 address lines
+        repeat(PdfLogbookMakerValues.ADDRESS_PAGE_BOX_NUMBER_OF_LINES) { lineNumber ->
+            val y = PdfLogbookMakerValues.ADDRESS_PAGE_BOX_TOP + PdfLogbookMakerValues.ADDRESS_PAGE_BOX_SIDE_MARGIN_INSIDE_BOX + (lineNumber + 1) * PdfLogbookMakerValues.ADDRESS_LINE_SPACING
+            canvas.drawLine(
+                PdfLogbookMakerValues.ADDRESS_PAGE_BOX_SIDE_MARGIN + PdfLogbookMakerValues.ADDRESS_PAGE_BOX_SIDE_MARGIN_INSIDE_BOX,
+                y,
+                width - PdfLogbookMakerValues.ADDRESS_PAGE_BOX_SIDE_MARGIN - PdfLogbookMakerValues.ADDRESS_PAGE_BOX_SIDE_MARGIN_INSIDE_BOX,
+                y,
+                Paints.thinLine
+            )
+        }
     }
 
 
@@ -64,15 +148,15 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
         canvas.drawRect(
             1f,
             1f,
-            canvas.width.toFloat() - 1f,
-            canvas.height.toFloat() - 1f,
+            width - 1f,
+            height - 1f,
             Paints.thickLine
         )
         // Bottom box:
         canvas.drawLine(
             0f,
             PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET,
-            canvas.width.toFloat(),
+            width,
             PdfLogbookMakerValues.BOTTOM_SECTION_OFFSET,
             Paints.thickLine
         )
@@ -80,7 +164,7 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
         canvas.drawLine(
             0f,
             PdfLogbookMakerValues.TOP_SECTION_HEIGHT,
-            canvas.width.toFloat(),
+            width,
             PdfLogbookMakerValues.TOP_SECTION_HEIGHT,
             Paints.thinLine
         )
@@ -228,49 +312,49 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
             "1",
             (PdfLogbookMakerValues.DATE_OFFSET + PdfLogbookMakerValues.DEPARTURE_PLACE_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "2",
             (PdfLogbookMakerValues.DEPARTURE_PLACE_OFFSET + PdfLogbookMakerValues.ARRIVAL_PLACE_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "3",
             (PdfLogbookMakerValues.ARRIVAL_PLACE_OFFSET + PdfLogbookMakerValues.AIRCRAFT_MODEL_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "4",
             (PdfLogbookMakerValues.AIRCRAFT_MODEL_OFFSET + PdfLogbookMakerValues.SP_TIME_ME_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "5",
             (PdfLogbookMakerValues.SP_TIME_ME_OFFSET + PdfLogbookMakerValues.TOTAL_HOURS_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "6",
             (PdfLogbookMakerValues.TOTAL_HOURS_OFFSET + PdfLogbookMakerValues.NAME_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "7",
             (PdfLogbookMakerValues.NAME_OFFSET + PdfLogbookMakerValues.LDG_DAY_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "8",
             (PdfLogbookMakerValues.LDG_DAY_OFFSET + canvas.width - 1) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
 
         //Draw first lines of titles in columns
@@ -279,55 +363,55 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
             "DATE",
             (PdfLogbookMakerValues.DATE_OFFSET + PdfLogbookMakerValues.DEPARTURE_PLACE_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "DEPARTURE",
             (PdfLogbookMakerValues.DEPARTURE_PLACE_OFFSET + PdfLogbookMakerValues.ARRIVAL_PLACE_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "ARRIVAL",
             (PdfLogbookMakerValues.ARRIVAL_PLACE_OFFSET + PdfLogbookMakerValues.AIRCRAFT_MODEL_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "AIRCRAFT",
             (PdfLogbookMakerValues.AIRCRAFT_MODEL_OFFSET + PdfLogbookMakerValues.SP_TIME_ME_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "SINGLE",
             (PdfLogbookMakerValues.SP_TIME_SE_OFFSET + PdfLogbookMakerValues.MP_HOURS_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         ) // will needmoar lines
         canvas.drawText(
             "MULTI",
             (PdfLogbookMakerValues.MP_HOURS_OFFSET + PdfLogbookMakerValues.TOTAL_HOURS_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         ) // will need moar lines
         canvas.drawText(
             "TOTAL",
             (PdfLogbookMakerValues.TOTAL_HOURS_OFFSET + PdfLogbookMakerValues.NAME_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )// will need moar lines
         canvas.drawText(
             "NAME PIC",
             (PdfLogbookMakerValues.NAME_OFFSET + PdfLogbookMakerValues.LDG_DAY_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
         canvas.drawText(
             "LANDINGS",
             (PdfLogbookMakerValues.LDG_DAY_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_LEFT_PAGE) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )
 
         //draw second lines of titles in columns:
@@ -342,19 +426,19 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
             "PILOT",
             (PdfLogbookMakerValues.SP_TIME_SE_OFFSET + PdfLogbookMakerValues.MP_HOURS_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         ) // will needmoar lines
         canvas.drawText(
             "PILOT",
             (PdfLogbookMakerValues.MP_HOURS_OFFSET + PdfLogbookMakerValues.TOTAL_HOURS_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         ) // will need moar lines
         canvas.drawText(
             "TIME",
             (PdfLogbookMakerValues.TOTAL_HOURS_OFFSET + PdfLogbookMakerValues.NAME_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )// will need moar lines
 
 
@@ -364,19 +448,19 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
             "TIME",
             (PdfLogbookMakerValues.SP_TIME_SE_OFFSET + PdfLogbookMakerValues.MP_HOURS_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         ) // will needmoar lines
         canvas.drawText(
             "TIME",
             (PdfLogbookMakerValues.MP_HOURS_OFFSET + PdfLogbookMakerValues.TOTAL_HOURS_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         ) // will need moar lines
         canvas.drawText(
             "OF FLIGHT",
             (PdfLogbookMakerValues.TOTAL_HOURS_OFFSET + PdfLogbookMakerValues.NAME_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
-            Paints.largeText
+            Paints.largeTextCentered
         )// will need moar lines
 
         //draw bottom line of titles in columns
@@ -530,32 +614,34 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
 
         //draw numbers in top line
 
-        canvas.drawText("9", (PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_HOURS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_HOURS_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText)
-        canvas.drawText("10", (PdfLogbookMakerValues.PILOT_FUNC_PIC_HOURS_OFFSET + PdfLogbookMakerValues.SYNTH_DATE_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText)
-        canvas.drawText("11", (PdfLogbookMakerValues.SYNTH_DATE_OFFSET + PdfLogbookMakerValues.SIGNATURE_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText)
-        canvas.drawText("12", (PdfLogbookMakerValues.REMARKS_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_RIGHT_PAGE)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText)
+        canvas.drawText("9", (PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_HOURS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_HOURS_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
+        canvas.drawText("10", (PdfLogbookMakerValues.PILOT_FUNC_PIC_HOURS_OFFSET + PdfLogbookMakerValues.SYNTH_DATE_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
+        canvas.drawText("11", (PdfLogbookMakerValues.SYNTH_DATE_OFFSET + PdfLogbookMakerValues.SIGNATURE_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
+        canvas.drawText("12", (PdfLogbookMakerValues.REMARKS_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_RIGHT_PAGE)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
 
         //Draw first lines of titles in columns
         lineNumber = 2
-        canvas.drawText("OPERATIONAL", (PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_HOURS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_HOURS_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText)
-        canvas.drawText("PILOT FUNCTION TIME", (PdfLogbookMakerValues.PILOT_FUNC_PIC_HOURS_OFFSET + PdfLogbookMakerValues.SYNTH_DATE_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText)
-        canvas.drawText("SYNTHETIC TRAINING", (PdfLogbookMakerValues.SYNTH_DATE_OFFSET + PdfLogbookMakerValues.SIGNATURE_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText)
-        canvas.drawText("SIGNA-", (PdfLogbookMakerValues.SIGNATURE_OFFSET + PdfLogbookMakerValues.REMARKS_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText)
-        canvas.drawText("REMARKS AND ENDORSEMENTS", (PdfLogbookMakerValues.REMARKS_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_RIGHT_PAGE)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText) // will needmoar lines
+        canvas.drawText("OPERATIONAL", (PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_HOURS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_HOURS_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
+        canvas.drawText("PILOT FUNCTION TIME", (PdfLogbookMakerValues.PILOT_FUNC_PIC_HOURS_OFFSET + PdfLogbookMakerValues.SYNTH_DATE_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
+        canvas.drawText("SYNTHETIC TRAINING", (PdfLogbookMakerValues.SYNTH_DATE_OFFSET + PdfLogbookMakerValues.SIGNATURE_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
+        canvas.drawText("SIGNA-", (PdfLogbookMakerValues.SIGNATURE_OFFSET + PdfLogbookMakerValues.REMARKS_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
+        canvas.drawText("REMARKS", (PdfLogbookMakerValues.REMARKS_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_RIGHT_PAGE)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered) // will needmoar lines
 
         //draw second lines of titles in columns:
         lineNumber = 3
-        canvas.drawText("CONDITION TIME", (PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_HOURS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_HOURS_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText)
-        canvas.drawText("DEVICES SESSION", (PdfLogbookMakerValues.SYNTH_DATE_OFFSET + PdfLogbookMakerValues.SIGNATURE_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText)
-        canvas.drawText("TURES", (PdfLogbookMakerValues.SIGNATURE_OFFSET + PdfLogbookMakerValues.REMARKS_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeText)
+        canvas.drawText("CONDITION TIME", (PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_HOURS_OFFSET + PdfLogbookMakerValues.PILOT_FUNC_PIC_HOURS_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
+        canvas.drawText("DEVICES SESSION", (PdfLogbookMakerValues.SYNTH_DATE_OFFSET + PdfLogbookMakerValues.SIGNATURE_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
+        canvas.drawText("TURES", (PdfLogbookMakerValues.SIGNATURE_OFFSET + PdfLogbookMakerValues.REMARKS_OFFSET)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
+        canvas.drawText("AND ENDORSEMENTS", (PdfLogbookMakerValues.REMARKS_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_RIGHT_PAGE)/2, PdfLogbookMakerValues.ENTRY_HEIGHT*lineNumber-4, Paints.largeTextCentered)
+
 
         //draw lines in bottom part
         canvas.drawLine(PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_HOURS_OFFSET, canvas.height-PdfLogbookMakerValues.TOTALS_LINE_HEIGHT, PdfLogbookMakerValues.SIGNATURE_OFFSET, canvas.height-PdfLogbookMakerValues.TOTALS_LINE_HEIGHT, Paints.thinLine)
         canvas.drawLine(PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_HOURS_OFFSET, canvas.height-PdfLogbookMakerValues.TOTALS_LINE_HEIGHT*2, PdfLogbookMakerValues.SIGNATURE_OFFSET, canvas.height-PdfLogbookMakerValues.TOTALS_LINE_HEIGHT*2, Paints.thinLine)
 
         //draw TOTALS texts in bottom part
-        canvas.drawText("I certify that the entries in this log are true", (PdfLogbookMakerValues.SIGNATURE_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_RIGHT_PAGE)/2, canvas.height-PdfLogbookMakerValues.TOTALS_LINE_HEIGHT*2-14, Paints.largeText) // will need moar lines
-        canvas.drawText("PILOT'S SIGNATURE", (PdfLogbookMakerValues.SIGNATURE_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_RIGHT_PAGE)/2, canvas.height-6f, Paints.largeText) // will need moar lines
+        canvas.drawText("I certify that the entries in this log are true", (PdfLogbookMakerValues.SIGNATURE_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_RIGHT_PAGE)/2, canvas.height-PdfLogbookMakerValues.TOTALS_LINE_HEIGHT*2-14, Paints.largeTextCentered) // will need moar lines
+        canvas.drawText("PILOT'S SIGNATURE", (PdfLogbookMakerValues.SIGNATURE_OFFSET + PdfLogbookMakerValues.TOTAL_WIDTH_RIGHT_PAGE)/2, canvas.height-6f, Paints.largeTextCentered) // will need moar lines
 
         //draw bottom line of titles in columns
         canvas.drawText("NIGHT", (PdfLogbookMakerValues.CONDITIONAL_TIME_NIGHT_HOURS_OFFSET + PdfLogbookMakerValues.CONDITIONAL_TIME_IFR_HOURS_OFFSET)/2, PdfLogbookMakerValues.TOP_SECTION_HEIGHT-5, Paints.mediumText)
@@ -1348,6 +1434,9 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
          * If we do that, it will no longer be a const val of course
          */
         const val maxLines: Int = ((PdfLogbookMakerValues.A4_WIDTH - PdfLogbookMakerValues.TOP_SECTION_HEIGHT - PdfLogbookMakerValues.BOTTOM_SECTION_HEIGHT)/PdfLogbookMakerValues.ENTRY_HEIGHT).toInt()
+
+        private const val NAME_PAGE_NAME_TEXT = "Holder’s name(s) "
+        private const val NAME_PAGE_LICENSE_TEXT = "Holder’s licence number "
     }
 }
 

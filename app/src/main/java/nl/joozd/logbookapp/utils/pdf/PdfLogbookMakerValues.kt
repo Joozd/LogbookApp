@@ -31,7 +31,24 @@ object PdfLogbookMakerValues{
     const val ENTRY_HEIGHT=20f
     const val TOTALS_LINE_HEIGHT = 30f
 
-    //values for left page
+    // Values for name page
+    const val NAME_PAGE_TITLE_HEIGHT = 200f
+    const val NAME_PAGE_NAME_HEIGHT = 300f
+    const val NAME_PAGE_LICENSE_HEIGHT = 400f
+    const val NAME_PAGE_HORIZONTAL_MARGIN = 150f
+
+    // Values for address page
+    const val ADDRESS_PAGE_BOX_NUMBER_OF_LINES = 4
+    const val ADDRESS_LINE_SPACING = 30f
+    const val ADDRESS_PAGE_TITLE_HEIGHT = 150f
+    const val ADDRESS_PAGE_BOX_SIDE_MARGIN = 200f
+    const val ADDRESS_PAGE_BOX_SIDE_MARGIN_INSIDE_BOX = 40f
+    const val ADDRESS_PAGE_BOX_TOP = 220f
+    const val ADDRESS_PAGE_BOX_BOTTOM = ADDRESS_PAGE_BOX_TOP + 2* ADDRESS_PAGE_BOX_SIDE_MARGIN_INSIDE_BOX + ADDRESS_PAGE_BOX_NUMBER_OF_LINES * ADDRESS_LINE_SPACING
+
+
+
+    // Values for left page
     const val DATE_OFFSET = 0f
     const val DATE_WIDTH = 61f // 781
     const val DEPARTURE_PLACE_OFFSET = DATE_OFFSET + DATE_WIDTH

@@ -25,6 +25,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityMakePdfBinding
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MakePdfActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.MakePdfActivityViewModel
@@ -70,6 +71,10 @@ class MakePdfActivity : JoozdlogActivity() {
         viewModel.buildLogbook()
 
         ActivityMakePdfBinding.inflate(layoutInflater).apply{
+            setSupportActionBarWithReturn(pdfMakeActivityToolbar)?.apply {
+                setDisplayHomeAsUpEnabled(true)
+                title = resources.getString(R.string.savePdf)
+            }
 
             /***************************************************************************************
              * OnClicklisteners etc

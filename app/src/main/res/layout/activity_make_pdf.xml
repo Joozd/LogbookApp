@@ -25,6 +25,13 @@
     android:layout_height="match_parent"
     tools:context=".ui.activities.MakePdfActivity">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/pdfMakeActivityToolbar"
+        style="@style/ToolBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Button
         android:id="@+id/temp_button"
         android:layout_width="wrap_content"
@@ -35,7 +42,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/pdfMakeActivityToolbar"
         tools:visibility="visible" />
 
     <TextView
@@ -73,6 +80,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/writingTextView"
         tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/textView7"
+        style="@style/SecondaryTextCentered"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/print_hint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pdfMakeActivityToolbar" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

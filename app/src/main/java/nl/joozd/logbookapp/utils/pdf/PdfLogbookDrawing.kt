@@ -21,31 +21,44 @@ package nl.joozd.logbookapp.utils.pdf
 
 import android.graphics.Canvas
 import android.graphics.RectF
-import android.util.Log
 import com.caverock.androidsvg.PreserveAspectRatio
 import com.caverock.androidsvg.SVG
-import nl.joozd.joozdlogcommon.AircraftType
-import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.miscClasses.TotalsForward
 import nl.joozd.logbookapp.extensions.toLogbookDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
-// TODO This is fine but needs some adjustments
-
-object PdfLogbookBuilder {
-    fun drawFrontPage(canvas: Canvas, name: String = "", licenceNumber: String = "") {
-        TODO("This will make the title page of logbook as found in https://www.easa.europa.eu/sites/default/files/dfu/Part-FCL.pdf")
+/**
+ * This will take a [Canvas] as parameter and provides functions to draw on that canvas IN PLACE.
+ * @param canvas: The canvas that will be drawn on
+ */
+class PdfLogbookDrawing(private val canvas: Canvas) {
+    /**
+     * Fill the canvas with a front page for a logbook
+     * TODO make this nicer. Maybe a logo or something.
+     */
+    fun drawFrontPage() {
+        //((textPaint.descent() + textPaint.ascent()) / 2) is the distance from the baseline to the center.
+        canvas.drawText(
+            "Joozdlog Pilot's Logbook",
+            canvas.width.toFloat() / 2,
+            canvas.height.toFloat() / 2 - (Paints.titlePageText.descent() + Paints.titlePageText.ascent()) / 2,
+            Paints.titlePageText
+        )
     }
 
-    fun drawSecondPage(canvas: Canvas, address: String) {
+    fun drawNamePage(canvas: Canvas, address: String) {
+        TODO("This will make the name/licence number  page of logbook as found in https://www.easa.europa.eu/sites/default/files/dfu/Part-FCL.pdf")
+    }
+
+    fun drawAddressPage(canvas: Canvas, address: String) {
         TODO("This will make the address page of logbook as found in https://www.easa.europa.eu/sites/default/files/dfu/Part-FCL.pdf")
     }
 
+
     /**
      * Put the lines and text for an empty logbook left page
-     * @param canvas: The canvas to draw on
      */
-    fun drawLeftPage(canvas: Canvas) {
+    fun drawLeftPage(): PdfLogbookDrawing {
         var lineNumber = 1
         // Outside box:
         canvas.drawRect(
@@ -450,19 +463,19 @@ object PdfLogbookBuilder {
             PdfLogbookMakerValues.MP_HOURS_OFFSET - 5,
             canvas.height - PdfLogbookMakerValues.TOTALS_LINE_HEIGHT * 2 - 9,
             Paints.largeTextRightAligned
-        ) // will need moar lines
+        )
         canvas.drawText(
             "TOTAL FROM PREVIOUS PAGES",
             PdfLogbookMakerValues.MP_HOURS_OFFSET - 5,
             canvas.height - PdfLogbookMakerValues.TOTALS_LINE_HEIGHT - 9,
             Paints.largeTextRightAligned
-        ) // will need moar lines
+        )
         canvas.drawText(
             "TOTAL TIME",
             PdfLogbookMakerValues.MP_HOURS_OFFSET - 5,
             canvas.height - 10f,
             Paints.largeTextRightAligned
-        ) // will need moar lines
+        )
 
         //draw horizontal lines between flights
         lineNumber = 1
@@ -476,14 +489,13 @@ object PdfLogbookBuilder {
             )
             lineNumber += 1
         }
-
+        return this
     }
 
     /**
      * Put the lines and text for an empty logbook right page
-     * * @param canvas: The canvas to draw on
      */
-    fun drawRightPage(canvas: Canvas){
+    fun drawRightPage(): PdfLogbookDrawing{
         var lineNumber = 1
         // Outside box:
         canvas.drawRect(1f,1f,canvas.width.toFloat() -1f,canvas.height.toFloat() -1f, Paints.thickLine)
@@ -568,17 +580,16 @@ object PdfLogbookBuilder {
             )
             lineNumber += 1
         }
+        return this
     }
 
     /**
      * Fill a left page with data
      * @param flights: List of all flights to be put on this page
      * @param totalsForward: Totals from previous page
-     * @param canvas: A canvas with a left page drawn on it
-     * @param aircraftMap: Map of Aircraft Identification strings and aircraft (for determining multipilot time)
      * @see drawLeftPage
      */
-    fun fillLeftPage(canvas: Canvas, flights: List<Flight>, totalsForward: TotalsForward){
+    fun fillLeftPage(flights: List<Flight>, totalsForward: TotalsForward){
         val oldTotals = totalsForward.copy()
         val currentTotals = TotalsForward()
         var index=1
@@ -842,11 +853,10 @@ object PdfLogbookBuilder {
      * Fill a right page with data
      * @param flights: List of all flights to be put on this page
      * @param totalsForward: Totals from previous page
-     * @param canvas: A canvas with a left page drawn on it
      * @see drawRightPage
      */
 
-    fun fillRightPage(canvas: Canvas, flights: List<Flight>, totalsForward: TotalsForward) {
+    fun fillRightPage(flights: List<Flight>, totalsForward: TotalsForward) {
         val oldTotals = totalsForward.copy()
         val currentTotals = TotalsForward()
         var index = 1
@@ -1332,9 +1342,12 @@ object PdfLogbookBuilder {
     }
 
 
-    /**
-     * This can be extended to accomodate multiuple paper sizes
-     */
-    fun maxLines(): Int = ((PdfLogbookMakerValues.A4_WIDTH - PdfLogbookMakerValues.TOP_SECTION_HEIGHT - PdfLogbookMakerValues.BOTTOM_SECTION_HEIGHT)/PdfLogbookMakerValues.ENTRY_HEIGHT).toInt()
+    companion object{
+        /**
+         * This can be extended to accomodate multiuple paper sizes
+         * If we do that, it will no longer be a const val of course
+         */
+        const val maxLines: Int = ((PdfLogbookMakerValues.A4_WIDTH - PdfLogbookMakerValues.TOP_SECTION_HEIGHT - PdfLogbookMakerValues.BOTTOM_SECTION_HEIGHT)/PdfLogbookMakerValues.ENTRY_HEIGHT).toInt()
+    }
 }
 

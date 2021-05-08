@@ -24,6 +24,12 @@ import android.graphics.Paint
 import android.graphics.Typeface
 
 object Paints {
+    val titlePageText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF000000.toInt()
+        textAlign = Paint.Align.CENTER
+        textSize=24f
+    }
+
     val smallTextCentered = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFF000000.toInt()
         textAlign = Paint.Align.CENTER

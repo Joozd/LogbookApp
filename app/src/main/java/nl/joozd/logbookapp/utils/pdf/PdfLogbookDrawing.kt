@@ -23,6 +23,7 @@ import android.graphics.Canvas
 import android.graphics.RectF
 import com.caverock.androidsvg.PreserveAspectRatio
 import com.caverock.androidsvg.SVG
+import nl.joozd.logbookapp.data.dataclasses.LogbookAddressInfo
 import nl.joozd.logbookapp.data.dataclasses.LogbookNameInfo
 import nl.joozd.logbookapp.data.miscClasses.TotalsForward
 import nl.joozd.logbookapp.extensions.toLogbookDate
@@ -138,6 +139,12 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
         }
     }
 
+    /**
+     * Draw name/licence data on Name page
+     */
+    fun fillAddressPage(addressInfo: LogbookAddressInfo){
+        TODO("Not Implemented")
+    }
 
     /**
      * Put the lines and text for an empty logbook left page

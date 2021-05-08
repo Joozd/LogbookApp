@@ -31,8 +31,9 @@ import nl.joozd.logbookapp.data.miscClasses.TotalsForward
 import nl.joozd.logbookapp.extensions.popFirst
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MakePdfActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.utils.pdf.PdfLogbookBuilder
+import nl.joozd.logbookapp.utils.pdf.PdfLogbookDrawing
 import nl.joozd.logbookapp.utils.pdf.PdfLogbookMakerValues
+import java.io.BufferedOutputStream
 import java.util.*
 
 class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
@@ -65,7 +66,7 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
      * Progress is kept in [_logbookBuilderProgress]
      * Can be monitored if ready or not by looking at [_pdfLogbookReady]
      */
-    fun buildLogbookAsync() {
+    private fun buildLogbookAsync() {
         _pdfLogbookReady.value = false
         pdfLogbook?.close()
         viewModelScope.launch {
@@ -75,41 +76,68 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
                 val aircraftMapAsync = aircraftRepository.getAircraftTypesMapShortNameAsync()
                 val allFlightsAsync = async(Dispatchers.IO) { flightRepository.getAllFlights()}
 
+                var pageNumber = 1
+
+                /**
+                 * Create front page
+                 */
+                //We can do this here while async flight loading parts are still loading
+                println("Je moeder")
+                finishPage(startPage(PdfDocument.PageInfo.Builder(PdfLogbookMakerValues.A4_LENGTH, PdfLogbookMakerValues.A4_WIDTH, pageNumber++).create()).apply{
+                    PdfLogbookDrawing(canvas)
+                        .drawFrontPage()
+                })
+                println("LAAALAALAAAA")
+
+
                 //fill Totals Forward with balance forward totals
                 val totalsForward = TotalsForward().apply{
                     val balancesForward = balancesForwardAsync.await()
-                    multiPilot = balancesForward.sumBy {it.multiPilotTime}
-                    totalTime = balancesForward.sumBy {it.aircraftTime}
-                    landingDay = balancesForward.sumBy {it.landingDay}
-                    landingNight = balancesForward.sumBy {it.landingNight}
-                    nightTime = balancesForward.sumBy {it.nightTime}
-                    ifrTime = balancesForward.sumBy {it.ifrTime}
-                    picTime = balancesForward.sumBy {it.picTime}
-                    copilotTime = balancesForward.sumBy {it.copilotTime}
-                    dualTime = balancesForward.sumBy {it.dualTime}
-                    instructorTime = balancesForward.sumBy {it.instructortime}
-                    simTime = balancesForward.sumBy {it.simTime}
+                    multiPilot = balancesForward.sumOf{it.multiPilotTime}
+                    totalTime = balancesForward.sumOf {it.aircraftTime}
+                    landingDay = balancesForward.sumOf {it.landingDay}
+                    landingNight = balancesForward.sumOf {it.landingNight}
+                    nightTime = balancesForward.sumOf {it.nightTime}
+                    ifrTime = balancesForward.sumOf {it.ifrTime}
+                    picTime = balancesForward.sumOf {it.picTime}
+                    copilotTime = balancesForward.sumOf {it.copilotTime}
+                    dualTime = balancesForward.sumOf {it.dualTime}
+                    instructorTime = balancesForward.sumOf {it.instructortime}
+                    simTime = balancesForward.sumOf {it.simTime}
                 }
                 //lets say this is 5% of the work
+                //TODO make this '5' into a const val in companion object
                 _logbookBuilderProgress.value = 5
 
-                val flightsPerPage = PdfLogbookBuilder.maxLines()
+
+
+
+                val flightsPerPage = PdfLogbookDrawing.maxLines
                 val allFlights = LinkedList(allFlightsAsync.await().filter {!it.isPlanned}.sortedBy { it.timeOut })
                 val aircraftMap = aircraftMapAsync.await()
-                var pageNumber = 1
+
                 val originalListSize = allFlights.size
 
+
+
+
+                /**
+                 * Create flights pages
+                 */
                 while (allFlights.isNotEmpty()){
                     val currentFlights = allFlights.popFirst(flightsPerPage)
+                    println("Currently on page $pageNumber")
                     //this call increases pagenumber after using it
                     finishPage(startPage(PdfDocument.PageInfo.Builder(PdfLogbookMakerValues.A4_LENGTH, PdfLogbookMakerValues.A4_WIDTH, pageNumber++).create()).apply{
-                        PdfLogbookBuilder.drawLeftPage(canvas)
-                        PdfLogbookBuilder.fillLeftPage(canvas, currentFlights, totalsForward)
+                        PdfLogbookDrawing(canvas)
+                            .drawLeftPage()
+                            .fillLeftPage(currentFlights, totalsForward)
                     })
 
                     finishPage(startPage(PdfDocument.PageInfo.Builder(PdfLogbookMakerValues.A4_LENGTH, PdfLogbookMakerValues.A4_WIDTH, pageNumber++).create()).apply{ // left page
-                            PdfLogbookBuilder.drawRightPage(canvas)
-                            PdfLogbookBuilder.fillRightPage(canvas, currentFlights, totalsForward)
+                            PdfLogbookDrawing(canvas)
+                                .drawRightPage()
+                                .fillRightPage(currentFlights, totalsForward)
                     })
 
                     val progress = (originalListSize-allFlights.size).toDouble() / originalListSize
@@ -131,11 +159,14 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
             feedback(MakePdfActivityEvents.ERROR).apply{ putInt(PDF_NOT_CREATED)}
             return
         }
-        context.contentResolver.openOutputStream(uri).use{
-            pdfLogbook?.writeTo(it)
+        viewModelScope.launch(Dispatchers.IO) {
+            feedback(MakePdfActivityEvents.WRITING)
+            context.contentResolver.openOutputStream(uri).use {
+                pdfLogbook?.writeTo(it)
+            }
+            _uriWithLogbook = uri
+            feedback(MakePdfActivityEvents.FILE_CREATED)
         }
-        _uriWithLogbook = uri
-        feedback(MakePdfActivityEvents.FILE_CREATED)
     }
 
     fun buildLogbook() = buildLogbookAsync()
@@ -147,8 +178,10 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
     val pdfLogbookReady: LiveData<Boolean>
         get() = _pdfLogbookReady
 
+
     val uriWithLogbook: Uri?
         get() = _uriWithLogbook
+
 
     companion object{
         const val PDF_NOT_CREATED = 1

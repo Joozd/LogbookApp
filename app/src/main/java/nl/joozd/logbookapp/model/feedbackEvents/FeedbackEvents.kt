@@ -68,7 +68,9 @@ object FeedbackEvents {
     enum class MakePdfActivityEvents: Event{
         NOT_IMPLEMENTED,
         ERROR,
+        WRITING,
         FILE_CREATED
+
     }
 
     enum class SettingsActivityEvents:

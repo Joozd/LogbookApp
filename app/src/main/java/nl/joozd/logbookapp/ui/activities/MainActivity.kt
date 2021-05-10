@@ -37,7 +37,6 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
 import nl.joozd.logbookapp.extensions.*
-import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityFeedbackExtraData
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModel
@@ -46,12 +45,11 @@ import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesActivity
 import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.dialogs.AboutDialog
 import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
-import nl.joozd.logbookapp.ui.fragments.EditFlightFragment
+import nl.joozd.logbookapp.ui.dialogs.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogProgressBar
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
-import java.time.Instant
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {

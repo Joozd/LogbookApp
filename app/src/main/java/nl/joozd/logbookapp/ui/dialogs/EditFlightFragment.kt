@@ -1,6 +1,6 @@
 /*
  *  JoozdLog Pilot's Logbook
- *  Copyright (c) 2020 Joost Welle
+ *  Copyright (c) 2021 Joost Welle
  *
  *      This program is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU Affero General Public License as
@@ -17,9 +17,8 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.fragments
+package nl.joozd.logbookapp.ui.dialogs
 
-import nl.joozd.logbookapp.ui.dialogs.LocalDatepickerDialog
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
@@ -33,7 +32,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.marginTop
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -41,7 +39,6 @@ import nl.joozd.logbookapp.databinding.LayoutEditFlightFragmentBinding
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
-import nl.joozd.logbookapp.ui.dialogs.*
 import nl.joozd.logbookapp.ui.utils.toast
 
 import nl.joozd.logbookapp.model.viewmodels.fragments.NewEditFlightFragmentViewModel
@@ -50,6 +47,7 @@ import nl.joozd.logbookapp.ui.dialogs.airportPicker.DestPicker
 import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
+import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 
 class EditFlightFragment: JoozdlogFragment(){
     private val viewModel: NewEditFlightFragmentViewModel by viewModels()

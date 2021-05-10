@@ -29,7 +29,6 @@
             android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".ui.activities.ChangePasswordActivity" />
         <activity android:name=".ui.activities.MakePdfActivity" />
-        <activity android:name=".ui.activities.CreateNewUserActivity" />
         <activity android:name=".ui.activities.newUserActivity.NewUserActivity"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize"/>

@@ -35,7 +35,7 @@ fun String.nullIfNotTrue(keep: Boolean?) = if (keep == true) this else null
 
 fun String.removeTrailingDigits(): String {
     if (isEmpty()) return this
-    var trailingDigits: Int = 0
+    var trailingDigits = 0
     while (this.dropLast(trailingDigits).last().isDigit()) trailingDigits++
     //We now know how many digits this EditText's text ends with (spoiler: it's [trailingDigtis]
 

@@ -25,7 +25,6 @@ import android.content.Intent
 import android.content.Intent.ACTION_VIEW
 import android.net.Uri
 import android.util.Log
-import android.view.MenuItem
 import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
@@ -300,19 +299,6 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     }
 
 
-    fun menuSelectedRebuild() {
-        feedback(MainActivityEvents.NOT_IMPLEMENTED)
-        /*
-val ENABLE_REBUILD = true
-if (ENABLE_REBUILD) {
-    launch { MenuFunctions.rebuildFlightsFromServer(this@MainActivity) }
-}
-else{
-    longToast("Disabled!")            }
-
- */
-    }
-
     fun menuSelectedAddFlight() = addFlight()
 
     fun undo() = flightRepository.undo()
@@ -433,20 +419,6 @@ else{
      */
     fun checkFlightConflictingWithCalendarSync(f: Flight): Long = if (f == flightRepository.undoSaveFlight) 0L
     else FlightConflictChecker.checkConflictingWithCalendarSync(flightRepository.undoSaveFlight, f)
-
-
-    /**
-     * Fixes a calendar sync conflict with edited flight by disabling calendar sync until after both flights.
-     * @param f: Flight to check against FlightRepository.undoFlight. Will throw error if f == null.
-     * Call this function from an observer of [nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository.savedFlight]
-     */
-    fun fixCalendarSyncConflictIfNeeded(f: Flight?, silent: Boolean = false) {
-        if (f == null) return // no flight, no conflict
-        checkFlightConflictingWithCalendarSync(f).nullIfZero()?.let {
-            disableCalendarImportUntil(it, silent)
-        }
-    }
-
 
     /*********************************************************************************************
      * Functions related to synchronization:

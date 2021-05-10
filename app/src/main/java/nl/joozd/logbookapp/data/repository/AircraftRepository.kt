@@ -278,7 +278,7 @@ class AircraftRepository(
     }
 
     /**
-     * Data will arrive from server as ConsensusData, [Cloud] should take care of converting to model (with [ConsensusData.toModel])
+     * Data will arrive from server as [ConsensusData], caller should take care of converting to model (with [ConsensusData.toModel])
      */
     private fun saveConsensus(dataToSave: List<AircraftTypeConsensus>) = launch (dispatcher + NonCancellable) {
         aircraftTypeConsensusDao.save(*(dataToSave.map{it.toModel()}.toTypedArray()))

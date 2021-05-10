@@ -29,7 +29,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogPickSimTypeBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AircraftPickerViewModel
 import nl.joozd.logbookapp.ui.adapters.AircraftPickerAdapter
 

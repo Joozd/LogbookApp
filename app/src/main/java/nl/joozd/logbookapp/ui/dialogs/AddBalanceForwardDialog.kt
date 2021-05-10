@@ -31,7 +31,7 @@ import nl.joozd.logbookapp.databinding.DialogAddBalanceForwardBinding
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardDialogEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AddBalanceForwardDialogViewmodel
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
 
 

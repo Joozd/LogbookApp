@@ -29,7 +29,7 @@ import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogAboutBinding
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AboutDialogViewModel
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 class AboutDialog: JoozdlogFragment() {
     private val viewModel: AboutDialogViewModel by viewModels()

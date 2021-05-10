@@ -25,7 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogMessageBinding
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 
 /**
@@ -34,7 +34,7 @@ import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
 class MessageDialog: JoozdlogFragment() {
     var message: String? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogMessageBinding.bind(inflater.inflate(R.layout.dialog_message, container, false)).apply {
             if (message == null) closeFragment() // just kill the fragment if no message set.
             messageView.text = message?: "NO TEXT"

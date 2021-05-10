@@ -30,7 +30,7 @@ import nl.joozd.logbookapp.databinding.ActivityNewUserBinding
 import nl.joozd.logbookapp.extensions.minusOneWithFloor
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
-import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
+import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.customs.viewpagernavigatorbar.ViewPager2NavigatorBar
 import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
 

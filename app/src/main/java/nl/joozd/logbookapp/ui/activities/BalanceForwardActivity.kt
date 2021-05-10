@@ -33,6 +33,7 @@ import nl.joozd.logbookapp.model.viewmodels.activities.BalanceForwardActivityVie
 import nl.joozd.logbookapp.ui.adapters.BalanceForwardAdapter
 
 import nl.joozd.logbookapp.ui.dialogs.AddBalanceForwardDialog
+import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.toast
 
 
@@ -75,9 +76,9 @@ class BalanceForwardActivity : JoozdlogActivity() {
                 onListItemClicked = {bf, item -> viewModel.itemClicked(bf, item)}
             }
             balanceForwardExListView.setAdapter(adapter)
-            viewModel.balancesForward.observe(this@BalanceForwardActivity, Observer {
+            viewModel.balancesForward.observe(this@BalanceForwardActivity) {
                 adapter.updateList(it)
-            })
+            }
 
             setContentView(root)
         }
@@ -89,14 +90,14 @@ class BalanceForwardActivity : JoozdlogActivity() {
          * Feedback observers:
          */
 
-        viewModel.feedbackEvent.observe(this, Observer {
+        viewModel.feedbackEvent.observe(this) {
             when (it.getEvent()){
                 FeedbackEvents.BalanceForwardActivityEvents.NOT_IMPLEMENTED -> toast("Not implemented!")
                 FeedbackEvents.BalanceForwardActivityEvents.DELETED -> toast("Deleted! (needs a snackbar)") // TODO needs a snackbar
                 FeedbackEvents.BalanceForwardActivityEvents.UNDELETE_OK -> toast("Undeleted!")
                 FeedbackEvents.BalanceForwardActivityEvents.UNDELETE_FAILED -> toast("Unable to undelete!")
             }
-        })
+        }
 
     }
 

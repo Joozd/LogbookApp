@@ -28,7 +28,7 @@ import com.github.gcacace.signaturepad.views.SignaturePad
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogSignatureBinding
 import nl.joozd.logbookapp.model.viewmodels.dialogs.SignatureDialogViewModel
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 
 /**

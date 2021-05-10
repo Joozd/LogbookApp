@@ -31,7 +31,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.CloudSyncTermsDialog
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageCloudBinding
 import nl.joozd.logbookapp.ui.utils.toast
 
@@ -44,7 +44,7 @@ class NewUserActivityCloudPage: JoozdlogFragment() {
 
     val pageNumber = NewUserActivityViewModel.PAGE_CLOUD
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageCloudBinding.bind(inflater.inflate(R.layout.activity_new_user_page_cloud, container, false)).apply {
             useCloudCheckbox.isChecked = Preferences.useCloud
 

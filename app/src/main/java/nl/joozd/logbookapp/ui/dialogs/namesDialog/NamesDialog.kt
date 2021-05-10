@@ -29,7 +29,7 @@ import nl.joozd.logbookapp.databinding.DialogNamesBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog.NamesDialogViewModel
 import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 //TODO if only one name selected in recyclerView, set that as active name if OK pressed
  abstract class NamesDialog: JoozdlogFragment() {

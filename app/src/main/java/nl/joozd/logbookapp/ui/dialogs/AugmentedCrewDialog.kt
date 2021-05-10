@@ -20,25 +20,20 @@
 package nl.joozd.logbookapp.ui.dialogs
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.DialogAugmentedCrewBinding
-import nl.joozd.logbookapp.extensions.nullIfZero
-import nl.joozd.logbookapp.extensions.toInt
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AugmentedCrewDialogViewModel
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 //TODO doesn't work yet, just skeleton
 class AugmentedCrewDialog: JoozdlogFragment(){
     private val viewModel: AugmentedCrewDialogViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         with(DialogAugmentedCrewBinding.bind(inflater.inflate(R.layout.dialog_augmented_crew, container, false))){
             crewDownButton.setOnClickListener {
                 viewModel.crewDown()

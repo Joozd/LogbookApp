@@ -28,7 +28,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogWaitingForSomethingBinding
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
 
 /**
@@ -51,7 +51,7 @@ class WaitingForSomethingDialog: JoozdlogFragment() {
 
 
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         DialogWaitingForSomethingBinding.bind(inflater.inflate(R.layout.dialog_waiting_for_something, container, false)).apply{
             // Disable onBack click

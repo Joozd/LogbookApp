@@ -27,7 +27,7 @@ import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogLandingsBinding
 import nl.joozd.logbookapp.model.viewmodels.dialogs.LandingsDialogViewModel
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 class LandingsDialog: JoozdlogFragment() {
     private val landingsDialogViewModel: LandingsDialogViewModel by viewModels()

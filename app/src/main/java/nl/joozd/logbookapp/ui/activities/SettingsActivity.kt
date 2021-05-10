@@ -46,6 +46,7 @@ import nl.joozd.logbookapp.ui.dialogs.CloudSyncTermsDialog
 import nl.joozd.logbookapp.ui.dialogs.EmailDialog
 import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.dialogs.NumberPickerDialog
+import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.utils.checkPermission

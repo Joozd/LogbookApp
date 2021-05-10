@@ -36,7 +36,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageCalendarBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 /**
  * Calendar import

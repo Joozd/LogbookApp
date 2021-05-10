@@ -24,7 +24,7 @@ import androidx.activity.viewModels
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityTotalTimesBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.TotalTimesViewModel
-import nl.joozd.logbookapp.ui.activities.JoozdlogActivity
+import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 
 /**
  * TODO: Animate expanding of lists

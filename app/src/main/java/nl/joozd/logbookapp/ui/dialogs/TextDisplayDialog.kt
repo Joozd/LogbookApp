@@ -20,14 +20,13 @@
 package nl.joozd.logbookapp.ui.dialogs
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.LiveData
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogTextDisplayBinding
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 /**
  * Fragment for displaying text

@@ -32,7 +32,7 @@ import androidx.core.view.children
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogDatepickerBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle

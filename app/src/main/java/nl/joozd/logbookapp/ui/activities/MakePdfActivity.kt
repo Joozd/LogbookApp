@@ -29,6 +29,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityMakePdfBinding
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MakePdfActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.MakePdfActivityViewModel
+import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.toast
 
 class MakePdfActivity : JoozdlogActivity() {

@@ -35,7 +35,7 @@ import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.AirportPickerV
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.adapters.AirportPickerAdapter
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.AirportPickerEvents
 

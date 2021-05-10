@@ -35,7 +35,7 @@ import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.showIfActive
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.TimePickerEvents
 import nl.joozd.logbookapp.model.viewmodels.dialogs.TimePickerViewModel
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
 
 open class TimePicker: JoozdlogFragment() {

@@ -19,9 +19,6 @@
 
 package nl.joozd.logbookapp.ui.dialogs
 
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -37,11 +34,10 @@ import nl.joozd.logbookapp.databinding.DialogPickAircraftTypeBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.extensions.onTextChanged
-import nl.joozd.logbookapp.ui.fragments.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AircraftPickerViewModel
 import nl.joozd.logbookapp.ui.adapters.AircraftAutoCompleteAdapter
 import nl.joozd.logbookapp.ui.adapters.AircraftPickerAdapter
-import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
 
 
 //TODO needs work

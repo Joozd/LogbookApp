@@ -73,7 +73,7 @@ class NewUserActivity : JoozdlogActivity() {
 
             viewModel.feedbackEvent.observe(activity) {
                 when (it.getEvent()) {
-                    NewUserActivityEvents.FINISHED -> closeAndstartMainActivity()
+                    NewUserActivityEvents.FINISHED -> closeAndStartMainActivity()
                     NewUserActivityEvents.NEXT_PAGE -> viewPager.currentItem++
                     NewUserActivityEvents.UPDATE_NAVBAR -> navigationBar.notifyDataChanged()
                 }
@@ -142,7 +142,7 @@ class NewUserActivity : JoozdlogActivity() {
          * if true, button is enabled when navigating to this page, if false, it is disabled.
          * If not implemented it stays the way it was on previous page.
          */
-        override fun nextButtonEnabled(position: Int): Boolean? = viewModel.isContinueButtonEnabled(position)
+        override fun nextButtonEnabled(position: Int): Boolean = viewModel.isContinueButtonEnabled(position)
 
         /**
          * Keep track of which page is open so in case of activity recreation (eg rotation) we will continue on that page

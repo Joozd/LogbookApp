@@ -17,8 +17,7 @@
   ~
   -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Base application theme. -->
 
@@ -194,6 +193,10 @@
         <item name="android:layout_height">wrap_content</item>
     </style>
 
+    <style name="SecondaryText.Bold">
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <style name="TertiaryText" parent="AppTheme">
         <item name="android:textColor">?android:attr/textColorTertiary</item>
         <item name="android:layout_width">0dp</item>
@@ -230,6 +233,10 @@
     <style name="SecondaryTextCentered" parent="SecondaryText">
         <item name="android:textAlignment">center</item>
         <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="SecondaryTextCentered.Bold">
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="DialogButtonText" parent="AppTheme">

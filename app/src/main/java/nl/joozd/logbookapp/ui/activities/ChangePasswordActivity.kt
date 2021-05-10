@@ -62,7 +62,6 @@ class ChangePasswordActivity : JoozdlogActivity() {
 
             // do some visual things (colors, texts etc)
             youAreSignedInAsTextView.text = Preferences.username?.let { getStringWithMakeup(R.string.you_are_signed_in_as, it) } ?: getString(R.string.you_are_not_signed_in)
-            submitButton.joozdLogSetBackgroundColor()
 
 
             /****************************************************************************************

@@ -67,7 +67,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                 when (it.getEvent()) {
                     PdfParserActivityEvents.NOT_IMPLEMENTED -> {
                         toast("Not supported yet")
-                        closeAndstartMainActivity()
+                        closeAndStartMainActivity()
                     }
 
                     PdfParserActivityEvents.IMPORTING_LOGBOOK -> {
@@ -76,11 +76,11 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
 
                     PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED -> {
                         longToast("YAAAAY it worked  (Roster)")
-                        closeAndstartMainActivity()
+                        closeAndStartMainActivity()
                     }
                     PdfParserActivityEvents.CHRONO_SUCCESSFULLY_ADDED -> {
                         longToast("YAAAAY it worked (Chrono)")
-                        closeAndstartMainActivity()
+                        closeAndStartMainActivity()
                     }
                     PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND -> {
                         showChronoConflictDialog(it.getInt())
@@ -91,14 +91,14 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
 
                     PdfParserActivityEvents.ERROR, PdfParserActivityEvents.FILE_NOT_FOUND -> {
                         toast("Error reading file: ${it.getString()}")
-                        closeAndstartMainActivity()
+                        closeAndStartMainActivity()
                     }
                     PdfParserActivityEvents.NOT_A_KNOWN_ROSTER, PdfParserActivityEvents.NOT_A_KNOWN_LOGBOOK -> {
                         JoozdlogAlertDialog().show(activity){
                             titleResource = R.string.unknown_file_title
                             messageResource = R.string.unknown_file_message
                             setPositiveButton(android.R.string.ok){
-                                closeAndstartMainActivity()
+                                closeAndStartMainActivity()
                             }
                         }
                     }
@@ -115,7 +115,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                                 viewModel.runAgain()
                             }
                             setNeutralButton(android.R.string.cancel) {
-                                closeAndstartMainActivity()
+                                closeAndStartMainActivity()
                             }
                         }
                     }
@@ -124,10 +124,10 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                             JoozdlogAlertDialog().show(activity) {
                                 messageResource = R.string.you_can_start_calendar_sync_again
                                 setPositiveButton(android.R.string.ok) {
-                                    closeAndstartMainActivity()
+                                    closeAndStartMainActivity()
                                 }
                             }
-                        else closeAndstartMainActivity()
+                        else closeAndStartMainActivity()
                     }
                     null -> {
                     }
@@ -150,7 +150,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
 
     private fun showChronoConflictDialog(conflicts: Int) {
         toast("showChronoConflictDialog: $conflicts")
-        closeAndstartMainActivity()
+        closeAndStartMainActivity()
     }
 }
 

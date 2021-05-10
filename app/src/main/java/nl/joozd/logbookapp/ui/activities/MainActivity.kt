@@ -47,7 +47,6 @@ import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.dialogs.AboutDialog
 import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.fragments.EditFlightFragment
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogAlertDialogV1
 import nl.joozd.logbookapp.ui.utils.customs.JoozdlogProgressBar
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
@@ -443,7 +442,7 @@ class MainActivity : JoozdlogActivity() {
     }
 
     private fun showDeletePlannedCalendarFlightDialog(id: Int){
-        JoozdlogAlertDialogV1(this).show {
+        JoozdlogAlertDialog().show(this) {
             messageResource = R.string.delete_calendar_flight
             setPositiveButton(android.R.string.ok){
                 viewModel.disableCalendarImport()
@@ -457,7 +456,7 @@ class MainActivity : JoozdlogActivity() {
     }
 
     private fun showDeleteCompletedFlightDialog(id: Int){
-        JoozdlogAlertDialogV1(this).show {
+        JoozdlogAlertDialog().show(this) {
             title = "WARNING"
             messageResource = R.string.delete_completed_flight
             setPositiveButton("Continue") {
@@ -469,7 +468,7 @@ class MainActivity : JoozdlogActivity() {
 
 
     private fun showCalendarSyncRestartInfo(){
-        JoozdlogAlertDialogV1(this).show{
+        JoozdlogAlertDialog().show(this) {
             messageResource = R.string.you_can_start_calendar_sync_again
             setPositiveButton(android.R.string.ok)
         }

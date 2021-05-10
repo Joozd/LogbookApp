@@ -19,14 +19,13 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
+import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import java.util.*
 
 class EmailDialogViewModel: JoozdlogDialogViewModel() {
     var email1 = Preferences.emailAddress
@@ -36,31 +35,35 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
     fun okClicked(){
         if (email1 != email2) feedback(GeneralEvents.ERROR).putInt(3)
         if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(GeneralEvents.ERROR).putInt(4)
-        if (Preferences.emailAddress != email1) {
-            Preferences.emailAddress = email1
+
+        if (Preferences.emailAddress.lowercase(Locale.ROOT) != email1)
             Preferences.emailVerified = false
+
+        if (!Preferences.emailVerified) {
+            if (email1 != Preferences.emailAddress.lowercase(Locale.ROOT))
+                Preferences.emailAddress = email1
+
             viewModelScope.launch {
-                when (Cloud.sendNewEmailAddress()){
-                    CloudFunctionResults.OK -> feedback(GeneralEvents.DONE)
-                    else -> feedback(GeneralEvents.ERROR).putInt(5)
-                }
+                UserManagement.changeEmailAddress()
+                // Fire and forget, UserManagement takes care of any errors that arise
             }
         }
+
 
     }
 
     fun updateEmail(it: String){
         if(!android.util.Patterns.EMAIL_ADDRESS.matcher(it.trim()).matches())
                 feedback(GeneralEvents.ERROR).putString("Not an email address").putInt(1)
-                email1 = it.trim()
+                email1 = it.lowercase(Locale.ROOT).trim()
     }
 
     fun updateEmail2(it: String){
         when {
-            it.trim() != email1 ->
+            it.lowercase(Locale.ROOT).trim() != email1 ->
                 feedback(GeneralEvents.ERROR).putString("Does not match").putInt(2)
             else -> {
-                email2 = it.trim()
+                email2 = it.lowercase(Locale.ROOT).trim()
 
             }
         }

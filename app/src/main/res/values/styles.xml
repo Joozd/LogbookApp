@@ -346,8 +346,22 @@
     <style name="DataBox" parent="AppTheme">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:layout_marginStart">4dp</item>
+        <item name="android:layout_marginEnd">4dp</item>
         <item name="android:background">@drawable/rounded_corners_secondarybackground</item>
         <item name="android:elevation">4dp</item>
+    </style>
+
+    <style name="Card" parent="AppTheme">
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/rounded_corners_textviewbackground</item>
+
     </style>
 
     <style name="DataBox.TextViewBackground">
@@ -421,6 +435,7 @@
     <style name="NumberBox.secondaryBackground">
         <item name="android:background">@drawable/rounded_corners_secondarybackground</item>
     </style>
+
 
     <!-- style for selectors like "sim" or "instructor" in editFlightFragment -->
     <style name="SelectorStyle" parent="AppTheme">

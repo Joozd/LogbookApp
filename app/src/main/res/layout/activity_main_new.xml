@@ -218,11 +218,17 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:animateLayoutChanges="true"
+        android:background="@drawable/primary_hairline_top"
         android:elevation="8dp"
         android:orientation="vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent">
+
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

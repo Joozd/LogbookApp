@@ -51,6 +51,8 @@ class JoozdlogProgressBar(private val target: ViewGroup) {
 
     fun show(): JoozdlogProgressBar {
         target.addView(view)
+        //redraw background because otherwise it doesn't work for some reason
+        view.setBackgroundResource(R.drawable.rounded_corners_secondarybackground)
         return this
     }
     fun remove() = target.removeView(view)

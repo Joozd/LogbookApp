@@ -38,7 +38,7 @@ object JoozdlogExport {
         val cachePath = File(context.cacheDir, "files").apply{
             mkdirs()
         }
-        val name = if (fileName.toUpperCase(Locale.ROOT).endsWith(".CSV")) fileName else "$fileName.csv"
+        val name = if (fileName.uppercase(Locale.ROOT).endsWith(".CSV")) fileName else "$fileName.csv"
         val file = File(cachePath, name)
         OutputStreamWriter(file.outputStream()).use{
             async(Dispatchers.IO) {

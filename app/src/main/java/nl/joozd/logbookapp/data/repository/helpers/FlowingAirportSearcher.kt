@@ -39,27 +39,27 @@ object FlowingAirportSearcher{
         if (query == null) {
             emit(fullList)
         } else {
-            val upperQuery = query.toUpperCase(Locale.ROOT)
+            val upperQuery = query.uppercase(Locale.ROOT)
             val result = mutableListOf<Airport>()
             var currentPosition = 0
             // pass1
             fullList.forEach {
-                if (upperQuery in it.iata_code.toUpperCase(Locale.ROOT)) result += it
+                if (upperQuery in it.iata_code.uppercase(Locale.ROOT)) result += it
                 emit(result)
             }
             //pass2
             fullList.forEach {
-                if (upperQuery in it.ident.toUpperCase(Locale.ROOT) && it !in result) result += it
+                if (upperQuery in it.ident.uppercase(Locale.ROOT) && it !in result) result += it
                 emit(result)
             }
             //pass3
             fullList.forEach {
-                if (upperQuery in it.municipality.toUpperCase(Locale.ROOT) && it !in result) result += it
+                if (upperQuery in it.municipality.uppercase(Locale.ROOT) && it !in result) result += it
                 emit(result)
             }
             //pass4
             fullList.forEach {
-                if (upperQuery in it.name.toUpperCase(Locale.ROOT) && it !in result) result += it
+                if (upperQuery in it.name.uppercase(Locale.ROOT) && it !in result) result += it
                 emit(result)
             }
         }

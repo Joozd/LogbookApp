@@ -475,10 +475,10 @@ class AircraftRepository(
      * A conflicting flight is one where multiple solutions are found.
      */
     private suspend fun getAircraftTypesFromFlights(flights: List<Flight>, types: List<AircraftType>): Pair<List<Aircraft>, List<Aircraft>> = withContext(Dispatchers.Default){
-        val typesMap = types.map{ it.shortName.toUpperCase(Locale.ROOT) to it}.toMap()
+        val typesMap = types.map { it.shortName.uppercase(Locale.ROOT) to it }.toMap()
 
         val regsToCheck = flights.filter{it.registration.isNotBlank()}
-            .map{it.registration to it.aircraftType.toUpperCase(Locale.ROOT)} // now we have a list of registrations paired with types
+            .map { it.registration to it.aircraftType.uppercase(Locale.ROOT) } // now we have a list of registrations paired with types
 
         //conflicts is a list of those registrations that match multiple types in flights database
         val conflicts = findConflicts(regsToCheck)
@@ -511,7 +511,7 @@ class AircraftRepository(
      * Will make a map of short names (UPPERCASE) to AircraftType
      */
     fun getAircraftTypesMapShortNameAsync() = async {
-        aircraftTypes?.map{ it.shortName.toUpperCase(Locale.ROOT) to it}?.toMap()
+        aircraftTypes?.map { it.shortName.uppercase(Locale.ROOT) to it }?.toMap()
     }
 
     /**
@@ -521,7 +521,7 @@ class AircraftRepository(
     suspend fun getAircraftFromRegistration(reg: String?): Aircraft? = when {
         reg == null -> null
         // use [reg] if it contains at least one '-', if it doesn't try to match it to a knownRegistration minus the '-'
-        "-" in reg -> requireMap()[reg.toUpperCase(Locale.ROOT)]
+        "-" in reg -> requireMap()[reg.uppercase(Locale.ROOT)]
         else -> { requireMap().keys.firstOrNull { it.filter{ c -> c !in "- "} == reg}?.let{
             requireMap()[it]
             }

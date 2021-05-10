@@ -43,9 +43,9 @@ fun findBestHitForRegistration(query: String, registrations: Collection<String>)
  * @return List of registrations
  */
 fun findSortedHitsForRegistration(query: String, registrations: Collection<String>, caseSensitive: Boolean = false): List<String>{
-    val q = if (caseSensitive) query else query.toUpperCase(Locale.ROOT)
+    val q = if (caseSensitive) query else query.uppercase(Locale.ROOT)
     val searchableRegs = registrations.filter{it.length > q.length}.filter{reg -> q.filter{ c -> c != '-'} in reg.filter{ c -> c != '-'} }.let { rrr->
-        if (caseSensitive) rrr else rrr.map { it.toUpperCase(Locale.ROOT) }
+        if (caseSensitive) rrr else rrr.map { it.uppercase(Locale.ROOT) }
     }
         return  (searchableRegs.filter {it == q} +
                 searchableRegs.filter{it.filter {c -> c != '-'} == q} +

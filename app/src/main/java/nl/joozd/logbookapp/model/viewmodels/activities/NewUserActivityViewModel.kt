@@ -230,9 +230,9 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Update [email1] and/or [email2]
      */
-    fun emailInputChanged(input1: String, input2: String){
-        email1 = input1.toLowerCase(Locale.ROOT).trim()
-        email2 = input2.toLowerCase(Locale.ROOT).trim()
+    fun emailInputChanged(input1: String, input2: String) {
+        email1 = input1.lowercase(Locale.ROOT).trim()
+        email2 = input2.lowercase(Locale.ROOT).trim()
         checkEmails()
     }
 

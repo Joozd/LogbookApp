@@ -144,21 +144,21 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     }
 
     private fun searchAll(fff: List<Flight>) = fff.filter {
-        query in it.name.toUpperCase(Locale.ROOT)
-                || query in it.name2.toUpperCase(Locale.ROOT)
-                || query in it.flightNumber.toUpperCase(Locale.ROOT)
-                || query in it.registration.toUpperCase(Locale.ROOT)
-                || query in it.orig.toUpperCase(Locale.ROOT)
-                || query in it.dest.toUpperCase(Locale.ROOT)
-                || query in icaoIataMap[it.orig]?.toUpperCase(Locale.ROOT) ?: ""
-                || query in icaoIataMap[it.dest]?.toUpperCase(Locale.ROOT) ?: ""
+        query in it.name.uppercase(Locale.ROOT)
+                || query in it.name2.uppercase(Locale.ROOT)
+                || query in it.flightNumber.uppercase(Locale.ROOT)
+                || query in it.registration.uppercase(Locale.ROOT)
+                || query in it.orig.uppercase(Locale.ROOT)
+                || query in it.dest.uppercase(Locale.ROOT)
+                || query in icaoIataMap[it.orig]?.uppercase(Locale.ROOT) ?: ""
+                || query in icaoIataMap[it.dest]?.uppercase(Locale.ROOT) ?: ""
     }
 
     private fun searchAirports(fff: List<Flight>) = fff.filter {
-        query in it.orig.toUpperCase(Locale.ROOT)
-                || query in it.dest.toUpperCase(Locale.ROOT)
-                || query in icaoIataMap[it.orig]?.toUpperCase(Locale.ROOT) ?: ""
-                || query in icaoIataMap[it.dest]?.toUpperCase(Locale.ROOT) ?: ""
+        query in it.orig.uppercase(Locale.ROOT)
+                || query in it.dest.uppercase(Locale.ROOT)
+                || query in icaoIataMap[it.orig]?.uppercase(Locale.ROOT) ?: ""
+                || query in icaoIataMap[it.dest]?.uppercase(Locale.ROOT) ?: ""
     }.also {
         viewModelScope.launch {
             // TODO make with async update from [airportRepository]
@@ -168,18 +168,18 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     private fun searchAircraft(fff: List<Flight>) = fff.filter {
         val ac = aircraftRepository.getAircraftTypeByShortName(it.aircraftType)
-        query in it.registration.toUpperCase(Locale.ROOT)
-                || ac?.shortName?.toUpperCase(Locale.ROOT)?.contains(query) ?: false
-                || ac?.name?.toUpperCase(Locale.ROOT)?.contains(query) ?: false
+        query in it.registration.uppercase(Locale.ROOT)
+                || ac?.shortName?.uppercase(Locale.ROOT)?.contains(query) ?: false
+                || ac?.name?.uppercase(Locale.ROOT)?.contains(query) ?: false
     }
 
     private fun searchNames(fff: List<Flight>) = fff.filter {
-        query in it.name.toUpperCase(Locale.ROOT)
-                || query in it.name2.toUpperCase(Locale.ROOT)
+        query in it.name.uppercase(Locale.ROOT)
+                || query in it.name2.uppercase(Locale.ROOT)
     }
 
     private fun searchFlightnumber(fff: List<Flight>) = fff.filter {
-        query in it.flightNumber.toUpperCase(Locale.ROOT)
+        query in it.flightNumber.uppercase(Locale.ROOT)
     }
 
     private fun disableCalendarImportUntil(time: Long, silent: Boolean = false) {
@@ -491,7 +491,7 @@ else{
 
 
     fun setSearchString(it: String) {
-        query = it.toUpperCase(Locale.ROOT)
+        query = it.uppercase(Locale.ROOT)
     }
 
     /**

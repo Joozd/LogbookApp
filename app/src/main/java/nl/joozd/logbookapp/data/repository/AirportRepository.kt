@@ -184,16 +184,16 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
             query.isBlank() -> null
             _cachedAirports.value == null -> {
                 searchAirportOnce(query).let{foundAP ->
-                    if (foundAP?.ident?.toUpperCase(Locale.ROOT) == query.toUpperCase(Locale.ROOT)) foundAP else null
+                    if (foundAP?.ident?.uppercase(Locale.ROOT) == query.uppercase(Locale.ROOT)) foundAP else null
                 }
             }
             else -> _cachedAirports.value!!.firstOrNull {
-                it.ident.toUpperCase(Locale.ROOT) == query.toUpperCase(
+                it.ident.uppercase(Locale.ROOT) == query.uppercase(
                     Locale.ROOT
                 )
             }
                 ?: _cachedAirports.value!!.firstOrNull {
-                    it.iata_code.toUpperCase(Locale.ROOT) == query.toUpperCase(
+                    it.iata_code.uppercase(Locale.ROOT) == query.uppercase(
                         Locale.ROOT
                     )
                 }
@@ -201,23 +201,23 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
     }
 
     suspend fun searchAirportsOnce(query: String): List<Airport> = withContext(dispatcher) {
-        airportDao.searchAirports("%${query.toUpperCase(Locale.ROOT)}%")
+        airportDao.searchAirports("%${query.uppercase(Locale.ROOT)}%")
     }
 
     suspend fun getQueryFlow(query: String): Flow<List<Airport>> = FlowingAirportSearcher.makeFlow(getAll(), query)
 
     suspend fun getIcaoToIataMap(forceReload: Boolean = false): Map<String, String> =
         if (forceReload)
-            withContext (dispatcher) { getAll().map { a -> a.ident.toUpperCase(Locale.ROOT) to a.iata_code.toUpperCase(Locale.ROOT) }.toMap() }
+            withContext (dispatcher) { getAll().map { a -> a.ident.uppercase(Locale.ROOT) to a.iata_code.uppercase(Locale.ROOT) }.toMap() }
         else {
-            _icaoIataMap.value ?: withContext (dispatcher){ getAll().map { a -> a.ident.toUpperCase(Locale.ROOT) to a.iata_code.toUpperCase(Locale.ROOT) }.toMap() }
+            _icaoIataMap.value ?: withContext (dispatcher){ getAll().map { a -> a.ident.uppercase(Locale.ROOT) to a.iata_code.uppercase(Locale.ROOT) }.toMap() }
     }
 
     /**
      * Non-suspend version that requires a list of airports to be provided
      */
     fun getIcaoToIataMap(airports: List<Airport>): Map<String, String> =
-            airports.map { a -> a.ident.toUpperCase(Locale.ROOT) to a.iata_code.toUpperCase(Locale.ROOT) }.toMap()
+            airports.map { a -> a.ident.uppercase(Locale.ROOT) to a.iata_code.uppercase(Locale.ROOT) }.toMap()
 
     fun getIcaoIataMapAsync() = async(Dispatchers.IO) { getIcaoToIataMap() }
     fun getIataIcaoMapAsync() = async(Dispatchers.IO) { getIcaoToIataMap().reversed() }

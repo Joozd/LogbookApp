@@ -33,7 +33,7 @@ fun String.emptyIfNotTrue(keep: Boolean) = if (keep) this else ""
 
 fun String.nullIfNotTrue(keep: Boolean?) = if (keep == true) this else null
 
-fun String.removeTrailingDigits(): String{
+fun String.removeTrailingDigits(): String {
     if (isEmpty()) return this
     var trailingDigits: Int = 0
     while (this.dropLast(trailingDigits).last().isDigit()) trailingDigits++
@@ -43,11 +43,11 @@ fun String.removeTrailingDigits(): String{
 }
 
 fun String.anyWordStartsWith(substring: String, ignoreCase: Boolean = false) =
-    if (ignoreCase) this.toUpperCase(Locale.ROOT).split(" ").any{it.startsWith(substring.toUpperCase(Locale.ROOT))}
-    else this.split(" ").any{it.startsWith(substring)}
+    if (ignoreCase) this.uppercase(Locale.ROOT).split(" ").any { it.startsWith(substring.uppercase(Locale.ROOT)) }
+    else this.split(" ").any { it.startsWith(substring) }
 
 /**
  * Checks if [this] in [other], ignoring case
  */
 @Suppress("FunctionName")
-infix fun String.in_ignoreCase(other: String): Boolean = this.toUpperCase(Locale.ROOT) in other.toUpperCase(Locale.ROOT)
+infix fun String.in_ignoreCase(other: String): Boolean = this.uppercase(Locale.ROOT) in other.uppercase(Locale.ROOT)

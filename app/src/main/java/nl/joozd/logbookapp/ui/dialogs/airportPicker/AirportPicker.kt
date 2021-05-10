@@ -142,8 +142,8 @@ abstract class AirportPicker: JoozdlogFragment() {
 
                 // if ((airportsSearchField.text?.toString() ?: "null").isBlank()) airportsSearchField.setText(it.ident)
                 airportPickerTitle.text =
-                    if (workingOnOrig) getString(R.string.origin).toUpperCase(Locale.ROOT)
-                    else getString(R.string.destination).toUpperCase(Locale.ROOT)
+                    if (workingOnOrig) getString(R.string.origin).uppercase(Locale.ROOT)
+                    else getString(R.string.destination).uppercase(Locale.ROOT)
                 @SuppressLint("SetTextI18n")
                 icaoIataField.text = "${it.ident} - ${it.iata_code}"
                 if (airportsSearchField.text?.isBlank() == true) airportsSearchField.setText(it.ident)

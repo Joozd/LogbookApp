@@ -177,13 +177,13 @@ class KlcCheckinSheet(roster: String?): Roster {
     /**
      * Helper class for names.
      */
-    private data class Name(val first: String = "", val last: String = "", val middle: String = ""){
+    private data class Name(val first: String = "", val last: String = "", val middle: String = "") {
         val checkMyName = (if (middle.isNotEmpty()) "$first $last, $middle" else "$first $last")
-            .toUpperCase(Locale.ROOT)
+            .uppercase(Locale.ROOT)
 
-        override fun toString() = listOf(first, middle.toLowerCase(Locale.ROOT), last).filter {!it.isBlank()}.joinToString(" ")
+        override fun toString() = listOf(first, middle.lowercase(Locale.ROOT), last).filter { !it.isBlank() }.joinToString(" ")
 
-        companion object{
+        companion object {
             /**
              * A complete name is 2 or 3 names long (Jan-Henk Nicolaas, van de, Wilde Wetering)
              * If 2 names, all are words are Capitalized, else only first and last
@@ -194,17 +194,18 @@ class KlcCheckinSheet(roster: String?): Roster {
                     1 -> Name(names.first().withCapital())
                     2 -> Name(capitalizeAllWords(names[1]), capitalizeAllWords(names[0]))
                     else -> // 3 or more, ignore any words past [2]
-                        Name(capitalizeAllWords(names[2]), capitalizeAllWords(names[0]), names[1].toLowerCase(Locale.ROOT))
+                        Name(capitalizeAllWords(names[2]), capitalizeAllWords(names[0]), names[1].lowercase(Locale.ROOT))
                 }
             }
 
             private fun capitalizeAllWords(line: String): String = line.split(' ')
-                .filter{!it.isBlank()} // remove any extra spaces
+                .filter { !it.isBlank() } // remove any extra spaces
                 .joinToString(" ") {
                     it.split('-')
                         .joinToString("-") { it.withCapital() }
                 }.trim()
-            private fun String.withCapital(): String = toLowerCase(Locale.ROOT).capitalize(Locale.ROOT)
+
+            private fun String.withCapital(): String = lowercase(Locale.ROOT).capitalize(Locale.ROOT)
         }
 
     }

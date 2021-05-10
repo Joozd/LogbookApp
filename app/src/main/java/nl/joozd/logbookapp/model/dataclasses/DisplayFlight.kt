@@ -80,7 +80,7 @@ data class DisplayFlight(
             timeIn = f.timeInString(),
             totalTime = f.durationString(),
             dateDay = f.tOut().dayOfMonth.toString(),
-            monthAndYear = f.tOut().toMonthYear().toUpperCase(Locale.ROOT),
+            monthAndYear = f.tOut().toMonthYear().uppercase(Locale.ROOT),
             simTime = minutesToHoursAndMinutesString(f.simTime),
             registration = f.registration,
             type = f.aircraftType,

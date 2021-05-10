@@ -107,8 +107,8 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
         aircraftRepository.saveAircraft(mAircraft)
     }
 
-    fun updateSearchString(query: String){
-        _typesSearchString.value = query.toUpperCase(Locale.ROOT)
+    fun updateSearchString(query: String) {
+        _typesSearchString.value = query.uppercase(Locale.ROOT)
     }
 
     /**

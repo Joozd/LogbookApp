@@ -114,7 +114,7 @@ fun Flight.mergeInto(other: Flight) = other.copy(
 )
 
 
-fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.toUpperCase(Locale.ROOT).trim() == other.flightNumber.toUpperCase(Locale.ROOT).trim()
+fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.uppercase(Locale.ROOT).trim() == other.flightNumber.uppercase(Locale.ROOT).trim()
 
 
 fun Flight.shortString() = "$flightID: ${tOut()} $orig-$dest / $registration"

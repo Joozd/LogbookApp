@@ -107,6 +107,25 @@ object JoozdlogWorkersHub {
         }
     }
 
+    /**
+     * Schedule an email confirmation
+     * If another worker is already doing this, that one will be kept and this will be ignored.
+     */
+    fun scheduleSetEmail(){
+        Log.d("scheduleEmailConf...", "Scheduling an email confirmation")
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+        val task = OneTimeWorkRequestBuilder<SetEmailWorker>().apply{
+            setConstraints(constraints)
+            addTag(CONFIRM_EMAIL)
+        }.build()
+        with(WorkManager.getInstance(App.instance)) {
+            enqueueUniqueWork(CONFIRM_EMAIL, ExistingWorkPolicy.KEEP, task)
+        }
+    }
+
 
     /**
      * Schedule server login attempt

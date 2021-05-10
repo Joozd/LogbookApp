@@ -194,6 +194,7 @@ class MainActivity : JoozdlogActivity() {
                     Errors.LOGIN_DATA_REJECTED_BY_SERVER -> showBadLoginDataDialog()
                     Errors.EMAIL_CONFIRMATION_FAILED -> showBadEmailConfirmationDialog()
                     Errors.SERVER_ERROR -> showRandomServerErrorDialog()
+                    Errors.BAD_EMAIL_SAVED -> showBadEmailSavedDialog()
                     // null -> do nothing
                 }
             }
@@ -501,9 +502,22 @@ class MainActivity : JoozdlogActivity() {
         JoozdlogAlertDialog().show(activity){
             titleResource = R.string.error
             messageResource = R.string.email_data_rejected
-            setPositiveButton(android.R.string.ok){ viewModel.emailErrorSeen() }
+            setPositiveButton(android.R.string.ok){ viewModel.emailConfirmationErrorSeen() }
         }
     }
+
+    /**
+     * Shows dialog stating that login data have been rejected by server
+     * Will notify viewModel that OK has been clicked
+     */
+    private fun showBadEmailSavedDialog(){
+        JoozdlogAlertDialog().show(activity){
+            titleResource = R.string.error
+            messageResource = R.string.email_address_rejected
+            setPositiveButton(android.R.string.ok){ viewModel.badEmailErrorSeen() }
+        }
+    }
+
 
     /**
      * Shows dialog stating that server did something wierd

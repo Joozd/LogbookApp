@@ -34,16 +34,15 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
     var onComplete: () -> Unit = {}
 
     fun okClicked(){
-        if (email1 != email2) feedback(GeneralEvents.ERROR).putInt(3).also{ Log.d("EmailDialogViewModel", "Error 3")}
-        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(GeneralEvents.ERROR).putInt(4).also{ Log.d("EmailDialogViewModel", "Error 4")}
-        Log.d("EmailDialogViewModel", "Looks OK! - $email1 / $email2 (${Preferences.emailAddress})")
+        if (email1 != email2) feedback(GeneralEvents.ERROR).putInt(3)
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(GeneralEvents.ERROR).putInt(4)
         if (Preferences.emailAddress != email1) {
             Preferences.emailAddress = email1
             Preferences.emailVerified = false
             viewModelScope.launch {
                 when (Cloud.sendNewEmailAddress()){
                     CloudFunctionResults.OK -> feedback(GeneralEvents.DONE)
-                    else -> feedback(GeneralEvents.ERROR).putInt(5).also{ Log.d("EmailDialogViewModel", "Error 5")}
+                    else -> feedback(GeneralEvents.ERROR).putInt(5)
                 }
             }
         }
@@ -52,14 +51,14 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
 
     fun updateEmail(it: String){
         if(!android.util.Patterns.EMAIL_ADDRESS.matcher(it.trim()).matches())
-                feedback(GeneralEvents.ERROR).putString("Not an email address").putInt(1) // TODO make other errors as well
+                feedback(GeneralEvents.ERROR).putString("Not an email address").putInt(1)
                 email1 = it.trim()
     }
 
     fun updateEmail2(it: String){
         when {
             it.trim() != email1 ->
-                feedback(GeneralEvents.ERROR).putString("Does not match").putInt(2) // TODO make other errors as well
+                feedback(GeneralEvents.ERROR).putString("Does not match").putInt(2)
             else -> {
                 email2 = it.trim()
 

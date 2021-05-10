@@ -28,7 +28,6 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.extensions.nullIfBlank
-import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.utils.generatePassword
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
@@ -116,6 +115,44 @@ object UserManagement {
             }
             false -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
             null -> CloudFunctionResults.CLIENT_ERROR
+        }
+    }
+
+    /**
+     * Change email address. It will confirm with server at the first possible time. Server will send a confirmation mail if needed.
+     * @return true if sent to server, false if failed due to bad data, or no connection.
+     * If no connection it will schedule sending to server when internet gets available
+     */
+    suspend fun changeEmailAddress(newEmailAddress: String = Preferences.emailAddress): Boolean{
+        if (Preferences.emailAddress != newEmailAddress) Preferences.emailAddress = Preferences.emailAddress
+        //don't do anything if no data entered and return false
+        return if (newEmailAddress.isBlank()) false
+        else when (Cloud.sendNewEmailAddress()) {
+            // If it works right away, good for us!
+            CloudFunctionResults.OK -> {
+                true
+            }
+            // No connection, schedule it
+            CloudFunctionResults.CLIENT_ERROR -> {
+                JoozdlogWorkersHub.scheduleSetEmail()
+                false
+            }
+            CloudFunctionResults.UNKNOWN_USER_OR_PASS -> {
+                ScheduledErrors.addError(Errors.LOGIN_DATA_REJECTED_BY_SERVER)
+                false
+            }
+            CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS -> {
+                ScheduledErrors.addError(Errors.BAD_EMAIL_SAVED)
+                false
+            }
+            CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER -> {
+                ScheduledErrors.addError(Errors.SERVER_ERROR)
+                false
+            }
+            else -> {
+                Log.w("confirmEmail", "Received unhandled response")
+                false
+            }
         }
     }
 

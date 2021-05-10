@@ -90,8 +90,12 @@ object Cloud {
 
     /**
      * Send new email address to server.
-     * Server will TODO
-     * TODO describe what will happen
+     * Function will return [CloudFunctionResults.NO_LOGIN_DATA] if no login data present.
+     * Server will:
+     * - check if user is logged in, otherwise [CloudFunctionResults.UNKNOWN_USER_OR_PASS]
+     * - Save a hash of that email and send a confirmation mail. If that fails due bad email address we get [CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS]
+     * - Generic server errors will be [CloudFunctionResults.SERVER_ERROR] or [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER]
+     * - Client errors will be [CloudFunctionResults.CLIENT_ERROR]
      */
     suspend fun sendNewEmailAddress(): CloudFunctionResults = withContext(Dispatchers.IO) {
         Client.getInstance().use { client ->

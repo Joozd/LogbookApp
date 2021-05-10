@@ -34,5 +34,6 @@ enum class CloudFunctionResults {
     UNKNOWN_REPLY_FROM_SERVER,
     UNKNOWN_USER_OR_PASS,
     EMAIL_DOES_NOT_MATCH,
+    NO_CHANGES,
     NO_LOGIN_DATA
 }

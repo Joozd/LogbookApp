@@ -341,8 +341,12 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         Preferences.mostRecentBackup = Instant.now().epochSecond
     }
 
-    fun emailErrorSeen(){
+    fun emailConfirmationErrorSeen(){
         ScheduledErrors.clearError(Errors.EMAIL_CONFIRMATION_FAILED)
+    }
+
+    fun badEmailErrorSeen(){
+        ScheduledErrors.clearError(Errors.BAD_EMAIL_SAVED)
     }
 
     fun loginErrorSeen(){

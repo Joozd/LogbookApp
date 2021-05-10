@@ -33,5 +33,10 @@ enum class Errors(val flag: Long) {
     /**
      * Server gave an unexpected response
      */
-    SERVER_ERROR(4)
+    SERVER_ERROR(4),
+
+    /**
+     * Server complained we tried to feed it a bad email address
+     */
+    BAD_EMAIL_SAVED(8)
 }

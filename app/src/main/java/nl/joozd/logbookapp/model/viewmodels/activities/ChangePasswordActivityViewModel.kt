@@ -77,10 +77,7 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
      * Public functions
      */
 
-    fun submitClicked(email: Editable? = null){
-        email?.let{
-            Preferences.emailAddress = it.toString()
-        }
+    fun submitClicked(){
         val password = generatePassword(16)
         Log.d("submitClicked()", "pass1: $password")
         Log.d("Internet", "${InternetStatus.internetAvailable}")
@@ -92,7 +89,7 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
                 Log.d("LALALALALAL" ,"HUPSAKEE 1")
                 viewModelScope.launch {
                     Log.d("LALALALALAL" ,"HUPSAKEE 2")
-                    when (UserManagement.changePassword(password, email?.toString())){
+                    when (UserManagement.changePassword(password)){
                         CloudFunctionResults.OK -> {
                             sendPasswordLinksToClipboard(UserManagement.generateLoginLink())
                             feedback(ChangePasswordEvents.FINISHED)

@@ -195,6 +195,7 @@
     <string name="password_does_not_meet_standards">Password does not meet standards. It needs a length of at least 6 and at least 2 different characters.</string>
     <string name="password_does_not_meet_standards_short">Password does not meet standards.</string>
     <string name="username_already_taken">This username is already taken. If this is you, use your login link if you have it, or create a new account.</string>
+    <string name="change_email">Change email</string>
     <string name="no_email">No email</string>
     <string name="no_email_text">No working email address was entered. I recommend you enter your email so a login link can be sent. Your email will not be stored outside your phone and will not be used for anything else.</string>
     <string name="i_dont_care">I don\'t care</string>
@@ -352,6 +353,7 @@
     <string name="standard_augmented_time"><![CDATA[<b>Augmented Crew takeoff/landing time</b><br><small>%1$s minutes</small>&nbsp;]]></string>
     <string name="backup_interval_time"><![CDATA[<b>Remind me to make a backup every</b><br><small>%1$s</small>&nbsp;]]></string>
     <string name="backup_from_cloud">Send backup emails from cloud</string>
+    <string name="mail_will_be_sent_to"><![CDATA[Your new login link will be sent to<br><b>%1$s&nbsp;</b>]]></string>
     <string name="backup_cloud_description">An email with your logbook will be emailed to you at the same interval as you get reminded to make a backup. You will still be reminded if server cannot be reached.</string>
 
     <string name="cloud_backup">Cloud Backup</string>

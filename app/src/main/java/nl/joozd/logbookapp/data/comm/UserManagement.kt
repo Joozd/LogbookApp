@@ -108,7 +108,7 @@ object UserManagement {
 
 
         Preferences.newPassword = newPassword
-        return when (Cloud.changePassword(newPassword, email).also { Log.d("changePassword()", "returned $it") }) {
+        return when (Cloud.changePassword(newPassword, email = Preferences.emailAddress.nullIfBlank()).also { Log.d("changePassword()", "returned $it") }) {
             true -> {
                 Preferences.password = newPassword
                 Preferences.newPassword = ""

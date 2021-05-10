@@ -30,8 +30,10 @@ import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityChangePasswordBinding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
+import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.ChangePasswordActivityViewModel
+import nl.joozd.logbookapp.ui.dialogs.EmailDialog
 import nl.joozd.logbookapp.ui.dialogs.WaitingForSomethingDialog
 import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
@@ -62,7 +64,9 @@ class ChangePasswordActivity : JoozdlogActivity() {
 
 
             // do some visual things (colors, texts etc)
-            youAreSignedInAsTextView.text = Preferences.username?.let { getStringWithMakeup(R.string.you_are_signed_in_as, it) } ?: getString(R.string.you_are_not_signed_in)
+            emailWillBeSentToTextView.text = Preferences.emailAddress.nullIfBlank()?.let {
+                getStringWithMakeup(R.string.mail_will_be_sent_to, it)
+            } ?: getString(R.string.no_email_text)
 
 
             /****************************************************************************************
@@ -70,10 +74,14 @@ class ChangePasswordActivity : JoozdlogActivity() {
              ***************************************************************************************/
 
             submitButton.setOnClickListener {
-                if (!PatternsCompat.EMAIL_ADDRESS.matcher(emailEditText.text.toString()).matches()) {
+                if (Preferences.emailAddress.isBlank()) {
                     noEmailDialog { viewModel.submitClicked() }
                 } else
-                viewModel.submitClicked(emailEditText.text)
+                viewModel.submitClicked()
+            }
+
+            changeEmailButton.setOnClickListener {
+                showEmailDialog()
             }
 
             /****************************************************************************************
@@ -85,8 +93,10 @@ class ChangePasswordActivity : JoozdlogActivity() {
                 checkInternet(it)
             }
 
-            viewModel.emailAddress.observe(activity){
-                emailEditText.setText(it)
+            viewModel.emailAddress.observe(activity){ email ->
+                emailWillBeSentToTextView.text = email?.nullIfBlank()?.let {
+                    getStringWithMakeup(R.string.mail_will_be_sent_to, it)
+                } ?: getString(R.string.no_email_text)
             }
 
             viewModel.feedbackEvent.observe(activity){
@@ -230,7 +240,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
      */
     private fun noEmailDialog(f: () -> Unit) =
         JoozdlogAlertDialog().show(activity) {
-            titleResource = R.string.username_already_taken
+            titleResource = R.string.no_email
             messageResource = R.string.no_email_text
             setPositiveButton(R.string.i_dont_care){
                 f()
@@ -245,6 +255,13 @@ class ChangePasswordActivity : JoozdlogActivity() {
                 startActivity(Intent.createChooser(it, getString(R.string.send_using)))
             }
         } ?: toast("ChangePass error 1: No login stored")
+    }
+
+    private fun showEmailDialog(extra: () -> Unit = {}) {
+        supportFragmentManager.commit {
+            add(R.id.changePasswordBackgroundLayout, EmailDialog(extra), null)
+            addToBackStack(null)
+        }
     }
 
 

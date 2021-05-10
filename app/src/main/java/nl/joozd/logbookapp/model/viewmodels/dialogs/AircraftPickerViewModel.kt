@@ -29,7 +29,7 @@ import java.util.*
 
 
 /**
- * Viewmodel for [AircraftPicker] and [SimTypePicker] fragments
+ * ViewModel for AircraftPicker and SimTypePicker fragments
  */
 class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     private val undoAircraft = workingFlight.aircraftLiveData.value

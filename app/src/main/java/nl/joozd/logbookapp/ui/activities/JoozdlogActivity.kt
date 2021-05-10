@@ -19,18 +19,12 @@
 
 package nl.joozd.logbookapp.ui.activities
 
-import android.R
+
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.GradientDrawable
-import android.view.Menu
-import android.view.View
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import nl.joozd.logbookapp.extensions.getColorFromAttr
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
@@ -51,13 +45,9 @@ open class JoozdlogActivity: AppCompatActivity() {
         return supportActionBar
     }
 
-    fun closeAndstartMainActivity(){
+    fun closeAndStartMainActivity(){
         startMainActivity(this)
         finish()
-    }
-
-    protected fun View.joozdLogSetBackgroundColor(color: Int = getColorFromAttr(R.attr.colorPrimary)){
-        (this.background as GradientDrawable).colorFilter = PorterDuffColorFilter( color, PorterDuff.Mode.SRC_IN)
     }
 
     fun startMainActivity(context: Context) = with (context) {

@@ -33,7 +33,8 @@ import java.io.Writer
 import java.util.*
 
 object JoozdlogExport {
-    private val context = App.instance.ctx
+    private val context
+        get() = App.instance.ctx
     suspend fun shareCsvExport(fileName: String): Uri = withContext(Dispatchers.Main) {
         val cachePath = File(context.cacheDir, "files").apply{
             mkdirs()

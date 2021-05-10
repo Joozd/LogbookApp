@@ -108,8 +108,8 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
 
         saveTypes?.join()
         saveForced?.join()
-        sendConsensus?.join()
-        receiveConsensus?.join()
+        sendConsensus.join()
+        receiveConsensus.join()
 
         return@withContext Result.success()
     }

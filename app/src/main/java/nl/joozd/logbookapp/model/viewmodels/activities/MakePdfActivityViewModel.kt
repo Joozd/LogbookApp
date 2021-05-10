@@ -116,7 +116,7 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
 
                 val flightsPerPage = PdfLogbookDrawing.maxLines
                 val allFlights = LinkedList(allFlightsAsync.await().filter { !it.isPlanned }.sortedBy { it.timeOut })
-                val aircraftMap = aircraftMapAsync.await()
+                // val aircraftMap = aircraftMapAsync.await()
 
                 val originalListSize = allFlights.size
 

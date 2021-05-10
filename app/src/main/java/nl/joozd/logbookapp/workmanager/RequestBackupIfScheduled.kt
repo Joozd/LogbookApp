@@ -20,7 +20,6 @@
 package nl.joozd.logbookapp.workmanager
 
 import android.content.Context
-import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
@@ -42,11 +41,11 @@ class RequestBackupIfScheduled(appContext: Context, workerParams: WorkerParamete
      * by [coroutineContext].
      * <p>
      * A CoroutineWorker is given a maximum of ten minutes to finish its execution and return a
-     * [ListenableWorker.Result].  After this time has expired, the worker will be signalled to
+     * [Result].  After this time has expired, the worker will be signalled to
      * stop.
      *
-     * @return The [ListenableWorker.Result] of the result of the background work; note that
-     * dependent work will not execute if you return [ListenableWorker.Result.failure]
+     * @return The [Result] of the result of the background work; note that
+     * dependent work will not execute if you return [Result.failure]
      */
     override suspend fun doWork(): Result = withContext(Dispatchers.IO + NonCancellable) {
         if (!Preferences.backupFromCloud || !backupNeeded()) Result.success() // If backup not needed, this (checking if it is needed) is all we do.
@@ -55,7 +54,7 @@ class RequestBackupIfScheduled(appContext: Context, workerParams: WorkerParamete
                 CloudFunctionResults.OK -> Result.success().also{
                     Preferences.mostRecentBackup = Instant.now().epochSecond
                 }
-                null, CloudFunctionResults.CLIENT_ERROR -> Result.retry()
+                CloudFunctionResults.CLIENT_ERROR -> Result.retry()
                 else -> Result.failure()
             }
         }

@@ -63,7 +63,7 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
      */
     fun setTakeoffLandingTime(time: Editable?) {
         if (time == null){
-            val w = Log.w("setTakeOffLanding()", "called with null reference for time, ignoring.")
+            Log.w("setTakeOffLanding()", "called with null reference for time, ignoring.")
             return
         }
         if (time.isBlank()) setTakeoffLandingTime(Preferences.standardTakeoffLandingTimes)

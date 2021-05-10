@@ -33,17 +33,17 @@ import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesListItem
  */
 class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): TotalTimesList {
     private val consolidatedBalancesForward = BalanceForward(-1, "",
-        multiPilotTime = balancesForward.sumBy{it.multiPilotTime},
-        aircraftTime = balancesForward.sumBy{it.aircraftTime},
-        landingDay = balancesForward.sumBy{it.landingDay},
-        landingNight = balancesForward.sumBy{it.landingNight},
-        nightTime = balancesForward.sumBy{it.nightTime},
-        ifrTime = balancesForward.sumBy{it.ifrTime},
-        picTime = balancesForward.sumBy{it.picTime},
-        copilotTime = balancesForward.sumBy{it.copilotTime},
-        dualTime = balancesForward.sumBy{it.dualTime},
-        instructortime = balancesForward.sumBy{it.instructortime},
-        simTime = balancesForward.sumBy{it.simTime}
+        multiPilotTime = balancesForward.sumOf{it.multiPilotTime},
+        aircraftTime = balancesForward.sumOf{it.aircraftTime},
+        landingDay = balancesForward.sumOf{it.landingDay},
+        landingNight = balancesForward.sumOf{it.landingNight},
+        nightTime = balancesForward.sumOf{it.nightTime},
+        ifrTime = balancesForward.sumOf{it.ifrTime},
+        picTime = balancesForward.sumOf{it.picTime},
+        copilotTime = balancesForward.sumOf{it.copilotTime},
+        dualTime = balancesForward.sumOf{it.dualTime},
+        instructortime = balancesForward.sumOf{it.instructortime},
+        simTime = balancesForward.sumOf{it.simTime}
     ).also{
         Log.d("bf", "consolidatedBalancesForward: $it")
     }
@@ -77,7 +77,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
         val categories = App.instance.resources.getStringArray(R.array.total_times_categories)
         val list = emptyList<TotalTimesListItem>().toMutableList()
 
-        flights.sumBy{f -> maxOf(f.duration(), f.simTime)}.let { t -> // total time in minutes
+        flights.sumOf{f -> maxOf(f.duration(), f.simTime)}.let { t -> // total time in minutes
             list.add(
                 TotalTimesListItem(
                 categories[TOTAL_TIME_INDEX],
@@ -86,7 +86,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             )
         }
 
-        flights.sumBy{it.duration()}.let { t ->
+        flights.sumOf{it.duration()}.let { t ->
             list.add(
                 TotalTimesListItem(
                 categories[FLIGHT_TIME_INDEX],
@@ -95,7 +95,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             )
         }
 
-        flights.filter{it.isSim}.sumBy{it.simTime}.let { t ->
+        flights.filter{it.isSim}.sumOf{it.simTime}.let { t ->
             list.add(
                 TotalTimesListItem(
                 categories[SIM_TIME_INDEX],
@@ -105,7 +105,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
         }
 
 
-            flights.sumBy{it.multiPilotTime}.let { t ->
+            flights.sumOf{it.multiPilotTime}.let { t ->
                 list.add(
                     TotalTimesListItem(
                         categories[MULTIPILOT_TIME_INDEX],
@@ -115,7 +115,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             }
 
 
-        flights.sumBy{it.nightTime}.let { t ->
+        flights.sumOf{it.nightTime}.let { t ->
             list.add(
                 TotalTimesListItem(
                 categories[NIGHT_TIME_INDEX],
@@ -124,7 +124,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             )
         }
 
-        flights.sumBy{it.ifrTime}.let { t ->
+        flights.sumOf{it.ifrTime}.let { t ->
             list.add(
                 TotalTimesListItem(
                 categories[IFR_TIME_INDEX],
@@ -133,7 +133,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             )
         }
 
-        flights.filter{it.isPIC || it.isPICUS}.sumBy{it.duration()}.let { t ->
+        flights.filter{it.isPIC || it.isPICUS}.sumOf{it.duration()}.let { t ->
             list.add(
                 TotalTimesListItem(
                 categories[PIC_TIME_INDEX],
@@ -142,7 +142,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             )
         }
 
-        flights.filter{it.isCoPilot}.sumBy{it.duration()}.let { t ->
+        flights.filter{it.isCoPilot}.sumOf{it.duration()}.let { t ->
             list.add(
                 TotalTimesListItem(
                 categories[COPILOT_TIME_INDEX],
@@ -151,7 +151,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             )
         }
 
-        flights.filter{it.isDual}.sumBy{it.duration()}.let { t ->
+        flights.filter{it.isDual}.sumOf{it.duration()}.let { t ->
             list.add(
                 TotalTimesListItem(
                 categories[DUAL_TIME_INDEX],
@@ -160,7 +160,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             )
         }
 
-        flights.filter{it.isInstructor}.sumBy{it.duration()}.let { t ->
+        flights.filter{it.isInstructor}.sumOf{it.duration()}.let { t ->
             list.add(
                 TotalTimesListItem(
                 categories[INSTRUCTOR_TIME_INDEX],
@@ -169,7 +169,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             )
         }
 
-        flights.sumBy{it.landingDay}.let { t ->
+        flights.sumOf{it.landingDay}.let { t ->
             list.add(
                 TotalTimesListItem(
                 categories[LANDING_DAY_TIME_INDEX],
@@ -179,7 +179,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             )
         }
 
-        flights.sumBy{it.landingNight}.let { t ->
+        flights.sumOf{it.landingNight}.let { t ->
             list.add(
                 TotalTimesListItem(
                 categories[LANDING_NIGHT_TIME_INDEX],

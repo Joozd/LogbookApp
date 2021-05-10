@@ -205,7 +205,7 @@ class KlcCheckinSheet(roster: String?): Roster {
                         .joinToString("-") { it.withCapital() }
                 }.trim()
 
-            private fun String.withCapital(): String = lowercase(Locale.ROOT).capitalize(Locale.ROOT)
+            private fun String.withCapital(): String = lowercase(Locale.ROOT).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
         }
 
     }

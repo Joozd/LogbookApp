@@ -104,11 +104,11 @@ class JoozdlogAlertDialog: Fragment() {
         _bonusButton = ButtonDescriptor(text, null, onClick)
     }
 
-    fun show(context: FragmentActivity, tag: String = "bla", block: JoozdlogAlertDialog.() -> Unit = {}): JoozdlogAlertDialog {
+    fun show(context: FragmentActivity, tag: String = JOOZDLOG_DIALOG_TAG, block: JoozdlogAlertDialog.() -> Unit = {}): JoozdlogAlertDialog {
         this.block()
 
         context.supportFragmentManager.commit{
-            add(android.R.id.content,this@JoozdlogAlertDialog, JOOZDLOG_DIALOG_TAG)
+            add(android.R.id.content,this@JoozdlogAlertDialog, tag)
         }
         return this
     }

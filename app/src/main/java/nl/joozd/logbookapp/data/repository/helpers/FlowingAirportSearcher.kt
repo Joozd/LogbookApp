@@ -41,7 +41,6 @@ object FlowingAirportSearcher{
         } else {
             val upperQuery = query.uppercase(Locale.ROOT)
             val result = mutableListOf<Airport>()
-            var currentPosition = 0
             // pass1
             fullList.forEach {
                 if (upperQuery in it.iata_code.uppercase(Locale.ROOT)) result += it

@@ -164,8 +164,8 @@ abstract class LocalDatePickerFragment: JoozdlogFragment() {
 
         val weekDays = (0..6L).map { dayInWeek ->
             (WeekFields.of(locale).firstDayOfWeek + dayInWeek)                  // get day of week
-                .getDisplayName(TextStyle.SHORT_STANDALONE, locale)             // get it's name
-                .first().toUpperCase()                                          // get first letter of that name as Uppercase
+                        .getDisplayName(TextStyle.SHORT_STANDALONE, locale)             // get it's name
+                        .first().uppercaseChar()                                          // get first letter of that name as Uppercase
                 .let { c -> makeCharacterTextView(inflater, container, c) }      // put that into a TextView
                 .also { addView(it) }                                            // add that textView to layout
         }

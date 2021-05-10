@@ -90,7 +90,7 @@ class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the da
      * is followed by going in a constant track to the next 5 degree longitude intersection
      * this assumes flights never go "the long way around" (ie max 180 degrees lat diff.
      * @param orig: [Airport] of origin
-     * @param desr: [Airport] of destination
+     * @param dest: [Airport] of destination
      * @param departureTime: time of departure in UTC (as LocalDateTime)
      * @param arrivalTime: time of arrival in UTC (as LocalDateTime)
      ****************************************************************************************/
@@ -178,9 +178,9 @@ class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the da
         posPlusTimes.add (positionsPassed[0] to departureTime)
 
         for (l in 0 until positionsPassed.size -1){
-            val distance = getDistance(positionsPassed[l], if (positionsPassed[l+1].first == 180.0) -180.0 to positionsPassed[l+1].second else(positionsPassed[l+1])) * 60
-            val elapsedSeconds = (distance * timePerMile *60).toLong()
-            Log.d("TwilightCalculator", "distance = $distance")
+            val d = getDistance(positionsPassed[l], if (positionsPassed[l+1].first == 180.0) -180.0 to positionsPassed[l+1].second else(positionsPassed[l+1])) * 60
+            val elapsedSeconds = (d * timePerMile *60).toLong()
+            Log.d("TwilightCalculator", "distance = $d")
             posPlusTimes.add(positionsPassed[l+1] to posPlusTimes[l].second.plusSeconds(elapsedSeconds))
             Log.d("TwilightCalculator", "added a stretch of $elapsedSeconds seconds!")
         }

@@ -88,7 +88,7 @@ class NewUserActivityCalendarPage: JoozdlogFragment() {
              * OnClickedListeners
              *******************************************************************************************/
 
-            useCalendarImportSwitch.setOnCheckedChangeListener { v, isChecked ->
+            useCalendarImportSwitch.setOnCheckedChangeListener { _, isChecked ->
                 if (!isChecked){
                     viewModel.disableCalendarSync()
                     return@setOnCheckedChangeListener

@@ -55,7 +55,7 @@ class NewUserActivityEmailPage: Fragment() {
                 viewModel.checkEmail2Delayed()
             }
 
-            emailAddressEditText.setOnFocusChangeListener { view, hasFocus ->
+            emailAddressEditText.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) viewModel.checkEmail1()
             }
 

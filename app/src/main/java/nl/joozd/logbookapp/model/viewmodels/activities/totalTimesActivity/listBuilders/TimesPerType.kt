@@ -51,7 +51,7 @@ class TimesPerType(flights: List<Flight>): TotalTimesList {
 
     private fun buildList(flights: List<Flight>): List<TotalTimesListItem> {
         val typesToTimes = flights.filter{!it.isSim}.map { it.aircraftType }.distinct().map { type ->
-            type to flights.filter { it.aircraftType == type }.sumBy { it.duration() }
+            type to flights.filter { it.aircraftType == type }.sumOf { it.duration() }
         }.toMap()
         return typesToTimes.keys.sorted().map { type ->
             val typeLongName: String = AircraftRepository.getInstance().getAircraftTypeByShortName(type)?.name ?: type // if AircraftRepo isn't initialized yet it will show short names else full names

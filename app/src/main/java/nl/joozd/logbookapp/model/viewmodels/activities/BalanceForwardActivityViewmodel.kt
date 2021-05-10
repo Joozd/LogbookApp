@@ -43,6 +43,7 @@ class BalanceForwardActivityViewmodel: JoozdlogActivityViewModel() {
     }
 
     fun itemClicked(bf: BalanceForward, item: Int){
+        //TODO implement this
         feedback(BalanceForwardActivityEvents.NOT_IMPLEMENTED)
     }
 }

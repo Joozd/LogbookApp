@@ -205,7 +205,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
         titleResource = R.string.login_error
         messageResource = R.string.login_error_message
         setPositiveButton(R.string.create_account){
-            startActivity(Intent(activity, CreateNewUserActivity::class.java))
+            Preferences.username = null // setting this to null will cause a new account to be created on the next sync
         }
         setNegativeButton(android.R.string.cancel){
             finish()

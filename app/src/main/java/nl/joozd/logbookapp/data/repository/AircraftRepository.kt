@@ -185,7 +185,7 @@ class AircraftRepository(
 
         addSource(acrwtLiveData) {
             launchWithLock {
-                value = aircraftTypeLiveData.value?.let { types -> updateAircraftListWithNewAcrwt(it) }
+                value = aircraftTypeLiveData.value?.let { _ -> updateAircraftListWithNewAcrwt(it) }
             }
         }
 
@@ -220,9 +220,7 @@ class AircraftRepository(
      * @see getSortedRegistrations
      */
     private val _sortedRegistrations = MediatorLiveData<List<String>>().apply{
-        addSource(aircraftListLiveData){ acList ->
-            value = getSortedRegistrations()
-        }
+        addSource(aircraftListLiveData){ value = getSortedRegistrations() }
         addSource(FlightRepository.getInstance().usedRegistrationsLiveData){
             value = getSortedRegistrations()
         }
@@ -580,11 +578,13 @@ class AircraftRepository(
             saveAircraft(it)
         }
     }
-
+/*
     fun deleteAircraft(aircraft: Aircraft){
-        TODO("Not implemented")
+        // Not implemented
         //Not sure if needed, but if it is, this will be where it goes
     }
+
+ */
 
     /********************************************************************************************
      * Public sync related functions

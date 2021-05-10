@@ -52,9 +52,9 @@ class TimesPerYear(flights: List<Flight>): TotalTimesList {
 
     private fun buildList(flights: List<Flight>): List<TotalTimesListItem> {
         val yearsToTimes = flights.map { it.tOut().year }.distinct().map { year ->
-            year to flights.filter { it.tOut().year == year }.sumBy { it.duration() }
+            year to flights.filter { it.tOut().year == year }.sumOf { it.duration() }
         }.toMap()
-        return listOf(flights.filter { it.tOut() >= LocalDateTime.now().minusYears(1) }.sumBy { it.duration() }.let { rollingTime ->
+        return listOf(flights.filter { it.tOut() >= LocalDateTime.now().minusYears(1) }.sumOf { it.duration() }.let { rollingTime ->
             TotalTimesListItem(App.instance.getString(R.string.last_12_months), minutesToHoursAndMinutesString(rollingTime), rollingTime, 0)
         }) + yearsToTimes.keys.sorted().map { year ->
             TotalTimesListItem(year.toString(), minutesToHoursAndMinutesString(yearsToTimes[year] ?: -1), yearsToTimes[year] ?: -1, 0)

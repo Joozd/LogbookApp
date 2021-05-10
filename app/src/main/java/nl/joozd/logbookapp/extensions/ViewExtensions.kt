@@ -46,7 +46,7 @@ extends a view (assumes said View's visibility is "gone", quickly fade that in, 
  */
 
 fun View.fadeIn(vararg fadeOutView: View) {
-    var shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
+    val shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
     this.apply {
         // Set the content view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.
@@ -57,13 +57,13 @@ fun View.fadeIn(vararg fadeOutView: View) {
         // listener set on the view.
         animate()
             .alpha(1f)
-            .setDuration(shortAnimationDuration.toLong())
+            .setDuration(shortAnimationDuration)
             .setListener(null)
     }
     for (v in fadeOutView){
         v.animate()
             .alpha(0f)
-            .setDuration(shortAnimationDuration.toLong())
+            .setDuration(shortAnimationDuration)
             .setListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     v.visibility = View.GONE
@@ -87,29 +87,11 @@ fun View.fadeOut() {
     }
 }
 
-fun View.animateToZeroHeight() {
-    val shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
-    val orinigalHeight = height
-
-    val animator = ValueAnimator.ofInt(orinigalHeight, 0)
-    animator.addUpdateListener {
-        val newHeight = it.animatedValue as Int
-        layoutParams.height = newHeight
-        layoutParams = layoutParams
-    }
-    animator.apply {
-        duration = 128
-        start()
-    }
-
-}
-
-
 var TextView.textColor: Long
     get() {
         return this.currentTextColor.toLong()
     }
-    set(value: Long) {
+    set(value) {
         this.setTextColor(value.toInt())
     }
 

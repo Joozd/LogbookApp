@@ -101,8 +101,8 @@ class NewUserActivity : JoozdlogActivity() {
              * This order must match the order in [NewUserActivityViewModel.Companion]
              */
             0 -> NewUserActivityIntroPage()
-            1 -> NewUserActivityEmailPage()
-            2 -> NewUserActivityCloudPage()
+            1 -> NewUserActivityCloudPage()
+            2 -> NewUserActivityEmailPage()
             3 -> NewUserActivityCalendarPage()
             4 -> NewUserActivityFinalPage()
             else -> error("ScreenSlidePagerAdapter asked to provide non-existing page")

@@ -27,7 +27,9 @@ import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.CalendarScraper
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
+import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
@@ -156,11 +158,11 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     fun continueClicked(position: Int) {
         when(position){
             PAGE_INTRO -> feedback(NewUserActivityEvents.NEXT_PAGE)
+            PAGE_CLOUD -> feedback(NewUserActivityEvents.NEXT_PAGE)
             PAGE_EMAIL -> {
                 emailPageContinueClicked()
                 feedback(NewUserActivityEvents.NEXT_PAGE)
             }
-            PAGE_CLOUD -> feedback(NewUserActivityEvents.NEXT_PAGE)
             PAGE_CALENDAR -> feedback(NewUserActivityEvents.NEXT_PAGE)
             PAGE_FINAL -> {
                 finalPageDoneClicked()
@@ -280,8 +282,15 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
                 setNextButtonEnabled(PAGE_EMAIL, it)
     }
 
+    /**
+     * When continue is clicked on Email page, email address is saved through UserManagement.
+     * This function is called when clicking on continue button. Continue button must only be visible if email is entered (see [checkEmails])
+     * This is not checked here again because any errors will be picked up by UserManagement which handles it better than we can do here.
+     */
     private fun emailPageContinueClicked() {
-        Preferences.emailAddress = email1
+        viewModelScope.launch{
+            UserManagement.changeEmailAddress(email1)
+        }
     }
 
     /*******************************************************************************************
@@ -337,7 +346,6 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      */
     private fun finalPageDoneClicked(){
         Preferences.lastUpdateTime=0                                    // force update upon loading MainActivity if cloud is in use
-        if (checkEmails()) Preferences.emailAddress = email1            // save email if matching valid emails were entered in both fields but swiped instead of continue pressed
         Preferences.newUserActivityFinished = true
     }
 
@@ -357,8 +365,8 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
 
     companion object{
         const val PAGE_INTRO = 0
-        const val PAGE_EMAIL = 1
-        const val PAGE_CLOUD = 2
+        const val PAGE_CLOUD = 1
+        const val PAGE_EMAIL = 2
         const val PAGE_CALENDAR = 3
         const val PAGE_FINAL = 4
 

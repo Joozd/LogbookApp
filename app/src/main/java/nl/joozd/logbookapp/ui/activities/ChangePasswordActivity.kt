@@ -23,7 +23,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
-import androidx.core.util.PatternsCompat
 import androidx.fragment.app.commit
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement

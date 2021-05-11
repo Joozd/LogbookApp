@@ -449,10 +449,10 @@ class SettingsActivity : JoozdlogActivity() {
             messageResource = R.string.make_new_account_question
             setNegativeButton(android.R.string.cancel)
             setPositiveButton(android.R.string.ok){
+                UserManagement.newUser()
                 if (Preferences.acceptedCloudSyncTerms)
-                    Preferences.useCloud = true
+                    viewModel.forceUseCloud()
                 else supportFragmentManager.commit {
-                    viewModel.wipeLoginData()
                     add(R.id.settingsActivityLayout, CloudSyncTermsDialog(sync = true)) // secondary constructor used, works on recreate
                     addToBackStack(null)
                 }
@@ -556,7 +556,7 @@ class SettingsActivity : JoozdlogActivity() {
     private fun toggleBackupFromCloudWithDialogIfNeeded(){
         when{
             Preferences.backupFromCloud -> Preferences.backupFromCloud = false
-            viewModel.emailAddress.value == null -> showEmailDialog() { Preferences.backupFromCloud = true }
+            viewModel.emailAddress.value == null -> showEmailDialog { Preferences.backupFromCloud = true }
             else -> Preferences.backupFromCloud = true
         }
     }

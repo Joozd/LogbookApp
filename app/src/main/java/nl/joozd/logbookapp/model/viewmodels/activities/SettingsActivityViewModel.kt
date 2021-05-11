@@ -321,12 +321,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     }
 
     /**
-     * Wipes login data.
-     * Is Cloud is enabled, next time a synch is requested new login data will be made by worker
+     * toggles useCloud to on
      */
-    fun wipeLoginData(){
-        Preferences.username = null
-        Preferences.password = null
+    fun forceUseCloud(){
+        Preferences.useCloud = true
     }
 
     /**

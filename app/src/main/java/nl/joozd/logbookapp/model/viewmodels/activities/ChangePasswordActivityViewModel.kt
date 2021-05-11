@@ -31,6 +31,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
@@ -77,25 +78,31 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
      * Public functions
      */
 
+    /**
+     * If submit button is clicked, we will check if internet is available
+     * If it is, generate a password and attempt to get server to set that as current password.
+     * If success, request a login link email (or schedule it for when email verified)
+     * If fail or no internet, feedback to Activity
+     */
     fun submitClicked(){
         val password = generatePassword(16)
-        Log.d("submitClicked()", "pass1: $password")
-        Log.d("Internet", "${InternetStatus.internetAvailable}")
         when {
             InternetStatus.internetAvailable != true -> feedback(ChangePasswordEvents.NO_INTERNET)
             else -> { // passwords match, are good enough, username not empty and internet looks OK
-                Log.d("LALALALALAL" ,"HUPSAKEE RAAAAR -1")
                 feedback(ChangePasswordEvents.WAITING_FOR_SERVER)
-                Log.d("LALALALALAL" ,"HUPSAKEE 1")
                 viewModelScope.launch {
-                    Log.d("LALALALALAL" ,"HUPSAKEE 2")
                     when (UserManagement.changePassword(password)){
                         CloudFunctionResults.OK -> {
                             sendPasswordLinksToClipboard(UserManagement.generateLoginLink())
+                            if (Preferences.emailVerified)
+                                Cloud.requestLoginLinkMail()
+                            else {
+                                Preferences.emailJobsWaiting.sendLoginLink = true
+                            }
                             feedback(ChangePasswordEvents.FINISHED)
                         }
-                        CloudFunctionResults.NO_LOGIN_DATA -> feedback(ChangePasswordEvents.NOT_LOGGED_IN).also {Log.d("XXXXXX", "1")}
-                        CloudFunctionResults.UNKNOWN_USER_OR_PASS -> feedback(ChangePasswordEvents.LOGIN_INCORRECT).also {Log.d("XXXXXX", "2")}
+                        CloudFunctionResults.NO_LOGIN_DATA -> feedback(ChangePasswordEvents.NOT_LOGGED_IN)
+                        CloudFunctionResults.UNKNOWN_USER_OR_PASS -> feedback(ChangePasswordEvents.LOGIN_INCORRECT)
                         CloudFunctionResults.CLIENT_ERROR -> feedback(ChangePasswordEvents.SERVER_NOT_RESPONDING)
                         else -> feedback(ChangePasswordEvents.NOT_IMPLEMENTED)
                     }

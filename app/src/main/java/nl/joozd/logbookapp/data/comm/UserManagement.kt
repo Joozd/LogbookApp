@@ -41,6 +41,15 @@ object UserManagement {
         get() = Preferences.username
 
     /**
+     * Will create a new user next time flights are synchronized.
+     * Doesn't change whether cloud is used (if it is not in use, no user will be created on server)
+     * Actual new user creation is triggered by [nl.joozd.logbookapp.workmanager.SyncFlightsWorker]
+     */
+    fun newUser(){
+        Preferences.username = null
+    }
+
+    /**
      * Create a new user on server
      * This will definitely invalidate current login data
      *
@@ -104,7 +113,7 @@ object UserManagement {
      * Then, saves new password, and changes that on server.
      * If anything goes wrong between saving new pass and setting it on server, user should be able to log in with previous loginlink.
      */
-    suspend fun changePassword(newPassword: String, email: String? = null): CloudFunctionResults = withContext (Dispatchers.IO){
+    suspend fun changePassword(newPassword: String): CloudFunctionResults = withContext (Dispatchers.IO){
         // Check if username/pass set
         Preferences.username ?: return@withContext CloudFunctionResults.NO_LOGIN_DATA
         Preferences.password ?: return@withContext CloudFunctionResults.NO_LOGIN_DATA

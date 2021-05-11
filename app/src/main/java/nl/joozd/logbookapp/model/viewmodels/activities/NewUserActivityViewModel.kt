@@ -219,6 +219,16 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     }
 
     /*******************************************************************************************
+     * [PAGE_CLOUD] functions
+     *******************************************************************************************/
+
+    fun useCloudCheckboxClicked(){
+        if (Preferences.acceptedCloudSyncTerms)
+            Preferences.useCloud = !Preferences.useCloud
+        else feedback(NewUserActivityEvents.SHOW_TERMS_DIALOG, PAGE_CLOUD)
+    }
+
+    /*******************************************************************************************
      * [PAGE_EMAIL] functions / variables
      *******************************************************************************************/
 
@@ -288,19 +298,10 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * This is not checked here again because any errors will be picked up by UserManagement which handles it better than we can do here.
      */
     private fun emailPageContinueClicked() {
+        if (Preferences.useCloud)
         viewModelScope.launch{
             UserManagement.changeEmailAddress(email1)
         }
-    }
-
-    /*******************************************************************************************
-     * [PAGE_CLOUD] functions
-     *******************************************************************************************/
-
-    fun useCloudCheckboxClicked(){
-        if (Preferences.acceptedCloudSyncTerms)
-            Preferences.useCloud = !Preferences.useCloud
-        else feedback(NewUserActivityEvents.SHOW_TERMS_DIALOG, PAGE_CLOUD)
     }
 
     /*******************************************************************************************

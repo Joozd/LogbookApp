@@ -401,6 +401,7 @@
     <string name="joozdlog_todo_title">Issues / TODO</string>
     <string name="use_dark_mode">Use Dark mode</string>
     <string name="print_hint">When printing logbook, make sure you make the printer fit it to printable area as the PDF does not have margins.</string>
+    <string name="help">Help</string>
 
 
 </resources>

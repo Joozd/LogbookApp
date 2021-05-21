@@ -41,6 +41,7 @@ import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.repository.helpers.*
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfRegistrations
+import nl.joozd.logbookapp.extensions.map
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.checkPermission
@@ -146,9 +147,10 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     /**
      * Returns all flights in DB which start in [period]
+     * @param period: Period in which these flights should be
      */
-    private suspend fun getFlightsOnDays(period: ClosedRange<Instant>, extraDays: Int = 0) =
-        getFlightsOnDays(getAllFlights(), (period.start.minusSeconds(86400L*extraDays)..period.endInclusive.plusSeconds(86400L*extraDays)))
+    private suspend fun getFlightsOnDays(period: ClosedRange<Instant>) =
+        getAllFlights().filter { it.timeOut in period.map { instant -> instant.epochSecond } }
 
     private val _syncProgress = MutableLiveData<Int>(-1)
 
@@ -402,6 +404,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     }
     */
 
+    /*
     /**
      * Save flights from a Roster
      * It will remove saved flights in [roster].period if they are not the same as any flights in [roster].flights
@@ -443,6 +446,44 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         Log.d("DEBUG", "New flights: ${newFlights.size}")
         Log.d("DEBUG", "updated flights: ${updatedFlights.size}")
         save(flightsToSave, addToUndo = false)
+    }
+    */
+
+    /**
+     * Save flights from a roster
+     * This will compare currently saved flights with flights in roster.
+     *  - Exact matches (orig, dest, tin, tout, flightNumber) will be kept
+     *      ->  These will be compared for some other data as well (name, name2, remarks, registration)
+     *          If any of those fields has data in roster, it will overwrite data in db if different
+     *  - Other flights in period will be deleted(hard) if planned, or ignored if completed.
+     *  - Rostered flights that are not exact matches + matches with extra data will be saved to DB
+     *  @param roster: a Roster with flights to be planned
+     *  @param canUndo: If true, this action will be given to [undoTracker]
+     */
+    suspend fun saveRoster(roster: Roster, canUndo: Boolean = false) = withContext(Dispatchers.IO + NonCancellable){
+        val plannedFlightsInDB = getFlightsOnDays(roster.period).filter { it.isPlanned }
+        //unchanged flights, these will not be deleted
+        val unchangedFlights = plannedFlightsInDB.filter { pf -> roster.flights.any { rf-> rf.isSameFlightAs(pf)}}
+
+        //These flights (the flights that are not unchanged) will be deleted.
+        val flightsToDelete = plannedFlightsInDB.filter { it !in unchangedFlights }
+
+        //These flights will be saved from roster (roster flights that are not in [unchangedFlights]
+        val rosterFlightsToSave = roster.flights.filter { rf -> unchangedFlights.none{ pf -> pf.isSameFlightAs(rf)}}
+
+        //These flights will also be saved, overwriting existing flights (unchanged flights that got extra info from roster)
+        val updatedFlights = updateFlightsWithRosterData(unchangedFlights, roster.flights)
+
+        val flightsToSave = rosterFlightsToSave + updatedFlights
+
+        if (canUndo){
+            val deleteEvent = DeleteEvent(flightsToDelete)
+            val saveEvent = SaveEvent(flightsToSave, flightsToSave.mapNotNull{ f -> fetchFlightByID(f.flightID)})
+            undoTracker.addRosterImportEvent(RosterImportEvent(saveEvent, deleteEvent))
+        }
+
+        delete(flightsToDelete, sync = false, addToUndo = false) // sync will happen after saving
+        save(flightsToSave, addToUndo = false)                   // this will trigger sync
     }
 
     /**
@@ -641,9 +682,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
     private inner class UndoTracker() {
         val undoAvailable: LiveData<Boolean>
-            get() = _undoAvailable
+            get() = distinctUntilChanged(_undoAvailable)
         val redoAvailable: LiveData<Boolean>
-            get() = _redoAvailable
+            get() = distinctUntilChanged(_redoAvailable)
 
         private val _undoAvailable = MutableLiveData(false)
         private val _redoAvailable = MutableLiveData(false)
@@ -741,7 +782,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
         private fun clearRedoStack(){
             redoStack.clear()
-            _redoAvailable.value = false
+            _redoAvailable.postValue(false)
         }
 
         /**
@@ -750,8 +791,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
          */
         private fun popUndo(): UndoableEvent?{
             val r = undoStack.removeLastOrNull()
-            if (undoStack.isEmpty())
-                    _undoAvailable.value = false
+            _undoAvailable.postValue(undoStack.isNotEmpty())
             return r
         }
 
@@ -761,8 +801,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
          */
         private fun popRedo(): UndoableEvent?{
             val r = redoStack.removeLastOrNull()
-            if (redoStack.isEmpty())
-                _redoAvailable.value = false
+            _redoAvailable.postValue(redoStack.isNotEmpty())
             return r
         }
 
@@ -772,7 +811,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
          */
         fun pushRedoEvent(event: UndoableEvent){
             redoStack.add(event)
-            _redoAvailable.value = redoStack.size > 0
+            _redoAvailable.postValue(redoStack.size > 0)
         }
 
         /**
@@ -782,7 +821,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         fun pushUndoEvent(event: UndoableEvent){
             undoStack.add(event)
             clearRedoStack()
-            _undoAvailable.value = undoStack.size > 0
+            _undoAvailable.postValue(undoStack.size > 0)
         }
     }
 

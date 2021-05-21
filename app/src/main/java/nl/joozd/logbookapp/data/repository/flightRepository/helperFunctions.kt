@@ -56,14 +56,22 @@ fun getFlightsOnDays(allFlights: List<Flight>, dateRange: ClosedRange<Instant>):
  */
 fun updateFlightsWithRosterData(currentFlights: List<Flight>, rosterFlights: List<Flight>): List<Flight> = rosterFlights.map{ rf ->
         currentFlights.firstOrNull { it.isSameFlightAs(rf) }?.let{ f->
-            f.copy(registration = rf.registration.nullIfBlank() ?: f.registration,
-                   aircraftType = rf.aircraftType.nullIfBlank() ?: f.aircraftType,
-                   name = rf.name.nullIfBlank() ?: f.name,
-                   name2 = rf.name2.nullIfBlank() ?: f.name2,
-                   remarks = rf.remarks.nullIfBlank() ?: f.remarks
+            if (
+                (rf.registration.isBlank() || rf.registration.trim().equals(f.registration, ignoreCase = true)) &&
+                (rf.aircraftType.isBlank() || rf.aircraftType.trim().equals(f.aircraftType, ignoreCase = true)) &&
+                (rf.name.isBlank() || rf.name.trim().equals(f.name, ignoreCase = true)) &&
+                (rf.name2.isBlank() || rf.name2.trim().equals(f.name2, ignoreCase = true)) &&
+                (rf.remarks.isBlank() || rf.remarks.trim().equals(f.remarks, ignoreCase = true))
+            ) null else
+            f.copy(registration = rf.registration.trim().nullIfBlank() ?: f.registration,
+                   aircraftType = rf.aircraftType.trim().nullIfBlank() ?: f.aircraftType,
+                   name = rf.name.trim().nullIfBlank() ?: f.name,
+                   name2 = rf.name2.trim().nullIfBlank() ?: f.name2,
+                   remarks = rf.remarks.trim().nullIfBlank() ?: f.remarks
             )
         }
     }.filterNotNull()
+
 
 
 

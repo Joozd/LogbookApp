@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.conflate
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.extensions.nonNullLiveData
+import nl.joozd.logbookapp.utils.nonNullLiveData
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
 //TODO make sure list gets filled straight away?

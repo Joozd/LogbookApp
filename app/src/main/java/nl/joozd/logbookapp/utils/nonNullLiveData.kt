@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.extensions
+package nl.joozd.logbookapp.utils
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData

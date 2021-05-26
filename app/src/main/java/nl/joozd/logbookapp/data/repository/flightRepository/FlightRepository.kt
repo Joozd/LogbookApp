@@ -201,11 +201,17 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     val usedRegistrationsLiveData: LiveData<List<String>>
         get() = _usedRegistrations
 
-    val undoAvailable: LiveData<Boolean>
-        get() = undoTracker.undoAvailable.distinctUntilChanged()
+    val undoAvailableLiveData: LiveData<Boolean>
+        get() = undoTracker.undoAvailableLiveData
 
-    val redoAvailable: LiveData<Boolean>
-        get() = undoTracker.redoAvailable.distinctUntilChanged()
+    val undoAvailable: Boolean
+        get() = undoTracker.undoAvailable
+
+    val redoAvailable: Boolean
+        get() = undoTracker.redoAvailable
+
+    val redoAvailableLiveData: LiveData<Boolean>
+        get() = undoTracker.redoAvailableLiveData
 
     /********************************************************************************************
      * Vars and vals
@@ -681,13 +687,33 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * Redo() will undo an undo and move the action back to [undoStack]
      */
     private inner class UndoTracker() {
-        val undoAvailable: LiveData<Boolean>
-            get() = distinctUntilChanged(_undoAvailable)
-        val redoAvailable: LiveData<Boolean>
-            get() = distinctUntilChanged(_redoAvailable)
+        val undoAvailableLiveData: LiveData<Boolean>
+            get() = _undoAvailable
+        val redoAvailableLiveData: LiveData<Boolean>
+            get() = _redoAvailable
 
-        private val _undoAvailable = MutableLiveData(false)
-        private val _redoAvailable = MutableLiveData(false)
+        /**
+         * keeps track if undo is available. sets [_undoAvailable] livedata if changed.
+         */
+        var undoAvailable: Boolean = false
+            private set(it){
+                println("SET UNDO_AVAILABLE to $it")
+                field = it
+                if (_undoAvailable.value != it) _undoAvailable.postValue(it)
+            }
+
+        /**
+         * keeps track if redo is available. sets [_redoAvailable] livedata if changed.
+         */
+        var redoAvailable: Boolean = false
+            private set(it){
+                println("SET REDO_AVAILABLE to $it")
+                field = it
+                _redoAvailable.postValue(it)
+            }
+
+        private val _undoAvailable = MutableLiveData(undoAvailable)
+        private val _redoAvailable = MutableLiveData(redoAvailable)
 
         // Stack of undo events
         private val undoStack = mutableListOf<UndoableEvent>()
@@ -730,7 +756,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             return when (val event = popUndo()){
                 is DeleteEvent -> {
                     save(event.oldFlights, addToUndo = false)
-                    pushRedoEvent(event)
+                    if (redoable)
+                        pushRedoEvent(event)
                     true
                 }
                 is SaveEvent -> {
@@ -740,7 +767,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
                     // save old version of flights that were changed
                     save(event.oldFlights, addToUndo = false)
-                    pushRedoEvent(event)
+                    if (redoable)
+                        pushRedoEvent(event)
                     true
                 }
                 is RosterImportEvent -> {
@@ -765,12 +793,12 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             return when(val event = popRedo()){
                 is DeleteEvent -> {
                     deleteHard(event.oldFlights, addToUndo = false) // this can put it back on undo stack, but doing it manually is faster than rebuilding the event
-                    pushUndoEvent(event)
+                    pushUndoEvent(event, false)
                     true
                 }
                 is SaveEvent -> {
                     save(event.newFlights, addToUndo = false) // this can put it back on undo stack, but doing it manually is faster than rebuilding the event
-                    pushUndoEvent(event)
+                    pushUndoEvent(event, false)
                     true
                 }
                 else -> {
@@ -782,48 +810,53 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
         private fun clearRedoStack(){
             redoStack.clear()
-            _redoAvailable.postValue(false)
+            redoAvailable = false
         }
 
         /**
          * Remove last item from undo stack and return it.
-         * Also keeps [_undoAvailable] up-to-date
+         * Also keeps [undoAvailable] up-to-date
          */
         private fun popUndo(): UndoableEvent?{
             val r = undoStack.removeLastOrNull()
-            _undoAvailable.postValue(undoStack.isNotEmpty())
+            undoAvailable = undoStack.isNotEmpty()
             return r
         }
 
         /**
          * Remove last item from redo stack and return it.
-         * Also keeps [_undoAvailable] up-to-date
+         * Also keeps [redoAvailable] up-to-date
          */
         private fun popRedo(): UndoableEvent?{
             val r = redoStack.removeLastOrNull()
-            _redoAvailable.postValue(redoStack.isNotEmpty())
+            redoAvailable = redoStack.isNotEmpty()
             return r
         }
 
         /**
-         * Push an event onto redo stack.
-         * Keeps [_redoAvailable] op-to-date
+         * Push an event onto undo stack.
+         * Keeps [undoAvailable] op-to-date
+         * @param event: Event to put on undo stack
+         * @param emptyRedoStack: If true, will empty redo stack. Should only be false when a redo item is put on redo stack from undo stack.
          */
-        fun pushRedoEvent(event: UndoableEvent){
-            redoStack.add(event)
-            _redoAvailable.postValue(redoStack.size > 0)
+        private fun pushUndoEvent(event: UndoableEvent, emptyRedoStack: Boolean = true){
+            undoStack.add(event)
+            if (emptyRedoStack)
+                clearRedoStack()
+            undoAvailable = undoStack.size > 0
         }
 
         /**
-         * Push an event onto undo stack.
-         * Keeps [_undoAvailable] op-to-date
+         * Push an event onto redo stack.
+         * Keeps [redoAvailable] op-to-date
          */
-        fun pushUndoEvent(event: UndoableEvent){
-            undoStack.add(event)
-            clearRedoStack()
-            _undoAvailable.postValue(undoStack.size > 0)
+        private fun pushRedoEvent(event: UndoableEvent){
+            redoStack.add(event)
+            redoAvailable = redoStack.size > 0
         }
     }
+
+
 
     /********************************************************************************************
      * Interfaces:

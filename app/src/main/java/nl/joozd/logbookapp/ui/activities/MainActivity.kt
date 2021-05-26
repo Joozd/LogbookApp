@@ -199,7 +199,7 @@ class MainActivity : JoozdlogActivity() {
                 }
             }
 
-            viewModel.undoAvailable.observe(activity){
+            viewModel.undoAvailableLiveData.observe(activity){
                 println("BOERENMETWORST!!!!!1 $it")
                 undoMenuItem?.let{ item ->
                     println("BERNAAN")
@@ -209,7 +209,7 @@ class MainActivity : JoozdlogActivity() {
 
             }
 
-            viewModel.redoAvailable.observe(activity){
+            viewModel.redoAvailableLiveData.observe(activity){
                 println("BOERENZONDERWORST!!!!!1 $it")
                 redoMenuItem?.let{ item ->
                     println("BERNAAN2")
@@ -296,8 +296,12 @@ class MainActivity : JoozdlogActivity() {
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
-        undoMenuItem = menu.findItem(R.id.menu_undo)
-        redoMenuItem = menu.findItem(R.id.menu_redo)
+        undoMenuItem = menu.findItem(R.id.menu_undo).also{ item ->
+            item.isVisible = viewModel.undoAvailable
+        }
+        redoMenuItem = menu.findItem(R.id.menu_redo).also{ item ->
+            item.isVisible = viewModel.redoAvailable
+        }
         return true
     }
 

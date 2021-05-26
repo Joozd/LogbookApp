@@ -263,10 +263,16 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     val backupUri: LiveData<Uri>
         get() = _backupUri
 
-    val undoAvailable
+    val undoAvailableLiveData
+        get() = flightRepository.undoAvailableLiveData
+
+    val undoAvailable: Boolean
         get() = flightRepository.undoAvailable
 
-    val redoAvailable
+    val redoAvailableLiveData
+        get() = flightRepository.redoAvailableLiveData
+
+    val redoAvailable: Boolean
         get() = flightRepository.redoAvailable
 
     /**

@@ -67,7 +67,7 @@ class MainActivity : JoozdlogActivity() {
 
         with (ActivityMainNewBinding.inflate(layoutInflater)) {
             setSupportActionBarWithReturn(mainToolbar)?.apply {
-                // can do stuff with toolbar here
+                // intentionally blank
             }
 
             /**
@@ -185,8 +185,8 @@ class MainActivity : JoozdlogActivity() {
                 }
             }
 
-            viewModel.searchFieldHint.observe(activity) {
-                mainSearchBoxLayout.hint = it ?: getString(R.string.search)
+            viewModel.displayedFlightsAmount.observe(activity){
+                mainToolbar.subtitle = getString(R.string.number_of_flights, it)
             }
 
             viewModel.errorToShow.observe(activity) {

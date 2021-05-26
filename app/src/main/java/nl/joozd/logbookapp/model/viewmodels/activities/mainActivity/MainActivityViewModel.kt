@@ -65,7 +65,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     // TODO do this work in adapter instead of on all flights that are never shown
     private val flightsList
-        get() = flightsToDisplayFlightsWithErrorCheck(searchFlights(rawFlights)).also { setSearchFieldHint(it.size) }
+        get() = flightsToDisplayFlightsWithErrorCheck(searchFlights(rawFlights))
 
     private val _backupInterval: LiveData<Int> = Preferences.backupIntervalLiveData
 
@@ -83,7 +83,6 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     private val searchStringLiveData = MutableLiveData<String>()
     private val searchSpinnerSelection = MutableLiveData<Int>()
-    private val _searchFieldHint = MutableLiveData<String?>()
 
     private var searchFieldOpen: Boolean = false
 
@@ -195,9 +194,12 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
+    /*
+    not using this anymore
     private fun setSearchFieldHint(it: Int) {
         _searchFieldHint.value = if (it == rawFlights.size) null else "$it flights found"
     }
+    */
 
     /**
      * Returns whether the time between now and most recent backup is greater than [Preferences.backupInterval] days
@@ -231,11 +233,10 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     val displayFlightsList: LiveData<List<DisplayFlight>>
         get() = _displayFlightsList2
 
+    val displayedFlightsAmount: LiveData<Int> = displayFlightsList.map { it.size }
+
     val picNameNeedsToBeSet: LiveData<Boolean>
         get() = distinctUntilChanged(Preferences.picNameNeedsToBeSetLiveData)
-
-    val searchFieldHint
-        get() = _searchFieldHint
 
     val internetAvailable: LiveData<Boolean>
         get() = InternetStatus.internetAvailableLiveData

@@ -61,6 +61,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     private val undoTracker = UndoTracker()
 
+    private val nextFlightID = FlightIDProvider()
+
     private val _workingFlight = MutableLiveData<WorkingFlight?>()
 
     private val _cachedFlights = MediatorLiveData<List<Flight>>().apply{
@@ -128,10 +130,13 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         if (addToUndo){
             undoTracker.addDeleteEvent(flights)
         }
+        Log.d("DeleteHard", "Cached flights before: ${cachedFlightsList?.size}")
         cachedFlightsList = ((cachedFlightsList
             ?: emptyList()).filter { it.flightID !in flights.map { f -> f.flightID } }).sortedByDescending { it.timeOut }
+        Log.d("DeleteHard", "Cached flights after: ${cachedFlightsList?.size}")
         launch (dispatcher + NonCancellable) {
             saveMutex.withLock {
+                Log.d("DeleteHard","Deleting ${flights.size} flights")
                 flightDao.deleteMultipleByID(flights.map { it.flightID })
             }
         }
@@ -234,6 +239,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         }
         else _workingFlight.value = f
     }
+
+    suspend fun lowestFreeFlightID() = nextFlightID()
 
 
     /**
@@ -359,8 +366,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean? = null, addToUndo: Boolean = false) = launch {
         saveMutex.withLock {
             //assign available FlightIDs if requested
-            val ff = if (updateIDs != false) flights.mapIndexed { index, flight ->
-                flight.copy(flightID = if (flight.flightID <= 0 || updateIDs == true) lowestFreeFlightID() + index else flight.flightID, timeStamp = TimestampMaker.nowForSycPurposes)
+            val ff = if (updateIDs != false) flights.map { flight ->
+                flight.copy(flightID = if (flight.flightID <= 0 || updateIDs == true) nextFlightID() else flight.flightID, timeStamp = TimestampMaker.nowForSycPurposes)
             } else flights.map {
                 it.copy(timeStamp = TimestampMaker.nowForSycPurposes)
             }
@@ -480,7 +487,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         //These flights will also be saved, overwriting existing flights (unchanged flights that got extra info from roster)
         val updatedFlights = updateFlightsWithRosterData(unchangedFlights, roster.flights)
 
-        val flightsToSave = rosterFlightsToSave + updatedFlights
+        val flightsToSave = (rosterFlightsToSave + updatedFlights).map{
+            if (it.flightID >0 )it else it.copy (flightID = nextFlightID() )
+        }
 
         if (canUndo){
             val deleteEvent = DeleteEvent(flightsToDelete)
@@ -606,13 +615,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
     private fun getHighestIdAsync() = async(dispatcher) { flightDao.highestId() ?: 0 }
 
-
-    /**
-     * Gets the lowest free FlightID
-     */
-    suspend fun lowestFreeFlightID(): Int = withContext(Dispatchers.IO){
-        (cachedFlightsList?.maxByOrNull { it.flightID }?.flightID ?: getHighestIdAsync().await()) + 1
-    }
 
     fun iAmACaptainAsync() =  async(dispatcher) {
         getMostRecentFlightAsync().await()?.isPIC == true
@@ -755,14 +757,19 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         fun undo(redoable: Boolean = true): Boolean{
             return when (val event = popUndo()){
                 is DeleteEvent -> {
+                    Log.d("Undo", "DeleteEvent Undo $redoable")
                     save(event.oldFlights, addToUndo = false)
                     if (redoable)
                         pushRedoEvent(event)
                     true
                 }
                 is SaveEvent -> {
+                    Log.d("Undo", "SaveEvent Undo $redoable")
                     // delete flights that were newly created
                     val newlyCreatedFlights = event.newFlights.filter { it.flightID !in event.oldFlights.map{old -> old.flightID}}
+                    Log.d("NewlyCreatedFlights", "${newlyCreatedFlights.size}, ${newlyCreatedFlights.map{it.flightID} }")
+
+
                     deleteHard(newlyCreatedFlights, addToUndo = false)
 
                     // save old version of flights that were changed
@@ -772,6 +779,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                     true
                 }
                 is RosterImportEvent -> {
+                    Log.d("Undo", "RosterImportEvent Undo $redoable")
                     //put deletes and updates on undo stack
                     pushUndoEvent(event.deleted)
                     pushUndoEvent(event.saved)
@@ -788,16 +796,32 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             }
         }
 
-        fun redo(): Boolean{
+        /**
+         * Redo an undone action.
+         * @param undoable: true if this redo can be undone. Meant for internal use (ie. a RosterImportEvent that is being redone)
+         */
+        fun redo(undoable: Boolean = true): Boolean{
             if (redoStack.isEmpty()) return false
             return when(val event = popRedo()){
                 is DeleteEvent -> {
+                    Log.d("Redo", "DeleteEvent Redo $undoable")
                     deleteHard(event.oldFlights, addToUndo = false) // this can put it back on undo stack, but doing it manually is faster than rebuilding the event
-                    pushUndoEvent(event, false)
+                    if (undoable) pushUndoEvent(event, false)
                     true
                 }
                 is SaveEvent -> {
+                    Log.d("Redo", "SaveEvent Redo $undoable")
                     save(event.newFlights, addToUndo = false) // this can put it back on undo stack, but doing it manually is faster than rebuilding the event
+                    if (undoable) pushUndoEvent(event, false)
+                    true
+                }
+                is RosterImportEvent -> {
+                    Log.d("Redo", "RosterImportEvent Redo $undoable")
+                    // put deleted and saved redo event on top of stack and redo them
+                    pushRedoEvent(event.deleted)
+                    pushRedoEvent(event.saved)
+                    redo(false) // don't put on undo stack as the RosterImportEvent will be pushed to it
+                    redo(false) // don't put on undo stack as the RosterImportEvent will be pushed to it
                     pushUndoEvent(event, false)
                     true
                 }
@@ -883,5 +907,33 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
         const val MIN_SYNC_INTERVAL = 30*60 // seconds
         const val MIN_CALENDAR_CHECK_INTERVAL = 30 // seconds
+    }
+
+    /**
+     * Worker class that will always provide an available flight ID in a thread-safe way
+     * van be used like this:
+     *      private val getID = FlightIDProvider()
+     *      getID()
+     */
+    private inner class FlightIDProvider {
+        private var currentLowestAvailable: Int = - 999
+        private var initialized = false
+        val mutex = Mutex()
+
+        suspend operator fun invoke(): Int = mutex.withLock {
+            // set currentLowestAvailable to lowest free ID if no initialized yet
+            if (!initialized) {
+                currentLowestAvailable = getNextAvailable()
+                initialized = true
+            }
+
+            return currentLowestAvailable++
+        }
+        /**
+         * Gets the lowest free FlightID
+         */
+        private suspend fun getNextAvailable(): Int = withContext(Dispatchers.IO){
+            (cachedFlightsList?.maxByOrNull { it.flightID }?.flightID ?: getHighestIdAsync().await()) + 1
+        }
     }
 }

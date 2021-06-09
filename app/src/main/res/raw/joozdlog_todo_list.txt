@@ -11,8 +11,6 @@ Everything needs more testing.
 
 Do more work at email verifications (when, how often etc)
 
-Create a front page for PDF logbook
-
 Monthlies:
 conflict handling / updating of logged flights needs more testing.
 

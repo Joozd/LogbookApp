@@ -57,252 +57,248 @@
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/bodyLayout"
-            style="@style/DialogBodyLayout"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/headerLayout">
-
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/takeoffCard"
-                style="@style/DataBox.Padded"
-                app:layout_constraintEnd_toEndOf="@+id/landingCard"
-                app:layout_constraintStart_toStartOf="@+id/landingCard"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <TextView
-                    android:id="@+id/textView8"
-                    style="@style/HeaderText.Bold.AllCaps"
-                    android:text="@string/takeoff"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/textView9"
-                    style="@style/SecondaryText"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/day"
-                    app:layout_constraintBottom_toBottomOf="@+id/toDayDownButton"
-                    app:layout_constraintEnd_toStartOf="@+id/toDayDownButton"
-                    app:layout_constraintTop_toTopOf="@+id/toDayDownButton" />
-
-                <ImageButton
-                    android:id="@+id/toDayDownButton"
-                    style="@style/PlusMinusButton"
-                    app:srcCompat="@drawable/minus_button"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintEnd_toStartOf="@+id/toDayField"
-                    app:layout_constraintTop_toTopOf="@+id/toDayUpButton" />
-
-                <EditText
-                    android:id="@+id/toDayField"
-                    style="@style/NumberBox"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/toDayUpButton"
-                    app:layout_constraintEnd_toStartOf="@+id/toDayUpButton"
-                    app:layout_constraintTop_toTopOf="@+id/toDayUpButton" />
-
-                <ImageButton
-                    android:id="@+id/toDayUpButton"
-                    style="@style/PlusMinusButton"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/plus_button" />
-
-                <TextView
-                    android:id="@+id/textView12"
-                    style="@style/SecondaryText"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/night"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/toNightDownButton"
-                    app:layout_constraintTop_toTopOf="@+id/toNightDownButton" />
-
-                <ImageButton
-                    android:id="@+id/toNightDownButton"
-                    style="@style/PlusMinusButton"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintEnd_toStartOf="@+id/toNightField"
-                    app:layout_constraintTop_toTopOf="@+id/toNightUpButton"
-                    app:srcCompat="@drawable/minus_button" />
-
-                <EditText
-                    android:id="@+id/toNightField"
-                    style="@style/NumberBox"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/toNightUpButton"
-                    app:layout_constraintEnd_toStartOf="@+id/toNightUpButton"
-                    app:layout_constraintTop_toTopOf="@+id/toNightUpButton" />
-
-                <ImageButton
-                    android:id="@+id/toNightUpButton"
-                    style="@style/PlusMinusButton"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/toDayUpButton"
-                    app:srcCompat="@drawable/plus_button" />
-
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/landingCard"
-                style="@style/DataBox.Padded"
-                android:layout_marginTop="8dp"
-                app:layout_constraintEnd_toEndOf="@+id/autolandCard"
-                app:layout_constraintStart_toStartOf="@+id/autolandCard"
-                app:layout_constraintTop_toBottomOf="@+id/takeoffCard">
-
-                <TextView
-                    android:id="@+id/textView14"
-                    style="@style/HeaderText.Bold.AllCaps"
-                    android:text="@string/landing"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/textView16"
-                    style="@style/SecondaryText"
-                    android:text="@string/day"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/ldgDayDownButton"
-                    app:layout_constraintEnd_toStartOf="@+id/ldgDayDownButton"
-                    app:layout_constraintTop_toTopOf="@+id/ldgDayDownButton" />
-
-                <ImageButton
-                    android:id="@+id/ldgDayDownButton"
-                    style="@style/PlusMinusButton"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintEnd_toStartOf="@+id/ldgDayField"
-                    app:layout_constraintTop_toTopOf="@+id/ldgDayUpButton"
-                    app:srcCompat="@drawable/minus_button" />
-
-                <EditText
-                    android:id="@+id/ldgDayField"
-                    style="@style/NumberBox"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/ldgDayUpButton"
-                    app:layout_constraintEnd_toStartOf="@+id/ldgDayUpButton"
-                    app:layout_constraintTop_toTopOf="@+id/ldgDayUpButton" />
-
-                <ImageButton
-                    android:id="@+id/ldgDayUpButton"
-                    style="@style/PlusMinusButton"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/plus_button" />
-
-                <ImageButton
-                    android:id="@+id/ldgNightDownButton"
-                    style="@style/PlusMinusButton"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintEnd_toStartOf="@+id/ldgNightField"
-                    app:layout_constraintTop_toTopOf="@+id/ldgNightUpButton"
-                    app:srcCompat="@drawable/minus_button" />
-
-                <EditText
-                    android:id="@+id/ldgNightField"
-                    style="@style/NumberBox"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/ldgNightUpButton"
-                    app:layout_constraintEnd_toStartOf="@+id/ldgNightUpButton"
-                    app:layout_constraintTop_toTopOf="@+id/ldgNightUpButton" />
-
-                <ImageButton
-                    android:id="@+id/ldgNightUpButton"
-                    style="@style/PlusMinusButton"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/ldgDayUpButton"
-                    app:srcCompat="@drawable/plus_button" />
-
-
-
-                <TextView
-                    android:id="@+id/textView17"
-                    style="@style/SecondaryText"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/night"
-                    app:layout_constraintBottom_toBottomOf="@+id/ldgNightDownButton"
-                    app:layout_constraintEnd_toStartOf="@+id/ldgNightDownButton"
-                    app:layout_constraintTop_toTopOf="@+id/ldgNightDownButton" />
-
-
-
-
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/autolandCard"
-            style="@style/DataBox.Padded"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/landingCard">
-
-            <ImageButton
-                android:id="@+id/autolandDownButton"
-                style="@style/PlusMinusButton"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/autolandField"
-                app:layout_constraintEnd_toStartOf="@+id/autolandField"
-                app:layout_constraintTop_toTopOf="@+id/autolandUpButton"
-                app:srcCompat="@drawable/minus_button" />
-
-            <EditText
-                android:id="@+id/autolandField"
-                style="@style/NumberBox"
-                android:layout_marginEnd="8dp"
-
-                app:layout_constraintBottom_toBottomOf="@+id/autolandUpButton"
-                app:layout_constraintEnd_toStartOf="@+id/autolandUpButton"
-                app:layout_constraintTop_toTopOf="@+id/autolandUpButton" />
-
-            <TextView
-                android:id="@+id/textView22"
-                style="@style/HeaderText.Bold.AllCaps"
-                android:text="@string/autoland"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageButton
-                android:id="@+id/autolandUpButton"
-                style="@style/PlusMinusButton"
+                android:id="@+id/bodyLayout"
+                style="@style/DialogBodyLayout"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/plus_button" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-            <TextView
-                android:id="@+id/saveTextButon"
-                style="@style/DialogButtonText"
-                android:layout_marginTop="24dp"
-                android:text="@android:string/ok"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/autolandCard" />
-
-            <TextView
-                android:id="@+id/cancelTextButton"
-                style="@style/DialogButtonText"
-                android:text="@android:string/cancel"
-                android:textAlignment="center"
-                app:layout_constraintBottom_toBottomOf="@+id/saveTextButon"
+                app:layout_constraintHorizontal_bias="0.166"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/saveTextButon" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                app:layout_constraintTop_toBottomOf="@+id/headerLayout">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/takeoffCard"
+                    style="@style/DataBox.Padded"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/textView8"
+                        style="@style/HeaderText.Bold.AllCaps"
+                        android:text="@string/takeoff"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textView9"
+                        style="@style/SecondaryText"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/day"
+                        app:layout_constraintBottom_toBottomOf="@+id/toDayDownButton"
+                        app:layout_constraintEnd_toStartOf="@+id/toDayDownButton"
+                        app:layout_constraintTop_toTopOf="@+id/toDayDownButton" />
+
+                    <ImageButton
+                        android:id="@+id/toDayDownButton"
+                        style="@style/PlusMinusButton"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintEnd_toStartOf="@+id/toDayField"
+                        app:layout_constraintTop_toTopOf="@+id/toDayUpButton"
+                        app:srcCompat="@drawable/minus_button" />
+
+                    <EditText
+                        android:id="@+id/toDayField"
+                        style="@style/NumberBox"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintBottom_toBottomOf="@+id/toDayUpButton"
+                        app:layout_constraintEnd_toStartOf="@+id/toDayUpButton"
+                        app:layout_constraintTop_toTopOf="@+id/toDayUpButton" />
+
+                    <ImageButton
+                        android:id="@+id/toDayUpButton"
+                        style="@style/PlusMinusButton"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/plus_button" />
+
+                    <TextView
+                        android:id="@+id/textView12"
+                        style="@style/SecondaryText"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/night"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toNightDownButton"
+                        app:layout_constraintTop_toTopOf="@+id/toNightDownButton" />
+
+                    <ImageButton
+                        android:id="@+id/toNightDownButton"
+                        style="@style/PlusMinusButton"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintEnd_toStartOf="@+id/toNightField"
+                        app:layout_constraintTop_toTopOf="@+id/toNightUpButton"
+                        app:srcCompat="@drawable/minus_button" />
+
+                    <EditText
+                        android:id="@+id/toNightField"
+                        style="@style/NumberBox"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintBottom_toBottomOf="@+id/toNightUpButton"
+                        app:layout_constraintEnd_toStartOf="@+id/toNightUpButton"
+                        app:layout_constraintTop_toTopOf="@+id/toNightUpButton" />
+
+                    <ImageButton
+                        android:id="@+id/toNightUpButton"
+                        style="@style/PlusMinusButton"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/toDayUpButton"
+                        app:srcCompat="@drawable/plus_button" />
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/landingCard"
+                    style="@style/DataBox.Padded"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/takeoffCard">
+
+                    <TextView
+                        android:id="@+id/textView14"
+                        style="@style/HeaderText.Bold.AllCaps"
+                        android:text="@string/landing"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textView16"
+                        style="@style/SecondaryText"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/day"
+                        app:layout_constraintBottom_toBottomOf="@+id/ldgDayDownButton"
+                        app:layout_constraintEnd_toStartOf="@+id/ldgDayDownButton"
+                        app:layout_constraintTop_toTopOf="@+id/ldgDayDownButton" />
+
+                    <ImageButton
+                        android:id="@+id/ldgDayDownButton"
+                        style="@style/PlusMinusButton"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintEnd_toStartOf="@+id/ldgDayField"
+                        app:layout_constraintTop_toTopOf="@+id/ldgDayUpButton"
+                        app:srcCompat="@drawable/minus_button" />
+
+                    <EditText
+                        android:id="@+id/ldgDayField"
+                        style="@style/NumberBox"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintBottom_toBottomOf="@+id/ldgDayUpButton"
+                        app:layout_constraintEnd_toStartOf="@+id/ldgDayUpButton"
+                        app:layout_constraintTop_toTopOf="@+id/ldgDayUpButton" />
+
+                    <ImageButton
+                        android:id="@+id/ldgDayUpButton"
+                        style="@style/PlusMinusButton"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/plus_button" />
+
+                    <ImageButton
+                        android:id="@+id/ldgNightDownButton"
+                        style="@style/PlusMinusButton"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintEnd_toStartOf="@+id/ldgNightField"
+                        app:layout_constraintTop_toTopOf="@+id/ldgNightUpButton"
+                        app:srcCompat="@drawable/minus_button" />
+
+                    <EditText
+                        android:id="@+id/ldgNightField"
+                        style="@style/NumberBox"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintBottom_toBottomOf="@+id/ldgNightUpButton"
+                        app:layout_constraintEnd_toStartOf="@+id/ldgNightUpButton"
+                        app:layout_constraintTop_toTopOf="@+id/ldgNightUpButton" />
+
+                    <ImageButton
+                        android:id="@+id/ldgNightUpButton"
+                        style="@style/PlusMinusButton"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/ldgDayUpButton"
+                        app:srcCompat="@drawable/plus_button" />
+
+
+                    <TextView
+                        android:id="@+id/textView17"
+                        style="@style/SecondaryText"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/night"
+                        app:layout_constraintBottom_toBottomOf="@+id/ldgNightDownButton"
+                        app:layout_constraintEnd_toStartOf="@+id/ldgNightDownButton"
+                        app:layout_constraintTop_toTopOf="@+id/ldgNightDownButton" />
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/autolandCard"
+                    style="@style/DataBox.Padded"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/landingCard">
+
+                    <ImageButton
+                        android:id="@+id/autolandDownButton"
+                        style="@style/PlusMinusButton"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintBottom_toBottomOf="@+id/autolandField"
+                        app:layout_constraintEnd_toStartOf="@+id/autolandField"
+                        app:layout_constraintTop_toTopOf="@+id/autolandUpButton"
+                        app:srcCompat="@drawable/minus_button" />
+
+                    <EditText
+                        android:id="@+id/autolandField"
+                        style="@style/NumberBox"
+                        android:layout_marginEnd="8dp"
+
+                        app:layout_constraintBottom_toBottomOf="@+id/autolandUpButton"
+                        app:layout_constraintEnd_toStartOf="@+id/autolandUpButton"
+                        app:layout_constraintTop_toTopOf="@+id/autolandUpButton" />
+
+                    <TextView
+                        android:id="@+id/textView22"
+                        style="@style/HeaderText.Bold.AllCaps"
+                        android:text="@string/autoland"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageButton
+                        android:id="@+id/autolandUpButton"
+                        style="@style/PlusMinusButton"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/plus_button" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                <TextView
+                    android:id="@+id/saveTextButon"
+                    style="@style/DialogButtonText"
+                    android:layout_marginTop="24dp"
+                    android:text="@android:string/ok"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/autolandCard" />
+
+                <TextView
+                    android:id="@+id/cancelTextButton"
+                    style="@style/DialogButtonText"
+                    android:text="@android:string/cancel"
+                    android:textAlignment="center"
+                    app:layout_constraintBottom_toBottomOf="@+id/saveTextButon"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/saveTextButon" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

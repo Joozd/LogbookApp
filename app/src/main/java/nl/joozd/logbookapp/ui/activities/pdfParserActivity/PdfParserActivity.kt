@@ -63,6 +63,17 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
              * Observers:
              ****************************************************************************************/
 
+            viewModel.statusLiveData.observe(activity){
+                pdfParserStatusTextView.text = when (it){
+                    PdfParserActivityViewModel.STARTING_UP -> getString(R.string.waiting_for_data)
+                    PdfParserActivityViewModel.READING_FILE -> getString(R.string.readingFile)
+                    PdfParserActivityViewModel.PARSING_ROSTER -> getString(R.string.reading_roster)
+                    PdfParserActivityViewModel.PARSING_CHRONO -> getString(R.string.reading_chrono)
+                    PdfParserActivityViewModel.DONE -> getString(R.string.done)
+                    else -> "This should not happen"
+                }
+            }
+
             viewModel.feedbackEvent.observe(activity) {
                 when (it.getEvent()) {
                     PdfParserActivityEvents.NOT_IMPLEMENTED -> {
@@ -75,11 +86,11 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                     }
 
                     PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED -> {
-                        longToast("YAAAAY it worked  (Roster)")
+                        longToast("Imported roster")
                         closeAndStartMainActivity()
                     }
                     PdfParserActivityEvents.CHRONO_SUCCESSFULLY_ADDED -> {
-                        longToast("YAAAAY it worked (Chrono)")
+                        longToast("Imported Chrono")
                         closeAndStartMainActivity()
                     }
                     PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND -> {

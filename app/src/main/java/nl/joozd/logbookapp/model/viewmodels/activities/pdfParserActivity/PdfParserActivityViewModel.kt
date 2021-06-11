@@ -23,6 +23,8 @@ import nl.joozd.joozdlogfiletypedetector.interfaces.FileTypeDetector
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import nl.joozd.joozdlogfiletypedetector.CsvTypeDetector
@@ -58,6 +60,11 @@ import java.time.Instant
  * - Fixes conflicts when importing Monthlies
  */
 class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
+    val statusLiveData: LiveData<Int>
+        get() = _statusLiveData
+
+    private val _statusLiveData = MutableLiveData(STARTING_UP)
+
     private var intent: Intent? = null
 
     /**
@@ -70,9 +77,11 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      */
     private suspend fun run() = withContext(Dispatchers.IO) {
         intent?.let {
+            updateStatus(READING_FILE)
             val uri = (it.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri ?: it.data)
             val typeDetector = getTypeDetector(uri) ?: run {
                 feedback(PdfParserActivityEvents.FILE_NOT_FOUND) // TODO handle this in Activity
+                updateStatus(ERROR)
                 return@withContext /* END HERE */
             }
 
@@ -81,6 +90,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
              */
             if (typeDetector.seemsInvalid || typeDetector.typeOfFile is SupportedTypes.Unsupported) {
                 feedback(PdfParserActivityEvents.UNSUPPORTED_FILE) // TODO handle this in Activity
+                updateStatus(ERROR)
                 return@withContext  /* END HERE */
             }
 
@@ -88,20 +98,29 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
              * We now have a supported file.
              * What happens next: Depending on if this is a roster or something else, start the respective function
              */
-            typeDetector.typeOfFile.let { type ->
-                when (type) {
-                    is SupportedTypes.PlannedFlights -> parseRoster(type, uri)
+            when (val type = typeDetector.typeOfFile) {
+                is SupportedTypes.PlannedFlights -> {
+                    updateStatus(PARSING_ROSTER)
+                    parseRoster(type, uri)
+                }
 
-                    is SupportedTypes.CompletedFlights -> parseCompletedFlights(type, uri)
+                is SupportedTypes.CompletedFlights -> {
+                    parseCompletedFlights(type, uri)
+                    updateStatus(PARSING_CHRONO)
+                }
 
-                    is SupportedTypes.CompleteLogbook -> parseCompleteLogbook(type, uri)
+                is SupportedTypes.CompleteLogbook -> {
+                    updateStatus(PARSING_CHRONO)
+                    parseCompleteLogbook(type, uri)
+                }
 
-                    else -> {
-                        feedback(PdfParserActivityEvents.ERROR).putString("Error -1: This should not happen.")
-                        return@withContext
-                    }
+                else -> {
+                    feedback(PdfParserActivityEvents.ERROR).putString("Error -1: This should not happen.")
+                    updateStatus(ERROR)
+                    return@withContext
                 }
             }
+            updateStatus(DONE)
         }
     }
 
@@ -269,6 +288,12 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             }
         }
 
+    /**
+     * Sugar for updating status a little more clearly
+     */
+    private fun updateStatus(status: Int){
+        _statusLiveData.postValue(status)
+    }
 
     /*********************************************************************************************
      * Parser functions. This work can (should) be done async in NonCancelable coroutine
@@ -309,5 +334,17 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      */
     fun runAgain(){
         viewModelScope.launch { run() }
+    }
+
+    companion object{
+        /**
+         * Status constants:
+         */
+        const val ERROR = -1
+        const val STARTING_UP = 0
+        const val READING_FILE = 1
+        const val PARSING_ROSTER = 2
+        const val PARSING_CHRONO = 3
+        const val DONE = 999
     }
 }

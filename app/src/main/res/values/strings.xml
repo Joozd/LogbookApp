@@ -291,13 +291,15 @@
     - Strings for PdfParserActivity
     -->
 
+
     <string name="calendar_update_active">You are loading a roster file, but calendar sync is enabled. Do you want to disable calendar sync until end of this roster?</string>
     <string name="backup_only_on_new_install">Due to reasons, a backup can only be loaded onto a fresh install (or at least an install with no unplanned flights in it). This is on the list to be fixed in a future update. Please remove and reinstall app and try again.</string>
 
-
+    <string name="waiting_for_data">Waiting for data…</string>
     <string name="receivedIntent">Receiving data</string>
     <string name="readingFile">Reading file</string>
-    <string name="readingRoster">getting flights from roster</string>
+    <string name="reading_roster">getting flights from roster…</string>
+    <string name="reading_chrono">getting flights…</string>
     <string name="removingOldFlights">Removing old flights</string>
     <string name="insertNewFlights">Inserting new flights</string>
     <string name="writingToStorage">Writing data to storage</string>
@@ -403,6 +405,7 @@
     <string name="use_dark_mode">Use Dark mode</string>
     <string name="print_hint">When printing logbook, make sure you make the printer fit it to printable area as the PDF does not have margins.</string>
     <string name="help">Help</string>
+    <string name="joozdlog_importer">Joozdlog Importer</string>
 
 
 </resources>

@@ -24,6 +24,8 @@ import android.content.Context
 import android.provider.CalendarContract
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
@@ -53,7 +55,7 @@ class CalendarScraper(private val context: Context) {
      * Should not be done on main thread
      */
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    fun getCalendarsList(): List<JoozdCalendar>? {
+    suspend fun getCalendarsList(): List<JoozdCalendar> = withContext(Dispatchers.IO){
         val foundCalendars = mutableListOf<JoozdCalendar>()
         context.contentResolver.query(
             CalendarContract.Calendars.CONTENT_URI,
@@ -82,7 +84,7 @@ class CalendarScraper(private val context: Context) {
                 ) //, name))
             }
         }
-        return foundCalendars
+        foundCalendars
     }
 
     /**
@@ -93,7 +95,7 @@ class CalendarScraper(private val context: Context) {
      * @param end: Latest time for any events, can be empty
      */
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    fun getEventsBetween(activeCalendar: JoozdCalendar, start: Instant? = null, end: Instant? = null): List<JoozdCalendarEvent> {
+    suspend fun getEventsBetween(activeCalendar: JoozdCalendar, start: Instant? = null, end: Instant? = null): List<JoozdCalendarEvent> = withContext(Dispatchers.IO){
         val selection: String
         val selectionArgs: Array<String>
         when {
@@ -153,14 +155,14 @@ class CalendarScraper(private val context: Context) {
                 }
             }
         }
-        return foundEvents
+        foundEvents
     }
 
 
 
 
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    fun getAllevents(activeCalendar: JoozdCalendar): List<JoozdCalendarEvent> {
+    suspend fun getAllevents(activeCalendar: JoozdCalendar): List<JoozdCalendarEvent> = withContext (Dispatchers.IO){
         val foundEvents: MutableList<JoozdCalendarEvent> = mutableListOf()
 
         val selection = "(${CalendarContract.Events.CALENDAR_ID} = ?)"
@@ -194,7 +196,7 @@ class CalendarScraper(private val context: Context) {
                 }
             }
         }
-        return foundEvents
+        foundEvents
     }
 
 

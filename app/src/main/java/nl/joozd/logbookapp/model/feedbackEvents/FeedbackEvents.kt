@@ -146,6 +146,7 @@ object FeedbackEvents {
         Event {
         NOT_IMPLEMENTED,
         SAVING,
+        EDIT_FLIGHT_CALENDAR_CONFLICT,
         CLOSE_EDIT_FLIGHT_FRAGMENT,
         INVALID_REG_TYPE_STRING,
         AIRPORT_NOT_FOUND_FOR_LANDINGS,

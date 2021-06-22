@@ -58,6 +58,8 @@ fun Instant.atEndOfDay(zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant = this.
 
 fun Instant.plusDays(daysToAdd: Int): Instant = this.plusSeconds(daysToAdd * 86400L) // 86400 seconds is 1 day
 
+fun Instant.plusMinutes(minutesToAdd: Int): Instant = this.plusSeconds(minutesToAdd * 60L) // 86400 seconds is 1 day
+
 /**
  * Return a string containing only the time part when converted to local time.
  * @param zoneOffset: Timezone at which we want to know the time. Standard is UTC

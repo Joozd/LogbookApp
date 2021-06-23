@@ -35,6 +35,7 @@ import nl.joozd.logbookapp.data.miscClasses.crew.ObservableCrew
 import nl.joozd.logbookapp.data.repository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -48,7 +49,7 @@ import kotlin.reflect.KProperty
  * Has functions to retreive a flight from, or save it to [FlightRepository]
  * has LiveData for things that need displaying *
  */
-class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineScope by MainScope() {
+class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean = false): CoroutineScope by MainScope() {
 
     private val initialFlight = flight
 
@@ -221,6 +222,19 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
         get() = _duration.value ?: correctedDuration() // generate value if _duration hasn't been observed yet
         private set(it) = _duration.setOnMainIfAble(it)
 
+    /**
+     * This flight is planned if it was planned, or if it was a new flight
+     */
+    val isPlanned: Boolean
+        get() = newFlight || originalFlight.isPlanned
+
+    /**
+     * Checks if the edits currently done on this flight will flag it as "not the same as originally synced"
+     */
+    val canCauseCalendarConflict: Boolean
+        get() = (newFlight || !originalFlight.also{println(it)}.isSameFlightAs(this.toFlight().also{println(it)})).also{
+            println("CAN CAUSE CALENDAR CONFLICT: $it")
+        }
 
     /**
      * async data filler functions
@@ -797,6 +811,9 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
      * Save data to repository
      **************************/
 
+    /**
+     * Save and close current WorkingFlight.
+     */
     fun saveAndClose(): Job = launchWithLocks(
         NonCancellable,
         ifrTimeMutex,
@@ -823,6 +840,24 @@ class WorkingFlight(flight: Flight, val newFlight: Boolean = false): CoroutineSc
                 closeWorkingFlight()
             }
         }
+    }
+
+    /**
+     * Waits for all locks to be cleared
+     */
+    suspend fun waitForAsyncWork() = withContext(Dispatchers.Default) {
+        launchWithLocks(
+            ifrTimeMutex,
+            nightTimeMutex,
+            multiPilotMutex,
+            aircraftMutex,
+            destMutex,
+            origMutex,
+            timeInOutMutex,
+            takeoffLandingMutex
+        ) {
+            // do nothing, just wait for locks
+        }.join()
     }
 
 

@@ -43,6 +43,12 @@ import nl.joozd.logbookapp.databinding.DialogJoozdlogTwoButtonBinding
  * [titleResource] = title, from resource.
  * Same goes for [message] / [messageResource]
  * [setPositiveButton] / [setNegativeButton] / [setNeutralButton] for buttons
+ * Buttons layout:
+ * 4:
+ *      BONUS           NEGATIVE
+ *      NEUTRAL         POSITIVE
+ * 2:
+ *      NEGATIVE        OK
  */
 class JoozdlogAlertDialog: Fragment() {
     private val ctx: Context

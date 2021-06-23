@@ -213,6 +213,7 @@ class EditFlightFragment: JoozdlogFragment(){
                     EditFlightFragmentEvents.INVALID_TIME_STRING -> toast("Error in time string, no changes")
                     EditFlightFragmentEvents.INVALID_SIM_TIME_STRING -> toast("Error in time string, simTime = 0")
                     EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT -> closeFragment()
+                    EditFlightFragmentEvents.EDIT_FLIGHT_CALENDAR_CONFLICT -> showCalendarConflictDialog()
                 }
                 Unit
             }
@@ -632,6 +633,26 @@ class EditFlightFragment: JoozdlogFragment(){
             addToBackStack(null)
         }
         return true
+    }
+
+    /**************************************************************************
+     * Dialogs:
+     **************************************************************************/
+
+    private fun showCalendarConflictDialog() = JoozdlogAlertDialog().show(requireActivity()){
+        titleResource = R.string.calendar_sync_conflict
+        messageResource = R.string.calendar_sync_edited_flight
+        setPositiveButton(android.R.string.ok) {
+            viewModel.disableCalendarSync()
+            viewModel.saveAndClose()
+        }
+        setNegativeButton(R.string.delete_calendar_flight_until_end){
+            viewModel.postponeCalendarSync()
+            viewModel.saveAndClose()
+        }
+        setNeutralButton(android.R.string.cancel){
+            //do nothing and just close this dialog
+        }
     }
 
     private fun showWelcomeMessage() = JoozdlogAlertDialog().show(requireActivity()){

@@ -43,7 +43,7 @@ class CalendarScraper(private val context: Context) {
     // private val hasPermission= ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED
 
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    private fun findCalendarByName(name: String?): JoozdCalendar? = if (name == null) null else getCalendarsList()?.singleOrNull{it.name == name}
+    private suspend fun findCalendarByName(name: String?): JoozdCalendar? = if (name == null) null else getCalendarsList().singleOrNull{it.name == name}
 
 
     /*********************************************************************************************

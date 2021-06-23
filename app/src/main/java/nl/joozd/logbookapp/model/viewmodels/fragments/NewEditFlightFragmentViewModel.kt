@@ -33,6 +33,8 @@ import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinute
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -222,7 +224,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Set registration and type from regAndTypeString.
      * - If [sim] it saves the whole thing as type
      * - if no '(' in [regAndTypeString] it assumes all is registration.
-     * Else, it will save exactly [reg] and [type] in [reg]([type]).
+     * Else, it will save exactly `reg` and `type` in `reg(type)`.
      * Closing bracket is ignored. If no opening bracket, it is all reg.
      */
     @Suppress("MemberVisibilityCanBePrivate")
@@ -257,7 +259,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     /**
      * Set takeoff/landings from a string.
-     * If '/' in string, it takes [takeoff]/[landing]
+     * If '/' in string, it takes [WorkingFlight.takeoff]/[WorkingFlight.landing]
      * else it sets both takeoff and landing to that value.
      * [WorkingFlight] takes care of day/night
      * @param tlString: Takeoff/landing string. Can only consist of digits or '/'
@@ -418,11 +420,36 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     }
 
     /**
-     * Save WorkingFlight and send Close message to fragment
+     * Save WorkingFlight and send Close message to fragment.
+     * If this edits a flight that doesn't end up as completed, it will either:
+     *      - push back calendar sync if offBlocks is less than 30 minutes in the future
+     *      - Feed back to main activity that this gives a possible sync problem
+     *          -> This feedback is given instead of CLOSE_EDIT_FLIGHT_FRAGMENT so user can decide to continue editing.
      */
+
     fun saveAndClose() {
-        wf.saveAndClose()
-        feedback(EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT)
+        viewModelScope.launch {
+            wf.waitForAsyncWork()
+            if (wf.isPlanned && wf.canCauseCalendarConflict) {
+                val now = Instant.now()
+                // Push back calendar sync if timeIn in future
+                if (wf.mTimeIn > now) {
+                    if (wf.mTimeOut <= now.plusMinutes(30)) {
+                        postponeCalendarSync()
+                    }
+                    //This happens if flight starts > 30 minutes in the future and calendar sync is active during this flight
+                    else if (Preferences.calendarDisabledUntil < wf.mTimeIn.epochSecond) {
+                        feedback(EditFlightFragmentEvents.EDIT_FLIGHT_CALENDAR_CONFLICT)
+                        return@launch
+                    }
+
+                }
+                //else { /*no problem, no action*/ }
+            }
+
+            wf.saveAndClose()
+            feedback(EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT)
+        }
     }
 
     /**
@@ -447,7 +474,24 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      */
     fun checkIfStillOpen(): Boolean = !closing
 
+    /**
+     * Disables Calendar Sync alltogether
+     */
+    fun disableCalendarSync(){
+        Preferences.useCalendarSync = false
+    }
 
+    /**
+     * Postpones Calendar Sync until max of:
+     *      - 1 second after [WorkingFlight.mTimeIn]
+     *      - current [Preferences.calendarDisabledUntil]
+     *
+     */
+    fun postponeCalendarSync(){
+        (wf.mTimeIn.epochSecond + 1).let {
+            if (it > Preferences.calendarDisabledUntil) Preferences.calendarDisabledUntil = it
+        }
+    }
 
     /**
      * Helper functions

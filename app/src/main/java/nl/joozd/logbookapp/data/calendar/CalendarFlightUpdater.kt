@@ -23,11 +23,10 @@ import android.Manifest
 import androidx.annotation.RequiresPermission
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
-import nl.joozd.logbookapp.data.calendar.dataclasses.SupportedCalendarTypes
 import nl.joozd.logbookapp.data.calendar.parsers.KlmKlcCalendarFlightsParser
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
-import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.Duration
 import java.time.Instant
@@ -42,7 +41,7 @@ import java.time.Instant
 class CalendarFlightUpdater {
     private val context = App.instance.ctx
     private val calendarScraper = CalendarScraper(context)
-    private val startCutoff = maxOf(Instant.now(), Instant.ofEpochSecond(Preferences.calendarDisabledUntil))
+    private val startCutoff = maxOf(Instant.now().atStartOfDay(), Instant.ofEpochSecond(Preferences.calendarDisabledUntil))
 
     val period = (startCutoff..Instant.now().plus(Duration.ofDays(Preferences.calendarSyncAmountOfDays)))
 
@@ -50,7 +49,7 @@ class CalendarFlightUpdater {
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
     @Deprecated("Deprecated, use getRoster")
     suspend fun getFlights(): List<Flight>?{
-        val activeCalendar = calendarScraper.getCalendarsList()?.firstOrNull { it.name == Preferences.selectedCalendar }
+        val activeCalendar = calendarScraper.getCalendarsList().firstOrNull { it.name == Preferences.selectedCalendar }
         val foundEvents: List<JoozdCalendarEvent> = activeCalendar?.let{
             calendarScraper.getEventsBetween(it, period.start, period.endInclusive)
         } ?: return null
@@ -64,7 +63,7 @@ class CalendarFlightUpdater {
     }
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
     suspend fun getRoster(): Roster? {
-        val activeCalendar = calendarScraper.getCalendarsList()?.firstOrNull { it.name == Preferences.selectedCalendar }
+        val activeCalendar = calendarScraper.getCalendarsList().firstOrNull { it.name == Preferences.selectedCalendar }
         val foundEvents: List<JoozdCalendarEvent> = activeCalendar?.let{
             calendarScraper.getEventsBetween(it, period.start, period.endInclusive)
         } ?: return null

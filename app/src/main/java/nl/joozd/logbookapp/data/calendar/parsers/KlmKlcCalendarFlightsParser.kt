@@ -32,6 +32,8 @@ import java.time.ZoneOffset
  * Parses JoozdCalendarEvents and builds a list of Flights.
  * All Flights have ID -1
  * suggested use: KlmCrewCalendarFlightsParser(listOfEvents).getFlights(icaoIataMap)
+ * @param events: Events that might contain a flight (a flight is anything that matches [flightRegEx])
+ * period: start of day of start of first flight until end of day of end of last flight
  */
 
 class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>):
@@ -76,8 +78,8 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>):
         get() {
             val start = flights.minByOrNull { it.timeOut }?.tOut()?.toLocalDate()
                 ?.atStartOfDay()?.toInstant(ZoneOffset.UTC) ?: Instant.ofEpochSecond(0)
-            val end = flights.maxByOrNull { it.timeIn }?.tIn()?.toLocalDate()?.plusDays(1)
-                ?.atStartOfDay()?.toInstant(ZoneOffset.UTC) ?: start.plusSeconds(1)
+            val end = flights.maxByOrNull { it.timeIn }?.tIn()?.toLocalDate()
+                ?.atStartOfDay()?.plusDays(1)?.toInstant(ZoneOffset.UTC) ?: start.plusSeconds(1)
             return(start..end)
         }
 

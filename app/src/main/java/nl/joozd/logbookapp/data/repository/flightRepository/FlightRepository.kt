@@ -154,10 +154,10 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * Returns all flights in DB which start in [period]
      * @param period: Period in which these flights should be
      */
-    private suspend fun getFlightsOnDays(period: ClosedRange<Instant>) =
+    private suspend fun getFlightsInPeriod(period: ClosedRange<Instant>) =
         getAllFlights().filter { it.timeOut in period.map { instant -> instant.epochSecond } }
 
-    private val _syncProgress = MutableLiveData<Int>(-1)
+    private val _syncProgress = MutableLiveData(-1)
 
     private val _notLoggedIn = MutableLiveData<Boolean>()
 
@@ -472,9 +472,12 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      *  - Rostered flights that are not exact matches + matches with extra data will be saved to DB
      *  @param roster: a Roster with flights to be planned
      *  @param canUndo: If true, this action will be given to [undoTracker]
+     *  NOTE If any times have been changed (like off-blocks time was entered when going off-blocks) a flight will not be recognized as being the same
+     *          The thought here is that if you want to enter extra data like crew names from a roster, you usually do that before modifying times,
+     *          and if you import a roster after modifying times, you probably do that because you want the original times back.
      */
-    suspend fun saveRoster(roster: Roster, canUndo: Boolean = false) = withContext(Dispatchers.IO + NonCancellable){
-        val plannedFlightsInDB = getFlightsOnDays(roster.period).filter { it.isPlanned }
+    suspend fun saveRoster(roster: Roster, canUndo: Boolean = false, fromCalendar: Boolean = false) = withContext(Dispatchers.IO + NonCancellable){
+        val plannedFlightsInDB = getFlightsInPeriod(roster.period).filter { it.isPlanned }
         //unchanged flights, these will not be deleted
         val unchangedFlights = plannedFlightsInDB.filter { pf -> roster.flights.any { rf-> rf.isSameFlightAs(pf)}}
 
@@ -515,7 +518,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     suspend fun saveCompletedFlights(completedFlights: CompletedFlights): Int = withContext(Dispatchers.IO + NonCancellable){
         require(completedFlights.isValid) { "Cannot parse an invalid roster! You should have checked this!" }
         val importFlights = completedFlights.flights
-        val flightsInPeriod = getFlightsOnDays(completedFlights.period)
+        val flightsInPeriod = getFlightsInPeriod(completedFlights.period)
 
         val conflicts = flightsInPeriod.filter { savedFlight -> importFlights.none { it.isSameCompletedFlight(savedFlight) } && importFlights.any { it.overlaps(savedFlight) } }
         println("I FOUND ${conflicts.size} CONFLICTING FLIGHTS: $conflicts")
@@ -556,12 +559,12 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             val needsServerSync =
                 TimestampMaker.nowForSycPurposes - Preferences.lastUpdateTime > MIN_SYNC_INTERVAL   // interval for checking remote changes has passed
                         || getFlightsChangedAfter(Preferences.lastUpdateTime).isNotEmpty()          // OR local changes since last sync
-            val needsCalendarSync =
-                TimestampMaker.nowForSycPurposes - Preferences.lastCalendarCheckTime > MIN_CALENDAR_CHECK_INTERVAL
+
+            val needsCalendarSync = TimestampMaker.nowForSycPurposes - Preferences.lastCalendarCheckTime > MIN_CALENDAR_CHECK_INTERVAL
+
             if (needsCalendarSync && Preferences.useCalendarSync) {
                 if (checkPermission(Manifest.permission.READ_CALENDAR)) {
-                    val calendar = CalendarFlightUpdater()
-                    calendar.getRoster()?.let {
+                    CalendarFlightUpdater().getRoster()?.let {
                         saveRoster(it.postProcess())
                     }
                 }

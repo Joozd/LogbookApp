@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.ui.utils.customs
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.MotionEvent
 import android.view.View
@@ -44,6 +45,7 @@ class Swiper(val backgroundLayout: ConstraintLayout) {
     /**
      * @param activity: Activity to get LayoutInflater from. If able, provide a root view for LayoutParams
      */
+    @SuppressLint("InflateParams")
     constructor(activity: Activity): this(EmptyConstraintLayoutBinding.bind(activity.layoutInflater.inflate(R.layout.empty_constraint_layout, null)).root)
 
     /**
@@ -266,9 +268,9 @@ class Swiper(val backgroundLayout: ConstraintLayout) {
         }
     }
 
-    private fun cancelSwipe() = swipeableView?.let{ v ->
+    private fun cancelSwipe(animationAllowed: Boolean = true) = swipeableView?.let{ v ->
         parent?.requestDisallowInterceptTouchEvent(false)
-        if (animate) {
+        if (animate && animationAllowed) {
             currentAnimation = ValueAnimator.ofInt((v.translationX).toInt(), 0).apply{
                 addUpdateListener {
                     v.translationX = 1.0f * it.animatedValue as Int
@@ -279,7 +281,10 @@ class Swiper(val backgroundLayout: ConstraintLayout) {
                 start()
             }
         }
-        else v.translationX = 0f
+        else {
+            v.translationX = 0f
+            backgroundLayout.background.alpha = 0
+        }
     }.also{
         isOpen = false
     }
@@ -336,7 +341,7 @@ class Swiper(val backgroundLayout: ConstraintLayout) {
      * If a view is reused and made into a Swiper again, close it first
      */
     init{
-        cancelSwipe()
+        cancelSwipe(false)
     }
 
 

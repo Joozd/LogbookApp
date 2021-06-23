@@ -38,5 +38,5 @@ data class Aircraft(val registration: String, val type: AircraftType? = null, va
 
     override fun toString() = type?.let{
         "$registration(${type.shortName})"
-    } ?: "$registration(???)"
+    } ?: registration
 }

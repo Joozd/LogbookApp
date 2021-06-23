@@ -403,7 +403,7 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
                 if (mName.isBlank()) mName = f.name
                 if (mName2.isBlank()) mName2 = f.name2
                 mIsPic = f.isPIC
-                if (flight.registration.isBlank()) setAircraft(f.registration)
+                // if (flight.registration.isBlank()) setAircraft(f.registration) // Don't auto set aircraft for pre-filled flights without aircraft data
             }
         }
         mIsAutovalues = autoFill

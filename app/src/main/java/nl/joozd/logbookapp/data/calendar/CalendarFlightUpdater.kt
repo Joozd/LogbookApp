@@ -62,6 +62,6 @@ class CalendarFlightUpdater {
         val foundEvents: List<JoozdCalendarEvent> = activeCalendar()?.let{
             calendarScraper.getEventsBetween(it, period.start, period.endInclusive)
         } ?: return null
-        return KlmKlcCalendarFlightsParser(foundEvents)
+        return KlmKlcCalendarFlightsParser(foundEvents, period)
     }
 }

@@ -24,9 +24,7 @@ import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
-import nl.joozd.logbookapp.utils.reversed
 import java.time.Instant
-import java.time.ZoneOffset
 
 /**
  * Parses JoozdCalendarEvents and builds a list of Flights.
@@ -36,7 +34,7 @@ import java.time.ZoneOffset
  * period: start of day of start of first flight until end of day of end of last flight
  */
 
-class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>):
+class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, override val period: ClosedRange<Instant>):
     Roster {
     init{
         Log.d(this::class.simpleName, "Got ${events.size} events")
@@ -73,16 +71,6 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>):
 
     override val isValid: Boolean
         get() = true
-
-    /**
-     * Period is start of first flight until end of last flight
-     */
-    override val period: ClosedRange<Instant> // if no flights: (0..1)
-        get() {
-            val start = flights.minByOrNull { it.timeOut }?.tOut()?.toInstant(ZoneOffset.UTC) ?: Instant.ofEpochSecond(0)
-            val end = flights.maxByOrNull { it.timeIn }?.tIn()?.toInstant(ZoneOffset.UTC) ?: start.plusSeconds(1)
-            return(start..end)
-        }
 
     override fun close() {
         // intentionally left blank

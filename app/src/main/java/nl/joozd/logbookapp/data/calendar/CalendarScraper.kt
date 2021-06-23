@@ -88,7 +88,7 @@ class CalendarScraper(private val context: Context) {
     }
 
     /**
-     * Returns a list of JoozdCalendarEvents starting between [start] and [end]
+     * Returns a list of JoozdCalendarEvents _starting_ between [start] and [end]
      * A null value means open, so all after a certain time can be gotten by leaving [end] open (or null)
      * @param activeCalendar: a JoozdCalendar object representing the calendar we are looking at
      * @param start: Earliest time for any events, can be empty
@@ -114,8 +114,8 @@ class CalendarScraper(private val context: Context) {
                 selection = "((${CalendarContract.Events.CALENDAR_ID} = ?) AND (" +
                         "${CalendarContract.Events.DTSTART} >= ?))"
                 selectionArgs = arrayOf(
-                    activeCalendar.calID.toString().also{Log.d("calID", it)},
-                    start.toEpochMilli().toString().also{Log.d("epochMilli", it)})
+                    activeCalendar.calID.toString(),
+                    start.toEpochMilli().toString())
             }
             else -> {
                 selection = "((${CalendarContract.Events.CALENDAR_ID} = ?) AND (" +

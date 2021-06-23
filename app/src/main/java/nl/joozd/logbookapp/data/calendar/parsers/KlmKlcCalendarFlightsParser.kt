@@ -74,12 +74,13 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>):
     override val isValid: Boolean
         get() = true
 
+    /**
+     * Period is start of first flight until end of last flight
+     */
     override val period: ClosedRange<Instant> // if no flights: (0..1)
         get() {
-            val start = flights.minByOrNull { it.timeOut }?.tOut()?.toLocalDate()
-                ?.atStartOfDay()?.toInstant(ZoneOffset.UTC) ?: Instant.ofEpochSecond(0)
-            val end = flights.maxByOrNull { it.timeIn }?.tIn()?.toLocalDate()
-                ?.atStartOfDay()?.plusDays(1)?.toInstant(ZoneOffset.UTC) ?: start.plusSeconds(1)
+            val start = flights.minByOrNull { it.timeOut }?.tOut()?.toInstant(ZoneOffset.UTC) ?: Instant.ofEpochSecond(0)
+            val end = flights.maxByOrNull { it.timeIn }?.tIn()?.toInstant(ZoneOffset.UTC) ?: start.plusSeconds(1)
             return(start..end)
         }
 
@@ -91,12 +92,6 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>):
         const val FLIGHT_EVENT_IDENTIFIER = "FLIGHT"
         //TODO make regex for eg. `FLIGHT KL0887 AMS - HKG`
 
-        /*
-        private const val FLIGHTNUMBER = "flightNumber"
-        private const val ORIG = "orig"
-        private const val DEST = "dest"
-        val flightRegEx = """FLIGHT (?<$FLIGHTNUMBER>[A-Z]{2}\d{3,4}) (?<$ORIG>[A-Z]{3}) - (?<$DEST>[A-Z]{3})""".toRegex()
-        */
         private const val FLIGHTNUMBER = 1
         private const val ORIG = 2
         private const val DEST = 3

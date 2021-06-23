@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.data.calendar
 import android.Manifest
 import androidx.annotation.RequiresPermission
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
 import nl.joozd.logbookapp.data.calendar.parsers.KlmKlcCalendarFlightsParser
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
@@ -36,35 +37,29 @@ import java.time.Instant
  * It will need some extra smarts, such as cut-off times etc
  */
 
-//TODO think of a better name
 
 class CalendarFlightUpdater {
     private val context = App.instance.ctx
     private val calendarScraper = CalendarScraper(context)
-    private val startCutoff = maxOf(Instant.now().atStartOfDay(), Instant.ofEpochSecond(Preferences.calendarDisabledUntil))
+    private val startCutoff
+        get() = maxOf(Instant.now().atStartOfDay(), Instant.ofEpochSecond(Preferences.calendarDisabledUntil))
 
-    val period = (startCutoff..Instant.now().plus(Duration.ofDays(Preferences.calendarSyncAmountOfDays)))
+    val period
+        get() = (startCutoff..Instant.now().plus(Duration.ofDays(Preferences.calendarSyncAmountOfDays)))
 
-
+    /**
+     * Get active calendar
+     */
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    @Deprecated("Deprecated, use getRoster")
-    suspend fun getFlights(): List<Flight>?{
-        val activeCalendar = calendarScraper.getCalendarsList().firstOrNull { it.name == Preferences.selectedCalendar }
-        val foundEvents: List<JoozdCalendarEvent> = activeCalendar?.let{
-            calendarScraper.getEventsBetween(it, period.start, period.endInclusive)
-        } ?: return null
-        return KlmKlcCalendarFlightsParser(foundEvents).flights
-        /* This for when no longer one regex fits all
-        when(Preferences.calendarType){
-            SupportedCalendarTypes.KLM_CREWCALENDAR -> KlmKlcCalendarFlightsParser(foundEvents).getFlights(icaoIataMapAsync.await())
-            else -> emptyList()
-        }
-        */
-    }
+    private suspend fun activeCalendar(): JoozdCalendar? = calendarScraper.getCalendarsList().firstOrNull { it.name == Preferences.selectedCalendar }
+
+    /**
+     * This will scrape all flights in [period] from the selected calendar
+     * @return a [Roster]
+     */
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
     suspend fun getRoster(): Roster? {
-        val activeCalendar = calendarScraper.getCalendarsList().firstOrNull { it.name == Preferences.selectedCalendar }
-        val foundEvents: List<JoozdCalendarEvent> = activeCalendar?.let{
+        val foundEvents: List<JoozdCalendarEvent> = activeCalendar()?.let{
             calendarScraper.getEventsBetween(it, period.start, period.endInclusive)
         } ?: return null
         return KlmKlcCalendarFlightsParser(foundEvents)

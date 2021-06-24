@@ -110,7 +110,7 @@ class KlcCheckinSheet(roster: String?): Roster {
              * If a number is followed by another number, that function stays the same person
              * If it followed by [A-Z] that is a new function, whose name is all text until next number
              * Names are written in reverse order, separated by commas (VRIES, DE, HENK), all caps
-             * should become "Ullllll, lll lll lll, Ulllll Ulll Ulll" (U = uppercase, l = lowercase)
+             * should become "Xxxxxxx, xxx xxx xxx, Xxxxxx Xxxx Xxxx" (X = uppercase, x = lowercase)
              */
             // update crewList
             line.putNamesInMap(crewList, myName)
@@ -169,7 +169,7 @@ class KlcCheckinSheet(roster: String?): Roster {
      * and turns it into a Name
      */
     private fun rawNameToName(rawName: String, myName: String): Name =
-        with (Name.ofList(rawName.split(','))){
+        with (Name.ofList(rawName.split(',').map{ it.trim() })){
             if (checkMyName == myName) Name(MY_NAME) else this
         }
 
@@ -181,7 +181,7 @@ class KlcCheckinSheet(roster: String?): Roster {
         val checkMyName = (if (middle.isNotEmpty()) "$first $last, $middle" else "$first $last")
             .uppercase(Locale.ROOT)
 
-        override fun toString() = listOf(first, middle.lowercase(Locale.ROOT), last).filter { !it.isBlank() }.joinToString(" ")
+        override fun toString() = listOf(first, middle.lowercase(Locale.ROOT), last).filter { it.isNotBlank() }.joinToString(" ")
 
         companion object {
             /**

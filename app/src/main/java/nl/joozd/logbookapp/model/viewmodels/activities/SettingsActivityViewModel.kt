@@ -251,6 +251,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         get() = AppCompatDelegate.getDefaultNightMode().takeIf{ it in (1..2)} ?: 0
 
 
+    val emailGoodAndVerified
+        get() = Preferences.emailAddress.isNotBlank() && Preferences.emailVerified
+
 
     /*********************************************************************************************
      * Callable functions
@@ -361,7 +364,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
     fun fillCalendarsList() {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }?.let { _foundCalendars.value = it }
+            withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }.let { _foundCalendars.value = it }
             _pickedCalendar.value = _foundCalendars.value?.firstOrNull {c -> c.name == Preferences.selectedCalendar}
         }
     }

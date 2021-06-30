@@ -556,7 +556,7 @@ class SettingsActivity : JoozdlogActivity() {
     private fun toggleBackupFromCloudWithDialogIfNeeded(){
         when{
             Preferences.backupFromCloud -> Preferences.backupFromCloud = false
-            viewModel.emailAddress.value == null -> showEmailDialog { Preferences.backupFromCloud = true }
+            !viewModel.emailGoodAndVerified -> showEmailDialog { Preferences.backupFromCloud = true }
             else -> Preferences.backupFromCloud = true
         }
     }

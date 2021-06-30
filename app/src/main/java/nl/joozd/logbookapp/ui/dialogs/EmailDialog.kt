@@ -25,7 +25,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
@@ -37,6 +36,11 @@ import nl.joozd.logbookapp.model.viewmodels.dialogs.EmailDialogViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
 
+/**
+ * Fragment that displays a dialog to enter email address
+ * Initially will show currently entered email address and OK if that is verified or empty, or VERIFY of it is not verified.
+ * @see EmailDialogViewModel.okButtonText
+ */
 class EmailDialog(): JoozdlogFragment() {
     /**
      * [extra] will be executed on successfully entering an email address
@@ -48,6 +52,10 @@ class EmailDialog(): JoozdlogFragment() {
     private var onComplete: (() -> Unit)? = null
     private val viewModel: EmailDialogViewModel by viewModels()
 
+    /**
+     * OK button when enabled will get focus (so onFocusChangeListeners will trigger) and tell viewModel it has been clicked.
+     * If not enabled, [okButtonListener] shall not be called
+     */
     private val okButtonListener = View.OnClickListener{
         activity?.currentFocus?.clearFocus()
         it.requestFocus()
@@ -57,14 +65,17 @@ class EmailDialog(): JoozdlogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogEmailAddressBinding.bind(inflater.inflate(R.layout.dialog_email_address, container, false)).apply{
 
+            //Set initial values from viewModel on (re)creation
             emailAddressEditText.setText(viewModel.email1)
             emailAddress2EditText.setText(viewModel.email2)
 
-            (emailAddressEditText as EditText).onTextChanged { text ->
+            //Whenever text changed, check if OK button should be enabled and update it's text if necessary
+            emailAddressEditText.onTextChanged { text ->
                 emailAddressLayout.error = ""
                 enableOkButton(okButton, viewModel.checkSame1(text))
             }
 
+            // When focus removed from field, update email1 in viewModel
             emailAddressEditText.setOnFocusChangeListener { _, hasFocus ->
                 if(!hasFocus)
                     emailAddressEditText.text?.toString()?.let {
@@ -72,12 +83,13 @@ class EmailDialog(): JoozdlogFragment() {
                     }
             }
 
-
-            (emailAddress2EditText as EditText).onTextChanged { text ->
+            //Whenever text changed, check if OK button should be enabled and update it's text if necessary
+            emailAddress2EditText.onTextChanged { text ->
                 emailAddress2Layout.error = ""
                 enableOkButton(okButton, viewModel.checkSame2(text))
             }
 
+            // When focus removed from field, update email2 in viewModel
             emailAddress2EditText.setOnFocusChangeListener { _, hasFocus ->
                 if(!hasFocus)
                     emailAddress2EditText.text?.toString()?.let {
@@ -88,16 +100,36 @@ class EmailDialog(): JoozdlogFragment() {
             headerLayout.setOnClickListener{ } // do nothing, catch clicks
             bodyLayout.setOnClickListener{ } // do nothing, catch clicks
 
+            // Clicking outside dialog == clicking cancel
             emailDialogBackground.setOnClickListener { closeFragment() }
 
-
-            okButton.setOnClickListener(okButtonListener)
+            // Initially set OKbutton activated or not
+            enableOkButton(okButton, viewModel.okButtonShouldBeEnabled())
+            viewModel.updateOKButtonText()
 
             cancelButton.setOnClickListener { closeFragment() }
+
+            /***************
+             * Observers:
+             **************/
+
+            viewModel.okButtonText.observe(viewLifecycleOwner){
+                okButton.text= getString(it)
+            }
 
             viewModel.feedbackEvent.observe(viewLifecycleOwner){
                 when (it.getEvent()){
                     GeneralEvents.DONE -> {
+                        viewModel.onComplete()
+                        JoozdlogAlertDialog().show(requireActivity()){
+                            titleResource = R.string.email_verification_requested_short
+                            messageResource = R.string.email_verification_requested_long
+                            setPositiveButton(android.R.string.ok){
+                                closeFragment()
+                            }
+                        }
+                    }
+                    GeneralEvents.OK -> {
                         viewModel.onComplete()
                         closeFragment()
                     }
@@ -126,18 +158,18 @@ class EmailDialog(): JoozdlogFragment() {
     /**
      * Only use for OK button
      */
-    private fun enableOkButton(v: TextView, enabled: Boolean){
+    private fun enableOkButton(okButton: TextView, enabled: Boolean){
         Log.d("TextView.enable", "enabled: $enabled")
         if (!enabled){
-            v.setOnClickListener {
+            okButton.setOnClickListener {
                 activity?.currentFocus?.clearFocus()
                 it.requestFocus()
             }
-            v.setTextColor(requireActivity().getColorFromAttr(android.R.attr.textColorTertiary))
+            okButton.setTextColor(requireActivity().getColorFromAttr(android.R.attr.textColorTertiary))
         }
         else{
-            v.setOnClickListener(okButtonListener)
-            v.setTextColor(requireActivity().getColorFromAttr(android.R.attr.colorAccent))
+            okButton.setOnClickListener(okButtonListener)
+            okButton.setTextColor(requireActivity().getColorFromAttr(android.R.attr.colorAccent))
         }
     }
 

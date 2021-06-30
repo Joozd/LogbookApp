@@ -114,7 +114,7 @@
             <TextView
                 android:id="@+id/okButton"
                 style="@style/DialogButtonText"
-                android:text="@android:string/ok"
+                tools:text="Verify/OK"
                 android:layout_marginTop="24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

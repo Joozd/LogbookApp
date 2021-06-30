@@ -526,7 +526,8 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
                         viewModelScope.launch{
                             Log.d("mainViewModel", "Sending $it")
                             if (UserManagement.confirmEmail(it)) {
-                                Cloud.requestLoginLinkMail()
+                                //if (Preferences.emailJobsWaiting.sendLoginLink)
+                                    viewModelScope.launch { Cloud.requestLoginLinkMail() }
                                 feedback(MainActivityEvents.EMAIL_VERIFIED)
                             }
                             else _errorToShow.value = ScheduledErrors.currentErrors.firstOrNull()

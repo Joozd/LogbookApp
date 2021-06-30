@@ -276,13 +276,17 @@ object ServerFunctions {
         val k = Preferences.key
         if (n == null || k == null) return CloudFunctionResults.NO_LOGIN_DATA
         val payload = LoginDataWithEmail(n, k, BasicFlight.VERSION.version, Preferences.emailAddress).serialize()
+        println("XXXXX LALALALALA BANAAN 1")
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_LOGIN_LINK_MAIL, payload)
-        return when (client.readFromServer()?.toString(Charsets.UTF_8)) {
+        println("XXXXX LALALALALA BANAAN 2")
+        return when (client.readFromServer()?.toString(Charsets.UTF_8)) { // <--- Somehow this doesn't return
             null -> CloudFunctionResults.CLIENT_ERROR
             JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
             JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
             JoozdlogCommsKeywords.EMAIL_NOT_KNOWN_OR_VERIFIED -> CloudFunctionResults.EMAIL_DOES_NOT_MATCH
             else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
+        }.also{
+            println(it)
         }
     }
 

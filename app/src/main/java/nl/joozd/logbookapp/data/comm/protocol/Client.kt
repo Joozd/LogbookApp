@@ -88,19 +88,19 @@ class Client: Closeable, CoroutineScope {
             return -5
         } catch (he: UnknownHostException) {
             val exceptionString = "An exception 0001 occurred:\n ${he.printStackTrace()}"
-            Log.e(TAG, exceptionString, he)
+            Log.i(TAG, exceptionString, he)
             return -1
         } catch (ioe: IOException) {
             val exceptionString = "An exception 0002 occurred:\n ${ioe.printStackTrace()}"
-            Log.e(TAG, exceptionString, ioe)
+            Log.i(TAG, exceptionString, ioe)
             return -2
         } catch (ce: ConnectException) {
             val exceptionString = "An exception 0003 occurred:\n ${ce.printStackTrace()}"
-            Log.e(TAG, exceptionString, ce)
+            Log.i(TAG, exceptionString, ce)
             return -3
         } catch (se: SocketException) {
             val exceptionString = "An exception 0004 occurred:\n ${se.printStackTrace()}"
-            Log.e(TAG, exceptionString, se)
+            Log.i(TAG, exceptionString, se)
             return -4
         }
     }

@@ -24,7 +24,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
-import nl.joozd.joozdlogcommon.BalanceForward
+import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ListElementTotalsBinding
 import nl.joozd.logbookapp.databinding.ListGroupBalanceForwardBinding
@@ -63,7 +63,7 @@ class BalanceForwardAdapter(private val activity: Activity, private var list: Li
      * underlying data.
      *
      * @return whether or not the same ID always refers to the same object
-     * @see Adapter.hasStableIds
+     * @see BaseExpandableListAdapter.hasStableIds
      */
     override fun hasStableIds(): Boolean = true
 

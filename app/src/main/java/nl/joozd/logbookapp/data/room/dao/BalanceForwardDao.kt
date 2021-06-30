@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.data.room.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import nl.joozd.joozdlogcommon.BalanceForward
+import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 
 @Dao
 interface BalanceForwardDao {

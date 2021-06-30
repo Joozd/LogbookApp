@@ -20,8 +20,8 @@
 package nl.joozd.logbookapp.data.repository
 
 import kotlinx.coroutines.*
-import nl.joozd.joozdlogcommon.BalanceForward
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.dao.BalanceForwardDao
 

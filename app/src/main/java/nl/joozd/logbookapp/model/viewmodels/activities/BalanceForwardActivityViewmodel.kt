@@ -20,7 +20,7 @@
 package nl.joozd.logbookapp.model.viewmodels.activities
 
 import androidx.lifecycle.LiveData
-import nl.joozd.joozdlogcommon.BalanceForward
+import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 

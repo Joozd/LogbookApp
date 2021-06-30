@@ -196,7 +196,7 @@ class SettingsActivity : JoozdlogActivity() {
             }
 
             emailAddressButton.setOnClickListener {
-                showEmailDialog()
+                showEmailDialog() // no extra will default to {}
             }
 
             changePasswordButton.setOnClickListener {
@@ -561,6 +561,10 @@ class SettingsActivity : JoozdlogActivity() {
         }
     }
 
+    /**
+     * Show dialog to enter an email address.
+     * @param extra: Extra function to be performed on successfully entering an email address (eg. switching auto backups on after email was entered)
+     */
     private fun showEmailDialog(extra: () -> Unit = {}) {
         supportFragmentManager.commit {
             add(R.id.settingsActivityLayout, EmailDialog(extra), null)

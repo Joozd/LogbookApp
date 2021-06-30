@@ -25,7 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.viewModels
-import nl.joozd.joozdlogcommon.BalanceForward
+import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogAddBalanceForwardBinding
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardDialogEvents

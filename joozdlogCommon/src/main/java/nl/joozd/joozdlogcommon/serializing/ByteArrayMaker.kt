@@ -153,7 +153,7 @@ fun intFromBytes(bytes: List<Byte>): Int =
  * returns an array of Char.SIZE_BYTES (==8) bytes, containing the same bits
  */
 fun Char.toByteArray(): ByteArray {
-    return this.toInt().toByteArray().takeLast(Char.SIZE_BYTES).toByteArray()
+    return this.code.toByteArray().takeLast(Char.SIZE_BYTES).toByteArray()
 }
 
 /**

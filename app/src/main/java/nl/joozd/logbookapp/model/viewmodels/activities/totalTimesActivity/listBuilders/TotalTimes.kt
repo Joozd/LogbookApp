@@ -20,7 +20,7 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders
 
 import android.util.Log
-import nl.joozd.joozdlogcommon.BalanceForward
+import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.dataclasses.Flight

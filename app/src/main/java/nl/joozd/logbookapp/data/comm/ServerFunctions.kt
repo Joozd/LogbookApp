@@ -279,7 +279,7 @@ object ServerFunctions {
         println("XXXXX LALALALALA BANAAN 1")
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_LOGIN_LINK_MAIL, payload)
         println("XXXXX LALALALALA BANAAN 2")
-        return when (client.readFromServer()?.toString(Charsets.UTF_8)) { // <--- Somehow this doesn't return
+        return when (client.readFromServer()?.toString(Charsets.UTF_8)) { // <--- TODO Somehow this doesn't return problem might be on server
             null -> CloudFunctionResults.CLIENT_ERROR
             JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
             JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS

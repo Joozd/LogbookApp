@@ -40,6 +40,7 @@ import nl.joozd.logbookapp.ui.utils.toast
 class EmailDialog(): JoozdlogFragment() {
     /**
      * [extra] will be executed on successfully entering an email address
+     * It wil be stored in ViewModel for persisting through recreations
      */
     constructor(extra: () -> Unit) : this() {
         onComplete = extra
@@ -114,6 +115,9 @@ class EmailDialog(): JoozdlogFragment() {
 
         }.root
 
+    /**
+     * Pass [onComplete] from secondary constructor to ViewModel so it will persist after recreation
+     */
     override fun onAttach(context: Context) {
         onComplete?.let {viewModel.onComplete = it }
         super.onAttach(context)

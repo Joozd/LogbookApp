@@ -121,10 +121,18 @@ class EmailDialog(): JoozdlogFragment() {
                 when (it.getEvent()){
                     GeneralEvents.DONE -> {
                         viewModel.onComplete()
-                        JoozdlogAlertDialog().show(requireActivity()){
-                            titleResource = R.string.email_verification_requested_short
-                            messageResource = R.string.email_verification_requested_long
-                            setPositiveButton(android.R.string.ok){
+                        if (viewModel.email1.isNotBlank())
+                            JoozdlogAlertDialog().show(requireActivity()){
+                                titleResource = R.string.email_verification_requested_short
+                                messageResource = R.string.email_verification_requested_long
+                                setPositiveButton(android.R.string.ok){
+                                    closeFragment()
+                                }
+                            }
+                        else JoozdlogAlertDialog().show(requireActivity()) {
+                            titleResource = R.string.email_deleted
+                            messageResource = R.string.email_deleted_long
+                            setPositiveButton(android.R.string.ok) {
                                 closeFragment()
                             }
                         }

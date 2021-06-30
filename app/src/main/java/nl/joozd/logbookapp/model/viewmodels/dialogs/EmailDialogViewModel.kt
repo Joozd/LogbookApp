@@ -57,7 +57,7 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
      */
     fun okClicked(){
         if (email1 != email2) feedback(GeneralEvents.ERROR).putInt(3)
-        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()) feedback(GeneralEvents.ERROR).putInt(4)
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches() && email1.isNotBlank()) feedback(GeneralEvents.ERROR).putInt(4)
 
         if (Preferences.emailAddress.lowercase(Locale.ROOT) != email1)
             Preferences.emailVerified = false
@@ -66,9 +66,11 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
             if (email1 != Preferences.emailAddress.lowercase(Locale.ROOT))
                 Preferences.emailAddress = email1
 
-            viewModelScope.launch {
-                UserManagement.changeEmailAddress()
-                // Fire and forget, UserManagement takes care of any errors that arise
+            if (email1.isNotBlank()) {
+                viewModelScope.launch {
+                    UserManagement.changeEmailAddress()
+                    // Fire and forget, UserManagement takes care of any errors that arise
+                }
             }
             feedback(GeneralEvents.DONE)
         }

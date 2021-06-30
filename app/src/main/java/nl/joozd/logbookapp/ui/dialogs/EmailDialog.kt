@@ -167,7 +167,6 @@ class EmailDialog(): JoozdlogFragment() {
      * Only use for OK button
      */
     private fun enableOkButton(okButton: TextView, enabled: Boolean){
-        Log.d("TextView.enable", "enabled: $enabled")
         if (!enabled){
             okButton.setOnClickListener {
                 activity?.currentFocus?.clearFocus()

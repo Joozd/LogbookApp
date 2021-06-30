@@ -36,6 +36,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.textfield.TextInputEditText
 
 
 val View.ctx: Context
@@ -96,6 +97,9 @@ var TextView.textColor: Long
     }
 
 fun View.setBackgroundColor(c: Long) = this.setBackgroundColor(c.toInt())
+
+
+fun TextInputEditText.onTextChanged(text: (String) -> Unit) = (this as EditText).onTextChanged(text)
 
 fun EditText.onTextChanged(text: (String) -> Unit) {
     this.addTextChangedListener(object : TextWatcher {

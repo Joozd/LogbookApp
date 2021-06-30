@@ -30,7 +30,7 @@ dependencies {
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 buildscript {
-    ext.kotlin_version = '1.5.10'
+    //ext.kotlin_version = '1.5.20'
     repositories {
         mavenCentral()
     }

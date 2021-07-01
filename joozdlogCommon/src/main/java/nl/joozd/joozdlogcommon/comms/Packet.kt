@@ -43,9 +43,21 @@ class Packet() {
         message = msg.toByteArray()
     }
 
+    /**
+     * The actual message
+     */
     var message = ByteArray(0)
+        private set
+
+    /**
+     * Size of the actual message, in bytes
+     */
     val messageSize: ByteArray
         get() = message.size.toByteArray()
+
+    /**
+     * The complete content of this Packet ([header] + [messageSize] + [message]
+     */
     val content: ByteArray
         get() = header + messageSize + message
 }

@@ -123,11 +123,9 @@ object Cloud {
             ServerFunctions.requestLoginLinkMail(client).also{
                 when(it){
                     CloudFunctionResults.OK -> {
-                        println("POEP 1")
                         Preferences.emailJobsWaiting.sendLoginLink = false
                     }
                     CloudFunctionResults.EMAIL_DOES_NOT_MATCH -> {
-                        println("POEP 2")
                         Preferences.emailVerified = false // error dialogs etc will be handled by calling function
                         Preferences.emailJobsWaiting.sendLoginLink = true
                     }

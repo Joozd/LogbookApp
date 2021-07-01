@@ -100,7 +100,8 @@ class Client: Closeable, CoroutineScope {
     }
 
     /**
-     * Runs listsner f with a 0-100 percentage completed value
+     * Reads data from server
+     * @param f: listener with a 0-100 percentage completed value
      */
     fun readFromServer(f: (Int) -> Unit = {}): ByteArray? {
         try {
@@ -120,8 +121,8 @@ class Client: Closeable, CoroutineScope {
 
     /**
      * Gets input from a BufferedInputStream
-     * @param inputStream The inputstream. This must be a complete [Packet]
-     * Runs listener f with a 0-100 percentage completed value
+     * @param inputStream: The InputStream. This must be a complete [Packet]
+     * @param f: listener with a 0-100 percentage completed value
      */
     private fun getInput(inputStream: BufferedInputStream, f: (Int) -> Unit = {}): ByteArray {
         val buffer = ByteArray(8192)
@@ -160,9 +161,8 @@ class Client: Closeable, CoroutineScope {
      * @param extraData: A bytearray with extra data to be sent as part of this request
      */
     fun sendRequest(request: String, extraData: ByteArray? = null): Int =
-        sendToServer(Packet(wrap(request) + (extraData ?: ByteArray(0)))).also{
-            Log.d("request", request)
-        }
+        sendToServer(Packet(wrap(request) + (extraData ?: ByteArray(0))))
+            //.also{ Log.d("request", request) }
 
 
     /**
@@ -180,11 +180,9 @@ class Client: Closeable, CoroutineScope {
     }
 
     private fun timeOut(timeOutMillis: Long = 10000): Job = launch{
-        Log.d("Client()", "Starting $timeOutMillis millis timeout")
         delay(timeOutMillis)
-        Log.d("Client()", "$timeOutMillis millis passed")
         if (isActive) {
-            Log.d("Client()", "Closing Client")
+            Log.i("Client()", "Closing Client")
             instance = null
             finalClose()
         }
@@ -198,7 +196,7 @@ class Client: Closeable, CoroutineScope {
     private fun finalClose(){
         try{
             socket.use {
-                Log.d(TAG, "sending EOS, closing socket")
+                Log.v(TAG, "sending EOS, closing socket")
                 this.sendRequest(JoozdlogCommsKeywords.END_OF_SESSION)
             }
         } finally {
@@ -226,8 +224,8 @@ class Client: Closeable, CoroutineScope {
                 timeOut.cancel()
             } finally{
 
-                return instance?.also{Log.d("Client()", "Reusing instance")}
-                    ?: Client().also{ instance = it }.also{Log.d("Client()", "Creating new instance")}
+                return instance?.also{Log.v("Client()", "Reusing instance")}
+                    ?: Client().also{ instance = it }.also{Log.v("Client()", "Creating new instance")}
             }
         }
     }

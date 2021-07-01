@@ -20,10 +20,6 @@
 package nl.joozd.logbookapp.data.comm.protocol
 
 import android.util.Log
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
-import androidx.lifecycle.Observer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import nl.joozd.joozdlogcommon.ProtocolVersion
@@ -32,8 +28,6 @@ import nl.joozd.joozdlogcommon.comms.Packet
 import nl.joozd.joozdlogcommon.serializing.intFromBytes
 import nl.joozd.joozdlogcommon.serializing.toByteArray
 import nl.joozd.joozdlogcommon.serializing.wrap
-import nl.joozd.joozdlogcommon.utils.LzwCompressor
-import nl.joozd.logbookapp.data.comm.InternetStatus
 
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -104,41 +98,6 @@ class Client: Closeable, CoroutineScope {
             return -4
         }
     }
-    /**
-     * sendCompressed with send a Packet with uncompressed header and
-     * will send it's message compressed with 16-bits LZW compression
-     */
-    fun sendCompressed(packet: Packet): Int{
-        Log.d("sendCompressed:", packet.message.take(40).toByteArray().toString(Charsets.UTF_8))
-        val compressedMessage = LzwCompressor.compress(packet.message)
-        val newPacket = Packet(compressedMessage)
-        try {
-            socket?.let {
-                val output = BufferedOutputStream(it.getOutputStream())
-                output.write(newPacket.content)
-                output.flush()
-                return newPacket.message.size
-            }
-            Log.e(TAG, "Error 0005: Socket is null")
-            return -5
-        } catch (he: UnknownHostException) {
-            val exceptionString = "An exception 0001 occurred:\n ${he.printStackTrace()}"
-            Log.e(TAG, exceptionString, he)
-            return -1
-        } catch (ioe: IOException) {
-            val exceptionString = "An exception 0002 occurred:\n ${ioe.printStackTrace()}"
-            Log.e(TAG, exceptionString, ioe)
-            return -2
-        } catch (ce: ConnectException) {
-            val exceptionString = "An exception 0003 occurred:\n ${ce.printStackTrace()}"
-            Log.e(TAG, exceptionString, ce)
-            return -3
-        } catch (se: SocketException) {
-            val exceptionString = "An exception 0004 occurred:\n ${se.printStackTrace()}"
-            Log.e(TAG, exceptionString, se)
-            return -4
-        }
-    }
 
     /**
      * Runs listsner f with a 0-100 percentage completed value
@@ -160,6 +119,8 @@ class Client: Closeable, CoroutineScope {
     }
 
     /**
+     * Gets input from a BufferedInputStream
+     * @param inputStream The inputstream. This must be a complete [Packet]
      * Runs listener f with a 0-100 percentage completed value
      */
     private fun getInput(inputStream: BufferedInputStream, f: (Int) -> Unit = {}): ByteArray {

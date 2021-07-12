@@ -102,6 +102,12 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                     PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND_AND_NOT_ALL_PLANNED -> {
                         showChronoConflictAndIncompleteDialog()
                     }
+                    /**
+                     * Tempo notification. TODO improve on this
+                     */
+                    PdfParserActivityEvents.PARSING_COMPLETE_LOGBOOK -> {
+                        showWholeLogbookInfoMessage()
+                    }
 
 
 
@@ -197,6 +203,15 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
             }
         }
     }
+
+    private fun showWholeLogbookInfoMessage(){
+        JoozdlogAlertDialog().show(this){
+            titleResource = R.string.importing_complete_logbook
+            message = this@PdfParserActivity.getString(R.string.importing_complete_logbook_long)
+            setPositiveButton(android.R.string.ok)
+        }
+    }
+
 
 
 

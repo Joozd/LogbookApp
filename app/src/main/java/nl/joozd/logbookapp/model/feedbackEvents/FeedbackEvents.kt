@@ -64,6 +64,7 @@ object FeedbackEvents {
         UNSUPPORTED_FILE,
         NOT_A_KNOWN_ROSTER,
         NOT_A_KNOWN_LOGBOOK,
+        PARSING_COMPLETE_LOGBOOK,
         ERROR
     }
 

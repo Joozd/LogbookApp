@@ -118,6 +118,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                 }
 
                 is SupportedTypes.CompleteLogbook -> {
+                    feedback(PdfParserActivityEvents.PARSING_COMPLETE_LOGBOOK)
                     updateStatus(PARSING_CHRONO)
                     parseCompleteLogbook(type, uri)
                 }

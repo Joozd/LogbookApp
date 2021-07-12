@@ -547,7 +547,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         // Save new flights
         save(newFlights + flightsToUpdate, updateIDs = false, sync = true)
 
-        val remainingPlanned = getFlightsStartingInPeriod(completedFlights.period).filter{it.isPlanned}
+        val remainingPlanned = flightsInPeriod.filter { it.isPlanned && it !in oldFlightsThatWillBeUpdated }
 
         return@withContext SaveCompleteFlightsResult(conflicts.size, remainingPlanned.size)
     }

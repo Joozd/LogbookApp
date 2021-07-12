@@ -19,12 +19,14 @@
 
 package nl.joozd.logbookapp.data.repository.helpers
 
+import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.atEndOfDay
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
+import nl.joozd.logbookapp.utils.TwilightCalculator
 import java.time.*
 import java.util.*
 
@@ -122,6 +124,7 @@ fun Flight.overlaps(other: Flight?): Boolean {
  */
 fun Flight.mergeInto(other: Flight) = other.copy(
     flightNumber = flightNumber.nullIfEmpty() ?: other.flightNumber,
+    ifrTime = ifrTime,
     timeOut = timeOut.nullIfZero() ?: other.timeOut,
     timeIn = timeIn.nullIfZero() ?: other.timeIn,
     registration = registration.nullIfEmpty() ?: other.registration,
@@ -129,6 +132,16 @@ fun Flight.mergeInto(other: Flight) = other.copy(
     isPlanned = isPlanned && other.isPlanned
 )
 
+/**
+ * auto fills night time only for now
+ */
+suspend fun Flight.autoValues(): Flight = if (!autoFill) this else {
+    val airportRepository = AirportRepository.getInstance()
+    val origAsync = airportRepository.getAirportByIcaoIdentOrNullAsync(orig)
+    val destAsync = airportRepository.getAirportByIcaoIdentOrNullAsync(dest)
+    val nightTime = TwilightCalculator(tOut()).minutesOfNight(origAsync.await(), destAsync.await(), tOut(), tIn())
+    this.copy(nightTime = nightTime)
+}
 
 fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.uppercase(Locale.ROOT).trim() == other.flightNumber.uppercase(Locale.ROOT).trim()
 

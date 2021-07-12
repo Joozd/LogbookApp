@@ -200,6 +200,11 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
         }
     }
 
+    /**
+     * @see getAirportByIcaoIdentOrNull but then async
+     */
+    fun getAirportByIcaoIdentOrNullAsync(query: String?) = async { getAirportByIcaoIdentOrNull(query) }
+
     suspend fun searchAirportsOnce(query: String): List<Airport> = withContext(dispatcher) {
         airportDao.searchAirports("%${query.uppercase(Locale.ROOT)}%")
     }

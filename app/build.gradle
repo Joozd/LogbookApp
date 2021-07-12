@@ -30,7 +30,7 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 64 // my version, increment this every build
+        versionCode 65 // my version, increment this every build
         versionName "JoozdLog RC3"
         vectorDrawables.useSupportLibrary = true
 
@@ -41,6 +41,9 @@ android {
                 arguments = ["room.incremental"   : "true",
                              "room.schemaLocation": "$projectDir/schemas".toString()]
             }
+        }
+        ndk {
+            debugSymbolLevel 'FULL'
         }
     }
 

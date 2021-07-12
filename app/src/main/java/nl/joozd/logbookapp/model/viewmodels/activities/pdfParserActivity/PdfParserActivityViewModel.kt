@@ -42,10 +42,12 @@ import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcCheckinSheet
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcMonthlyParser
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcRoster
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlmMonthlyParser
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.extensions.*
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.time.Instant
@@ -62,6 +64,12 @@ import java.time.Instant
 class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     val statusLiveData: LiveData<Int>
         get() = _statusLiveData
+
+    /**
+     * Holds result of chrono import, null if no chrono was imported before this
+     */
+    var chronoImportResult: FlightRepository.SaveCompleteFlightsResult? = null
+        private set
 
     private val _statusLiveData = MutableLiveData(STARTING_UP)
 
@@ -105,8 +113,8 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                 }
 
                 is SupportedTypes.CompletedFlights -> {
-                    parseCompletedFlights(type, uri)
                     updateStatus(PARSING_CHRONO)
+                    parseCompletedFlights(type, uri)
                 }
 
                 is SupportedTypes.CompleteLogbook -> {
@@ -176,9 +184,19 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
 
             // Repository will save flights and return how many conflicts were found. User can fix them in MainActivity
             // TODO or undo this whole thing (make undo logic in repository)
-            flightRepository.saveCompletedFlights(processedCompleteFlights).nullIfZero()?.let{conflicts ->
-                feedback(PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND).putInt(conflicts)
-            } ?: feedback(PdfParserActivityEvents.CHRONO_SUCCESSFULLY_ADDED)
+            flightRepository.saveCompletedFlights(processedCompleteFlights).let{result ->
+                chronoImportResult = result
+                when {
+                    result.conflicts != 0 && result.plannedRemaining != 0 ->
+                        feedback(PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND_AND_NOT_ALL_PLANNED)
+                    result.conflicts != 0 ->
+                        feedback(PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND)
+                    result.plannedRemaining != 0 ->
+                        feedback(PdfParserActivityEvents.CHRONO_DOES_NOT_FILL_ALL_PLANNED)
+                    else ->
+                        feedback(PdfParserActivityEvents.CHRONO_SUCCESSFULLY_ADDED)
+                }
+            }
 
         } ?: run{
             feedback(PdfParserActivityEvents.FILE_NOT_FOUND) // TODO handle this in Activity

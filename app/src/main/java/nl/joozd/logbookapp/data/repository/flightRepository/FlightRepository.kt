@@ -515,31 +515,41 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      *  - Aircraft Type
      * @return the amount of conflicts found (doesn't handle conflicts, only detects them)
      */
-    suspend fun saveCompletedFlights(completedFlights: CompletedFlights): Int = withContext(Dispatchers.IO + NonCancellable){
+    suspend fun saveCompletedFlights(completedFlights: CompletedFlights, canUndo: Boolean = true): SaveCompleteFlightsResult = withContext(Dispatchers.IO + NonCancellable){
         require(completedFlights.isValid) { "Cannot parse an invalid roster! You should have checked this!" }
         val importFlights = completedFlights.flights
         val flightsInPeriod = getFlightsStartingInPeriod(completedFlights.period)
 
-        val conflicts = flightsInPeriod.filter { savedFlight -> importFlights.none { it.isSameCompletedFlight(savedFlight) } && importFlights.any { it.overlaps(savedFlight) } }
-        println("I FOUND ${conflicts.size} CONFLICTING FLIGHTS: $conflicts")
-        val newFlights = importFlights.filter { importFlight ->flightsInPeriod.none { it.isSameCompletedFlight(importFlight) }}
-        val flightsToUpdate = flightsInPeriod.filter { savedFlight -> importFlights.any { it.isSameCompletedFlight(savedFlight) }}
+        // New flights are those who do not have (a planned version of) it in logbook already
+        val newFlights = importFlights.filter { importFlight ->flightsInPeriod.none { importFlight.isUpdatedVersionOf(it) || importFlight.isSameFlightAs(it) }}
+            .map{ it.copy (flightID = nextFlightID())}
+
+        println("I FOUND ${newFlights.size} NEW FLIGHTS FLIGHTS: ${newFlights.map{it.shortString() +"\n"}}")
+
+        //Flights that will be updated, for undo purposes
+        val oldFlightsThatWillBeUpdated = flightsInPeriod.filter { fip -> importFlights.any { it.isUpdatedVersionOf(fip)}}
+
+        // Flights To Update are those who do have a planned version of it in logbook already.
+        val flightsToUpdate = importFlights.filter { importFlight -> oldFlightsThatWillBeUpdated.any { importFlight.isUpdatedVersionOf(it) }}.map{ importFlight ->
+            importFlight.mergeInto(oldFlightsThatWillBeUpdated.first{ importFlight.isUpdatedVersionOf(it) })
+        }
         println("I FOUND ${flightsToUpdate.size} FLIGHTS TO UPDATE: ${flightsToUpdate.map{it.shortString() +"\n"}}")
 
-        // Update known flights, ignore flights that will not change:
-        val updatedFlights = flightsToUpdate.mapNotNull{ oldFlight ->
-            val importingFlight = importFlights.first{ it.isSameCompletedFlight(oldFlight)}
-            if (importingFlight.isSameFlightAs(oldFlight, withMargins = false) || oldFlight.isPlanned)
-                null
-            else importingFlight.mergeInto(oldFlight)
+        //Conflicts tracking
+        //A conflict is a flight that overlaps another flight
+        //Planned flights are not considered as conflicts
+        val conflicts = flightsInPeriod.filter { fip -> newFlights.any{ importFlight -> importFlight.overlaps(fip) && !importFlight.isSameFlightAs(fip) } }
+
+        if (canUndo){
+            undoTracker.addSaveEvent(newFlights + flightsToUpdate, oldFlightsThatWillBeUpdated)
         }
-        println("I FOUND ${updatedFlights.size} FLIGHTS TO UPDATE: ${updatedFlights.joinToString("\n") { it.toString() }}")
 
         // Save new flights
-        save(newFlights, updateIDs = true, sync = false)
-        save(updatedFlights, updateIDs = false, sync = true)
+        save(newFlights + flightsToUpdate, updateIDs = false, sync = true)
 
-        return@withContext conflicts.size
+        val remainingPlanned = getFlightsStartingInPeriod(completedFlights.period).filter{it.isPlanned}
+
+        return@withContext SaveCompleteFlightsResult(conflicts.size, remainingPlanned.size)
     }
 
     /**
@@ -939,4 +949,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             (cachedFlightsList?.maxByOrNull { it.flightID }?.flightID ?: getHighestIdAsync().await()) + 1
         }
     }
+
+    class SaveCompleteFlightsResult(val conflicts: Int, val plannedRemaining: Int)
 }

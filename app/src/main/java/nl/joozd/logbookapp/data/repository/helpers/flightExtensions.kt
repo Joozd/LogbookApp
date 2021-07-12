@@ -44,12 +44,28 @@ fun Flight.isSamedPlannedFlightAs(f: Flight) =
  * Checks if two flights are the same physical flight (ie the same orig to same dest at the same time with the same flightnumber)
  */
 fun Flight.isSameFlightAs(f: Flight, withMargins: Boolean = false) = (Preferences.maxChronoAdjustment * 60L).let { margin ->
-           orig == f.orig
-                && dest == f.dest
-                && if (withMargins) timeOut in (f.timeOut - margin..f.timeOut + margin) else timeOut == f.timeOut
-                && if (withMargins) timeIn in (f.timeIn - margin..f.timeIn + margin) else timeIn == f.timeIn
-                && hasSameflightNumberAs(f)
+       orig == f.orig
+            && dest == f.dest
+            && if (withMargins) timeOut in (f.timeOut - margin..f.timeOut + margin) else timeOut == f.timeOut
+            && if (withMargins) timeIn in (f.timeIn - margin..f.timeIn + margin) else timeIn == f.timeIn
+            && hasSameflightNumberAs(f)
 }
+
+/**
+ * This checks if a flight is the completed version of a planned flight:
+ * - it is not a planned flight
+ * - origin, destinatoin and flightnumber match
+ * - it starts on the same day (in UTC)
+ */
+fun Flight.isUpdatedVersionOf(other: Flight): Boolean =
+    !isPlanned
+            && orig == other.orig
+            && dest == other.dest
+            && hasSameflightNumberAs(other)
+            && tOut().toLocalDate() == other.tOut().toLocalDate()
+
+
+
 
 /**
  * Check if flight is the same with [isSameFlightAs] but also check remarks, name, name2 and registration

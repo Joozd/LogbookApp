@@ -21,4 +21,9 @@ package nl.joozd.logbookapp.data.repository.flightRepository
 
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
+/**
+ * @param newFlights: Newly saved flights
+ * @param oldFlights: Any old flights that were updated
+ * On Undo, [newFlights] will be deleted (hard) and [oldFlights] will be saved as they are.
+ */
 data class SaveEvent(val newFlights: List<Flight>, val oldFlights: List<Flight>): UndoableEvent

@@ -94,8 +94,15 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                         closeAndStartMainActivity()
                     }
                     PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND -> {
-                        showChronoConflictDialog(it.getInt())
+                        showChronoConflictDialog()
                     }
+                    PdfParserActivityEvents.CHRONO_DOES_NOT_FILL_ALL_PLANNED -> {
+                        showChronoIncompleteDialog()
+                    }
+                    PdfParserActivityEvents.CHRONO_CONFLICTS_FOUND_AND_NOT_ALL_PLANNED -> {
+                        showChronoConflictAndIncompleteDialog()
+                    }
+
 
 
 
@@ -159,10 +166,40 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
         cancel()
     }
 
-    private fun showChronoConflictDialog(conflicts: Int) {
-        toast("showChronoConflictDialog: $conflicts")
-        closeAndStartMainActivity()
+    /**
+     * Show dialog stating conflicts were found in chrono import
+     */
+
+    private fun showChronoConflictDialog() {
+        JoozdlogAlertDialog().show(this){
+            titleResource = R.string.chrono_conflict_found
+            message = this@PdfParserActivity.getString(R.string.chrono_conflict_found_long, viewModel.chronoImportResult?.conflicts ?: -1)
+            setPositiveButton(android.R.string.ok){
+                closeAndStartMainActivity()
+            }
+        }
     }
+    private fun showChronoIncompleteDialog() {
+        JoozdlogAlertDialog().show(this){
+            titleResource = R.string.planned_flights_found
+            message = this@PdfParserActivity.getString(R.string.planned_flights_found_long, viewModel.chronoImportResult?.plannedRemaining ?: -1)
+            setPositiveButton(android.R.string.ok){
+                closeAndStartMainActivity()
+            }
+        }
+    }
+    private fun showChronoConflictAndIncompleteDialog() {
+        JoozdlogAlertDialog().show(this){
+            titleResource = R.string.planned_flights_and_conflict_found
+            message = this@PdfParserActivity.getString(R.string.planned_flights_and_conflict_found_long, viewModel.chronoImportResult?.conflicts ?: -1, viewModel.chronoImportResult?.plannedRemaining ?: -1)
+            setPositiveButton(android.R.string.ok){
+                closeAndStartMainActivity()
+            }
+        }
+    }
+
+
+
 }
 
 

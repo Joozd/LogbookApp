@@ -315,6 +315,9 @@
     <string name="planned_flights_and_conflict_found">Conflicts found</string>
     <string name="planned_flights_and_conflict_found_long">Your overview was imported, but %1$d conflicting flights and %2$d planned flights are still in your logbook. Please check the period for which you just imported an overview for correct data!</string>
 
+    <string name="importing_complete_logbook">Importing complete logbook</string>
+    <string name="importing_complete_logbook_long">You are importing a complete logbook. This will work, but is still "work in progress".\nIn certain cases (importing a large logbook into a logbook filled with a lot of flights already) this can take a long time.</string>
+
 
     <string name="XXXXXXXXXXXXXXX">XXXXXXXXXXXXXXX</string>
     <string name="repeatPassword">Repeat password</string>

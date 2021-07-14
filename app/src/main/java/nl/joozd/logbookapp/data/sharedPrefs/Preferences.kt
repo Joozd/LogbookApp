@@ -190,7 +190,7 @@ object Preferences {
      */
     var useCalendarSync: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
-    var lastCalendarCheckTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
+    var nextCalendarCheckTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
 
     var calendarDisabledUntil: Long by JoozdLogSharedPrefs(sharedPref, 0)
 
@@ -267,4 +267,9 @@ object Preferences {
      * Login link waiting for server to be available
      */
     var loginLinkStringWaiting: String by JoozdLogSharedPrefs(sharedPref, "")
+
+    /**
+     * Hardcoded global const values
+     */
+    const val MIN_CALENDAR_CHECK_INTERVAL = 30 // seconds
 }

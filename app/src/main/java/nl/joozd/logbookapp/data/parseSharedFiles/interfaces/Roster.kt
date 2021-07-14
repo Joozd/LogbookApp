@@ -27,7 +27,6 @@ import java.time.Instant
  *a Roster to be used for parsing anything into flights
  * This must contain:
  * - A marker [isValid] stating if data is valid
- * - Carrier ID [carrier] (using ID from [Companion])
  * - The [period] this Roster covers
  * - a list [flights] of [Flight] objects:
  *      - Airports can be ICAO or IATA format
@@ -53,13 +52,6 @@ interface Roster: Closeable {
         get() = !isValid
 
     /**
-     * Identifier of the carrier.
-     * See companion object.
-     */
-    val carrier: String?
-
-
-    /**
      * The period covered by this roster.
      * Should start at start of day and end at end of day
      */
@@ -78,7 +70,7 @@ interface Roster: Closeable {
     /**
      * Cast this to a [ProcessedRoster] data class
      */
-    fun toProcessedRoster(): ProcessedRoster = ProcessedRoster(isValid, carrier, period, flights)
+    fun toProcessedRoster(): ProcessedRoster = ProcessedRoster(isValid, period, flights)
 
 
 

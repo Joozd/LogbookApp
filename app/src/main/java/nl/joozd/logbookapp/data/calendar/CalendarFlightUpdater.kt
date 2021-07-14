@@ -25,6 +25,7 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
 import nl.joozd.logbookapp.data.calendar.parsers.KlmKlcCalendarFlightsParser
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.AutoRetrievedCalendar
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.atStartOfDay
@@ -58,7 +59,7 @@ class CalendarFlightUpdater {
      * @return a [Roster]
      */
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    suspend fun getRoster(): Roster? {
+    suspend fun getRoster(): AutoRetrievedCalendar? {
         val foundEvents: List<JoozdCalendarEvent> = activeCalendar()?.let{
             calendarScraper.getEventsBetween(it, period.start, period.endInclusive)
         } ?: return null

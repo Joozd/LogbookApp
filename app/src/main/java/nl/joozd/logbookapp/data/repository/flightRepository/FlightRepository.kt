@@ -570,12 +570,13 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                 TimestampMaker.nowForSycPurposes - Preferences.lastUpdateTime > MIN_SYNC_INTERVAL   // interval for checking remote changes has passed
                         || getFlightsChangedAfter(Preferences.lastUpdateTime).isNotEmpty()          // OR local changes since last sync
 
-            val needsCalendarSync = TimestampMaker.nowForSycPurposes - Preferences.lastCalendarCheckTime > MIN_CALENDAR_CHECK_INTERVAL
+            val needsCalendarSync = TimestampMaker.nowForSycPurposes > Preferences.nextCalendarCheckTime
 
             if (needsCalendarSync && Preferences.useCalendarSync) {
                 if (checkPermission(Manifest.permission.READ_CALENDAR)) {
                     CalendarFlightUpdater().getRoster()?.let {
                         saveRoster(it.postProcess())
+                        Preferences.nextCalendarCheckTime = it.validUntil.epochSecond
                     }
                 }
             }
@@ -919,7 +920,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         }
 
         const val MIN_SYNC_INTERVAL = 30*60 // seconds
-        const val MIN_CALENDAR_CHECK_INTERVAL = 30 // seconds
     }
 
     /**

@@ -271,5 +271,5 @@ object Preferences {
     /**
      * Hardcoded global const values
      */
-    const val MIN_CALENDAR_CHECK_INTERVAL = 30 // seconds
+    const val MIN_CALENDAR_CHECK_INTERVAL = 30L // seconds
 }

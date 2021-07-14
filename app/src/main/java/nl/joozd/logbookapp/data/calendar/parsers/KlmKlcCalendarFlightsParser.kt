@@ -21,9 +21,12 @@ package nl.joozd.logbookapp.data.calendar.parsers
 
 import android.util.Log
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
+import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.AutoRetrievedCalendar
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.extensions.plusMinutes
 import java.time.Instant
 
 /**
@@ -35,7 +38,7 @@ import java.time.Instant
  */
 
 class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, override val period: ClosedRange<Instant>):
-    Roster {
+    AutoRetrievedCalendar {
     init{
         Log.d(this::class.simpleName, "Got ${events.size} events")
     }
@@ -64,10 +67,10 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, override val
 
 
     /**
-     * Identifier of the carrier.
-     * See companion object.
+     * This data in this calendar will be good for at least this amount of seconds
+     * @see Preferences.MIN_CALENDAR_CHECK_INTERVAL
      */
-    override val carrier: String? = null
+    override val validUntil: Instant = Instant.now().plusSeconds(Preferences.MIN_CALENDAR_CHECK_INTERVAL)
 
     override val isValid: Boolean
         get() = true

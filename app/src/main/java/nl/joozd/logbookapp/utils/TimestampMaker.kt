@@ -24,6 +24,11 @@ import nl.joozd.logbookapp.extensions.withMinimumValue
 import java.time.Instant
 
 object TimestampMaker {
+    /**
+     * Now, in seconds from Epoch, for sync purposes
+     * - corrected for differences with server time
+     * - always 1 second later than the last sync
+     */
     val nowForSycPurposes: Long
         get() = (Instant.now().epochSecond + Preferences.serverTimeOffset).withMinimumValue(Preferences.lastUpdateTime+1)
 }

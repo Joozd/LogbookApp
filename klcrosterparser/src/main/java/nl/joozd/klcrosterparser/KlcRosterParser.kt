@@ -136,8 +136,8 @@ class KlcRosterParser(private val inputStream: InputStream): Closeable {
         //next line will cause exception if roster doesnt end with _endOfRosterMarker_
         completeString.slice(0 until completeString.indexOf(endOfRosterMarker))
     }
-    val startOfRoster: Instant?
-    val endOfRoster: Instant?
+    private val startOfRoster: Instant?
+    private val endOfRoster: Instant?
 
     init{
         if (!seemsValid){

@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.extensions
 
 import java.time.*
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 /**
  * Gets the date from an Instant. If no [zoneOffset] given, it assumes UTC.
@@ -43,7 +42,7 @@ fun Instant.atDate(date: LocalDate, zoneOffset: ZoneOffset = ZoneOffset.UTC): In
 
 /**
  * Changes an instant to a different time at the same date. If no [zoneOffset] given, assumes UTC
- * @param date: New date to set
+ * @param time: New time to set
  * @param zoneOffset: Timezone at which that dat is supposed to be
  */
 fun Instant.atTime(time: LocalTime, zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant = LocalDateTime.of(this.toLocalDate(zoneOffset), time).toInstant(zoneOffset)

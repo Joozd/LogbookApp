@@ -23,7 +23,7 @@ package nl.joozd.joozdlogfiletypedetector
  * Identify type of file by this:
  * supports following pairs:
  * pair(# of line to look at, text to find there)
- * Pair<Identifier string, [strict] (true means whole line needs to match, false means identifier IN line)
+ * Pair<Identifier string, Strict: Boolean (true means whole line needs to match, false means identifier IN line)
  */
 object TypeIdentifiers {
     val KLC_ROSTER = 1 to "Individual duty plan for"

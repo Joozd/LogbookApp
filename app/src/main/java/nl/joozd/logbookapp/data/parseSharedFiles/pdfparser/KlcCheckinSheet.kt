@@ -214,14 +214,6 @@ class KlcCheckinSheet(roster: String?): Roster {
      * Public parts
      *********************************************************************************************/
 
-
-    /**
-     * Identifier of the carrier.
-     * See companion object.
-     */
-    override val carrier: String
-        get() = Roster.KLC_CHECKIN_SHEET
-
     /**
      * true if the data provided to this parser seems to be valid
      */
@@ -248,14 +240,6 @@ class KlcCheckinSheet(roster: String?): Roster {
             (Instant.ofEpochSecond(startEpochSecond).atStartOfDay() .. Instant.ofEpochSecond(lastEpochSecond).atEndOfDay())
         }
     }
-
-    /**
-     * This Roster doesn't keep an inputStream open.
-     */
-    override fun close() {
-        // Intentionally left blank
-    }
-
 
     companion object {
         const val ONE_DAY = 86400 // seconds

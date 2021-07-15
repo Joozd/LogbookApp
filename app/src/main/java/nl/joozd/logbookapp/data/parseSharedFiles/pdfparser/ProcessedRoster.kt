@@ -27,8 +27,4 @@ import java.time.Instant
  * Model class for processed data from any [Roster] source.
  * This class can be given to repository for saving/replacing data
  */
-data class ProcessedRoster(override val isValid: Boolean, override val period: ClosedRange<Instant>, override val flights: List<Flight>): Roster{
-    override fun close() {
-        // Intentionally left blank
-    }
-}
+data class ProcessedRoster(override val isValid: Boolean, override val period: ClosedRange<Instant>, override val flights: List<Flight>): Roster

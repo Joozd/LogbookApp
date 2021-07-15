@@ -153,6 +153,16 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                             }
                         else closeAndStartMainActivity()
                     }
+                    PdfParserActivityEvents.UNSUPPORTED_FILE -> {
+                        JoozdlogAlertDialog().show(activity) {
+                            titleResource = R.string.unknown_file_title
+                            message = this@PdfParserActivity.getString(R.string.unknown_file_message)
+                            setPositiveButton(android.R.string.ok){
+                                closeAndStartMainActivity()
+                            }
+
+                        }
+                    }
                     null -> {
                     }
                     else -> {

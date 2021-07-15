@@ -75,10 +75,6 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, override val
     override val isValid: Boolean
         get() = true
 
-    override fun close() {
-        // intentionally left blank
-    }
-
     companion object{
         const val FLIGHT_EVENT_IDENTIFIER = "FLIGHT"
         //TODO make regex for eg. `FLIGHT KL0887 AMS - HKG`

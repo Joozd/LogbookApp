@@ -1,6 +1,6 @@
 /*
  *  JoozdLog Pilot's Logbook
- *  Copyright (c) 2020 Joost Welle
+ *  Copyright (c) 2021 Joost Welle
  *
  *      This program is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU Affero General Public License as
@@ -19,103 +19,101 @@
 
 package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
 
-import android.util.Log
-import nl.joozd.klcrosterparser.Activities
-import nl.joozd.klcrosterparser.KlcRosterEvent
-import nl.joozd.klcrosterparser.KlcRosterParser
+import com.itextpdf.text.pdf.PdfReader
+import com.itextpdf.text.pdf.parser.PdfTextExtractor
+import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
+import nl.joozd.logbookapp.extensions.plusDays
+import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.TimestampMaker
 import java.io.InputStream
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
+
+class KlcRoster(inputString: String?): Roster {
+    private val markerRegex = """^Individual duty plan for .* NetLine/Crew\(KLC\)""".toRegex(RegexOption.MULTILINE)
+    private val periodRegex = """^Period: ($DATE_REGEX) - ($DATE_REGEX)""".toRegex(RegexOption.MULTILINE)
+    private val flightRegex = """^(KL \d{3,4}) R?\w?($AIRPORT_IDENT) ($TIME) ($TIME) ($AIRPORT_IDENT)""".toRegex(RegexOption.MULTILINE)
+    private val currentDayRegex = """^$DAY_OF_WEEK(\d\d)""".toRegex()
+
+    private val dateFormatter = DateTimeFormatter.ofPattern("ddMMMyy")
+    private val timeFormatter = DateTimeFormatter.ofPattern("HHmm")
 
 
-/**
- * Will transfor a KLC PDF roster into flights
- * Flights need to be cleaned before use.
- */
-class KlcRoster(private val inputStream: InputStream): Roster {
+    override val isValid: Boolean = inputString?.let { markerRegex.containsMatchIn(it) } ?: false
 
-    /*********************************************************************************************
-     * Private parts
-     *********************************************************************************************/
+    override val period: ClosedRange<Instant> = periodRegex.find(inputString?: "")?.let{
+        LocalDate.parse(it.groupValues[1], dateFormatter).atStartOfDay(ZoneOffset.UTC).toInstant()..LocalDate.parse(it.groupValues[2], dateFormatter).atStartOfDay(ZoneOffset.UTC).toInstant().plusDays(1)
+    } ?: Instant.EPOCH..Instant.EPOCH
 
-    private val roster = KlcRosterParser(inputStream)
-
-    //flights with [orig] and [dest] in IATA format
-    private val flightsToPlan: List<Flight> = eventsToFlights(roster.days.map { it.events }.flatten()
-        .filter { it.type == Activities.FLIGHT })
-
-    // simsToPlan are all actual sim times in roster
-    private val simsToPlan: List<Flight> = eventsToSims(roster.days.map { it.events }.flatten()
-        .filter { it.type == Activities.ACTUALSIM })
-
-
-    /**
-     * Makes KlcRosterEvents into Flights
-     * NOTE: Airports are IATA format, flightID = -1
-     */
-    private fun eventsToFlights(events: List<KlcRosterEvent>): List<Flight> =
-        events.map { rf ->
-            val flightNumOrigArrowDest = rf.description.split(" ").map { it.trim() }
-            val flightNumber = flightNumOrigArrowDest[0]
-            val orig = flightNumOrigArrowDest[1]
-            val dest = flightNumOrigArrowDest[3]
-
-            Flight(
-                flightID = -1,
-                orig = orig,
-                dest = dest,
-                timeOut = rf.startEpochSecond,
-                timeIn = rf.endEpochSecond,
-                flightNumber = flightNumber,
-                timeStamp = TimestampMaker.nowForSycPurposes,
-                isPlanned = true,
-                unknownToServer = true
-            )
-        }
-    private fun eventsToSims(events: List<KlcRosterEvent>): List<Flight> =
-        events.map { rf ->
-            // val description = rf.description
-            val simTime: Int = (rf.endEpochSecond - rf.startEpochSecond).toInt() / 60
-
-            Flight(
-                flightID = -1,
-                timeOut = rf.startEpochSecond,
-                timeIn = rf.endEpochSecond,
-                simTime = simTime,
-                timeStamp = TimestampMaker.nowForSycPurposes,
-                isSim = true,
-                isPlanned = true,
-                unknownToServer = true
-            )
-        }
-
-    /*********************************************************************************************
-     * Public parts
-     *********************************************************************************************/
-
-    override val carrier = Roster.KLC
-
-    override val isValid = roster.seemsValid
-
-    /**
-     * getFlights needs an icaoIataMap
-     * @param icaoIataMap: map that holds icao names as keys and iata names as values
-     * @return list of flights (flightIDs are -1)
-     */
     override val flights: List<Flight>
-    get() {
-        Log.d("KLC Roster Parser", "found ${flightsToPlan.size} flights")
-        return flightsToPlan + simsToPlan
+        get() = _flights
+
+    // This will be populated by flights to fill [flights]
+    private var _flights = ArrayList<Flight>()
+
+    init{
+        //The date we are currently parsing flights for
+        var currentDate = period.start.toLocalDate(ZoneOffset.UTC)
+        println("currentDate now $currentDate")
+
+        inputString?.lines()?.forEach { line ->
+            /*
+                set current day to the day found if this line containsMatchIn [currentDayRegex]
+                If this day is earlier than the previous current day (ie first of the month when previous was last of the month) add a month.
+             */
+            currentDayRegex.find(line)?.let{
+                val day = it.groupValues[1].toInt()
+                currentDate = if (currentDate.isLastDayOfMonth()) currentDate.withDayOfMonth(day).plusMonths(1) else currentDate.withDayOfMonth(day)
+                println("currentDate now $currentDate")
+            }
+
+            /*
+                If current line is a flight, add it to [_flights]
+             */
+            flightRegex.find(line)?.let{
+                it.groupValues.let{ r ->
+                    val flightNumber = r[1].filter {c -> c != ' '} // remove whitespace
+                    val orig = r[2]
+                    val dest = r[5]
+                    val tOut = LocalTime.parse(r[3], timeFormatter).atDate(currentDate).toInstant(ZoneOffset.UTC).epochSecond
+                    val tIn = LocalTime.parse(r[4], timeFormatter).atDate(currentDate).toInstant(ZoneOffset.UTC).epochSecond
+                    _flights.add(Flight(-1, flightNumber = flightNumber, orig = orig, dest = dest, timeOut = tOut, timeIn = tIn))
+                } // KL 1218 TRF 1330 1515 AMS, KL 1218, TRF, 1330, 1515, AMS
+            }
+        }
     }
 
-    override val period = (Instant.ofEpochSecond(roster.period!!.start)..Instant.ofEpochSecond(roster.period!!.endInclusive))
 
-    override fun close() {
-        roster.close()
+
+
+    private fun LocalDate.isLastDayOfMonth(): Boolean = this == this.with(TemporalAdjusters.lastDayOfMonth())
+
+
+    companion object{
+        private const val DATE_REGEX = """\d\d[A-Z][a-z]{2}\d\d"""
+        private const val AIRPORT_IDENT = """[A-Z]{3}"""
+        private const val TIME = """\d{4}"""
+        private const val DAY_OF_WEEK = "(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)"
+
+        suspend fun ofInputStream(inputStream: InputStream): KlcRoster {
+            @Suppress("BlockingMethodInNonBlockingContext") val reader = try {
+                withContext(Dispatchers.IO){ PdfReader(inputStream) } // Dispatchers.IO doesn't have a problem with blocking methods
+            } catch (e: Exception) {
+                return KlcRoster(null)
+            }
+            if (reader.numberOfPages == 0) return KlcRoster(null)
+            val roster = (1..reader.numberOfPages).joinToString("\n") { page ->
+                PdfTextExtractor.getTextFromPage(reader, page, SimpleTextExtractionStrategy())
+            }
+            return KlcRoster(roster)
+        }
+
     }
-
 }
-
-

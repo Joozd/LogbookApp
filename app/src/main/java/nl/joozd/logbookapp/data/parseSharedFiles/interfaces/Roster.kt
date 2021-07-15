@@ -42,7 +42,7 @@ import java.time.Instant
  *  - flightID
  *  - TimeStamp
  */
-interface Roster: Closeable {
+interface Roster {
     /**
      * true if the data provided to this parser seems to be valid
      */

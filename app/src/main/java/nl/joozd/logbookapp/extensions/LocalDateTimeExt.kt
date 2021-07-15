@@ -20,10 +20,7 @@
 package nl.joozd.logbookapp.extensions
 
 import android.nfc.FormatException
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneOffset
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -34,7 +31,6 @@ private val dateFormatterLocalized = DateTimeFormatter.ofLocalizedDate(FormatSty
 private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 private val timeFormatterLocalized = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
 private val monthYearFormatter = DateTimeFormatter.ofPattern(("MMM yyyy"))
-private val timeFormatterNoColon = DateTimeFormatter.ofPattern("HH:mm")
 private val dateAndTimeFormatter =  DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm")
 
 fun LocalDate.toDateString() = this.format(dateFormatter)
@@ -46,7 +42,6 @@ fun LocalDateTime.toDateStringLocalized() = this.format(dateFormatterLocalized)
 fun LocalDateTime.toTimeString() = this.format(timeFormatter)
 fun LocalDateTime.toTimeStringLocalized() = this.format(timeFormatterLocalized)
 fun LocalDateTime.toMonthYear() = this.format(monthYearFormatter).filter {it != '.'} // I don't want "MRT. 2020" but "MRT 2020"
-fun LocalDateTime.noColon() = this.format(timeFormatterNoColon)
 
 fun String.makeLocalDate(): LocalDate = LocalDate.parse(this, dateFormatter)
 
@@ -60,18 +55,17 @@ fun String.makeLocalDateTime(): LocalDateTime = LocalDateTime.parse(this, dateAn
 
 fun String.makeLocalDateTimeTime(): LocalDateTime = LocalDateTime.parse(this, timeFormatter)
 
-fun String.addColonToTime() = LocalDateTime.parse(this, timeFormatterNoColon).toTimeString()
+fun String.makeLocalTime(): LocalTime = LocalTime.parse(this, timeFormatter)
 
-fun String.makeLocalTime() = LocalTime.parse(this, timeFormatter)
-
-fun LocalDateTime.roundToMinutes() =
+fun LocalDateTime.roundToMinutes(): LocalDateTime =
     if (this.second < 30) this.withSecond(0)
     else this.withSecond(0).plusMinutes(1)
 
-fun LocalDateTime.atDate(date: LocalDate) = LocalDateTime.of(date, this.toLocalTime())
+fun LocalDateTime.atDate(date: LocalDate): LocalDateTime = LocalDateTime.of(date, this.toLocalTime())
 
 /**
  * Instant at start of day
  * @param zoneOffset Zoneoffset, defaults to UTC
  */
-fun LocalDate.toInstant(zoneOffset: ZoneOffset = java.time.ZoneOffset.UTC) = atStartOfDay(zoneOffset).toInstant()
+fun LocalDate.toInstant(zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant = atStartOfDay(zoneOffset).toInstant()
+

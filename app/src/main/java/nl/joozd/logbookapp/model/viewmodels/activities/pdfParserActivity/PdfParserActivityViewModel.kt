@@ -23,6 +23,7 @@ import nl.joozd.joozdlogfiletypedetector.interfaces.FileTypeDetector
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -38,16 +39,12 @@ import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.MccPilotLogCsvPar
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcCheckinSheet
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcMonthlyParser
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlcRoster
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.KlmMonthlyParser
+import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.*
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.extensions.*
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.time.Instant
@@ -98,6 +95,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
              */
             if (typeDetector.seemsInvalid || typeDetector.typeOfFile is SupportedTypes.Unsupported) {
                 feedback(PdfParserActivityEvents.UNSUPPORTED_FILE) // TODO handle this in Activity
+                Log.w(this::class.simpleName, "Unsupported file 001")
                 updateStatus(ERROR)
                 return@withContext  /* END HERE */
             }
@@ -141,9 +139,10 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         getParser(type, uri)?.let{ roster ->
             if (roster.isInvalid) {
                 feedback(PdfParserActivityEvents.UNSUPPORTED_FILE)
+                Log.w(this::class.simpleName, "Unsupported file 002")
                 return
             }
-            val processedRoster = roster.use{ r -> r.postProcess() } // this will close the original Roster's InputStream
+            val processedRoster = roster.postProcess()
 
             /**
              * Check if calendar sync enabled for this.
@@ -179,6 +178,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         getParser(type, uri)?.let { completedFlights ->
             if (completedFlights.isInvalid){
                 feedback(PdfParserActivityEvents.UNSUPPORTED_FILE)
+                Log.w(this::class.simpleName, "Unsupported file 003")
                 return
             }
             val processedCompleteFlights = completedFlights.use { cf -> cf.postProcess() }
@@ -217,6 +217,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
             //TODO("Handle completelogbook")
             if (!completeLogbook.validImportedLogbook){
                 feedback(PdfParserActivityEvents.UNSUPPORTED_FILE)
+                Log.w(this::class.simpleName, "Unsupported file 004")
                 return
             }
             flightRepository.saveCompletedFlights(completeLogbook.postProcess())
@@ -268,10 +269,11 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     private suspend fun getParser(type: SupportedTypes.PlannedFlights, uri: Uri?): Roster? =
         uri?.getInputStream()?.let{ inputStream ->
             when(type){
-                SupportedTypes.KLC_ROSTER ->  KlcRoster(inputStream)
+                SupportedTypes.KLC_ROSTER ->  inputStream.use { KlcRoster.ofInputStream(it) }
                 SupportedTypes.KLC_CHECKIN_SHEET -> inputStream.use { KlcCheckinSheet.ofInputStream(it) }
                 SupportedTypes.KLM_ICA_ROSTER -> {
                     feedback(PdfParserActivityEvents.UNSUPPORTED_FILE).putString("Sorry, KLM Roster Not supported atm, use ical calendar")
+                    Log.w(this::class.simpleName, "Unsupported file 005")
                     null
                 }
                 else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -2: This should not happen.") }

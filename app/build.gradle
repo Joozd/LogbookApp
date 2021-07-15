@@ -138,7 +138,6 @@ dependencies {
     // implementation "androidx.work:work-gcm:$work_version"
     //Own classes
     implementation project(":joozdlogCommon")
-    implementation project(":klcrosterparser")
     implementation project(":JoozdlogPdfDetector")
 
 

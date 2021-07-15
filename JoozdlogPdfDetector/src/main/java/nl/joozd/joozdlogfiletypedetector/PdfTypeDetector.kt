@@ -51,7 +51,10 @@ class PdfTypeDetector(inputStream: InputStream): FileTypeDetector {
             match(lines, TypeIdentifiers.KLC_MONTHLY) -> SupportedTypes.KLC_MONTHLY
             match(lines, TypeIdentifiers.KLM_ICA_ROSTER) -> SupportedTypes.KLM_ICA_ROSTER // this can cascade further if other types also start wiith this
             match(lines, TypeIdentifiers.KLM_ICA_MONTHLY) -> SupportedTypes.KLM_ICA_MONTHLY
-            else -> SupportedTypes.UNSUPPORTED_PDF
+            else -> SupportedTypes.UNSUPPORTED_PDF.also{
+                println("KOEKHAPPEN")
+                println(lines.take(5))
+            }
         }
     }
 

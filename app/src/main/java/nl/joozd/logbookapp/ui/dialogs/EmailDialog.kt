@@ -165,17 +165,17 @@ class EmailDialog(): JoozdlogFragment() {
     /**
      * Only use for OK button
      */
-    private fun enableOkButton(okButton: TextView, enabled: Boolean){
+    private fun enableOkButton(okButton: TextView, enabled: Boolean) = with (okButton){
         if (!enabled){
-            okButton.setOnClickListener {
+            setOnClickListener {
                 activity?.currentFocus?.clearFocus()
                 it.requestFocus()
             }
-            okButton.setTextColor(requireActivity().getColorFromAttr(android.R.attr.textColorTertiary))
+            setTextColor(requireActivity().getColorFromAttr(android.R.attr.textColorTertiary))
         }
         else{
-            okButton.setOnClickListener(okButtonListener)
-            okButton.setTextColor(requireActivity().getColorFromAttr(android.R.attr.colorAccent))
+            setOnClickListener(okButtonListener)
+            setTextColor(requireActivity().getColorFromAttr(android.R.attr.colorAccent))
         }
     }
 

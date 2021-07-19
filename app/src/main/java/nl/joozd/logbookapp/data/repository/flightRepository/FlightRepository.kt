@@ -385,7 +385,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             launch(dispatcher + NonCancellable) {
                 flightDao.insertFlights(*(ff.map { it.toModel() }.toTypedArray()))
                 Log.d("Saved", "Saved ${ff.size} flights!")
-                Log.d("Saved", ff.joinToString("\n") { it.shortString() })
                 if (sync) syncAfterChange()
             }
         }

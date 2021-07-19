@@ -46,6 +46,9 @@ open class JoozdlogViewModel: ViewModel() {
     val feedbackEvent: LiveData<FeedbackEvent>
         get() = _feedbackEvent
 
+    /**
+     * App context. Can be used in viewModels for application-wide context, do not use for anything UI related.
+     */
     protected val context: Context
         get() = App.instance.ctx
 

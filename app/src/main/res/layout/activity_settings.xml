@@ -348,7 +348,7 @@
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/syncDescriptionTextView"
-                tools:visibility="gone">
+                tools:visibility="visible">
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/settingsGetFlightsFromCalendarSelector"
@@ -360,25 +360,14 @@
                     tools:visibility="visible" />
 
 
-                <FrameLayout
-                    android:id="@+id/settingsCalendarPickerSpinnerLayout"
-                    style="@style/SpinnerFrameStyle"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
+                <Button
+                    android:id="@+id/calendarSyncTypeButton"
+                    style="@style/SettingsActivityButton"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/settingsGetFlightsFromCalendarSelector">
-
-                    <Spinner
-                        android:id="@+id/settingsCalendarPickerSpinner"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:paddingBottom="4dp"
-                        tools:visibility="visible" />
-
-
-                </FrameLayout>
+                    app:layout_constraintTop_toBottomOf="@+id/settingsGetFlightsFromCalendarSelector"
+                    tools:text="PLACEHOLDER TEXT" />
 
 
                 <androidx.appcompat.widget.SwitchCompat
@@ -387,8 +376,7 @@
                     android:text="@string/always_postpone_calendar_sync"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/settingsCalendarPickerSpinnerLayout"
-                    tools:visibility="visible" />
+                    app:layout_constraintTop_toBottomOf="@+id/calendarSyncTypeButton" />
 
 
                 <TextView
@@ -396,8 +384,7 @@
                     style="@style/SettingsActivitySubText"
                     app:layout_constraintStart_toStartOf="@+id/autoPostponeCalendarSyncSelector"
                     app:layout_constraintTop_toBottomOf="@+id/autoPostponeCalendarSyncSelector"
-                    tools:text="@string/disabled_until"
-                    tools:visibility="visible" />
+                    tools:text="@string/disabled_until" />
 
                 <TextView
                     android:id="@+id/dontPostponeTextView"
@@ -405,8 +392,7 @@
                     android:layout_marginEnd="16dp"
                     android:text="@string/enable_now"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/calendarSyncPostponedTextView"
-                    tools:visibility="visible" />
+                    app:layout_constraintTop_toTopOf="@+id/calendarSyncPostponedTextView" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <View

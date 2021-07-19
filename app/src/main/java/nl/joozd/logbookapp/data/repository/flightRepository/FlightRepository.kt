@@ -34,18 +34,22 @@ import nl.joozd.logbookapp.data.room.model.toFlight
 import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfNamesAsync
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.CalendarFlightUpdater
+import nl.joozd.logbookapp.data.calendar.parsers.KlmIcalFlightsParser
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.parseSharedFiles.extensions.postProcess
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.repository.helpers.*
+import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncTypes
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfRegistrations
 import nl.joozd.logbookapp.extensions.map
+import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.checkPermission
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
+import java.lang.Exception
 import java.time.Instant
 import java.util.*
 
@@ -564,6 +568,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      *      Server Sync will create an account on server if [Preferences.username] is empty
      */
     fun syncIfNeeded(){
+        Log.i("FlightRepo", "Starting Synchronization")
         launch {
             val needsServerSync =
                 TimestampMaker.nowForSycPurposes - Preferences.lastUpdateTime > MIN_SYNC_INTERVAL   // interval for checking remote changes has passed
@@ -571,12 +576,35 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
             val needsCalendarSync = TimestampMaker.nowForSycPurposes > Preferences.nextCalendarCheckTime
 
+            println("needsCalendarSync: $needsCalendarSync && Preferences.useCalendarSync: ${Preferences.useCalendarSync}")
             if (needsCalendarSync && Preferences.useCalendarSync) {
-                if (checkPermission(Manifest.permission.READ_CALENDAR)) {
-                    CalendarFlightUpdater().getRoster()?.let {
-                        saveRoster(it.postProcess())
-                        Preferences.nextCalendarCheckTime = it.validUntil.epochSecond
+                println("KOEKWAUS JONGE")
+                when (Preferences.calendarSyncType) {
+                    CalendarSyncTypes.CALENDAR_SYNC_DEVICE -> {
+                        if (checkPermission(Manifest.permission.READ_CALENDAR)) {
+                            CalendarFlightUpdater().getRoster()
+                        } else null
                     }
+                    CalendarSyncTypes.CALENDAR_SYNC_ICAL -> {
+                        println("jajaja")
+                        Preferences.calendarSyncIcalAddress.nullIfBlank()?.let{ urlString ->
+                            println(urlString)
+                            try {
+                                KlmIcalFlightsParser.ofString(urlString)
+                            } catch (e: Exception){
+                                Log.w("iCal sync", "Caught exception $e")
+                                null
+                            }
+                        }
+                    }
+                    else -> null
+                } ?.let { roster ->
+                    println("FOUND ROSTER with period ${roster.period}")
+                    roster.flights.map {it.shortString()}.forEach{
+                        println(it)
+                    }
+                    saveRoster(roster.postProcess())
+                    Preferences.nextCalendarCheckTime = roster.validUntil.epochSecond
                 }
             }
             if (needsServerSync && Preferences.useCloud)

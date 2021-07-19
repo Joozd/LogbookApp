@@ -190,6 +190,10 @@ object Preferences {
      */
     var useCalendarSync: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
+    var calendarSyncType: Int by JoozdLogSharedPrefs(sharedPref, CalendarSyncTypes.CALENDAR_SYNC_NONE)
+
+    var calendarSyncIcalAddress: String by JoozdLogSharedPrefs(sharedPref, "")
+
     var nextCalendarCheckTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
 
     var calendarDisabledUntil: Long by JoozdLogSharedPrefs(sharedPref, 0)

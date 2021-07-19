@@ -121,6 +121,7 @@
     <string name="arrowRight">➔</string>
     <string name="settings">Settings</string>
     <string name="error">Error</string>
+    <string name="error_dialog_message">An error %1$d has occurred. Please let Joozd know though the "Feedback" menu option.\n\nError description:\n%2$s</string>
     <string name="never">Never</string>
     <string name="always">Always</string>
     <string name="warning">Warning</string>
@@ -213,7 +214,7 @@
     <string name="delete_calendar_flight">You are deleting a a flight from your calendar. Do you want to disable calendar import?</string>
     <string name="delete_calendar_flight_until_end">Until end of flight</string>
     <string name="you_can_start_calendar_sync_again">You can start calendar synchronizing again by re-enabling it in the Settings menu</string>
-    <string name="always_postpone_calendar_sync">Postpone on conflict</string>
+    <string name="always_postpone_calendar_sync">Always postpone on conflict</string>
 
 
     <!--
@@ -242,6 +243,12 @@
 
     <string name="need_permission">Permission needed.</string>
     <string name="need_permission_calendar">Joozdlog needs permission to access calendars if you want it to access your calendars.</string>
+
+    <string name="no_ical_link_found">No iCalendar link found.</string>
+    <string name="no_ical_link_found_long">Please save the link to your iCal calendar on your clipboard (usually long-press and select "copy URL")</string>
+
+    <string name="ical_link_found">iCalendar link found.</string>
+    <string name="ical_link_found_long">Your clipboard seems to be holding an iCalendar link. Do you wish to use this?</string>
 
     <!--
     - Strings for help when long-pressing things
@@ -341,11 +348,15 @@
     <string name="cloud_sync_terms">Cloud Sync terms</string>
     <string name="about">About Joozdlog</string>
     <string name="calendar_import">Calendar Import</string>
+    <string name="calendar_import_description">You can automatically import flights into your logbook. The planned flights in Joozdlog will be synced to the calendar you pick.</string>
     <string name="calendar_import_description_line1">You can import flights from your device\'s calendar.</string>
     <string name="calendar_import_description_line2">This will look for entries like \"KL1234 AMS-LCY" in whatever calendar you pick.</string>
     <string name="calendar_import_description_line3">Apart from these entries, none of your calendar contents are being saved or transmitted.</string>
     <string name="do_you_want_to_enable_this">Do you want to enable this?</string>
     <string name="use_calendar_import">Use Calendar Import</string>
+    <string name="calendar_this_device">Calendar on this device</string>
+    <string name="ical_link">iCalendar link</string>
+
     <string name="use_cloud_sync">Accept Terms and Use Cloud Sync</string>
     <string name="use_wifi_for_large_files">Only use WiFi for larger files</string>
 

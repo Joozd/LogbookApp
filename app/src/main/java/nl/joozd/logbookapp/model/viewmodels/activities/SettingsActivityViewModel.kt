@@ -19,25 +19,20 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities
 
-import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
-import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.calendar.CalendarScraper
-import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.export.JoozdlogExport
+import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncTypes
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.toDateStringForFiles
 import nl.joozd.logbookapp.extensions.toDateStringLocalized
@@ -57,7 +52,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
      * Private parts
      *********************************************************************************************/
 
-    private val calendarScraper = CalendarScraper(context)
+
 
     private val _consensusOptIn = MutableLiveData(Preferences.consensusOptIn)
     private val _picNameNeedsToBeSet = MutableLiveData(Preferences.picNameNeedsToBeSet)
@@ -80,11 +75,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val _emailAddress = MutableLiveData(Preferences.emailAddress)
     private val _emailVerified = MutableLiveData(Preferences.emailVerified)
 
+    private val _calendarSyncType = MutableLiveData(Preferences.calendarSyncType)
     private val _calendarDisabledUntil = MutableLiveData(Preferences.calendarDisabledUntil) //  <Long>
 
-    private val _settingsUseIataSelectorTextResource = MutableLiveData<Int>()
-    private val _foundCalendars = MutableLiveData<List<JoozdCalendar>>()
-    private val _pickedCalendar = MutableLiveData<JoozdCalendar>()
+    private val _settingsUseIataSelectorTextResource = MutableLiveData(if (Preferences.useIataAirports) R.string.useIataAirports else R.string.useIcaoAirports)
 
     private val _uriToShare = MutableLiveData<Uri>()
     private val _emailData = MediatorLiveData<Pair<String?, Boolean>>().apply{
@@ -111,9 +105,6 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
             Preferences::alwaysPostponeCalendarSync.name ->
                 _alwaysPostponeCalendarSync.value = Preferences.alwaysPostponeCalendarSync
-
-            Preferences::selectedCalendar.name ->
-                _pickedCalendar.value = _foundCalendars.value?.firstOrNull {c -> c.name == Preferences.selectedCalendar}
 
             Preferences::useCloud.name ->
                 _useCloudSync.value = Preferences.useCloud
@@ -142,6 +133,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
             Preferences::backupFromCloud.name -> _backupFromCloud.value = Preferences.backupFromCloud
 
+            Preferences::calendarSyncType.name -> _calendarSyncType.value = Preferences.calendarSyncType
+
             Preferences::consensusOptIn.name -> _consensusOptIn.value = Preferences.consensusOptIn
 
             Preferences::picNameNeedsToBeSet.name -> _picNameNeedsToBeSet.value = Preferences.picNameNeedsToBeSet
@@ -162,7 +155,6 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     }
     init{
         Preferences.getSharedPreferences().registerOnSharedPreferenceChangeListener (onSharedPrefsChangedListener)
-        _settingsUseIataSelectorTextResource.value = if (Preferences.useIataAirports) R.string.useIataAirports else R.string.useIcaoAirports
     }
 
 
@@ -170,7 +162,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
      * Observables
      *********************************************************************************************/
 
-    val useIataAirports = distinctUntilChanged(_useIataAirports)
+    val useIataAirports get() = _useIataAirports
 
     val consensusOptIn: LiveData<Boolean>
         get() = _consensusOptIn
@@ -178,9 +170,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     val picNameNeedsToBeSet: LiveData<Boolean>
         get() = _picNameNeedsToBeSet
 
-    val getFlightsFromCalendar = distinctUntilChanged(_getFlightsFromCalendar)
+    val getFlightsFromCalendar get() = _getFlightsFromCalendar
 
-    val alwaysPostponeCalendarSync = distinctUntilChanged(_alwaysPostponeCalendarSync)
+    val alwaysPostponeCalendarSync get() = _alwaysPostponeCalendarSync
 
     val useCloudSync: LiveData<Boolean>
         get() = _useCloudSync
@@ -212,14 +204,10 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     val settingsUseIataSelectorTextResource: LiveData<Int>
         get() = _settingsUseIataSelectorTextResource
 
-    val foundCalendars = Transformations.map(_foundCalendars) {it.map{c -> c.name} }
 
     // This is not used at the moment but it's there when we need it. Just set [settingsCalendarTypeSpinner] visibility to VISIBLE in SettingsActivity
     // val pickedCalendarType: MutableLiveData<Int>
     //     get() = _calendarType
-
-    val selectedCalendar: LiveData<JoozdCalendar>
-        get() = _pickedCalendar
 
     val csvUriToShare: LiveData<Uri>
         get() = _uriToShare
@@ -235,8 +223,21 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     val emailData: LiveData<Pair<String?, Boolean>>
         get() = _emailData
 
+    val calendarSyncType: LiveData<Int> = _calendarSyncType.map{
+        when{
+            !Preferences.useCalendarSync -> 0 // button should be hidden when this is 0
+            it == CalendarSyncTypes.CALENDAR_SYNC_NONE -> 0.also { Preferences.useCalendarSync = false } // this should not happen but if it does its okay now
+            it == CalendarSyncTypes.CALENDAR_SYNC_DEVICE -> R.string.calendar_this_device
+            it == CalendarSyncTypes.CALENDAR_SYNC_ICAL -> R.string.ical_link
+            else -> R.string.error // this should not happen aub grgr
+        }
+    }
+
+    /*
+     * If calendar Sync is disabled, this should always be false because it should always be hidden then
+     */
     val calendarDisabled: LiveData<Boolean> = Transformations.map(_calendarDisabledUntil) {
-        it > Instant.now().epochSecond
+        Preferences.useCalendarSync && it > Instant.now().epochSecond
     }
 
     val calendarDisabledUntilString: String
@@ -281,10 +282,22 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         Preferences.picNameNeedsToBeSet = it
     }
 
-    fun setGetFlightsFromCalendar(it: Boolean) {
-        if (it && !Preferences.useCalendarSync) // if it is switched on from being off
+    /**
+     * If [Preferences.useCalendarSync] is true, (switch is on) set it to off
+     * else, if a type of sync is selected, switch it to on; if it isn't show dialog (which will switch it on on success)
+     */
+    fun setGetFlightsFromCalendarClicked() {
+        if (!Preferences.useCalendarSync) { // if it is switched on from being off
             Preferences.calendarDisabledUntil = 0
-        Preferences.useCalendarSync = it
+
+            // If no calendar sync type chosen, show dialog, else just set it to on
+            if (Preferences.calendarSyncType == CalendarSyncTypes.CALENDAR_SYNC_NONE)
+                feedback(SettingsActivityEvents.CALENDAR_DIALOG_NEEDED)
+            else
+                Preferences.useCalendarSync = true
+        }
+        else
+            Preferences.useCalendarSync = false
     }
 
     fun setAutoPostponeCalendarSync(it: Boolean){
@@ -349,24 +362,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         } ?: feedback(SettingsActivityEvents.NOT_LOGGED_IN)
     }
 
-    fun calendarPicked(index: Int){
-        _foundCalendars.value?.get(index)?.let{
-            Preferences.selectedCalendar = it.name
-            flightRepository.syncIfNeeded()
-        }
-    }
-
     fun dontPostponeCalendarSync(){
         Preferences.calendarDisabledUntil = 0
         flightRepository.syncIfNeeded()
-    }
-
-    @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    fun fillCalendarsList() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }.let { _foundCalendars.value = it }
-            _pickedCalendar.value = _foundCalendars.value?.firstOrNull {c -> c.name == Preferences.selectedCalendar}
-        }
     }
 
     private fun makeTimeString(instant: Long): String =

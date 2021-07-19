@@ -78,6 +78,7 @@ object FeedbackEvents {
 
     enum class SettingsActivityEvents:
         Event {
+        CALENDAR_DIALOG_NEEDED,
         LOGIN_LINK_COPIED,
         NOT_LOGGED_IN,
         WANT_TO_CREATE_NEW_ACCOUNT_QMK,
@@ -187,6 +188,12 @@ object FeedbackEvents {
         TOTAL_TIME_GREATER_THAN_DURATION,
         INVALID_IFR_TIME,
         IFR_TIME_GREATER_THAN_DURATION
+    }
+
+    enum class CalendarSyncDialogEvents: Event {
+        NO_ICAL_LINK_FOUND,
+        ERROR,
+        DONE
     }
 
     enum class FlightEditorOpenOrClosed:

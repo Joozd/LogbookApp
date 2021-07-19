@@ -48,7 +48,7 @@ import nl.joozd.logbookapp.databinding.DialogJoozdlogTwoButtonBinding
  *      BONUS           NEGATIVE
  *      NEUTRAL         POSITIVE
  * 2:
- *      NEGATIVE        OK
+ *      NEGATIVE        POSITIVE
  */
 class JoozdlogAlertDialog: Fragment() {
     private val ctx: Context
@@ -232,6 +232,5 @@ class JoozdlogAlertDialog: Fragment() {
     companion object{
         const val JOOZDLOG_DIALOG_TAG = "JOOZDLOG_DIALOG_TAG"
     }
-
 }
 

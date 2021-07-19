@@ -23,7 +23,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.AutoRetrievedCalendar
 import nl.joozd.logbookapp.extensions.atEndOfDay
-import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.extensions.plusMinutes
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.net.URL
@@ -37,6 +36,7 @@ import java.time.format.DateTimeFormatter
  * @param icalString: The downloaded iCalendar file, as a single String
  */
 class KlmIcalFlightsParser(icalString: String): AutoRetrievedCalendar {
+    private val now = Instant.now()
     private val eventRegex = "BEGIN:VEVENT.*?END:VEVENT".toRegex(RegexOption.DOT_MATCHES_ALL)
     private val flightRegex = """SUMMARY:(?:FLIGHT )?($FLIGHT_NUMBER) ($AIRPORT_IDENT)\s?-\s?($AIRPORT_IDENT)""".toRegex()
     private val tOutRegex = """DTSTART:(.*)""".toRegex()
@@ -52,7 +52,7 @@ class KlmIcalFlightsParser(icalString: String): AutoRetrievedCalendar {
     } ?: Instant.now().plusMinutes(15) // fifteen minutes seems ok for a backup validity period?
 
     override val period: ClosedRange<Instant> by lazy{
-        (flights.firstOrNull()?.tOut()?.toInstant(ZoneOffset.UTC)?.atStartOfDay() ?: Instant.EPOCH)..(flights.firstOrNull()?.tOut()?.toInstant(ZoneOffset.UTC)?.atEndOfDay() ?: Instant.EPOCH)
+        now..(flights.maxByOrNull{ it.tOut()}?.tIn()?.toInstant(ZoneOffset.UTC)?.atEndOfDay() ?: Instant.EPOCH)
     }
 
 
@@ -68,6 +68,8 @@ class KlmIcalFlightsParser(icalString: String): AutoRetrievedCalendar {
 
             Flight(-1, flightNumber = flightNumber, orig = orig, dest = dest, timeOut = tOut, timeIn = tIn)
         }
+    }.filter {
+        it.timeOut > now.epochSecond
     }.toList()
 
     companion object{
@@ -79,5 +81,14 @@ class KlmIcalFlightsParser(icalString: String): AutoRetrievedCalendar {
         suspend fun ofURL(url: URL) = withContext(Dispatchers.IO){
             KlmIcalFlightsParser(url.readText())
         }
+
+        @Suppress("BlockingMethodInNonBlockingContext")
+        suspend fun ofString(s: String) = withContext(Dispatchers.IO) {
+            println("Creating AAP BANAAN XXX")
+            val url = URL(s)
+            println("Creating AAP BANAAN YYY")
+            ofURL(url).also{
+            println("Created AAP BANAAN XXX")
+        } }
     }
 }

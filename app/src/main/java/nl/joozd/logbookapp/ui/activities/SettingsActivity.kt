@@ -42,10 +42,7 @@ import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
-import nl.joozd.logbookapp.ui.dialogs.CloudSyncTermsDialog
-import nl.joozd.logbookapp.ui.dialogs.EmailDialog
-import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
-import nl.joozd.logbookapp.ui.dialogs.NumberPickerDialog
+import nl.joozd.logbookapp.ui.dialogs.*
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
@@ -102,38 +99,6 @@ class SettingsActivity : JoozdlogActivity() {
                     }
                 }
 
-
-            /**
-             * Calendar picker spinner
-             */
-            ArrayAdapter(
-                activity,
-                android.R.layout.simple_spinner_item,
-                arrayListOf<String>()
-            ).apply {
-                // Specify the layout to use when the list of choices appears
-                setDropDownViewResource(R.layout.spinner_dropdown_item)
-            }.also { a ->
-                // Apply the adapter to the spinner
-                settingsCalendarPickerSpinner.apply{
-                    adapter = a
-                }
-            }
-            settingsCalendarPickerSpinner.onItemSelectedListener =
-                object : AdapterView.OnItemSelectedListener {
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        //mainSearchField.text = mainSearchField.text
-                        viewModel.calendarPicked(position)
-                    }
-                }
-
-
             /****************************************************************************************
              * Expand or collapse groups of settings
              ****************************************************************************************/
@@ -174,10 +139,18 @@ class SettingsActivity : JoozdlogActivity() {
                 viewModel.setMarkIncompleteWithoutPIC(isChecked)
             }
 
+            settingsGetFlightsFromCalendarSelector.setOnClickListener {
+                viewModel.setGetFlightsFromCalendarClicked()
 
-            settingsGetFlightsFromCalendarSelector.setOnCheckedChangeListener { _, isChecked ->
-                viewModel.setGetFlightsFromCalendar(isChecked)
             }
+
+            calendarSyncTypeButton.setOnClickListener {
+                supportFragmentManager.commit {
+                    add(R.id.settingsActivityLayout, CalendarSyncDialog()) // secondary constructor used, works on recreate
+                    addToBackStack(null)
+                }
+            }
+
 
             autoPostponeCalendarSyncSelector.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.setAutoPostponeCalendarSync(isChecked)
@@ -259,6 +232,8 @@ class SettingsActivity : JoozdlogActivity() {
                     SettingsActivityEvents.NOT_LOGGED_IN ->
                         toast(R.string.error)
                     SettingsActivityEvents.WANT_TO_CREATE_NEW_ACCOUNT_QMK -> showNewAccountDialog()
+
+                    SettingsActivityEvents.CALENDAR_DIALOG_NEEDED -> showCalendarDialog()
                 }
             }
 
@@ -294,14 +269,19 @@ class SettingsActivity : JoozdlogActivity() {
                 markInclompleteWithoutPicText.visibility = if (it) View.VISIBLE else View.GONE
             }
 
-            viewModel.getFlightsFromCalendar.observe(activity) {
+            viewModel.getFlightsFromCalendar.observe(activity){
                 settingsGetFlightsFromCalendarSelector.isChecked = it
-                if (it)
-                    fillCalendarsList()
+                showAllCalendarSyncViews(it)
+            }
+
+            viewModel.calendarSyncType.observe(activity){
+                if (it == 0) // this is when calendar sync is not used or when no selection is made
+                    showAllCalendarSyncViews(false)
                 else {
-                    settingsCalendarPickerSpinner.visibility = View.GONE
-                    // settingsCalendarTypeSpinner.visibility = View.GONE
+                    calendarSyncTypeButton.text = getString(it)
+                    showAllCalendarSyncViews(true)
                 }
+
             }
 
             viewModel.alwaysPostponeCalendarSync.observe(activity){
@@ -329,18 +309,7 @@ class SettingsActivity : JoozdlogActivity() {
             }
             */
 
-            viewModel.foundCalendars.observe(activity) {
-                @Suppress("UNCHECKED_CAST")
-                (settingsCalendarPickerSpinner.adapter as ArrayAdapter<String>).apply {
-                    clear()
-                    addAll(it)
-                }
-                settingsCalendarPickerSpinner.setSelection(it.indexOf(Preferences.selectedCalendar))
-            }
 
-            viewModel.selectedCalendar.observe(activity) {
-                if (it != null) settingsCalendarPickerSpinner.setSelectionWithArrayAdapter(it.name)
-            }
 
             // viewModel.pickedCalendarType.observe(this, Observer {
             //     binding.settingsCalendarTypeSpinner.setSelection(it)
@@ -387,55 +356,11 @@ class SettingsActivity : JoozdlogActivity() {
 
     }
 
-    /**
-     * TODO use newer interface for this using registerForActivityResult()
-     */
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            CALENDAR_PERMISSION_REQUEST_CODE -> {
-                // If request is cancelled, the result arrays are empty.
-                //todo do this through ViewModel so we can get rid of [mBinding]
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
-                    mBinding.fillCalendarsList()
-                else {
-                    //TODO make this a dialog, use R strings
-                    longToast("No permission for calendar access")
-                }
-                return
-            }
-            // Add other 'when' lines to check for other
-            // permissions this app might request.
-            else -> {
-                toast("DEBUG: warning 1")
-                // Ignore all other requests.
-            }
-        }
-    }
 
     //TODO make this happen in viewModel through observer and get rid of [mBinding]
     override fun onResume() {
         super.onResume()
         mBinding.setLoggedInInfo(Preferences.username)
-    }
-
-    private fun ActivitySettingsBinding.fillCalendarsList(){
-        Log.d(this::class.simpleName, "started fillCalendarsList()")
-        if (!checkPermission(Manifest.permission.READ_CALENDAR)) {
-            ActivityCompat.requestPermissions(
-                activity,
-                arrayOf(Manifest.permission.READ_CALENDAR),
-                CALENDAR_PERMISSION_REQUEST_CODE
-            )
-            settingsCalendarPickerSpinner.visibility = View.GONE
-            // settingsCalendarTypeSpinner.visibility = View.GONE
-        } else {
-            settingsCalendarPickerSpinner.visibility = View.VISIBLE
-            // Not used at the moment but it's there when we need it
-            // TAG: #SETTHISIFNEEDED1
-            // settingsCalendarTypeSpinner.visibility = View.VISIBLE
-            viewModel.fillCalendarsList()
-        }
     }
 
     /**
@@ -460,6 +385,18 @@ class SettingsActivity : JoozdlogActivity() {
         }
     }
 
+    /**
+     * This dialog will ask all info for calendar sync (ical + address, scraper + calendar)
+     * If [Preferences.useCalendarSync] is false it will set it to true on OK
+     * if not, it will open a dialog that will allow user to accept terms and if so, sets those both to true.
+     */
+    private fun showCalendarDialog(){
+        supportFragmentManager.commit {
+            add(R.id.settingsActivityLayout, CalendarSyncDialog())
+            addToBackStack(null)
+        }
+    }
+
     /***********************************************************************************************
      * Private functions for changing layout
      ***********************************************************************************************/
@@ -469,6 +406,18 @@ class SettingsActivity : JoozdlogActivity() {
      */
     private fun ConstraintLayout.toggleVisibility() {
         visibility = if (this.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+    }
+
+    /**
+     * Shows/hides Calendar controls if calendar is en/disabled.
+     * Has some extra logic for things that should be hidden even if the rest is allowed to be shown again
+     */
+    private fun ActivitySettingsBinding.showAllCalendarSyncViews(visible: Boolean){
+        val show = if (visible) View.VISIBLE else View.GONE
+        calendarSyncTypeButton.visibility = show
+        autoPostponeCalendarSyncSelector.visibility = show
+        calendarSyncPostponedTextView.visibility = if (viewModel.calendarDisabled.value == true) show else View.GONE
+        dontPostponeTextView.visibility = if (viewModel.calendarDisabled.value == true) show else View.GONE
     }
 
 

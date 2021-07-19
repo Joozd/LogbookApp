@@ -35,7 +35,9 @@ import java.time.Instant
 
 /**
  * This will scrape planned flights from calendar.
- * It will need some extra smarts, such as cut-off times etc
+ * It is used to create an object that has a function to grab a roster from your device's calendar
+ * This function will return an [AutoRetrievedCalendar] (which is a [Roster] with a validity period)
+ * The period of this Roster is from highest of Now and [Preferences.calendarDisabledUntil] until [Preferences.calendarSyncAmountOfDays] days later
  */
 
 
@@ -43,9 +45,9 @@ class CalendarFlightUpdater {
     private val context = App.instance.ctx
     private val calendarScraper = CalendarScraper(context)
     private val startCutoff
-        get() = maxOf(Instant.now().atStartOfDay(), Instant.ofEpochSecond(Preferences.calendarDisabledUntil))
+        get() = maxOf(Instant.now(), Instant.ofEpochSecond(Preferences.calendarDisabledUntil))
 
-    val period
+    private val period
         get() = (startCutoff..Instant.now().plus(Duration.ofDays(Preferences.calendarSyncAmountOfDays)))
 
     /**

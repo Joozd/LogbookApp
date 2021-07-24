@@ -141,7 +141,6 @@ class SettingsActivity : JoozdlogActivity() {
 
             settingsGetFlightsFromCalendarSelector.setOnClickListener {
                 viewModel.setGetFlightsFromCalendarClicked()
-
             }
 
             calendarSyncTypeButton.setOnClickListener {

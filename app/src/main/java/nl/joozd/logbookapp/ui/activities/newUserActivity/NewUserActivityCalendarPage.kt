@@ -19,23 +19,18 @@
 
 package nl.joozd.logbookapp.ui.activities.newUserActivity
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
+import androidx.fragment.app.commit
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageCalendarBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
+import nl.joozd.logbookapp.ui.dialogs.CalendarSyncDialog
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 /**
@@ -46,80 +41,47 @@ class NewUserActivityCalendarPage: JoozdlogFragment() {
 
     val viewModel: NewUserActivityViewModel by activityViewModels()
 
-    @SuppressLint("MissingPermission") // false positive
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-        if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED){
-            viewModel.fillCalendarsList()
-        }
-        else JoozdlogAlertDialog().show(requireActivity()){
-            titleResource = R.string.need_permission
-            messageResource = R.string.need_permission_calendar
-            setPositiveButton(android.R.string.ok){
-                viewModel.disableCalendarSync()
-            }
-        }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageCalendarBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_calendar, container, false)).apply {
-
-
-
-            /****************************************************************************************
-             * initialize spinner
-             ****************************************************************************************/
-            val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, arrayListOf<String>()).apply {
-                // Specify the layout to use when the list of choices appears
-                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            }.also { adapter ->
-                // Apply the adapter to the spinner
-                calendarPickerSpinner.adapter = adapter
-            }
-            calendarPickerSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    //mainSearchField.text = mainSearchField.text
-                    viewModel.calendarPicked(position)
-                }
-            }
 
 
             /*******************************************************************************************
              * OnClickedListeners
              *******************************************************************************************/
 
-            useCalendarImportSwitch.setOnCheckedChangeListener { _, isChecked ->
-                if (!isChecked){
-                    viewModel.disableCalendarSync()
-                    return@setOnCheckedChangeListener
-                }
-                fillCalendarsList()
+            useCalendarImportSwitch.setOnClickListener {
+                viewModel.setGetFlightsFromCalendarClicked()
+                useCalendarImportSwitch.isChecked = Preferences.useCalendarSync
             }
 
 
             /*******************************************************************************************
              * Observers
              *******************************************************************************************/
-
-            viewModel.foundCalendars.observe(viewLifecycleOwner) { items ->
-                useCalendarImportSwitch.isChecked = items != null
-                calendarPickerSpinnerLayout.visibility = items?.let {
-                    spinnerAdapter.clear()
-                    spinnerAdapter.addAll(it)
-                    calendarPickerSpinner.setSelection(it.indexOf(Preferences.selectedCalendar).takeIf {i -> i != -1} ?: 0)
-
-                    View.VISIBLE
-                } ?: View.INVISIBLE
-
-
+            viewModel.getFlightsFromCalendar.observe(viewLifecycleOwner){
+                useCalendarImportSwitch.isChecked = it
             }
-            return root
-        }
-    }
 
-    private fun fillCalendarsList(){
-        if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
-            viewModel.fillCalendarsList()
-        else requestPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+            /**
+             * Observe feedback from viewModel
+             */
+            viewModel.getFeedbackChannel(pageNumber).observe(viewLifecycleOwner){
+                when (it.getEvent()){
+                    SettingsActivityEvents.CALENDAR_DIALOG_NEEDED -> showCalendarDialogNoSync()
+                }
+            }
+
+        }.root
+
+    /**
+     * This dialog will ask all info for calendar sync (ical + address, scraper + calendar)
+     * If [Preferences.useCalendarSync] is false it will set it to true on OK
+     * if not, it will open a dialog that will allow user to accept terms and if so, sets those both to true.
+     */
+    private fun showCalendarDialogNoSync(){
+        supportFragmentManager.commit {
+            add(R.id.newUserActivityLayout, CalendarSyncDialog(syncAfter = false))
+            addToBackStack(null)
+        }
     }
 }

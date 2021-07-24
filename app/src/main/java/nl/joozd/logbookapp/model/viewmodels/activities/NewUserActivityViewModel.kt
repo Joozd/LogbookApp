@@ -19,19 +19,18 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities
 
-import android.Manifest
 import android.content.SharedPreferences
-import androidx.annotation.RequiresPermission
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.CalendarScraper
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncTypes
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import java.util.*
@@ -41,12 +40,6 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     /*******************************************************************************************
      * Private parts
      *******************************************************************************************/
-
-    /**
-     * Helper classes/objects/etc
-     */
-
-    private val calendarScraper = CalendarScraper(context)
 
     /**
      * Feedback channels, every page should observe it's channel if feedback is needed
@@ -76,6 +69,8 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     //Use IATA airports instead of ICAO, used on PAGE_FINAL
     private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
 
+    private val _getFlightsFromCalendar = MutableLiveData(Preferences.useCalendarSync)
+
 
 
     /**
@@ -97,6 +92,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         when(key) {
             Preferences::useCloud.name -> _useCloudCheckboxStatus.value = Preferences.useCloud
             Preferences::useIataAirports.name -> _useIataAirports.value = Preferences.useIataAirports
+            Preferences::useCalendarSync.name -> _getFlightsFromCalendar.value = Preferences.useCalendarSync
         }
     }
     init{
@@ -116,9 +112,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         get() = _useCloudCheckboxStatus
 
     // used on PAGE_CALENDAR
-    // null if no calendars are to be shown
-    val foundCalendars = Transformations.map(_foundCalendars) {it?.map{ c -> c.name} }
-
+    val getFlightsFromCalendar: LiveData<Boolean> get() = _getFlightsFromCalendar
 
     //used on PAGE_FINAL
     val useIataAirports: LiveData<Boolean>
@@ -308,19 +302,20 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * [PAGE_CALENDAR] functions
      *******************************************************************************************/
 
-    fun disableCalendarSync(){
+    fun CalendarSyncSwitchClicked(){
         Preferences.useCalendarSync = false
         _foundCalendars.value = null //
     }
 
-    @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    fun fillCalendarsList() {
-        println("DIKKEBANAAN")
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }.let {
-                _foundCalendars.value = it
-            }
-        }
+    /**
+     * If [Preferences.useCalendarSync] is true, (switch is on) set it to off
+     * else, show dialog (which will switch it on on success)
+     */
+    fun setGetFlightsFromCalendarClicked() {
+        if (!Preferences.useCalendarSync) // if it is switched on from being off
+            feedback(SettingsActivityEvents.CALENDAR_DIALOG_NEEDED, PAGE_CALENDAR)
+        else
+            Preferences.useCalendarSync = false
     }
 
     fun calendarPicked(index: Int) {

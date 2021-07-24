@@ -245,7 +245,7 @@
     <string name="need_permission_calendar">Joozdlog needs permission to access calendars if you want it to access your calendars.</string>
 
     <string name="no_ical_link_found">No iCalendar link found.</string>
-    <string name="no_ical_link_found_long">Please save the link to your iCal calendar on your clipboard (usually long-press and select "copy URL")</string>
+    <string name="no_ical_link_found_long">Please save the link to your iCal calendar on your clipboard (usually long-press and select "copy URL")\nCurrently only KLM Ical links are supported.</string>
 
     <string name="ical_link_found">iCalendar link found.</string>
     <string name="ical_link_found_long">Your clipboard seems to be holding an iCalendar link. Do you wish to use this?</string>

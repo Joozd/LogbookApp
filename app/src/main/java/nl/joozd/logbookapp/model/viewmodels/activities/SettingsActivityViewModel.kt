@@ -170,7 +170,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     val picNameNeedsToBeSet: LiveData<Boolean>
         get() = _picNameNeedsToBeSet
 
-    val getFlightsFromCalendar get() = _getFlightsFromCalendar
+    val getFlightsFromCalendar: LiveData<Boolean> get() = _getFlightsFromCalendar
 
     val alwaysPostponeCalendarSync get() = _alwaysPostponeCalendarSync
 

@@ -50,6 +50,7 @@ class AugmentedCrewDialog: JoozdlogFragment(){
 
             timeForTakeoffLandingEditText.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus){
+                    println("FOCUS CHANGED for takeoffLandingTimes")
                     viewModel.setTakeoffLandingTime(timeForTakeoffLandingEditText.text)
                 }
             }
@@ -86,6 +87,7 @@ class AugmentedCrewDialog: JoozdlogFragment(){
                 closeFragment()
             }
             saveCrewDialogButon.setOnClickListener {
+                it.requestFocus()
                 closeFragment()
             }
             return root

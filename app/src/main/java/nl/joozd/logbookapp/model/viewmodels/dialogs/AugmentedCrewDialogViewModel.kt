@@ -29,11 +29,8 @@ import nl.joozd.logbookapp.extensions.toInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
 class AugmentedCrewDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
-    private val undoCrew = Crew.of(workingFlight.crew.toInt())
     private val crew // shortcut
         get() = workingFlight.crew
-
-    val augmentedCrewData = crew
 
     fun crewDown() = crew.dec() // = crew-- but works on a val
 
@@ -68,7 +65,7 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
         }
         if (time.isBlank()) setTakeoffLandingTime(Preferences.standardTakeoffLandingTimes)
         else {
-            Preferences.standardTakeoffLandingTimes = time.toInt()
+            setTakeoffLandingTime(time.toInt())
         }
     }
 

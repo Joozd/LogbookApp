@@ -22,10 +22,6 @@ package nl.joozd.logbookapp.data.miscClasses.crew
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import nl.joozd.logbookapp.extensions.getBit
-import nl.joozd.logbookapp.extensions.setBit
-import nl.joozd.logbookapp.extensions.toInt
-import java.time.Duration
 
 /**
  *  Observable version of [Crew]
@@ -120,7 +116,7 @@ class ObservableCrew(iCrewSize: Int = 2,
      * Make a crew from [crewInt] and clone that
      */
     fun clone(crewInt: Int){
-        clone(Crew.of(crewInt))
+        clone(of(crewInt))
     }
 
     private fun Int.putInRange(range: IntRange): Int {

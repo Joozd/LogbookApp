@@ -150,6 +150,9 @@ class CalendarSyncDialog : JoozdlogFragment() {
                 calendarScraperRadioButton.isChecked = it == CalendarSyncTypes.CALENDAR_SYNC_DEVICE
                 icalSubscriptionRadioButton.isChecked = it == CalendarSyncTypes.CALENDAR_SYNC_ICAL
 
+                /**
+                 * Depending on which Calendar Sync Type is active, show spinner, editText or neither
+                 */
                 when(it){
                     CalendarSyncTypes.CALENDAR_SYNC_DEVICE -> {
                         icalAddressLayout.visibility = View.INVISIBLE
@@ -160,6 +163,10 @@ class CalendarSyncDialog : JoozdlogFragment() {
                         icalAddressLayout.visibility = View.VISIBLE
                         calendarPickerSpinnerLayout.visibility = View.GONE
                         icalAddressEditText.setText(viewModel.foundLink)
+                    }
+                    else -> {
+                        icalAddressLayout.visibility = View.INVISIBLE
+                        calendarPickerSpinnerLayout.visibility = View.GONE
                     }
 
                 }

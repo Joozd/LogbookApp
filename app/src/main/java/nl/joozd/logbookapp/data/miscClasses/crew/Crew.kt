@@ -116,6 +116,15 @@ open class Crew(iCrewSize: Int = 2,
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other !is Crew) return false
+        return toInt() == other.toInt()
+    }
+
+    override fun hashCode(): Int = toInt()
+
+    override fun toString(): String = "Crew(size = $size, takeoff = $takeoff, landing = $landing, toLdgTime = $times)"
+
     companion object {
         const val MIN_CREW_SIZE = 1
         const val MAX_CREW_SIZE = 15

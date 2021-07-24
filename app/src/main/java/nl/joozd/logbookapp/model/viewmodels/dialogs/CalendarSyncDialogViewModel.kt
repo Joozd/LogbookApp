@@ -38,6 +38,9 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.CalendarSyncDialo
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
 class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
+    // Private flags
+    private var calendarScrapeWaitingForCalendars: Boolean = false
+
     /**
      * Temporary values for settings
      */
@@ -93,6 +96,11 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
     val calendarSyncIcalAddress: LiveData<String> get() = _calendarSyncIcalAddress
     val okButtonEnabled: LiveData<Boolean> get() = _okButtonEnabled
 
+    /**
+     * This can be set to on if a sync shouldn't happen right after clicking OK
+     */
+    var sync: Boolean = true
+
     private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         when (key) {
             Preferences::selectedCalendar.name ->
@@ -111,9 +119,10 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
 
     /**
      * Fill calendars list
+     * call [calendarScraperRadioButtonClicked] if that was waiting for calendar list to be filled
      */
     @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    fun fillCalendarsList(forceCalendarScrape: Boolean? = null) {
+    fun fillCalendarsList() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }.let { _foundCalendars.value = it }
             _selectedCalendar.value = _foundCalendars.value?.firstOrNull { c -> c.name == Preferences.selectedCalendar} ?: run{
@@ -123,9 +132,8 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
                     firstCalendarInList
                 }
             }
-            if (forceCalendarScrape == true){
-                println("FORCING CALENDAR SCOPE to ${CalendarSyncTypes.CALENDAR_SYNC_DEVICE}")
-                mCalendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_DEVICE
+            if (calendarScrapeWaitingForCalendars){
+                calendarScraperRadioButtonClicked()
             }
         }
     }
@@ -148,22 +156,33 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
      * Calendar Scraper radio button clicked.
      * This should set [Preferences.calendarSyncType] to [CalendarSyncTypes.CALENDAR_SYNC_DEVICE]
      * which in turn should trigger a watcher that updates a livedata that updates the UI
+     * If no calendars found (ie. no permission (yet)), it sets [calendarScrapeWaitingForCalendars] to true
      */
     fun calendarScraperRadioButtonClicked(){
         if (_foundCalendars.value != null) {
             mCalendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_DEVICE
+            calendarScrapeWaitingForCalendars = false
         }
-        else mCalendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_NONE
+        else {
+            mCalendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_NONE
+            calendarScrapeWaitingForCalendars = true
+        }
 
     }
 
+    /**
+     * If a new link is on clipboard, use that
+     * If there isn't one but an old one was stored, use that
+     * If there isn't one, feedback [CalendarSyncDialogEvents.NO_ICAL_LINK_FOUND] and set type to NONE
+     */
     fun icalSubscriptionRadioButtonClicked(){
-        if (foundLink != null)
-            useIcalLink()
+        getLinkFromClipboard()?.let { foundLink = it }
+        if (foundLink != null) {
+            useFoundLink()
+        }
         else {
             feedback(CalendarSyncDialogEvents.NO_ICAL_LINK_FOUND)
             mCalendarSyncType=CalendarSyncTypes.CALENDAR_SYNC_NONE
-
         }
     }
 
@@ -173,16 +192,9 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
         } ?: run { Preferences.calendarSyncType=CalendarSyncTypes.CALENDAR_SYNC_NONE }
     }
 
-    fun useIcalLink() {
-        getLinkFromClipboard()?.let { foundLink = it }
-        foundLink?.let {
-            println("found link $foundLink")
-            mCalendarSyncIcalAddress = it
-            mCalendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_ICAL
-
-        } ?: feedback(CalendarSyncDialogEvents.ERROR)
-    }
-
+    /**
+     * Set the selected calendar type + its associated data, and, if one actually is selected, set [Preferences.useCalendarSync] to true and sync it
+     */
     fun okClicked(){
         Preferences.calendarSyncType = mCalendarSyncType
         Preferences.selectedCalendar = mSelectedCalendar?.name ?: ""
@@ -190,7 +202,8 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
         Preferences.useCalendarSync = (mCalendarSyncType != CalendarSyncTypes.CALENDAR_SYNC_NONE).also{
             if (it) {
                 Preferences.nextCalendarCheckTime = 0
-                flightRepository.syncIfNeeded()
+                if (sync)
+                    flightRepository.syncIfNeeded()
             }
         }
         feedback(CalendarSyncDialogEvents.DONE)
@@ -201,6 +214,18 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
         CalendarSyncTypes.CALENDAR_SYNC_ICAL -> mCalendarSyncIcalAddress.isNotBlank()
         CalendarSyncTypes.CALENDAR_SYNC_DEVICE -> mSelectedCalendar != null
         else -> false // It will never be this but compiler doesn't know that
+    }
+
+    /**
+     * Use [foundLink] to fill appropriate fields, will feedback an ERROR if null
+     */
+    private fun useFoundLink() {
+        foundLink?.let {
+            println("found link $foundLink")
+            mCalendarSyncIcalAddress = it
+            mCalendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_ICAL
+
+        } ?: feedback(CalendarSyncDialogEvents.ERROR)
     }
 
     /**

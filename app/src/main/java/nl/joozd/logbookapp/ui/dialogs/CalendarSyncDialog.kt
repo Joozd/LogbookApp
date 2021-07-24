@@ -49,7 +49,12 @@ When a button is selected, check for permissions and do stuff
 see fillCalendarsList for how to check
  */
 
-class CalendarSyncDialog : JoozdlogFragment() {
+class CalendarSyncDialog() : JoozdlogFragment() {
+    // Secondary constructor to make it not sync afterwards if we don't want that
+    constructor(syncAfter: Boolean): this(){
+        sync = syncAfter
+    }
+    private var sync: Boolean? = null
     private val viewModel: CalendarSyncDialogViewModel by viewModels()
     private var mCancelButton: TextView? = null // to get focus onResume
 
@@ -70,6 +75,9 @@ class CalendarSyncDialog : JoozdlogFragment() {
             /*************************************
              * Initialization
              *************************************/
+            sync?.let{
+                viewModel.sync = it
+            }
 
             if (viewModel.checkClipboardForIcalLink()){
                 showIcalLinkFoundDialog()
@@ -99,7 +107,7 @@ class CalendarSyncDialog : JoozdlogFragment() {
 
             calendarScraperRadioButton.setOnClickListener {
                 clearButtons()
-                fillCalendarsList(true)
+                fillCalendarsList()
                 viewModel.calendarScraperRadioButtonClicked()
             }
 
@@ -218,12 +226,12 @@ class CalendarSyncDialog : JoozdlogFragment() {
     }
 
 
-    private fun fillCalendarsList(forceCalendarScrape: Boolean? = null) {
+    private fun fillCalendarsList() {
         if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
             return
         }
-        viewModel.fillCalendarsList(forceCalendarScrape)
+        viewModel.fillCalendarsList()
     }
 
     private fun showNeedPermissionDialog() {
@@ -243,21 +251,24 @@ class CalendarSyncDialog : JoozdlogFragment() {
             titleResource = R.string.ical_link_found
             messageResource = R.string.ical_link_found_long
             setPositiveButton(android.R.string.ok){
-                viewModel.useIcalLink()
+                viewModel.icalSubscriptionRadioButtonClicked()
             }
             setNegativeButton(android.R.string.cancel)
         }
     }
 
+    /**
+     * This will display a message to put an iCal link on clipboard.
+     * OK will simulate another click on iCal radio button and close this dialog.
+     * Cancel will do nothing.
+     */
     private fun noIcalLinkFoundDialog(){
         JoozdlogAlertDialog().show(requireActivity(), tag = NO_ICAL_LINK_DIALOG_TAG){
             titleResource = R.string.no_ical_link_found
             messageResource = R.string.no_ical_link_found_long
             setNegativeButton(android.R.string.cancel)
             setPositiveButton(android.R.string.ok){
-                if (viewModel.checkClipboardForIcalLink()){
-                    viewModel.useIcalLink()
-                }
+                viewModel.icalSubscriptionRadioButtonClicked()
             }
         }
     }

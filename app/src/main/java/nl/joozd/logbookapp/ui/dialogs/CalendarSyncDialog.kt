@@ -71,6 +71,10 @@ class CalendarSyncDialog : JoozdlogFragment() {
              * Initialization
              *************************************/
 
+            if (viewModel.checkClipboardForIcalLink()){
+                showIcalLinkFoundDialog()
+            }
+
             /**
              * Populate Calendar picker spinner
              */

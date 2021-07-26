@@ -24,12 +24,19 @@ import androidx.fragment.app.FragmentActivity
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 
+/**
+ * Predefined error codes
+ */
 object ErrorCodes {
     val FOUNDLINK_IS_NULL = 1 to "CalendarSyncDialogViewModel.foundLink == null"
 }
 
 
-
+/**
+ * Show an errorDialog with a predefined error from a [Fragment]
+ * @param code: Predefined error code.
+ * @see ErrorCodes
+ */
 fun Fragment.errorDialog(code: Pair<Int, String>) {
     val ctx = this
     JoozdlogAlertDialog().show(requireActivity()){
@@ -39,6 +46,11 @@ fun Fragment.errorDialog(code: Pair<Int, String>) {
     }
 }
 
+/**
+ * Show an errorDialog with a predefined error from a [FragmentActivity]
+ * @param code: Predefined error code.
+ * @see ErrorCodes
+ */
 fun FragmentActivity.errorDialog(code: Pair<Int, String>) {
     val ctx = this
     JoozdlogAlertDialog().show(this) {
@@ -47,3 +59,19 @@ fun FragmentActivity.errorDialog(code: Pair<Int, String>) {
         setPositiveButton(android.R.string.ok)
     }
 }
+
+/**
+ * Show an error with a custom code and message from a [Fragment]
+ * @param message: Error Message
+ * @param code: Error code
+ * Good practice is to always use error code -1 for this, otherwise make an [ErrorCodes] entry
+ */
+fun Fragment.errorDialog(message: String, code: Int = -1) = errorDialog(code to message)
+
+/**
+ * Show an error with a custom code and message from a [FragmentActivity]
+ * @param message: Error Message
+ * @param code: Error code
+ * Good practice is to always use error code -1 for this, otherwise make an [ErrorCodes] entry
+ */
+fun FragmentActivity.errorDialog(message: String, code: Int = -1) = errorDialog(code to message)

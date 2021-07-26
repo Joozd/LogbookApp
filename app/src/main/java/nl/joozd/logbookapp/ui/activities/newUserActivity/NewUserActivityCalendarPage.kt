@@ -49,6 +49,12 @@ class NewUserActivityCalendarPage: JoozdlogFragment() {
              * OnClickedListeners
              *******************************************************************************************/
 
+            /**
+             * When useCalendarImportSwitch is clicked, viewModel will open UseCalendarDialog if switching to on,
+             * or switch [Preferences.useCalendarSync] when switching to off.
+             * This will intitially also set switch state to [Preferences.useCalendarSync],
+             *      which will update later when that gets updated through viewModel.getFlightsFromCalendar.observe
+             */
             useCalendarImportSwitch.setOnClickListener {
                 viewModel.setGetFlightsFromCalendarClicked()
                 useCalendarImportSwitch.isChecked = Preferences.useCalendarSync
@@ -58,8 +64,11 @@ class NewUserActivityCalendarPage: JoozdlogFragment() {
             /*******************************************************************************************
              * Observers
              *******************************************************************************************/
+
+            // set useCalendarImportSwitch and "Continue" button enabled to it
             viewModel.getFlightsFromCalendar.observe(viewLifecycleOwner){
                 useCalendarImportSwitch.isChecked = it
+                viewModel.setNextButtonEnabled(pageNumber, it)
             }
 
             /**

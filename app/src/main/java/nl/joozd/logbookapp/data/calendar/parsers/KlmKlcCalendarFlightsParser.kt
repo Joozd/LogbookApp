@@ -37,14 +37,14 @@ import java.time.Instant
  * period: start of day of start of first flight until end of day of end of last flight
  */
 
-class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, override val period: ClosedRange<Instant>):
-    AutoRetrievedCalendar {
-    init{
-        Log.d(this::class.simpleName, "Got ${events.size} events")
-    }
-    private val flightEvents = events.filter {flightRegEx.containsMatchIn(it.eventType)}.also{
-        Log.d(this::class.simpleName, "Got ${it.size} flight events")
-    }
+class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, override val period: ClosedRange<Instant>): AutoRetrievedCalendar {
+    private val flightRegEx = """([A-Z]{2}\d{3,4})\s([A-Z]{3})\s?-\s?([A-Z]{3})""".toRegex()
+
+    private val flightEvents = events.filter {flightRegEx.containsMatchIn(it.eventType)}
+
+    /**
+     * Gets the flights from the events by looking for [flightRegEx] in their description
+     */
     override val flights = flightEvents.mapNotNull { event ->
         flightRegEx.find(event.description)?.let { data ->
             Flight(
@@ -65,7 +65,6 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, override val
     private fun MatchResult.orig() = (groups[ORIG]?.value ?: error ("ERROR 0004 NO ORIG"))
     private fun MatchResult.dest() = (groups[DEST]?.value ?: error ("ERROR 0005 NO DEST"))
 
-
     /**
      * This data in this calendar will be good for at least this amount of seconds
      * @see Preferences.MIN_CALENDAR_CHECK_INTERVAL
@@ -76,13 +75,8 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, override val
         get() = true
 
     companion object{
-        const val FLIGHT_EVENT_IDENTIFIER = "FLIGHT"
-        //TODO make regex for eg. `FLIGHT KL0887 AMS - HKG`
-
         private const val FLIGHTNUMBER = 1
         private const val ORIG = 2
         private const val DEST = 3
-        val flightRegEx = """([A-Z]{2}\d{3,4})\s([A-Z]{3})\s?-\s?([A-Z]{3})""".toRegex()
-
     }
 }

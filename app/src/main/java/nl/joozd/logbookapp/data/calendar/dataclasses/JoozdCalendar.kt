@@ -19,9 +19,4 @@
 
 package nl.joozd.logbookapp.data.calendar.dataclasses
 
-data class JoozdCalendar(val calID: Long, val displayName: String, val accountName: String, val ownerName: String, val name: String = "GEEN NAAM", val color: Int=0){
-
-}
-
-//TODO remov3e below
-
+data class JoozdCalendar(val calID: Long, val displayName: String, val accountName: String, val ownerName: String, val name: String = "GEEN NAAM", val color: Int=0)

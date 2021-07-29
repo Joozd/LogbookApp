@@ -30,5 +30,6 @@ class TimestampMaker(private val mock: Boolean = false) {
      * - always 1 second later than the last sync
      */
     val nowForSycPurposes: Long
-        get() = if (mock) Instant.now().epochSecond else (Instant.now().epochSecond + Preferences.serverTimeOffset).withMinimumValue(Preferences.lastUpdateTime+1)
+        get() = if (mock) Instant.now().epochSecond
+                else (Instant.now().epochSecond + Preferences.serverTimeOffset).withMinimumValue(Preferences.lastUpdateTime+1)
 }

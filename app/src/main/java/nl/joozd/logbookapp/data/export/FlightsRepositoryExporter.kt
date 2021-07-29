@@ -20,7 +20,6 @@
 package nl.joozd.logbookapp.data.export
 
 import android.util.Base64
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
@@ -40,7 +39,6 @@ import java.time.Instant
  */
 class FlightsRepositoryExporter(val flightRepository: FlightRepository, private val mock: Boolean = false): CoroutineScope by MainScope() {
     private val allFlightsAsync = async { flightRepository.getAllFlights().filter{ !it.isPlanned} }
-    private val timestamp get() = TimestampMaker(mock).nowForSycPurposes
 
     suspend fun buildCsvString(): String = (listOf(FIRST_LINE_V5)  +
         allFlightsAsync.await().map{ it.toCsvV5() }).joinToString("\n")
@@ -142,15 +140,15 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository, private 
         /**
          *  Read a csv with basicFlights to a list of Flights. Flight ID's will need to be assigned before saving.
          */
-        fun csvToFlights(csvBasicFlights: String) = csvToFlights(csvBasicFlights.lines())
+        fun csvToFlights(csvBasicFlights: String, mock: Boolean = false) = csvToFlights(csvBasicFlights.lines(), mock)
 
         /**
          *  Read a csv with basicFlights to a list of Flights. Flight ID's will need to be assigned before saving.
          *  @param csvBasicFlights = list of lines each containing a csv encoded basicFlight
          */
-        fun csvToFlights(csvBasicFlights: List<String>): List<Flight> = when (csvBasicFlights.first()){
-            FIRST_LINE_V4 -> csvBasicFlights.drop(1).map{Flight(upgrade4to5(csvFlightToBasicFlightv4(it)))}
-            FIRST_LINE_V5 -> csvBasicFlights.drop(1).map{Flight(csvFlightToBasicFlightv5(it))}
+        fun csvToFlights(csvBasicFlights: List<String>, mock: Boolean = false): List<Flight> = when (csvBasicFlights.first()){
+            FIRST_LINE_V4 -> csvBasicFlights.drop(1).map{Flight(upgrade4to5(csvFlightToBasicFlightv4(it, mock)))}
+            FIRST_LINE_V5 -> csvBasicFlights.drop(1).map{Flight(csvFlightToBasicFlightv5(it, mock))}
             else -> throw (IllegalArgumentException("Not a supported CSV format"))
         }
 
@@ -158,7 +156,7 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository, private 
         /**
          * Convert a flight in CSV String format to a flight in [BasicFlight_version4] format
          */
-        private fun csvFlightToBasicFlightv4(csvFlight: String): BasicFlight_version4 = csvFlight.split(';').map{ it.replace('|', ';')}.let { v->
+        private fun csvFlightToBasicFlightv4(csvFlight: String, mock: Boolean = false): BasicFlight_version4 = csvFlight.split(';').map{ it.replace('|', ';')}.let { v->
             require(BasicFlight_version4.VERSION.version == 4)
             BasicFlight_version4(
                 flightID = -1,
@@ -193,12 +191,12 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository, private 
                 autoFill = v[28] == true.toString(),
                 augmentedCrew = v[29].toInt(),
                 DELETEFLAG = false,
-                timeStamp = ,
-                signature = Base64.decode(v[30], Base64.NO_WRAP).toString(Charsets.UTF_8)
+                timeStamp = TimestampMaker(mock).nowForSycPurposes,
+                signature = if (mock) "" else Base64.decode(v[30], Base64.NO_WRAP).toString(Charsets.UTF_8)
             )
         }
 
-        private fun csvFlightToBasicFlightv5(csvFlight: String): BasicFlight = csvFlight.split(';').map{ it.replace('|', ';')}.let { v->
+        private fun csvFlightToBasicFlightv5(csvFlight: String, mock: Boolean = false): BasicFlight = csvFlight.split(';').map{ it.replace('|', ';')}.let { v->
             require(BasicFlight.VERSION.version == 5)
             BasicFlight(
                 flightID = -1,
@@ -234,8 +232,8 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository, private 
                 autoFill = v[29] == true.toString(),
                 augmentedCrew = v[30].toInt(),
                 DELETEFLAG = false,
-                timeStamp = TimestampMaker().nowForSycPurposes,
-                signature = Base64.decode(v[31], Base64.NO_WRAP).toString(Charsets.UTF_8)
+                timeStamp = TimestampMaker(mock).nowForSycPurposes,
+                signature = if (mock) "" else Base64.decode(v[31], Base64.NO_WRAP).toString(Charsets.UTF_8)
             )
         }
 

@@ -21,6 +21,7 @@
 package nl.joozd.logbookapp.ui.activities
 
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -201,9 +202,7 @@ class MainActivity : JoozdlogActivity() {
             }
 
             viewModel.undoAvailableLiveData.observe(activity){
-                println("BOERENMETWORST!!!!!1 $it")
                 undoMenuItem?.let{ item ->
-                    println("BERNAAN")
                     item.isVisible = it
                     //invalidateOptionsMenu()
                 }
@@ -211,9 +210,7 @@ class MainActivity : JoozdlogActivity() {
             }
 
             viewModel.redoAvailableLiveData.observe(activity){
-                println("BOERENZONDERWORST!!!!!1 $it")
                 redoMenuItem?.let{ item ->
-                    println("BERNAAN2")
                     item.isVisible = it
                     //invalidateOptionsMenu()
                 }

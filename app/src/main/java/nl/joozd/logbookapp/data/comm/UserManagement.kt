@@ -118,22 +118,20 @@ object UserManagement {
         Preferences.username ?: return@withContext CloudFunctionResults.NO_LOGIN_DATA
         Preferences.password ?: return@withContext CloudFunctionResults.NO_LOGIN_DATA
 
-        if (Cloud.checkUser().also {Log.d("XXXXXX", "checkUser gave $it")}
-            != true
-        ) return@withContext CloudFunctionResults.NO_LOGIN_DATA
-
-
+        Cloud.checkUser().let {
+            if (!it.isOK())
+                return@withContext it
+        }
         Preferences.newPassword = newPassword
-        return@withContext when (Cloud.changePassword(newPassword, email = Preferences.emailAddress.nullIfBlank()).also { Log.d("changePassword()", "returned $it") }) {
-            true -> {
+        return@withContext Cloud.changePassword(newPassword, email = Preferences.emailAddress.nullIfBlank()).also{
+            if (it.isOK()) {
                 Preferences.password = newPassword
                 Preferences.newPassword = ""
                 CloudFunctionResults.OK
             }
-            false -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
-            null -> CloudFunctionResults.CLIENT_ERROR
         }
     }
+
 
     /**
      * Change email address. It will confirm with server at the first possible time. Server will send a confirmation mail if needed.
@@ -180,40 +178,45 @@ object UserManagement {
         Preferences.newPassword.nullIfBlank()?.let {
             Preferences.password?.let { pw ->
                 when (Cloud.checkUser(Preferences.username ?: return@withContext false, pw)) {
-                    true -> {
+                    CloudFunctionResults.OK -> {
                         Log.w("tryToFixLogin", "Login was already correct")
                         return@withContext true
                     }
-                    null -> return@withContext null // other problem, don't do anything
-                    false -> Unit
+                    in CloudFunctionResults.connectionErrors -> return@withContext null // other problem, don't do anything
+                    else -> Unit
                 }
             }
             //If we get here, either Preferences.password == null or it is incorrect for login, and newPassword is not blank
 
             when (Cloud.checkUser(Preferences.username ?: return@withContext false, Preferences.newPassword)) {
-                true -> { // yay this fixed it
+                CloudFunctionResults.OK -> { // yay this fixed it
                     Preferences.password = Preferences.newPassword
                     Preferences.newPassword = ""
                     true
                 }
-                false -> { // Didn't fix it, just wrong login credentials (which is wierd as newPassword wasn't empty)
+                in CloudFunctionResults.connectionErrors -> null // Server didn't respond well. Don't do anything.
+                CloudFunctionResults.UNKNOWN_USER_OR_PASS -> { // Didn't fix it, just wrong login credentials (which is wierd as newPassword wasn't empty)
                     Preferences.newPassword = ""
+                    Preferences.username = null  //this will start the creation of a new account on the next sync
                     false
                 }
-                null -> null // Server didn't respond well. Don't do anything.
+                else -> null // something else went wrong. Doing nothing for now, maybe force a new creation here as well?
             }
         } ?: false.also { Log.w("tryToFixLogin", "Don't run this when Preferences.newPassword is blank") }
     }
 
     /**
      * check username/password with server and store them if OK
-     * @return true if success
-     * @return false if username taken
-     * @return null if server or connection error
+     * @return [CloudFunctionResults]:
+     *  [CloudFunctionResults.OK] if logged in OK
+     *  [CloudFunctionResults.UNKNOWN_USER_OR_PASS] if server rejected login data. In this case, an error to be shown to user will be scheduled through [ScheduledErrors.addError]
+     *  [CloudFunctionResults.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
+     *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
+     *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
      */
-    suspend fun loginFromLink(loginPassPair: Pair<String, String>): Boolean? = withContext (Dispatchers.IO) {
+    suspend fun loginFromLink(loginPassPair: Pair<String, String>): CloudFunctionResults = withContext (Dispatchers.IO) {
         return@withContext Cloud.checkUserFromLink(loginPassPair.first, loginPassPair.second).also {
-            if (it == true) {
+            if (it.isOK()) {
                 Preferences.username = loginPassPair.first
                 Preferences.forcePassword(loginPassPair.second)
                 Preferences.lastUpdateTime = -1

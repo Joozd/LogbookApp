@@ -391,7 +391,6 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      */
     fun checkAutovaluesForUnknownAirport(){
         val unknownAirportFound = originIsValid.value == false || destinationIsValid.value == false
-        println("BOTERHAM ${originIsValid.value} / ${destinationIsValid.value} - av is ${wf.isAutoValuesLiveData.value}")
         if (!unknownAirportFound && autoValuesOnlyOffBecauseOfUnknownAirport){              // autovalues off because unknown airports, but all airports known
             toggleAutoValues(true)                                                // force autoValues on
             autoValuesOnlyOffBecauseOfUnknownAirport = false                            // it is not off so this should be false
@@ -399,7 +398,6 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         if (unknownAirportFound && wf.mIsAutovalues){                        // autovalues wants to be on, but unknown airports prevet that
             autoValuesOnlyOffBecauseOfUnknownAirport = true                             // We switch off Autovalues for this reason
             toggleAutoValues(false)                                               // force autoValues off. If airports are all known again, calling this function again will reset it to on
-            println("BANAAAAAAAN")
         }
     }
 

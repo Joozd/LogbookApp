@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.ui.adapters
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,10 +33,10 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
 /**
  * Adapter for RecyclerView that can highlight one entry
  * Needs
- * @param color: the color of [itemBackground] will be set to this value for [selectedEntry]
- * @param itemLayout: Layout to be used for an item. MUST have a view named [itemBackground]
+ * @param color: the color of itemBackground will be set to this value for [selectedEntry]
+ * @param itemLayout: Layout to be used for an item. MUST have a view named itemBackground
  * @param itemClick: Action to be performed onClick on an item
- * itemLayout must have a field named [itemBackground]
+ * itemLayout must have a field named 'itemBackground'
  */
 class AircraftPickerAdapter(
     private var l: List<AircraftType> = emptyList(),
@@ -75,6 +76,7 @@ class AircraftPickerAdapter(
         return ViewHolder(view)
     }
 
+    @SuppressLint("NotifyDataSetChanged") // This will only ever be called to refresh the entire list
     fun updateList(l: List<AircraftType>){
         list = l
         notifyDataSetChanged()
@@ -86,7 +88,6 @@ class AircraftPickerAdapter(
     fun selectActiveItem(activeItem: AircraftType?) {
         val previousIndex = l.indexOf(selectedEntry)
         val foundIndex = l.indexOf(activeItem)
-        println("BANANA $foundIndex on $mRecylerView")
         selectedEntry = activeItem
         if (previousIndex >= 0)
             notifyItemChanged(previousIndex)

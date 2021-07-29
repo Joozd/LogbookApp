@@ -33,6 +33,7 @@ import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.repository.helpers.overlaps
@@ -509,7 +510,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
                         viewModelScope.launch {
                             val result = UserManagement.loginFromLink(loginPass)
                             Log.d("LinkLogin", "result: $result")
-                            if (result == null){
+                            if (result in CloudFunctionResults.connectionErrors){
                                 Preferences.loginLinkStringWaiting = lpString
                                 JoozdlogWorkersHub.scheduleLoginAttempt()
                                 feedback(MainActivityEvents.LOGIN_DELAYED_DUE_NO_SERVER)

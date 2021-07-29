@@ -19,5 +19,17 @@
 
 package nl.joozd.logbookapp.data.dataclasses
 
-data class LogbookAddressInfo(val street1: String, val street2: String, val zipcode: String, val city: String, val state: String, val country: String)
-//TODO maybe make this serializable for input in [Preferences].
+/**
+ * Store and address
+ * NOTE no line breaks allowed
+ */
+data class LogbookAddressInfo(val street1: String, val street2: String, val zipcode: String, val city: String, val state: String, val country: String){
+    override fun toString() = listOf(street1, street2, zipcode, city, state).joinToString("\n")
+    companion object{
+        fun ofString(s: String): LogbookAddressInfo = s.split("\n").let{
+            require (it.size == 6) { "$it does not have 6 elements"}
+            LogbookAddressInfo(it[0], it[1], it[2], it[3], it[4], it[5])
+        }
+    }
+}
+

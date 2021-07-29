@@ -825,7 +825,6 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
         timeInOutMutex,
         takeoffLandingMutex
     ) {
-        Log.d("lalalala", "huppakeeee")
         val flightToSave = try {
             toFlight()
         } catch (ex: NullPointerException) {

@@ -28,7 +28,6 @@ import nl.joozd.joozdlogcommon.comms.Packet
 import nl.joozd.joozdlogcommon.serializing.intFromBytes
 import nl.joozd.joozdlogcommon.serializing.toByteArray
 import nl.joozd.joozdlogcommon.serializing.wrap
-
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.Closeable
@@ -45,9 +44,17 @@ class Client: Closeable, CoroutineScope {
      * Context is encapsulated by the scope and used for implementation of coroutine builders that are extensions on the scope.
      * Accessing this property in general code is not recommended for any purposes except accessing the [Job] instance for advanced usages.
      *
-     * By convention, should contain an instance of a [job][Job] to enforce structured concurrency.
+     * By convention, should contain an instance of a [Job] to enforce structured concurrency.
      */
     override val coroutineContext: CoroutineContext = Dispatchers.IO + Job()
+
+    /**
+     * If socket died, this is set to false.
+     * Set to true on creation of socket.
+     * Set to false on receiving a socket exception
+     */
+    var alive = false
+        private set
 
     private val socket = try {
         SSLSocketFactory.getDefault().createSocket(
@@ -61,41 +68,60 @@ class Client: Closeable, CoroutineScope {
     }
     init{
         socket?.let{
-            sendRequest(JoozdlogCommsKeywords.HELLO, ProtocolVersion.CURRENTVERSION.toByteArray())
+            sendRequest(JoozdlogCommsKeywords.HELLO, ProtocolVersion.CURRENTVERSION.toByteArray(), initializing = true).let{
+                alive = it.isOK()
+                println("ALIVE! - $it")
+            }
+
+
         }
+        println("WWWWWWWWWWW socket alive: $alive")
     }
 
     /**
      * Send data to server. On success, returns the amount of bytes sent, on failure returns a negative Integer
-     * TODO define return codes in [CloudFunctionResults]
+     * @return [CloudFunctionResults]:
+     *  [CloudFunctionResults.OK] if all OK
+     *  [CloudFunctionResults.SOCKET_IS_NULL] if socket is not created
+     *  [CloudFunctionResults.UNKNOWN_HOST] if host was not found
+     *  [CloudFunctionResults.IO_ERROR] if a generic IO error occurred
+     *  [CloudFunctionResults.CONNECTION_REFUSED] if connection could not be established by remote host
+     *  [CloudFunctionResults.SOCKET_ERROR] if there is an error creating or accessing a Socket
      */
-    fun sendToServer(packet: Packet): Int {
+    private fun sendToServer(packet: Packet): CloudFunctionResults {
         // Log.d("SendToServer:", packet.message.take(40).toByteArray().toString(Charsets.UTF_8))
         try {
             socket?.let {
                 val output = BufferedOutputStream(it.getOutputStream())
                 output.write(packet.content)
                 output.flush()
-                return packet.message.size
+                return CloudFunctionResults.OK
             }
             Log.e(TAG, "Error 0005: Socket is null")
-            return -5
+            return CloudFunctionResults.SOCKET_IS_NULL.also{
+                instance = null
+                alive = false
+            }
         } catch (he: UnknownHostException) {
-            val exceptionString = "An exception 0001 occurred:\n ${he.printStackTrace()}"
-            Log.i(TAG, exceptionString, he)
-            return -1
+            return CloudFunctionResults.UNKNOWN_HOST.also{
+                instance = null
+                alive = false
+            }
         } catch (ioe: IOException) {
-            val exceptionString = "An exception 0002 occurred:\n ${ioe.printStackTrace()}"
-            Log.i(TAG, exceptionString, ioe)
-            return -2
+            return CloudFunctionResults.IO_ERROR.also{
+                instance = null
+                alive = false
+            }
         } catch (ce: ConnectException) {
-            val exceptionString = "An exception 0003 occurred:\n ${ce.printStackTrace()}"
-            Log.i(TAG, exceptionString, ce)
-            return -3
+            return CloudFunctionResults.CONNECTION_REFUSED.also{
+                instance = null
+                alive = false
+            }
         } catch (se: SocketException) {
-            val exceptionString = "An exception 0004 occurred:\n ${se.printStackTrace()}"
-            Log.i(TAG, exceptionString, se)
-            return -4
+            return CloudFunctionResults.SOCKET_ERROR.also{
+                instance = null
+                alive = false
+            }
         }
     }
 
@@ -104,19 +130,22 @@ class Client: Closeable, CoroutineScope {
      * @param f: listener with a 0-100 percentage completed value
      */
     fun readFromServer(f: (Int) -> Unit = {}): ByteArray? {
-        try {
-            socket?.let {
-                return try {
-                    getInput(BufferedInputStream(it.getInputStream()), f)
-                } catch (e: IOException) {
-                    Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
-                    null
+        if (alive) {
+            try {
+                socket?.let {
+                    return try {
+                        getInput(BufferedInputStream(it.getInputStream()), f)
+                    } catch (e: IOException) {
+                        Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
+                        null
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error: $e, ${e.printStackTrace()}")
+            return null
         }
-        return null
+        else return null
     }
 
     /**
@@ -159,9 +188,19 @@ class Client: Closeable, CoroutineScope {
      * Send a request to server
      * @param request: A string as defined in nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
      * @param extraData: A bytearray with extra data to be sent as part of this request
+     * @return [CloudFunctionResults]:
+     *  [CloudFunctionResults.OK] if all OK
+     *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
+     *  Or any of the results that [sendToServer] can return:
+     *  [CloudFunctionResults.SOCKET_IS_NULL] if socket is not created
+     *  [CloudFunctionResults.UNKNOWN_HOST] if host was not found
+     *  [CloudFunctionResults.IO_ERROR] if a generic IO error occurred
+     *  [CloudFunctionResults.CONNECTION_REFUSED] if connection could not be established by remote host
+     *  [CloudFunctionResults.SOCKET_ERROR] if there is an error creating or accessing a Socket
      */
-    fun sendRequest(request: String, extraData: ByteArray? = null): Int =
+    fun sendRequest(request: String, extraData: ByteArray? = null, initializing: Boolean = false): CloudFunctionResults = if (alive || initializing)
         sendToServer(Packet(wrap(request) + (extraData ?: ByteArray(0))))
+    else CloudFunctionResults.CLIENT_NOT_ALIVE
             //.also{ Log.d("request", request) }
 
 
@@ -220,13 +259,10 @@ class Client: Closeable, CoroutineScope {
          */
         suspend fun getInstance(): Client {
             mutex.lock()
-            try{ // in a try loop so it won't spam Log with exceptions
-                timeOut.cancel()
-            } finally{
-
-                return instance?.also{Log.v("Client()", "Reusing instance")}
+            timeOut.cancel()
+            return instance?.also{Log.v("Client()", "Reusing instance")}
                     ?: Client().also{ instance = it }.also{Log.v("Client()", "Creating new instance")}
-            }
+
         }
     }
 

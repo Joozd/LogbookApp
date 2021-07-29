@@ -32,9 +32,7 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.joozdlogcommon.exceptions.NotAuthorizedException
 import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
-import nl.joozd.logbookapp.data.room.model.AircraftTypeConsensusData
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.data.utils.Encryption
 
@@ -148,12 +146,13 @@ object Cloud {
 
     /**
      * Changes a user's password
-     * Calling function should consider storing username and pasword in [Preferences]
+     * Calling function should consider storing username and password in [Preferences]
+     * For returns see [ServerFunctions.login] and [ServerFunctions.changePassword]
      */
-    suspend fun changePassword(newPassword: String, email: String?): Boolean? = withContext(Dispatchers.IO) {
+    suspend fun changePassword(newPassword: String, email: String?): CloudFunctionResults = withContext(Dispatchers.IO) {
         Client.getInstance().use {client ->
-            ServerFunctions.login(client)?.let{
-                if (!it) return@withContext it.also{
+            ServerFunctions.login(client).let{
+                if (!it.isOK()) return@withContext it.also{
                     Log.w("changePassword","Incorrect login credentials given")
                 }
             }
@@ -169,21 +168,13 @@ object Cloud {
      * ServerFunctions.testLogin returns 1 if success, 2 if failed, negative value if connection failed
      * @return true if correct, false if incorrect, null if unexpected response, server error or no connection
      */
-    suspend fun checkUser(username: String, password: String): Boolean? =  withContext(Dispatchers.IO) {
-            when (Client.getInstance().use{
-                ServerFunctions.testLogin(it, username, password)
-            }) {
-                1 -> true
-                2 -> false
-                -998 -> {
-                    Log.w("Cloud", "Server gave unexpected response")
-                    null
-                }
-                else -> null
-            }
+    suspend fun checkUser(username: String, password: String): CloudFunctionResults =  withContext(Dispatchers.IO) {
+        Client.getInstance().use {
+            ServerFunctions.testLogin(it, username, password)
         }
+    }
 
-    suspend fun checkUser(): Boolean? =  withContext(Dispatchers.IO) {
+    suspend fun checkUser(): CloudFunctionResults =  withContext(Dispatchers.IO) {
         Client.getInstance().use {
             ServerFunctions.login(it)
         }
@@ -191,22 +182,16 @@ object Cloud {
 
     /**
      * Check username / pass
-     * ServerFunctions.testLogin returns 1 if success, 2 if failed, negative value if connection failed
+     * @return [CloudFunctionResults]:
+     *  [CloudFunctionResults.OK] if logged in OK
+     *  [CloudFunctionResults.UNKNOWN_USER_OR_PASS] if server rejected login data. In this case, an error to be shown to user will be scheduled through [ScheduledErrors.addError]
+     *  [CloudFunctionResults.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
+     *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
+     *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
      */
-    suspend fun checkUserFromLink(username: String, password: String): Boolean? =  withContext(Dispatchers.IO) {
-        when (Client.getInstance().use{
+    suspend fun checkUserFromLink(username: String, password: String): CloudFunctionResults =  withContext(Dispatchers.IO) {
+        Client.getInstance().use {
             ServerFunctions.testLoginFromLink(it, username, password)
-        }) {
-            1 -> true
-            2 -> false.also{
-                ScheduledErrors.addError(Errors.LOGIN_DATA_REJECTED_BY_SERVER)
-            }
-            -998 -> {
-                ScheduledErrors.addError(Errors.SERVER_ERROR)
-                Log.w("Cloud", "Server gave unexpected response")
-                null
-            }
-            else -> null
         }
     }
 
@@ -320,7 +305,7 @@ object Cloud {
     suspend fun requestAllFlights(f: (Int) -> Unit = {}): List<Flight>? =
         withContext(Dispatchers.IO) {
             Client.getInstance().use {
-                if (ServerFunctions.login(it) != true) {
+                if (!ServerFunctions.login(it).isOK()) {
                     f(100)
                     null
                 } else
@@ -336,37 +321,9 @@ object Cloud {
         }
 
     /**
-     * Just send all flights to server.
-     * @param f: List of flights
-     * @return: Error code, 0 if all OK
-     * Error codes:
-     *  1: Login failed
-     *  2: Sending flights failed
-     *  3: time sync failed
-     */
-    suspend fun justSendFlights(f: List<Flight>): Int = withContext(Dispatchers.IO) {
-        Client.getInstance().use { client ->
-            val timeStamp = ServerFunctions.getTimestamp(client) ?: return@withContext 3
-            val loggedIn = ServerFunctions.login(client) == true
-            when {
-                !loggedIn -> 1
-                !ServerFunctions.sendFlights(client, f) -> 2
-                else -> {
-                    ServerFunctions.sendTimeStamp(client, timeStamp)
-                    ServerFunctions.save(client)
-                    ServerFunctions.finish(client)
-                    0
-                }
-            }
-        }
-    }
-
-
-    /**
      * @return timestamp on success, -1 on critical fail (ie wrong credentials), null on server error (retry later)
      * Listsner will give an estimated completion percentage
      */
-
     suspend fun syncAllFlights(flightRepository: FlightRepository, listener: (Int) -> Unit = {}): Long? = try {
         withContext(Dispatchers.IO) f@{
             syncingFlights = true
@@ -382,12 +339,18 @@ object Cloud {
                     } ?: return@f null.also { Log.d("Cloud", "getTimeStamp() returned null") } // if no timestamp received, server is not working so might as well quit here
 
                     //Login and handle if that fails:
-                    when (login(server)) {
-                        false -> {
-                            flightRepository.setNotLoggedInFlag(true)
-                            return@f -1L
+                    login(server).let { result ->
+                        when (result) {
+                            CloudFunctionResults.OK -> Unit
+                            CloudFunctionResults.UNKNOWN_USER_OR_PASS, CloudFunctionResults.NOT_LOGGED_IN -> {
+                                flightRepository.setNotLoggedInFlag(true)
+                                return@f -1L
+                            }
+                            else -> {
+                                Log.w("syncAllFlights", "Failed, result was $result")
+                                return@f null
+                            }
                         }
-                        null -> return@f null.also { Log.d("Cloud", "Login returned null") }
                     }
                     listener(15)
 
@@ -448,23 +411,13 @@ object Cloud {
 
                     //send the flights to server, retry on fail as login worked earlier
                     // Could make this incrementally increase progbar, but it would make things somewhat more inefficient. Lets see.
-                    if (!sendFlights(server, flightsToSend)) return@f null.also {
-                        Log.d(
-                            "Cloud",
-                            "sendFlights returned null"
-                        )
-                    }
+                    if (!sendFlights(server, flightsToSend).isOK()) return@f null
                     listener(75)
                     //add timestamp to this transaction
-                    if (!sendTimeStamp(server, timeStamp)) return@f null.also {
-                        Log.d(
-                            "Cloud",
-                            "sendTimeStamp returned null"
-                        )
-                    }
+                    if (!sendTimeStamp(server, timeStamp).isOK()) return@f null
                     listener(80)
                     //save changes on server
-                    if (!save(server)) return@f null.also { Log.d("Cloud", "save returned null") }
+                    if (!save(server).isOK()) return@f null.also { Log.d("Cloud", "save returned null") }
                     listener(85)
 
                     //mark time of this successful sync
@@ -487,7 +440,7 @@ object Cloud {
         syncingFlights = false
     }
 
-    suspend fun sendFeedback(feedback: String, contactInfo: String): Boolean = withContext(Dispatchers.IO) {
+    suspend fun sendFeedback(feedback: String, contactInfo: String): CloudFunctionResults = withContext(Dispatchers.IO) {
         Client.getInstance().use{ client ->
             val feedbackData = FeedbackData(feedback, contactInfo)
             ServerFunctions.sendFeedback(client, feedbackData)

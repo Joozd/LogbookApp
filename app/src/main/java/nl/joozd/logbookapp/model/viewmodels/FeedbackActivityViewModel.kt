@@ -68,7 +68,7 @@ class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
             InternetStatus.internetAvailable != true -> feedback(GeneralEvents.ERROR).putInt(NO_INTERNET)
             _feedbackText.isBlank() -> feedback(GeneralEvents.ERROR).putInt(EMPTY_FEEDBACK) // don't feel like making a while FeedbackEvents class
             else -> viewModelScope.launch{
-                if (Cloud.sendFeedback(_feedbackText, _contactInfo)) {
+                if (Cloud.sendFeedback(_feedbackText, _contactInfo).isOK()) {
                     Preferences.feedbackWaiting = ""
                     feedback(GeneralEvents.DONE)
                 }

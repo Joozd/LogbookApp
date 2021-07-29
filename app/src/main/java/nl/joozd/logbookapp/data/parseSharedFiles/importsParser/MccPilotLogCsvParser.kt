@@ -51,7 +51,7 @@ class MccPilotLogCsvParser(private val csvLines: List<String>, private val lowes
      * Private parts
      *********************************************************************************************/
 
-    private val now = TimestampMaker.nowForSycPurposes
+    private val now = TimestampMaker().nowForSycPurposes
 
     private val _isValid = csvLines.first() == MCC_PILOT_LOG_CSV_IDENTIFIER
 

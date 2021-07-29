@@ -81,7 +81,7 @@ class LogTenProParser(private val lines: List<String>): ImportedLogbook {
         }
         return try {
             //make time out/in from date and parsing
-            val now = TimestampMaker.nowForSycPurposes
+            val now = TimestampMaker().nowForSycPurposes
 
             val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
             val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")

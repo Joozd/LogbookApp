@@ -262,7 +262,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         else save(
             flight.copy(
                 DELETEFLAG = true,
-                timeStamp = TimestampMaker.nowForSycPurposes,
+                timeStamp = TimestampMaker().nowForSycPurposes,
             ),
             addToUndo = addToUndo
         ).also{ Log.d(this::class.simpleName, "soft-deleted flight $flight")}
@@ -336,7 +336,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     fun save(flight: Flight, sync: Boolean = true, updateIDs: Boolean = false, addToUndo: Boolean = false) = launch {
         saveMutex.withLock {
             //assign available FlightID if requested
-            val f = if (updateIDs) flight.copy(flightID = lowestFreeFlightID(), timeStamp = TimestampMaker.nowForSycPurposes) else flight.copy(timeStamp = TimestampMaker.nowForSycPurposes)
+            val f = if (updateIDs) flight.copy(flightID = lowestFreeFlightID(), timeStamp = TimestampMaker().nowForSycPurposes) else flight.copy(timeStamp = TimestampMaker().nowForSycPurposes)
 
             // Add to undo if needed:
             if (addToUndo){
@@ -371,9 +371,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         saveMutex.withLock {
             //assign available FlightIDs if requested
             val ff = if (updateIDs != false) flights.map { flight ->
-                flight.copy(flightID = if (flight.flightID <= 0 || updateIDs == true) nextFlightID() else flight.flightID, timeStamp = TimestampMaker.nowForSycPurposes)
+                flight.copy(flightID = if (flight.flightID <= 0 || updateIDs == true) nextFlightID() else flight.flightID, timeStamp = TimestampMaker().nowForSycPurposes)
             } else flights.map {
-                it.copy(timeStamp = TimestampMaker.nowForSycPurposes)
+                it.copy(timeStamp = TimestampMaker().nowForSycPurposes)
             }
 
             // Add to undo if needed:
@@ -415,7 +415,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         delete(flightsToRemove)
         val lowestNewID = highestID.await() + 1
         save(flightsToSave.mapIndexed { index: Int, f: Flight ->
-            f.copy(flightID = lowestNewID + index, timeStamp = TimestampMaker.nowForSycPurposes)
+            f.copy(flightID = lowestNewID + index, timeStamp = TimestampMaker().nowForSycPurposes)
         }, sync)
     }
     */
@@ -571,10 +571,10 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         Log.i("FlightRepo", "Starting Synchronization")
         launch {
             val needsServerSync =
-                TimestampMaker.nowForSycPurposes - Preferences.lastUpdateTime > MIN_SYNC_INTERVAL   // interval for checking remote changes has passed
+                TimestampMaker().nowForSycPurposes - Preferences.lastUpdateTime > MIN_SYNC_INTERVAL   // interval for checking remote changes has passed
                         || getFlightsChangedAfter(Preferences.lastUpdateTime).isNotEmpty()          // OR local changes since last sync
 
-            val needsCalendarSync = TimestampMaker.nowForSycPurposes > Preferences.nextCalendarCheckTime
+            val needsCalendarSync = TimestampMaker().nowForSycPurposes > Preferences.nextCalendarCheckTime
 
             println("needsCalendarSync: $needsCalendarSync && Preferences.useCalendarSync: ${Preferences.useCalendarSync}")
             if (needsCalendarSync && Preferences.useCalendarSync) {

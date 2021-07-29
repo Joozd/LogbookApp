@@ -36,7 +36,7 @@ const val PLANNING_MARGIN = 300 // seconds = 5 minutes. Flights saved with timeI
 fun Flight.prepareForSave(): Flight{
     val now = Instant.now().epochSecond
     //planned if time in later than now (with a bit of margin) or sim later than end of local day
-    return this.copy(isPlanned = if (isSim) timeIn > Instant.now().atEndOfDay(ZonedDateTime.now().offset).epochSecond else (timeIn > now + PLANNING_MARGIN), timeStamp = TimestampMaker.nowForSycPurposes)
+    return this.copy(isPlanned = if (isSim) timeIn > Instant.now().atEndOfDay(ZonedDateTime.now().offset).epochSecond else (timeIn > now + PLANNING_MARGIN), timeStamp = TimestampMaker().nowForSycPurposes)
 }
 
 fun Flight.isSamedPlannedFlightAs(f: Flight) =

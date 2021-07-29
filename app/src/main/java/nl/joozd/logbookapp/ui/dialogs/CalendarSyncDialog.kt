@@ -41,8 +41,8 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.CalendarSyncDialo
 import nl.joozd.logbookapp.model.viewmodels.dialogs.CalendarSyncDialogViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
-import nl.joozd.logbookapp.utils.ErrorCodes
-import nl.joozd.logbookapp.utils.errorDialog
+import nl.joozd.logbookapp.errors.Errors
+import nl.joozd.logbookapp.errors.errorDialog
 
 /*
 When a button is selected, check for permissions and do stuff
@@ -195,7 +195,7 @@ class CalendarSyncDialog() : JoozdlogFragment() {
             viewModel.feedbackEvent.observe(viewLifecycleOwner) {
                 when (it.getEvent()){
                     CalendarSyncDialogEvents.DONE -> closeFragment()
-                    CalendarSyncDialogEvents.ERROR -> errorDialog(ErrorCodes.FOUNDLINK_IS_NULL)
+                    CalendarSyncDialogEvents.ERROR -> errorDialog(Errors.FOUNDLINK_IS_NULL)
                     CalendarSyncDialogEvents.NO_ICAL_LINK_FOUND -> {
                         noIcalLinkFoundDialog()
                     }

@@ -50,7 +50,7 @@ class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private va
     suspend fun cleanFlights(): List<Flight>?{
         val iataToIcaoMap = icaoIataMapAsync.await().reversed()
         val aircraftMap = aircraftMapAsync.await()
-        val now = TimestampMaker.nowForSycPurposes
+        val now = TimestampMaker().nowForSycPurposes
         return dirtyFlights?.map{cleanFlight(it, aircraftMap, iataToIcaoMap, now)}
     }
 

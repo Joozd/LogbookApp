@@ -95,7 +95,10 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
              */
             if (typeDetector.seemsInvalid || typeDetector.typeOfFile is SupportedTypes.Unsupported) {
                 feedback(PdfParserActivityEvents.UNSUPPORTED_FILE) // TODO handle this in Activity
-                Log.w(this::class.simpleName, "Unsupported file 001")
+                if (typeDetector.seemsInvalid)
+                    Log.w(this::class.simpleName, "Unsupported file 001")
+                else
+                    Log.w(this::class.simpleName, "Unsupported file 002")
                 updateStatus(ERROR)
                 return@withContext  /* END HERE */
             }
@@ -139,7 +142,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
         getParser(type, uri)?.let{ roster ->
             if (roster.isInvalid) {
                 feedback(PdfParserActivityEvents.UNSUPPORTED_FILE)
-                Log.w(this::class.simpleName, "Unsupported file 002")
+                Log.w(this::class.simpleName, "Unsupported file 006")
                 return
             }
             val processedRoster = roster.postProcess()

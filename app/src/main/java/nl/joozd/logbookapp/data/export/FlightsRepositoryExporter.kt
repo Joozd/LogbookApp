@@ -35,13 +35,15 @@ import java.time.Instant
 
 /**
  * Exporter class for flights
- * TODO upgrade to V5
+ * @param flightRepository: Flight Repository to use
+ * @param mock: True if testing without Android environment (bypasses Preferences)
  */
-class FlightsRepositoryExporter(val flightRepository: FlightRepository): CoroutineScope by MainScope() {
+class FlightsRepositoryExporter(val flightRepository: FlightRepository, private val mock: Boolean = false): CoroutineScope by MainScope() {
     private val allFlightsAsync = async { flightRepository.getAllFlights().filter{ !it.isPlanned} }
+    private val timestamp get() = TimestampMaker(mock).nowForSycPurposes
 
-    suspend fun buildCsvString(): String = (listOf(FIRST_LINE_V4)  +
-        allFlightsAsync.await().map{ it.toCsvV4() }).joinToString("\n")
+    suspend fun buildCsvString(): String = (listOf(FIRST_LINE_V5)  +
+        allFlightsAsync.await().map{ it.toCsvV5() }).joinToString("\n")
 
 
     private fun Flight.toCsvV4(): String {
@@ -86,6 +88,49 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
         }
     }
 
+    private fun Flight.toCsvV5(): String {
+        return with (this.toBasicFlight()){
+            listOf<String>(
+                flightID.toString(),
+                orig,
+                dest,
+                Instant.ofEpochSecond(timeOut).toString(),// from original Flight
+                Instant.ofEpochSecond(timeIn).toString(), // from original Flight
+                correctedTotalTime.toString(),
+                multiPilotTime.toString(),
+                nightTime.toString(),
+                ifrTime.toString(),
+                simTime.toString(),
+                aircraftType,
+                registration,
+                name,
+                name2,
+                takeOffDay.toString(),
+                takeOffNight.toString(),
+                landingDay.toString(),
+                landingNight.toString(),
+                autoLand.toString(),
+                flightNumber,
+                remarks,
+                isPIC.toString(),
+                isPICUS.toString(),
+                isCoPilot.toString(),
+                isDual.toString(),
+                isInstructor.toString(),
+                isSim.toString(),
+                isPF.toString(),
+                isPlanned.toString(),
+                // unknownToServer.toString(),
+                autoFill.toString(),
+                augmentedCrew.toString(),
+                // DELETEFLAG,
+                // timeStamp,
+                Base64.encodeToString(signature.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
+            ).joinToString(";") { it.replace(';', '|') }
+
+        }
+    }
+
 
 
 
@@ -97,7 +142,7 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
         /**
          *  Read a csv with basicFlights to a list of Flights. Flight ID's will need to be assigned before saving.
          */
-        fun csvToFlights(csvBasicFlights: String) = csvToFlights(csvBasicFlights.split('\n'))
+        fun csvToFlights(csvBasicFlights: String) = csvToFlights(csvBasicFlights.lines())
 
         /**
          *  Read a csv with basicFlights to a list of Flights. Flight ID's will need to be assigned before saving.
@@ -148,7 +193,7 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
                 autoFill = v[28] == true.toString(),
                 augmentedCrew = v[29].toInt(),
                 DELETEFLAG = false,
-                timeStamp = TimestampMaker.nowForSycPurposes,
+                timeStamp = ,
                 signature = Base64.decode(v[30], Base64.NO_WRAP).toString(Charsets.UTF_8)
             )
         }
@@ -189,7 +234,7 @@ class FlightsRepositoryExporter(val flightRepository: FlightRepository): Corouti
                 autoFill = v[29] == true.toString(),
                 augmentedCrew = v[30].toInt(),
                 DELETEFLAG = false,
-                timeStamp = TimestampMaker.nowForSycPurposes,
+                timeStamp = TimestampMaker().nowForSycPurposes,
                 signature = Base64.decode(v[31], Base64.NO_WRAP).toString(Charsets.UTF_8)
             )
         }

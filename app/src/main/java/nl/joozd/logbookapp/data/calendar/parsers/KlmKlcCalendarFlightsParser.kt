@@ -55,7 +55,7 @@ class KlmKlcCalendarFlightsParser(events: List<JoozdCalendarEvent>, override val
                 timeOut = event.startTime.epochSecond,
                 timeIn = event.endTime.epochSecond,
                 unknownToServer = true,
-                timeStamp = TimestampMaker.nowForSycPurposes,
+                timeStamp = TimestampMaker().nowForSycPurposes,
                 isPlanned = true
             )
         }

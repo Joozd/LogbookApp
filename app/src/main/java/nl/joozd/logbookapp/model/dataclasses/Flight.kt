@@ -49,9 +49,9 @@ data class Flight(
     val correctedTotalTime: Int = 0,
     val multiPilotTime: Int = 0,
     val nightTime: Int = 0,
-    val ifrTime:Int = 0, // 0 means 0 minutes, -1 means this is a VFR flight
+    val ifrTime:Int = 0,                                    // 0 means 0 minutes, -1 means this is a VFR flight
     val simTime: Int = 0,
-    val aircraftType: String = "",                           // overrides standard AircraftType that goes with registration
+    val aircraftType: String = "",                          // overrides standard AircraftType that goes with registration
     val registration: String = "",
     val name: String = "",
     val name2: String = "",
@@ -70,7 +70,7 @@ data class Flight(
     val isSim: Boolean = false,
     val isPF: Boolean = false,
     val isPlanned: Boolean = true,
-    val unknownToServer: Boolean = true,                                   // Changed 1 means server doesn't know about this flight and it can be safely hard-deleted from DB.
+    val unknownToServer: Boolean = true,                    // Changed 1 means server doesn't know about this flight and it can be safely hard-deleted from DB.
     val autoFill: Boolean = true,
     val augmentedCrew: Int = 0,
     val DELETEFLAG: Boolean = false,
@@ -155,38 +155,6 @@ data class Flight(
         signature
     )
 
-
-
-    // timeOut and timeIn are seconds since epoch
-    // multiPilotTime, nightTime, ifrTime are number of minutes
-    // TODO ifrTime "0" is standard by aircraft
-
-    private val allNames: String // TODO remove this comment: made private because compiler told me to
-    val takeoffLanding: String
-    init{
-        var allNamesBuilder=name
-        if (name2 != "") allNamesBuilder += ", $name2"
-        allNames = allNamesBuilder
-        takeoffLanding = "${takeOffNight+takeOffDay}/${landingNight+landingDay}"
-    }
-
-/*
-    val pic = isPIC > 0
-    val picus = isPICUS > 0
-    val coPilot = isCoPilot > 0
-    val dual = isDual > 0
-    val instructor = isInstructor > 0
-    val sim = isSim > 0
-    val pf = isPF > 0
-    val planned = isPlanned > 0 // only planned flights should be deletable, not planned is flown
-
- */
-
-
-    fun regAndType() =
-        if ((registration + aircraftType).isEmpty()) ""
-        else registration + if (aircraftType.isNotEmpty()) "($aircraftType)" else ""
-
     fun landings() = "${landingDay + landingNight}"
     fun takeoffs() = "${takeOffDay + takeOffNight}"
     fun tOut(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeOut), ZoneId.of("UTC"))
@@ -209,11 +177,7 @@ data class Flight(
 
     fun durationString() = FlightDataPresentationFunctions.minutesToHoursAndMinutesString(duration())
 
-    // override fun toString(): String = "Flight $flightID: orig: $orig, $dest: dest, $flightNumber out: ${tOut()}, in: ${tIn()} "
-
-
     companion object{
-
         fun createEmpty() = Flight(-1)
     }
 }

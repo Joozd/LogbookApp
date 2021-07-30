@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.flow
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import java.util.*
 
-//TODO this needs performance work
 object FlowingAirportSearcher{
     /**
      * Makes a Flow that emits lists of matching Airports to query in order:

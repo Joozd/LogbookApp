@@ -47,7 +47,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
         super.onCreate(savedInstanceState)
 
         if (Preferences.aircraftTypesVersion == 0 || Preferences.airportDbVersion == 0) {
-            toast("Cannot import without Airport DB, try again later")
+            toast("Airport DB not downloaded yet, try again later")
             //TODO try to download it first before failing?
             finish()
         }

@@ -468,13 +468,6 @@ object ServerFunctions {
         }
     }
 
-    /**
-     * Run this at the end of a session to save server changes to disk and close connection
-     */
-    fun finish(client: Client){
-        client.sendRequest(JoozdlogCommsKeywords.END_OF_SESSION)
-    }
-
     fun save(client: Client): CloudFunctionResults =
         client.sendRequest(JoozdlogCommsKeywords.SAVE_CHANGES)
 
@@ -486,10 +479,9 @@ object ServerFunctions {
         digest()
     }
 
-    private fun generateLoginDataWithEmail(username: String? = null, key: ByteArray? = null, email: String? = null): LoginDataWithEmail?{
-        val n = username ?: Preferences.username
-        val k = key ?: Preferences.key
-        return if (n == null || k == null)  null else
-        LoginDataWithEmail(n, k, BasicFlight.VERSION.version, email ?: Preferences.emailAddress)
+    private fun generateLoginDataWithEmail(username: String? = null, key: ByteArray? = null, email: String? = null): LoginDataWithEmail? {
+        return LoginDataWithEmail(username ?: Preferences.username ?: return null,
+                           key ?: Preferences.key ?: return null,
+                           BasicFlight.VERSION.version, email ?: Preferences.emailAddress)
     }
 }

@@ -139,7 +139,7 @@ object UserManagement {
      * If no connection it will schedule sending to server when internet gets available
      */
     suspend fun changeEmailAddress(newEmailAddress: String = Preferences.emailAddress): Boolean = withContext (Dispatchers.IO){
-        if (Preferences.emailAddress != newEmailAddress) Preferences.emailAddress = Preferences.emailAddress
+        Preferences.emailAddress = newEmailAddress
         //don't do anything if no data entered and return false
         return@withContext if (newEmailAddress.isBlank()) false
         else when (Cloud.sendNewEmailAddress()) {

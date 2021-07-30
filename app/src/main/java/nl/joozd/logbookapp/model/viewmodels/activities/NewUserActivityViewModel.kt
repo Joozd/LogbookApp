@@ -23,10 +23,7 @@ import android.content.SharedPreferences
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.calendar.CalendarScraper
-import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncTypes
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
@@ -63,9 +60,6 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     //Use Cloud, used on PAGE_CLOUD
     private val _useCloudCheckboxStatus = MutableLiveData(Preferences.useCloud)
 
-    //list of all found calendars on device, used on PAGE_CALENDAR
-    private val _foundCalendars = MutableLiveData<List<JoozdCalendar>?>()
-
     //Use IATA airports instead of ICAO, used on PAGE_FINAL
     private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
 
@@ -82,7 +76,6 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
             field?.cancel(null)
             field = it
         }
-
 
     /**
      * Listen to changes in [Preferences]
@@ -183,15 +176,6 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         return _feedbackChannels[channel]
     }
 
-    /**
-     * @param pageNumber: Number of the page requesting the next page do be displayed
-     */
-    fun nextPage(pageNumber: Int){
-        feedback(NewUserActivityEvents.NEXT_PAGE).apply{
-            putInt(pageNumber + 1)
-        }
-    }
-
     fun done(){
         Preferences.newUserActivityFinished = true
         syncFlights()
@@ -216,6 +200,12 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * [PAGE_CLOUD] functions
      *******************************************************************************************/
 
+    /**
+     * When useCloudCheckbox is clicked:
+     * if terms are already accepted, toggle [Preferences.useCloud]
+     * Else, [NewUserActivityEvents.SHOW_TERMS_DIALOG] is sent to NewUserActivityCloudPage
+     *  This will show a CloudSyncTermsDialog, which will set [Preferences.useCloud] to true
+     */
     fun useCloudCheckboxClicked(){
         if (Preferences.acceptedCloudSyncTerms)
             Preferences.useCloud = !Preferences.useCloud
@@ -289,23 +279,19 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * When continue is clicked on Email page, email address is saved through UserManagement.
      * This function is called when clicking on continue button. Continue button must only be visible if email is entered (see [checkEmails])
-     * This is not checked here again because any errors will be picked up by UserManagement which handles it better than we can do here.
+     * If Cloud is used, email address is confirmed with server, if not it is stored for later usage
      */
     private fun emailPageContinueClicked() {
+        Preferences.emailAddress = email1
         if (Preferences.useCloud)
-        viewModelScope.launch{
-            UserManagement.changeEmailAddress(email1)
-        }
+            viewModelScope.launch{
+                UserManagement.changeEmailAddress()
+            }
     }
 
     /*******************************************************************************************
      * [PAGE_CALENDAR] functions
      *******************************************************************************************/
-
-    fun CalendarSyncSwitchClicked(){
-        Preferences.useCalendarSync = false
-        _foundCalendars.value = null //
-    }
 
     /**
      * If [Preferences.useCalendarSync] is true, (switch is on) set it to off
@@ -318,12 +304,6 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
             Preferences.useCalendarSync = false
     }
 
-    fun calendarPicked(index: Int) {
-        _foundCalendars.value?.get(index)?.let {
-            Preferences.selectedCalendar = it.name
-            setNextButtonEnabled(PAGE_CALENDAR, true)
-        }
-    }
 
     /*******************************************************************************************
      * [PAGE_FINAL] functions

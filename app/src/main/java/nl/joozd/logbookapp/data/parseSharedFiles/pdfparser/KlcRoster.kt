@@ -29,10 +29,7 @@ import nl.joozd.logbookapp.extensions.plusDays
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.io.InputStream
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneOffset
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
@@ -49,7 +46,7 @@ class KlcRoster(inputString: String?): Roster {
     override val isValid: Boolean = inputString?.let { markerRegex.containsMatchIn(it) } ?: false
 
     override val period: ClosedRange<Instant> = periodRegex.find(inputString?: "")?.let{
-        LocalDate.parse(it.groupValues[1], dateFormatter).atStartOfDay(ZoneOffset.UTC).toInstant()..LocalDate.parse(it.groupValues[2], dateFormatter).atStartOfDay(ZoneOffset.UTC).toInstant().plusDays(1)
+        it.groupValues[1].toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant()..it.groupValues[2].toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().plusDays(1)
     } ?: Instant.EPOCH..Instant.EPOCH
 
     override val flights: List<Flight>
@@ -87,6 +84,26 @@ class KlcRoster(inputString: String?): Roster {
                     _flights.add(Flight(-1, flightNumber = flightNumber, orig = orig, dest = dest, timeOut = tOut, timeIn = tIn))
                 } // KL 1218 TRF 1330 1515 AMS, KL 1218, TRF, 1330, 1515, AMS
             }
+        }
+    }
+
+    /**
+     * Make a localDate out of a string. Needs the format ddMonyy eg 02Aug21
+     */
+    private fun String.toLocalDate(): LocalDate{
+        val month = "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+        val months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+        val regex = """(\d\d)($month)(\d\d)""".toRegex()
+        require (this matches regex) { "$this doesn't match \"\\d\\dMMM\\d\\d" }
+        return regex.find(this)!!.groupValues.let{ // we just checked it matches
+            require (it[2] in months) { "${it[2]} not in $months" }
+            val now = LocalDate.now()
+            var year = now.withYear(now.year - now.year % 100 + it[3].toInt()).year
+            if (year - now.year > 2) year -= 100 // if year is more than 2 years in the future, it is actually a century ago
+
+            LocalDate.of(year,
+                         months.indexOf(it[2]) + 1,
+                         it[1].toInt())
         }
     }
 

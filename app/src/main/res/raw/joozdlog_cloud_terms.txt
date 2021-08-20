@@ -10,11 +10,11 @@ Please read this, it's not a lot of text.
 ***** How reliable is the cloud storage? *****
 
 - YOU CANNOT RESTORE YOUR LOGIN LINK IF YOU LOSE YOUR DEVICE.
-I just don't see a way to safely store your data and still be able to decrypt it without your login credentials.
-I cannot help you retrieve your data if you lose your login link.
-Don't lose your login link. You can (re-)create it at any time from the Settings screen.
+Don't lose your login link.
+I cannot help you access your Cloud account if you lose your login link.
+Your login link can be exported from the Settings menu if you do lose it, but still have your device.
 
-- At any time I can decide to no longer keep my server up, without notice or a reason
+- At any time I can decide to stop providing cloud storage, without notice or a reason.
 
 - I will probably delete accounts that are inactive for over a year.
 (as they probably aren't used anymore)
@@ -30,7 +30,6 @@ Use the backup function provided.
 I don't know who you are, and I cannot read your logbook.
 Everything you have on my server is encrypted with your password, that I cannot see or change.
 Your IP address and logins will be logged with a timestamp.
-Your email address might end up in a debug logfile by accident but I will remove them as soon as I am done.
 
 - Communication between app and server uses SSL encryption, the same kind your bank uses.
 

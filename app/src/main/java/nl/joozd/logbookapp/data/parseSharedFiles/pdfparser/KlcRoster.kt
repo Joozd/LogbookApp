@@ -32,6 +32,7 @@ import java.io.InputStream
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
+import kotlin.collections.ArrayList
 
 class KlcRoster(inputString: String?): Roster {
     private val markerRegex = """^Individual duty plan for .* NetLine/Crew\(KLC\)""".toRegex(RegexOption.MULTILINE)
@@ -55,17 +56,22 @@ class KlcRoster(inputString: String?): Roster {
     // This will be populated by flights to fill [flights]
     private var _flights = ArrayList<Flight>()
 
+    /**
+     * This init block fills _flights
+     */
     init{
         //The date we are currently parsing flights for
         var currentDate = period.start.toLocalDate(ZoneOffset.UTC)
         println("currentDate now $currentDate")
 
-        inputString?.lines()?.forEach { line ->
+        inputString?.removeHeaders()?.lines()?.forEach { line ->
             /*
                 set current day to the day found if this line containsMatchIn [currentDayRegex]
                 If this day is earlier than the previous current day (ie first of the month when previous was last of the month) add a month.
              */
+            println("Line: $line")
             currentDayRegex.find(line)?.let{
+                println(it.groupValues[0])
                 val day = it.groupValues[1].toInt()
                 currentDate = if (currentDate.isLastDayOfMonth()) currentDate.withDayOfMonth(day).plusMonths(1) else currentDate.withDayOfMonth(day)
                 println("currentDate now $currentDate")
@@ -105,6 +111,30 @@ class KlcRoster(inputString: String?): Roster {
                          months.indexOf(it[2]) + 1,
                          it[1].toInt())
         }
+    }
+
+    /**
+     * Remove header(s) from a roster string.
+     * Header is everything from the line starting with "Individual duty plan" to the line starting with "date H duty R dep arr AC info"
+     * @return the string with headers removed.
+     */
+    private fun String.removeHeaders(): String{
+        val startMarker = "Individual duty plan"
+        val endMarker = "date H duty R dep arr AC info date H duty R dep arr AC info date H duty R dep arr AC info"
+
+        val headerRegEx = "$startMarker.*?$endMarker".toRegex(RegexOption.DOT_MATCHES_ALL)
+
+        var result = this
+        headerRegEx.findAll(this).forEach {
+            println("BOTERHAM")
+            println(it.value)
+            println("MET KAAS")
+            result = result.replace(it.value, "")
+        }
+        // In case there is an extra page without endMarker at the end of the roster, drop it entirely.
+        if (startMarker in result) result = result.take(result.indexOf(startMarker))
+        return result
+
     }
 
 

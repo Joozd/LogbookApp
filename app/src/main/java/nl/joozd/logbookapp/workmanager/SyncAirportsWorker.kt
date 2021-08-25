@@ -62,7 +62,7 @@ class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
             }
             progress = 5
             Cloud.getAirports { processDownloadProgress(it) }?.map { Airport(it) }?.let {
-                AirportRepository.getInstance().replaceDbWith(it)
+                airportsRepository.replaceDbWith(it)
                 progress = 99
                 Preferences.airportDbVersion = serverDbVersion
                 progress = 100

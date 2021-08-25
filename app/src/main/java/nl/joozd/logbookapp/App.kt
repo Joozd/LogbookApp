@@ -43,6 +43,8 @@ class App : Application(){
     override fun onCreate() {
         super.onCreate()
         instance = this
+
+        //Periodic workers get started as soon as app gets started
         JoozdlogWorkersHub.periodicGetAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
         JoozdlogWorkersHub.periodicSynchronizeAircraftTypes(Preferences.updateLargerFilesOverWifiOnly)
         JoozdlogWorkersHub.periodicBackupFromServer()

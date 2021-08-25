@@ -151,6 +151,7 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
      */
     fun replaceDbWith(airports: List<Airport>){
         launch(dispatcher + NonCancellable) {
+            //Clear DB and wait for that to  finish
             clearDB().join()
             save(airports)
         }
@@ -263,10 +264,16 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
         }
     }
 
+    /**
+     * Locks [lockedForWorker]
+     */
     suspend fun acquireLock(){
         lockedForWorker.lock()
     }
 
+    /**
+     * Releases [lockedForWorker]
+     */
     fun releaseLock(){
         try{
             lockedForWorker.unlock()

@@ -49,7 +49,7 @@ data class Flight(
     val correctedTotalTime: Int = 0,
     val multiPilotTime: Int = 0,
     val nightTime: Int = 0,
-    val ifrTime:Int = 0,                                    // 0 means 0 minutes, -1 means this is a VFR flight
+    val ifrTime: Int = 0,                                    // 0 means 0 minutes, -1 means this is a VFR flight
     val simTime: Int = 0,
     val aircraftType: String = "",                          // overrides standard AircraftType that goes with registration
     val registration: String = "",

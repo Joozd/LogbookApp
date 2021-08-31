@@ -46,7 +46,7 @@ data class Flight(
     val dest: String = "",
     val timeOut: Long = Instant.now().epochSecond -3600,    // timeOut and timeIn are seconds since epoch
     val timeIn: Long = Instant.now().epochSecond,           // timeOut and timeIn are seconds since epoch
-    val correctedTotalTime: Int = 0,
+    val correctedTotalTime: Int = 0,                        //  if 0 it will be disregarded
     val multiPilotTime: Int = 0,
     val nightTime: Int = 0,
     val ifrTime: Int = 0,                                    // 0 means 0 minutes, -1 means this is a VFR flight

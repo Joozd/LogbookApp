@@ -43,10 +43,10 @@ import nl.joozd.logbookapp.ui.adapters.AircraftPickerAdapter
 //TODO needs work
 class AircraftPicker: JoozdlogFragment(){
     private val viewModel: AircraftPickerViewModel by viewModels()
-    var presetEnteredRegistration: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogPickAircraftTypeBinding.bind(inflater.inflate(R.layout.dialog_pick_aircraft_type, container, false)).apply{
+
             //set color of dialog head
             val typesPickerAdapter = AircraftPickerAdapter {
                 Log.d(this::class.simpleName, "clicked on $it")
@@ -80,20 +80,12 @@ class AircraftPicker: JoozdlogFragment(){
              * Observers
              ******************************************************************************/
 
-/*
-            viewModel.selectedAircraftString.observe(viewLifecycleOwner) {
-                typesPickerAdapter.selectActiveItem(it)
-                typesPickerRecyclerView.scrollToPosition(typesPickerAdapter.list.indexOf(it))
-            }
-
- */
-
             viewModel.selectedAircraft.observe(viewLifecycleOwner){
                 pickedAircraftText.text = it.registration.nullIfBlank()?.also{
                     if (!regFieldActive) registrationField.setText(it)
                 } ?: getString(R.string.aircraft)
                 typeDescriptionTextView.text = it.type?.name ?: "" // set type text to found type or to empty string
-                typesPickerAdapter.selectActiveItem(it.type).also { println("MY SPOON IS TOO BIG")}
+                typesPickerAdapter.selectActiveItem(it.type)
 
                 val errorText = registrationFieldLayout.findViewById<TextView>(R.id.textinput_error).apply{
                     visibility=View.VISIBLE
@@ -172,10 +164,6 @@ class AircraftPicker: JoozdlogFragment(){
             headerLayout.setOnClickListener { }
             bodyLayout.setOnClickListener { }
 
-            //set preset values if found:
-            presetEnteredRegistration?.let{
-                registrationField.setText(it)
-            }
         }.root // end of inflater.inflate(...).apply
      // end of onCreateView()
 }

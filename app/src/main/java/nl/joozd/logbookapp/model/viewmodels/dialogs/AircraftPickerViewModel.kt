@@ -104,6 +104,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
      * Save aircraft to repository
      */
     fun saveAircraftToRepository() {
+
         aircraftRepository.saveAircraft(mAircraft)
     }
 

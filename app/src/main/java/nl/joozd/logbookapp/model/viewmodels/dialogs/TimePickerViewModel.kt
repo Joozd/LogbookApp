@@ -19,7 +19,10 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.map
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.TimePickerEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
@@ -30,25 +33,60 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFl
  */
 class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
 
-    val augmentedCrew
-        get() = workingFlight.crew
-    val pic
-        get() = workingFlight.isPicLiveData
-    val coPilot
-        get() = workingFlight.isCopilotLiveData
-    val dual
-        get() = workingFlight.isDualLiveData
-    val instructor
-        get() = workingFlight.isInstructorLiveData
-
-    val totalTime = Transformations.map(workingFlight.durationLiveData) {
-        minutesToHoursAndMinutesString(it.toMinutes())
+    /**
+     * Livedata objects:
+     */
+    val isAugmentedCrew // LiveData<Boolean>
+        get() = workingFlight.isAugmented
+    private val _isPicOrPicus = MediatorLiveData<Boolean>().apply{
+        addSource(workingFlight.isPICLiveData){
+            value = it || workingFlight.isPICUS
+        }
+        addSource(workingFlight.isPICUSLiveData){
+            value = it || workingFlight.isPIC
+        }
     }
+    val isPic: LiveData<Boolean> get() = _isPicOrPicus
 
+    private val _picPicusText = MediatorLiveData<String>().apply{
+        addSource(workingFlight.isPICLiveData){
+            value = getPicPicusString()
+        }
+        addSource(workingFlight.isPICUSLiveData){
+            value = getPicPicusString()
+        }
+    }
+    val picPicusText: LiveData<String> get() = _picPicusText
 
-    val ifrTime = Transformations.map(workingFlight.ifrTimeLiveData) { minutesToHoursAndMinutesString(it) }
+    val coPilot
+        get() = workingFlight.isCoPilotLiveData
 
-    val nightTime = Transformations.map(workingFlight.nightTimeLiveData){minutesToHoursAndMinutesString(it)}
+    val totalTime = workingFlight.durationLiveData.map { minutesToHoursAndMinutesString(it) }
+
+    val ifrTime = workingFlight.ifrTimeLiveData.map { minutesToHoursAndMinutesString(it) }
+
+    val nightTime = workingFlight.nightTimeLiveData.map {minutesToHoursAndMinutesString(it)}
+
+    private val _dualInstructorText = MediatorLiveData<String>().apply{
+        addSource(workingFlight.isDualLiveData){
+            value = getDualInstructorString()
+        }
+        addSource(workingFlight.isInstructorLiveData){
+            value = getDualInstructorString()
+        }
+    }
+    val dualInstructorText: LiveData<String> get() = _dualInstructorText
+
+    private val _dualInstructorActive = MediatorLiveData<Boolean>().apply{
+        addSource(workingFlight.isDualLiveData){
+            value = it || workingFlight.isInstructor
+        }
+        addSource(workingFlight.isInstructorLiveData){
+            value = it || workingFlight.isDual
+        }
+    }
+    val dualInstructorActive: LiveData<Boolean> get() = _dualInstructorActive
+
 
     /**
      * Set IFR time to time parsed from [enteredTime], only if
@@ -60,8 +98,11 @@ class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
             when {
                 workingFlight.durationLiveData.value == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
                 ifrMinutes == null -> feedback(TimePickerEvents.INVALID_IFR_TIME) // previous time can be found in ifrTime.value
-                ifrMinutes > workingFlight.durationLiveData.value!!.toMinutes() -> feedback(TimePickerEvents.IFR_TIME_GREATER_THAN_DURATION).putInt(ifrMinutes)
-                else -> workingFlight.setIfrTime(ifrMinutes)
+                ifrMinutes > workingFlight.duration -> feedback(TimePickerEvents.IFR_TIME_GREATER_THAN_DURATION).putInt(ifrMinutes)
+                else -> {
+                    workingFlight.autoFill = workingFlight.autoFill && (ifrMinutes == workingFlight.duration) // set autofill off if it was on and ifrTime is not entire flight
+                    workingFlight.ifrTime = ifrMinutes
+                }
             }
         }
 
@@ -75,59 +116,88 @@ class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
             when{
                 workingFlight.durationLiveData.value == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
                 it == null -> feedback(TimePickerEvents.INVALID_NIGHT_TIME) // previous time can be found in ifrTime.value
-                it > workingFlight.durationLiveData.value!!.toMinutes() -> feedback(TimePickerEvents.NIGHT_TIME_GREATER_THAN_DURATION)
-                else -> workingFlight.setNightTime(it)
+                it > workingFlight.duration -> feedback(TimePickerEvents.NIGHT_TIME_GREATER_THAN_DURATION)
+                else -> workingFlight.nightTime = it
             }
         }
     }
 
     /**
      * set correctedTotalTime
-     * if autoValues is true: Set IFR and Night as same ratio
+     * if autoValues is true: workingFlight will Set IFR and Night as same ratio
      * set autoValues to false of not 0
      */
     fun setTotalTimeOfFlight(enteredTime: String){
         hoursAndMinutesStringToInt(enteredTime).let{
             when{
                 workingFlight.durationLiveData.value == null -> feedback(TimePickerEvents.FLIGHT_IS_NULL)
-                enteredTime.isBlank() -> workingFlight.setCorrectedTotalTime(0)
+                enteredTime.isBlank() -> workingFlight.correctedTotalTime = 0
                 it == null -> feedback(TimePickerEvents.INVALID_TOTAL_TIME) // previous time can be found in ifrTime.value
-                it > workingFlight.durationLiveData.value!!.toMinutes() -> feedback(TimePickerEvents.TOTAL_TIME_GREATER_THAN_DURATION)
-                else -> workingFlight.setCorrectedTotalTime(it)
+                else -> workingFlight.correctedTotalTime = it
             }
         }
     }
 
     /**
-     * Toggle PIC
-     * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
+     * Toggle PICUS -> PIC -> NONE -> PICUS -> etc
      */
-    fun togglePic(force: Boolean? = null){
-        workingFlight.setIsPic(force ?: workingFlight.isPicLiveData.value == false)
+    fun togglePic() = when {
+        workingFlight.isPIC -> {
+            workingFlight.isPIC = false
+            workingFlight.isPICUS = false
+        }
+        workingFlight.isPICUS -> {
+            workingFlight.isPIC = true
+            workingFlight.isPICUS = false
+        }
+        else -> {
+            workingFlight.isPICUS = true
+            workingFlight.isPIC = false
+        }
     }
+
+
 
     /**
      * Toggle isCopilot
-     * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      * If Aircraft or isPic is changed, this will automatically be set again
      */
-    fun toggleCopilot(force: Boolean? = null){
-        workingFlight.setIsCopilot(force ?: workingFlight.isCopilotLiveData.value == false)
+    fun toggleCopilot(){
+        workingFlight.isCoPilot = !workingFlight.isCoPilot
     }
 
     /**
-     * Toggle isDual
-     * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
+     * Toggle isDual - instructor - none
      */
-    fun toggleDual(force: Boolean? = null){
-        workingFlight.setIsDual(force ?: workingFlight.isDualLiveData.value == false)
+    fun toggleDualInstructor() = when{
+        workingFlight.isDual -> {
+            workingFlight.isInstructor = true
+            workingFlight.isDual = false
+        }
+        workingFlight.isInstructor -> {
+            workingFlight.isInstructor = false
+            workingFlight.isDual = false
+        }
+        else  -> {
+            workingFlight.isInstructor = false
+            workingFlight.isDual = true
+        }
     }
 
     /**
-     * Set instructor
-     * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
+     * Gets the correct string for when flight is marked as PIC, PICUS or neither
      */
-    fun toggleInstructor(force: Boolean? = null) = workingFlight.setIsInstructor ( force ?: workingFlight.isInstructorLiveData.value == false)
+    private fun getPicPicusString(): String = getString(
+        if(workingFlight.isPICUS) R.string.picus else R.string.pic
+        )
+    /**
+     * Gets the correct string for when flight is marked as dual, instructor or neither
+     */
+    private fun getDualInstructorString(): String = getString(when{
+        workingFlight.isDual -> R.string.dualString
+        workingFlight.isInstructor -> R.string.instructorString
+        else -> R.string.dualInstructorString
+    })
 
     /**
      * Undo all changes made in this dialog

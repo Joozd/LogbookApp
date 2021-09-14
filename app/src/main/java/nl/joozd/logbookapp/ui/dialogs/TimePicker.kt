@@ -87,12 +87,8 @@ open class TimePicker: JoozdlogFragment() {
                 viewModel.toggleCopilot()
             }
 
-            dualTextview.setOnClickListener {
-                viewModel.toggleDual()
-            }
-
             instructorTextView.setOnClickListener {
-                viewModel.toggleInstructor()
+                viewModel.toggleDualInstructor()
             }
 
 
@@ -153,21 +149,29 @@ open class TimePicker: JoozdlogFragment() {
 
             viewModel.nightTime.observe(viewLifecycleOwner) { nightTimeText.setText(it) }
 
-            viewModel.augmentedCrew.crewSize.observe(viewLifecycleOwner) {
-                augmentedTextView.showIfActive(it > 2)
+            viewModel.isAugmentedCrew.observe(viewLifecycleOwner) {
+                augmentedTextView.showIfActive(it)
             }
 
-            viewModel.pic.observe(viewLifecycleOwner) {
+            viewModel.isPic.observe(viewLifecycleOwner) {
                 picTextView.showIfActive(it)
             }
+
+            viewModel.picPicusText.observe(viewLifecycleOwner){
+                picTextView.text = it
+            }
+
+
             viewModel.coPilot.observe(viewLifecycleOwner) {
                 coPilotTextView.showIfActive(it)
             }
-            viewModel.dual.observe(viewLifecycleOwner) {
-                dualTextview.showIfActive(it)
-            }
-            viewModel.instructor.observe(viewLifecycleOwner) {
+
+            viewModel.dualInstructorActive.observe(viewLifecycleOwner) {
                 instructorTextView.showIfActive(it)
+            }
+
+            viewModel.dualInstructorText.observe(viewLifecycleOwner){
+                instructorTextView.text = it
             }
         }.root
 

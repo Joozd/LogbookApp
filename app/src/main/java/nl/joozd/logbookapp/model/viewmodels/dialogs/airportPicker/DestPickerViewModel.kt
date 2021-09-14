@@ -22,22 +22,17 @@ package nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker
 import nl.joozd.logbookapp.data.dataclasses.Airport
 
 class DestPickerViewModel: AirportPickerViewModel(){
-    init{
-        pickedAirportMediator.addSource(workingFlight.destinationLiveData) { ap ->
-            pickedAirportMediator.value = ap
-        }
-    }
+    override val pickedAirport
+        get() = workingFlight.destinationLiveData
 
     override fun pickAirport(airport: Airport) {
-        workingFlight.setDest(airport)
-        Unit
+        workingFlight.dest = airport.ident
     }
 
 
 
     override fun setCustomAirport(airport: String) {
-        workingFlight.setDest(airport)
-        Unit
+        workingFlight.dest = airport
     }
 
     /**
@@ -49,8 +44,7 @@ class DestPickerViewModel: AirportPickerViewModel(){
      * Set [initialAirport] back to [workingFlight]
      */
     override fun undo() {
-        workingFlight.setDest(initialAirport)
-        Unit
+        initialAirport?.ident?.let { workingFlight.dest = it }
     }
 
 }

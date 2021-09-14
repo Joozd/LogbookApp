@@ -22,20 +22,15 @@ package nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker
 import nl.joozd.logbookapp.data.dataclasses.Airport
 
 class OrigPickerViewmodel: AirportPickerViewModel(){
-    init{
-        pickedAirportMediator.addSource(workingFlight.originLiveData) { ap ->
-            pickedAirportMediator.value = ap
-        }
-    }
+    override val pickedAirport
+        get() = workingFlight.originLiveData
 
     override fun pickAirport(airport: Airport) {
-        workingFlight.setOrig(airport)
-        Unit
+        workingFlight.orig = airport.ident
     }
 
     override fun setCustomAirport(airport: String) {
-        workingFlight.setOrig(airport)
-        Unit
+        workingFlight.orig = airport
     }
 
     /**
@@ -47,7 +42,7 @@ class OrigPickerViewmodel: AirportPickerViewModel(){
      * Set [initialAirport] back to [workingFlight]
      */
     override fun undo() {
-        workingFlight.setOrig(initialAirport)
+        initialAirport?.let { workingFlight.orig = it.ident }
         Unit
     }
 

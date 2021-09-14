@@ -23,6 +23,7 @@ import android.Manifest
 import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -46,6 +47,7 @@ import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfRegistratio
 import nl.joozd.logbookapp.extensions.map
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
+import nl.joozd.logbookapp.model.workingFlight.WorkingFlightNew
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.checkPermission
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
@@ -67,7 +69,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     private val nextFlightID = FlightIDProvider()
 
-    private val _workingFlight = MutableLiveData<WorkingFlight?>()
+    private val _workingFlight = MutableLiveData<WorkingFlightNew?>()
 
     private val _cachedFlights = MediatorLiveData<List<Flight>>().apply{
         // Fill it before first observer arrives so it is cached right away
@@ -170,6 +172,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         flightDao.requestAllFlights().map{it.toFlight()}
     }
 
+    /**
+     * Get a flight from its ID, or null if no flight found by that ID
+     */
     suspend fun fetchFlightByID(id: Int): Flight? {
         cachedFlightsList?.let {
             return it.firstOrNull {f -> f.flightID == id }
@@ -188,12 +193,12 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * Flight to be edited in EditFlightFragmnt + dialogs
      */
-    val workingFlight: LiveData<WorkingFlight?>
+    val workingFlight: LiveData<WorkingFlightNew?>
         get() = _workingFlight
     val wf
         get() = workingFlight.value!! // shortcut.
 
-    fun getWorkingFlight(): WorkingFlight = workingFlight.value ?: error ("WorkingFlight not initialized")
+    fun getWorkingFlight(): WorkingFlightNew = workingFlight.value ?: error ("WorkingFlight not initialized")
 
     //list of valid flights (not soft-deleted ones)
     val liveFlights: LiveData<List<Flight>> = distinctUntilChanged(_cachedFlights)
@@ -236,12 +241,22 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * Public functions
      ********************************************************************************************/
 
-    fun setWorkingFlight(f: WorkingFlight?){
+    /**
+     * The ONLY way to set working flight to a Flight.
+     */
+    fun setWorkingFlight(f: WorkingFlightNew?){
         if (Looper.myLooper() != Looper.getMainLooper()) launch(Dispatchers.Main){
             Log.w("setWorkingFlight", "setWorkingFlight called on a background thread, setting workingFlight async on main")
             _workingFlight.value = f
         }
         else _workingFlight.value = f
+    }
+
+    /**
+     * Close working flight (stop observing all Mediators and set it's liveData to null)
+     */
+    fun closeWorkingFlight(){
+        _workingFlight.value = null
     }
 
     suspend fun lowestFreeFlightID() = nextFlightID()
@@ -305,16 +320,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      */
 
     /**
-     * put a flight in [undoSaveFlight] so you can undo saving a flight or check any changes made
+     * put a flight in [changedFlight] so you can check any changes made
      */
-    var undoSaveFlight: Flight? = null
-
-    /**
-     * Close working flight (set it's liveData to null)
-     */
-    fun closeWorkingFlight(){
-        _workingFlight.value = null
-    }
+    var changedFlight: Flight? = null
 
     /**
      * Undo last undoable event if able
@@ -330,16 +338,21 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * update cached data and save to disk
      * This will update Flight.timeStamp
      * @param flight: Flight to save
+     * @param updateID:
+     *      true: always make a new ID
+     *      false: never make a new ID
+     *      null (default): make a new ID if id <= 0
      * @param sync: Whether or not to sync to server after saving
      * @param addToUndo: If this save action should be undoable
      */
-    fun save(flight: Flight, sync: Boolean = true, updateIDs: Boolean = false, addToUndo: Boolean = false) = launch {
+    fun save(flight: Flight, sync: Boolean = true, updateID: Boolean? = null, addToUndo: Boolean = false) = launch {
         saveMutex.withLock {
             //assign available FlightID if requested
-            val f = if (updateIDs) flight.copy(flightID = lowestFreeFlightID(), timeStamp = TimestampMaker().nowForSycPurposes) else flight.copy(timeStamp = TimestampMaker().nowForSycPurposes)
+            val f = if (updateID == true || (flight.flightID < 0) && updateID == null) flight.copy(flightID = lowestFreeFlightID(), timeStamp = TimestampMaker().nowForSycPurposes) else flight.copy(timeStamp = TimestampMaker().nowForSycPurposes)
 
             // Add to undo if needed:
             if (addToUndo){
+                // If this got a freshly assigned ID, undo means delete because [fetchFlightByID] will return null
                 undoTracker.addSaveEvent(f, fetchFlightByID(f.flightID))
             }
 
@@ -393,77 +406,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             }
         }
     }
-
-    /*
-    /**
-     * SaveFromRoster will remove flights on days that new planned flights are added (ignoring those that are the same)
-     * and fixed flightIDs for new flights
-     */
-    @Deprecated("use [saveRoster]")
-    fun saveFromRoster(rosteredFlights: List<Flight>, period: ClosedRange<Instant>? = null, sync: Boolean = true) = launch(NonCancellable) {
-        Log.d("saveFromRoster()", "rosteredFlights: $rosteredFlights")
-        val highestID =
-            getHighestIdAsync() // async, start looking for that while doing other stuff
-        val sameFlights = getFlightsMatchingPlannedFlights(getAllFlights(), rosteredFlights)
-        Log.d("saveFromRoster()", "sameFlights: $sameFlights")
-        val flightsToRemove =
-            getFlightsOnDays(getAllFlights(), dateRange = period, flightsOnDays = rosteredFlights)
-                .filter { it.isPlanned && it !in sameFlights && it.timeOut > Instant.now().epochSecond }
-        Log.d("saveFromRoster()", "flightsToRemove: $flightsToRemove")
-        val flightsToSave = getNonMatchingPlannedFlights(getAllFlights(), rosteredFlights)
-        Log.d("saveFromRoster()", "flightsToSave: $flightsToSave")
-        delete(flightsToRemove)
-        val lowestNewID = highestID.await() + 1
-        save(flightsToSave.mapIndexed { index: Int, f: Flight ->
-            f.copy(flightID = lowestNewID + index, timeStamp = TimestampMaker().nowForSycPurposes)
-        }, sync)
-    }
-    */
-
-    /*
-    /**
-     * Save flights from a Roster
-     * It will remove saved flights in [roster].period if they are not the same as any flights in [roster].flights
-     * It will remove all current planned flights in period.
-     * It will save flights in [roster].flights that are not the same as any that are already saved in DB.
-     * It will update all flights that are in both:
-     *      - Planned flights will always  get names and registrations from roster
-     *      - Completed flights will only get names and registrations of those respective fields are empty
-     * @param canUndo: If true, an "undo" event will be created
-     *
-     */
-    suspend fun saveRoster(roster: Roster, canUndo: Boolean = false) = withContext(Dispatchers.IO + NonCancellable){
-        require(roster.isValid) { "Cannot parse an invalid roster! You should have checked this!" }
-        val rosterFlights = roster.flights
-        val flightsInPeriod = getFlightsOnDays(roster.period)
-
-        // Save all flights that are not also in DB, or if they are, have updated data
-        val newAndUpdatedFlights = rosterFlights.filter { rosteredFlight -> flightsInPeriod.none { it.isSameFlightWithSameInfo(rosteredFlight) }}
-        val newFlights = newAndUpdatedFlights.filter { rosteredFlight -> flightsInPeriod.none { it.isSameFlightAs(rosteredFlight) }}
-        val updatedFlights = updateFlightsWithRosterData(flightsInPeriod, newAndUpdatedFlights.filter{it !in newFlights})
-
-        //keep flights that are in calendar and that are not changed from roster but are in roster
-        val flightsToKeep = flightsInPeriod.filter { oldFlight -> rosterFlights.any {it.isSameFlightWithSameInfo(oldFlight)}}
-
-
-        // delete all flights that are not also in roster and that are isPlanned
-        val flightsToDelete = flightsInPeriod.filter { savedFlight -> savedFlight.isPlanned && savedFlight !in flightsToKeep}
-        val flightsToSave = newFlights + updatedFlights
-
-        if (canUndo){
-            val deleteEvent = DeleteEvent(flightsToDelete.filter {it.unknownToServer})
-            val softDeletedFlights = flightsToDelete.filter {!it.unknownToServer}
-            val saveEvent = SaveEvent(flightsToSave + softDeletedFlights.map{it.copy(DELETEFLAG = true)}, flightsToSave.mapNotNull{ f -> fetchFlightByID(f.flightID)} + softDeletedFlights)
-            launch (Dispatchers.Main) { undoTracker.addRosterImportEvent(RosterImportEvent(saveEvent, deleteEvent)) } // launch on main thread because of live data setters
-        }
-
-        delete(flightsToDelete, false, addToUndo = false) // sync will happen after saving
-        Log.d("DEBUG", "flightsInPeriod: ${flightsInPeriod.size}")
-        Log.d("DEBUG", "New flights: ${newFlights.size}")
-        Log.d("DEBUG", "updated flights: ${updatedFlights.size}")
-        save(flightsToSave, addToUndo = false)
-    }
-    */
 
     /**
      * Save flights from a roster

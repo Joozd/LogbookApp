@@ -25,6 +25,6 @@ import java.time.LocalDate
 class LocalDatepickerDialog: LocalDatePickerFragment() {
     private val wf = FlightRepository.getInstance().getWorkingFlight()
     override fun onDateSelectedListener(date: LocalDate?) {
-        date?.let { wf.setDate(it) }
+        date?.let { wf.date = it }
     }
 }

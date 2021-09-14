@@ -47,10 +47,10 @@ data class TakeoffLandings(val takeoffDay: Int = 0, val takeoffNight: Int = 0, v
     val landings get() = landingDay + landingNight
 
     /**
-     * ToString will display combined takeoff and landings
-     * eg. TakeoffLandings(1,2,3,4,5).ToString wil be "3/7"
+     * ToString will display combined takeoff and landings and any autolands between parentheses
+     * eg. TakeoffLandings(1,2,3,4,5).ToString wil be "3/7 (5)"
      */
-    override fun toString() = "${takeoffDay + takeoffNight}/${landingDay + landingNight}"
+    override fun toString() = "${takeoffDay + takeoffNight}/${landingDay + landingNight}" + if (autoLand > 0) " ($autoLand)" else ""
 
     override fun equals(other: Any?): Boolean = if (other !is TakeoffLandings) false else
         listOf(other.takeoffDay, other.takeoffNight, other.landingDay, other.landingNight, other.autoLand) ==

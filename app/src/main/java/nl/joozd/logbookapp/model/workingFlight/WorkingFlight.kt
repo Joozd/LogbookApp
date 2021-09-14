@@ -31,7 +31,6 @@ import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
-import nl.joozd.logbookapp.data.miscClasses.crew.ObservableCrew
 import nl.joozd.logbookapp.data.repository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
@@ -46,9 +45,10 @@ import kotlin.reflect.KProperty
 
 /**
  * Worker class for handling changes to a Flight that is being edited.
- * Has functions to retreive a flight from, or save it to [FlightRepository]
+ * Has functions to retrieve a flight from, or save it to [FlightRepository]
  * has LiveData for things that need displaying *
  */
+@Deprecated("Deprecated, use WorkingFlightNew")
 class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean = false): CoroutineScope by MainScope() {
 
     private val initialFlight = flight
@@ -104,10 +104,6 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
     private val _duration = MediatorLiveData<Duration>()
     private val _allNamesList = MediatorLiveData<List<String>>()
 
-    /**
-     * crew composition:
-     */
-    val crew = ObservableCrew()
 
     /**
      * vars for getting/setting mutable livedata
@@ -189,11 +185,6 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
     var mSignature: String by ShowInLiveData(_signature)
         private set
 
-    //another weird one.
-    var mAugmentedCrew: Crew
-        get() = crew
-        private set(it) = crew.clone(it)
-
     var mIsSim: Boolean by ShowInLiveData(_isSim)
         private set
 
@@ -232,9 +223,7 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
      * Checks if the edits currently done on this flight will flag it as "not the same as originally synced"
      */
     val canCauseCalendarConflict: Boolean
-        get() = (newFlight || !originalFlight.also{println(it)}.isSameFlightAs(this.toFlight().also{println(it)})).also{
-            println("CAN CAUSE CALENDAR CONFLICT: $it")
-        }
+        get() = (newFlight || !originalFlight.isSameFlightAs(this.toFlight()))
 
     /**
      * async data filler functions
@@ -308,7 +297,7 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
      * If correctedTotalTime != 0, it returns that.
      */
     private fun correctedDuration(): Duration = mCorrectedTotalTime.nullIfZero()?.let { Duration.ofMinutes(it.toLong()) }
-        ?: mAugmentedCrew.getLogTime(mTimeIn - mTimeOut, mIsPic)
+        ?: Duration.ZERO
 
 
     /**
@@ -343,7 +332,7 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
         name2 = mName2,
         remarks = mRemarks,
         signature = mSignature,
-        augmentedCrew = mAugmentedCrew.toInt(),
+        augmentedCrew = 0,
         isSim = mIsSim,
         isDual = mIsDual,
         isInstructor = mIsInstructor,
@@ -390,7 +379,6 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
         mIsPF = isPF
         // Async setting of values is always locked to prevent unexpected behavior
         launchWithLocks(origMutex, destMutex, aircraftMutex, nightTimeMutex, multiPilotMutex) {
-            crew.clone(augmentedCrew)
             setOriginFromId(orig)
             setDestFromId(dest)
             setAircraftFromFlight(flight)
@@ -619,7 +607,8 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
             val repo = AircraftRepository.getInstance()
             if (registration == null && type == null) return@launchWithLocks
             mAircraft =
-                if (type == null) repo.getAircraftFromRegistration(registration) ?: Aircraft(registration ?: "") else Aircraft(
+                if (type == null) repo.getAircraftFromRegistration(registration) ?: Aircraft(registration ?: "")
+                else Aircraft(
                     registration = registration ?: mAircraft?.registration ?: "",
                     type = repo.getAircraftTypeByShortName(type) ?: AircraftType("",
                                                                                  type,
@@ -705,7 +694,6 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
     fun setAugmentedCrew(augmentedCrew: Int) = setAugmentedCrew(Crew.of(augmentedCrew))
     fun setAugmentedCrew(crew: Crew) =
         launchWithLocks(ifrTimeMutex, nightTimeMutex, multiPilotMutex) {
-            mAugmentedCrew = crew
             if (mIsAutovalues) {
                 val setNightJob = calculateNightJob()
                 if (mIsIfr)
@@ -776,7 +764,7 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
      */
     fun setIsPF(isPF: Boolean) {
         mIsPF = isPF
-        if (crew.crewSize.value!! > 2) setTimeOut(mTimeOut)
+
     }
 
     /**
@@ -834,7 +822,7 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
         flightToSave?.let { f ->
             with(FlightRepository.getInstance()) {
                 save(f.prepareForSave(), addToUndo = true)
-                undoSaveFlight = if (newFlight) null else originalFlight
+                changedFlight = if (newFlight) null else originalFlight
 
                 closeWorkingFlight()
             }
@@ -1058,7 +1046,7 @@ class WorkingFlight private constructor(flight: Flight, val newFlight: Boolean =
 
         _duration.addSource(_timeIn) { mDuration = correctedDuration() }
         _duration.addSource(_timeOut) { mDuration = correctedDuration() }
-        _duration.addSource(crew.changed) { mDuration = correctedDuration() }
+        //_duration.addSource(crew.changed) { mDuration = correctedDuration() }
         _duration.addSource(_isPic) { mDuration = correctedDuration() }
         _duration.addSource(_correctedTotalTime) { mDuration = correctedDuration() }
 

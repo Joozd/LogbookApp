@@ -46,7 +46,7 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
 import nl.joozd.logbookapp.model.helpers.FlightConflictChecker
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
+import nl.joozd.logbookapp.model.workingFlight.WorkingFlightNew
 import nl.joozd.logbookapp.utils.CoroutineTimerTask
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.time.*
@@ -251,7 +251,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     val flightSyncProgress: LiveData<Int>
         get() = flightRepository.syncProgress
 
-    val workingFlight: LiveData<WorkingFlight?>
+    val workingFlight: LiveData<WorkingFlightNew?>
         get() = flightRepository.workingFlight
 
     val showBackupNotice: LiveData<Boolean>
@@ -373,7 +373,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     private val openingFlightMutex = Mutex()
     fun showFlight(flightId: Int) = viewModelScope.launch {
         openingFlightMutex.withLock {
-            WorkingFlight.fromFlightId(flightId)?.let {
+            WorkingFlightNew.fromFlightID(flightId)?.let {
                 flightRepository.setWorkingFlight(it)
                 // feedback(MainActivityEvents.SHOW_FLIGHT) this goes through livedata
             } ?: feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
@@ -382,7 +382,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     fun addFlight() {
         viewModelScope.launch(Dispatchers.IO) {
-            flightRepository.setWorkingFlight(WorkingFlight.createNew())
+            flightRepository.setWorkingFlight(WorkingFlightNew.createNew())
         }
     }
 
@@ -429,8 +429,8 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
      * @param f: Flight to check against FlightRepository.undoFlight
      * @return time (epochSecond) to disable calendarSync to if conflict, 0 if not
      */
-    fun checkFlightConflictingWithCalendarSync(f: Flight): Long = if (f == flightRepository.undoSaveFlight) 0L
-    else FlightConflictChecker.checkConflictingWithCalendarSync(flightRepository.undoSaveFlight, f)
+    fun checkFlightConflictingWithCalendarSync(f: Flight): Long = if (f == flightRepository.changedFlight) 0L
+    else FlightConflictChecker.checkConflictingWithCalendarSync(flightRepository.changedFlight, f)
 
     /*********************************************************************************************
      * Functions related to synchronization:

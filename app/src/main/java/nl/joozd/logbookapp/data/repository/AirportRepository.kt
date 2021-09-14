@@ -46,12 +46,13 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
     //Mutex lock to make sure forced and scheduled workers don't interfere with each other
     private val lockedForWorker = Mutex()
 
-    private val _live = getLive()
+    private val _live = airportDao.requestLiveAirports()
+
     /**
      * All airports, cached and held in a LiveData
      */
     private val _cachedAirports = MediatorLiveData<List<Airport>>().apply{
-        launch{ value=getAll(true) }
+        launch{ value=getAll(true) } // this forces _cachedAirports to load data even when not observed
         addSource(_live){
             value = it
             launch {
@@ -89,14 +90,6 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
     }
 
     /**
-     * Get LiveData containing all airports on disk
-     */
-    private fun getLive() =
-        airportDao.requestLiveAirports()
-
-
-
-    /**
      * Update on changed SharedPrefs
      */
     private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -122,8 +115,8 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
     /**
      * Exposed live Airports
      */
-    val liveAirports: LiveData<List<Airport>> =
-        Transformations.distinctUntilChanged(_cachedAirports)
+    val liveAirports: LiveData<List<Airport>>
+        get() = _cachedAirports
 
     /**
      * Exposed 'use IATA' preference
@@ -178,6 +171,7 @@ class AirportRepository(private val airportDao: AirportDao, private val dispatch
 
     /**
      * Gets an airport from database by ICAO identifier
+     * @return [Airport] found, or null if not found or query was null
      */
     suspend fun getAirportByIcaoIdentOrNull(query: String?):Airport? = withContext(dispatcher){
         when {

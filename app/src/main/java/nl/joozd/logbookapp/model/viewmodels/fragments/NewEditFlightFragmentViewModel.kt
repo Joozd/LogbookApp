@@ -24,7 +24,6 @@ import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.*
@@ -33,7 +32,7 @@ import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinute
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
+import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -42,7 +41,7 @@ import java.time.LocalTime
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val wf = flightRepository.getWorkingFlight()
 
-    private val _title = MutableLiveData<String>(context.getString(if(wf.newFlight) R.string.add_flight else R.string.edit_flight))
+    private val _title = MutableLiveData(context.getString(if(wf.newFlight) R.string.add_flight else R.string.edit_flight))
 
     // If this is true, no more windows should be opened
     private var closing: Boolean = false
@@ -84,20 +83,25 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     /**
      * Observables
      */
-    // this will cause nullpointerexception if not set
-    // However, fragment should only be
-    val date = Transformations.map(wf.dateLiveData){ it.toDateString() ?: NO_DATA_STRING }
+    val aircraftDbLiveData
+        get()= aircraftRepository.aircraftListLiveData
+
+    val airportDbLiveData
+        get() = airportRepository.liveAirports
+
+    val dateStringLiveData = wf.timeOutLiveData.map{ Instant.ofEpochSecond(it).toLocalDate().toDateString() ?: NO_DATA_STRING }
     val localDate
-            get() = wf.mDate
+            get() = wf.date
     val flightNumber
             get() = wf.flightNumberLiveData
     val origin = Transformations.map(wf.originLiveData) { getAirportString(it)}
     val destination = Transformations.map(wf.destinationLiveData) { getAirportString(it)}
-    val originIsValid = Transformations.map(wf.originLiveData){ it != null && it.latitude_deg != 0.0 && it.longitude_deg != 0.0}
-    val destinationIsValid = Transformations.map(wf.destinationLiveData){ it != null && it.latitude_deg != 0.0 && it.longitude_deg != 0.0}
-    val timeOut = Transformations.map(wf.timeOutLiveData) { it.toTimeString()}
-    val timeIn = Transformations.map(wf.timeInLiveData) { it.toTimeString()}
-    val landings = Transformations.map(wf.takeoffLandingsLiveData){it.toString()}
+    val originIsValid = Transformations.map(wf.originLiveData){ it?.checkIfValidCoordinates() == true }
+    val destinationIsValid = Transformations.map(wf.destinationLiveData){ it?.checkIfValidCoordinates() == true }
+    val timeOut = wf.timeOutLiveData.map { Instant.ofEpochSecond(it).toTimeString()}
+    val timeIn = wf.timeInLiveData.map { Instant.ofEpochSecond(it).toTimeString()}
+    val landings: LiveData<String>
+        get() = wf.takeoffLandingsLiveData.map { it.toString() }
     val aircraft: LiveData<String>
         get() = _aircraft
     val name
@@ -122,7 +126,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         get()= isSim.value ?: false
 
     val isSigned
-        get() = wf.isSignedLiveData
+        get() = wf.signatureLiveData.map { it.isNotBlank() }
     val signature: String
         get() = wf.signatureLiveData.value ?: ""
     /*val isDual
@@ -143,11 +147,11 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     val isIfr
         get() = wf.isIfrLiveData
     val isPic
-        get() = wf.isPicLiveData
+        get() = wf.isPICLiveData
     val isPF
         get() = wf.isPFLiveData
     val isAutoValues
-        get() = wf.isAutoValuesLiveData
+        get() = wf.autoFillLiveData
     val knownRegistrations
         get() = aircraftRepository.registrationsLiveData
 
@@ -164,18 +168,20 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * @param newDate: Date as [LocalDate]
      */
     fun setDate(newDate: LocalDate?){
-        newDate?.let { wf.setDate(it) }
+        newDate?.let { wf.date = it }
             ?: Log.w(this::class.simpleName, "setDate() trying to set date as null")
     }
 
     /**
      * Set FlightNumber
+     * If new flightnumber is the old one mines all the digits (eg KL1234 becomes KL) it doesn't
+     *  update.
      */
     fun setFlightNumber(newFlightNumber: Editable?){
         newFlightNumber?.toString()?.let{
             if (it != (wf.flightNumberLiveData.value ?: "").removeTrailingDigits())
-                wf.setFlightNumber(it)
-            else wf.setFlightNumber(wf.flightNumberLiveData.value ?: "")
+                wf.flightNumber = it
+
         }
     }
 
@@ -184,7 +190,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Checks if entered data is found in airportRepository.
      * If it is not found, it will enter it "as is" as identifier (ICAO code)
      */
-    private fun setOrig(origString: String) = wf.setOrig(origString)
+    private fun setOrig(origString: String) { wf.orig = origString }
 
 
     fun setOrig(origEditable: Editable?) = origEditable?.let { setOrig(it.toString()) }
@@ -194,7 +200,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Checks if entered data is found in airportRepository.
      * If it is not found, it will enter it "as is" as identifier (ICAO code)
      */
-    private fun setDest(destString: String) = wf.setDest(destString)
+    private fun setDest(destString: String) { wf.dest = destString }
 
     fun setDest(destEditable: Editable?) = destEditable?.let {setDest (it.toString())}
 
@@ -217,7 +223,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     }
 
     fun setSimTime(simTimeString: Editable?){
-        wf.setSimTime(hoursAndMinutesStringToInt(simTimeString.toString()) ?: return)
+        hoursAndMinutesStringToInt(simTimeString.toString())?.let { wf.simTime = it }
     }
 
     /**
@@ -230,15 +236,15 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     @Suppress("MemberVisibilityCanBePrivate")
     fun setRegAndType(regAndTypeString: String){
         when {
-            sim -> wf.setAircraft(type = regAndTypeString)                                 // simulator
-            regAndTypeString.isBlank() -> wf.setAircraft(Aircraft(""))          // no reg and type if field is empty
-            "(" !in regAndTypeString -> viewModelScope.launch {                            // only registration entered
+            sim -> wf.aircraftType = regAndTypeString                                       // simulator
+            regAndTypeString.isBlank() -> wf.registration = ""                              // no reg and type if field is empty
+            "(" !in regAndTypeString -> viewModelScope.launch {                             // only registration entered
                 aircraftRepository.getBestHitForPartialRegistration(regAndTypeString)?.let {
-                    wf.setAircraft(it)
+                    wf.setAircraftHard(it)
                 } ?: feedback(EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND).apply {
                     putString(regAndTypeString)
                 }.also {
-                    wf.setAircraft(regAndTypeString)
+                    wf.registration = regAndTypeString
                 }
             }
 
@@ -267,11 +273,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     fun setTakeoffLandings(tlString: String){
         require (tlString.all{ it in "1234567890/"})
         if ('/' in tlString) tlString.split('/').let{
-            wf.takeoff = it[0].toInt()
-            wf.landing = it[1].toInt()
+            wf.takeoffLandings = TakeoffLandings(it[0].toInt(), it[1].toInt())
         } else {
-            wf.takeoff = tlString.toInt()
-            wf.landing = tlString.toInt()
+            wf.takeoffLandings = TakeoffLandings(tlString.toInt())
         }
     }
 
@@ -280,8 +284,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * @see [String.anyWordStartsWith]
      */
     fun setName(name: String){
-        if (';' in name) wf.setName(name.dropLast(1))
-        else wf.setName(if (name.isEmpty()) "" else allNames.value?.firstOrNull{it.anyWordStartsWith(name, ignoreCase = true)} ?: name)
+        if (';' in name) wf.name = name.dropLast(1)
+        else wf.name = if (name.isEmpty()) "" else allNames.value?.firstOrNull{it.anyWordStartsWith(name, ignoreCase = true)} ?: name
     }
 
     /**
@@ -291,8 +295,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * @see [String.anyWordStartsWith]
      */
     fun setName2(name2: String){
-        if (';' in name2) wf.setName2(name2.split(';').joinToString(";") { it.trim() })
-        else wf.setName2(if (name2.isEmpty()) "" else allNames.value?.firstOrNull{it.anyWordStartsWith(name2, ignoreCase = true)} ?: name2)
+        if (';' in name2) wf.name2 = (name2.split(';').joinToString(";") { it.trim() })
+        else wf.name2 = if (name2.isEmpty()) "" else allNames.value?.firstOrNull{it.anyWordStartsWith(name2, ignoreCase = true)} ?: name2
 
     }
 
@@ -300,46 +304,38 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     /**
      * Set remarks
      */
-    fun setRemarks(remarks: String) = wf.setRemarks(remarks)
+    fun setRemarks(remarks: String) {
+        wf.remarks = remarks
+    }
 
     /**
      * Set sim
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not
      */
-    fun toggleSim(force: Boolean? = null) = wf.setIsSim ( force ?: !sim) // [sim] comes straight from [wf] so it is a true toggle
+    fun toggleSim(force: Boolean? = null) {
+        wf.isSim = force ?: !sim // [sim] comes straight from [wf] so it is a true toggle
+    }
 
     /**
      * Set signature
      */
-    fun setSignature(signature: String) = wf.setSignature(signature)
-
-    /*
-    /**
-     * Set dual
-     * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
-     */
-    fun toggleDual(force: Boolean? = null) = wf.setIsDual ( force ?: wf.isDualLiveData.value == false)
-
-    /**
-     * Set instructor
-     * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
-     */
-    fun toggleInstructor(force: Boolean? = null) = wf.setIsInstructor ( force ?: wf.isInstructorLiveData.value == false)
-    */
+    fun setSignature(signature: String) {
+        wf.signature = signature
+    }
 
     /**
      * Toggle between Dual, Instructor and None.
      */
     fun toggleDualInstructor(){
         when (dualInstructor.value){
-            DUAL_INSTRUCTOR_FLAG_NONE -> wf.setIsDual(true)
+            DUAL_INSTRUCTOR_FLAG_NONE -> wf.isDual = true
             DUAL_INSTRUCTOR_FLAG_DUAL -> {
-                wf.setIsDual(false)
-                wf.setIsInstructor(true)
+                wf.isDual = false
+                wf.isInstructor = true
             }
             else -> {
-                wf.setIsDual(false)
-                wf.setIsInstructor(false)
+                wf.isDual = false
+                wf.isInstructor =false
             }
         }
     }
@@ -348,8 +344,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Set multiPilot. If multipilot time was 0, [wf] sets multiPilotTime to mDuration.toMinutes().toInt()
      */
     fun toggleMultiPilot(force: Boolean? = null){
-        wf.setAutoValues(false)
-        wf.setIsMultipilot(force ?: wf.mMultiPilotTime == 0)
+        wf.autoFill = false
+        wf.isMultipilot = force ?: !wf.isMultipilot
     }
 
     /**
@@ -358,7 +354,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
     fun toggleIfr(force: Boolean? = null){
-        wf.setIsIfr(force ?: wf.isIfrLiveData.value == false)
+        wf.isIfr = force ?: !wf.isIfr
     }
 
     /**
@@ -366,7 +362,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
     fun togglePic(force: Boolean? = null){
-        wf.setIsPic(force ?: wf.isPicLiveData.value == false)
+        wf.isPIC =force ?: !wf.isPIC
     }
 
     /**
@@ -376,16 +372,15 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      */
     fun togglePF(force: Boolean? = null){
         val newValue = force ?: wf.isPFLiveData.value == false
-        wf.setIsPF(newValue)
-        if (wf.isAutoValuesLiveData.value == true) {
-            wf.takeoff = newValue.toInt() // Boolean.toInt() is 1 if true or 0 if false
-            wf.landing = newValue.toInt()
+        wf.isPF = newValue
+        if (wf.autoFill) {
+            wf.takeoffLandings = TakeoffLandings(newValue.toInt())
         }
     }
 
     //If this is true, if autoValues is off, the only reason for that is [checkAutovaluesForUnknownAirport] set it to off.
     //If checkAutovaluesForUnknownAirport decides it's ok again,  autoValues can be set to on again
-    private var autoValuesOnlyOffBecauseOfUnknownAirport: Boolean = wf.isAutoValuesLiveData.value == true
+    private var autoValuesOnlyOffBecauseOfUnknownAirport: Boolean = wf.autoFill
     /**
      * Will set autovalues to "soft-off" if not both airports known
      */
@@ -395,7 +390,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
             toggleAutoValues(true)                                                // force autoValues on
             autoValuesOnlyOffBecauseOfUnknownAirport = false                            // it is not off so this should be false
         }
-        if (unknownAirportFound && wf.mIsAutovalues){                        // autovalues wants to be on, but unknown airports prevet that
+        if (unknownAirportFound && wf.autoFill){                        // autovalues wants to be on, but unknown airports prevet that
             autoValuesOnlyOffBecauseOfUnknownAirport = true                             // We switch off Autovalues for this reason
             toggleAutoValues(false)                                               // force autoValues off. If airports are all known again, calling this function again will reset it to on
         }
@@ -407,15 +402,28 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Used by [checkAutovaluesForUnknownAirport] with parameter
      */
     fun toggleAutoValues(force: Boolean? = null){
-        val newValue = force ?: (!wf.mIsAutovalues)
         viewModelScope.launch {
-            val j: Job = wf.setAutoValues(newValue)
-            j.join()
-            if (force == null) { // set fr0m checkbox,
+            wf.autoFill = force ?: !wf.autoFill
+            if (force == null) { // set from checkbox,
                 checkAutovaluesForUnknownAirport() // check airports known to see if we can set it to on
             }
         }
     }
+
+    /**
+     * Notify WorkingFlight that Aircraft DB has changed (which leads to aircraft being reloaded)
+     */
+    fun notifyAircraftDbChanged(){
+        wf.notifyAircraftDbUpdated()
+    }
+
+    /**
+     * Notify WorkingFlight that Aircraft DB has changed (which leads to aircraft being reloaded)
+     */
+    fun notifyAirportDbChanged(){
+        wf.notifyAirportDbUpdated()
+    }
+
 
     /**
      * Save WorkingFlight and send Close message to fragment.
@@ -424,30 +432,24 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      *      - Feed back to main activity that this gives a possible sync problem
      *          -> This feedback is given instead of CLOSE_EDIT_FLIGHT_FRAGMENT so user can decide to continue editing.
      */
-
     fun saveAndClose() {
-        viewModelScope.launch {
-            wf.waitForAsyncWork()
-            if (wf.isPlanned && wf.canCauseCalendarConflict) {
-                val now = Instant.now()
-                // Push back calendar sync if timeIn in future
-                if (wf.mTimeIn > now) {
-                    if (wf.mTimeOut <= now.plusMinutes(30)) {
-                        postponeCalendarSync()
-                    }
-                    //This happens if flight starts > 30 minutes in the future and calendar sync is active during this flight
-                    else if (Preferences.calendarDisabledUntil < wf.mTimeIn.epochSecond) {
-                        feedback(EditFlightFragmentEvents.EDIT_FLIGHT_CALENDAR_CONFLICT)
-                        return@launch
-                    }
-
+        if (wf.canCauseCalendarConflict) {
+            val now = Instant.now().epochSecond
+            // Push back calendar sync if timeIn in future
+            if (wf.timeIn > now) {
+                if (wf.timeOut <= now + 30*60) {
+                    postponeCalendarSync() // if flight starts less than half an hour in the future, just always postpone.
                 }
-                //else { /*no problem, no action*/ }
+                //Below happens if flight starts > 30 minutes in the future and calendar sync is active during this flight
+                else if (Preferences.calendarDisabledUntil < wf.timeIn) {
+                    feedback(EditFlightFragmentEvents.EDIT_FLIGHT_CALENDAR_CONFLICT)
+                    return
+                }
             }
-
-            wf.saveAndClose()
-            feedback(EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT)
+            //else { /*no problem, no action*/ }
         }
+        wf.saveAndClose()
+        feedback(EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT)
     }
 
     /**
@@ -486,7 +488,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      *
      */
     fun postponeCalendarSync(){
-        (wf.mTimeIn.epochSecond + 1).let {
+        (wf.timeIn + 1).let {
             if (it > Preferences.calendarDisabledUntil) Preferences.calendarDisabledUntil = it
         }
     }

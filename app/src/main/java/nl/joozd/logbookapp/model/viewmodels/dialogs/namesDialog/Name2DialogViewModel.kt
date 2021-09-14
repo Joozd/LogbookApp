@@ -41,14 +41,14 @@ class Name2DialogViewModel: NamesDialogViewModel() {
      * Add a selected name to the list of names, or replace name if only one name allowed
      */
     override fun addName(name: String) {
-        workingFlight.setNames2List(workingFlight.name2ListLiveData.value!! + name)
+        workingFlight.name2List += name
     }
 
     /**
      * Remove the last name from the list. If no names left, set names to [""]
      */
     override fun removeLastName() {
-        workingFlight.setNames2List(workingFlight.name2ListLiveData.value!!.dropLast(1))
+        workingFlight.name2List = workingFlight.name2List.dropLast(1)
     }
 
     /**

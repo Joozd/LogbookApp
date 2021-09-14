@@ -25,17 +25,28 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.*
 
 
-// returns a flight that is the return flight of the flight given (ie dest and orig swapped, flightnr plus one)
-fun reverseFlight(flight: Flight, newID: Int, unknownToServer: Boolean = true): Flight {
-    var flightnumber= flight.flightNumber
-    var flightnumberDigits = ""
-    while (flightnumber.isNotEmpty() && flightnumber.last().isDigit()){
-        flightnumberDigits = flightnumber.last() + flightnumberDigits
-        flightnumber = flightnumber.dropLast(1)
-    }
-    flightnumber = if (flightnumberDigits.isEmpty()) flightnumber else flightnumber+(flightnumberDigits.toLong() + 1).toString()
+/**
+ * Creates a flight that is the return flight of the flight given (ie dest and orig swapped, flightNumber++)
+ * If flight doesn't end with digits, it will keep same flightNumber.
+ * @param flight: Flight to reverse
+ * @param newID: New ID to force, if none given will set to -1 (meaning it will be assigned on save)
+ */
+
+fun reverseFlight(flight: Flight, newID: Int = -1): Flight {
+    val flightNumberDigitsRegex = ".*(\\d+$)".toRegex()
+
+    val fn = flight.flightNumber
+    // Find numbers that flightnumber ends with. If found, increase by one
+    val flightNumber = flightNumberDigitsRegex.find(fn)?.let{
+        val digits = it.groupValues[1]
+        if (digits.isBlank()) fn
+        else fn.dropLast(digits.length) + (digits.toInt()+1).toString()
+    } ?: fn
+    val isIfr = flight.ifrTime > 0
+
+
     val now = Instant.now().roundHoursDown().epochSecond
-    return flight.copy(flightID = newID, orig=flight.dest, dest=flight.orig, flightNumber = flightnumber, timeOut = now, timeIn = now + 3600, remarks = "", correctedTotalTime = 0, ifrTime = 0, nightTime = 0, unknownToServer = unknownToServer, isPlanned = true).also{Log.d("reverseFlight", "$it")}
+    return flight.copy(flightID = newID, orig=flight.dest, dest=flight.orig, flightNumber = flightNumber, timeOut = now, timeIn = now + 3600, remarks = "", correctedTotalTime = 0, ifrTime = if (isIfr) 60 else 0, nightTime = 0, unknownToServer = true, isPlanned = true).also{Log.d("reverseFlight", "$it")}
 }
 
 

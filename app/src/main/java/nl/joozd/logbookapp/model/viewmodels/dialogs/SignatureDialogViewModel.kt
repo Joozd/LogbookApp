@@ -36,17 +36,12 @@ class SignatureDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
 
     fun updateSignature(newSignature: String){
         _signature = newSignature
-        wf.setSignature(newSignature)
+        wf.signature = newSignature
     }
 
-    fun signatureCleared(){
-        _signature = ""
+    fun signatureCleared() = updateSignature("")
+
+    override fun undo() {
+        wf.signature = undoSignature
     }
-
-    /**
-     * Set signature
-     */
-    fun setSignature(signature: String) = wf.setSignature(signature)
-
-    override fun undo() = wf.setSignature(undoSignature)
 }

@@ -75,13 +75,13 @@ class EditFlightFragment: JoozdlogFragment(){
                 flightInfoText.text = it
             }
 
-            viewModel.date.observe(viewLifecycleOwner, {
+            viewModel.dateStringLiveData.observe(viewLifecycleOwner) {
                 flightDateField.setTextIfNotFocused(it)
-            })
+            }
 
-            viewModel.flightNumber.observe(viewLifecycleOwner, {
+            viewModel.flightNumber.observe(viewLifecycleOwner) {
                 flightFlightNumberField.setTextIfNotFocused(it)
-            })
+            }
 
 
             viewModel.origin.observe(viewLifecycleOwner) {
@@ -189,6 +189,18 @@ class EditFlightFragment: JoozdlogFragment(){
                 aircraftFieldAdapter.setItems(registrations)
             }
 
+            // Notify viewmodel that aircraft DB has changed. Triggered from here to keep
+            // LiveData lifecycle pattern intact and prevent using observeForever in viewModel
+            viewModel.aircraftDbLiveData.observe(viewLifecycleOwner){
+                viewModel.notifyAircraftDbChanged()
+            }
+
+            // Notify viewmodel that aircraft DB has changed. Triggered from here to keep
+            // LiveData lifecycle pattern intact and prevent using observeForever in viewModel
+            viewModel.airportDbLiveData.observe(viewLifecycleOwner){
+                viewModel.notifyAirportDbChanged()
+            }
+
             /************************************************************************************
              * Event handler observer
              ************************************************************************************/
@@ -202,9 +214,7 @@ class EditFlightFragment: JoozdlogFragment(){
                     EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND -> {
                         if (viewModel.checkIfStillOpen()) { // only autofire this window if Fragment is not closing
                             supportFragmentManager.commit {
-                                add(R.id.mainActivityLayout, AircraftPicker().apply {
-                                    presetEnteredRegistration = event.getString()
-                                })
+                                add(R.id.mainActivityLayout, AircraftPicker())
                                 addToBackStack(null)
                             }
                         }

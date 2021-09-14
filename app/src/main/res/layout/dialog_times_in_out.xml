@@ -143,24 +143,17 @@
                     android:id="@+id/coPilotTextView"
                     style="@style/SelectorStyleInactive"
                     android:text="@string/copilot"
-                    app:layout_constraintEnd_toStartOf="@+id/dualTextview"
+                    app:layout_constraintEnd_toStartOf="@+id/instructorTextView"
                     app:layout_constraintStart_toEndOf="@+id/picTextView"
                     app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
 
-                <TextView
-                    android:id="@+id/dualTextview"
-                    style="@style/SelectorStyleInactive"
-                    android:text="@string/dualString"
-                    app:layout_constraintEnd_toStartOf="@+id/instructorTextView"
-                    app:layout_constraintStart_toEndOf="@+id/coPilotTextView"
-                    app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
 
                 <TextView
                     android:id="@+id/instructorTextView"
                     style="@style/SelectorStyleInactive"
                     android:text="@string/instructorString"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/dualTextview"
+                    app:layout_constraintStart_toEndOf="@+id/coPilotTextView"
                     app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
 
                 <TextView

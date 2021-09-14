@@ -516,12 +516,14 @@ class AircraftRepository(
      * Get aircraft from registration, with or without '-'.
      * @return found flight, null if [reg] is null or nothing found.
      */
-    suspend fun getAircraftFromRegistration(reg: String?): Aircraft? = when {
-        reg == null -> null
-        // use [reg] if it contains at least one '-', if it doesn't try to match it to a knownRegistration minus the '-'
-        "-" in reg -> requireMap()[reg.uppercase(Locale.ROOT)]
-        else -> { requireMap().keys.firstOrNull { it.filter{ c -> c !in "- "} == reg}?.let{
-            requireMap()[it]
+    suspend fun getAircraftFromRegistration(reg: String?): Aircraft? = withContext(dispatcher) {
+        when {
+            reg == null -> null
+            // use [reg] if it contains at least one '-', if it doesn't try to match it to a knownRegistration minus the '-'
+            "-" in reg -> requireMap()[reg.uppercase(Locale.ROOT)]
+            else -> { requireMap().keys.firstOrNull { it.filter{ c -> c !in "- "} == reg}?.let{
+                requireMap()[it]
+            }
             }
         }
     }

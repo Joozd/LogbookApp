@@ -32,79 +32,55 @@ import java.time.Duration
  * bit 5: in seat on landing                                                        *
  * bit 6-31: amount of time reserved for takeoff/landing (standard in settings)     *
  ************************************************************************************/
-open class Crew(iCrewSize: Int = 2,
-           iDidTakeoff: Boolean = true,
-           iDidLanding: Boolean = true,
-           iTakeoffLandingTimes: Int = 0)
+data class Crew(val size: Int = 2,
+           val takeoff: Boolean = true,
+           val landing: Boolean = true,
+           val times: Int = 0)
 {
-    protected open var mCrewSize: Int = iCrewSize
-
-    protected open var mDidTakeoff: Boolean = iDidTakeoff
-
-    protected open var mDidLanding: Boolean = iDidLanding
-
-    protected open var mTakeoffLandingTimes: Int = iTakeoffLandingTimes
-
-    /**
-     * Getters for stored values.
-     */
-    val size
-        get() = mCrewSize
-
-    val takeoff
-        get() = mDidTakeoff
-
-    val landing
-        get() = mDidLanding
-
-    val times
-        get() = mTakeoffLandingTimes
-
     fun toInt():Int {
-        var value = if (mCrewSize > 15) 15 else mCrewSize
-        value = value.setBit(4, mDidTakeoff).setBit(5, mDidLanding)
-        value += mTakeoffLandingTimes.shl(6)
+        var value = if (size > 15) 15 else size
+        value = value.setBit(4, takeoff).setBit(5, landing)
+        value += times.shl(6)
         return value
     }
+
+    /**
+     * Returns a [Crew] object with [size] set to [crewSize]
+     */
+    fun withCrewSize(crewSize: Int): Crew = this.copy (size = crewSize)
+
+    /**
+     * Returns a [Crew] object with [landing] set to [didLanding]
+     */
+    fun withLanding(didLanding: Boolean): Crew = this.copy (landing = didLanding)
+
+    /**
+     * Returns a [Crew] object with [takeoff] set to [didTakeoff]
+     */
+    fun withTakeoff(didTakeoff: Boolean): Crew = this.copy (takeoff = didTakeoff)
+
+    /**
+     * Returns a [Crew] object with [times] set to [newTimes]
+     */
+    fun withTimes(newTimes: Int): Crew = this.copy (times = newTimes)
+
 
     /**
      * Return amount of time to log. Cannot be negative, so 3 man ops for a 20 min flight with 30 mins to/landing is 0 minutes to log.
      */
     fun getLogTime(totalTime: Int, pic: Boolean): Int{
-        if (pic || mCrewSize <=2) return totalTime
-        return maxOf(0, (((totalTime.toFloat()-2*mTakeoffLandingTimes)/mCrewSize) * 2 + mTakeoffLandingTimes * (mDidTakeoff.toInt() + mDidLanding.toInt()) + 0.5).toInt())
+        if (pic || size <=2) return totalTime
+        return maxOf(0, (((totalTime.toFloat()-2*times)/size) * 2 + times * (takeoff.toInt() + landing.toInt()) + 0.5).toInt())
     }
 
     fun getLogTime(totalTime: Duration, pic: Boolean): Duration{
-        if (pic || mCrewSize <=2) return totalTime
-        return Duration.ofMinutes(maxOf(0L, (((totalTime.toMinutes().toFloat()-2*mTakeoffLandingTimes)/mCrewSize) * 2 + mTakeoffLandingTimes * (mDidTakeoff.toInt() + mDidLanding.toInt()) + 0.5).toLong()))
+        if (pic || size <=2) return totalTime
+        return Duration.ofMinutes(maxOf(0L, (((totalTime.toMinutes().toFloat()-2*times)/size) * 2 + times * (takeoff.toInt() + landing.toInt()) + 0.5).toLong()))
     }
 
-    operator fun plus(extraCrewMembers: Int): Crew = Crew ((mCrewSize + extraCrewMembers).putInRange((1..15)), mDidTakeoff, mDidLanding, mTakeoffLandingTimes)
-    operator fun minus(extraCrewMembers: Int): Crew = Crew ((mCrewSize - extraCrewMembers).putInRange((1..15)), mDidTakeoff, mDidLanding, mTakeoffLandingTimes)
+    operator fun inc(): Crew = this.copy (size = (size + 1).putInRange(MIN_CREW_SIZE..MAX_CREW_SIZE))
 
-
-    operator fun plusAssign(extraCrewMembers: Int){
-        mCrewSize += extraCrewMembers
-        mCrewSize = mCrewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
-    }
-
-    operator fun minusAssign(fewerCrewMebers: Int){
-        mCrewSize -= fewerCrewMebers
-        mCrewSize = mCrewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
-    }
-
-    operator fun inc(): Crew {
-        mCrewSize++
-        mCrewSize = mCrewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
-        return this
-    }
-
-    operator fun dec(): Crew {
-        mCrewSize--
-        mCrewSize = mCrewSize.putInRange((MIN_CREW_SIZE..MAX_CREW_SIZE))
-        return this
-    }
+    operator fun dec(): Crew = this.copy (size = (size - 1).putInRange(MIN_CREW_SIZE..MAX_CREW_SIZE))
 
     private fun Int.putInRange(range: IntRange): Int {
         require (!range.isEmpty()) { "cannot put an int in a range without elements"}
@@ -118,7 +94,7 @@ open class Crew(iCrewSize: Int = 2,
 
     override fun equals(other: Any?): Boolean {
         if (other !is Crew) return false
-        return toInt() == other.toInt()
+        return this.toInt() == other.toInt()
     }
 
     override fun hashCode(): Int = toInt()
@@ -128,16 +104,17 @@ open class Crew(iCrewSize: Int = 2,
     companion object {
         const val MIN_CREW_SIZE = 1
         const val MAX_CREW_SIZE = 15
-        val CREW_RANGE = (MIN_CREW_SIZE..MAX_CREW_SIZE)
+
+        val COCO: Crew
+            get() = Crew(3, takeoff = false, landing = false, times = Preferences.standardTakeoffLandingTimes)
 
         fun of(value: Int) = if (value == 0) Crew() else Crew(
-            iCrewSize = 15.and(value),
-            iDidTakeoff = value.getBit(4),
-            iDidLanding = value.getBit(5),
-            iTakeoffLandingTimes = value.ushr(6)
+            size = 15.and(value),
+            takeoff = value.getBit(4),
+            landing = value.getBit(5),
+            times = value.ushr(6)
         )
         fun of(crewSize: Int, didTakeoff: Boolean, didLanding: Boolean, nonStandardTimes: Int) = Crew(crewSize,didTakeoff,didLanding,nonStandardTimes)
 
-        fun asCoco(): Crew = Crew(3, iDidTakeoff = false, iDidLanding = false, iTakeoffLandingTimes = Preferences.standardTakeoffLandingTimes)
     }
 }

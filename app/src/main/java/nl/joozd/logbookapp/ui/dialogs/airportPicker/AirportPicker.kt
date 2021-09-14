@@ -137,25 +137,26 @@ abstract class AirportPicker: JoozdlogFragment() {
              * Only set search field if it is blank.
              * TODO make that happen in a better way.
              */
-            viewModel.pickedAirport.observe(viewLifecycleOwner) {
-                airportPickerAdapter.pickAirport(it)
+            viewModel.pickedAirport.observe(viewLifecycleOwner) { ap ->
+                ap?.let{
+                    airportPickerAdapter.pickAirport(it)
 
-                // if ((airportsSearchField.text?.toString() ?: "null").isBlank()) airportsSearchField.setText(it.ident)
-                airportPickerTitle.text =
-                    if (workingOnOrig) getString(R.string.origin).uppercase(Locale.ROOT)
-                    else getString(R.string.destination).uppercase(Locale.ROOT)
-                @SuppressLint("SetTextI18n")
-                icaoIataField.text = "${it.ident} - ${it.iata_code}"
-                if (airportsSearchField.text?.isBlank() == true) airportsSearchField.setText(it.ident)
-                @SuppressLint("SetTextI18n")
-                cityAirportNameField.text = "${it.municipality} - ${it.name}"
-                val latString = latToString(it.latitude_deg)
-                val lonString = lonToString(it.longitude_deg)
-                @SuppressLint("SetTextI18n")
-                latLonField.text = "$latString - $lonString"
+                    // if ((airportsSearchField.text?.toString() ?: "null").isBlank()) airportsSearchField.setText(it.ident)
+                    airportPickerTitle.text =
+                        if (workingOnOrig) getString(R.string.origin).uppercase(Locale.ROOT)
+                        else getString(R.string.destination).uppercase(Locale.ROOT)
+                    @SuppressLint("SetTextI18n")
+                    icaoIataField.text = "${it.ident} - ${it.iata_code}"
+                    if (airportsSearchField.text?.isBlank() == true) airportsSearchField.setText(it.ident)
+                    @SuppressLint("SetTextI18n")
+                    cityAirportNameField.text = "${it.municipality} - ${it.name}"
+                    val latString = latToString(it.latitude_deg)
+                    val lonString = lonToString(it.longitude_deg)
+                    @SuppressLint("SetTextI18n")
+                    latLonField.text = "$latString - $lonString"
 
-                //This one should actually be a string resource
-                altitudeField.text = getString(R.string.alt_with_placeholder, it.elevation_ft.toString()) // "alt: ${it.elevation_ft}\'"
+                    altitudeField.text = getString(R.string.alt_with_placeholder, it.elevation_ft.toString()) // "alt: ${it.elevation_ft}\'"
+                }
             }
         }.root
 

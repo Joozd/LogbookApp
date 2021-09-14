@@ -24,6 +24,9 @@ package nl.joozd.logbookapp.model.workingFlight
  * Can be added to each other
  */
 data class TakeoffLandings(val takeoffDay: Int = 0, val takeoffNight: Int = 0, val landingDay: Int = 0, val landingNight: Int = 0, val autoLand: Int = 0) {
+    constructor(takeoff: Int, landing: Int): this (takeoffDay = takeoff, landingDay = landing)
+    constructor(takeoffLandings: Int): this (takeoffDay = takeoffLandings, landingDay = takeoffLandings)
+
     operator fun plus(other: TakeoffLandings) = TakeoffLandings(
         takeoffDay = takeoffDay + other.takeoffDay,
         takeoffNight = takeoffNight + other.takeoffNight,
@@ -40,9 +43,25 @@ data class TakeoffLandings(val takeoffDay: Int = 0, val takeoffNight: Int = 0, v
         autoLand = autoLand - other.autoLand
     )
 
+    val takeOffs get() = takeoffDay + takeoffNight
+    val landings get() = landingDay + landingNight
+
     /**
      * ToString will display combined takeoff and landings
      * eg. TakeoffLandings(1,2,3,4,5).ToString wil be "3/7"
      */
     override fun toString() = "${takeoffDay + takeoffNight}/${landingDay + landingNight}"
+
+    override fun equals(other: Any?): Boolean = if (other !is TakeoffLandings) false else
+        listOf(other.takeoffDay, other.takeoffNight, other.landingDay, other.landingNight, other.autoLand) ==
+            listOf(  takeoffDay,       takeoffNight,       landingDay,       landingNight,       autoLand)
+
+    override fun hashCode(): Int {
+        var result = takeoffDay
+        result = 31 * result + takeoffNight
+        result = 31 * result + landingDay
+        result = 31 * result + landingNight
+        result = 31 * result + autoLand
+        return result
+    }
 }

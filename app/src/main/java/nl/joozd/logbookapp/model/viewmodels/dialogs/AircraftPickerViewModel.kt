@@ -32,7 +32,7 @@ import java.util.*
  * ViewModel for AircraftPicker and SimTypePicker fragments
  */
 class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
-    private val undoAircraft = workingFlight.aircraftLiveData.value
+    private val undoAircraft = workingFlight.aircraft
     private val _typesSearchString = MutableLiveData("")
     private val typesSearchString
         get() = _typesSearchString.value ?: ""
@@ -59,7 +59,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     private var mAircraft: Aircraft
         get() = selectedAircraft.value!!
         set(newAircraft){
-            workingFlight.setAircraft(newAircraft)
+            workingFlight.setAircraftHard(newAircraft)
         }
 
 
@@ -97,7 +97,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
      * workingFlight will look for aircraft to match registration or will create one with null type
      */
     fun updateRegistration(reg: String){
-        workingFlight.setAircraft(registration = reg)
+        workingFlight.registration = reg
     }
 
     /**
@@ -115,7 +115,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
      * Revert aircraft to what it was when this viewModel was created
      */
     override fun undo() {
-        workingFlight.setAircraft(undoAircraft)
+        workingFlight.setAircraftHard(undoAircraft)
     }
 
 }

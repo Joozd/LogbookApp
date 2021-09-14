@@ -35,10 +35,9 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFl
 //@ExperimentalCoroutinesApi
 abstract class AirportPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     /**
-     * MediatorLiveData for kepping track of which airport is picked.
-     * Add sources in implementing classes
+     * The picked airport
      */
-    protected val pickedAirportMediator = MediatorLiveData<Airport>()
+    abstract val pickedAirport: LiveData<Airport?>
 
     /**
      * Pick an airport and set that as Airport
@@ -63,8 +62,7 @@ abstract class AirportPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(
         _airportsList.value = airportRepository.liveAirports.value
     }
 
-    val pickedAirport: LiveData<Airport>
-        get() = pickedAirportMediator
+
 
 
     /**

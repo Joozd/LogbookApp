@@ -94,7 +94,7 @@ class KlmMonthlyParser(private val inputStream: InputStream): CompletedFlights {
             if (it > tOut) it else it + ONE_DAY
         }
         val duration = Duration.between(Instant.ofEpochSecond(tOut), Instant.ofEpochSecond(tIn)).toMinutes().toInt()
-        val crew = if (function == COCO) Crew.asCoco() else Crew()
+        val crew = if (function == COCO) Crew.COCO else Crew()
         val isPIC = function == CAPTAIN
         val logTime = crew.getLogTime(duration, isPIC)
 

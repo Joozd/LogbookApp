@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.data.miscClasses.crew
 
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.getBit
+import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.extensions.setBit
 import nl.joozd.logbookapp.extensions.toInt
 import java.time.Duration
@@ -70,12 +71,18 @@ data class Crew(val size: Int = 2,
      */
     fun getLogTime(totalTime: Int, pic: Boolean): Int{
         if (pic || size <=2) return totalTime
-        return maxOf(0, (((totalTime.toFloat()-2*times)/size) * 2 + times * (takeoff.toInt() + landing.toInt()) + 0.5).toInt())
+        val t = times.nullIfZero() ?: Preferences.standardTakeoffLandingTimes
+        val divideableTime = (totalTime - 2*t).toFloat()
+        val timePerShare = divideableTime / size
+        val minutesInSeat = (timePerShare*2).toInt()
+        return minutesInSeat + (if(takeoff) t else 0) + (if (landing) t else 0)
     }
+
+    fun getLogTime(totalTime: Long, pic: Boolean): Long = getLogTime(totalTime.toInt(), pic).toLong()
 
     fun getLogTime(totalTime: Duration, pic: Boolean): Duration{
         if (pic || size <=2) return totalTime
-        return Duration.ofMinutes(maxOf(0L, (((totalTime.toMinutes().toFloat()-2*times)/size) * 2 + times * (takeoff.toInt() + landing.toInt()) + 0.5).toLong()))
+        return Duration.ofMinutes(getLogTime(totalTime.toMinutes(), pic))
     }
 
     operator fun inc(): Crew = this.copy (size = (size + 1).putInRange(MIN_CREW_SIZE..MAX_CREW_SIZE))

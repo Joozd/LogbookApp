@@ -58,19 +58,19 @@ class AugmentedCrewDialog: JoozdlogFragment(){
             /**
              * observers:
              */
-            viewModel.crewsize.observe(viewLifecycleOwner) {
+            viewModel.crewSizeLiveData.observe(viewLifecycleOwner) {
                 crewSizeEditText.setText(it.toString())
             }
 
-            viewModel.didTakeoff.observe(viewLifecycleOwner) {
+            viewModel.didTakeoffLiveData.observe(viewLifecycleOwner) {
                 didTakeoffCheckbox.isChecked = it
             }
 
-            viewModel.didLanding.observe(viewLifecycleOwner) {
+            viewModel.didLandingLiveData.observe(viewLifecycleOwner) {
                 didLandingCheckbox.isChecked = it
             }
 
-            viewModel.takeoffLandingTimes.observe(viewLifecycleOwner) { t ->
+            viewModel.takeoffLandingTimesLiveData.observe(viewLifecycleOwner) { t ->
                 timeForTakeoffLandingEditText.setText(t)
             }
 

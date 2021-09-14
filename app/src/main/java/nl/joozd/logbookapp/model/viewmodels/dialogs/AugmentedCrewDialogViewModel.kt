@@ -21,26 +21,31 @@ package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import android.text.Editable
 import android.util.Log
-import androidx.lifecycle.Transformations
-import nl.joozd.logbookapp.data.miscClasses.crew.Crew
+import androidx.core.text.isDigitsOnly
+import androidx.lifecycle.map
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.extensions.toInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
 class AugmentedCrewDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
-    private val crew // shortcut
-        get() = workingFlight.crew
 
-    fun crewDown() = crew.dec() // = crew-- but works on a val
+    fun crewDown() = workingFlight.crew-- // = crew-- but works on a val
 
-    fun crewUp() = crew.inc() // = crew++ but works on a val
+    fun crewUp() = workingFlight.crew++ // = crew++ but works on a val
 
+    /**
+     * Set whether pilot did takeoff in seat or not
+     */
     fun setTakeoff(didTakeoff: Boolean) {
-        workingFlight.crew.setDidTakeoff(didTakeoff)
+        workingFlight.crew = workingFlight.crew.withTakeoff(didTakeoff)
     }
+
+    /**
+     * Set whether pilot did landing in seat or not
+     */
     fun setLanding(didLanding: Boolean){
-        workingFlight.crew.setDidLanding(didLanding)
+        workingFlight.crew = workingFlight.crew.withLanding(didLanding)
     }
 
     /**
@@ -49,8 +54,8 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
      * @return [time]
      */
     fun setTakeoffLandingTime(time: Int) {
-        workingFlight.crew.setNonstandardTakeoffLandingTimes(time)
-        Preferences.standardTakeoffLandingTimes = time
+        workingFlight.crew = workingFlight.crew.withTimes(time)
+        time.nullIfZero()?.let { Preferences.standardTakeoffLandingTimes = it }
     }
 
     /**
@@ -63,24 +68,26 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
             Log.w("setTakeOffLanding()", "called with null reference for time, ignoring.")
             return
         }
-        if (time.isBlank()) setTakeoffLandingTime(Preferences.standardTakeoffLandingTimes)
-        else {
-            setTakeoffLandingTime(time.toInt())
+        if (!time.isDigitsOnly()){
+            Log.w("setTakeOffLanding()", "called with bad time: $time, must be digits only, ignoring.")
+            return
         }
+        setTakeoffLandingTime(if (time.isBlank()) 0 else time.toInt())
     }
 
     /**
      * Observables:
      */
 
-    val crewsize
-        get() = crew.crewSize
+    val crewSizeLiveData
+        get() = workingFlight.crewLiveData.map { it.size }
 
-    val didTakeoff
-        get() = crew.didTakeoff
+    val didTakeoffLiveData
+        get() = workingFlight.crewLiveData.map {it.takeoff}
 
-    val didLanding
-        get() = crew.didLanding
+    val didLandingLiveData
+        get() = workingFlight.crewLiveData.map {it.landing}
 
-    val takeoffLandingTimes = Transformations.map(crew.takeoffLandingTimes) {(it.nullIfZero() ?: Preferences.standardTakeoffLandingTimes).toString()}
+    val takeoffLandingTimesLiveData
+        get() = workingFlight.crewLiveData.map {(it.times.nullIfZero() ?: Preferences.standardTakeoffLandingTimes).toString()}
 }

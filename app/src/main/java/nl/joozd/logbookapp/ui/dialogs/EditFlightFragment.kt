@@ -458,17 +458,11 @@ class EditFlightFragment: JoozdlogFragment(){
                 }
             }
             flightName2Selector.setOnClickListener {
-                Log.d("DEBUG", "xXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxX 1 1 1 1 1 1")
                 activity?.currentFocus?.clearFocus()
                 supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout,
-                        Name2Dialog().also{
-                            Log.d("DEBUG", "xXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxX 2 2 2 2 2 2")
-                        }
-                    )
+                    add(R.id.mainActivityLayout, Name2Dialog())
                     addToBackStack(null)
                 }
-                Log.d("DEBUG", "xXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxX 3 3 3 3 3 3")
             }
 
             /**************************************************************************************

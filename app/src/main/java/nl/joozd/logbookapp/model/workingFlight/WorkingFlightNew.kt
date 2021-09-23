@@ -372,7 +372,7 @@ class WorkingFlightNew private constructor(flight: Flight): CoroutineScope {
     val landingDayLiveData = _wfLiveData.map { it.landingDay }
     val landingNightLiveData = _wfLiveData.map { it.landingNight }
     val autoLandLiveData = _wfLiveData.map { it.autoLand }
-    val takeoffLandingsLiveData = _wfLiveData.map {TakeoffLandings(it.takeOffDay, it.landingNight, it.landingDay, it.landingNight, it.autoLand)}
+    val takeoffLandingsLiveData = _wfLiveData.map { TakeoffLandings.fromFlight(it) }
     val flightNumberLiveData = _wfLiveData.map { it.flightNumber }
     val remarksLiveData = _wfLiveData.map { it.remarks }
     val isPICLiveData = _wfLiveData.map { it.isPIC }

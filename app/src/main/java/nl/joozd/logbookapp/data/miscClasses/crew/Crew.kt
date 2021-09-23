@@ -75,7 +75,7 @@ data class Crew(val size: Int = 2,
         val divideableTime = (totalTime - 2*t).toFloat()
         val timePerShare = divideableTime / size
         val minutesInSeat = (timePerShare*2).toInt()
-        return minutesInSeat + (if(takeoff) t else 0) + (if (landing) t else 0)
+        return maxOf (minutesInSeat + (if(takeoff) t else 0) + (if (landing) t else 0), 0)
     }
 
     fun getLogTime(totalTime: Long, pic: Boolean): Long = getLogTime(totalTime.toInt(), pic).toLong()

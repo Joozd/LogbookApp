@@ -164,7 +164,7 @@ data class Flight(
 
     //duration in minutes
     val calculatedDuration: Int
-        get() = Crew.of(augmentedCrew).also {println("crew found: $it")}.getLogTime(Duration.between(this.tOut(), this.tIn()).toMinutes().toInt(), this.isPIC).also { println("Log time: $it")}
+        get() = Crew.of(augmentedCrew).getLogTime(Duration.between(this.tOut(), this.tIn()).toMinutes().toInt(), this.isPIC)
 
     /**
      * Get the logged duration of a flight in minutes (corrected for augmented crew and [correctedTotalTime])

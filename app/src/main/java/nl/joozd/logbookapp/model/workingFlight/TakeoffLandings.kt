@@ -19,6 +19,8 @@
 
 package nl.joozd.logbookapp.model.workingFlight
 
+import nl.joozd.logbookapp.model.dataclasses.Flight
+
 /**
  * Model class to help keep track of takeoff and landing data
  * Can be added to each other
@@ -63,5 +65,9 @@ data class TakeoffLandings(val takeoffDay: Int = 0, val takeoffNight: Int = 0, v
         result = 31 * result + landingNight
         result = 31 * result + autoLand
         return result
+    }
+
+    companion object{
+        fun fromFlight(flight: Flight) = TakeoffLandings(flight.takeOffDay, flight.takeOffNight, flight.landingDay, flight.landingNight, flight.autoLand)
     }
 }

@@ -437,6 +437,7 @@
     <string name="print_hint">When printing logbook, make sure you make the printer fit it to printable area as the PDF does not have margins.</string>
     <string name="help">Help</string>
     <string name="joozdlog_importer">Joozdlog Importer</string>
+    <string name="delete">delete</string>
 
 
 </resources>

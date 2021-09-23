@@ -32,6 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="40dp"
+        android:contentDescription="@string/delete"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -85,6 +86,7 @@
         <TextView
             android:id="@+id/simAircraftTypeText"
             style="@style/FlightListNarrow"
+            android:layout_width="wrap_content"
             android:layout_marginEnd="16dp"
             app:layout_constraintBottom_toTopOf="@+id/simTotalTimeText"
             app:layout_constraintEnd_toEndOf="parent"
@@ -95,10 +97,11 @@
             android:id="@+id/simRemarksText"
             style="@style/FlightListBold"
             android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:ellipsize="end"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/simNamesText"
+            app:layout_constraintEnd_toStartOf="@+id/simTakeoffLandingsText"
             app:layout_constraintStart_toStartOf="@+id/simText"
             app:layout_constraintTop_toBottomOf="@+id/simNamesText"
             tools:text="Remarks go here!" />
@@ -117,6 +120,7 @@
         <TextView
             android:id="@+id/simTotalTimeText"
             style="@style/FlightListBold"
+            android:layout_width="wrap_content"
             android:layout_marginEnd="16dp"
             android:includeFontPadding="false"
             app:layout_constraintBottom_toTopOf="@+id/simTakeoffLandingsText"
@@ -127,6 +131,7 @@
         <TextView
             android:id="@+id/simTakeoffLandingsText"
             style="@style/FlightListNarrow"
+            android:layout_width="wrap_content"
             android:layout_marginEnd="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

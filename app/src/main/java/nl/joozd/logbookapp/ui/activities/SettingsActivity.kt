@@ -145,7 +145,7 @@ class SettingsActivity : JoozdlogActivity() {
 
             calendarSyncTypeButton.setOnClickListener {
                 supportFragmentManager.commit {
-                    add(R.id.settingsActivityLayout, CalendarSyncDialog()) // secondary constructor used, works on recreate
+                    add(R.id.settingsActivityLayout, CalendarSyncDialog())
                     addToBackStack(null)
                 }
             }
@@ -300,20 +300,6 @@ class SettingsActivity : JoozdlogActivity() {
                 addNamesFromRosterSwitch.isChecked = it
             }
 
-
-            /*
-            //NOT IMPLEMENTED
-            viewModel.showOldTimesOnChronoUpdate.observe(activity) {
-                addRemarksToChronoUpdatesSwitch.isChecked = it
-            }
-            */
-
-
-
-            // viewModel.pickedCalendarType.observe(this, Observer {
-            //     binding.settingsCalendarTypeSpinner.setSelection(it)
-            // })
-
             viewModel.username.observe(activity) {
                 setLoggedInInfo(it)
             }
@@ -347,7 +333,6 @@ class SettingsActivity : JoozdlogActivity() {
             viewModel.updateLargerFilesOverWifiOnly.observe(activity){
                 useWifiForLargeFilesSwitch.isChecked = it
             }
-
 
             // Set content view
             setContentView(root)

@@ -214,7 +214,7 @@
     <string name="delete_calendar_flight">You are deleting a a flight from your calendar. Do you want to disable calendar import?</string>
     <string name="delete_calendar_flight_until_end">Until end of flight</string>
     <string name="you_can_start_calendar_sync_again">You can start calendar synchronizing again by re-enabling it in the Settings menu</string>
-    <string name="always_postpone_calendar_sync">Always postpone on conflict</string>
+    <string name="always_postpone_calendar_sync">Always postpone on manual import</string>
 
 
     <!--

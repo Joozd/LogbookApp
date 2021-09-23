@@ -49,7 +49,7 @@ import java.util.*
  * @param flight: The flight to edit. Will be considered "new" if flightID < 0 (for undo purposes)
  * @NOTE
  */
-class WorkingFlightNew private constructor(flight: Flight): CoroutineScope {
+class WorkingFlight private constructor(flight: Flight): CoroutineScope {
     // This will keep all the jobs
     private val job = Job()
     override val coroutineContext = Dispatchers.Main + job
@@ -943,23 +943,23 @@ class WorkingFlightNew private constructor(flight: Flight): CoroutineScope {
 
         /**
          * Gets a flight from a flightID, null if none found.
-         * @return a [WorkingFlightNew] object of this flight and runs all updates on it.
+         * @return a [WorkingFlight] object of this flight and runs all updates on it.
          */
         suspend fun fromFlightID(id: Int) = withContext(Dispatchers.Main){
-            FlightRepository.getInstance().fetchFlightByID(id)?.let { WorkingFlightNew(it) }
+            FlightRepository.getInstance().fetchFlightByID(id)?.let { WorkingFlight(it) }
         }
 
         /**
          * Creates a new flight with standard data from most recent completed flight in flight repository
          * If none found, creates an empty flight
          */
-        suspend fun createNew(): WorkingFlightNew {
+        suspend fun createNew(): WorkingFlight {
             val repo = FlightRepository.getInstance()
             val fAsync = repo.getMostRecentFlightAsync()
             val f = fAsync.await()?.let { f ->
                 reverseFlight(f, repo.lowestFreeFlightID())
             } ?: Flight(repo.lowestFreeFlightID())
-            return withContext(Dispatchers.Main){WorkingFlightNew(f)
+            return withContext(Dispatchers.Main){WorkingFlight(f)
             }
         }
 

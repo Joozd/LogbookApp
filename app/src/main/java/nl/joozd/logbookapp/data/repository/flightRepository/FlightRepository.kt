@@ -23,7 +23,6 @@ import android.Manifest
 import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.*
-import androidx.lifecycle.Observer
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -46,7 +45,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfRegistrations
 import nl.joozd.logbookapp.extensions.map
 import nl.joozd.logbookapp.extensions.nullIfBlank
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlightNew
+import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.checkPermission
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
@@ -68,7 +67,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     private val nextFlightID = FlightIDProvider()
 
-    private val _workingFlight = MutableLiveData<WorkingFlightNew?>()
+    private val _workingFlight = MutableLiveData<WorkingFlight?>()
 
     private val _cachedFlights = MediatorLiveData<List<Flight>>().apply{
         // Fill it before first observer arrives so it is cached right away
@@ -192,12 +191,12 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * Flight to be edited in EditFlightFragmnt + dialogs
      */
-    val workingFlight: LiveData<WorkingFlightNew?>
+    val workingFlight: LiveData<WorkingFlight?>
         get() = _workingFlight
     val wf
         get() = workingFlight.value!! // shortcut.
 
-    fun getWorkingFlight(): WorkingFlightNew = workingFlight.value ?: error ("WorkingFlight not initialized")
+    fun getWorkingFlight(): WorkingFlight = workingFlight.value ?: error ("WorkingFlight not initialized")
 
     //list of valid flights (not soft-deleted ones)
     val liveFlights: LiveData<List<Flight>> = distinctUntilChanged(_cachedFlights)
@@ -243,7 +242,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * The ONLY way to set working flight to a Flight.
      */
-    fun setWorkingFlight(f: WorkingFlightNew?){
+    fun setWorkingFlight(f: WorkingFlight?){
         if (Looper.myLooper() != Looper.getMainLooper()) launch(Dispatchers.Main){
             Log.w("setWorkingFlight", "setWorkingFlight called on a background thread, setting workingFlight async on main")
             _workingFlight.value = f

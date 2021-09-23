@@ -30,8 +30,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 68 // my version, increment this every build
-        versionName "JoozdLog RC3.1.1"
+        versionCode 70 // my version, increment this every build
+        versionName "JoozdLog RC4.1"
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -55,7 +55,7 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
+        viewBinding true
     }
 
 
@@ -97,8 +97,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
 
     //kotlin Coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
 
     //Kotlin Extensions
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1"

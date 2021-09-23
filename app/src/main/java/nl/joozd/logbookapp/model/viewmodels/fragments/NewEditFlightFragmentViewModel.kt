@@ -77,6 +77,25 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         }
     }
 
+    private val _isPicOrPicus = MediatorLiveData<Boolean>().apply{
+        addSource(wf.isPICLiveData){
+            value = it || wf.isPICUS
+        }
+        addSource(wf.isPICUSLiveData){
+            value = it || wf.isPIC
+        }
+    }
+
+
+    private val _picPicusText = MediatorLiveData<String>().apply{
+        addSource(wf.isPICLiveData){
+            value = getPicPicusString()
+        }
+        addSource(wf.isPICUSLiveData){
+            value = getPicPicusString()
+        }
+    }
+
     //Transformations.map(wf.aircraft)
     /**
      * Observables
@@ -127,11 +146,11 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         get() = wf.signatureLiveData.map { it.isNotBlank() }
     val signature: String
         get() = wf.signatureLiveData.value ?: ""
-    /*val isDual
-        get() = wf.isDualLiveData
-    val isInstructor
-        get() = wf.isInstructorLiveData
-    */
+
+    val isPic: LiveData<Boolean> get() = _isPicOrPicus
+    val picPicusText: LiveData<String> get() = _picPicusText
+
+
     /**
      * Livedata keeps track of if [wf] is logged as Dual, Instructor or neither.
      */
@@ -141,11 +160,10 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     /**
      * emits true if wf.multipilotTime is not zero
      */
-    val isMultiPilot = wf.multiPilotTimeLiveData.map { it > 0 }
+    val isMultiPilot
+        get() = wf.isMultipilotLiveData
     val isIfr
         get() = wf.isIfrLiveData
-    val isPic
-        get() = wf.isPICLiveData
     val isPF
         get() = wf.isPFLiveData
     val isAutoValues
@@ -340,10 +358,11 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     /**
      * Set multiPilot. If multipilot time was 0, [wf] sets multiPilotTime to mDuration.toMinutes().toInt()
+     * Will disable autofill if it was on.
      */
-    fun toggleMultiPilot(force: Boolean? = null){
-        wf.autoFill = false
-        wf.isMultipilot = force ?: !wf.isMultipilot
+    fun toggleMultiPilot(){
+        if (wf.autoFill) wf.autoFill = false
+        wf.isMultipilot = !wf.isMultipilot
     }
 
     /**
@@ -359,8 +378,19 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Toggle PIC
      * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
      */
-    fun togglePic(force: Boolean? = null){
-        wf.isPIC =force ?: !wf.isPIC
+    fun togglePic() = when {
+        wf.isPIC -> {
+            wf.isPIC = false
+            wf.isPICUS = false
+        }
+        wf.isPICUS -> {
+            wf.isPIC = true
+            wf.isPICUS = false
+        }
+        else -> {
+            wf.isPICUS = true
+            wf.isPIC = false
+        }
     }
 
     /**
@@ -521,7 +551,12 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
             LocalTime.of(hours, mins)
         }
 
-
+    /**
+     * Gets the correct string for when flight is marked as PIC, PICUS or neither
+     */
+    private fun getPicPicusString(): String = getString(
+        if(wf.isPICUS) R.string.picus else R.string.pic
+    )
 
     companion object{
         const val NO_DATA_STRING = "…"

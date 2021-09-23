@@ -151,8 +151,6 @@ class EditFlightFragment: JoozdlogFragment(){
                 simSelector.showIfActive(active)
             }
 
-            // viewModel.isDual.observe(viewLifecycleOwner) { active -> dualSelector.showIfActive(active) }
-            // viewModel.isInstructor.observe(viewLifecycleOwner, { active -> instructorSelector.showIfActive(active) })
             viewModel.dualInstructor.observe(viewLifecycleOwner) { flag ->
                 dualInstructorSelector.showIfActive(flag != NewEditFlightFragmentViewModel.DUAL_INSTRUCTOR_FLAG_NONE)
                 dualInstructorSelector.text = when(flag){
@@ -161,12 +159,15 @@ class EditFlightFragment: JoozdlogFragment(){
                     else -> getString(R.string.dualInstructorString)
                 }
             }
+            viewModel.picPicusText.observe(viewLifecycleOwner){
+                picSelector.text = it
+            }
+
             viewModel.isMultiPilot.observe(viewLifecycleOwner){ active -> multiPilotSelector.showIfActive(active) }
             viewModel.isIfr.observe(viewLifecycleOwner) { active -> ifrSelector.showIfActive(active) }
             viewModel.isPic.observe(viewLifecycleOwner) { active -> picSelector.showIfActive(active) }
             viewModel.isPF.observe(viewLifecycleOwner) { active -> pfSelector.showIfActive(active) }
             viewModel.isAutoValues.observe(viewLifecycleOwner) { active ->
-                println("Autofill is $active")
                 autoFillCheckBox.isChecked = active
             }
 

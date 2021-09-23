@@ -38,6 +38,7 @@ class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
      */
     val isAugmentedCrew // LiveData<Boolean>
         get() = workingFlight.isAugmented
+
     private val _isPicOrPicus = MediatorLiveData<Boolean>().apply{
         addSource(workingFlight.isPICLiveData){
             value = it || workingFlight.isPICUS
@@ -190,6 +191,7 @@ class TimePickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     private fun getPicPicusString(): String = getString(
         if(workingFlight.isPICUS) R.string.picus else R.string.pic
         )
+
     /**
      * Gets the correct string for when flight is marked as dual, instructor or neither
      */

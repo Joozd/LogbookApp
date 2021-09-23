@@ -111,7 +111,6 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
     private val _destinationLiveData = MutableLiveData<Airport?>()  // null if none found
     private val _aircraftLiveData = MutableLiveData<Aircraft?>()    // null if none found
     private val _isIfrLiveData = MutableLiveData(flight.ifrTime > 0)
-    private val _isMultipilotLiveData = MutableLiveData(flight.multiPilotTime > 0)
 
     /************************************************************************
      * Mutexes
@@ -353,6 +352,9 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
     val timeInLiveData = _wfLiveData.map { it.timeIn }
     val correctedTotalTimeLiveData = _wfLiveData.map { it.correctedTotalTime }
     val multiPilotTimeLiveData = _wfLiveData.map { it.multiPilotTime }
+
+    val isMultipilotLiveData = _wfLiveData.map { it.multiPilotTime > 0}
+
     val nightTimeLiveData = _wfLiveData.map { it.nightTime }
     val ifrTimeLiveData = _wfLiveData.map { it.ifrTime }
     val simTimeLiveData = _wfLiveData.map { it.simTime }
@@ -651,10 +653,10 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
         }
 
     var isMultipilot
-        get() = _isMultipilotLiveData.value!! // this is set at construction so will always have a value
+        get() = isMultipilotLiveData.value ?: false
         set(it) {
             if (it != isMultipilot) { // to prevent loops
-                _isMultipilotLiveData.value = it
+                wf = wf.copy (multiPilotTime = if (it) wf.duration() else 0)
                 updated(ISMULTIPILOT)
             }
         }

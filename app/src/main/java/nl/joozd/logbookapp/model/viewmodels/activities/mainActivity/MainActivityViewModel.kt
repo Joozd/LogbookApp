@@ -374,7 +374,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     fun showFlight(flightId: Int) = viewModelScope.launch {
         openingFlightMutex.withLock {
             WorkingFlight.fromFlightID(flightId)?.let {
-                flightRepository.setWorkingFlight(it)
+                flightRepository.setWorkingFlight(it, autoSetIfrAndPic = it.isPlanned)
                 // feedback(MainActivityEvents.SHOW_FLIGHT) this goes through livedata
             } ?: feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
         }
@@ -382,7 +382,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     fun addFlight() {
         viewModelScope.launch(Dispatchers.IO) {
-            flightRepository.setWorkingFlight(WorkingFlight.createNew())
+            flightRepository.setWorkingFlight(WorkingFlight.createNew(), autoSetIfrAndPic = true)
         }
     }
 

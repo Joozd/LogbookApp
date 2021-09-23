@@ -837,6 +837,17 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
     }
 
     /**
+     * Will (async) set isPIC and isIFR to same as in last completed flight
+     */
+    fun autoSetIfrAndPic() = launch {
+        FlightRepository.getInstance().getMostRecentFlightAsync().await()?.let{ lastCompleted ->
+            isPIC = lastCompleted.isPIC
+            isIfr = lastCompleted.ifrTime > 0
+        }
+
+    }
+
+    /**
      * Gives a snapshot
      * This is used for canceling a dialog; any background work will be done again after sending
      * this snapshot to [setFromFlight] so it is no problem is any background work is still

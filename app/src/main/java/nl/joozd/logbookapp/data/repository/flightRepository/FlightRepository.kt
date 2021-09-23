@@ -242,12 +242,14 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * The ONLY way to set working flight to a Flight.
      */
-    fun setWorkingFlight(f: WorkingFlight?){
+    fun setWorkingFlight(f: WorkingFlight?, autoSetIfrAndPic: Boolean = false){
         if (Looper.myLooper() != Looper.getMainLooper()) launch(Dispatchers.Main){
             Log.w("setWorkingFlight", "setWorkingFlight called on a background thread, setting workingFlight async on main")
             _workingFlight.value = f
         }
         else _workingFlight.value = f
+
+        if (autoSetIfrAndPic) f?.autoSetIfrAndPic()
     }
 
     /**

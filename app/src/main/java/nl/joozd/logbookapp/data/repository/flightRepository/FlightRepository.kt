@@ -46,7 +46,6 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfRegistrations
 import nl.joozd.logbookapp.extensions.map
 import nl.joozd.logbookapp.extensions.nullIfBlank
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlightNew
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.checkPermission

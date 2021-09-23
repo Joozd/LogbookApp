@@ -22,7 +22,6 @@ package nl.joozd.logbookapp.model.viewmodels.fragments
 import android.text.Editable
 import android.util.Log
 import androidx.lifecycle.*
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -30,7 +29,6 @@ import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
 import java.time.Instant
@@ -265,9 +263,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     /**
      * Set takeoff/landings from a string.
-     * If '/' in string, it takes [WorkingFlight.takeoff]/[WorkingFlight.landing]
+     * If '/' in string, it sets takeoff and landing to before and after '/' (eg. 1/2 == 1 to 2 ldg)
      * else it sets both takeoff and landing to that value.
-     * [WorkingFlight] takes care of day/night
+     * [wf] takes care of day/night
      * @param tlString: Takeoff/landing string. Can only consist of digits or '/'
      */
     fun setTakeoffLandings(tlString: String){

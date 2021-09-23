@@ -564,7 +564,6 @@ class SettingsActivity : JoozdlogActivity() {
     }
 
     companion object{
-        private const val CALENDAR_PERMISSION_REQUEST_CODE = 1
         private const val CSV_MIME_TYPE = "text/csv"
     }
 }

@@ -497,9 +497,9 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
         }
 
     var name2List
-        get() = wf.name2.split(';').map {it.trim()}
+        get() = wf.name2.split(';').filter { it.isNotBlank() }
         set(it) {
-            wf = wf.copy(name2 = it.joinToString(";"))
+            wf = wf.copy(name2 = it.joinToString(";"){it.trim()})
             updated(NAME2)
         }
 

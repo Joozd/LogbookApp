@@ -1,17 +1,30 @@
-JOOZDLOG TODO LIST
-
-BUGS:
-
-
 ******************
-TODO BEFORE 1.0:
+JOOZDLOG TODO LIST (in no particular order)
 ******************
 
-Everything needs more testing.
+Improve email texts
 
-Monthlies:
-conflict handling / updating of logged flights needs more testing.
+"back" when editing flight now minimzes app, fix that
 
-
-*** This only for non-KLC (1.0.1) ***
 Custom aircraft + upload to server
+
+Don't add flights from roster if they are already in logbook as completed flights
+
+Names dialog needs improving
+
+Make dialog for name, address etc when exporting PDF logbook
+
+Currencies, limits, max times, etcetera
+
+Totals with nice graphs, stats etc.
+
+Entering a flightnumber - make a copy of the last flight with that number?
+
+sim time start the same as last sim time instead of 0
+
+Notification when doing background work (ie. up/download to server)
+
+Date Picker Dialog needs some work
+
+
+

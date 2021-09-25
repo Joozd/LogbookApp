@@ -230,7 +230,8 @@
     <!--
     - Strings for new user experience
     -->
-    <string name="welcome_message">hallon aub!(grgr)\n\nWelcome to Joozdlog Early Access.\n\nThe next few screens will allow you to set some preferences and make a Cloud account if you want to.!\n\nIf you have any feedback or bugreports, the main menu has a Feedback function.\n\nEnjoy!</string>
+    <string name="welcome_message_header">Welcome to Joozdlog.</string>
+    <string name="welcome_message">The next few screens will allow you to set some preferences and make a Cloud account if you want to.\n\nAll this will take under a minute, and after that you are all set to start logging (or importing) your flights!\n\nIf you have any feedback or bugreports, the main menu has a Feedback function. Feedback is appreciated!\n\nEnjoy the app,\n\nJoozd</string>
     <string name="cloud_explanation" tools:ignore="Typos">Sync your data to the cloud!\nThis is not a backup, read terms&amp;conditions.\nInactive accounts can be removed.</string>
     <string name="read_terms_conditions">Read Terms&amp;Conditions</string>
     <string name="accept_terms_conditions">Accept Terms&amp;Conditions</string>

@@ -30,8 +30,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 70 // my version, increment this every build
-        versionName "JoozdLog RC4.1"
+        versionCode 71 // my version, increment this every build
+        versionName "JoozdLog RC4.2"
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

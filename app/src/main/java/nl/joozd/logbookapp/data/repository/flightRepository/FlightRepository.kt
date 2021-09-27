@@ -114,7 +114,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * update cached data and delete from disk
      */
     private fun deleteFlightHard(flight: Flight, addToUndo: Boolean = false) = launch {
-        println("Hard-deleting flight. AddToUndo is $addToUndo")
         if (addToUndo){
             undoTracker.addDeleteEvent(flight)
         }
@@ -130,18 +129,26 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * update cached data and delete multiple flights from disk
      */
-    private fun deleteHard(flights: List<Flight>, addToUndo: Boolean = false) = launch {
-        if (addToUndo){
+    private fun deleteHard(flights: List<Flight>, addToUndo: Boolean = false) {
+        // Add to undo before chunking
+        if (addToUndo) {
             undoTracker.addDeleteEvent(flights)
         }
-        Log.d("DeleteHard", "Cached flights before: ${cachedFlightsList?.size}")
-        cachedFlightsList = ((cachedFlightsList
-            ?: emptyList()).filter { it.flightID !in flights.map { f -> f.flightID } }).sortedByDescending { it.timeOut }
-        Log.d("DeleteHard", "Cached flights after: ${cachedFlightsList?.size}")
-        launch (dispatcher + NonCancellable) {
-            saveMutex.withLock {
-                Log.d("DeleteHard","Deleting ${flights.size} flights")
-                flightDao.deleteMultipleByID(flights.map { it.flightID })
+        // If saving more than MAX_SQL_BATCH_SIZE flights, an exception will be thrown.
+        //
+        // This will be saved one at a time due to [saveMutex] being locked.
+        // Can trigger sync multiple times as sync has a 1 minute delay and is set to REPLACE
+        // Don't add to undo as that is already done if needed.
+        if (flights.size > MAX_SQL_BATCH_SIZE) flights.chunked(MAX_SQL_BATCH_SIZE).forEach{
+            deleteHard(it, addToUndo = false)
+        }
+        else launch {
+            cachedFlightsList = ((cachedFlightsList
+                ?: emptyList()).filter { it.flightID !in flights.map { f -> f.flightID } }).sortedByDescending { it.timeOut }
+            launch(dispatcher + NonCancellable) {
+                saveMutex.withLock {
+                    flightDao.deleteMultipleByID(flights.map { it.flightID })
+                }
             }
         }
     }
@@ -272,15 +279,14 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * soft-delete will update cache through Dao observer
      */
     fun delete(flight: Flight, addToUndo: Boolean = false) {
-        Log.d(this::class.simpleName, "Deleting flight $flight. AddToUndo is $addToUndo")
-        if (flight.unknownToServer) deleteFlightHard(flight, addToUndo).also{ Log.d(this::class.simpleName, "hard-deleted flight $flight")}
+        if (flight.unknownToServer) deleteFlightHard(flight, addToUndo)
         else save(
             flight.copy(
                 DELETEFLAG = true,
                 timeStamp = TimestampMaker().nowForSycPurposes,
             ),
             addToUndo = addToUndo
-        ).also{ Log.d(this::class.simpleName, "soft-deleted flight $flight")}
+        )
     }
 
 
@@ -380,29 +386,42 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      *      false: never make a new ID
      *      null (default): make a new ID if id <= 0
      */
-    fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean? = null, addToUndo: Boolean = false) = launch {
-        saveMutex.withLock {
-            //assign available FlightIDs if requested
-            val ff = if (updateIDs != false) flights.map { flight ->
-                flight.copy(flightID = if (flight.flightID <= 0 || updateIDs == true) nextFlightID() else flight.flightID, timeStamp = TimestampMaker().nowForSycPurposes)
-            } else flights.map {
-                it.copy(timeStamp = TimestampMaker().nowForSycPurposes)
-            }
+    fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean? = null, addToUndo: Boolean = false) {
 
-            // Add to undo if needed:
-            if (addToUndo){
-                undoTracker.addSaveEvent(ff, ff.mapNotNull{ f -> fetchFlightByID(f.flightID)})
-            }
+        // If saving more than MAX_SQL_BATCH_SIZE flights, an exception will be thrown.
+        //
+        // This will be saved one at a time due to [saveMutex] being locked.
+        // Can trigger sync multiple times as sync has a 1 minute delay and is set to REPLACE
+        if (flights.size > MAX_SQL_BATCH_SIZE) flights.chunked(MAX_SQL_BATCH_SIZE).forEach{
+            save(it, sync, updateIDs)
+        }
+        else launch {
+            saveMutex.withLock {
+                //assign available FlightIDs if requested
+                val ff = if (updateIDs != false) flights.map { flight ->
+                    flight.copy(
+                        flightID = if (flight.flightID <= 0 || updateIDs == true) nextFlightID() else flight.flightID,
+                        timeStamp = TimestampMaker().nowForSycPurposes
+                    )
+                } else flights.map {
+                    it.copy(timeStamp = TimestampMaker().nowForSycPurposes)
+                }
 
-            //update cached flights
-            cachedFlightsList = ((cachedFlightsList ?: emptyList()).filter { it.flightID !in ff.map { it2 -> it2.flightID } }
-                    + ff.filter { !it.DELETEFLAG })
-                .sortedByDescending { it.timeOut }
-            //Save flights to disk
-            launch(dispatcher + NonCancellable) {
-                flightDao.insertFlights(*(ff.map { it.toModel() }.toTypedArray()))
-                Log.d("Saved", "Saved ${ff.size} flights!")
-                if (sync) syncAfterChange()
+                // Add to undo if needed:
+                if (addToUndo) {
+                    undoTracker.addSaveEvent(ff, ff.mapNotNull { f -> fetchFlightByID(f.flightID) })
+                }
+
+                //update cached flights
+                cachedFlightsList = ((cachedFlightsList
+                    ?: emptyList()).filter { it.flightID !in ff.map { it2 -> it2.flightID } }
+                        + ff.filter { !it.DELETEFLAG })
+                    .sortedByDescending { it.timeOut }
+                //Save flights to disk
+                launch(dispatcher + NonCancellable) {
+                    flightDao.insertFlights(*(ff.map { it.toModel() }.toTypedArray()))
+                    if (sync) syncAfterChange()
+                }
             }
         }
     }
@@ -469,8 +488,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         val newFlights = importFlights.filter { importFlight ->flightsInPeriod.none { importFlight.isUpdatedVersionOf(it) || importFlight.isSameFlightAs(it) }}
             .map{ it.copy (flightID = nextFlightID())}
 
-        println("I FOUND ${newFlights.size} NEW FLIGHTS FLIGHTS: ${newFlights.map{it.shortString() +"\n"}}")
-
         //Flights that will be updated, for undo purposes
         val oldFlightsThatWillBeUpdated = flightsInPeriod.filter { fip -> importFlights.any { it.isUpdatedVersionOf(fip)}}
 
@@ -478,7 +495,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         val flightsToUpdate = importFlights.filter { importFlight -> oldFlightsThatWillBeUpdated.any { importFlight.isUpdatedVersionOf(it) }}.map{ importFlight ->
             importFlight.mergeInto(oldFlightsThatWillBeUpdated.first{ importFlight.isUpdatedVersionOf(it) })
         }
-        println("I FOUND ${flightsToUpdate.size} FLIGHTS TO UPDATE: ${flightsToUpdate.map{it.shortString() +"\n"}}")
 
         //Conflicts tracking
         //A conflict is a flight that overlaps another flight
@@ -518,9 +534,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
             val needsCalendarSync = TimestampMaker().nowForSycPurposes > Preferences.nextCalendarCheckTime
 
-            println("needsCalendarSync: $needsCalendarSync && Preferences.useCalendarSync: ${Preferences.useCalendarSync}")
             if (needsCalendarSync && Preferences.useCalendarSync) {
-                println("KOEKWAUS JONGE")
                 when (Preferences.calendarSyncType) {
                     CalendarSyncTypes.CALENDAR_SYNC_DEVICE -> {
                         if (checkPermission(Manifest.permission.READ_CALENDAR)) {
@@ -528,9 +542,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                         } else null
                     }
                     CalendarSyncTypes.CALENDAR_SYNC_ICAL -> {
-                        println("jajaja")
                         Preferences.calendarSyncIcalAddress.nullIfBlank()?.let{ urlString ->
-                            println(urlString)
                             try {
                                 KlmIcalFlightsParser.ofString(urlString)
                             } catch (e: Exception){
@@ -541,10 +553,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                     }
                     else -> null
                 } ?.let { roster ->
-                    println("FOUND ROSTER with period ${roster.period}")
-                    roster.flights.map {it.shortString()}.forEach{
-                        println(it)
-                    }
                     saveRoster(roster.postProcess())
                     Preferences.nextCalendarCheckTime = roster.validUntil.epochSecond
                 }
@@ -640,9 +648,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                 (if (checkEntireDay)
                     it.isSameFlightOnSameDay(f)
                 else it.isSameFlightAs(f))
-                        && if (checkRegistrations) (it.registration == f.registration).also{ m ->
-                    if (!m) Log.d("findMatches", "Mismatched registration: ${it.registration} != ${f.registration}")
-                } else true // if [checkRegistrations] registrations need to be the same as well
+                        && if (checkRegistrations) (it.registration == f.registration) else true // if [checkRegistrations] registrations need to be the same as well
             }
         }
         return matches.map{ f-> f to allFlights.first{
@@ -682,7 +688,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
          */
         var undoAvailable: Boolean = false
             private set(it){
-                println("SET UNDO_AVAILABLE to $it")
+
                 field = it
                 if (_undoAvailable.value != it) _undoAvailable.postValue(it)
             }
@@ -692,7 +698,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
          */
         var redoAvailable: Boolean = false
             private set(it){
-                println("SET REDO_AVAILABLE to $it")
+
                 field = it
                 _redoAvailable.postValue(it)
             }
@@ -740,17 +746,14 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         fun undo(redoable: Boolean = true): Boolean{
             return when (val event = popUndo()){
                 is DeleteEvent -> {
-                    Log.d("Undo", "DeleteEvent Undo $redoable")
                     save(event.oldFlights, addToUndo = false)
                     if (redoable)
                         pushRedoEvent(event)
                     true
                 }
                 is SaveEvent -> {
-                    Log.d("Undo", "SaveEvent Undo $redoable")
                     // delete flights that were newly created
                     val newlyCreatedFlights = event.newFlights.filter { it.flightID !in event.oldFlights.map{old -> old.flightID}}
-                    Log.d("NewlyCreatedFlights", "${newlyCreatedFlights.size}, ${newlyCreatedFlights.map{it.flightID} }")
 
 
                     deleteHard(newlyCreatedFlights, addToUndo = false)
@@ -762,7 +765,6 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                     true
                 }
                 is RosterImportEvent -> {
-                    Log.d("Undo", "RosterImportEvent Undo $redoable")
                     //put deletes and updates on undo stack
                     pushUndoEvent(event.deleted)
                     pushUndoEvent(event.saved)
@@ -787,19 +789,16 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
             if (redoStack.isEmpty()) return false
             return when(val event = popRedo()){
                 is DeleteEvent -> {
-                    Log.d("Redo", "DeleteEvent Redo $undoable")
                     deleteHard(event.oldFlights, addToUndo = false) // this can put it back on undo stack, but doing it manually is faster than rebuilding the event
                     if (undoable) pushUndoEvent(event, false)
                     true
                 }
                 is SaveEvent -> {
-                    Log.d("Redo", "SaveEvent Redo $undoable")
                     save(event.newFlights, addToUndo = false) // this can put it back on undo stack, but doing it manually is faster than rebuilding the event
                     if (undoable) pushUndoEvent(event, false)
                     true
                 }
                 is RosterImportEvent -> {
-                    Log.d("Redo", "RosterImportEvent Redo $undoable")
                     // put deleted and saved redo event on top of stack and redo them
                     pushRedoEvent(event.deleted)
                     pushRedoEvent(event.saved)
@@ -889,6 +888,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         }
 
         const val MIN_SYNC_INTERVAL = 30*60 // seconds
+
+        private const val MAX_SQL_BATCH_SIZE = 999
     }
 
     /**
@@ -920,4 +921,5 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     }
 
     class SaveCompleteFlightsResult(val conflicts: Int, val plannedRemaining: Int)
+
 }

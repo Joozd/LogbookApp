@@ -135,7 +135,6 @@ object Cloud {
 
     /**
      * Send pending email jobs to server, remove them from pending jobs when successful
-     * TODO make this an Iteration from EmailJobsWaiting
      */
     suspend fun sendPendingEmailJobs(){
         Preferences.emailJobsWaiting.forEach {

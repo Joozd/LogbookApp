@@ -42,7 +42,6 @@ class CloudSyncTermsDialogViewModel: JoozdlogDialogViewModel() {
         get() = _waitedLongEnough
 
     init{
-        //TODO maybe make a counter? or check if text was scrolled down?
         viewModelScope.launch {
             Log.d("WATING....", "started! (${waitedLongEnough.value})")
             delay(10000)

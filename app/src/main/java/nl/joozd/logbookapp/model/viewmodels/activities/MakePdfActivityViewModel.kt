@@ -33,7 +33,6 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MakePdfActivityEv
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.utils.pdf.PdfLogbookDrawing
 import nl.joozd.logbookapp.utils.pdf.PdfLogbookMakerValues
-import java.io.BufferedOutputStream
 import java.util.*
 
 class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
@@ -110,8 +109,7 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
                     simTime = balancesForward.sumOf { it.simTime }
                 }
                 //lets say this is 5% of the work
-                //TODO make this '5' into a const val in companion object
-                _logbookBuilderProgress.value = 5
+                _logbookBuilderProgress.value = PERCENTAGE_FOR_FIRST_PAGES
 
 
                 val flightsPerPage = PdfLogbookDrawing.maxLines
@@ -191,5 +189,7 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
 
     companion object{
         const val PDF_NOT_CREATED = 1
+
+        private const val PERCENTAGE_FOR_FIRST_PAGES = 5
     }
 }

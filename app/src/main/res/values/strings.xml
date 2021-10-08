@@ -134,6 +134,8 @@
     <string name="times_per_year">Times per year</string>
     <string name="last_12_months">Last 12 Months</string>
     <string name="times_per_type">Times per type</string>
+    <string name="times_per_reg">Times per registration</string>
+    <string name="arrivals_per_airport">Arrivals per airport</string>
 
     <string name="login">Log In</string>
 

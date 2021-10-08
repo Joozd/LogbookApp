@@ -23,15 +23,14 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.repository.AircraftRepository
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesListItem
 
-class TimesPerType(flights: List<Flight>): TotalTimesList {
+class AirportsArrived(flights: List<Flight>): TotalTimesList {
     /**
      * Title of the list (eg. "Times per aircraft"
      */
-    override val title = App.instance.ctx.getString(R.string.times_per_type)
+    override val title = App.instance.ctx.getString(R.string.arrivals_per_airport)
 
     /**
      * List of [TotalTimesListItem]
@@ -50,12 +49,12 @@ class TimesPerType(flights: List<Flight>): TotalTimesList {
     override val autoOpen = false
 
     private fun buildList(flights: List<Flight>): List<TotalTimesListItem> {
-        val typesToTimes = flights.filter{!it.isSim}.map { it.aircraftType }.distinct().map { type ->
-            type to flights.filter { it.aircraftType == type }.sumOf { it.duration() }
+        val destsToVisits = flights.filter{!it.isSim}.map { it.dest }.distinct().map { dest ->
+            dest to flights.filter { it.dest == dest }.size
         }.toMap()
-        return typesToTimes.keys.sorted().map { type ->
+        return destsToVisits.keys.sorted().map { type ->
             val typeLongName: String = AircraftRepository.getInstance().getAircraftTypeByShortName(type)?.name ?: type // if AircraftRepo isn't initialized yet it will show short names else full names
-            TotalTimesListItem(typeLongName, FlightDataPresentationFunctions.minutesToHoursAndMinutesString(typesToTimes[type] ?: -1), typesToTimes[type] ?: -1, 0)
+            TotalTimesListItem(typeLongName, (destsToVisits[type] ?: -1).toString(), destsToVisits[type] ?: -1, 0)
         }
     }
 }

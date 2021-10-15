@@ -21,20 +21,18 @@ package nl.joozd.logbookapp.data.comm
 
 import android.util.Base64
 import android.util.Log
+import nl.joozd.comms.Client
+import nl.joozd.comms.isOK
 import nl.joozd.joozdlogcommon.*
-import nl.joozd.logbookapp.data.comm.protocol.Client
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
-import nl.joozd.joozdlogcommon.exceptions.NotAuthorizedException
-import nl.joozd.joozdlogcommon.serializing.*
-import nl.joozd.joozdlogcommon.serializing.longFromBytes
-import nl.joozd.joozdlogcommon.serializing.unwrapInt
-import nl.joozd.joozdlogcommon.serializing.wrap
-import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
+import nl.joozd.serializing.*
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
+import nl.joozd.logbookapp.exceptions.NotAuthorizedException
 import nl.joozd.logbookapp.extensions.nullIfBlank
+import nl.joozd.logbookapp.extensions.toCloudFunctionResults
 import java.security.MessageDigest
 
 object ServerFunctions {
@@ -75,7 +73,7 @@ object ServerFunctions {
         ).serialize()
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_BACKUP_MAIL, payload).let{
             if (!it.isOK())
-                return it
+                return it.toCloudFunctionResults()
         }
         return when (val r = client.readFromServer()?.toString(Charsets.UTF_8)) {
             JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
@@ -172,7 +170,7 @@ object ServerFunctions {
      *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
      *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
      */
-    fun login(client: Client): CloudFunctionResults{
+    fun login(client: Client): CloudFunctionResults {
         //payLoad is LoginData.serialize()
         val payLoad = LoginData(
             Preferences.username ?: return CloudFunctionResults.NO_LOGIN_DATA,
@@ -209,10 +207,10 @@ object ServerFunctions {
      *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
      *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
      */
-    fun testLogin(client: Client, username: String, password: String): CloudFunctionResults{
+    fun testLogin(client: Client, username: String, password: String): CloudFunctionResults {
         val payload = LoginData(username, makeKey(password),BasicFlight.VERSION.version).serialize()
         val requestResult = client.sendRequest(JoozdlogCommsKeywords.LOGIN, payload)
-        if (!requestResult.isOK()) return requestResult
+        if (!requestResult.isOK()) return requestResult.toCloudFunctionResults()
         return when (val x = client.readFromServer()?.toString(Charsets.UTF_8)){
             JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
             JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
@@ -239,10 +237,10 @@ object ServerFunctions {
      *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
      *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
      */
-    fun testLoginFromLink(client: Client, username: String, password: String): CloudFunctionResults{
+    fun testLoginFromLink(client: Client, username: String, password: String): CloudFunctionResults {
         val payload = LoginData(username, Base64.decode(password, Base64.DEFAULT) ,BasicFlight.VERSION.version).serialize()
         val requestResult = client.sendRequest(JoozdlogCommsKeywords.LOGIN, payload)
-        if (!requestResult.isOK()) return requestResult
+        if (!requestResult.isOK()) return requestResult.toCloudFunctionResults()
         return when (val x = client.readFromServer()?.toString(Charsets.UTF_8)){
             JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
             JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
@@ -271,7 +269,7 @@ object ServerFunctions {
      * @param name: Username
      * @param key: Key
      */
-    fun createNewAccount(client: Client, name: String, key: ByteArray): CloudFunctionResults{
+    fun createNewAccount(client: Client, name: String, key: ByteArray): CloudFunctionResults {
         val payLoad = LoginData(name, key, BasicFlight.VERSION.version).serialize()
         client.sendRequest(JoozdlogCommsKeywords.NEW_ACCOUNT, payLoad)
         val result = client.readFromServer()
@@ -292,7 +290,7 @@ object ServerFunctions {
     fun sendNewEmailData(client: Client, emailToSend: String): CloudFunctionResults =
         generateLoginDataWithEmail(email = emailToSend)?.let{loginData ->
             client.sendRequest(JoozdlogCommsKeywords.SET_EMAIL, loginData.serialize()).let{
-                if (!it.isOK()) return it
+                if (!it.isOK()) return it.toCloudFunctionResults()
             }
             when(client.readFromServer()?.toString(Charsets.UTF_8)) {
                 JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
@@ -308,10 +306,10 @@ object ServerFunctions {
     /**
      * send an email confirmation string to server
      */
-    fun confirmEmail(client: Client, confirmationString: String): CloudFunctionResults{
+    fun confirmEmail(client: Client, confirmationString: String): CloudFunctionResults {
         val payload = wrap(confirmationString)
         client.sendRequest(JoozdlogCommsKeywords.CONFIRM_EMAIL, payload).let {
-            if (!it.isOK()) return it
+            if (!it.isOK()) return it.toCloudFunctionResults()
         }
         return when(client.readFromServer()?.toString(Charsets.UTF_8)){
             null -> CloudFunctionResults.CLIENT_ERROR
@@ -361,7 +359,7 @@ object ServerFunctions {
     fun changePassword(client: Client, newPassword: ByteArray, email: String): CloudFunctionResults {
         val payload = LoginDataWithEmail("", newPassword, 0, email).serialize() // username and basicFlightVersion are unused in this function
         client.sendRequest(JoozdlogCommsKeywords.UPDATE_PASSWORD, payload).let{
-            if (it != CloudFunctionResults.OK) return it
+            if (!it.isOK()) return it.toCloudFunctionResults()
         }
         client.readFromServer().let {
             return when(val result = it?.toString(Charsets.UTF_8)){
@@ -411,7 +409,7 @@ object ServerFunctions {
      *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if client died before this
      *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server gave an unexpected reply
      */
-    fun sendFlights(client: Client, flightsToSend: List<Flight>): CloudFunctionResults{
+    fun sendFlights(client: Client, flightsToSend: List<Flight>): CloudFunctionResults {
         client.sendRequest(
             JoozdlogCommsKeywords.SENDING_FLIGHTS,
             packSerialized(flightsToSend.map {it.toBasicFlight().serialize() }))
@@ -433,7 +431,7 @@ object ServerFunctions {
      * Send a timestamp to server
      */
     fun sendTimeStamp(client: Client, timeStamp: Long): CloudFunctionResults =
-        client.sendRequest(JoozdlogCommsKeywords.ADD_TIMESTAMP, wrap(timeStamp))
+        client.sendRequest(JoozdlogCommsKeywords.ADD_TIMESTAMP, wrap(timeStamp)).toCloudFunctionResults()
 
     /**
      * Send consensus data to server
@@ -453,7 +451,7 @@ object ServerFunctions {
      *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if client died before this
      *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server gave an unexpected reply
      */
-    fun sendFeedback(client: Client, feedbackData: FeedbackData): CloudFunctionResults{
+    fun sendFeedback(client: Client, feedbackData: FeedbackData): CloudFunctionResults {
         client.sendRequest(JoozdlogCommsKeywords.SENDING_FEEDBACK, feedbackData.serialize())
         return when (val result = client.readFromServer()?.toString(Charsets.UTF_8)){
             JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
@@ -469,7 +467,7 @@ object ServerFunctions {
     }
 
     fun save(client: Client): CloudFunctionResults =
-        client.sendRequest(JoozdlogCommsKeywords.SAVE_CHANGES)
+        client.sendRequest(JoozdlogCommsKeywords.SAVE_CHANGES).toCloudFunctionResults()
 
     /**
      * Make a key from password in the same way it is done in Preferences, for checking purposes

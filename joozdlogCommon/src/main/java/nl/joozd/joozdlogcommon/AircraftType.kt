@@ -19,12 +19,12 @@
 
 package nl.joozd.joozdlogcommon
 
-import nl.joozd.joozdlogcommon.serializing.unwrap
-import nl.joozd.joozdlogcommon.serializing.wrap
-import nl.joozd.joozdlogcommon.serializing.JoozdlogSerializable
+import nl.joozd.serializing.unwrap
+import nl.joozd.serializing.wrap
+import nl.joozd.serializing.JoozdSerializable
 
 data class AircraftType(val name: String, val shortName: String, val multiPilot:Boolean, val multiEngine:Boolean):
-    JoozdlogSerializable {
+    JoozdSerializable {
     object VERSION {
         const val version = 1
         // version 1: Initial version
@@ -40,7 +40,7 @@ data class AircraftType(val name: String, val shortName: String, val multiPilot:
         return serialized
     }
 
-    companion object: JoozdlogSerializable.Creator {
+    companion object: JoozdSerializable.Deserializer<AircraftType> {
 
         override fun deserialize(source: ByteArray): AircraftType {
             val wraps = serializedToWraps(source)

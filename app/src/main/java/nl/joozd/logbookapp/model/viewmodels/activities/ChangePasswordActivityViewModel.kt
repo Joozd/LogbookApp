@@ -23,8 +23,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
-import android.text.Editable
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -34,7 +32,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
+import nl.joozd.logbookapp.data.comm.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel

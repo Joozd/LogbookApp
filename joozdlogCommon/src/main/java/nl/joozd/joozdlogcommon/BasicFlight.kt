@@ -19,9 +19,8 @@
 
 package nl.joozd.joozdlogcommon
 
-import nl.joozd.joozdlogcommon.serializing.*
-import nl.joozd.joozdlogcommon.serializing.unwrap
-import nl.joozd.joozdlogcommon.serializing.wrap
+import nl.joozd.joozdlogcommon.legacy.basicflight.BasicFlight_version2
+import nl.joozd.serializing.*
 
 data class BasicFlight(
     val flightID: Int,
@@ -60,7 +59,7 @@ data class BasicFlight(
     // val signed: Boolean,
     val timeStamp: Long = -1, // timeStamp is time of synch with server for this flight
     val signature: String = ""
-): JoozdlogSerializable {
+): JoozdSerializable {
     object VERSION {
         const val version = 5
         // version 3: Added signature: String
@@ -114,7 +113,7 @@ data class BasicFlight(
 
         return serialized
     }
-    companion object: JoozdlogSerializable.Creator{
+    companion object: JoozdSerializable.Deserializer<BasicFlight> {
 
         override fun deserialize(source: ByteArray): BasicFlight {
             val wraps = serializedToWraps(source)

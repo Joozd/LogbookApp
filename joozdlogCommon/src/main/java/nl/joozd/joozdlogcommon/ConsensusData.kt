@@ -19,10 +19,7 @@
 
 package nl.joozd.joozdlogcommon
 
-import nl.joozd.joozdlogcommon.serializing.JoozdlogSerializable
-import nl.joozd.joozdlogcommon.serializing.unwrap
-import nl.joozd.joozdlogcommon.serializing.unwrapByteArray
-import nl.joozd.joozdlogcommon.serializing.wrap
+import nl.joozd.serializing.*
 
 /**
  * Add or remove an opinion to/from consensus
@@ -35,7 +32,7 @@ import nl.joozd.joozdlogcommon.serializing.wrap
 data class ConsensusData(val registration: String,
                          val serializedType: ByteArray, // serialized AircraftType
                          val subtract: Boolean = false
-                        ) : JoozdlogSerializable {
+                        ) : JoozdSerializable {
     constructor(registration: String, aircraftType: AircraftType, subtract: Boolean = false): this(registration, aircraftType.serialize(), subtract)
 
     override fun serialize(): ByteArray {
@@ -51,7 +48,7 @@ data class ConsensusData(val registration: String,
         get() = AircraftType.deserialize(serializedType)    // TODO check if used on server
 
 
-    companion object: JoozdlogSerializable.Creator {
+    companion object: JoozdSerializable.Deserializer<ConsensusData> {
         override fun deserialize(source: ByteArray): ConsensusData {
             val wraps = ConsensusData.serializedToWraps(source)
             return ConsensusData(

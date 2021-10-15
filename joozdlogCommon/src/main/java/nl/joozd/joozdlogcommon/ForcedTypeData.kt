@@ -19,16 +19,14 @@
 
 package nl.joozd.joozdlogcommon
 
-import nl.joozd.joozdlogcommon.serializing.JoozdlogSerializable
-import nl.joozd.joozdlogcommon.serializing.unwrap
-import nl.joozd.joozdlogcommon.serializing.wrap
+import nl.joozd.serializing.*
 
 /**
  * This class matches aircraft registrations to types
  * @param registration: Primary key, aircraft registration (can be any string, but usually something like "PH-EZE"
  * @param type: AircraftTypeData.name<String> to match with AircraftType
  */
-data class ForcedTypeData(val registration: String, val type: String): JoozdlogSerializable {
+data class ForcedTypeData(val registration: String, val type: String): JoozdSerializable {
     override fun serialize(): ByteArray {
         var serialized = ByteArray(0)
         serialized += wrap(component1())
@@ -36,7 +34,7 @@ data class ForcedTypeData(val registration: String, val type: String): JoozdlogS
         return serialized
     }
 
-    companion object : JoozdlogSerializable.Creator {
+    companion object: JoozdSerializable.Deserializer<ForcedTypeData> {
         override fun deserialize(source: ByteArray): ForcedTypeData {
             val wraps = ForcedTypeData.serializedToWraps(source)
             return ForcedTypeData(

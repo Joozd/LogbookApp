@@ -33,7 +33,7 @@ import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
+import nl.joozd.logbookapp.data.comm.CloudFunctionResults
 import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.repository.GeneralRepository
 import nl.joozd.logbookapp.data.repository.helpers.overlaps

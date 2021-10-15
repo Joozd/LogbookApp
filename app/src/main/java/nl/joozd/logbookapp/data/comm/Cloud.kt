@@ -22,19 +22,18 @@ package nl.joozd.logbookapp.data.comm
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import nl.joozd.comms.Client
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.joozdlogcommon.ConsensusData
 import nl.joozd.joozdlogcommon.FeedbackData
 import nl.joozd.joozdlogcommon.ForcedTypeData
-import nl.joozd.logbookapp.data.comm.protocol.Client
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.joozdlogcommon.exceptions.NotAuthorizedException
-import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.data.utils.Encryption
+import nl.joozd.logbookapp.exceptions.NotAuthorizedException
 
 import java.time.Instant
 

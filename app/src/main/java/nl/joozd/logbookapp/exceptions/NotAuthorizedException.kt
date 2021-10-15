@@ -1,6 +1,6 @@
 /*
  *  JoozdLog Pilot's Logbook
- *  Copyright (c) 2020 Joost Welle
+ *  Copyright (c) 2021 Joost Welle
  *
  *      This program is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU Affero General Public License as
@@ -17,12 +17,10 @@
  *
  */
 
-package nl.joozd.joozdlogcommon.encryption
+package nl.joozd.logbookapp.exceptions
 
-class AESMessage (val noncePlusTagPlusData: ByteArray) {
-    val nonce = noncePlusTagPlusData.slice(0..15).toByteArray()
-    val tag = noncePlusTagPlusData.slice(16..31).toByteArray()
-    val data = noncePlusTagPlusData.drop(32).toByteArray()
-}
-
-
+/**
+ * Exception thrown when an operation is attempted that is not authorized (eg. not logged in, not
+ *  enough access rights, etc)
+ */
+class NotAuthorizedException(error: String): Exception(error)

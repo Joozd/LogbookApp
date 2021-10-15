@@ -18,8 +18,8 @@
  */
 
 package nl.joozd.joozdlogcommon.comms
-
-import nl.joozd.joozdlogcommon.serializing.toByteArray
+/*
+import nl.joozd.serializing.toByteArray
 
 
 /**
@@ -61,3 +61,5 @@ class Packet() {
     val content: ByteArray
         get() = header + messageSize + message
 }
+
+ */

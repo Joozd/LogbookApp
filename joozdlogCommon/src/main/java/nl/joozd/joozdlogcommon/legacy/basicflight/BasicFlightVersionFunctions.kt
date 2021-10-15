@@ -22,8 +22,8 @@ package nl.joozd.joozdlogcommon.legacy.basicflight
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogcommon.BasicFlight_version3
 import nl.joozd.joozdlogcommon.BasicFlight_version4
-import nl.joozd.joozdlogcommon.serializing.packSerialized
-import nl.joozd.joozdlogcommon.serializing.unpackSerialized
+import nl.joozd.serializing.packSerialized
+import nl.joozd.serializing.unpackSerialized
 
 object BasicFlightVersionFunctions {
     /**

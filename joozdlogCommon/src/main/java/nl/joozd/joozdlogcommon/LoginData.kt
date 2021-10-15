@@ -19,9 +19,7 @@
 
 package nl.joozd.joozdlogcommon
 
-import nl.joozd.joozdlogcommon.serializing.JoozdlogSerializable
-import nl.joozd.joozdlogcommon.serializing.unwrap
-import nl.joozd.joozdlogcommon.serializing.wrap
+import nl.joozd.serializing.*
 
 /**
  * @param userName: Username (a string, example: "joozd" or "Bsdligfh3456"
@@ -30,7 +28,7 @@ import nl.joozd.joozdlogcommon.serializing.wrap
  */
 
 @Suppress("ArrayInDataClass")
-data class LoginData(val userName: String, val password: ByteArray, val basicFlightVersion: Int): JoozdlogSerializable {
+data class LoginData(val userName: String, val password: ByteArray, val basicFlightVersion: Int): JoozdSerializable {
     override fun serialize(): ByteArray {
         var serialized = ByteArray(0)
         serialized += wrap(component1())
@@ -40,7 +38,7 @@ data class LoginData(val userName: String, val password: ByteArray, val basicFli
         return serialized
     }
 
-    companion object : JoozdlogSerializable.Creator {
+    companion object: JoozdSerializable.Deserializer<LoginData> {
         override fun deserialize(source: ByteArray): LoginData {
             val wraps = serializedToWraps(source)
             return LoginData(

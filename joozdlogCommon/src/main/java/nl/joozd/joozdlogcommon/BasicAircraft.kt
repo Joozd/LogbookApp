@@ -19,9 +19,7 @@
 
 package nl.joozd.joozdlogcommon
 
-import nl.joozd.joozdlogcommon.serializing.*
-import nl.joozd.joozdlogcommon.serializing.unwrap
-import nl.joozd.joozdlogcommon.serializing.wrap
+import nl.joozd.serializing.*
 
 /**
  * BasicAircraft is a communication format that describes the [registration] and [type] of an aircraft.
@@ -31,7 +29,7 @@ data class BasicAircraft(
     val registration: String,
     val type: String, // AircraftType.name
     val timestamp: Long
-): JoozdlogSerializable {
+): JoozdSerializable {
     override fun serialize(): ByteArray {
         var serialized = ByteArray(0)
 
@@ -41,7 +39,7 @@ data class BasicAircraft(
 
         return serialized
     }
-    companion object: JoozdlogSerializable.Creator {
+    companion object: JoozdSerializable.Deserializer<BasicAircraft> {
 
         override fun deserialize(source: ByteArray): BasicAircraft {
             val wraps = serializedToWraps(source)

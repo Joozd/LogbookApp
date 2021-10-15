@@ -25,7 +25,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors

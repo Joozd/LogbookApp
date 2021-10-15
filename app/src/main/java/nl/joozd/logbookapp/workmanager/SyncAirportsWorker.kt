@@ -26,15 +26,14 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.joozdlogcommon.BasicAirport
-import nl.joozd.joozdlogcommon.serializing.SIZE_WRAPPED_INT
-import nl.joozd.joozdlogcommon.serializing.unpackSerialized
-import nl.joozd.joozdlogcommon.serializing.unwrapInt
+import nl.joozd.serializing.SIZE_WRAPPED_INT
+import nl.joozd.serializing.unpackSerialized
+import nl.joozd.serializing.unwrapInt
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.readUntilEOF
-import java.io.BufferedInputStream
 import java.net.URL
 
 class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)

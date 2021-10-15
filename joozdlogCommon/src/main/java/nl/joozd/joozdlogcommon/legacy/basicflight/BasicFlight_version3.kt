@@ -19,9 +19,7 @@
 
 package nl.joozd.joozdlogcommon
 
-import nl.joozd.joozdlogcommon.serializing.*
-import nl.joozd.joozdlogcommon.serializing.unwrap
-import nl.joozd.joozdlogcommon.serializing.wrap
+import nl.joozd.serializing.*
 
 data class BasicFlight_version3(
     val flightID: Int,
@@ -59,7 +57,7 @@ data class BasicFlight_version3(
     // val signed: Boolean,
     val timeStamp: Long = -1, // timeStamp is time of synch with server for this flight
     val signature: String = ""
-): JoozdlogSerializable {
+): JoozdSerializable {
     object VERSION {
         const val version = 3
         // version 3: Added signature: String
@@ -111,7 +109,7 @@ data class BasicFlight_version3(
 
         return serialized
     }
-    companion object: JoozdlogSerializable.Creator{
+    companion object: JoozdSerializable.Deserializer<BasicFlight_version3> {
 
         /**
          * Unfortunately, I don't know how to do this with non-typed functions
@@ -155,7 +153,6 @@ data class BasicFlight_version3(
                 unwrap(wraps[32]),
                 unwrap(wraps[33])
             )
-
         }
     }
 }

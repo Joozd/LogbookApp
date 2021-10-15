@@ -19,9 +19,8 @@
 
 package nl.joozd.joozdlogcommon.legacy.basicflight
 
-import nl.joozd.joozdlogcommon.serializing.unwrap
-import nl.joozd.joozdlogcommon.serializing.wrap
-import nl.joozd.joozdlogcommon.serializing.JoozdlogSerializable
+import nl.joozd.joozdlogcommon.LoginDataWithEmail
+import nl.joozd.serializing.*
 
 data class BasicFlight_version2(
     val flightID: Int,
@@ -58,7 +57,7 @@ data class BasicFlight_version2(
     val DELETEFLAG: Int,
     // val signed: Boolean,
     val timeStamp: Long = -1 // timeStamp is time of synch with server for this flight
-): JoozdlogSerializable {
+): JoozdSerializable {
     object VERSION {
         const val version = 2
     }
@@ -109,13 +108,10 @@ data class BasicFlight_version2(
 
         return serialized
     }
-    companion object: JoozdlogSerializable.Creator{
+    companion object: JoozdSerializable.Deserializer<BasicFlight_version2> {
 
-        /**
-         * Unfortunately, I don't know how to do this with non-typed functions
-         */
         override fun deserialize(source: ByteArray): BasicFlight_version2 {
-            val wraps = nl.joozd.joozdlogcommon.BasicFlight.serializedToWraps(source)
+            val wraps = serializedToWraps(source)
             return BasicFlight_version2(
                 unwrap(wraps[0]),
                 unwrap(wraps[1]),

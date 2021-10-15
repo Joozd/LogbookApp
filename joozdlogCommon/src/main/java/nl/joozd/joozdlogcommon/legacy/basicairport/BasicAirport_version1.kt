@@ -19,9 +19,8 @@
 
 package nl.joozd.joozdlogcommon.legacy.basicairport
 
-import nl.joozd.joozdlogcommon.serializing.unwrap
-import nl.joozd.joozdlogcommon.serializing.wrap
-import nl.joozd.joozdlogcommon.serializing.JoozdlogSerializable
+import nl.joozd.joozdlogcommon.BasicFlight_version4
+import nl.joozd.serializing.*
 
 
 data class BasicAirport_version1(
@@ -44,7 +43,7 @@ data class BasicAirport_version1(
     val wikipedia_link: String,
     val keywords: String
 ):
-    JoozdlogSerializable {
+    JoozdSerializable {
     object VERSION {
         const val version = 1
     }
@@ -76,7 +75,7 @@ data class BasicAirport_version1(
         return serialized
     }
 
-    companion object : JoozdlogSerializable.Creator {
+    companion object: JoozdSerializable.Deserializer<BasicAirport_version1> {
         override fun deserialize(source: ByteArray): BasicAirport_version1 {
             val wraps = nl.joozd.joozdlogcommon.BasicAirport.serializedToWraps(source)
             return BasicAirport_version1(

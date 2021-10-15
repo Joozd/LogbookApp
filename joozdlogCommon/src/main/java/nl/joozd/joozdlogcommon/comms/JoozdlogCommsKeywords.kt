@@ -35,6 +35,7 @@ object JoozdlogCommsKeywords {
     const val BAD_DATA_RECEIVED = "BAD_DATA_RECEIVED"
     const val NEXT_IS_COMPRESSED = "NEXT_IS_COMPRESSED"
     const val HELLO = "HELLO" // to be done before any communications with PROTOCOL_VERSION. Do this right after creating SSL connection.
+    const val END_OF_SESSION = "END_OF_SESSION"
 
     //general keywords
     const val REQUEST_TIMESTAMP = "REQUEST_TIMESTAMP"
@@ -76,7 +77,6 @@ object JoozdlogCommsKeywords {
 
     //control keywords
     const val ADD_TIMESTAMP = "ADD_TIMESTAMP"
-    const val END_OF_SESSION = "END_OF_SESSION"
     const val SAVE_CHANGES = "SAVE_CHANGES"
 
     //debug keywords

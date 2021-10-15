@@ -26,7 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.comm.protocol.CloudFunctionResults
+import nl.joozd.logbookapp.data.comm.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.extensions.minus

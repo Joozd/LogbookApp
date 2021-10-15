@@ -841,12 +841,15 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
     /**
      * Will (async) set isPIC and isIFR to same as in last completed flight
      */
-    fun autoSetIfrAndPic() = launch {
+    fun autoSetIfrAndPic(ifr: Boolean = true, pic: Boolean = true, names: Boolean = true) = launch {
         FlightRepository.getInstance().getMostRecentFlightAsync().await()?.let{ lastCompleted ->
-            isPIC = lastCompleted.isPIC
-            isIfr = lastCompleted.ifrTime > 0
+            if (pic) isPIC = lastCompleted.isPIC
+            if (ifr) isIfr = lastCompleted.ifrTime > 0
+            if (names) {
+                name = lastCompleted.name
+                name2 = lastCompleted.name2
+            }
         }
-
     }
 
     /**

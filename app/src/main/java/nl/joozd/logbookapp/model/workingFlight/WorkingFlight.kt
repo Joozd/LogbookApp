@@ -846,8 +846,8 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
             if (pic) isPIC = lastCompleted.isPIC
             if (ifr) isIfr = lastCompleted.ifrTime > 0
             if (names) {
-                name = lastCompleted.name
-                name2 = lastCompleted.name2
+                if (name.isBlank()) name = lastCompleted.name
+                if (name2.isBlank()) name2 = lastCompleted.name2
             }
         }
     }

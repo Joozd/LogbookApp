@@ -425,7 +425,7 @@ object Cloud {
                     //listsner from 85 to 100
 
                     flightRepository.save(flightsToSend.map { it.copy(unknownToServer = false) } + newFlightsFromServer,
-                        sync = false, addToUndo = false) // { listener(85 + it * 15 / 100) } // TODO Listsner not implemented
+                        sync = false, addToUndo = false, timeStamp = timeStamp) // { listener(85 + it * 15 / 100) } // TODO Listsner not implemented
 
 
                     // Profit!

@@ -353,10 +353,11 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      * @param sync: Whether or not to sync to server after saving
      * @param addToUndo: If this save action should be undoable
      */
-    fun save(flight: Flight, sync: Boolean = true, updateID: Boolean? = null, addToUndo: Boolean = false) = launch {
+    fun save(flight: Flight, sync: Boolean = true, updateID: Boolean? = null, addToUndo: Boolean = false, timeStamp: Long = TimestampMaker().nowForSycPurposes) = launch {
         saveMutex.withLock {
             //assign available FlightID if requested
-            val f = if (updateID == true || (flight.flightID < 0) && updateID == null) flight.copy(flightID = lowestFreeFlightID(), timeStamp = TimestampMaker().nowForSycPurposes) else flight.copy(timeStamp = TimestampMaker().nowForSycPurposes)
+            val f = if (updateID == true || (flight.flightID < 0) && updateID == null) flight.copy(flightID = lowestFreeFlightID(), timeStamp = timeStamp)
+                    else flight.copy(timeStamp = timeStamp)
 
             // Add to undo if needed:
             if (addToUndo){
@@ -388,7 +389,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      *      false: never make a new ID
      *      null (default): make a new ID if id <= 0
      */
-    fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean? = null, addToUndo: Boolean = false) {
+    fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean? = null, addToUndo: Boolean = false, timeStamp: Long = TimestampMaker().nowForSycPurposes) {
 
         // If saving more than MAX_SQL_BATCH_SIZE flights, an exception will be thrown.
         //
@@ -403,10 +404,10 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                 val ff = if (updateIDs != false) flights.map { flight ->
                     flight.copy(
                         flightID = if (flight.flightID <= 0 || updateIDs == true) nextFlightID() else flight.flightID,
-                        timeStamp = TimestampMaker().nowForSycPurposes
+                        timeStamp = timeStamp
                     )
                 } else flights.map {
-                    it.copy(timeStamp = TimestampMaker().nowForSycPurposes)
+                    it.copy(timeStamp = timeStamp)
                 }
 
                 // Add to undo if needed:

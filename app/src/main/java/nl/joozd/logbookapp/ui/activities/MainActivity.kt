@@ -149,6 +149,10 @@ class MainActivity : JoozdlogActivity() {
              * Redraw flights list when requirements for PIC name being filled changes
              */
             viewModel.picNameNeedsToBeSet.observe(activity){
+                println("KIWI XXXXXX THIS IS RUNNING XXXXXXX")
+                // I am aware this is not an efficient way to do this, but it is a very specific event.
+                // (picNameNeedsToBeSet changed in settings and then navigating back to mainActivity)
+                // which is a screen change anyway so one or two dropped frames won't be noticed.
                 flightsAdapter.notifyDataSetChanged()
             }
 
@@ -223,7 +227,7 @@ class MainActivity : JoozdlogActivity() {
                     MainActivityEvents.OPEN_SEARCH_FIELD -> {
                         searchField.visibility = View.VISIBLE
                         mainSearchField.requestFocus()
-                        showKeyboard()
+                        mainSearchField.showKeyboard()
                     }
                     MainActivityEvents.CLOSE_SEARCH_FIELD -> {
                         mainSearchField.setText("")
@@ -536,9 +540,9 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    private fun showKeyboard(){
+    private fun View.showKeyboard(){
         val imm: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,InputMethodManager.HIDE_IMPLICIT_ONLY)
+        imm.showSoftInput(this,0)
     }
 
     private fun hideKeyboard(view: View){

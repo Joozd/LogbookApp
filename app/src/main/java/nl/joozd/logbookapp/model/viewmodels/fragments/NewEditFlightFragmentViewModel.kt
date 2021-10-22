@@ -277,6 +277,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     }
 
+    /**
+     * @see [setRegAndType]
+     */
     fun setRegAndType(regAndTypeEditable: Editable) = setRegAndType(regAndTypeEditable.toString())
 
     /**
@@ -375,8 +378,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     }
 
     /**
-     * Toggle PIC
-     * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
+     * Toggle PIC: NONE -> PICUS -> PIC -> NONE etc
      */
     fun togglePic() = when {
         wf.isPIC -> {

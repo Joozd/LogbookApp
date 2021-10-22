@@ -44,16 +44,20 @@ fun findBestHitForRegistration(query: String, registrations: Collection<String>)
  */
 fun findSortedHitsForRegistration(query: String, registrations: Collection<String>, caseSensitive: Boolean = false): List<String>{
     val q = if (caseSensitive) query else query.uppercase(Locale.ROOT)
-    val searchableRegs = registrations.filter{it.length > q.length}.filter{reg -> q.filter{ c -> c != '-'} in reg.filter{ c -> c != '-'} }.let { rrr->
-        if (caseSensitive) rrr else rrr.map { it.uppercase(Locale.ROOT) }
-    }
-        return  (searchableRegs.filter {it == q} +
-                searchableRegs.filter{it.filter {c -> c != '-'} == q} +
-                searchableRegs.filter{it.endsWith((q))} +
-                searchableRegs.filter{'-' in it}.map {it.split('-')}.filter{it[1].startsWith(q)}.map{it.joinToString("-")} +
-                searchableRegs.filter{it.startsWith(q)} +
-                searchableRegs.filter{it.filter{c -> c != '-'}.startsWith(q)} +
-                searchableRegs.filter{q in it} +
-                searchableRegs.filter{q in it.filter{ c -> c != '-'} }
-                ).distinct()
+
+    //remove all no-hits from registrations
+    val searchableRegs = registrations
+        .filter{it.length >= q.length} // anything shorter than query is not a match
+    .let { rrr-> if (caseSensitive) rrr else rrr.map { it.uppercase(Locale.ROOT)} } // if not case-sensitive, make all uppercase. Query already did this before.
+        .filter{reg -> q.filter{ c -> c != '-'} in reg.filter{ c -> c != '-'} } // remove '-' from both query and registrations (we ignore the '-' while searching)
+
+    return  (searchableRegs.filter {it == q} +
+            searchableRegs.filter{it.filter {c -> c != '-'} == q} +
+            searchableRegs.filter{it.endsWith((q))} +
+            searchableRegs.filter{'-' in it}.map {it.split('-')}.filter{it[1].startsWith(q)}.map{it.joinToString("-")} +
+            searchableRegs.filter{it.startsWith(q)} +
+            searchableRegs.filter{it.filter{c -> c != '-'}.startsWith(q)} +
+            searchableRegs.filter{q in it} +
+            searchableRegs.filter{q in it.filter{ c -> c != '-'} }
+            ).distinct()
 }

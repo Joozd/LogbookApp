@@ -51,23 +51,22 @@ abstract class JoozdlogDatabase: RoomDatabase() {
     companion object {
         // Singleton prevents multiple instances of database opening at the
         // same time.
-        @Volatile
         private var INSTANCE: JoozdlogDatabase? = null
 
+        @Synchronized
         fun getDatabase(context: Context): JoozdlogDatabase {
-            INSTANCE?.let {return it}
-            synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    JoozdlogDatabase::class.java,
-                    "flights_database"
-                ).addMigrations(UPDATE_8_9)
-                    .build()
-                INSTANCE = instance
-                return instance
-            }
+            INSTANCE?.let { return it }
+            val instance = Room.databaseBuilder(
+                context.applicationContext,
+                JoozdlogDatabase::class.java,
+                "flights_database"
+            ).addMigrations(UPDATE_8_9)
+                .build()
+            INSTANCE = instance
+            return instance
         }
-/*
+
+        /*
         private val UPDATE_4_5 = object: Migration(4,5){
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE AircraftRegistrationWithTypeData ADD COLUMN timestamp INTEGER NOT NULL DEFAULT -1")
@@ -80,16 +79,17 @@ abstract class JoozdlogDatabase: RoomDatabase() {
         }
 
  */
-        private val UPDATE_7_8 = object: Migration(7, 8){
+        private val UPDATE_7_8 = object : Migration(7, 8) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE FlightData ADD COLUMN multiPilotTime INTEGER NOT NULL DEFAULT 0")
             }
         }
-        private val UPDATE_8_9 = object: Migration(8, 9){
+        private val UPDATE_8_9 = object : Migration(8, 9) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("DROP TABLE AircraftRegistrationWithTypeData")
                 database.execSQL("CREATE TABLE IF NOT EXISTS `AircraftRegistrationWithTypeData` (`registration` TEXT NOT NULL, `serializedType` BLOB NOT NULL, `knownToServer` INTEGER NOT NULL, `serializedPreviousType` BLOB NOT NULL, PRIMARY KEY(`registration`))")
             }
         }
     }
+
 }

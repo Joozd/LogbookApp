@@ -452,6 +452,7 @@ object ServerFunctions {
      *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server gave an unexpected reply
      */
     fun sendFeedback(client: Client, feedbackData: FeedbackData): CloudFunctionResults {
+        Log.d(this::class.simpleName, "SendFeedback $client / $feedbackData")
         client.sendRequest(JoozdlogCommsKeywords.SENDING_FEEDBACK, feedbackData.serialize())
         return when (val result = client.readFromServer()?.toString(Charsets.UTF_8)){
             JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK

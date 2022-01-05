@@ -49,12 +49,8 @@ object JoozdlogWorkersHub {
      * If another Worker is already trying to do that, that one is canceled
      */
     fun synchronizeTime(){
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-
         val task = OneTimeWorkRequestBuilder<SyncTimeWorker>()
-            .setConstraints(constraints)
+            .setConstraints(makeConstraintsNeedNetwork())
             .addTag(SYNC_TIME)
             .build()
 
@@ -70,13 +66,8 @@ object JoozdlogWorkersHub {
      */
     fun synchronizeFlights(delay: Boolean = true){
         if (Preferences.useCloud) {
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .setRequiresBatteryNotLow(true)
-                .build()
-
             val task = OneTimeWorkRequestBuilder<SyncFlightsWorker>().apply {
-                setConstraints(constraints)
+                setConstraints(makeConstraintsNeedNetwork())
                 if (delay)
                     setInitialDelay(MIN_DELAY_FOR_OUTBOUND_SYNC, TimeUnit.MINUTES)
                 addTag(SYNC_FLIGHTS)
@@ -94,12 +85,8 @@ object JoozdlogWorkersHub {
      */
     fun scheduleEmailConfirmation(){
         Log.d("scheduleEmailConf...", "Scheduling an email confirmation")
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresBatteryNotLow(true)
-            .build()
         val task = OneTimeWorkRequestBuilder<ConfirmEmailWorker>().apply{
-            setConstraints(constraints)
+            setConstraints(makeConstraintsNeedNetwork())
             addTag(CONFIRM_EMAIL)
         }.build()
         with(WorkManager.getInstance(App.instance)) {
@@ -113,12 +100,8 @@ object JoozdlogWorkersHub {
      */
     fun scheduleSetEmail(){
         Log.d("scheduleEmailConf...", "Scheduling an email confirmation")
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresBatteryNotLow(true)
-            .build()
         val task = OneTimeWorkRequestBuilder<SetEmailWorker>().apply{
-            setConstraints(constraints)
+            setConstraints(makeConstraintsNeedNetwork())
             addTag(CONFIRM_EMAIL)
         }.build()
         with(WorkManager.getInstance(App.instance)) {
@@ -133,16 +116,28 @@ object JoozdlogWorkersHub {
      */
     fun scheduleLoginAttempt(){
         Log.d("scheduleLoginAttempt", "Scheduling a login attempt")
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresBatteryNotLow(true)
-            .build()
         val task = OneTimeWorkRequestBuilder<CloudLoginWorker>().apply{
-            setConstraints(constraints)
+            setConstraints(makeConstraintsNeedNetwork())
             addTag(LOGIN_TO_CLOUD)
         }.build()
         with(WorkManager.getInstance(App.instance)) {
             enqueueUniqueWork(LOGIN_TO_CLOUD, ExistingWorkPolicy.KEEP, task)
+        }
+    }
+
+    /**
+     * Send feedback to server.
+     * [SubmitFeedbackWorker] will also reset [Preferences.feedbackWaiting] to an empty String
+     */
+    fun sendFeedback(contactInfo: String){
+        val task = OneTimeWorkRequestBuilder<SubmitFeedbackWorker>()
+            .setConstraints(makeConstraintsNeedNetwork())
+            .setInputData(makeDataWithString(SubmitFeedbackWorker.CONTACT_INFO_TAG, contactInfo))
+            .addTag(SUBMIT_FEEDBACK)
+            .build()
+
+        with(WorkManager.getInstance(App.instance)) {
+            enqueueUniqueWork(SUBMIT_FEEDBACK, ExistingWorkPolicy.REPLACE, task)
         }
     }
 
@@ -200,10 +195,7 @@ object JoozdlogWorkersHub {
      */
     fun periodicBackupFromServer(force: Boolean = false){
         Log.d("periodBackupFrmServer()", "added task to check for backup")
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresBatteryNotLow(true)
-            .build()
+        val constraints = makeConstraintsNeedNetwork()
         val task = PeriodicWorkRequestBuilder<RequestBackupIfScheduled>(Duration.ofDays(1)).apply {
             setConstraints(constraints)
             addTag(GET_BACKUP_EMAIL)
@@ -224,6 +216,19 @@ object JoozdlogWorkersHub {
     }
 
     /**
+     * Build Constraints with requiredNetworkType = NetworkType.CONNECTED
+     */
+    private fun makeConstraintsNeedNetwork() = Constraints.Builder()
+        .setRequiredNetworkType(NetworkType.CONNECTED)
+        .build()
+
+    /**
+     * Make an input data object with a single string
+     */
+    private fun makeDataWithString(tag: String, value: String) =
+        Data.Builder().putString(tag, value).build()
+
+    /**
      * Constants for use as tags
      */
     private const val SYNC_TIME = "SYNC_TIME"
@@ -234,4 +239,5 @@ object JoozdlogWorkersHub {
     private const val SYNC_AIRCRAFT_TYPES = "SYNC_AIRCRAFT_TYPES"
     private const val GET_BACKUP_EMAIL = "GET_BACKUP_EMAIL"
     private const val TEST_EMAIL = "GET_BACKUP_EMAIL"
+    private const val SUBMIT_FEEDBACK = "SUBMIT_FEEDBACK"
 }

@@ -25,17 +25,15 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Text entered in feedback text field
      */
-    private var _feedbackText = ""
+    private var _feedbackText = Preferences.feedbackWaiting
     // + exposed getter
     val feedbackText
         get() = _feedbackText
@@ -57,27 +55,16 @@ class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
         })
     }
 
-
-
     fun updateFeedbackText(it: String){ _feedbackText = it }
     fun updateContactText(it: String){ _contactInfo = it }
 
-    // TODO make this be handled by a worker
+    /**
+     * When "submit" is clicked, save [_feedbackText] to [Preferences] and start a worker with [_contactInfo]
+     */
     fun submitClicked(){
-        when {
-            InternetStatus.internetAvailable != true -> feedback(GeneralEvents.ERROR).putInt(NO_INTERNET)
-            _feedbackText.isBlank() -> feedback(GeneralEvents.ERROR).putInt(EMPTY_FEEDBACK) // don't feel like making a while FeedbackEvents class
-            else -> viewModelScope.launch{
-                if (Cloud.sendFeedback(_feedbackText, _contactInfo).isOK()) {
-                    Preferences.feedbackWaiting = ""
-                    feedback(GeneralEvents.DONE)
-                }
-                else {
-                    Preferences.feedbackWaiting = _feedbackText
-                    feedback(GeneralEvents.ERROR).putInt(CONNECTION_ERROR)
-                }
-            }
-        }
+        Preferences.feedbackWaiting = _feedbackText
+        JoozdlogWorkersHub.sendFeedback(_contactInfo)
+        feedback(GeneralEvents.DONE)
     }
 
     companion object{

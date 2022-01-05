@@ -45,7 +45,7 @@ import java.time.Instant
 
 object Cloud {
     var syncingFlights = false
-    const val TAG = "JoozdLogCloud object"
+    const val name = "JoozdLogCloud object"
     //TODO make listeners for progress tracking+
 
     /**********************************************************************************************
@@ -196,18 +196,18 @@ object Cloud {
     suspend fun requestBackup(): CloudFunctionResults = withContext(Dispatchers.IO) {
         Client.getInstance().use {client ->
             ServerFunctions.login(client)
-            ServerFunctions.requestBackup(client).also{
-                when (it){
-                    CloudFunctionResults.OK -> {
-                        Preferences.emailJobsWaiting.sendBackupCsv = false
-                    }
-                    CloudFunctionResults.EMAIL_DOES_NOT_MATCH -> {
-                        Preferences.emailVerified = false
-                        Preferences.emailJobsWaiting.sendBackupCsv = true
-                    }
-                    else -> Log.w("requestBackup()", "unhandled result $it")
+            val result = ServerFunctions.requestBackup(client)
+            when (result){
+                CloudFunctionResults.OK -> {
+                    Preferences.emailJobsWaiting.sendBackupCsv = false
                 }
+                CloudFunctionResults.EMAIL_DOES_NOT_MATCH -> {
+                    Preferences.emailVerified = false
+                    Preferences.emailJobsWaiting.sendBackupCsv = true
+                }
+                else -> Log.w("requestBackup()", "unhandled result $result")
             }
+            result
         }
     }
 
@@ -297,105 +297,38 @@ object Cloud {
      **********************************************************************************************/
 
     /**
-     * Gets all flights from server
-     * @param f: Listener for progress
-     */
-    suspend fun requestAllFlights(f: (Int) -> Unit = {}): List<Flight>? =
-        withContext(Dispatchers.IO) {
-            Client.getInstance().use {
-                if (!ServerFunctions.login(it).isOK()) {
-                    f(100)
-                    null
-                } else
-                    try {
-                        val result = ServerFunctions.requestFlightsSince(it, -100L, f)
-
-                        result
-                    } catch (nae: NotAuthorizedException) {
-                        Log.e(TAG, nae.stackTrace.toString())
-                        null
-                    }
-            }
-        }
-
-    /**
      * @return timestamp on success, -1 on critical fail (ie wrong credentials), null on server error (retry later)
      * Listsner will give an estimated completion percentage
      */
     suspend fun syncAllFlights(flightRepository: FlightRepository, listener: (Int) -> Unit = {}): Long? = try {
+        syncingFlights = true
         withContext(Dispatchers.IO) f@{
-            syncingFlights = true
             listener(0)
             Client.getInstance().use { server ->
                 listener(5) // Connection is made!
                 with(ServerFunctions) {
                     //sync time with server
-                    val timeStamp: Long = getTimestamp(server)?.also {
-                        Log.d(TAG, "Got timestamp ${Instant.ofEpochSecond(it)}")
-                        listener(10)
-                        Preferences.serverTimeOffset = it - Instant.now().epochSecond
-                    } ?: return@f null.also { Log.d("Cloud", "getTimeStamp() returned null") } // if no timestamp received, server is not working so might as well quit here
+                    val timeStamp: Long = getTimestamp(server) ?: return@f null // if no timestamp received, server is not working
+                    Preferences.serverTimeOffset = timeStamp - Instant.now().epochSecond
+                    listener(10)
 
                     //Login and handle if that fails:
-                    login(server).let { result ->
-                        when (result) {
-                            CloudFunctionResults.OK -> Unit
-                            CloudFunctionResults.UNKNOWN_USER_OR_PASS, CloudFunctionResults.NOT_LOGGED_IN -> {
-                                flightRepository.setNotLoggedInFlag(true)
-                                return@f -1L
-                            }
-                            else -> {
-                                Log.w("syncAllFlights", "Failed, result was $result")
-                                return@f null
-                            }
-                        }
-                    }
+                    checkLoginOK(flightRepository, login(server)) ?: return@f -1L
                     listener(15)
 
                     //get new flights from server
                     //listener from 15 to 40 (25 total)
-                    val newFlightsFromServer = try {
-                        requestFlightsSince(
-                            server,
-                            Preferences.lastUpdateTime
-                        ) { listener(15 + it / 4) }?.filter{ !it.isPlanned }?.map { it.copy(timeStamp = timeStamp) } // don't load planned flights
-                            ?: return@f null.also {
-                                Log.w(
-                                    "Cloud",
-                                    "requestFlightsSince returned null"
-                                )
-                            }
-                    } catch (e: NotAuthorizedException) {
-                        return@f -1L
-                    }
+                    val newFlightsFromServer = getNewFlightsFromServer(server, listener).addTimeStamp(timeStamp) ?: return@f -1L
                     listener(40)
                     val completeFlightDB = flightRepository.requestWholeDB()
                     listener(45)
 
                     //fix possible flightID conflicts
-                    val newLocalFlights =
-                        completeFlightDB.filter { it.unknownToServer }
-                    val fixedLocalFlights = mutableListOf<Flight>()
-
-                    val takenIDs = newFlightsFromServer.map { it.flightID }
-                    val lowestFixedID =
-                        (takenIDs.maxOrNull() ?: -1) + 1 // null on empty list, but empty list means no fixes
-                    val fixedNewLocalFlights = newLocalFlights.filter { it.flightID in takenIDs }
-                        .mapIndexed { index: Int, flight: Flight ->
-                            flight.copy(flightID = lowestFixedID + index)
-                        }
-
-                    flightRepository.delete(
-                        newLocalFlights.filter { it.flightID in takenIDs },
-                        sync = false
-                    )
-                    flightRepository.save(fixedNewLocalFlights, sync = false, addToUndo = false)
-
-                    fixedLocalFlights.addAll(fixedNewLocalFlights)
+                    val highestTakenID = newFlightsFromServer.maxOfOrNull { it.flightID } ?: Int.MIN_VALUE
+                    val newLocalFlights = flightRepository.getAllFlightsUnknownToServer(highestTakenID + 1)
 
                     listener(50)
                     //previous block added all fixed flights to a list, now add the ones that didn't need fixing:
-                    fixedLocalFlights.addAll(newLocalFlights.filter { it.flightID !in takenIDs })
 
                     //prepare list to send to Server:
                     // -> add fixed and not-fixed flights together
@@ -403,7 +336,7 @@ object Cloud {
                     // (this means that editing flights on two devices before syncing will stick to most recent sync, not most recent edit)
                     val flightsToSend =
                         (completeFlightDB.filter { it.timeStamp > Preferences.lastUpdateTime && !it.unknownToServer && (!it.isPlanned) } + // Not including flightslist we just fixed. Don't sync planned flights.
-                                fixedLocalFlights)
+                                newLocalFlights)
                             .filter { !it.isPlanned || !it.unknownToServer } // don't send planned flights unless server knows about them somehow
                             .map { it.copy(timeStamp = timeStamp, unknownToServer = false) }
 
@@ -425,10 +358,8 @@ object Cloud {
                     //listsner from 85 to 100
 
                     flightRepository.save(flightsToSend.map { it.copy(unknownToServer = false) } + newFlightsFromServer,
-                        sync = false, addToUndo = false, timeStamp = timeStamp) // { listener(85 + it * 15 / 100) } // TODO Listsner not implemented
+                        sync = false, addToUndo = false, timeStamp = timeStamp)
 
-
-                    // Profit!
                     listener(100)
                     timeStamp
                 }
@@ -437,6 +368,46 @@ object Cloud {
     } finally {
         syncingFlights = false
     }
+
+    /**
+     * Handle login result
+     * return Unit if login OK, null if not.
+     * If login failed due to bad login data, set flag
+     */
+    private fun checkLoginOK(flightRepository: FlightRepository, result: CloudFunctionResults): Unit?{
+        return when (result) {
+            CloudFunctionResults.OK -> Unit
+            CloudFunctionResults.UNKNOWN_USER_OR_PASS, CloudFunctionResults.NOT_LOGGED_IN -> {
+                flightRepository.setNotLoggedInFlag(true)
+                null
+            }
+            else -> {
+                Log.w("syncAllFlights", "Failed, result was $result")
+                null
+            }
+        }
+    }
+
+    /**
+     * Get flights from [server]
+     */
+    private fun getNewFlightsFromServer(server: Client, listener: (Int) -> Unit): List<Flight>? =
+        try {
+            ServerFunctions.requestFlightsSince(server, Preferences.lastUpdateTime) {
+                listener(15 + it / 4)
+            }
+                ?.filter{ !it.isPlanned }
+
+
+        } catch (e: NotAuthorizedException) {
+            null
+        }
+
+
+    /**
+     * update timestamp for a list of flights
+     */
+    private fun List<Flight>?.addTimeStamp(timeStamp: Long) = this?.map { it.copy(timeStamp = timeStamp) }
 
     suspend fun sendFeedback(feedback: String, contactInfo: String): CloudFunctionResults = withContext(Dispatchers.IO) {
         Client.getInstance().use{ client ->

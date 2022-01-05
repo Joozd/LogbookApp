@@ -20,7 +20,6 @@
 package nl.joozd.logbookapp.data.repository.flightRepository
 
 import android.Manifest
-import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
@@ -52,6 +51,7 @@ import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.lang.Exception
 import java.time.Instant
 import java.util.*
+import kotlin.math.min
 
 //TODO reorder this and make direct DB functions private
 //TODO make cloud functions originate from here and do their DB work here, not in [Cloud]
@@ -389,16 +389,32 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      *      false: never make a new ID
      *      null (default): make a new ID if id <= 0
      */
-    fun save(flights: List<Flight>, sync: Boolean = true, updateIDs: Boolean? = null, addToUndo: Boolean = false, timeStamp: Long = TimestampMaker().nowForSycPurposes) {
+    fun save(
+        flights: List<Flight>,
+        sync: Boolean = true,
+        updateIDs: Boolean? = null,
+        addToUndo: Boolean = false,
+        timeStamp: Long = TimestampMaker().nowForSycPurposes
+    ) = launch{
+        saveWithReturn(flights, sync, updateIDs, addToUndo, timeStamp)
+    }
+
+    private suspend fun saveWithReturn(
+        flights: List<Flight>,
+        sync: Boolean = true,
+        updateIDs: Boolean? = null,
+        addToUndo: Boolean = false,
+        timeStamp: Long = TimestampMaker().nowForSycPurposes
+    ): List<Flight> = withContext(Dispatchers.Main){
 
         // If saving more than MAX_SQL_BATCH_SIZE flights, an exception will be thrown.
         //
         // This will be saved one at a time due to [saveMutex] being locked.
         // Can trigger sync multiple times as sync has a 1 minute delay and is set to REPLACE
-        if (flights.size > MAX_SQL_BATCH_SIZE) flights.chunked(MAX_SQL_BATCH_SIZE).forEach{
-            save(it, sync, updateIDs)
-        }
-        else launch {
+        if (flights.size > MAX_SQL_BATCH_SIZE) flights.chunked(MAX_SQL_BATCH_SIZE).map{
+            saveWithReturn(it, sync, updateIDs)
+        }.flatten()
+        else{
             saveMutex.withLock {
                 //assign available FlightIDs if requested
                 val ff = if (updateIDs != false) flights.map { flight ->
@@ -425,6 +441,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
                     flightDao.insertFlights(*(ff.map { it.toModel() }.toTypedArray()))
                     if (sync) syncAfterChange()
                 }
+                ff // return updated saved flights
             }
         }
     }
@@ -575,6 +592,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
         }
     }
 
+    /**
+     * TODO write documentation here
+     */
     fun setNotLoggedInFlag(notLoggedIn: Boolean = false){
         launch {
             _notLoggedIn.value = notLoggedIn
@@ -588,6 +608,29 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     //gets all flights that are not marked DELETED
     suspend fun getAllFlights(): List<Flight> = cachedFlightsList ?: withContext(dispatcher) {
         flightDao.requestValidFlights().map{it.toFlight()}
+    }
+
+    /**
+     * get all flights that are not yet know to server
+     * This will reassign FlightIDs if needed (in case they were already taken on server)
+     * @param startingID = lowest ID to be given out
+     */
+    suspend fun getAllFlightsUnknownToServer(startingID: Int): List<Flight>{
+        val newFlights = getAllFlights().filter { it.unknownToServer }
+        return if (newFlights.all { it.flightID >= startingID} ) newFlights
+        else updateIDsForFlights(newFlights, startingID)
+    }
+
+    /**
+     * Update IDs for flights with a minimum ID. Will also update DB.
+     */
+    private suspend fun updateIDsForFlights(flights: List<Flight>, startingID: Int): List<Flight>{
+        nextFlightID.setMinimumID(startingID)
+        val updatedFlights = flights.map{
+            it.copy (flightID = nextFlightID())
+        }
+        delete(flights)
+        return saveWithReturn(updatedFlights, sync = false, updateIDs = false)
     }
 
     /**
@@ -902,14 +945,24 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      *      getID()
      */
     private inner class FlightIDProvider {
-        private var currentLowestAvailable: Int = - 999
+        private var currentLowestAvailable: Int = -999
         private var initialized = false
         val mutex = Mutex()
+
+        /**
+         * Force set a minimum ID. If that is lower than current lowest this will be ignored.
+         */
+        suspend fun setMinimumID(minimumID: Int){
+            mutex.withLock {
+                if (minimumID > currentLowestAvailable)
+                    currentLowestAvailable = minimumID
+            }
+        }
 
         suspend operator fun invoke(): Int = mutex.withLock {
             // set currentLowestAvailable to lowest free ID if no initialized yet
             if (!initialized) {
-                currentLowestAvailable = getNextAvailable()
+                currentLowestAvailable = maxOf (getNextAvailable(), currentLowestAvailable)
                 initialized = true
             }
 

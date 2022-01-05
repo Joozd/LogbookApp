@@ -28,7 +28,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.data.calendar.dataclasses.SupportedCalendarTypes
 import nl.joozd.logbookapp.data.utils.Encryption
 
 @Suppress("ObjectPropertyName")
@@ -202,12 +201,6 @@ object Preferences {
      * CalendarSync days into the future:
      */
     var calendarSyncAmountOfDays: Long by JoozdLogSharedPrefs(sharedPref, 30L)
-
-    /**
-     * Type of calendar used
-     * @see SupportedCalendarTypes for supported types and their codes
-     */
-    var calendarType: Int by JoozdLogSharedPrefs(sharedPref, SupportedCalendarTypes.INVALID)
 
     /**
      * Postpone calendar sync without asking

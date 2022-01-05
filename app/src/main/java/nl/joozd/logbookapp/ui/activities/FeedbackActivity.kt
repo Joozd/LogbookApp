@@ -22,7 +22,6 @@ package nl.joozd.logbookapp.ui.activities
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.fragment.app.commit
 import nl.joozd.logbookapp.R
@@ -63,9 +62,7 @@ class FeedbackActivity : JoozdlogActivity() {
 
             // load joozdlog_todo_list.txt in LiveData in viewModel and show it in a [TextDisplayDialog]
             knownIssuesButton.setOnClickListener {
-                Log.d("DEBUG", "CHECKPOINT 1")
                 viewModel.loadKnownIssuesLiveData(R.raw.joozdlog_todo_list)
-                Log.d("DEBUG", "CHECKPOINT 2")
                 supportFragmentManager.commit {
                     add(R.id.layoutBelowToolbar, TextDisplayDialog(R.string.joozdlog_todo_title, viewModel.knownIssuesLiveData), null)
                     addToBackStack(null)

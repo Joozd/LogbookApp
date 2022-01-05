@@ -22,7 +22,6 @@ package nl.joozd.logbookapp.data.calendar
 import android.Manifest
 import android.content.Context
 import android.provider.CalendarContract
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -36,20 +35,6 @@ import java.time.Instant
  */
 
 class CalendarScraper(private val context: Context) {
-    /*********************************************************************************************
-     * Private parts
-     *********************************************************************************************/
-
-    // private val hasPermission= ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED
-
-    @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    private suspend fun findCalendarByName(name: String?): JoozdCalendar? = if (name == null) null else getCalendarsList().singleOrNull{it.name == name}
-
-
-    /*********************************************************************************************
-     * Public functions
-     *********************************************************************************************/
-
     /**
      * Get a list of CalendarDescriptors representing the calendars on this device
      * Should not be done on main thread
@@ -159,48 +144,6 @@ class CalendarScraper(private val context: Context) {
     }
 
 
-
-
-    @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    suspend fun getAllevents(activeCalendar: JoozdCalendar): List<JoozdCalendarEvent> = withContext (Dispatchers.IO){
-        val foundEvents: MutableList<JoozdCalendarEvent> = mutableListOf()
-
-        val selection = "(${CalendarContract.Events.CALENDAR_ID} = ?)"
-        val selectionArgs: Array<String> = arrayOf(
-            activeCalendar.calID.toString()
-        )
-
-        context.contentResolver.query(
-            CalendarContract.Events.CONTENT_URI,
-            EVENT_PROJECTION,
-            selection,
-            selectionArgs,
-            null
-        )?.use { cur ->
-            while (cur.moveToNext()) {
-                if (cur.getLong(EVENT_CALENDAR_ID_INDEX) == activeCalendar.calID && cur.getInt(
-                        EVENT_DELETED_INDEX
-                    ) == 0
-                ) {
-                    foundEvents.add(
-                        JoozdCalendarEvent(
-                            cur.getString(EVENT_TITLE_INDEX),
-                            cur.getString(EVENT_TITLE_INDEX),
-                            Instant.ofEpochMilli(cur.getLong(EVENT_DTSTART_INDEX)),
-                            Instant.ofEpochMilli(cur.getLong(EVENT_DTEND_INDEX)),
-                            cur.getString(EVENT_EVENT_LOCATION_INDEX),
-                            "",
-                            cur.getLong(EVENT_ID_INDEX)
-                        )
-                    )
-                }
-            }
-        }
-        foundEvents
-    }
-
-
-
     /*********************************************************************************************
      * Companion object
      *********************************************************************************************/
@@ -208,9 +151,8 @@ class CalendarScraper(private val context: Context) {
     companion object {
 
         /*********************************************************************************************
-         * Constant and projection arrays
+         * Constants and projection arrays
          *********************************************************************************************/
-
 
         // The indices for the projection array below.
         private const val PROJECTION_ID_INDEX: Int = 0

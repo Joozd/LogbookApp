@@ -544,7 +544,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         when (withContext(Dispatchers.IO) { UserManagement.tryToFixLogin() }) {
             true -> flightRepository.syncIfNeeded() // this will eventually check if login is correct and set flag accordingly, setting [notLoggedIn]
             false -> flightRepository.setNotLoggedInFlag(notLoggedIn = true) // This will set [notLoggedIn], triggering observer in MainActivity
-            // null -> Don't do anything, server is not OK
+            null ->  { /* do nothing; server is not OK */ }
         }
     }
 

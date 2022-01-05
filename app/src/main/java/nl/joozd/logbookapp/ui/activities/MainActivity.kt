@@ -201,7 +201,7 @@ class MainActivity : JoozdlogActivity() {
                     Errors.EMAIL_CONFIRMATION_FAILED -> showBadEmailConfirmationDialog()
                     Errors.SERVER_ERROR -> showRandomServerErrorDialog()
                     Errors.BAD_EMAIL_SAVED -> showBadEmailSavedDialog()
-                    // null -> do nothing
+                    null ->  { /* do nothing */ }
                 }
             }
 

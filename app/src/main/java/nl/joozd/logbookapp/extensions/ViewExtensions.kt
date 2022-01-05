@@ -115,6 +115,7 @@ fun EditText.onTextChanged(text: (String) -> Unit) {
     })
 }
 
+/*
 fun EditText.onTextChanged(before: (String) -> Unit, during: (String) -> Unit, after: (String) -> Unit) {
     this.addTextChangedListener(object : TextWatcher {
         override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -128,6 +129,7 @@ fun EditText.onTextChanged(before: (String) -> Unit, during: (String) -> Unit, a
         }
     })
 }
+*/
 
 internal fun View?.findSuitableParent(): ViewGroup? {
     var view = this

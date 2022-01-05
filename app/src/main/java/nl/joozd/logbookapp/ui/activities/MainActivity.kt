@@ -20,11 +20,8 @@
 
 package nl.joozd.logbookapp.ui.activities
 
-
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -148,8 +145,8 @@ class MainActivity : JoozdlogActivity() {
             /**
              * Redraw flights list when requirements for PIC name being filled changes
              */
+
             viewModel.picNameNeedsToBeSet.observe(activity){
-                println("KIWI XXXXXX THIS IS RUNNING XXXXXXX")
                 // I am aware this is not an efficient way to do this, but it is a very specific event.
                 // (picNameNeedsToBeSet changed in settings and then navigating back to mainActivity)
                 // which is a screen change anyway so one or two dropped frames won't be noticed.
@@ -244,7 +241,6 @@ class MainActivity : JoozdlogActivity() {
                         showDeleteCompletedFlightDialog(it.extraData.getInt(MainActivityFeedbackExtraData.FLIGHT_ID))
                     MainActivityEvents.CALENDAR_SYNC_PAUSED -> showCalendarSyncRestartInfo()
                     MainActivityEvents.EMAIL_VERIFIED -> {
-                        Log.d("MainActivity", "Email Verified!")
                         longToast(R.string.email_verified)
                     }
                     MainActivityEvents.LOGGED_IN -> longToast(R.string.logged_in)
@@ -253,7 +249,7 @@ class MainActivity : JoozdlogActivity() {
                     MainActivityEvents.BACKUP_NEEDED -> JoozdlogWorkersHub.periodicBackupFromServer(true) // If a backup should be made, try to do that through server
                     MainActivityEvents.SHOW_ABOUT_DIALOG -> showAboutDialog()
                     MainActivityEvents.DONE -> longToast(" Yay fixed!")
-                    MainActivityEvents.ERROR -> longToast("An error occurred :(")
+                    MainActivityEvents.ERROR -> longToast("An error ${it.getInt()} occurred :(") // currently not used
                 }
             }
 

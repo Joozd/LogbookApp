@@ -32,6 +32,7 @@ import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 //TODO if only one name selected in recyclerView, set that as active name if OK pressed
+//TODO Make this less ugly
  abstract class NamesDialog: JoozdlogFragment() {
     /**
      * Set to true if working on PIC, or false if working on other names (Flight.name2)

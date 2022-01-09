@@ -22,7 +22,11 @@ package nl.joozd.logbookapp.ui.dialogs
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import java.time.LocalDate
 
-class LocalDatepickerDialog: LocalDatePickerFragment() {
+/**
+ * Update flight when a date is picked
+ * [wf] will take care of exactly that happens
+ */
+class LocalDatePickerDialog: LocalDatePickerFragment() {
     private val wf = FlightRepository.getInstance().getWorkingFlight()
     override fun onDateSelectedListener(date: LocalDate?) {
         date?.let { wf.date = it }

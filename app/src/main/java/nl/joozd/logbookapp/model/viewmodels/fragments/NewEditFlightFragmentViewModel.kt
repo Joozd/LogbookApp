@@ -41,15 +41,6 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     private val _title = MutableLiveData(context.getString(if(wf.newFlight) R.string.add_flight else R.string.edit_flight))
 
-    // If this is true, no more windows should be opened
-    private var closing: Boolean = false
-
-
-        /**
-     * MediatorLiveData
-     */
-
-
     /**
      * MediatorLiveData
      */
@@ -485,24 +476,10 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     /**
      * Close workingFlight without saving
      */
-    fun close(){
-        notifyClosing()                                                     // this makes sure any pending dialogs don't get opened anymore
+    fun close(){                                                 // this makes sure any pending dialogs don't get opened anymore
         flightRepository.closeWorkingFlight()                               // This makes sure fligth doesn't reopen again on recreate activity (ie. rotate)
         feedback(EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT)       // This tells fragment to close itself
     }
-
-    /**
-     * Let the viewModel know the Fragment is about to close itself
-     */
-    fun notifyClosing(){
-        closing = true
-    }
-
-
-    /**
-     * Check if
-     */
-    fun checkIfStillOpen(): Boolean = !closing
 
     /**
      * Disables Calendar Sync alltogether

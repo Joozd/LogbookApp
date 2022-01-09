@@ -41,6 +41,7 @@ import nl.joozd.logbookapp.ui.adapters.AircraftPickerAdapter
 
 
 //TODO needs work
+//TODO remake this dialog as complete aircraft editor
 class AircraftPicker: JoozdlogFragment(){
     private val viewModel: AircraftPickerViewModel by viewModels()
 

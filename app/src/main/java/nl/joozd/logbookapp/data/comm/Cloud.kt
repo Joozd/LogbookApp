@@ -378,7 +378,7 @@ object Cloud {
         return when (result) {
             CloudFunctionResults.OK -> Unit
             CloudFunctionResults.UNKNOWN_USER_OR_PASS, CloudFunctionResults.NOT_LOGGED_IN -> {
-                flightRepository.setNotLoggedInFlag(true)
+                flightRepository.serverRefusedLoginData()
                 null
             }
             else -> {

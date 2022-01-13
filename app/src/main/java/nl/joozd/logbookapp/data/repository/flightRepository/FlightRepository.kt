@@ -51,7 +51,6 @@ import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.lang.Exception
 import java.time.Instant
 import java.util.*
-import kotlin.math.min
 
 //TODO reorder this and make direct DB functions private
 //TODO make cloud functions originate from here and do their DB work here, not in [Cloud]
@@ -170,7 +169,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
 
     private val _syncProgress = MutableLiveData(-1)
 
-    private val _notLoggedIn = MutableLiveData<Boolean>()
+    private val _serverRefusedLoginData = MutableLiveData<Boolean>()
 
     //Might become private, depending on how i will do cloud syncs
     suspend fun requestWholeDB(): List<Flight> = withContext(dispatcher){
@@ -211,8 +210,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     val syncProgress: LiveData<Int>
         get() = _syncProgress
 
-    val notLoggedIn: LiveData<Boolean>
-        get() = _notLoggedIn
+    val serverRefusedLoginData: LiveData<Boolean>
+        get() = _serverRefusedLoginData
 
     val allNames: LiveData<List<String>>
         get() = _allNames
@@ -595,9 +594,9 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     /**
      * TODO write documentation here
      */
-    fun setNotLoggedInFlag(notLoggedIn: Boolean = false){
+    fun serverRefusedLoginData(){
         launch {
-            _notLoggedIn.value = notLoggedIn
+            _serverRefusedLoginData.value = true
         }
     }
 

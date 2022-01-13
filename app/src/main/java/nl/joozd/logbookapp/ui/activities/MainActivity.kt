@@ -20,7 +20,9 @@
 
 package nl.joozd.logbookapp.ui.activities
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -36,6 +38,8 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
 import nl.joozd.logbookapp.extensions.*
+import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityFeedbackExtraData
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModel
@@ -64,230 +68,299 @@ class MainActivity : JoozdlogActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        with (ActivityMainNewBinding.inflate(layoutInflater)) {
-            setSupportActionBarWithReturn(mainToolbar)?.apply {
-                // intentionally blank
+        val binding = (ActivityMainNewBinding.inflate(layoutInflater)).apply {
+            setSupportActionBar(mainToolbar)
+
+            addAdapterAndManagerToFlightsList(makeFlightsListAdapter())
+
+            initializeSearchTypeSpinner()
+
+            setOnClickListeners()
+
+            addOnTextChangedListenerToMainSearchField()
+
+            setBackupMessageText()
+
+            observeFeedback()
+
+            startObservers()
+        }
+
+        setContentView(binding.root)
+    }
+
+    private fun ActivityMainNewBinding.startObservers() {
+        viewModel.showBackupNotice.observe(activity) {
+            showBackupReminderLayoutIf(it)
+        }
+
+        // It doesn;t matter if pic name actually needs to be set or not,
+        // if this value changes, the list needs to be redrawn.
+        viewModel.picNameNeedsToBeSet.observe(activity) {
+            redrawFlightsList(getFlightsListAdapter())
+        }
+
+        viewModel.backupUri.observe(activity) {
+            shareBackupFile(it)
+        }
+
+        viewModel.loginFailed.observe(activity) {
+            handleLoginFailedSituation(it)
+        }
+
+        viewModel.displayFlightsList.observe(activity) { fff ->
+            updateFlightsListAdapter(fff)
+        }
+
+        viewModel.displayedFlightsAmount.observe(activity) {
+            mainToolbar.subtitle = getString(R.string.number_of_flights, it)
+        }
+
+        viewModel.undoAvailableLiveData.observe(activity) {
+            showUndoMenuItemIf(it)
+        }
+
+        viewModel.redoAvailableLiveData.observe(activity) {
+            showRedoMenuItemIf(it)
+        }
+
+
+        viewModel.airportSyncProgress.observe(activity) { p ->
+            when {
+                p == -1 -> airportSyncProgressBar?.remove()
+                airportSyncProgressBar != null -> airportSyncProgressBar?.progress = p
+                else -> airportSyncProgressBar =
+                    makeProgressBar(this, R.string.loadingAirports, p).show()
             }
+        }
 
-            /**
-             * Flights List (RecyclerView) adapter initialization and onClick/onDelete
-             */
-            val flightsAdapter = FlightsAdapter().apply {
-                onDelete = { id -> viewModel.deleteFlight(id) }
-                itemClick = { id -> viewModel.showFlight(id) }
-            }.also {
-                flightsList.layoutManager = LinearLayoutManager(activity)
-                flightsList.adapter = it
+        viewModel.flightSyncProgress.observe(activity) { p ->
+            when {
+                p == -1 -> flightsSyncProgressBar?.remove()
+
+                flightsSyncProgressBar != null -> flightsSyncProgressBar?.progress = p
+
+                else -> flightsSyncProgressBar =
+                    makeProgressBar(this, R.string.loadingFlights, p).show()
             }
+        }
 
-            /**
-             * Fill spinner and set onSelected
-             * for search field
-             */
-            ArrayAdapter.createFromResource(
-                activity,
-                R.array.search_options,
-                android.R.layout.simple_spinner_item
-            ).apply {
-                // Specify the layout to use when the list of choices appears
-                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            }.also { adapter ->
-                // Apply the adapter to the spinner
-                searchTypeSpinner.adapter = adapter
-            }
-            searchTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    //mainSearchField.text = mainSearchField.text
-                    viewModel.setSpinnerSelection(position)
-                }
-            }
-
-            /**
-             * addButton wil show a null flight (and showing a null flight will create a new empty flight)
-             */
-            addButton.setOnClickListener {
-                viewModel.addFlight()
-            }
-
-            /**
-             * Search field and -spinner functions
-             */
-            mainSearchField.onTextChanged {
-                viewModel.setSearchString(it)
-            }
-
-            /**
-             * Hide backup mnessage until end of day or untill next creation of viewModel
-             */
-            dontBackupButton.setOnClickListener { viewModel.dismissBackup() }
-
-            backupButton.setOnClickListener { viewModel.backUpNow() }
-
-            /**
-             * Set dynamic text fields:
-             */
-            backupMessage.text = getString(R.string.backup_message_main_activity, viewModel.daysSinceLastBackup)
-
-            /*******************************************************************************************
-             * Observers below here
-             *******************************************************************************************/
-
-            viewModel.showBackupNotice.observe(activity){
-                backupReminderLayout.visibility = if (it) View.VISIBLE else View.GONE
-            }
-
-            /**
-             * Redraw flights list when requirements for PIC name being filled changes
-             */
-
-            viewModel.picNameNeedsToBeSet.observe(activity){
-                // I am aware this is not an efficient way to do this, but it is a very specific event.
-                // (picNameNeedsToBeSet changed in settings and then navigating back to mainActivity)
-                // which is a screen change anyway so one or two dropped frames won't be noticed.
-                flightsAdapter.notifyDataSetChanged()
-            }
-
-            viewModel.backupUri.observe(activity){
-                startActivity(Intent.createChooser(Intent().apply{
-                    action = Intent.ACTION_SEND
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    setDataAndType(it, CSV_MIME_TYPE)
-                    putExtra(Intent.EXTRA_STREAM, it)
-                }, "Gooi maar ergens heen aub"))
-            }
-
-            /**
-             * Checks for bad login data
-             */
-            viewModel.notLoggedIn.observe(activity) {
-                if (it && Preferences.useCloud){
-                    if (Preferences.newPassword.isNotEmpty()) // app got killed while changing password
-                        viewModel.tryToFixLogin()
-                    else
-                        showLoginDialog()
-                }
-                else hideLoginDialog()
-            }
-
-            viewModel.displayFlightsList.observe(activity,){ fff ->
-                flightsAdapter.updateList(fff)
-                if (!flightsList.canScrollVertically(-1)){ // if at top
-                    val plannedFlightsInSight = findAmountOfPlannedFlightsToShow()
-                    val positionToScrollTo = maxOf (fff.firstOrNull{!it.planned}?.let { f -> fff.indexOf(f)} ?: 0, plannedFlightsInSight) - plannedFlightsInSight
-                    flightsList.scrollToPosition(positionToScrollTo)
-
-                    // scroll by half the size of the top item in the list (actual item may not be drawn yet so we'll hav to make do with
-
-                    if (positionToScrollTo != 0) flightsList.scrollBy(0, -30.dpToPixels().toInt())
-                }
-            }
-
-            viewModel.displayedFlightsAmount.observe(activity){
-                mainToolbar.subtitle = getString(R.string.number_of_flights, it)
-            }
-
-            viewModel.errorToShow.observe(activity) {
-                when (it) {
-                    Errors.LOGIN_DATA_REJECTED_BY_SERVER -> showBadLoginDataDialog()
-                    Errors.EMAIL_CONFIRMATION_FAILED -> showBadEmailConfirmationDialog()
-                    Errors.SERVER_ERROR -> showRandomServerErrorDialog()
-                    Errors.BAD_EMAIL_SAVED -> showBadEmailSavedDialog()
-                    null ->  { /* do nothing */ }
-                }
-            }
-
-            viewModel.undoAvailableLiveData.observe(activity){
-                undoMenuItem?.let{ item ->
-                    item.isVisible = it
-                    //invalidateOptionsMenu()
-                }
-
-            }
-
-            viewModel.redoAvailableLiveData.observe(activity){
-                redoMenuItem?.let{ item ->
-                    item.isVisible = it
-                    //invalidateOptionsMenu()
-                }
-            }
-
-            viewModel.feedbackEvent.observe(activity) {
-                when (it.getEvent()) {
-                    MainActivityEvents.NOT_IMPLEMENTED -> toast("Not Implemented")
-                    // MainActivityEvents.SHOW_FLIGHT -> showFlight() this is now through liveData
-                    MainActivityEvents.OPEN_SEARCH_FIELD -> {
-                        searchField.visibility = View.VISIBLE
-                        mainSearchField.requestFocus()
-                        mainSearchField.showKeyboard()
+        /**
+         * If workingFlight gives a WorkingFlight, show it in an EditFlightFragment.
+         * If it is null, it means a workingFlight is closed. Check for conflicts and show undo-bar if a flight was saved.
+         */
+        viewModel.workingFlight.observe(activity) {
+            it?.let {
+                with(supportFragmentManager) {
+                    findFragmentByTag(EDIT_FLIGHT_TAG)?.let {
+                        commit { remove(it) }
                     }
-                    MainActivityEvents.CLOSE_SEARCH_FIELD -> {
-                        mainSearchField.setText("")
-                        mainSearchField.clearFocus()
-                        hideKeyboard(mainSearchField)
-                        searchTypeSpinner.setSelection(0)
-                        //reset search types spinner//
-                        searchField.visibility = View.GONE
-                    }
-                    MainActivityEvents.FLIGHT_NOT_FOUND -> longToast("ERROR: Flight not found!")
-                    MainActivityEvents.TRYING_TO_DELETE_CALENDAR_FLIGHT ->
-                        showDeletePlannedCalendarFlightDialog(it.extraData.getInt(MainActivityFeedbackExtraData.FLIGHT_ID))
-                    MainActivityEvents.TRYING_TO_DELETE_COMPLETED_FLIGHT ->
-                        showDeleteCompletedFlightDialog(it.extraData.getInt(MainActivityFeedbackExtraData.FLIGHT_ID))
-                    MainActivityEvents.CALENDAR_SYNC_PAUSED -> showCalendarSyncRestartInfo()
-                    MainActivityEvents.EMAIL_VERIFIED -> {
-                        longToast(R.string.email_verified)
-                    }
-                    MainActivityEvents.LOGGED_IN -> longToast(R.string.logged_in)
-                    MainActivityEvents.LOGIN_DELAYED_DUE_NO_SERVER -> longToast(R.string.login_delayed)
-
-                    MainActivityEvents.BACKUP_NEEDED -> JoozdlogWorkersHub.periodicBackupFromServer(true) // If a backup should be made, try to do that through server
-                    MainActivityEvents.SHOW_ABOUT_DIALOG -> showAboutDialog()
-                    MainActivityEvents.DONE -> longToast(" Yay fixed!")
-                    MainActivityEvents.ERROR -> longToast("An error ${it.getInt()} occurred :(") // currently not used
                 }
+                showFlight()
+            } ?: showToolbar()
+        }
+    }
+
+    private fun showRedoMenuItemIf(it: Boolean) {
+        redoMenuItem?.let { item ->
+            item.isVisible = it
+            //invalidateOptionsMenu()
+        }
+    }
+
+    private fun showUndoMenuItemIf(it: Boolean) {
+        undoMenuItem?.let { item ->
+            item.isVisible = it
+        }
+    }
+
+    private fun ActivityMainNewBinding.getFlightsListAdapter() =
+        flightsList.adapter as FlightsAdapter
+
+    private fun ActivityMainNewBinding.updateFlightsListAdapter(newFLightsList: List<DisplayFlight>) {
+        getFlightsListAdapter().updateList(newFLightsList)
+        scrollToFirstCompletedFlight(newFLightsList)
+    }
+
+    private fun ActivityMainNewBinding.scrollToFirstCompletedFlight(
+        newFLightsList: List<DisplayFlight>
+    ) {
+        if (!flightsList.canScrollVertically(-1)) { // if at top
+            val positionToScrollTo = findIndexOfTopFlightOnScreenAfterScrolling(newFLightsList)
+            flightsList.scrollToPosition(positionToScrollTo)
+
+            // scroll by another 30 dp
+            if (positionToScrollTo != 0) flightsList.scrollBy(0, -30.dpToPixels().toInt())
+        }
+    }
+
+    private fun findIndexOfTopFlightOnScreenAfterScrolling(
+        newFLightsList: List<DisplayFlight>
+    ) = maxOf(
+        newFLightsList.firstOrNull { !it.planned }
+            ?.let { f -> newFLightsList.indexOf(f) } ?: 0,
+        PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED
+    ) - PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED
+
+    private fun handleLoginFailedSituation(loginFailed: Boolean) {
+        if (loginFailed && Preferences.useCloud) {
+            if (Preferences.newPassword.isNotEmpty()) // app got killed while changing password
+                viewModel.tryToFixLogin()
+            else
+                showLoginDialog()
+        } else hideLoginDialog()
+    }
+
+    private fun shareBackupFile(it: Uri?) {
+        startActivity(Intent.createChooser(Intent().apply {
+            action = Intent.ACTION_SEND
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            setDataAndType(it, CSV_MIME_TYPE)
+            putExtra(Intent.EXTRA_STREAM, it)
+        }, "Gooi maar ergens heen aub"))
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    // I am aware this is not an efficient way to do this, but it is a very specific event.
+    // (picNameNeedsToBeSet changed in settings and then navigating back to mainActivity)
+    // which is a screen change anyway so one or two dropped frames won't be noticed.
+    private fun redrawFlightsList(flightsListAdapter: FlightsAdapter) {
+        flightsListAdapter.notifyDataSetChanged()
+    }
+
+    private fun ActivityMainNewBinding.showBackupReminderLayoutIf(it: Boolean) {
+        backupReminderLayout.visibility = if (it) View.VISIBLE else View.GONE
+    }
+
+    private fun ActivityMainNewBinding.observeFeedback() {
+        viewModel.feedbackEvent.observe(activity) {
+            handleFeedbackEvent(it)
+        }
+
+        viewModel.errorToShow.observe(activity) {
+            handleErrorEvent(it)
+        }
+    }
+
+    private fun handleErrorEvent(error: Errors?) {
+        when (error) {
+            Errors.LOGIN_DATA_REJECTED_BY_SERVER -> showBadLoginDataDialog()
+            Errors.EMAIL_CONFIRMATION_FAILED -> showBadEmailConfirmationDialog()
+            Errors.SERVER_ERROR -> showRandomServerErrorDialog()
+            Errors.BAD_EMAIL_SAVED -> showBadEmailSavedDialog()
+            null -> { /* do nothing */
             }
+        }
+    }
 
-            viewModel.airportSyncProgress.observe(activity) { p ->
-                when {
-                    p == -1 -> airportSyncProgressBar?.remove()
-                    airportSyncProgressBar != null -> airportSyncProgressBar?.progress = p
-                    else -> airportSyncProgressBar =
-                        makeProgressBar(this, R.string.loadingAirports, p).show()
-                }
+    private fun ActivityMainNewBinding.handleFeedbackEvent(feedbackevent: FeedbackEvent) {
+        when (feedbackevent.getEvent()) {
+            MainActivityEvents.NOT_IMPLEMENTED -> toast("Not Implemented")
+            MainActivityEvents.OPEN_SEARCH_FIELD -> openSearchField()
+            MainActivityEvents.CLOSE_SEARCH_FIELD -> closeSearchField()
+            MainActivityEvents.FLIGHT_NOT_FOUND -> longToast("ERROR: Flight not found!")
+            MainActivityEvents.TRYING_TO_DELETE_CALENDAR_FLIGHT ->
+                showDeletePlannedFLightDialogWithFlightData(feedbackevent)
+            MainActivityEvents.TRYING_TO_DELETE_COMPLETED_FLIGHT ->
+                showDeleteCompletedFlightDialog(
+                    feedbackevent.extraData.getInt(
+                        MainActivityFeedbackExtraData.FLIGHT_ID
+                    )
+                )
+            MainActivityEvents.CALENDAR_SYNC_PAUSED -> showCalendarSyncRestartInfo()
+            MainActivityEvents.EMAIL_VERIFIED -> {
+                longToast(R.string.email_verified)
             }
+            MainActivityEvents.LOGGED_IN -> longToast(R.string.logged_in)
+            MainActivityEvents.LOGIN_DELAYED_DUE_NO_SERVER -> longToast(R.string.login_delayed)
 
-            viewModel.flightSyncProgress.observe(activity) { p ->
-                when {
-                    p == -1 -> flightsSyncProgressBar?.remove()
+            MainActivityEvents.BACKUP_NEEDED -> JoozdlogWorkersHub.periodicBackupFromServer(true) // If a backup should be made, try to do that through server
+            MainActivityEvents.SHOW_ABOUT_DIALOG -> showAboutDialog()
+            MainActivityEvents.DONE -> longToast(" Yay fixed!")
+            MainActivityEvents.ERROR -> longToast("An error ${feedbackevent.getInt()} occurred :(") // currently not used
+        }
+    }
 
-                    flightsSyncProgressBar != null -> flightsSyncProgressBar?.progress = p
+    private fun showDeletePlannedFLightDialogWithFlightData(it: FeedbackEvent) {
+        val flightID = it.extraData.getInt(MainActivityFeedbackExtraData.FLIGHT_ID)
+        showDeletePlannedCalendarFlightDialog(flightID)
+    }
 
-                    else -> flightsSyncProgressBar = makeProgressBar(this, R.string.loadingFlights, p).show()
-                }
+    private fun ActivityMainNewBinding.closeSearchField() {
+        mainSearchField.setText("")
+        mainSearchField.clearFocus()
+        hideKeyboard(mainSearchField)
+        searchTypeSpinner.setSelection(0)
+        //reset search types spinner//
+        searchField.visibility = View.GONE
+    }
+
+    private fun ActivityMainNewBinding.openSearchField() {
+        searchField.visibility = View.VISIBLE
+        mainSearchField.requestFocus()
+        mainSearchField.showKeyboard()
+    }
+
+    private fun ActivityMainNewBinding.setBackupMessageText() {
+        backupMessage.text =
+            getString(R.string.backup_message_main_activity, viewModel.daysSinceLastBackup)
+    }
+
+    private fun ActivityMainNewBinding.addOnTextChangedListenerToMainSearchField() {
+        mainSearchField.onTextChanged { viewModel.setSearchString(it) }
+    }
+
+    private fun ActivityMainNewBinding.setOnClickListeners() {
+        /*
+         * addButton wil make viewModel add a null flight,
+         * adding a flight will trigger EditFlightFragment to show.
+         */
+        addButton.setOnClickListener { viewModel.addFlight() }
+
+        dontBackupButton.setOnClickListener { viewModel.dismissBackupUntilEndOfDay() }
+
+        backupButton.setOnClickListener { viewModel.backUpNow() }
+    }
+
+    private fun ActivityMainNewBinding.addAdapterAndManagerToFlightsList(
+        flightsListAdapter: FlightsAdapter
+    ) {
+        flightsList.layoutManager = LinearLayoutManager(activity)
+        flightsList.adapter = flightsListAdapter
+    }
+
+    private fun makeFlightsListAdapter() =
+        FlightsAdapter().apply {
+            onDelete = { id -> viewModel.deleteFlight(id) }
+            itemClick = { id -> viewModel.showFlight(id) }
+        }
+
+
+    private fun ActivityMainNewBinding.initializeSearchTypeSpinner() {
+        addAdapterToSearchTypeSpinner()
+        addOnItemSelectedListenerToSearchTypeSpinner()
+    }
+
+    private fun ActivityMainNewBinding.addAdapterToSearchTypeSpinner() {
+        val adapter = ArrayAdapter.createFromResource(
+            activity, R.array.search_options, android.R.layout.simple_spinner_item
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        searchTypeSpinner.adapter = adapter
+    }
+
+    private fun ActivityMainNewBinding.addOnItemSelectedListenerToSearchTypeSpinner() {
+        searchTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                viewModel.setSpinnerSelection(position)
             }
-
-            /**
-             * If workingFlight gives a WorkingFlight, show it in an EditFlightFragment.
-             * If it is null, it means a workingFlight is closed. Check for conflicts and show undo-bar if a flight was saved.
-             */
-            viewModel.workingFlight.observe(activity) {
-                it?.let {
-                    with(supportFragmentManager) {
-                        findFragmentByTag(EDIT_FLIGHT_TAG)?.let {
-                            commit { remove(it) }
-                        }
-                    }
-                    showFlight()
-                } ?: showToolbar()
-            }
-
-            setContentView(root)
         }
     }
 
@@ -546,20 +619,12 @@ class MainActivity : JoozdlogActivity() {
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    /**
-     * Returns the amount of planned flights to show when opening app (constant now, might change for something dynamic depending on screen size or somwething.
-     * It's an nl.joozd.joozdlogpdfdetector.interface dependant function, thats why this is here and not in ViewModel
-     */
-    private fun findAmountOfPlannedFlightsToShow(): Int{
-        return PLANNED_FLIGHTS_IN_SIGHT
-    }
-
 
 
 
     companion object{
         const val EDIT_FLIGHT_TAG = "EDIT_FLIGHT_TAG"
-        const val PLANNED_FLIGHTS_IN_SIGHT = 3
+        const val PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED = 3
 
         const val LOGIN_DIALOG_TAG = "LOGIN_DIALOG"
 

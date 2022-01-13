@@ -195,13 +195,6 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
-    /*
-    not using this anymore
-    private fun setSearchFieldHint(it: Int) {
-        _searchFieldHint.value = if (it == rawFlights.size) null else "$it flights found"
-    }
-    */
-
     /**
      * Returns whether the time between now and most recent backup is greater than [Preferences.backupInterval] days
      * Will count days starting from midnight LT, so if I just backed up and set it to 1 day, I will get a reminder at midnight.
@@ -223,13 +216,6 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         DisplayFlight.of(f, icaoIataMap, Preferences.useIataAirports, error = f.overlaps(previous) || f.overlaps(next))
     }
 
-    /*********************************************************************************************
-     * Public parts
-     *********************************************************************************************/
-
-    /**
-     * Observable data:
-     */
 
     val displayFlightsList: LiveData<List<DisplayFlight>>
         get() = _displayFlightsList2
@@ -242,8 +228,9 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     val internetAvailable: LiveData<Boolean>
         get() = InternetStatus.internetAvailableLiveData
 
-    val notLoggedIn: LiveData<Boolean>
-        get() = flightRepository.notLoggedIn
+    //true if
+    val loginFailed: LiveData<Boolean>
+        get() = flightRepository.serverRefusedLoginData
 
     val airportSyncProgress: LiveData<Int>
         get() = airportRepository.airportSyncProgress
@@ -330,11 +317,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
-
-    /**
-     * Handlers for clickety thingies
-     */
-    fun dismissBackup() {
+    fun dismissBackupUntilEndOfDay() {
         _showBackupNotice.value = false
         CoroutineTimerTask(Instant.now().atEndOfDay(OffsetDateTime.now().offset)).run(viewModelScope + Dispatchers.Main){
             _showBackupNotice.value = backupDialogShouldBeShown()
@@ -543,7 +526,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     fun tryToFixLogin() = viewModelScope.launch {
         when (withContext(Dispatchers.IO) { UserManagement.tryToFixLogin() }) {
             true -> flightRepository.syncIfNeeded() // this will eventually check if login is correct and set flag accordingly, setting [notLoggedIn]
-            false -> flightRepository.setNotLoggedInFlag(notLoggedIn = true) // This will set [notLoggedIn], triggering observer in MainActivity
+            false -> flightRepository.serverRefusedLoginData() // This will set [notLoggedIn], triggering observer in MainActivity
             null ->  { /* do nothing; server is not OK */ }
         }
     }

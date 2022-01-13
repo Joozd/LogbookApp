@@ -56,48 +56,57 @@ class EditFlightFragment: JoozdlogFragment(){
     /**
      * Will define all listeners etc, and set initial
      */
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        LayoutEditFlightFragmentBinding.bind(inflater.inflate(R.layout.layout_edit_flight_fragment, container, false)).apply {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val inflatedLayout = inflater.inflate(R.layout.layout_edit_flight_fragment, container, false)
+        val binding = LayoutEditFlightFragmentBinding.bind(inflatedLayout).apply {
+            /*
             (flightInfoText.background as GradientDrawable).colorFilter = PorterDuffColorFilter(
                 requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
                 PorterDuff.Mode.SRC_IN
             ) // set background color to background with rounded corners
 
-            //Set and attach the adapters for autocomplete fields
-            setAdapters()
+             */
 
-            //Set the observers that fill the data for EditTexts
-            setEditTextObservers()
+            setAndattachAdaptersForAutocompleteFields()
 
-            //Set the observers that make toggle fields (PF, SIM, Sign, etc) appear in the correct way
-            setToggleFieldsObservers()
+            setLongPressListenersForHelpDialogs()
 
-            //Handle changed source data (airports, names, etc)
-            setDataChangedObservers()
+            setOnClickListeners()
 
-            //handle feedback from viewModel
+            observeLiveData()
+
             setFeedbackObserver()
-
-            //Show a help dialog when an item is long-pressed
-            setLongPressHelpDialogs()
-
-            //What should happen when a toggle switch (like PF, IFR or Sign) is clicked
-            setToggleSwitchOnClickListeners()
-
-            //Launch dialogs when the appropriate button is clicked (datepicker, airportpicker, etc)
-            setDialogLaunchingOnClickListeners()
-
-            //What to do when an EditText gets or loses focus (usually: Send its data to viewModel)
-            setOnFocusChangedListeners()
-
-            //ignore clicks on empty parts of dialog
-            flightBox.setOnClickListener {  }
-
-            setClosingOnClickListeners()
 
             if (Preferences.editFlightFragmentWelcomeMessageShouldBeDisplayed)
                 showWelcomeMessage()
-        }.root
+        }
+        return binding.root
+    }
+
+    private fun LayoutEditFlightFragmentBinding.observeLiveData() {
+        setObserversForEditTextContents()
+
+        setObserversForToggleButtons()
+
+        //Handle changed source data (airports, names, etc)
+        setSourceDataObservers()
+    }
+
+    private fun LayoutEditFlightFragmentBinding.setOnClickListeners() {
+        setToggleSwitchOnClickListeners()
+
+        setDialogLaunchingOnClickListeners()
+
+        setOnFocusChangedListeners()
+
+        setClosingOnClickListeners()
+
+        catchAndIgnoreClicksOnEmptyPartOfDialog()
+    }
+
+    private fun LayoutEditFlightFragmentBinding.catchAndIgnoreClicksOnEmptyPartOfDialog() {
+        flightBox.setOnClickListener { }
+    }
 
     /**
      * Functions that handle closing fragments.
@@ -453,7 +462,7 @@ class EditFlightFragment: JoozdlogFragment(){
     /**
      * Set Long-press help dialogs:
      */
-    private fun LayoutEditFlightFragmentBinding.setLongPressHelpDialogs() {
+    private fun LayoutEditFlightFragmentBinding.setLongPressListenersForHelpDialogs() {
         flightDateField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_date_help) }
         flightFlightNumberField     .setOnLongClickListener { showHelpMessage(R.string.edit_flight_flight_number_help) }
         flightOrigField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_orig_help) }
@@ -508,7 +517,35 @@ class EditFlightFragment: JoozdlogFragment(){
     /**
      * Observers for when data for adapters has been changed
      */
-    private fun LayoutEditFlightFragmentBinding.setDataChangedObservers() {
+    private fun LayoutEditFlightFragmentBinding.setSourceDataObservers() {
+        observeNames()
+        observeKnownAircraftRegistrations()
+
+
+        // Notify viewmodel that aircraft DB has changed. Triggered from here to keep
+        // LiveData lifecycle pattern intact and prevent using observeForever in viewModel
+        //TODO I don't like this
+        viewModel.aircraftDbLiveData.observe(viewLifecycleOwner) {
+            viewModel.notifyAircraftDbChanged()
+        }
+
+        // Notify viewmodel that aircraft DB has changed. Triggered from here to keep
+        // LiveData lifecycle pattern intact and prevent using observeForever in viewModel
+        //TODO I don't like this
+        viewModel.airportDbLiveData.observe(viewLifecycleOwner) {
+            viewModel.notifyAirportDbChanged()
+        }
+    }
+
+    private fun LayoutEditFlightFragmentBinding.observeKnownAircraftRegistrations() {
+        viewModel.knownRegistrations.observe(viewLifecycleOwner) { registrations ->
+            (flightAircraftField.adapter as AircraftAutoCompleteAdapter).apply {
+                setItems(registrations)
+            }
+        }
+    }
+
+    private fun LayoutEditFlightFragmentBinding.observeNames() {
         @Suppress("UNCHECKED_CAST")
         viewModel.allNames.observe(viewLifecycleOwner) {
             (flightNameField.adapter as ArrayAdapter<String>).apply {
@@ -520,29 +557,12 @@ class EditFlightFragment: JoozdlogFragment(){
                 addAll(it)
             }
         }
-        viewModel.knownRegistrations.observe(viewLifecycleOwner) { registrations ->
-            (flightAircraftField.adapter as AircraftAutoCompleteAdapter).apply{
-                setItems(registrations)
-            }
-        }
-
-        // Notify viewmodel that aircraft DB has changed. Triggered from here to keep
-        // LiveData lifecycle pattern intact and prevent using observeForever in viewModel
-        viewModel.aircraftDbLiveData.observe(viewLifecycleOwner) {
-            viewModel.notifyAircraftDbChanged()
-        }
-
-        // Notify viewmodel that aircraft DB has changed. Triggered from here to keep
-        // LiveData lifecycle pattern intact and prevent using observeForever in viewModel
-        viewModel.airportDbLiveData.observe(viewLifecycleOwner) {
-            viewModel.notifyAirportDbChanged()
-        }
     }
 
     /**
      * observers to show data in toggle fields
      */
-    private fun LayoutEditFlightFragmentBinding.setToggleFieldsObservers() {
+    private fun LayoutEditFlightFragmentBinding.setObserversForToggleButtons() {
         viewModel.isSigned.observe(viewLifecycleOwner) { active -> signSelector.showIfActive(active) }
 
         //This one does a little bit more
@@ -558,16 +578,24 @@ class EditFlightFragment: JoozdlogFragment(){
             picSelector.text = it
         }
 
-        viewModel.isMultiPilot.observe(viewLifecycleOwner) { active ->
-            multiPilotSelector.showIfActive(
-                active
-            )
+        viewModel.isMultiPilot.observe(viewLifecycleOwner) { isActive ->
+            multiPilotSelector.showIfActive(isActive)
         }
-        viewModel.isIfr.observe(viewLifecycleOwner) { active -> ifrSelector.showIfActive(active) }
-        viewModel.isPic.observe(viewLifecycleOwner) { active -> picSelector.showIfActive(active) }
-        viewModel.isPF.observe(viewLifecycleOwner) { active -> pfSelector.showIfActive(active) }
-        viewModel.isAutoValues.observe(viewLifecycleOwner) { active ->
-            autoFillCheckBox.isChecked = active
+
+        viewModel.isIfr.observe(viewLifecycleOwner) { active ->
+            ifrSelector.showIfActive(active)
+        }
+
+        viewModel.isPic.observe(viewLifecycleOwner) { active ->
+            picSelector.showIfActive(active)
+        }
+
+        viewModel.isPF.observe(viewLifecycleOwner) { active ->
+            pfSelector.showIfActive(active)
+        }
+
+        viewModel.isAutoValues.observe(viewLifecycleOwner) { isActive ->
+            autoFillCheckBox.isChecked = isActive
         }
     }
 
@@ -598,7 +626,7 @@ class EditFlightFragment: JoozdlogFragment(){
     /**
      * observers to show data in editText fields
      */
-    private fun LayoutEditFlightFragmentBinding.setEditTextObservers() {
+    private fun LayoutEditFlightFragmentBinding.setObserversForEditTextContents() {
         viewModel.title.observe(viewLifecycleOwner) {
             flightInfoText.text = it
         }
@@ -685,7 +713,7 @@ class EditFlightFragment: JoozdlogFragment(){
     /**
      * Add adapters to fields that have an adapter (autocomplee fields)
      */
-    private fun LayoutEditFlightFragmentBinding.setAdapters() {
+    private fun LayoutEditFlightFragmentBinding.setAndattachAdaptersForAutocompleteFields() {
         flightNameField.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))
 
         flightName2Field.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))

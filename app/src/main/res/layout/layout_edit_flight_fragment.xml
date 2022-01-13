@@ -39,11 +39,12 @@
 
             <TextView
                 android:id="@+id/flightInfoText"
+                style="@style/DialogHeaderLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                android:background="@drawable/top_corners_primarybackgrounddark"
+                android:padding = "0dp"
                 android:gravity="center"
                 android:text="@string/add_flight"
                 android:textColor="@color/white"

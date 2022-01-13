@@ -360,8 +360,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         feedback(EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT)
     }
 
-    fun closeWithoutSaving(){                                               // this makes sure any pending dialogs don't get opened anymore
-        flightRepository.closeWorkingFlight()                               // This makes sure flight doesn't reopen again on recreate activity (ie. rotate)
+    fun closeWithoutSaving(){                                                 // this makes sure any pending dialogs don't get opened anymore
+        flightRepository.closeWorkingFlight()                               // This makes sure fligth doesn't reopen again on recreate activity (ie. rotate)
         feedback(EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT)       // This tells fragment to close itself
     }
 

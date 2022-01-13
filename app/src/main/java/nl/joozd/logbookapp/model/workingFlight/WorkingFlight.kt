@@ -398,7 +398,7 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
      */
 
 
-    /**
+    /*
      * Things that can be set from anywhere:
      */
     var orig: String

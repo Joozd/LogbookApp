@@ -20,7 +20,6 @@
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
 import android.text.Editable
-import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -31,185 +30,128 @@ import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinute
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
+import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalTime
 
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val wf = flightRepository.getWorkingFlight()
 
-    private val _title = MutableLiveData(context.getString(if(wf.newFlight) R.string.add_flight else R.string.edit_flight))
+    val airportDbLiveData = airportRepository.liveAirports
+    val aircraftDbLiveData = aircraftRepository.aircraftListLiveData
+    val knownRegistrationsLiveData = aircraftRepository.registrationsLiveData
 
-    /**
-     * MediatorLiveData
-     */
+    val title: LiveData<String> = MutableLiveData(context.getString(if(wf.newFlight) R.string.add_flight else R.string.edit_flight))
 
-    private val _aircraft = MediatorLiveData<String>().apply{
-        addSource(wf.aircraftLiveData) { ac -> value = (if (sim) ac?.type?.shortName else ac?.toString()) ?: NO_DATA_STRING}
-        addSource (wf.isSimLiveData) { sim -> value = (if (sim) wf.aircraftLiveData.value?.type?.shortName else wf.aircraftLiveData.value?.toString()) ?: NO_DATA_STRING}
-    }
+    val dualInstructor: LiveData<Int> = makeDualInstructorMediatorLivedata()
+    val aircraft: LiveData<String> = makeAircraftDisplayNameMediatorLiveData()
+    val isPic: LiveData<Boolean> = makePicOrPicusMediatorLiveData()
+    val picPicusText: LiveData<String> = makePicPicusTextMediatorLiveData()
 
-    private val _dualInstructor = MediatorLiveData<Int>().apply{
-        value = DUAL_INSTRUCTOR_FLAG_NONE
-        addSource(wf.isDualLiveData) {
-            isDual -> value = when {
-                isDual -> DUAL_INSTRUCTOR_FLAG_DUAL
-                wf.isInstructorLiveData.value == true -> DUAL_INSTRUCTOR_FLAG_INSTRUCTOR
-                else -> DUAL_INSTRUCTOR_FLAG_NONE
-            }
-        }
-        addSource(wf.isInstructorLiveData) {
-            isInstructor -> value = when {
-                isInstructor -> DUAL_INSTRUCTOR_FLAG_INSTRUCTOR
-                wf.isDualLiveData.value == true -> DUAL_INSTRUCTOR_FLAG_DUAL
-                else -> DUAL_INSTRUCTOR_FLAG_NONE
-            }
-        }
-    }
-
-    private val _isPicOrPicus = MediatorLiveData<Boolean>().apply{
-        addSource(wf.isPICLiveData){
-            value = it || wf.isPICUS
-        }
-        addSource(wf.isPICUSLiveData){
-            value = it || wf.isPIC
-        }
-    }
-
-
-    private val _picPicusText = MediatorLiveData<String>().apply{
-        addSource(wf.isPICLiveData){
-            value = getPicPicusString()
-        }
-        addSource(wf.isPICUSLiveData){
-            value = getPicPicusString()
-        }
-    }
-
-    //Transformations.map(wf.aircraft)
-    /**
-     * Observables
-     */
-    val aircraftDbLiveData
-        get()= aircraftRepository.aircraftListLiveData
-
-    val airportDbLiveData
-        get() = airportRepository.liveAirports
-
-    val dateStringLiveData = wf.timeOutLiveData.map{ Instant.ofEpochSecond(it).toLocalDate().toDateString() ?: NO_DATA_STRING }
-    val localDate
-            get() = wf.date
-    val flightNumber
-            get() = wf.flightNumberLiveData
+    val dateStringLiveData = wf.timeOutLiveData.map{ makeDateString(it) }
+    val flightNumberLiveData = wf.flightNumberLiveData
     val origin = Transformations.map(wf.originLiveData) { getAirportString(it)}
     val destination = Transformations.map(wf.destinationLiveData) { getAirportString(it)}
     val originIsValid = Transformations.map(wf.originLiveData){ it?.checkIfValidCoordinates() == true }
     val destinationIsValid = Transformations.map(wf.destinationLiveData){ it?.checkIfValidCoordinates() == true }
     val timeOut = wf.timeOutLiveData.map { Instant.ofEpochSecond(it).toTimeString()}
     val timeIn = wf.timeInLiveData.map { Instant.ofEpochSecond(it).toTimeString()}
-    val landings: LiveData<String>
-        get() = wf.takeoffLandingsLiveData.map { it.toString() }
-    val aircraft: LiveData<String>
-        get() = _aircraft
-    val name
-        get() = wf.nameLiveData
-    val name2
-        get() = wf.name2LiveData
-    val allNames
-        get() = flightRepository.allNames
-    val remarks
-        get() = wf.remarksLiveData
-    val ifrTime
-        get() = wf.ifrTimeLiveData
-    val simTime
-        get() = wf.simTimeLiveData
-    val nightTime
-        get() = wf.nightTimeLiveData
-    val multiPilotTime
-        get() = wf.multiPilotTimeLiveData
-    val isSim
-        get() = wf.isSimLiveData
-    val sim: Boolean    // val to check if flight is sim
-        get()= isSim.value ?: false
+    val landingsLiveData: LiveData<String>  = wf.takeoffLandingsLiveData.map { it.toString() }
+    val nameLiveData = wf.nameLiveData
+    val name2LiveData = wf.name2LiveData
+    val allNamesLiveData = flightRepository.allNamesLiveData
+    val remarksLiveData = wf.remarksLiveData
+    val simTimeLiveData = wf.simTimeLiveData
+    val isSimLiveData = wf.isSimLiveData
+    val isMultiPilotLiveData = wf.isMultipilotLiveData
+    val isIfrLiveData = wf.isIfrLiveData
+    val isPFLiveData = wf.isPFLiveData
+    val isAutoValuesLiveData = wf.autoFillLiveData
 
-    val isSigned
-        get() = wf.signatureLiveData.map { it.isNotBlank() }
+    val isSignedLiveData = wf.signatureLiveData.map { it.isNotBlank() }
+
     val signature: String
         get() = wf.signatureLiveData.value ?: ""
+    val isSim: Boolean    // val to check if flight is sim
+        get() = isSimLiveData.value ?: false
 
-    val isPic: LiveData<Boolean> get() = _isPicOrPicus
-    val picPicusText: LiveData<String> get() = _picPicusText
+    val localDate
+        get() = wf.date
+
+    //If this is true, if autoValues is off, the only reason for that is [checkAutovaluesForUnknownAirport] set it to off.
+    //If checkAutovaluesForUnknownAirport decides it's ok again,  autoValues can be set to on again
+    private var autoValuesOnlyOffBecauseOfUnknownAirport: Boolean = wf.autoFill
+
+    private fun makeDateString(epochSecond: Long) =
+        Instant.ofEpochSecond(epochSecond).toLocalDate().toDateString() ?: NO_DATA_STRING
+
+    private fun makeAircraftDisplayNameMediatorLiveData() =
+        MediatorLiveData<String>().apply {
+            addSource(wf.aircraftLiveData) { value = getAircraftDisplayName() }
+            addSource(wf.isSimLiveData) { value = getAircraftDisplayName() }
+        }
+
+    private fun makePicOrPicusMediatorLiveData() =
+        MediatorLiveData<Boolean>().apply {
+            addSource(wf.isPICLiveData) { value = wf.isPicOrPicus() }
+            addSource(wf.isPICUSLiveData) { value = wf.isPicOrPicus() }
+        }
+
+    private fun makePicPicusTextMediatorLiveData() =
+        MediatorLiveData<String>().apply {
+            addSource(wf.isPICLiveData) { value = getPicOrPicusString() }
+            addSource(wf.isPICUSLiveData) { value = getPicOrPicusString() }
+        }
 
 
-    /**
-     * Livedata keeps track of if [wf] is logged as Dual, Instructor or neither.
-     */
-    val dualInstructor: LiveData<Int>
-        get() = _dualInstructor
+    private fun getAircraftDisplayName() =
+        (if (isSim) wf.aircraftLiveData.value?.type?.shortName else wf.aircraftLiveData.value?.toString())
+            ?: NO_DATA_STRING
 
-    /**
-     * emits true if wf.multipilotTime is not zero
-     */
-    val isMultiPilot
-        get() = wf.isMultipilotLiveData
-    val isIfr
-        get() = wf.isIfrLiveData
-    val isPF
-        get() = wf.isPFLiveData
-    val isAutoValues
-        get() = wf.autoFillLiveData
-    val knownRegistrations
-        get() = aircraftRepository.registrationsLiveData
+    private fun makeDualInstructorMediatorLivedata() =
+        MediatorLiveData<Int>().apply {
+            value = DUAL_INSTRUCTOR_FLAG_NONE
+            addSource(wf.isDualLiveData) {
+                value = makeDualOrInstructorFlag()
+            }
+            addSource(wf.isInstructorLiveData) {
+                value = makeDualOrInstructorFlag()
+            }
+        }
 
-    val title: LiveData<String>
-        get() = _title
-
-
-    /**
-     * Data entry functions
-     */
-
-    /**
-     * Set date
-     * @param newDate: Date as [LocalDate]
-     */
-    fun setDate(newDate: LocalDate?){
-        newDate?.let { wf.date = it }
-            ?: Log.w(this::class.simpleName, "setDate() trying to set date as null")
+    private fun makeDualOrInstructorFlag() = when {
+        wf.isDualLiveData.value == true -> DUAL_INSTRUCTOR_FLAG_DUAL
+        wf.isInstructorLiveData.value == true -> DUAL_INSTRUCTOR_FLAG_INSTRUCTOR
+        else -> DUAL_INSTRUCTOR_FLAG_NONE
     }
 
-    /**
-     * Set FlightNumber
-     * If new flightnumber is the old one mines all the digits (eg KL1234 becomes KL) it doesn't
-     *  update.
-     */
+    private fun WorkingFlight.isPicOrPicus(): Boolean =
+        isPIC || isPICUS
+
+
     fun setFlightNumber(newFlightNumber: Editable?){
         newFlightNumber?.toString()?.let{
-            if (it != (wf.flightNumberLiveData.value ?: "").removeTrailingDigits())
+            // If new flightnumber is not the old one minus all the digits (eg KL1234 becomes KL)
+            if (it.isNotOldValueWithDigitsRemoved())
                 wf.flightNumber = it
-
         }
     }
 
-    /**
-     * Set origin.
-     * Checks if entered data is found in airportRepository.
-     * If it is not found, it will enter it "as is" as identifier (ICAO code)
-     */
-    private fun setOrig(origString: String) { wf.orig = origString }
+    // true if all digits are removed from wf.flightNumber and nothing else changed, eg. KL1234 became KL
+    private fun String.isNotOldValueWithDigitsRemoved() =
+        this != (wf.flightNumber).removeTrailingDigits()
 
 
     fun setOrig(origEditable: Editable?) = origEditable?.let { setOrig(it.toString()) }
 
-    /**
-     * Set destination.
-     * Checks if entered data is found in airportRepository.
-     * If it is not found, it will enter it "as is" as identifier (ICAO code)
-     */
+    fun setDest(destEditable: Editable?) = destEditable?.let {setDest (it.toString())}
+
+    private fun setOrig(origString: String) { wf.orig = origString }
+
     private fun setDest(destString: String) { wf.dest = destString }
 
-    fun setDest(destEditable: Editable?) = destEditable?.let {setDest (it.toString())}
+
 
 
     /**
@@ -222,9 +164,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         wf.setTimeOut(makeTimeFromTimeString(timeString.toString()))
     }
 
-    /**
-     * Set arrival time
-     */
+
     fun setTimeIn(timeString: Editable?){
         wf.setTimeIn(makeTimeFromTimeString(timeString.toString()))
     }
@@ -233,110 +173,89 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         hoursAndMinutesStringToInt(simTimeString.toString())?.let { wf.simTime = it }
     }
 
-    /**
-     * Set registration and type from regAndTypeString.
-     * - If [sim] it saves the whole thing as type
-     * - if no '(' in [regAndTypeString] it assumes all is registration.
-     * Else, it will save exactly `reg` and `type` in `reg(type)`.
-     * Closing bracket is ignored. If no opening bracket, it is all reg.
-     */
-    @Suppress("MemberVisibilityCanBePrivate")
-    fun setRegAndType(regAndTypeString: String){
+    private fun setRegAndType(regAndTypeString: String){
         when {
-            sim -> wf.aircraftType = regAndTypeString                                       // simulator
+            isSim -> wf.aircraftType = regAndTypeString                                     // simulator
             regAndTypeString.isBlank() -> wf.registration = ""                              // no reg and type if field is empty
-            "(" !in regAndTypeString -> viewModelScope.launch {                             // only registration entered
-                aircraftRepository.getBestHitForPartialRegistration(regAndTypeString)?.let {
-                    wf.setAircraftHard(it)
-                } ?: feedback(EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND).apply {
-                    putString(regAndTypeString)
-                }.also {
-                    wf.registration = regAndTypeString
-                }
-            }
-
-            else -> { // If a ( or ) in [regAndTypeString] it will save exactly [reg] and [type] in [reg]([type]). Closing bracket is ignored. If no opening bracket, it is all reg.
-                val reg: String?
-                val type: String?
-                regAndTypeString.filter { it != ')' }.split('(').let {
-                    reg = it.firstOrNull()
-                    type = it.getOrNull(1)
-                }
-                wf.setAircraft(reg, type)
+            "(" !in regAndTypeString -> searchRegistrationAndSaveInWorkingFlight(regAndTypeString)   // only registration entered
+            else -> {                                                                       // If a ( or ) in [regAndTypeString] it will save exactly [reg] and [type] in [reg]([type]). Closing bracket is ignored. If no opening bracket, it is all reg.
+                saveRegAndTypeInWorkingFlight(regAndTypeString)
             }
         }
-
     }
 
-    /**
-     * @see [setRegAndType]
-     */
+    private fun saveRegAndTypeInWorkingFlight(regAndTypeString: String) {
+        require ('(' in regAndTypeString) { "Don't call saveRegAndTypeInWorkingFlight on a String without an opening parenthesis"}
+        val reg: String?
+        val type: String?
+        regAndTypeString.filter { it != ')' }
+            .split('(').let {
+                reg = it.firstOrNull()
+                type = it.lastOrNull()
+            }
+        wf.setAircraft(reg, type)
+    }
+
+    private fun searchRegistrationAndSaveInWorkingFlight(regAndTypeString: String) {
+        viewModelScope.launch {
+            val bestRegistrationHit =
+                aircraftRepository.getBestHitForPartialRegistration(regAndTypeString)
+            if (bestRegistrationHit == null) {
+                feedback(EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND).putString(regAndTypeString)
+                wf.registration = regAndTypeString
+            } else
+                wf.setAircraftHard(bestRegistrationHit)
+        }
+    }
+
     fun setRegAndType(regAndTypeEditable: Editable) = setRegAndType(regAndTypeEditable.toString())
 
-    /**
-     * Set takeoff/landings from a string.
-     * If '/' in string, it sets takeoff and landing to before and after '/' (eg. 1/2 == 1 to 2 ldg)
-     * else it sets both takeoff and landing to that value.
-     * [wf] takes care of day/night
-     * @param tlString: Takeoff/landing string. Can only consist of digits or '/'
-     */
+    //tlString is expected to have only numbers or slashes
     fun setTakeoffLandings(tlString: String){
-        require (tlString.all{ it in "1234567890/"})
-        if ('/' in tlString) tlString.split('/').let{
-            wf.takeoffLandings = TakeoffLandings(it[0].toInt(), it[1].toInt())
+        if ('/' in tlString) {
+            val parts = tlString.split('/')
+            wf.takeoffLandings = TakeoffLandings(parts[0].toInt(), parts[1].toInt())
         } else {
             wf.takeoffLandings = TakeoffLandings(tlString.toInt())
         }
     }
 
-    /**
-     * Set name. Will auto-complete names if it doesn't end with ';'
-     * @see [String.anyWordStartsWith]
-     */
     fun setName(name: String){
-        if (';' in name) wf.name = name.dropLast(1)
-        else wf.name = if (name.isEmpty()) "" else allNames.value?.firstOrNull{it.anyWordStartsWith(name, ignoreCase = true)} ?: name
+        wf.name = autoCompleteNameIfNotEndingWithSemicolon(name)
     }
 
-    /**
-     * Set name2. Will auto-complete names.
-     * Names can be separated by ';', in which case they will be trimmed and not autocompleted
-     * (you can also use this to enter an exact name if a longer one exists ie. "jan"jans" might becom "jan janssen" where "jan jans;" will be "jan jans")
-     * @see [String.anyWordStartsWith]
-     */
     fun setName2(name2: String){
-        if (';' in name2) wf.name2 = (name2.split(';').joinToString(";") { it.trim() })
-        else wf.name2 = if (name2.isEmpty()) "" else allNames.value?.firstOrNull{it.anyWordStartsWith(name2, ignoreCase = true)} ?: name2
-
+        wf.name2 = autoCompleteOrCleanNames(name2)
     }
 
+    private fun autoCompleteOrCleanNames(name2: String) = when {
+        ';' in name2 -> removeSpacesAroundSemicolons(name2)
+        name2.isEmpty() -> ""
+        else -> autoCompleteName(name2) ?: name2
+    }
 
-    /**
-     * Set remarks
-     */
+    private fun autoCompleteName(name: String) =
+        allNamesLiveData.value?.firstOrNull { it.anyWordStartsWith(name, ignoreCase = true) }
+
+    private fun autoCompleteNameIfNotEndingWithSemicolon(name: String) = when {
+        ';' in name -> name.dropLast(1)
+        name.isEmpty() -> ""
+        else -> autoCompleteName(name) ?: name
+    }
+
+    private fun removeSpacesAroundSemicolons(name2: String) =
+        (name2.split(';').joinToString(";") { it.trim() })
+
+
     fun setRemarks(remarks: String) {
         wf.remarks = remarks
     }
 
-    /**
-     * Set sim
-     * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not
-     */
     fun toggleSim(force: Boolean? = null) {
-        wf.isSim = force ?: !sim // [sim] comes straight from [wf] so it is a true toggle
+        wf.isSim = force ?: !isSim
     }
 
-    /**
-     * Set signature
-     */
-    fun setSignature(signature: String) {
-        wf.signature = signature
-    }
-
-    /**
-     * Toggle between Dual, Instructor and None.
-     */
-    fun toggleDualInstructor(){
+    fun toggleDualInstructorNone(){
         when (dualInstructor.value){
             DUAL_INSTRUCTOR_FLAG_NONE -> wf.isDual = true
             DUAL_INSTRUCTOR_FLAG_DUAL -> {
@@ -350,28 +269,15 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         }
     }
 
-    /**
-     * Set multiPilot. If multipilot time was 0, [wf] sets multiPilotTime to mDuration.toMinutes().toInt()
-     * Will disable autofill if it was on.
-     */
     fun toggleMultiPilot(){
-        if (wf.autoFill) wf.autoFill = false
         wf.isMultipilot = !wf.isMultipilot
     }
 
-    /**
-     * Set IFR
-     * workingFlight will take care of also adjusting ifrTime (if autovalues)
-     * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
-     */
     fun toggleIfr(force: Boolean? = null){
         wf.isIfr = force ?: !wf.isIfr
     }
 
-    /**
-     * Toggle PIC: NONE -> PICUS -> PIC -> NONE etc
-     */
-    fun togglePic() = when {
+    fun togglePicusPicNone() = when {
         wf.isPIC -> {
             wf.isPIC = false
             wf.isPICUS = false
@@ -386,27 +292,17 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         }
     }
 
-    /**
-     * Toggle PF.
-     * If augmentedCrew.crewSize > 2, WorkingFlight will recalculate times (if autovalues)
-     * @param force: Can be used to force sim on or off. If not given or null, it sets it to what it currently is not (or to true if it is null for some reason)
-     */
     fun togglePF(force: Boolean? = null){
         val newValue = force ?: wf.isPFLiveData.value == false
         wf.isPF = newValue
+        //TODO this must be done in WorkingFlight not here
         if (wf.autoFill) {
             wf.takeoffLandings = TakeoffLandings(newValue.toInt())
         }
     }
 
-    //If this is true, if autoValues is off, the only reason for that is [checkAutovaluesForUnknownAirport] set it to off.
-    //If checkAutovaluesForUnknownAirport decides it's ok again,  autoValues can be set to on again
-    private var autoValuesOnlyOffBecauseOfUnknownAirport: Boolean = wf.autoFill
-    /**
-     * Will set autovalues to "soft-off" if not both airports known
-     */
-    fun checkAutovaluesForUnknownAirport(){
-        val unknownAirportFound = originIsValid.value == false || destinationIsValid.value == false
+    fun toggleAutovaluesSoftOffIfUnknownAirport(){
+        val unknownAirportFound = origOrDestInvalid()
         if (!unknownAirportFound && autoValuesOnlyOffBecauseOfUnknownAirport){              // autovalues off because unknown airports, but all airports known
             toggleAutoValues(true)                                                // force autoValues on
             autoValuesOnlyOffBecauseOfUnknownAirport = false                            // it is not off so this should be false
@@ -416,50 +312,41 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
             toggleAutoValues(false)                                               // force autoValues off. If airports are all known again, calling this function again will reset it to on
         }
     }
+    private fun origOrDestInvalid() =
+        originIsValid.value == false || destinationIsValid.value == false
 
-    /**
-     * Toggle auto values.
-     * Used by "autoValues" checkbox without parameter
-     * Used by [checkAutovaluesForUnknownAirport] with parameter
-     */
     fun toggleAutoValues(force: Boolean? = null){
         viewModelScope.launch {
             wf.autoFill = force ?: !wf.autoFill
-            if (force == null) { // set from checkbox,
-                checkAutovaluesForUnknownAirport() // check airports known to see if we can set it to on
+            if (force == null) {
+                toggleAutovaluesSoftOffIfUnknownAirport()
             }
         }
     }
 
-    /**
-     * Notify WorkingFlight that Aircraft DB has changed (which leads to aircraft being reloaded)
-     */
+    // TODO do this in [WorkingFlight]
     fun notifyAircraftDbChanged(){
         wf.notifyAircraftDbUpdated()
     }
 
-    /**
-     * Notify WorkingFlight that Aircraft DB has changed (which leads to aircraft being reloaded)
-     */
+    // TODO do this in [WorkingFlight]
     fun notifyAirportDbChanged(){
         wf.notifyAirportDbUpdated()
     }
 
 
-    /**
-     * Save WorkingFlight and send Close message to fragment.
+    /*
      * If this edits a flight that doesn't end up as completed, it will either:
      *      - push back calendar sync if offBlocks is less than 30 minutes in the future
      *      - Feed back to main activity that this gives a possible sync problem
      *          -> This feedback is given instead of CLOSE_EDIT_FLIGHT_FRAGMENT so user can decide to continue editing.
      */
-    fun saveAndClose() {
+    fun saveWorkingFlightAndCloseFragment() {
         if (wf.canCauseCalendarConflict) {
             val now = Instant.now().epochSecond
-            // Push back calendar sync if timeIn in future
             if (wf.timeIn > now) {
-                if (wf.timeOut <= now + 30*60) {
-                    postponeCalendarSync() // if flight starts less than half an hour in the future, just always postpone.
+                if (wf.timeOut <= now + THIRTY_MINUTES_IN_SECONDS) {
+                    postponeCalendarSync()
                 }
                 //Below happens if flight starts > 30 minutes in the future and calendar sync is active during this flight
                 else if (Preferences.calendarDisabledUntil < wf.timeIn) {
@@ -473,17 +360,11 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         feedback(EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT)
     }
 
-    /**
-     * Close workingFlight without saving
-     */
-    fun close(){                                                 // this makes sure any pending dialogs don't get opened anymore
+    fun closeWithoutSaving(){                                                 // this makes sure any pending dialogs don't get opened anymore
         flightRepository.closeWorkingFlight()                               // This makes sure fligth doesn't reopen again on recreate activity (ie. rotate)
         feedback(EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT)       // This tells fragment to close itself
     }
 
-    /**
-     * Disables Calendar Sync alltogether
-     */
     fun disableCalendarSync(){
         Preferences.useCalendarSync = false
     }
@@ -492,7 +373,6 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
      * Postpones Calendar Sync until max of:
      *      - 1 second after [WorkingFlight.mTimeIn]
      *      - current [Preferences.calendarDisabledUntil]
-     *
      */
     fun postponeCalendarSync(){
         (wf.timeIn + 1).let {
@@ -514,7 +394,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         else -> a.iata_code.nullIfBlank() ?: a.ident
     }
 
-    /**
+    /*
      * Make a Local Time from a string with format "1234"
      * Any non-number characters are ignored (so you can use 12+34, 12:34, etc)
      * "34" will be 00:34
@@ -530,10 +410,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
             LocalTime.of(hours, mins)
         }
 
-    /**
-     * Gets the correct string for when flight is marked as PIC, PICUS or neither
-     */
-    private fun getPicPicusString(): String = getString(
+    private fun getPicOrPicusString(): String = getString(
         if(wf.isPICUS) R.string.picus else R.string.pic
     )
 
@@ -543,6 +420,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         const val DUAL_INSTRUCTOR_FLAG_NONE = 0
         const val DUAL_INSTRUCTOR_FLAG_DUAL = 1
         const val DUAL_INSTRUCTOR_FLAG_INSTRUCTOR = 2
+
+        private const val THIRTY_MINUTES_IN_SECONDS = 30*60
     }
 
 }

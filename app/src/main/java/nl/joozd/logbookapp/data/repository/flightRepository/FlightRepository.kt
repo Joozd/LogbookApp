@@ -213,7 +213,7 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     val serverRefusedLoginData: LiveData<Boolean>
         get() = _serverRefusedLoginData
 
-    val allNames: LiveData<List<String>>
+    val allNamesLiveData: LiveData<List<String>>
         get() = _allNames
 
     val usedRegistrationsLiveData: LiveData<List<String>>

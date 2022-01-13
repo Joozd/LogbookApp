@@ -70,15 +70,15 @@ abstract class NamesDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() 
     val allNames: LiveData<List<String>>
         get() = _allNames
     init{
-        _allNames.addSource(flightRepository.allNames){
+        _allNames.addSource(flightRepository.allNamesLiveData){
             _allNames.value = filterNames(it)
         }
         _allNames.addSource(_manualName){
-            _allNames.value = filterNames((flightRepository.allNames.value ?: emptyList()))
+            _allNames.value = filterNames((flightRepository.allNamesLiveData.value ?: emptyList()))
         }
         //workingFlight.allNames is a List<String> of all names used in currentFlight
         _allNames.addSource(workingFlight.allNamesListLiveData){
-            _allNames.value = filterNames((flightRepository.allNames.value ?: emptyList()))
+            _allNames.value = filterNames((flightRepository.allNamesLiveData.value ?: emptyList()))
         }
     }
 

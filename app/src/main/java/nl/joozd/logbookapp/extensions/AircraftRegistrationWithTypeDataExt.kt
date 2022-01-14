@@ -19,19 +19,20 @@
 
 package nl.joozd.logbookapp.extensions
 
-import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.joozdlogcommon.ConsensusData
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
-import nl.joozd.logbookapp.utils.emptyMutableList
 
-/**
- * Returns a list of [ConsensusData] to be sent to server
- * If no previous type, it will only contain the new type to add
- * if previous type, it will also contain previous type with [ConsensusData.subtract] flag set
- */
-fun AircraftRegistrationWithTypeData.toConsensusDataList(): List<ConsensusData>{
-    val results = emptyMutableList<ConsensusData>()
-    if (serializedPreviousType.isNotEmpty()) results.add(ConsensusData(registration, serializedPreviousType, subtract = true))
-    results.add(ConsensusData(registration, serializedType))
-    return results
-}
+fun AircraftRegistrationWithTypeData.toConsensusDataList(): List<ConsensusData> =
+    listOfNotNull(
+        makeConsensusDataForPreviousType(),
+        makeConsensusDataForNewType()
+    )
+
+private fun AircraftRegistrationWithTypeData.makeConsensusDataForNewType() =
+    ConsensusData(registration, serializedType)
+
+private fun AircraftRegistrationWithTypeData.makeConsensusDataForPreviousType(): ConsensusData? =
+    if (serializedPreviousType.isEmpty())
+        null
+    else
+        ConsensusData(registration, serializedPreviousType, subtract = true)

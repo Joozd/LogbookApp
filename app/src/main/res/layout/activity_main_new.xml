@@ -194,18 +194,6 @@
 
         </com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/addButton"
-            style="@style/FloatingAddButton"
-            android:contentDescription="@string/add_flight"
-            app:backgroundTint="?attr/colorPrimary"
-            app:fabSize="normal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ic_add_white_48dp"
-            app:tint="@null"/>
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
@@ -225,5 +213,16 @@
 
 
     </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addButton"
+        style="@style/FloatingAddButton"
+        android:contentDescription="@string/add_flight"
+        app:backgroundTint="?attr/colorPrimary"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_add_white_48dp"
+        app:tint="@null"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

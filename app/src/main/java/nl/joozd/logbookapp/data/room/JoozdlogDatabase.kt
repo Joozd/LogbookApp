@@ -39,7 +39,7 @@ import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
  * Version 9: Changed AircraftRegistrationWithTypeData
  */
 @Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, AircraftTypeConsensusData::class, PreloadedRegistration::class, BalanceForward::class], version = 9, exportSchema = true)
-abstract class JoozdlogDatabase: RoomDatabase() {
+abstract class JoozdlogDatabase private constructor(): RoomDatabase() {
     abstract fun flightDao(): FlightDao
     abstract fun airportDao(): AirportDao
     abstract fun aircraftTypeDao(): AircraftTypeDao
@@ -49,8 +49,6 @@ abstract class JoozdlogDatabase: RoomDatabase() {
     abstract fun balanceForwardDao(): BalanceForwardDao
 
     companion object {
-        // Singleton prevents multiple instances of database opening at the
-        // same time.
         private var INSTANCE: JoozdlogDatabase? = null
 
         @Synchronized
@@ -65,6 +63,8 @@ abstract class JoozdlogDatabase: RoomDatabase() {
             INSTANCE = instance
             return instance
         }
+
+        //obsolete migrations are kept here to remind me of how to do that
 
         /*
         private val UPDATE_4_5 = object: Migration(4,5){

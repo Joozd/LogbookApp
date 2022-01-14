@@ -75,8 +75,7 @@ fun EditText.onTextChanged(text: (String) -> Unit) {
 }
 
 //Find the Activity this View is a part of
-val View.activity: Activity?
-    get() {
+fun View.findActivity(): Activity? {
     var ctx: Context? = context
     while (ctx is ContextWrapper) {
         if (ctx is Activity) {

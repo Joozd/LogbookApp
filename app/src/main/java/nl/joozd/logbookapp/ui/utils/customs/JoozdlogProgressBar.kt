@@ -24,10 +24,10 @@ import android.view.View
 import android.view.ViewGroup
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ItemProgressbarBinding
-import nl.joozd.logbookapp.extensions.activity
+import nl.joozd.logbookapp.extensions.findActivity
 
 class JoozdlogProgressBar(private val target: ViewGroup) {
-    private val activity = target.activity!!
+    private val activity = target.findActivity()!!
     private val progBarBinding = ItemProgressbarBinding.bind(activity.layoutInflater.inflate(R.layout.item_progressbar, target, false))
     private val progressBar = progBarBinding.progressBar
     private val view: View

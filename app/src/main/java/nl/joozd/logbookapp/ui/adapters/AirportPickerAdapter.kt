@@ -28,7 +28,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.databinding.ItemAirportPickerBinding
 import nl.joozd.logbookapp.extensions.ctx
-import nl.joozd.logbookapp.extensions.activity
+import nl.joozd.logbookapp.extensions.findActivity
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
 class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerView.Adapter<AirportPickerAdapter.APViewHolder>() {
@@ -45,7 +45,7 @@ class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerVi
         val airport = airports[position]
         holder.bindAirport(airport)
         with (holder.binding) {
-            backgroundLayout.activity?.let {
+            backgroundLayout.findActivity()?.let {
                 if (airport.ident == pickedAirport) {
                     backgroundLayout.setBackgroundColor(it.getColorFromAttr(android.R.attr.colorPrimaryDark))
                     identifier.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))

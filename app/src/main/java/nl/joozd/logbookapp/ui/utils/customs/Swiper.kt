@@ -30,7 +30,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.EmptyConstraintLayoutBinding
-import nl.joozd.logbookapp.extensions.activity
+import nl.joozd.logbookapp.extensions.findActivity
 import nl.joozd.logbookapp.extensions.setBackgroundColor
 import kotlin.math.abs
 
@@ -52,7 +52,7 @@ class Swiper(val backgroundLayout: ConstraintLayout) {
      * @param root: ViewGroup for getting LayoutParams from for inflating standard (empty) background
      *              If not attached to an activity, provide an activity to get LayoutInflater from
      */
-    constructor(root: ViewGroup): this(EmptyConstraintLayoutBinding.bind(root.activity!!.layoutInflater.inflate(R.layout.empty_constraint_layout, root)).root)
+    constructor(root: ViewGroup): this(EmptyConstraintLayoutBinding.bind(root.findActivity()!!.layoutInflater.inflate(R.layout.empty_constraint_layout, root)).root)
 
     /**
      * @param root: ViewGroup for getting LayoutParams from for inflating standard (empty) background
@@ -64,7 +64,7 @@ class Swiper(val backgroundLayout: ConstraintLayout) {
      * Private values
      ***********************************************************************************************************/
     private val activity
-        get() = backgroundLayout.activity!!
+        get() = backgroundLayout.findActivity()!!
 
     private val parent
         get() = backgroundLayout.parent

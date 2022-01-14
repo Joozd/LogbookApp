@@ -21,4 +21,6 @@ package nl.joozd.logbookapp.extensions
 
 import android.text.Editable
 
-fun Editable?.toInt() = this.toString().toInt() // will probably throw an exception if not correct string.
+// will throw an exception if not a correct string.
+fun Editable?.toInt() =
+    this.toString().toInt()

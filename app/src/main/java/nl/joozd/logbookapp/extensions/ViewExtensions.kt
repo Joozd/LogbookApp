@@ -43,26 +43,6 @@ fun View.setVisibilityVisibleAndFadeIn() {
     animateFadeIn(duration)
 }
 
-fun View.fadeOutAndSetVisibilityToGone() {
-    val duration = resources.getInteger(android.R.integer.config_shortAnimTime)
-    val listenerThatSetsVisibilityToGone = makeAnimatorListenerAdapterThatSetsVisibilityToGone()
-    animateFadeOut(duration, listenerThatSetsVisibilityToGone)
-}
-
-private fun View.makeAnimatorListenerAdapterThatSetsVisibilityToGone() =
-    object : AnimatorListenerAdapter() {
-        override fun onAnimationEnd(animation: Animator) {
-            visibility = View.GONE
-        }
-    }
-
-private fun View.animateFadeOut(duration: Int, listener: AnimatorListenerAdapter) {
-    animate()
-        .alpha(0f)
-        .setDuration(duration.toLong())
-        .setListener(listener)
-}
-
 private fun View.animateFadeIn(duration: Long) {
     animate()
         .alpha(1f)

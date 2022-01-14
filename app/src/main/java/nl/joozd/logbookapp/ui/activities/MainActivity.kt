@@ -474,7 +474,7 @@ class MainActivity : JoozdlogActivity() {
      */
     private fun ActivityMainNewBinding.hideToolbar(){
         mainToolbar.visibility = View.GONE
-        addButton.fadeOutAndSetVisibilityToGone()
+        addButton.visibility = View.GONE
     }
 
     //TODO make this something else. Password is no longer known to users.

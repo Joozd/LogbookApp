@@ -35,10 +35,7 @@ fun String.nullIfNotTrue(keep: Boolean?) = if (keep == true) this else null
 
 fun String.removeTrailingDigits(): String {
     if (isEmpty()) return this
-    var trailingDigits = 0
-    while (this.dropLast(trailingDigits).last().isDigit()) trailingDigits++
-    //We now know how many digits this EditText's text ends with (spoiler: it's [trailingDigtis]
-
+    val trailingDigits = countHowManyCharsAtTheEndAreDigits()
     return this.dropLast(trailingDigits)
 }
 
@@ -46,8 +43,11 @@ fun String.anyWordStartsWith(substring: String, ignoreCase: Boolean = false) =
     if (ignoreCase) this.uppercase(Locale.ROOT).split(" ").any { it.startsWith(substring.uppercase(Locale.ROOT)) }
     else this.split(" ").any { it.startsWith(substring) }
 
-/**
- * Checks if [this] in [other], ignoring case
- */
-@Suppress("FunctionName")
-infix fun String.in_ignoreCase(other: String): Boolean = this.uppercase(Locale.ROOT) in other.uppercase(Locale.ROOT)
+infix fun String.inIgnoreCase(other: String): Boolean = this.uppercase(Locale.ROOT) in other.uppercase(Locale.ROOT)
+
+
+private fun String.countHowManyCharsAtTheEndAreDigits(): Int{
+    var count = 0
+    while (getOrNull(indices.last-count)?.isDigit() == true) count++
+    return count
+}

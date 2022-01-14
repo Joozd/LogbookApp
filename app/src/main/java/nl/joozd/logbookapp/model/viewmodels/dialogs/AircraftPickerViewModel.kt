@@ -23,7 +23,7 @@ import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.extensions.in_ignoreCase
+import nl.joozd.logbookapp.extensions.inIgnoreCase
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 import java.util.*
 
@@ -40,10 +40,10 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     private val _aircraftTypes = MediatorLiveData<List<AircraftType>>().apply {
         addSource(aircraftRepository.aircraftTypesLiveData){
             // Create a list of names of all known aircraft matching [typesSearchString]
-            value = it.filter{type -> typesSearchString in_ignoreCase type.name}
+            value = it.filter{type -> typesSearchString inIgnoreCase type.name}
         }
         addSource(_typesSearchString){
-            value = (aircraftRepository.aircraftTypes ?: emptyList()).filter{typesSearchString in_ignoreCase it.name}
+            value = (aircraftRepository.aircraftTypes ?: emptyList()).filter{typesSearchString inIgnoreCase it.name}
         }
     }
 

@@ -24,6 +24,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import androidx.core.content.ContextCompat
 import androidx.core.view.marginTop
 import androidx.fragment.app.commit
@@ -686,13 +687,16 @@ class EditFlightFragment: JoozdlogFragment(){
         }
     }
 
+    private fun EditText.setTextIfNotFocused(text: CharSequence?){
+        if(!isFocused) setText(text ?: "")
+    }
+
     /**
      * Set an airport field to valid or invalid
      * (invalid means airport not found in DB and auto values light night time cannot be calculated)
-     * Will also instruct [viewModel] to set autoValues to false if airport is unknown.
+     * Will also instruct [viewModel] to check autoValues.
      */
     private fun TextInputEditText.setAirportFieldToValidOrInvalidLayout(isValid: Boolean) {
-        //instruct viewModel to set autoValues to false if airport is unknown.
         viewModel.toggleAutovaluesSoftOffIfUnknownAirport()
 
         val drawable = if (isValid) null else ContextCompat.getDrawable(

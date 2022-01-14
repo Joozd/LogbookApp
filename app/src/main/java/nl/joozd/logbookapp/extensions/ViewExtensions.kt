@@ -19,8 +19,6 @@
 
 package nl.joozd.logbookapp.extensions
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper

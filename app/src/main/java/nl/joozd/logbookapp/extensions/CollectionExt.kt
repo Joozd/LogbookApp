@@ -19,8 +19,5 @@
 
 package nl.joozd.logbookapp.extensions
 
-fun <T> Collection<T>.mostCommon(): T =
-    groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: throw(NullPointerException("Could not find a max value in $this"))
-
 fun <T> Collection<T>.mostCommonOrNull(): T? =
     groupingBy { it }.eachCount().maxByOrNull { it.value }?.key

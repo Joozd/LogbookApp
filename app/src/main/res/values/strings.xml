@@ -193,8 +193,8 @@
     <string name="username_cannot_be_empty">Username cannot be empty</string>
     <string name="does_not_match">Does not match</string>
     <string name="wrong_username_password">The server has rejected your login data. Please create a new cloud account or find your working login link.</string>
-    <string name="email_data_rejected">The server has rejected your email confirmation data. Please check you clicked the link that goes with this account.</string>
-    <string name="email_address_rejected">The server has rejected your email address. Please check your email address in Settings.</string>
+    <string name="email_data_rejected">The server has rejected your email confirmation data. Please check you clicked the correct confirmation link.</string>
+    <string name="email_address_rejected">The server has rejected your email address. Please re-enter your email address in Settings</string>
 
     <string name="pass_requirements">Password requirements</string>
     <string name="password_requirements">At least 6 characters, two of which are not the same.</string>

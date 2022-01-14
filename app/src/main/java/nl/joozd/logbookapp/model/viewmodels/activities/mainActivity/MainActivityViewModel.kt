@@ -294,15 +294,19 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     }
 
 
-    fun menuSelectedAddFlight() = addFlight()
+    fun menuSelectedAddFlight(): Boolean {
+        addFlight()
+        return true
+    }
 
     fun undo() = flightRepository.undo()
 
 
     fun redo() = flightRepository.redo()
 
-    fun menuSelectedSearch() {
+    fun menuSelectedSearch(): Boolean {
         toggleSearchField()
+        return true
     }
 
     fun menuSelectedEditAircraft() {
@@ -311,10 +315,11 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         }
     }
 
-    fun menuSelectedAboutDialog(){
+    fun menuSelectedAboutDialog(): Boolean{
         viewModelScope.launch {
             feedback(MainActivityEvents.SHOW_ABOUT_DIALOG)
         }
+        return true
     }
 
     fun dismissBackupUntilEndOfDay() {
@@ -422,7 +427,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * This will synch time with server and launch repository update functions (which can decide for themselves if it is necessary)
      */
-    fun notifyActivityResumed() {
+    fun syncWithServer() {
         GeneralRepository.synchTimeWithServer()
         flightRepository.syncIfNeeded()
         if (Preferences.emailVerified){

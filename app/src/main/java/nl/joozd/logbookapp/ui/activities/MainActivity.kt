@@ -89,6 +89,50 @@ class MainActivity : JoozdlogActivity() {
         setContentView(binding.root)
     }
 
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        undoMenuItem = getUndoMenuItem(menu).apply{
+            isVisible = viewModel.undoAvailable
+        }
+        redoMenuItem = getRedoMenuItem(menu).apply{
+            isVisible = viewModel.redoAvailable
+        }
+        return true
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        R.id.menu_settings -> startSettingsActivity()
+        R.id.menu_add_flight -> viewModel.menuSelectedAddFlight()
+        R.id.menu_undo -> viewModel.undo()
+        R.id.menu_redo -> viewModel.redo()
+        R.id.menu_total_times -> startTotalTimesActivity()
+        R.id.menu_balance_forward -> startBalanceForwardActivity()
+        R.id.app_bar_search -> viewModel.menuSelectedSearch()
+        R.id.menu_feedback -> startFeedbackActivity()
+        R.id.menu_about -> viewModel.menuSelectedAboutDialog()
+        R.id.menu_export_pdf -> startMakePdfActivity()
+        else -> false
+    }
+
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        viewModel.handleIntent(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        startNewUserActivityIfNewInstall()
+        viewModel.syncWithServer()
+    }
+
+
+    override fun onBackPressed() {
+        moveTaskToBack(true)
+    }
+
     private fun ActivityMainNewBinding.startObservers() {
         viewModel.showBackupNotice.observe(activity) {
             showBackupReminderLayoutIf(it)
@@ -245,9 +289,9 @@ class MainActivity : JoozdlogActivity() {
     private fun handleErrorEvent(error: Errors?) {
         when (error) {
             Errors.LOGIN_DATA_REJECTED_BY_SERVER -> showBadLoginDataDialog()
-            Errors.EMAIL_CONFIRMATION_FAILED -> showBadEmailConfirmationDialog()
+            Errors.EMAIL_CONFIRMATION_FAILED -> showBadEmailConfirmationReceivedFromServerDialog()
             Errors.SERVER_ERROR -> showRandomServerErrorDialog()
-            Errors.BAD_EMAIL_SAVED -> showBadEmailSavedDialog()
+            Errors.BAD_EMAIL_SAVED -> showBadEmailAddressSavedDialog()
             null -> { /* do nothing */
             }
         }
@@ -289,9 +333,8 @@ class MainActivity : JoozdlogActivity() {
     private fun ActivityMainNewBinding.closeSearchField() {
         mainSearchField.setText("")
         mainSearchField.clearFocus()
-        hideKeyboard(mainSearchField)
+        mainSearchField.hideKeyboard()
         searchTypeSpinner.setSelection(0)
-        //reset search types spinner//
         searchField.visibility = View.GONE
     }
 
@@ -364,103 +407,43 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
+    private fun getRedoMenuItem(menu: Menu) =
+        menu.findItem(R.id.menu_redo)
 
-    /**
-     * Create menu
-     */
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        undoMenuItem = menu.findItem(R.id.menu_undo).also{ item ->
-            item.isVisible = viewModel.undoAvailable
-        }
-        redoMenuItem = menu.findItem(R.id.menu_redo).also{ item ->
-            item.isVisible = viewModel.redoAvailable
-        }
+    private fun getUndoMenuItem(menu: Menu) =
+        menu.findItem(R.id.menu_undo)
+
+
+
+    private fun startMakePdfActivity(): Boolean {
+        startActivity(Intent(this, MakePdfActivity::class.java))
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.menu_settings -> {
-            startActivity(Intent(this, SettingsActivity::class.java))
-            true
-        }
-        R.id.menu_add_flight -> {
-            viewModel.menuSelectedAddFlight()
-            true
-        }
-        R.id.menu_undo -> {
-            viewModel.undo()
-        }
-
-        R.id.menu_redo -> {
-            viewModel.redo()
-        }
-
-
-        R.id.menu_total_times -> {
-            startActivity(Intent(this, TotalTimesActivity::class.java))
-            true
-        }
-        R.id.menu_balance_forward -> {
-            startActivity(Intent(this, BalanceForwardActivity::class.java))
-            true
-        }
-        R.id.app_bar_search -> {
-            viewModel.menuSelectedSearch()
-            true
-        }
-        R.id.menu_feedback -> {
-            startActivity(Intent(this, FeedbackActivity::class.java))
-            true
-        }
-        R.id.menu_about -> {
-            viewModel.menuSelectedAboutDialog()
-            true
-        }
-        /*
-        R.id.menu_edit_aircraft -> {
-            viewModel.menuSelectedEditAircraft()
-            true
-        }
-        */
-        R.id.menu_export_pdf -> {
-            //viewModel.menuSelectedExportPDF()
-            startActivity(Intent(this, MakePdfActivity::class.java))
-            //TODO decide if this becomes a new activity or a fragment
-            true
-        }
-/*
-        R.id.menu_do_something -> {
-            viewModel.menuSelectedDoSomething()
-
-            true
-
-        }
-
-        R.id.menu_login -> {
-            startActivity(Intent(this, ChangePasswordActivity::class.java))
-            true
-        }
-        */
-        else -> false
+    private fun startFeedbackActivity(): Boolean {
+        startActivity(Intent(this, FeedbackActivity::class.java))
+        return true
     }
 
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        viewModel.handleIntent(intent)
+    private fun startBalanceForwardActivity(): Boolean {
+        startActivity(Intent(this, BalanceForwardActivity::class.java))
+        return true
     }
 
-    override fun onResume() {
-        super.onResume()
+    private fun startTotalTimesActivity(): Boolean {
+        startActivity(Intent(this, TotalTimesActivity::class.java))
+        return true
+    }
 
+    private fun startSettingsActivity(): Boolean {
+        startActivity(Intent(this, SettingsActivity::class.java))
+        return true
+    }
+
+
+    private fun startNewUserActivityIfNewInstall() {
         if (!Preferences.newUserActivityFinished)
             startActivity(Intent(this, NewUserActivity::class.java))
-        viewModel.notifyActivityResumed()
-
-    }
-
-    override fun onBackPressed() {
-        moveTaskToBack(true)
     }
 
 
@@ -541,9 +524,7 @@ class MainActivity : JoozdlogActivity() {
                 viewModel.deleteNotPlannedFlight(id)}
             setNegativeButton("Cancel")
         }
-
     }
-
 
     private fun showCalendarSyncRestartInfo(){
         JoozdlogAlertDialog().show(this) {
@@ -557,13 +538,8 @@ class MainActivity : JoozdlogActivity() {
             add(R.id.mainActivityLayout, AboutDialog())
             addToBackStack(null)
         }
-
     }
 
-    /**
-     * Shows dialog stating that login data have been rejected by server
-     * Will notify viewModel that OK has been clicked
-     */
     private fun showBadLoginDataDialog(){
         JoozdlogAlertDialog().show(activity){
             titleResource = R.string.error
@@ -572,11 +548,7 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    /**
-     * Shows dialog stating that login data have been rejected by server
-     * Will notify viewModel that OK has been clicked
-     */
-    private fun showBadEmailConfirmationDialog(){
+    private fun showBadEmailConfirmationReceivedFromServerDialog(){
         JoozdlogAlertDialog().show(activity){
             titleResource = R.string.error
             messageResource = R.string.email_data_rejected
@@ -584,11 +556,7 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    /**
-     * Shows dialog stating that login data have been rejected by server
-     * Will notify viewModel that OK has been clicked
-     */
-    private fun showBadEmailSavedDialog(){
+    private fun showBadEmailAddressSavedDialog(){
         JoozdlogAlertDialog().show(activity){
             titleResource = R.string.error
             messageResource = R.string.email_address_rejected
@@ -596,11 +564,6 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-
-    /**
-     * Shows dialog stating that server did something wierd
-     * Will notify viewModel that OK has been clicked
-     */
     private fun showRandomServerErrorDialog(){
         JoozdlogAlertDialog().show(activity){
             titleResource = R.string.error
@@ -614,21 +577,15 @@ class MainActivity : JoozdlogActivity() {
         imm.showSoftInput(this,0)
     }
 
-    private fun hideKeyboard(view: View){
+    private fun View.hideKeyboard(){
         val imm: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view.windowToken, 0)
+        imm.hideSoftInputFromWindow(windowToken, 0)
     }
-
-
-
 
     companion object{
         const val EDIT_FLIGHT_TAG = "EDIT_FLIGHT_TAG"
         const val PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED = 3
-
         const val LOGIN_DIALOG_TAG = "LOGIN_DIALOG"
-
         private const val CSV_MIME_TYPE = "text/csv"
-
     }
 }

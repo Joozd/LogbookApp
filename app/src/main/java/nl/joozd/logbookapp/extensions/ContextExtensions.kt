@@ -33,4 +33,5 @@ fun Context.getColorFromAttr(
     return typedValue.data
 }
 
-fun Context.getStringWithMakeup(res: Int, vararg args: Any?) = HtmlCompat.fromHtml(getString(res, *args), HtmlCompat.FROM_HTML_MODE_COMPACT)
+fun Context.getStringWithMakeup(res: Int, vararg args: Any?) =
+    HtmlCompat.fromHtml(getString(res, *args), HtmlCompat.FROM_HTML_MODE_COMPACT)

@@ -24,7 +24,6 @@ import java.io.InputStream
 const val BUFFER_SIZE = 8096
 
 fun InputStream.readUntilEOF(bufferSize: Int =  BUFFER_SIZE): ByteArray{
-
     val buffer = ByteArray(bufferSize)
     val result = emptyList<Byte>().toMutableList()
     var bytesRead = read(buffer, 0, bufferSize)

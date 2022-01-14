@@ -19,7 +19,4 @@
 
 package nl.joozd.logbookapp.extensions
 
-/**
- * Will return 1 if true, 0 if false
- */
 fun Boolean.toInt() = if (this) 1 else 0

@@ -19,5 +19,6 @@
 
 package nl.joozd.logbookapp.extensions
 
+//works like List.map
 fun <T : Comparable<T>, S: Comparable<S>> ClosedRange<T>.map(f: (T) -> S): ClosedRange<S> =
     f(start)..f(endInclusive)

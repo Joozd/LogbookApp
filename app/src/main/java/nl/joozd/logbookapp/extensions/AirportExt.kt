@@ -21,8 +21,4 @@ package nl.joozd.logbookapp.extensions
 
 import nl.joozd.logbookapp.data.dataclasses.Airport
 
-
-/**
- * Check if airport is not located at (0,0)
- */
 fun Airport.checkIfValidCoordinates() = latitude_deg != 0.0 || longitude_deg != 0.0

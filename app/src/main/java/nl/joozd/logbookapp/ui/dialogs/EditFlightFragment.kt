@@ -561,7 +561,7 @@ class EditFlightFragment: JoozdlogFragment(){
      * observers to show data in toggle fields
      */
     private fun LayoutEditFlightFragmentBinding.setObserversForToggleButtons() {
-        viewModel.isSignedLiveData.observe(viewLifecycleOwner) { active -> signSelector.showIfActive(active) }
+        viewModel.isSignedLiveData.observe(viewLifecycleOwner) { active -> signSelector.showAsActiveIf(active) }
 
         //This one does a little bit more
         viewModel.isSimLiveData.observe(viewLifecycleOwner) { isSim ->
@@ -577,19 +577,19 @@ class EditFlightFragment: JoozdlogFragment(){
         }
 
         viewModel.isMultiPilotLiveData.observe(viewLifecycleOwner) { isActive ->
-            multiPilotSelector.showIfActive(isActive)
+            multiPilotSelector.showAsActiveIf(isActive)
         }
 
         viewModel.isIfrLiveData.observe(viewLifecycleOwner) { active ->
-            ifrSelector.showIfActive(active)
+            ifrSelector.showAsActiveIf(active)
         }
 
         viewModel.isPic.observe(viewLifecycleOwner) { active ->
-            picSelector.showIfActive(active)
+            picSelector.showAsActiveIf(active)
         }
 
         viewModel.isPFLiveData.observe(viewLifecycleOwner) { active ->
-            pfSelector.showIfActive(active)
+            pfSelector.showAsActiveIf(active)
         }
 
         viewModel.isAutoValuesLiveData.observe(viewLifecycleOwner) { isActive ->
@@ -604,14 +604,14 @@ class EditFlightFragment: JoozdlogFragment(){
             makeSimLayout()
         else
             makeNormalLayout()
-        simSelector.showIfActive(isSim)
+        simSelector.showAsActiveIf(isSim)
     }
 
     /**
      * Set the contents of [LayoutEditFlightFragmentBinding.dualInstructorSelector] to the correct value
      */
     private fun LayoutEditFlightFragmentBinding.setDualInstructorField(flag: Int?) {
-        dualInstructorSelector.showIfActive(flag != NewEditFlightFragmentViewModel.DUAL_INSTRUCTOR_FLAG_NONE)
+        dualInstructorSelector.showAsActiveIf(flag != NewEditFlightFragmentViewModel.DUAL_INSTRUCTOR_FLAG_NONE)
         dualInstructorSelector.text = getDualInstructorStringForFlag(flag)
     }
 
@@ -727,9 +727,9 @@ class EditFlightFragment: JoozdlogFragment(){
      */
     private fun LayoutEditFlightFragmentBinding.makeSimLayout() {
         flightSimTimeWrapper.visibility = View.VISIBLE
-        flightAircraftWrapper.constrainTopToBottom(flightSimTimeWrapper, flightSimTimeWrapper.marginTop) // clone flightSimTimeWrapper's top margin as somehow dp to pixels seems to not work
-        flighttOutSelector.constrainToCenterVertical(flightSimTimeWrapper)
-        flighttInSelector.constrainToCenterVertical(flightSimTimeWrapper)
+        flightAircraftWrapper.constrainTopToBottomOf(flightSimTimeWrapper, flightSimTimeWrapper.marginTop) // clone flightSimTimeWrapper's top margin as somehow dp to pixels seems to not work
+        flighttOutSelector.constrainTopToTopAndBottomToBottomOf(flightSimTimeWrapper)
+        flighttInSelector.constrainTopToTopAndBottomToBottomOf(flightSimTimeWrapper)
         flighttOutStringWrapper.visibility = View.GONE
         autoFillCheckBox.isChecked = false
         autoFillCheckBox.isEnabled = false
@@ -752,9 +752,9 @@ class EditFlightFragment: JoozdlogFragment(){
     private fun LayoutEditFlightFragmentBinding.makeNormalLayout() {
         flightSimTimeWrapper.visibility = View.GONE
         flighttOutStringWrapper.visibility = View.VISIBLE
-        flightAircraftWrapper.constrainTopToBottom(flighttOutStringWrapper, flighttOutStringWrapper.marginTop) // clone flighttOutStringWrapper's top margin as somehow dp to pixels seems to not work
-        flighttOutSelector.constrainToCenterVertical(flighttOutStringWrapper)
-        flighttInSelector.constrainToCenterVertical(flighttOutStringWrapper)
+        flightAircraftWrapper.constrainTopToBottomOf(flighttOutStringWrapper, flighttOutStringWrapper.marginTop) // clone flighttOutStringWrapper's top margin as somehow dp to pixels seems to not work
+        flighttOutSelector.constrainTopToTopAndBottomToBottomOf(flighttOutStringWrapper)
+        flighttInSelector.constrainTopToTopAndBottomToBottomOf(flighttOutStringWrapper)
         flighttInStringWrapper.visibility = View.VISIBLE
         flightFlightNumberWrapper.visibility = View.VISIBLE
         flightNameWrapper.visibility=View.VISIBLE

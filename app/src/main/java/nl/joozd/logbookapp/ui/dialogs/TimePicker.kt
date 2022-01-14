@@ -32,7 +32,7 @@ import nl.joozd.logbookapp.R
 
 import nl.joozd.logbookapp.databinding.DialogTimesInOutBinding
 import nl.joozd.logbookapp.extensions.ctx
-import nl.joozd.logbookapp.extensions.showIfActive
+import nl.joozd.logbookapp.extensions.showAsActiveIf
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.TimePickerEvents
 import nl.joozd.logbookapp.model.viewmodels.dialogs.TimePickerViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
@@ -150,11 +150,11 @@ open class TimePicker: JoozdlogFragment() {
             viewModel.nightTime.observe(viewLifecycleOwner) { nightTimeText.setText(it) }
 
             viewModel.isAugmentedCrew.observe(viewLifecycleOwner) {
-                augmentedTextView.showIfActive(it)
+                augmentedTextView.showAsActiveIf(it)
             }
 
             viewModel.isPic.observe(viewLifecycleOwner) {
-                picTextView.showIfActive(it)
+                picTextView.showAsActiveIf(it)
             }
 
             viewModel.picPicusText.observe(viewLifecycleOwner){
@@ -163,11 +163,11 @@ open class TimePicker: JoozdlogFragment() {
 
 
             viewModel.coPilot.observe(viewLifecycleOwner) {
-                coPilotTextView.showIfActive(it)
+                coPilotTextView.showAsActiveIf(it)
             }
 
             viewModel.dualInstructorActive.observe(viewLifecycleOwner) {
-                instructorTextView.showIfActive(it)
+                instructorTextView.showAsActiveIf(it)
             }
 
             viewModel.dualInstructorText.observe(viewLifecycleOwner){

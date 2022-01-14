@@ -23,14 +23,13 @@ import java.util.*
 
 /**
  * Removes n Items from front of a LinkedList and returns them as a [List]
- * if List shorted than n, it returns the full list
- *
+ * if List shorter than n, it returns the full list
  */
-fun <E> LinkedList<E>.popFirst(n: Int): List<E> {
+fun <E> LinkedList<E>.popFirstNElements(n: Int): List<E> {
     return when {
-        n >= size -> this.toList().also{ this.clear() }
-        n == 0 -> emptyList()
         n < 0 ->  throw IndexOutOfBoundsException("index $n less than 0")
+        n == 0 -> emptyList()
+        n >= size -> this.toList().also{ this.clear() }
         else -> {
             val subList = subList(0, n)
             subList.toList().also{

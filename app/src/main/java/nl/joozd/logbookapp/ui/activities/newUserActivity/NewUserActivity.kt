@@ -27,7 +27,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityNewUserBinding
-import nl.joozd.logbookapp.extensions.minusOneWithFloor
+import nl.joozd.logbookapp.extensions.minusOneWithMinimumValue
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
@@ -89,7 +89,7 @@ class NewUserActivity : JoozdlogActivity() {
 
     override fun onBackPressed() {
         // select previous step if > 0
-        mViewPager.currentItem = mViewPager.currentItem.minusOneWithFloor(0)
+        mViewPager.currentItem = mViewPager.currentItem.minusOneWithMinimumValue(0)
     }
 
     private inner class ScreenSlidePagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa), ViewPager2NavigatorBar.Adapter {

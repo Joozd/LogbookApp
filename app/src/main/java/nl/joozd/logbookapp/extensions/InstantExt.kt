@@ -22,49 +22,45 @@ package nl.joozd.logbookapp.extensions
 import java.time.*
 import java.time.format.DateTimeFormatter
 
-/**
- * Gets the date from an Instant. If no [zoneOffset] given, it assumes UTC.
- */
-fun Instant.toLocalDate(zoneOffset: ZoneOffset = ZoneOffset.UTC): LocalDate = LocalDateTime.ofInstant(this, zoneOffset).toLocalDate()
+fun Instant.toLocalDate(zoneOffset: ZoneOffset = ZoneOffset.UTC): LocalDate =
+    LocalDateTime.ofInstant(this, zoneOffset).toLocalDate()
+
+fun Instant.toLocalTime(zoneOffset: ZoneOffset = ZoneOffset.UTC): LocalTime =
+    LocalDateTime.ofInstant(this, zoneOffset).toLocalTime()
 
 /**
- * Gets the time from an Instant. If no [zoneOffset] given, it assumes UTC.
+ * Changes an instant to the same time at a different date.
  */
-fun Instant.toLocalTime(zoneOffset: ZoneOffset = ZoneOffset.UTC): LocalTime = LocalDateTime.ofInstant(this, zoneOffset).toLocalTime()
-
-/**
- * Changes an instant to the same time at a different date. If no [zoneOffset] given, assumes UTC
- * @param date: New date to set
- * @param zoneOffset: Timezone at which that dat is supposed to be
- */
-fun Instant.atDate(date: LocalDate, zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant = LocalDateTime.ofInstant(this, zoneOffset).atDate(date).toInstant(zoneOffset)
+fun Instant.atDate(date: LocalDate, zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant =
+    LocalDateTime.ofInstant(this, zoneOffset).atDate(date).toInstant(zoneOffset)
 
 
 /**
- * Changes an instant to a different time at the same date. If no [zoneOffset] given, assumes UTC
- * @param time: New time to set
- * @param zoneOffset: Timezone at which that dat is supposed to be
+ * Changes an instant to a different time at the same date.
  */
-fun Instant.atTime(time: LocalTime, zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant = LocalDateTime.of(this.toLocalDate(zoneOffset), time).toInstant(zoneOffset)
+fun Instant.atTime(time: LocalTime, zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant =
+    LocalDateTime.of(this.toLocalDate(zoneOffset), time).toInstant(zoneOffset)
 
 
-/**
- * Changes this instant to the instant at start of day. If no timezone given, timezone = UTC
- */
-fun Instant.atStartOfDay(zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant = this.toLocalDate(zoneOffset).atStartOfDay().toInstant(zoneOffset)
+fun Instant.atStartOfDay(zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant =
+    this.toLocalDate(zoneOffset).atStartOfDay().toInstant(zoneOffset)
 
-fun Instant.atEndOfDay(zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant = this.toLocalDate(zoneOffset).plusDays(1).atStartOfDay().toInstant(zoneOffset)
+fun Instant.atEndOfDay(zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant =
+    this.toLocalDate(zoneOffset).plusDays(1).atStartOfDay().toInstant(zoneOffset)
 
-fun Instant.plusDays(daysToAdd: Int): Instant = this.plusSeconds(daysToAdd * 86400L) // 86400 seconds is 1 day
+fun Instant.plusDays(daysToAdd: Int): Instant =
+    this.plusSeconds(daysToAdd * 86400L) // 86400 seconds is 1 day
 
-fun Instant.plusMinutes(minutesToAdd: Int): Instant = this.plusSeconds(minutesToAdd * 60L) // 86400 seconds is 1 day
+fun Instant.plusMinutes(minutesToAdd: Int): Instant =
+    this.plusSeconds(minutesToAdd * 60L)
 
 /**
  * Return a string containing only the time part when converted to local time.
- * @param zoneOffset: Timezone at which we want to know the time. Standard is UTC
- * @param formatter: Format of the string. Standard is localized Short (eg. 12:34)
  */
-fun Instant.toTimeString(zoneOffset: ZoneOffset = ZoneOffset.UTC, formatter: DateTimeFormatter? = DateTimeFormatter.ofPattern("HH:mm")) =
+fun Instant.toTimeString(
+    zoneOffset: ZoneOffset = ZoneOffset.UTC,
+    formatter: DateTimeFormatter? = DateTimeFormatter.ofPattern("HH:mm")
+): String =
     this.toLocalTime(zoneOffset).format(formatter)
 
 /**
@@ -74,8 +70,10 @@ fun Instant.toTimeString(zoneOffset: ZoneOffset = ZoneOffset.UTC, formatter: Dat
  */
 fun Instant.roundHoursDown(): Instant{
     val localDateTime = LocalDateTime.ofInstant(this, ZoneOffset.UTC)
-    return LocalDateTime.of(localDateTime.toLocalDate(), LocalTime.of(localDateTime.hour, 0)).toInstant(ZoneOffset.UTC)
+    return LocalDateTime.of(
+        localDateTime.toLocalDate(),
+        LocalTime.of(localDateTime.hour, 0)
+    ).toInstant(ZoneOffset.UTC)
 }
-
 
 operator fun Instant.minus(other: Instant): Duration = Duration.between(other, this)

@@ -28,7 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.miscClasses.TotalsForward
-import nl.joozd.logbookapp.extensions.popFirst
+import nl.joozd.logbookapp.extensions.popFirstNElements
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MakePdfActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.utils.pdf.PdfLogbookDrawing
@@ -123,7 +123,7 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
                  * Create flights pages
                  */
                 while (allFlights.isNotEmpty()) {
-                    val currentFlights = allFlights.popFirst(flightsPerPage)
+                    val currentFlights = allFlights.popFirstNElements(flightsPerPage)
                     println("Currently on page $pageNumber")
                     //this call increases pagenumber after using it
                     addPage(pageNumber++) {

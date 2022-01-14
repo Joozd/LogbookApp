@@ -20,7 +20,7 @@
 package nl.joozd.logbookapp.utils
 
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.withMinimumValue
+import nl.joozd.logbookapp.extensions.maxOfThisAnd
 import java.time.Instant
 
 class TimestampMaker(private val mock: Boolean = false) {
@@ -31,5 +31,5 @@ class TimestampMaker(private val mock: Boolean = false) {
      */
     val nowForSycPurposes: Long
         get() = if (mock) Instant.now().epochSecond
-                else (Instant.now().epochSecond + Preferences.serverTimeOffset).withMinimumValue(Preferences.lastUpdateTime+1)
+                else (Instant.now().epochSecond + Preferences.serverTimeOffset).maxOfThisAnd(Preferences.lastUpdateTime+1)
 }

@@ -33,27 +33,18 @@ private val timeFormatterLocalized = DateTimeFormatter.ofLocalizedTime(FormatSty
 private val monthYearFormatter = DateTimeFormatter.ofPattern(("MMM yyyy"))
 private val dateAndTimeFormatter =  DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm")
 
-fun LocalDate.toDateString() = this.format(dateFormatter)
-fun LocalDate.toDateStringLocalized() = this.format(dateFormatterLocalized)
-fun LocalDate.toDateStringForFiles() = this.format(dateFormatterForFiles)
-fun LocalDateTime.toDateString() = this.format(dateFormatter)
-fun LocalDateTime.toLogbookDate() = this.format(dateFormatterTwoDigitYear)
-fun LocalDateTime.toDateStringLocalized() = this.format(dateFormatterLocalized)
-fun LocalDateTime.toTimeString() = this.format(timeFormatter)
-fun LocalDateTime.toTimeStringLocalized() = this.format(timeFormatterLocalized)
+fun LocalDate.toDateString(): String = this.format(dateFormatter)
+fun LocalDate.toDateStringForFiles(): String = this.format(dateFormatterForFiles)
+fun LocalDateTime.toLogbookDate(): String = this.format(dateFormatterTwoDigitYear)
+fun LocalDateTime.toDateStringLocalized(): String = this.format(dateFormatterLocalized)
+fun LocalDateTime.toTimeStringLocalized(): String = this.format(timeFormatterLocalized)
 fun LocalDateTime.toMonthYear() = this.format(monthYearFormatter).filter {it != '.'} // I don't want "MRT. 2020" but "MRT 2020"
-
-fun String.makeLocalDate(): LocalDate = LocalDate.parse(this, dateFormatter)
 
 fun String.makeLocalDateSmart(): LocalDate{
     val numbers = this.split('-', '/', ' ').map{it.toInt()}
     if (numbers.size != 3) throw FormatException("Need a string with 3 separate numbers, divided by \'-\', \'/\' or \' \'. Got $this")
     return LocalDate.of(numbers[2], numbers[1], numbers[0])
 }
-
-fun String.makeLocalDateTime(): LocalDateTime = LocalDateTime.parse(this, dateAndTimeFormatter)
-
-fun String.makeLocalDateTimeTime(): LocalDateTime = LocalDateTime.parse(this, timeFormatter)
 
 fun String.makeLocalTime(): LocalTime = LocalTime.parse(this, timeFormatter)
 
@@ -63,9 +54,5 @@ fun LocalDateTime.roundToMinutes(): LocalDateTime =
 
 fun LocalDateTime.atDate(date: LocalDate): LocalDateTime = LocalDateTime.of(date, this.toLocalTime())
 
-/**
- * Instant at start of day
- * @param zoneOffset Zoneoffset, defaults to UTC
- */
-fun LocalDate.toInstant(zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant = atStartOfDay(zoneOffset).toInstant()
+fun LocalDate.toInstantAtStartOfDay(zoneOffset: ZoneOffset = ZoneOffset.UTC): Instant = atStartOfDay(zoneOffset).toInstant()
 

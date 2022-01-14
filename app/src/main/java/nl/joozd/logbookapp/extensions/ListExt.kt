@@ -22,7 +22,7 @@ package nl.joozd.logbookapp.extensions
 fun <T> List<T>.nullIfEmpty() = if (isEmpty()) null else this
 
 fun <T> List<T>.replaceValueAt(index: Int, newValue: T): List<T> {
-    if (index !in indices) throw IndexOutOfBoundsException(index.toString())
+    if (index !in indices) throw IndexOutOfBoundsException("$index not in indices of this List")
     return mapIndexed { i: Int, t: T ->
         if (i == index) newValue else t
     }

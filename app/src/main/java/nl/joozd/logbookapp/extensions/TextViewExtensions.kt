@@ -23,19 +23,22 @@ import android.graphics.Typeface
 import android.widget.TextView
 import nl.joozd.logbookapp.R
 
-fun TextView.showIfActive(active: Boolean){
+fun TextView.showAsActiveIf(active: Boolean){
     if (active) this.showAsActive()
     else this.showAsInactive()
 }
 
 fun TextView.showAsActive(){
-    this.alpha=1.0F
+    this.alpha=ACTIVE_ALPHA
     this.setTypeface(null, Typeface.BOLD)
     this.setBackgroundResource(R.drawable.rounded_corners_primarybackground)
 }
 
 fun TextView.showAsInactive(){
-    this.alpha=0.5F
+    this.alpha=INACTIVE_ALPHA
     this.setTypeface(null, Typeface.NORMAL)
     this.setBackgroundResource(0)
 }
+
+private const val ACTIVE_ALPHA = 1.0F
+private const val INACTIVE_ALPHA = 0.5F

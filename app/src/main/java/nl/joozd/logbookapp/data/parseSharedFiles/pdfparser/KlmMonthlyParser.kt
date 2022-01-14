@@ -24,7 +24,7 @@ import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
-import nl.joozd.logbookapp.extensions.toInstant
+import nl.joozd.logbookapp.extensions.toInstantAtStartOfDay
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.io.InputStream
@@ -71,7 +71,7 @@ class KlmMonthlyParser(private val inputStream: InputStream): CompletedFlights {
         val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         val start = LocalDate.parse(results[1], formatter)
         val end = LocalDate.parse(results[2], formatter)
-        (start.toInstant()..end.plusDays(1).toInstant())
+        (start.toInstantAtStartOfDay()..end.plusDays(1).toInstantAtStartOfDay())
     } ?: Instant.EPOCH..Instant.EPOCH.also { _dataSeemsValid = false} // bogus data, [validMonthlyOverview] will be false
 
     //1day    2flightnr    3reg          (4c/i) 5out   6orig   Dtime   7Func    8dest  Dtime  9in  ignore rest of line

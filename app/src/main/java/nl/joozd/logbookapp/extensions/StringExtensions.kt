@@ -19,19 +19,14 @@
 
 package nl.joozd.logbookapp.extensions
 
-import android.util.Log
 import java.util.*
 
-/**
- * returns null if String is empty
- */
+infix fun String.inIgnoreCase(other: String): Boolean =
+    this.uppercase(Locale.ROOT) in other.uppercase(Locale.ROOT)
+
 fun String.nullIfEmpty() = if (this.isEmpty()) null else this
 
 fun String.nullIfBlank() = if (this.isBlank()) null else this
-
-fun String.emptyIfNotTrue(keep: Boolean) = if (keep) this else ""
-
-fun String.nullIfNotTrue(keep: Boolean?) = if (keep == true) this else null
 
 fun String.removeTrailingDigits(): String {
     if (isEmpty()) return this
@@ -39,15 +34,21 @@ fun String.removeTrailingDigits(): String {
     return this.dropLast(trailingDigits)
 }
 
-fun String.anyWordStartsWith(substring: String, ignoreCase: Boolean = false) =
-    if (ignoreCase) this.uppercase(Locale.ROOT).split(" ").any { it.startsWith(substring.uppercase(Locale.ROOT)) }
-    else this.split(" ").any { it.startsWith(substring) }
-
-infix fun String.inIgnoreCase(other: String): Boolean = this.uppercase(Locale.ROOT) in other.uppercase(Locale.ROOT)
-
 
 private fun String.countHowManyCharsAtTheEndAreDigits(): Int{
     var count = 0
     while (getOrNull(indices.last-count)?.isDigit() == true) count++
     return count
 }
+
+
+fun String.anyWordStartsWith(substring: String, ignoreCase: Boolean = false) =
+    if (ignoreCase) anyWordStartsWithIgnoreCase(substring)
+    else anyWordStartsWithKeepCase(substring)
+
+private fun String.anyWordStartsWithKeepCase(substring: String) =
+    this.split(" ").any { it.startsWith(substring) }
+
+private fun String.anyWordStartsWithIgnoreCase(substring: String) =
+    this.uppercase(Locale.ROOT).split(" ").any { it.startsWith(substring.uppercase(Locale.ROOT)) }
+

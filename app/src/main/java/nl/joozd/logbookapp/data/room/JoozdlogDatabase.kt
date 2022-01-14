@@ -39,7 +39,7 @@ import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
  * Version 9: Changed AircraftRegistrationWithTypeData
  */
 @Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, AircraftTypeConsensusData::class, PreloadedRegistration::class, BalanceForward::class], version = 9, exportSchema = true)
-abstract class JoozdlogDatabase private constructor(): RoomDatabase() {
+abstract class JoozdlogDatabase protected constructor(): RoomDatabase() { // protected constructor instead of private due to room needing access to it
     abstract fun flightDao(): FlightDao
     abstract fun airportDao(): AirportDao
     abstract fun aircraftTypeDao(): AircraftTypeDao

@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.data.parseSharedFiles.extensions
 
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedCompleteFlights
-import nl.joozd.logbookapp.data.repository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.autoValues
@@ -34,7 +34,7 @@ import nl.joozd.logbookapp.data.repository.helpers.autoValues
  * - Save to model Class so original CompletedFlights can be closed
  */
 suspend fun CompletedFlights.postProcess(): ProcessedCompleteFlights{
-    val aircraftRepository = AircraftRepository.getInstance()
+    val aircraftRepository = AircraftRepository
     val mrfAsync = FlightRepository.getInstance().getMostRecentFlightAsync()
     val iataIcaoMap = AirportRepository.getInstance().getIataIcaoMapAsync().await()
     val lastFlightWasIFR = (mrfAsync.await()?.ifrTime ?: 1) > 0

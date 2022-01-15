@@ -65,8 +65,8 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         get() = flightRepository.liveFlights.value ?: emptyList()
 
     // TODO do this work in adapter instead of on all flights that are never shown
-    private val flightsList
-        get() = flightsToDisplayFlightsWithErrorCheck(searchFlights(rawFlights))
+    private suspend fun buildFlightsToShowList() =
+        flightsToDisplayFlightsWithErrorCheck(searchFlights(rawFlights))
 
     private val _backupInterval: LiveData<Int> = Preferences.backupIntervalLiveData
 
@@ -100,19 +100,25 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     private val _displayFlightsList2 = MediatorLiveData<List<DisplayFlight>>().apply{
         addSource(flightRepository.liveFlights) {
-            value = flightsList
+            updateFlightsList()
         }
         addSource(airportRepository.icaoIataMap) {
-            value = flightsList
+            updateFlightsList()
         }
         addSource(airportRepository.useIataAirports) {
-            value = flightsList
+            updateFlightsList()
         }
         addSource(searchStringLiveData) {
-            value = flightsList
+            updateFlightsList()
         }
         addSource(searchSpinnerSelection) {
-            value = flightsList
+            updateFlightsList()
+        }
+    }
+
+    private fun MediatorLiveData<List<DisplayFlight>>.updateFlightsList() {
+        viewModelScope.launch {
+            postValue(buildFlightsToShowList())
         }
     }
 
@@ -129,7 +135,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Will search flights, return immediate results but if needed also update [_displayFlightsList2] async with more detailed data
      */
-    private fun searchFlights(fff: List<Flight>?): List<Flight> {
+    private suspend fun searchFlights(fff: List<Flight>?): List<Flight> {
         if (fff == null) return emptyList()
         if (!searchFieldOpen) return fff
         return when (searchType) {
@@ -165,7 +171,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     }
 
 
-    private fun searchAircraft(fff: List<Flight>) = fff.filter {
+    private suspend fun searchAircraft(fff: List<Flight>) = fff.filter {
         val ac = aircraftRepository.getAircraftTypeByShortName(it.aircraftType)
         query in it.registration.uppercase(Locale.ROOT)
                 || ac?.shortName?.uppercase(Locale.ROOT)?.contains(query) ?: false

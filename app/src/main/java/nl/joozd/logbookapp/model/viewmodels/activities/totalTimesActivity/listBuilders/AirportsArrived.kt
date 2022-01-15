@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listB
 
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.repository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesListItem
@@ -49,12 +49,16 @@ class AirportsArrived(flights: List<Flight>): TotalTimesList {
     override val autoOpen = false
 
     private fun buildList(flights: List<Flight>): List<TotalTimesListItem> {
-        val destsToVisits = flights.filter{!it.isSim}.map { it.dest }.distinct().map { dest ->
-            dest to flights.filter { it.dest == dest }.size
-        }.toMap()
-        return destsToVisits.keys.sorted().map { type ->
-            val typeLongName: String = AircraftRepository.getInstance().getAircraftTypeByShortName(type)?.name ?: type // if AircraftRepo isn't initialized yet it will show short names else full names
-            TotalTimesListItem(typeLongName, (destsToVisits[type] ?: -1).toString(), destsToVisits[type] ?: -1, 0)
+        val destsToVisits =
+            flights.filter{!it.isSim}
+                .map { it.dest }
+                .distinct()
+                .map { dest ->
+                    dest to flights.filter { it.dest == dest }.size
+                }
+                .toMap()
+        return destsToVisits.keys.sorted().map { icaoName ->
+            TotalTimesListItem(icaoName, (destsToVisits[icaoName] ?: -1).toString(), destsToVisits[icaoName] ?: -1, 0)
         }
     }
 }

@@ -41,7 +41,7 @@ import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.lang.Exception
 import java.util.*
 
-class AirportRepository(private val airportDao: AirportDao, private val dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope by MainScope()  {
+class AirportRepository private constructor(private val airportDao: AirportDao, private val dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope by MainScope()  {
 
     //Mutex lock to make sure forced and scheduled workers don't interfere with each other
     private val lockedForWorker = Mutex()

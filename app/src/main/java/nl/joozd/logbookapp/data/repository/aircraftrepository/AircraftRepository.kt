@@ -17,54 +17,69 @@
  *
  */
 
-package nl.joozd.logbookapp.data.repository
+package nl.joozd.logbookapp.data.repository.aircraftrepository
 
-import android.content.SharedPreferences
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.asLiveData
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import nl.joozd.joozdlogcommon.AircraftType
-import nl.joozd.joozdlogcommon.ConsensusData
 import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.data.dataclasses.AircraftTypeConsensus
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
+import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
-import nl.joozd.logbookapp.data.repository.helpers.findSortedHitsForRegistration
+import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
-import nl.joozd.logbookapp.data.room.dao.AircraftTypeConsensusDao
-import nl.joozd.logbookapp.data.room.dao.AircraftTypeDao
-import nl.joozd.logbookapp.data.room.dao.PreloadedRegistrationsDao
-import nl.joozd.logbookapp.data.room.dao.RegistrationDao
-import nl.joozd.logbookapp.data.room.model.*
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-
-import nl.joozd.logbookapp.extensions.mostCommonOrNull
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import java.util.*
-
 
 /**
  * Repository for everything aircraft.
- * Public parts
- * [aircraftTypesLiveData]: All aircraftTypes known in DB.
- * [aircraftListLiveData]: All aircraft known in DB
- * [aircraftMap]: All aircraft known in DB as [Aircraft.registration] to [Aircraft], also as LiveData
- * TODO: Consensus data only to be uploaded to server, not downloaded. Checked consensus data will be added to forced types list on server.
- *
+ * This takes care of storing/retrieving data from local DBs
+ * TODO: Consensus data only to be uploaded to server, not downloaded. Checked consensus data will be added to forced types list on server? Maybe?
  */
-class AircraftRepository(
-    private val aircraftTypeDao: AircraftTypeDao,
-    private val registrationDao: RegistrationDao,
-    private val aircraftTypeConsensusDao: AircraftTypeConsensusDao,
-    private val preloadedRegistrationsDao: PreloadedRegistrationsDao,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
-): CoroutineScope by MainScope() {
+object AircraftRepository: CoroutineScope by MainScope() {
+    private val dataBase = JoozdlogDatabase.getDatabase(App.instance)
+    private val aircraftTypeDao = dataBase.aircraftTypeDao()
+    private val registrationDao = dataBase.registrationDao()
+    private val aircraftTypeConsensusDao = dataBase.aircraftTypeConsensusDao()
+    private val preloadedRegistrationsDao = dataBase.preloadedRegistrationsDao()
+
+    private val cache = AircraftDataCache(aircraftTypeDao, registrationDao, aircraftTypeConsensusDao, preloadedRegistrationsDao, Dispatchers.IO)
+
+    val aircraftMapFlow = cache.registrationToAircraftMapFlow
+
+    /*
+    TODO this uses cachedSortedRegistrationsList which did not belong in here.
+        If it is used in more places than just EditFLightFragment I might make a
+        RegistrationsWorker or something class to deal with this
+
+
+    /**
+     * Searches for a match in order of priority in aircraftMap
+     * If nothing cached yet, it will return an empty list
+     */
+    fun getBestHitForPartialRegistration(r: String): Aircraft? =
+        cache.getRegistrationToAircraftMapOrEmptyMapIfNotLoadedYet()[findBestHitForRegistration(r, cachedSortedRegistrationsList)]
+
+     */
+
+    suspend fun requireMap() = cache.getRegistrationToAircraftMap()
+
+    //This gets whatever we have currently loaded. Might be nothing if its called really fast after starting app.
+    //Its not suspended though.
+    fun getMapWithCurrentCachedValues() = cache.getRegistrationToAircraftMapOrEmptyMapIfNotLoadedYet()
+
+    suspend fun getAircraftFromRegistration(registration: String?): Aircraft? =
+        registration?.let {
+            cache.getRegistrationToAircraftMap()[formatRegistration(registration)]
+        }
+
+    suspend fun getAircraftTypeByShortName(shortName: String): AircraftType? =
+        cache.getAircraftTypes().firstOrNull { it.shortName == shortName }
+
+
+
+
+    /*
 
     /**
      * Livedata of al AircraftTypes
@@ -316,11 +331,7 @@ class AircraftRepository(
         Aircraft.PRELOADED
     )
 
-    private fun AircraftTypeConsensus.toAircraft() = Aircraft(
-        registration,
-        aircraftType,
-        Aircraft.CONSENSUS
-    )
+
 
 
     /********************************************************************************************
@@ -596,28 +607,11 @@ class AircraftRepository(
 
     fun replaceAllPreloadedWith(newPreloaded: List<PreloadedRegistration>) = replacePreloadedTypesDB(newPreloaded)
 
-        /********************************************************************************************
-         * Companion object
-         ********************************************************************************************/
+ */
 
-        companion object {
-        private var singletonInstance: AircraftRepository? = null
-        fun getInstance(): AircraftRepository = synchronized(this) {
-            singletonInstance
-                ?: run {
-                    val dataBase = JoozdlogDatabase.getDatabase(App.instance)
-                    val aircraftTypeDao = dataBase.aircraftTypeDao()
-                    val registrationDao = dataBase.registrationDao()
-                    val aircraftTypeConsensusDao = dataBase.aircraftTypeConsensusDao()
-                    val preloadedRegistrationsDao = dataBase.preloadedRegistrationsDao()
-                    singletonInstance = AircraftRepository(
-                        aircraftTypeDao,
-                        registrationDao,
-                        aircraftTypeConsensusDao,
-                        preloadedRegistrationsDao
-                    )
-                    singletonInstance!!
-                }
-        }
-    }
+    /********************************************************************************************
+     * Companion object
+     ********************************************************************************************/
+
 }
+

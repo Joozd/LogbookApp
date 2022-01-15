@@ -31,7 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.repository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -43,7 +43,7 @@ import nl.joozd.logbookapp.utils.reversed
 @Deprecated("ViewModel has postProcess function")
 class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private val carrier: String? = null): CoroutineScope by MainScope() {
     private val airportRepository = AirportRepository.getInstance()
-    private val aircraftRepository = AircraftRepository.getInstance()
+    private val aircraftRepository = AircraftRepository
     private val icaoIataMapAsync = async(Dispatchers.IO) {airportRepository.getIcaoToIataMap()}
     private val aircraftMapAsync = async(Dispatchers.IO) { aircraftRepository.requireMap() }
 

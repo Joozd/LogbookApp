@@ -21,6 +21,8 @@ package nl.joozd.logbookapp.ui.activities.totalTimesActivity
 
 /**
  * Classes implementing this can output a total times list for use in [TotalTimesExpandableListAdapter]
+ * TODO make stuff suspendable. Possible with all null values and an "initialize" function or
+ *  with suspend functions instead of vals
  */
 interface TotalTimesList {
     /**

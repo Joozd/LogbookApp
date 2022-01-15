@@ -207,6 +207,8 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
     //list of valid flights (not soft-deleted ones)
     val liveFlights: LiveData<List<Flight>> = distinctUntilChanged(_cachedFlights)
 
+    val allFlightsFlow = flightDao.requestFlow()
+
     val syncProgress: LiveData<Int>
         get() = _syncProgress
 

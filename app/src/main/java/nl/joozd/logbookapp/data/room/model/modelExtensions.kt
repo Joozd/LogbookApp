@@ -21,6 +21,8 @@ package nl.joozd.logbookapp.data.room.model
 
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.joozdlogcommon.ConsensusData
+import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
 import nl.joozd.logbookapp.data.dataclasses.AircraftTypeConsensus
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.dataclasses.FlightData
@@ -79,3 +81,24 @@ fun AircraftTypeConsensus.toModel() = AircraftTypeConsensusData(registration, ai
 fun AircraftTypeConsensusData.toAircraftTypeConsensus() = AircraftTypeConsensus(registration, AircraftType.deserialize(serializedType))
 
 fun ConsensusData.toModel() = AircraftTypeConsensusData(registration, serializedType)
+
+fun PreloadedRegistration.toAircraft(types: List<AircraftType>?) = Aircraft(
+    registration,
+    types?.firstOrNull{ it.name == type},
+    Aircraft.PRELOADED
+)
+
+fun AircraftRegistrationWithTypeData.toAircraftRegistrationWithType() =
+    AircraftRegistrationWithType(this)
+
+fun AircraftRegistrationWithType.toAircraft() = Aircraft(
+    registration,
+    type,
+    Aircraft.KNOWN
+)
+
+fun AircraftTypeConsensus.toAircraft() = Aircraft(
+    registration,
+    aircraftType,
+    Aircraft.CONSENSUS
+)

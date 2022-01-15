@@ -23,10 +23,11 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.repository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import kotlin.coroutines.CoroutineContext
@@ -42,7 +43,7 @@ import kotlin.coroutines.CoroutineContext
 class OrigDestAircraftWorker: CoroutineScope {
     override val coroutineContext: CoroutineContext = Job() + Dispatchers.Main
     private val airportRepository = AirportRepository.getInstance()
-    private val aircraftRepository = AircraftRepository.getInstance()
+    private val aircraftRepository = AircraftRepository
 
     /**********************************************************************************************
      * Private parts
@@ -63,8 +64,9 @@ class OrigDestAircraftWorker: CoroutineScope {
     init{
         /**
          * If aircraftDatabase gets updated, update aircraft
+         * TODO this .toLiveData is just to make it work quickly.
          */
-        _aircraft.addSource(aircraftRepository.aircraftListLiveData){
+        _aircraft.addSource(aircraftRepository.aircraftMapFlow.asLiveData()){
             _aircraft.value?.let{
                 setAircraft(it.registration)
             }

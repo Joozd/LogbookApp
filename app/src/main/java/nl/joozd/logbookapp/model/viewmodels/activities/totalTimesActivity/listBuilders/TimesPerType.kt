@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listB
 
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.repository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
@@ -54,7 +54,7 @@ class TimesPerType(flights: List<Flight>): TotalTimesList {
             type to flights.filter { it.aircraftType == type }.sumOf { it.duration() }
         }.toMap()
         return typesToTimes.keys.sorted().map { type ->
-            val typeLongName: String = AircraftRepository.getInstance().getAircraftTypeByShortName(type)?.name ?: type // if AircraftRepo isn't initialized yet it will show short names else full names
+            val typeLongName: String = /* AircraftRepository.getAircraftTypeByShortName(type)?.name ?: */ type // TODO getAircraftByShortName is suspend, gotta fix that
             TotalTimesListItem(typeLongName, FlightDataPresentationFunctions.minutesToHoursAndMinutesString(typesToTimes[type] ?: -1), typesToTimes[type] ?: -1, 0)
         }
     }

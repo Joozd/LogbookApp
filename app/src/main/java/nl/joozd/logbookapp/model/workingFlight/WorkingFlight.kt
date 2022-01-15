@@ -26,7 +26,7 @@ import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
-import nl.joozd.logbookapp.data.repository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
@@ -153,9 +153,8 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
     private suspend fun getAircraft(): Aircraft {
         val reg = wf.registration
         val typeString = wf.aircraftType
-        val repo = AircraftRepository.getInstance()
         return if (typeString.isBlank()) {
-            repo.getAircraftFromRegistration(reg).also{ ac ->
+            AircraftRepository.getAircraftFromRegistration(reg).also{ ac ->
                 ac?.type?.let {
                     aircraftType = it.shortName
                 }
@@ -163,7 +162,7 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
         } else {
             Aircraft(
                 registration = reg,
-                type = repo.getAircraftTypeByShortName(typeString) ?: AircraftType(
+                type = AircraftRepository.getAircraftTypeByShortName(typeString) ?: AircraftType(
                     "",
                     typeString,
                     multiPilot = isMultipilot,

@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.model.viewmodels.fragments
 
 import android.text.Editable
 import androidx.lifecycle.*
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -29,6 +30,11 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmen
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.dataclasses.FlightData
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import java.time.Instant
@@ -38,9 +44,10 @@ import java.time.LocalTime
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val wf = flightRepository.getWorkingFlight()
 
+    private var cachedSortedRegistrationsList: List<String> = emptyList()
+
     val airportDbLiveData = airportRepository.liveAirports
-    val aircraftDbLiveData = aircraftRepository.aircraftListLiveData
-    val knownRegistrationsLiveData = aircraftRepository.registrationsLiveData
+    val knownRegistrationsFlow = makeSortedRegistrationsFlowAndCacheIt()
 
     val title: LiveData<String> = MutableLiveData(context.getString(if(wf.newFlight) R.string.add_flight else R.string.edit_flight))
 
@@ -84,7 +91,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private var autoValuesOnlyOffBecauseOfUnknownAirport: Boolean = wf.autoFill
 
     private fun makeDateString(epochSecond: Long) =
-        Instant.ofEpochSecond(epochSecond).toLocalDate().toDateString() ?: NO_DATA_STRING
+        Instant.ofEpochSecond(epochSecond).toLocalDate().toDateString()
 
     private fun makeAircraftDisplayNameMediatorLiveData() =
         MediatorLiveData<String>().apply {
@@ -199,7 +206,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private fun searchRegistrationAndSaveInWorkingFlight(regAndTypeString: String) {
         viewModelScope.launch {
             val bestRegistrationHit =
-                aircraftRepository.getBestHitForPartialRegistration(regAndTypeString)
+                getBestHitForPartialRegistration(regAndTypeString)
             if (bestRegistrationHit == null) {
                 feedback(EditFlightFragmentEvents.AIRCRAFT_NOT_FOUND).putString(regAndTypeString)
                 wf.registration = regAndTypeString
@@ -325,8 +332,10 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     }
 
     // TODO do this in [WorkingFlight]
-    fun notifyAircraftDbChanged(){
-        wf.notifyAircraftDbUpdated()
+    init {
+        viewModelScope.launch {
+            wf.notifyAircraftDbUpdated()
+        }
     }
 
     // TODO do this in [WorkingFlight]
@@ -413,6 +422,25 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private fun getPicOrPicusString(): String = getString(
         if(wf.isPICUS) R.string.picus else R.string.pic
     )
+
+    private fun makeSortedRegistrationsFlowAndCacheIt() =
+        combine(AircraftRepository.aircraftMapFlow, FlightRepository.getInstance().allFlightsFlow){
+                regMap, allFlights ->
+            makeSortedRegistrationsList(allFlights, regMap).also{
+                cachedSortedRegistrationsList = it
+            }
+        }
+
+    private fun makeSortedRegistrationsList(
+        allFlights: List<FlightData>,
+        regMap: Map<String, Aircraft>
+    ) = (allFlights.map { it.registration } + regMap.values.map { it.registration })
+        .distinct()
+
+    //I could make this suspended and use requireMap() but cannot think enough about what consequences that has due to being tired.
+    //probably fine as is.
+    private fun getBestHitForPartialRegistration(r: String): Aircraft? =
+        AircraftRepository.getMapWithCurrentCachedValues()[findBestHitForRegistration(r, cachedSortedRegistrationsList)]
 
     companion object{
         const val NO_DATA_STRING = "…"

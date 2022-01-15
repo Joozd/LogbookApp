@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.data.room.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 
 /**
@@ -40,6 +41,9 @@ interface FlightDao {
 
     @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
     fun requestLiveData(): LiveData<List<FlightData>>
+
+    @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
+    fun requestFlow(): Flow<List<FlightData>>
 
     @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 ORDER BY timeOut DESC")
     fun requestNonDeletedLiveData(): LiveData<List<FlightData>>

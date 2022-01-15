@@ -33,7 +33,7 @@ interface AircraftTypeDao {
     suspend fun requestAllAircraftTypes(): List<AircraftTypeData>
 
     @Query("SELECT * FROM AircraftTypeData")
-    fun requestLiveAircraftTypes(): LiveData<List<AircraftTypeData>>
+    fun liveAircraftTypes(): LiveData<List<AircraftTypeData>>
 
     @Query("SELECT * FROM AircraftTypeData")
     fun aircraftTypesFlow(): Flow<List<AircraftTypeData>>

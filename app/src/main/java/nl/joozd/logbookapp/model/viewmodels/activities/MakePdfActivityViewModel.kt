@@ -72,7 +72,6 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
             pdfLogbook = PdfDocument().apply {
                 //get all aircraft:
                 val balancesForwardAsync = async(Dispatchers.IO) { balanceForwardRepository.getAll() }
-                val aircraftMapAsync = aircraftRepository.getAircraftTypesMapShortNameAsync()
                 val allFlightsAsync = async(Dispatchers.IO) { flightRepository.getAllFlights() }
 
                 var pageNumber = 1

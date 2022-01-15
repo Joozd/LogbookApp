@@ -29,7 +29,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.marginTop
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -523,22 +527,19 @@ class EditFlightFragment: JoozdlogFragment(){
         // Notify viewmodel that aircraft DB has changed. Triggered from here to keep
         // LiveData lifecycle pattern intact and prevent using observeForever in viewModel
         //TODO I don't like this
-        viewModel.aircraftDbLiveData.observe(viewLifecycleOwner) {
-            viewModel.notifyAircraftDbChanged()
-        }
-
-        // Notify viewmodel that aircraft DB has changed. Triggered from here to keep
-        // LiveData lifecycle pattern intact and prevent using observeForever in viewModel
-        //TODO I don't like this
         viewModel.airportDbLiveData.observe(viewLifecycleOwner) {
             viewModel.notifyAirportDbChanged()
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.observeKnownAircraftRegistrations() {
-        viewModel.knownRegistrationsLiveData.observe(viewLifecycleOwner) { registrations ->
-            (flightAircraftField.adapter as AircraftAutoCompleteAdapter).apply {
-                setItems(registrations)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.knownRegistrationsFlow.collect{ registrations ->
+                    (flightAircraftField.adapter as AircraftAutoCompleteAdapter).apply {
+                        setItems(registrations)
+                    }
+                }
             }
         }
     }

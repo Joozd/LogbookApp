@@ -61,23 +61,19 @@ class EditFlightFragment: JoozdlogFragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val inflatedLayout = inflater.inflate(R.layout.layout_edit_flight_fragment, container, false)
         val binding = LayoutEditFlightFragmentBinding.bind(inflatedLayout).apply {
-            /*
-            (flightInfoText.background as GradientDrawable).colorFilter = PorterDuffColorFilter(
-                requireActivity().getColorFromAttr(android.R.attr.colorPrimary),
-                PorterDuff.Mode.SRC_IN
-            ) // set background color to background with rounded corners
-
-             */
-
             setAndattachAdaptersForAutocompleteFields()
 
             setLongPressListenersForHelpDialogs()
 
             setOnClickListeners()
 
+            setOnFocusChangedListeners()
+
             observeLiveData()
 
             setFeedbackObserver()
+
+            catchAndIgnoreClicksOnEmptyPartOfDialog()
 
             if (Preferences.editFlightFragmentWelcomeMessageShouldBeDisplayed)
                 showWelcomeMessage()
@@ -99,11 +95,8 @@ class EditFlightFragment: JoozdlogFragment(){
 
         setDialogLaunchingOnClickListeners()
 
-        setOnFocusChangedListeners()
-
         setClosingOnClickListeners()
 
-        catchAndIgnoreClicksOnEmptyPartOfDialog()
     }
 
     private fun LayoutEditFlightFragmentBinding.catchAndIgnoreClicksOnEmptyPartOfDialog() {
@@ -510,6 +503,7 @@ class EditFlightFragment: JoozdlogFragment(){
      * If this fragment is not closing, open an [AircraftPicker] dialog
      */
     private fun openAircraftPicker() {
+        if(!viewModel.closing)
             supportFragmentManager.commit {
                 add(R.id.mainActivityLayout, AircraftPicker())
                 addToBackStack(null)

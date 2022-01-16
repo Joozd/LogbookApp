@@ -86,6 +86,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     val localDate
         get() = wf.date
 
+    var closing: Boolean = false
+        private set
+
     //If this is true, if autoValues is off, the only reason for that is [checkAutovaluesForUnknownAirport] set it to off.
     //If checkAutovaluesForUnknownAirport decides it's ok again,  autoValues can be set to on again
     private var autoValuesOnlyOffBecauseOfUnknownAirport: Boolean = wf.autoFill
@@ -203,6 +206,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         wf.setAircraft(reg, type)
     }
 
+    //TODO this has work that should be done in WorkingFlight
     private fun searchRegistrationAndSaveInWorkingFlight(regAndTypeString: String) {
         viewModelScope.launch {
             val bestRegistrationHit =
@@ -365,6 +369,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
             }
             //else { /*no problem, no action*/ }
         }
+        closing = true
         wf.saveAndClose()
         feedback(EditFlightFragmentEvents.CLOSE_EDIT_FLIGHT_FRAGMENT)
     }
@@ -437,10 +442,12 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     ) = (allFlights.map { it.registration } + regMap.values.map { it.registration })
         .distinct()
 
-    //I could make this suspended and use requireMap() but cannot think enough about what consequences that has due to being tired.
-    //probably fine as is.
+    //I could make this suspended and use requireMap() and getAircraftFromRegistration()
+    //Why is this done here anyway and not in WorkingFlight? TODO
     private fun getBestHitForPartialRegistration(r: String): Aircraft? =
-        AircraftRepository.getMapWithCurrentCachedValues()[findBestHitForRegistration(r, cachedSortedRegistrationsList)]
+        AircraftRepository.getAircraftFromRegistrationCachedOnly(r)
+        ?: AircraftRepository.getMapWithCurrentCachedValues()[findBestHitForRegistration(r,cachedSortedRegistrationsList)]
+
 
     companion object{
         const val NO_DATA_STRING = "…"

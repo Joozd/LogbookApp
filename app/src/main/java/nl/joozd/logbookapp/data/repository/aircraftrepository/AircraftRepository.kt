@@ -86,6 +86,12 @@ object AircraftRepository: CoroutineScope by MainScope() {
             cache.getRegistrationToAircraftMap()[formatRegistration(registration)]
         }
 
+    fun getAircraftFromRegistrationCachedOnly(registration: String?): Aircraft? =
+        registration?.let {
+            cache.getRegistrationToAircraftMapOrEmptyMapIfNotLoadedYet()[formatRegistration(registration)]
+        }
+
+
     suspend fun getAircraftTypeByShortName(shortName: String): AircraftType? =
         cache.getAircraftTypes().firstOrNull { it.shortName == shortName }
 

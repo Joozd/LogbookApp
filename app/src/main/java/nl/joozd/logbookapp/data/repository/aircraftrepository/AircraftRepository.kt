@@ -89,9 +89,6 @@ object AircraftRepository: CoroutineScope by MainScope() {
     suspend fun getAircraftTypeByShortName(shortName: String): AircraftType? =
         cache.getAircraftTypes().firstOrNull { it.shortName == shortName }
 
-    /**
-     * Save aircraft to Aircraft Database
-     */
     fun saveAircraft(aircraft: Aircraft) = launch(Dispatchers.IO) {
         if (aircraft.type?.name == null) return@launch // Don't save aircraft without type.
         val newAcrwt = AircraftRegistrationWithType(aircraft.registration, aircraft.type)

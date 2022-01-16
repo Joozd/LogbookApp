@@ -20,21 +20,10 @@
 package nl.joozd.logbookapp.data.room.model
 
 import nl.joozd.joozdlogcommon.AircraftType
-import nl.joozd.joozdlogcommon.ConsensusData
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
-import nl.joozd.logbookapp.data.dataclasses.AircraftTypeConsensus
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.dataclasses.FlightData
-
-fun AircraftTypeData.toAircraftType() = AircraftType(
-    name,
-    shortName,
-    multiPilot,
-    multiEngine
-)
-
-fun AircraftType.toModel() = AircraftTypeData(name, shortName, multiPilot, multiEngine)
 
 fun FlightData.toFlight(): Flight =
     Flight(
@@ -75,12 +64,22 @@ fun FlightData.toFlight(): Flight =
         signature
     )
 
-// This doesn't happen locally, server sends [ConsensusData]
-fun AircraftTypeConsensus.toModel() = AircraftTypeConsensusData(registration, aircraftType.serialize())
+fun AircraftTypeData.toAircraftType() = AircraftType(
+    name,
+    shortName,
+    multiPilot,
+    multiEngine
+)
 
-fun AircraftTypeConsensusData.toAircraftTypeConsensus() = AircraftTypeConsensus(registration, AircraftType.deserialize(serializedType))
+fun AircraftType.toData() = AircraftTypeData(
+    name,
+    shortName,
+    multiPilot,
+    multiEngine
+)
 
-fun ConsensusData.toModel() = AircraftTypeConsensusData(registration, serializedType)
+fun List<AircraftTypeData>.toAircraftTypes(): List<AircraftType> =
+    map { it.toAircraftType() }
 
 fun PreloadedRegistration.toAircraft(types: List<AircraftType>?) = Aircraft(
     registration,
@@ -91,14 +90,13 @@ fun PreloadedRegistration.toAircraft(types: List<AircraftType>?) = Aircraft(
 fun AircraftRegistrationWithTypeData.toAircraftRegistrationWithType() =
     AircraftRegistrationWithType(this)
 
+fun List<AircraftRegistrationWithTypeData>.toAircraftRegistrationWithTypes()
+: List<AircraftRegistrationWithType> =
+    map { it.toAircraftRegistrationWithType() }
+
+
 fun AircraftRegistrationWithType.toAircraft() = Aircraft(
     registration,
     type,
     Aircraft.KNOWN
-)
-
-fun AircraftTypeConsensus.toAircraft() = Aircraft(
-    registration,
-    aircraftType,
-    Aircraft.CONSENSUS
 )

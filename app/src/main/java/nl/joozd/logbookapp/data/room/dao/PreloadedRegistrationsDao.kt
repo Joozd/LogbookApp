@@ -42,6 +42,9 @@ interface PreloadedRegistrationsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(vararg regs: PreloadedRegistration)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun save(regs: List<PreloadedRegistration>)
+
     @Query ("DELETE FROM PreloadedRegistration")
     suspend fun clearDb()
 }

@@ -20,32 +20,39 @@
 package nl.joozd.logbookapp.data.repository.aircraftrepository
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.dataclasses.FlightData
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
+import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
 import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
+import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
+import nl.joozd.logbookapp.data.room.model.toAircraftTypes
+import nl.joozd.logbookapp.data.room.model.toData
 
 /**
  * Repository for everything aircraft.
  * This takes care of storing/retrieving data from local DBs
- * TODO: Consensus data only to be uploaded to server, not downloaded. Checked consensus data will be added to forced types list on server? Maybe?
  */
 object AircraftRepository: CoroutineScope by MainScope() {
     private val dataBase = JoozdlogDatabase.getDatabase(App.instance)
     private val aircraftTypeDao = dataBase.aircraftTypeDao()
     private val registrationDao = dataBase.registrationDao()
-    private val aircraftTypeConsensusDao = dataBase.aircraftTypeConsensusDao()
     private val preloadedRegistrationsDao = dataBase.preloadedRegistrationsDao()
 
-    private val cache = AircraftDataCache(aircraftTypeDao, registrationDao, aircraftTypeConsensusDao, preloadedRegistrationsDao, Dispatchers.IO)
+    private val cache = AircraftDataCache(aircraftTypeDao, registrationDao, preloadedRegistrationsDao, Dispatchers.IO)
 
     val aircraftMapFlow = cache.registrationToAircraftMapFlow
+
+    val aircraftFlow = cache.registrationToAircraftMapFlow.map { it.values }
+
+    val aircraftTypesFlow = aircraftTypeDao.aircraftTypesFlow().map {
+        it.toAircraftTypes()
+    }
+
+    //null if not cached yet
+    val aircraftTypes: List<AircraftType>? get() = cache.cachedAircraftTypeData
 
     /*
     TODO this uses cachedSortedRegistrationsList which did not belong in here.
@@ -75,6 +82,38 @@ object AircraftRepository: CoroutineScope by MainScope() {
 
     suspend fun getAircraftTypeByShortName(shortName: String): AircraftType? =
         cache.getAircraftTypes().firstOrNull { it.shortName == shortName }
+
+    /**
+     * Save aircraft to Aircraft Database
+     */
+    fun saveAircraft(aircraft: Aircraft) = launch(Dispatchers.IO) {
+            if (aircraft.type?.name == null) return@launch // Don't save aircraft without type.
+            val newAcrwt = AircraftRegistrationWithType(aircraft.registration, aircraft.type)
+            saveAircraftRegistrationWithType(newAcrwt)
+    }
+
+    fun replaceAllTypesWith(newTypes: List<AircraftType>) = launch(Dispatchers.IO + NonCancellable) {
+            aircraftTypeDao.clearDb()
+            saveAircraftTypes(newTypes)
+    }
+
+    fun replaceAllPreloadedWith(newPreloaded: List<PreloadedRegistration>) = launch(Dispatchers.IO){
+        preloadedRegistrationsDao.clearDb()
+        savePreloadedRegs(newPreloaded)
+    }
+
+    private suspend fun saveAircraftTypes(types: List<AircraftType>) {
+        val typeData = types.map { it.toData() }
+        aircraftTypeDao.save(*typeData.toTypedArray())
+    }
+
+    private suspend fun saveAircraftRegistrationWithType(arwt: AircraftRegistrationWithType){
+        registrationDao.save(arwt.toData())
+    }
+
+    private suspend fun savePreloadedRegs(preloaded: List<PreloadedRegistration>){
+        preloadedRegistrationsDao.save(preloaded)
+    }
 
 
 

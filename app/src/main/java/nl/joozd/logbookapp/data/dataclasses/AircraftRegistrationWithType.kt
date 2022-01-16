@@ -22,7 +22,8 @@ package nl.joozd.logbookapp.data.dataclasses
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
 
-data class AircraftRegistrationWithType(val registration: String, val type: AircraftType, val knownToServer: Boolean, val previousType: AircraftType? = null){
+//knownToServer is not used anymore, I am leaving it in because I don't want to update database. (I am lazy)
+data class AircraftRegistrationWithType(val registration: String, val type: AircraftType, val knownToServer: Boolean = false, val previousType: AircraftType? = null){
     constructor(model: AircraftRegistrationWithTypeData): this(
         model.registration,
         AircraftType.deserialize(model.serializedType),
@@ -33,7 +34,7 @@ data class AircraftRegistrationWithType(val registration: String, val type: Airc
 
 
 
-    fun toModel() = AircraftRegistrationWithTypeData(
+    fun toData() = AircraftRegistrationWithTypeData(
         registration = registration,
         serializedType = type.serialize(),
         knownToServer = knownToServer,

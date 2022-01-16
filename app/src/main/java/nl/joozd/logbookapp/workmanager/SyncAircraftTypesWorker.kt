@@ -32,8 +32,6 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 /**
  * Sync aircraftTypes with server
  * - First, check version of forcedTypes and update that list if needed
- * Then, check local consensus data to send, and send it
- * TODO - Finally, download consensus data from server
  */
 class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
@@ -77,36 +75,9 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
             } ?: return@withContext Result.retry()
         }
 
-        /**
-         * collect unsent consensus data and send it to server (if optIn)
-         */
-        val sendConsensus = launch{
-            if (Preferences.consensusOptIn) {
-                aircraftRepository.getAcrwtData().filter { !it.knownToServer }.nullIfEmpty()?.let {
-                    if (Cloud.sendAircraftConsensus(it.map { acrwt -> acrwt.toConsensusDataList() }.flatten())) {
-                        aircraftRepository.saveAcrwtData(it.map { acrwt -> acrwt.copy(knownToServer = true, serializedPreviousType = ByteArray(0)) })
-                    }
-                }
-            }
-        }
-
-        /**
-         * Receive complete consensus DB from server (if optIn)
-         */
-        val receiveConsensus = launch{
-            if (Preferences.consensusOptIn) {
-                Cloud.getConsensus()?.let {
-                    aircraftRepository.replaceConsensusData(it)
-                }
-            }
-        }
-
-
 
         saveTypes?.join()
         saveForced?.join()
-        sendConsensus.join()
-        receiveConsensus.join()
 
         return@withContext Result.success()
     }

@@ -37,7 +37,6 @@ import kotlin.coroutines.CoroutineContext
 class AircraftDataCache(
     private val aircraftTypeDao: AircraftTypeDao,
     private val registrationDao: RegistrationDao,
-    private val aircraftTypeConsensusDao: AircraftTypeConsensusDao,
     private val preloadedRegistrationsDao: PreloadedRegistrationsDao,
 
     // coroutineContext must have the same lifetime as the object creating this
@@ -47,9 +46,8 @@ class AircraftDataCache(
     override val coroutineContext: CoroutineContext = coroutineContext + SupervisorJob()
 
     //Main Caches; functions will get from this and collectors will update this.
-    private var cachedAircraftTypeData: List<AircraftType>? = null
-    private var cachedRegistrationData: List<AircraftRegistrationWithType>? = null
-    private var cachedAircraftTypeConsensusData: List<Aircraft>? = null
+    var cachedAircraftTypeData: List<AircraftType>? = null; private set
+    private var cachedRegistrationWithTypeData: List<AircraftRegistrationWithType>? = null
     private var cachedPreloadedRegistrationsData: List<PreloadedRegistration>? = null
 
     // registrations are all caps, only A-Z
@@ -66,10 +64,7 @@ class AircraftDataCache(
                 cachedAircraftTypeData = getAircraftTypes()
             },
             launch(Dispatchers.IO) {
-                cachedRegistrationData = getRegistrationData()
-            },
-            launch(Dispatchers.IO) {
-                cachedAircraftTypeConsensusData = getAircraftTypeConsensusData()
+                cachedRegistrationWithTypeData = getRegistrationData()
             },
             launch(Dispatchers.IO) {
                 cachedPreloadedRegistrationsData = getPreloadedRegistrationsData()
@@ -93,13 +88,8 @@ class AircraftDataCache(
             ?: aircraftTypeDao.requestAllAircraftTypes().map { it.toAircraftType() }
 
     private suspend fun getRegistrationData(): List<AircraftRegistrationWithType> =
-        cachedRegistrationData
+        cachedRegistrationWithTypeData
             ?: registrationDao.requestAllRegistrations().map { it.toAircraftRegistrationWithType() }
-
-    private suspend fun getAircraftTypeConsensusData(): List<Aircraft> =
-        cachedAircraftTypeConsensusData
-            ?: aircraftTypeConsensusDao.getAllConsensusData()
-                .map { it.toAircraftTypeConsensus().toAircraft() }
 
     private suspend fun getPreloadedRegistrationsData(): List<PreloadedRegistration> =
         cachedPreloadedRegistrationsData
@@ -109,8 +99,7 @@ class AircraftDataCache(
     private val collectionJobs = listOf(
         launchAircraftTypeFlowCollector(),
         launchAircraftWithRegistrationFlowCollector(),
-        launchConsensusFlowCollector(),
-
+        launchPreloadedRegistrationsFlowCollector()
     )
 
     private fun launchAircraftTypeFlowCollector() =
@@ -121,13 +110,7 @@ class AircraftDataCache(
 
     private fun launchAircraftWithRegistrationFlowCollector() =
         getAndTransformAircraftRegistrationDataFlow().onEach {
-            cachedRegistrationData = it
-            updateRegistrationToAircraftMap()
-        }.launchIn(this)
-
-    private fun launchConsensusFlowCollector() =
-        getAndTransformConsensusDataFlow().onEach{
-            cachedAircraftTypeConsensusData = it
+            cachedRegistrationWithTypeData = it
             updateRegistrationToAircraftMap()
         }.launchIn(this)
 
@@ -142,17 +125,10 @@ class AircraftDataCache(
         registrationToAircraftMap.clear()
         //The order matters as values will be overwritten when we get down the list
         //If this takes too much time we can wrap this in a `launch(Dispatchers.Default)` block
-        addConsensusDataToAircraftMap()
         addPreloadedRegistrationsDataToAircraftMap()
         addAircraftWithRegistrationsToAircraftMap()
 
         updateCacheUpdatedFlow()
-    }
-
-    private fun addConsensusDataToAircraftMap(){
-        cachedAircraftTypeConsensusData?.forEach{
-            registrationToAircraftMap[formatRegistration(it.registration)] = it
-        }
     }
 
     /*
@@ -169,7 +145,7 @@ class AircraftDataCache(
     }
 
     private fun addAircraftWithRegistrationsToAircraftMap(){
-        cachedRegistrationData?.forEach {
+        cachedRegistrationWithTypeData?.forEach {
             registrationToAircraftMap[formatRegistration(it.registration)] = it.toAircraft()
         }
     }
@@ -181,29 +157,16 @@ class AircraftDataCache(
 
 
     private fun getAndTransformAircraftTypeFlow() =
-        aircraftTypeDao.aircraftTypesFlow().map { aircraftTypesDataToAircraftTypes(it) }
+        aircraftTypeDao.aircraftTypesFlow().map { it.toAircraftTypes() }
 
     private fun getAndTransformAircraftRegistrationDataFlow() =
         registrationDao.allRegistrationsFlow().map {
-            aircraftRegistrationWithTypeDataListToAircraftRegistrationWithTypeList(it)
-        }
-
-    private fun getAndTransformConsensusDataFlow() =
-        aircraftTypeConsensusDao.consensusDataFlow().map{
-            aircraftTypeConsensusDataListToAircraftList(it)
+            it.toAircraftRegistrationWithTypes()
         }
 
     private fun getPreloadedRegistrationsFlow() =
         preloadedRegistrationsDao.registrationsFlow()
 
-    private fun aircraftTypesDataToAircraftTypes(l: List<AircraftTypeData>) =
-        l.map { it.toAircraftType() }
-
-    private fun aircraftRegistrationWithTypeDataListToAircraftRegistrationWithTypeList(l: List<AircraftRegistrationWithTypeData>) =
-        l.map { it.toAircraftRegistrationWithType() }
-
-    private fun aircraftTypeConsensusDataListToAircraftList(l: List<AircraftTypeConsensusData>) =
-        l.map { it.toAircraftTypeConsensus().toAircraft() }
 
     /*
      * Closing this object will stop it from updating, but it can still be read.

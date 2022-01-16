@@ -133,7 +133,7 @@ class AircraftPicker: JoozdlogFragment(){
                 typesPickerAdapter.updateList(it)
             }
 
-            viewModel.knownRegistrations.observe(viewLifecycleOwner){
+            viewModel.knownRegistrationsLiveData.observe(viewLifecycleOwner){
                 regFieldAdapter.setItems(it)
             }
 

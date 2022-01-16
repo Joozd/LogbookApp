@@ -23,6 +23,7 @@ import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.extensions.inIgnoreCase
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 import java.util.*
@@ -38,12 +39,12 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
         get() = _typesSearchString.value ?: ""
 
     private val _aircraftTypes = MediatorLiveData<List<AircraftType>>().apply {
-        addSource(aircraftRepository.aircraftTypesLiveData){
+        addSource(AircraftRepository.aircraftTypesFlow.asLiveData()){
             // Create a list of names of all known aircraft matching [typesSearchString]
             value = it.filter{type -> typesSearchString inIgnoreCase type.name}
         }
         addSource(_typesSearchString){
-            value = (aircraftRepository.aircraftTypes ?: emptyList()).filter{typesSearchString inIgnoreCase it.name}
+            value = (AircraftRepository.aircraftTypes ?: emptyList()).filter{typesSearchString inIgnoreCase it.name}
         }
     }
 
@@ -54,7 +55,9 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     val aircraftTypes: LiveData<List<AircraftType>>
         get() = _aircraftTypes
 
-    val knownRegistrations = aircraftRepository.allAircraftLiveData.map{ it.map{ ac -> ac.registration}}
+    val knownRegistrationsLiveData =
+        AircraftRepository.aircraftFlow.asLiveData()
+        .map{ it.map{ ac -> ac.registration} }
 
     private var mAircraft: Aircraft
         get() = selectedAircraft.value!!
@@ -74,15 +77,6 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     }
 
     val selectedAircraftType: LiveData<AircraftType?> = Transformations.map(selectedAircraft) { it.type }
-
-    fun selectAircraftTypeByString(typeString: String, shortString: Boolean = false){
-        viewModelScope.launch {
-            val newType = if (shortString) aircraftRepository.getAircraftTypeByShortName(typeString) else aircraftRepository.getAircraftType(typeString)
-            updatedSelectedAircraft(type = newType)
-        }
-
-        //TODO set AircraftRegistrationWithTypeData
-    }
 
     fun selectAircraftType(type: AircraftType){
         viewModelScope.launch {
@@ -104,8 +98,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
      * Save aircraft to repository
      */
     fun saveAircraftToRepository() {
-
-        aircraftRepository.saveAircraft(mAircraft)
+        AircraftRepository.saveAircraft(mAircraft)
     }
 
     fun updateSearchString(query: String) {

@@ -39,12 +39,12 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
         get() = _typesSearchString.value ?: ""
 
     private val _aircraftTypes = MediatorLiveData<List<AircraftType>>().apply {
-        addSource(AircraftRepository.aircraftTypesFlow.asLiveData()){
+        addSource(aircraftRepository.aircraftTypesFlow.asLiveData()){
             // Create a list of names of all known aircraft matching [typesSearchString]
             value = it.filter{type -> typesSearchString inIgnoreCase type.name}
         }
         addSource(_typesSearchString){
-            value = (AircraftRepository.aircraftTypes ?: emptyList()).filter{typesSearchString inIgnoreCase it.name}
+            value = (aircraftRepository.aircraftTypes ?: emptyList()).filter{typesSearchString inIgnoreCase it.name}
         }
     }
 
@@ -56,7 +56,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
         get() = _aircraftTypes
 
     val knownRegistrationsLiveData =
-        AircraftRepository.aircraftFlow.asLiveData()
+        aircraftRepository.aircraftFlow.asLiveData()
         .map{ it.map{ ac -> ac.registration} }
 
     private var mAircraft: Aircraft
@@ -98,7 +98,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
      * Save aircraft to repository
      */
     fun saveAircraftToRepository() {
-        AircraftRepository.saveAircraft(mAircraft)
+        aircraftRepository.saveAircraft(mAircraft)
     }
 
     fun updateSearchString(query: String) {

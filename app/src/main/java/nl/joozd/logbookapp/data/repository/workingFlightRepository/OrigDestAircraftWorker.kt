@@ -43,7 +43,7 @@ import kotlin.coroutines.CoroutineContext
 class OrigDestAircraftWorker: CoroutineScope {
     override val coroutineContext: CoroutineContext = Job() + Dispatchers.Main
     private val airportRepository = AirportRepository.getInstance()
-    private val aircraftRepository = AircraftRepository
+    private val aircraftRepository = AircraftRepository.getInstance()
 
     /**********************************************************************************************
      * Private parts

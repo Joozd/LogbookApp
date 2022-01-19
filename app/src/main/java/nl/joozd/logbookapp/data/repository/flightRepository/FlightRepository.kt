@@ -28,10 +28,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
-import nl.joozd.logbookapp.data.room.dao.FlightDao
 import nl.joozd.logbookapp.data.room.model.toFlight
 import nl.joozd.logbookapp.data.utils.FlightsListFunctions.makeListOfNamesAsync
-import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.CalendarFlightUpdater
 import nl.joozd.logbookapp.data.calendar.parsers.KlmIcalFlightsParser
 import nl.joozd.logbookapp.data.comm.Cloud
@@ -54,11 +52,13 @@ import java.util.*
 
 //TODO reorder this and make direct DB functions private
 //TODO make cloud functions originate from here and do their DB work here, not in [Cloud]
-class FlightRepository(private val flightDao: FlightDao, private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+class FlightRepository(database: JoozdlogDatabase, private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ): CoroutineScope by MainScope() {
     /********************************************************************************************
      * Private parts:
      ********************************************************************************************/
+
+    private val flightDao = database.flightDao()
 
     private val saveMutex = Mutex()
 
@@ -920,18 +920,13 @@ class FlightRepository(private val flightDao: FlightDao, private val dispatcher:
      ********************************************************************************************/
 
     companion object{
-        private var singletonInstance: FlightRepository? = null
+        private var INSTANCE: FlightRepository? = null
         fun getInstance(): FlightRepository = synchronized(this) {
-            singletonInstance
-                ?: run {
-                    val dataBase = JoozdlogDatabase.getDatabase(App.instance)
-                    val flightsDao = dataBase.flightDao()
-                    singletonInstance =
-                        FlightRepository(
-                            flightsDao
-                        )
-                    singletonInstance!!
+            INSTANCE
+                ?: FlightRepository(JoozdlogDatabase.getInstance()).also{
+                    INSTANCE = it
                 }
+
         }
 
         const val MIN_SYNC_INTERVAL = 30*60 // seconds

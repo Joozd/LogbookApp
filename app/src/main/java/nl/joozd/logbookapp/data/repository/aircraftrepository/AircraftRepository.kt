@@ -30,22 +30,25 @@ import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 import nl.joozd.logbookapp.data.room.model.toAircraftTypes
 import nl.joozd.logbookapp.data.room.model.toData
+import nl.joozd.logbookapp.utils.DispatcherProvider
 
 /**
  * Repository for everything aircraft.
  * This takes care of storing/retrieving data from local DBs
+ * Singleton instead of object so we can inject a mock database
  */
-object AircraftRepository: CoroutineScope by MainScope() {
-    private val dataBase = JoozdlogDatabase.getDatabase(App.instance)
-    private val aircraftTypeDao = dataBase.aircraftTypeDao()
-    private val registrationDao = dataBase.registrationDao()
-    private val preloadedRegistrationsDao = dataBase.preloadedRegistrationsDao()
+class AircraftRepository private constructor(private val dataBase: JoozdlogDatabase = JoozdlogDatabase.getInstance()) : CoroutineScope by MainScope() {
+    private val aircraftTypeDao get() = dataBase.aircraftTypeDao()
+    private val registrationDao get() = dataBase.registrationDao()
+    private val preloadedRegistrationsDao get() = dataBase.preloadedRegistrationsDao()
 
+
+    //TODO move cache to model. Repository is not for caching but for retrieving.
     private val cache = AircraftDataCache(
         aircraftTypeDao,
         registrationDao,
         preloadedRegistrationsDao,
-        Dispatchers.IO
+        DispatcherProvider.io()
     )
 
     val aircraftMapFlow = cache.registrationToAircraftMapFlow
@@ -95,20 +98,20 @@ object AircraftRepository: CoroutineScope by MainScope() {
     suspend fun getAircraftTypeByShortName(shortName: String): AircraftType? =
         cache.getAircraftTypes().firstOrNull { it.shortName == shortName }
 
-    fun saveAircraft(aircraft: Aircraft) = launch(Dispatchers.IO) {
+    fun saveAircraft(aircraft: Aircraft) = launch(DispatcherProvider.io()) {
         if (aircraft.type?.name == null) return@launch // Don't save aircraft without type.
         val newAcrwt = AircraftRegistrationWithType(aircraft.registration, aircraft.type)
         saveAircraftRegistrationWithType(newAcrwt)
     }
 
     fun replaceAllTypesWith(newTypes: List<AircraftType>) =
-        launch(Dispatchers.IO + NonCancellable) {
+        launch(DispatcherProvider.io() + NonCancellable) {
             aircraftTypeDao.clearDb()
             saveAircraftTypes(newTypes)
         }
 
     fun replaceAllPreloadedWith(newPreloaded: List<PreloadedRegistration>) =
-        launch(Dispatchers.IO) {
+        launch(DispatcherProvider.io()) {
             preloadedRegistrationsDao.clearDb()
             savePreloadedRegs(newPreloaded)
         }
@@ -124,6 +127,13 @@ object AircraftRepository: CoroutineScope by MainScope() {
 
     private suspend fun savePreloadedRegs(preloaded: List<PreloadedRegistration>) {
         preloadedRegistrationsDao.save(preloaded)
+    }
+
+    companion object{
+        private var INSTANCE: AircraftRepository? = null
+        fun getInstance() = INSTANCE ?: AircraftRepository().also { INSTANCE = it}
+
+        fun mock(mockDatabase: JoozdlogDatabase) = AircraftRepository(mockDatabase)
     }
 }
 

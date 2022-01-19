@@ -104,7 +104,7 @@ class BalanceForwardRepository private constructor(private val balanceforwardDao
         fun getInstance(): BalanceForwardRepository = synchronized(this) {
             singletonInstance
                 ?: run {
-                    val dataBase = JoozdlogDatabase.getDatabase(App.instance)
+                    val dataBase = JoozdlogDatabase.getInstance()
                     val balanceForwardDao = dataBase.balanceForwardDao()
                     singletonInstance = BalanceForwardRepository(balanceForwardDao)
                     singletonInstance!!

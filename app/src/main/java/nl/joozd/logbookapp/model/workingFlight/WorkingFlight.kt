@@ -54,6 +54,8 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
     private val job = Job()
     override val coroutineContext = Dispatchers.Main + job
 
+    private val aircraftRepository = AircraftRepository.getInstance()
+
 
     // For undo purposes; if flightID < 0 this is a new flight so undo means delete
     private val originalFlight = if (flight.flightID < 0) null else flight.copy()
@@ -154,7 +156,7 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
         val reg = wf.registration
         val typeString = wf.aircraftType
         return if (typeString.isBlank()) {
-            AircraftRepository.getAircraftFromRegistration(reg).also{ ac ->
+            aircraftRepository.getAircraftFromRegistration(reg).also{ ac ->
                 ac?.type?.let {
                     aircraftType = it.shortName
                 }
@@ -162,7 +164,7 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
         } else {
             Aircraft(
                 registration = reg,
-                type = AircraftRepository.getAircraftTypeByShortName(typeString) ?: AircraftType(
+                type = aircraftRepository.getAircraftTypeByShortName(typeString) ?: AircraftType(
                     "",
                     typeString,
                     multiPilot = isMultipilot,

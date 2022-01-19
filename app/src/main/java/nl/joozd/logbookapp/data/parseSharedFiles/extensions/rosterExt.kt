@@ -44,7 +44,7 @@ suspend fun Roster.postProcess(): ProcessedRoster {
          * 1. If registration from [flight] found in AircraftRepository (Repo), use that registration with type from Repo, ignore any type from Flight
          * 2. Otherwise, use data from [flight]. Any unknown aircraft type data will be handled where it is used.
          */
-        val foundAircraft = AircraftRepository.getAircraftFromRegistration(flight.registration)
+        val foundAircraft = AircraftRepository.getInstance().getAircraftFromRegistration(flight.registration)
 
         // result of lambda:
         flight.copy(

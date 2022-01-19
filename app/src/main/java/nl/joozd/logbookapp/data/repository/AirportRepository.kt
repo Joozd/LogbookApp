@@ -24,7 +24,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
@@ -35,9 +34,7 @@ import nl.joozd.logbookapp.data.room.dao.AirportDao
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.extensions.nullIfEmpty
-import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.reversed
-import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.lang.Exception
 import java.util.*
 
@@ -282,7 +279,7 @@ class AirportRepository private constructor(private val airportDao: AirportDao, 
         fun getInstance(): AirportRepository = synchronized(this) {
             singletonInstance
                 ?: run {
-                    val dataBase = JoozdlogDatabase.getDatabase(App.instance)
+                    val dataBase = JoozdlogDatabase.getInstance()
                     val airportDao = dataBase.airportDao()
                     singletonInstance = AirportRepository(airportDao)
                     singletonInstance!!

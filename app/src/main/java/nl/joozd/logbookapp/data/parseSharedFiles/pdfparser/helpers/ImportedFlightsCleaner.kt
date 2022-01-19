@@ -43,7 +43,7 @@ import nl.joozd.logbookapp.utils.reversed
 @Deprecated("ViewModel has postProcess function")
 class ImportedFlightsCleaner(private val dirtyFlights: List<Flight>?, private val carrier: String? = null): CoroutineScope by MainScope() {
     private val airportRepository = AirportRepository.getInstance()
-    private val aircraftRepository = AircraftRepository
+    private val aircraftRepository = AircraftRepository.getInstance()
     private val icaoIataMapAsync = async(Dispatchers.IO) {airportRepository.getIcaoToIataMap()}
     private val aircraftMapAsync = async(Dispatchers.IO) { aircraftRepository.requireMap() }
 

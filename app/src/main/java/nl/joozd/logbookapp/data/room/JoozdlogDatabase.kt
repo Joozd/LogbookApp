@@ -25,6 +25,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
 import nl.joozd.logbookapp.data.room.model.AircraftTypeConsensusData
@@ -52,10 +53,10 @@ abstract class JoozdlogDatabase protected constructor(): RoomDatabase() { // pro
         private var INSTANCE: JoozdlogDatabase? = null
 
         @Synchronized
-        fun getDatabase(context: Context): JoozdlogDatabase {
+        fun getInstance(): JoozdlogDatabase {
             INSTANCE?.let { return it }
             val instance = Room.databaseBuilder(
-                context.applicationContext,
+                App.instance.applicationContext,
                 JoozdlogDatabase::class.java,
                 "flights_database"
             ).addMigrations(UPDATE_8_9)

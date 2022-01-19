@@ -34,7 +34,7 @@ import nl.joozd.logbookapp.data.repository.helpers.autoValues
  * - Save to model Class so original CompletedFlights can be closed
  */
 suspend fun CompletedFlights.postProcess(): ProcessedCompleteFlights{
-    val aircraftRepository = AircraftRepository
+    val aircraftRepository = AircraftRepository.getInstance()
     val mrfAsync = FlightRepository.getInstance().getMostRecentFlightAsync()
     val iataIcaoMap = AirportRepository.getInstance().getIataIcaoMapAsync().await()
     val lastFlightWasIFR = (mrfAsync.await()?.ifrTime ?: 1) > 0

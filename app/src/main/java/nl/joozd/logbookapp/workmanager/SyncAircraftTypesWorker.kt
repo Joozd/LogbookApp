@@ -44,7 +44,7 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
         // var receiveConsensus: Job? = null // same
 
         Log.d(this::class.simpleName,"Started doWork()")
-        val aircraftRepository = AircraftRepository
+        val aircraftRepository = AircraftRepository.getInstance()
 
         val serverTypesVersion = Cloud.getAircraftTypesVersion() ?: return@withContext Result.retry()
         val serverForcedVersion = Cloud.getForcedAircraftTypesVersion() ?: return@withContext Result.retry()

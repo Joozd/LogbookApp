@@ -36,7 +36,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 
 open class JoozdlogViewModel: ViewModel() {
     protected val flightRepository = FlightRepository.getInstance()
-    protected val aircraftRepository = AircraftRepository
+    protected val aircraftRepository = AircraftRepository.getInstance()
     protected val airportRepository = AirportRepository.getInstance()
     protected val balanceForwardRepository = BalanceForwardRepository.getInstance()
 

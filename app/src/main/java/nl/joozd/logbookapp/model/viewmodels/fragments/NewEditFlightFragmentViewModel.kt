@@ -429,7 +429,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     )
 
     private fun makeSortedRegistrationsFlowAndCacheIt() =
-        combine(AircraftRepository.aircraftMapFlow, FlightRepository.getInstance().allFlightsFlow){
+        combine(aircraftRepository.aircraftMapFlow, FlightRepository.getInstance().allFlightsFlow){
                 regMap, allFlights ->
             makeSortedRegistrationsList(allFlights, regMap).also{
                 cachedSortedRegistrationsList = it
@@ -445,8 +445,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     //I could make this suspended and use requireMap() and getAircraftFromRegistration()
     //Why is this done here anyway and not in WorkingFlight? TODO
     private fun getBestHitForPartialRegistration(r: String): Aircraft? =
-        AircraftRepository.getAircraftFromRegistrationCachedOnly(r)
-        ?: AircraftRepository.getMapWithCurrentCachedValues()[findBestHitForRegistration(r,cachedSortedRegistrationsList)]
+        aircraftRepository.getAircraftFromRegistrationCachedOnly(r)
+        ?: aircraftRepository.getMapWithCurrentCachedValues()[findBestHitForRegistration(r,cachedSortedRegistrationsList)]
 
 
     companion object{

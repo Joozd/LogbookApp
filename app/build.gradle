@@ -30,8 +30,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 23
         targetSdkVersion 31
-        versionCode 75 // my version, increment this every build
-        versionName "JoozdLog 1.0.1"
+        versionCode 76 // my version, increment this every build
+        versionName "JoozdLog 1.0.1.dev1"
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -91,8 +91,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     //androidX
-    implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.core:core-ktx:1.7.0'
 
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'

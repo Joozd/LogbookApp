@@ -24,6 +24,7 @@ import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedCompleteFlights
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepositoryImpl
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepositoryImpl
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
@@ -39,15 +40,16 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
  */
 suspend fun CompletedFlights.postProcess(): ProcessedCompleteFlights {
     val aircraftDataCache = AircraftRepository.getInstance().getAircraftDataCache()
+    val airportDataCache = AirportRepository.getInstance().getAirportDataCache()
+
     val mrfAsync = FlightRepository.getInstance().getMostRecentFlightAsync()
-    val iataIcaoMap = AirportRepository.getInstance().getIataIcaoMapAsync().await()
     val lastFlightWasIFR = (mrfAsync.await()?.ifrTime ?: 1) > 0
 
     val newFlights = flights.map { flight ->
         // In case airports are IATA format, switch them to ICAO.
         // I think there is no need to have that set by RosterParser as there is no overlap between (4 letter) ICAO and (3 letter) IATA codes.
-        val orig = iataIcaoMap[flight.orig] ?: flight.orig
-        val dest = iataIcaoMap[flight.dest] ?: flight.dest
+        val orig = airportDataCache.iataToIcao(flight.orig) ?: flight.orig
+        val dest = airportDataCache.iataToIcao(flight.dest) ?: flight.dest
 
         /*
          * Priority for aircraft data:
@@ -57,25 +59,16 @@ suspend fun CompletedFlights.postProcess(): ProcessedCompleteFlights {
         val foundAircraft = aircraftDataCache.getAircraftFromRegistration(flight.registration)
 
         // result of lambda:
-        makeFlight(flight, orig, dest, foundAircraft, lastFlightWasIFR)
+        flight.copy(
+            orig = orig,
+            dest = dest,
+            registration = foundAircraft?.registration ?: flight.registration,
+            aircraftType = foundAircraft?.type?.shortName ?: flight.aircraftType,
+            ifrTime = if (lastFlightWasIFR || flight.ifrTime > 0) flight.calculatedDuration else 0,
+            isPlanned = false
+        ).autoValues(airportDataCache)
     }
     return toProcessedCompletedFlights().copy(flights = newFlights)
 }
-
-private suspend fun makeFlight(
-    flight: Flight,
-    orig: String,
-    dest: String,
-    foundAircraft: Aircraft?,
-    lastFlightWasIFR: Boolean
-) = flight.copy(
-    orig = orig,
-    dest = dest,
-    registration = foundAircraft?.registration ?: flight.registration,
-    aircraftType = foundAircraft?.type?.shortName ?: flight.aircraftType,
-    ifrTime = if (lastFlightWasIFR || flight.ifrTime > 0) flight.calculatedDuration else 0,
-    isPlanned = false
-).autoValues()
-
 
 

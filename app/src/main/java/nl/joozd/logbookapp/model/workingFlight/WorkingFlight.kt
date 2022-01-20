@@ -26,7 +26,9 @@ import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepositoryImpl
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepositoryImpl
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
@@ -34,6 +36,7 @@ import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
 import nl.joozd.logbookapp.data.room.model.toAircraft
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.TwilightCalculator
 import nl.joozd.logbookapp.utils.reverseFlight
 import java.time.Duration
@@ -51,11 +54,13 @@ import java.util.*
  * @NOTE
  */
 class WorkingFlight private constructor(flight: Flight): CoroutineScope {
-    // This will keep all the jobs
-    private val job = Job()
-    override val coroutineContext = Dispatchers.Main + job
+    private val job = SupervisorJob()
+    override val coroutineContext = Dispatchers.Main + SupervisorJob()
 
-    private val aircraftRepository = AircraftRepositoryImpl.getInstance()
+    private val airportRepository = AirportRepository.getInstance()
+
+    // private var airportDataCache = airportRepository.getStaleOrEmptyAirportDataCache()
+    private var aircraftDataCache = async(DispatcherProvider.io()) { AircraftRepository.getInstance().getAircraftDataCache() }
 
 
     // For undo purposes; if flightID < 0 this is a new flight so undo means delete
@@ -110,8 +115,8 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
     /************************************************************************
      * Mutable LiveData
      ***********************************************************************/
-    private val _originLiveData = MutableLiveData<Airport?>()       // null if none found
-    private val _destinationLiveData = MutableLiveData<Airport?>()  // null if none found
+    private val _originLiveData = MutableLiveData<Airport?>(Airport.placeholderWithIdentOnly(flight.orig))       // null if none found
+    private val _destinationLiveData = MutableLiveData<Airport?>(Airport.placeholderWithIdentOnly(flight.dest))  // null if none found
     private val _aircraftLiveData = MutableLiveData<Aircraft?>()    // null if none found
     private val _isIfrLiveData = MutableLiveData(flight.ifrTime > 0)
 
@@ -130,7 +135,7 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
      * Get airport from ICAO ID
      */
     private suspend fun getAirport(id: String): Airport? =
-        AirportRepositoryImpl.getInstance().getAirportByIcaoIdentOrNull(id)
+        airportRepository.getAirportByIcaoIdentOrNull(id)
 
     /**
      * Calculate night time. Doesn't check if autoValues is on.
@@ -180,7 +185,7 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
         typeString: String
     ) = Aircraft(
         registration = reg,
-        type = aircraftRepository.getAircraftTypeByShortName(typeString)
+        type = aircraftDataCache.await().getAircraftTypeByShortName(typeString)
             ?: makeUnknownAircraftType(typeString),
         source = Aircraft.FLIGHT
     )
@@ -200,8 +205,8 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
         findAircraftByRegistrationFromRepositoryOrNull(reg)
             ?: Aircraft(reg)
 
-    private suspend fun findAircraftByRegistrationFromRepositoryOrNull(reg: String) =
-        aircraftRepository.getAircraftFromRegistration(reg)?.toAircraft()
+    private suspend fun findAircraftByRegistrationFromRepositoryOrNull(reg: String): Aircraft? =
+        aircraftDataCache.await().getAircraftFromRegistration(reg)
 
 
     /**

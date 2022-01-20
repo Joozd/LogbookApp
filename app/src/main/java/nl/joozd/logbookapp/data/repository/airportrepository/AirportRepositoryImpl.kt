@@ -21,26 +21,64 @@ package nl.joozd.logbookapp.data.repository.airportrepository
 
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 
 class AirportRepositoryImpl(
-    private val dataBase: JoozdlogDatabase
+    dataBase: JoozdlogDatabase
 ): AirportRepository, CoroutineScope by MainScope()  {
     private val airportDao = dataBase.airportDao()
+    // used for getStaleOrEmptyAirportDataCache
+    private var mostRecentlyLoadedAirportDataCache: AirportDataCache = AirportDataCache.make(emptyList())
+
+    // a progress of -1 means no airport sync in progress.
+    private val airportSyncProgressMutableStateFlow = MutableStateFlow(-1)
 
     override fun airportsFlow() = airportDao.airportsFlow()
 
-    override suspend fun getSelfUpdatingAirportDataCache(coroutineScope: CoroutineScope): AirportDataCache =
-        SelfUpdatingAirportDataCache(coroutineScope, getAirportDataCache())
+    override suspend fun getAirportDataCache(): AirportDataCache =
+        makeAndStoreAirportDataCache(getAirports())
 
-    override suspend fun getAirportDataCache(): AirportDataCache = AirportDataCache.make(
-        getAirports()
-    )
+    override fun airportDataCacheFlow(): Flow<AirportDataCache> =
+        airportsFlow().map { makeAndStoreAirportDataCache(it) }
+
+    override fun getStaleOrEmptyAirportDataCache(): AirportDataCache =
+        mostRecentlyLoadedAirportDataCache
+
+    override suspend fun getAirportByIcaoIdentOrNull(ident: String): Airport? =
+        airportDao.searchAirportByIdent(ident)
+
+
+    /**
+     * Set the progress of an ongoing Airport Sync operation for [getAirportSyncProgressFlow] to emit
+     */
+    override fun setAirportSyncProgress(progress: Int) {
+        airportSyncProgressMutableStateFlow.update { progress }
+    }
+
+    /**
+     * Get a flow that emits when [setAirportSyncProgress] has set progress
+     */
+    override fun getAirportSyncProgressFlow(): Flow<Int> = airportSyncProgressMutableStateFlow
+
+    /**
+     * Replace current airport database with [newAirports]
+     */
+    override suspend fun replaceDbWith(newAirports: Collection<Airport>) {
+        airportDao.clearDb()
+        airportDao.insertAirports(newAirports)
+    }
 
     suspend fun getAirports(): List<Airport> = airportDao.requestAllAirports()
 
-
+    private fun makeAndStoreAirportDataCache(it: List<Airport>) =
+        AirportDataCache.make(it).also{
+            mostRecentlyLoadedAirportDataCache = it
+        }
 
 
 /*

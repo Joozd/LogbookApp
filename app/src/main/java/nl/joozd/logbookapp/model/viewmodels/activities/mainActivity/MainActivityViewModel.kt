@@ -28,6 +28,8 @@ import android.util.Log
 import androidx.lifecycle.*
 import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.data.comm.Cloud
@@ -36,6 +38,7 @@ import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
 import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.repository.GeneralRepository
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.helpers.overlaps
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
@@ -58,8 +61,16 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
      * Private parts
      *********************************************************************************************/
 
-    private val icaoIataMap
-        get() = airportRepository.icaoIataMap.value ?: emptyMap()
+    private var airportDataCache: AirportDataCache? = null
+    init{
+        keepAirportDataCacheUpToDate()
+    }
+
+    private fun keepAirportDataCacheUpToDate() {
+        initializeairportDataCache()
+        collectAirportDataCacheUpdates()
+    }
+
 
     private val rawFlights
         get() = flightRepository.liveFlights.value ?: emptyList()
@@ -100,12 +111,6 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     private val _displayFlightsList2 = MediatorLiveData<List<DisplayFlight>>().apply{
         addSource(flightRepository.liveFlights) {
-            updateFlightsList()
-        }
-        addSource(airportRepository.icaoIataMap) {
-            updateFlightsList()
-        }
-        addSource(airportRepository.useIataAirports) {
             updateFlightsList()
         }
         addSource(searchStringLiveData) {
@@ -155,19 +160,15 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
                 || query in it.registration.uppercase(Locale.ROOT)
                 || query in it.orig.uppercase(Locale.ROOT)
                 || query in it.dest.uppercase(Locale.ROOT)
-                || query in icaoIataMap[it.orig]?.uppercase(Locale.ROOT) ?: ""
-                || query in icaoIataMap[it.dest]?.uppercase(Locale.ROOT) ?: ""
+                || query in airportDataCache?.icaoToIata(it.orig)?.uppercase(Locale.ROOT) ?: ""
+                || query in airportDataCache?.icaoToIata(it.dest)?.uppercase(Locale.ROOT) ?: ""
     }
 
     private fun searchAirports(fff: List<Flight>) = fff.filter {
         query in it.orig.uppercase(Locale.ROOT)
                 || query in it.dest.uppercase(Locale.ROOT)
-                || query in icaoIataMap[it.orig]?.uppercase(Locale.ROOT) ?: ""
-                || query in icaoIataMap[it.dest]?.uppercase(Locale.ROOT) ?: ""
-    }.also {
-        viewModelScope.launch {
-            // TODO make with async update from [airportRepository]
-        }
+                || query in airportDataCache?.icaoToIata(it.orig)?.uppercase(Locale.ROOT) ?: ""
+                || query in airportDataCache?.icaoToIata(it.dest)?.uppercase(Locale.ROOT) ?: ""
     }
 
 
@@ -219,7 +220,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     private fun flightsToDisplayFlightsWithErrorCheck(fff: List<Flight>): List<DisplayFlight> = fff.mapIndexed { index, f ->
         val previous = fff.getOrNull(index-1)
         val next = fff.getOrNull(index+1)
-        DisplayFlight.of(f, icaoIataMap, Preferences.useIataAirports, error = f.overlaps(previous) || f.overlaps(next))
+        DisplayFlight.of(f, airportDataCache, error = f.overlaps(previous) || f.overlaps(next))
     }
 
 
@@ -239,7 +240,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         get() = flightRepository.serverRefusedLoginData
 
     val airportSyncProgress: LiveData<Int>
-        get() = airportRepository.airportSyncProgress
+        get() = airportRepository.getAirportSyncProgressFlow().asLiveData()
 
     val flightSyncProgress: LiveData<Int>
         get() = flightRepository.syncProgress
@@ -539,6 +540,23 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
             true -> flightRepository.syncIfNeeded() // this will eventually check if login is correct and set flag accordingly, setting [notLoggedIn]
             false -> flightRepository.serverRefusedLoginData() // This will set [notLoggedIn], triggering observer in MainActivity
             null ->  { /* do nothing; server is not OK */ }
+        }
+    }
+
+    private fun collectAirportDataCacheUpdates() {
+        airportRepository.airportDataCacheFlow().onEach {
+            handleNewAirportDataCacheEmitted(it)
+        }.launchIn(viewModelScope)
+    }
+
+    private fun handleNewAirportDataCacheEmitted(it: AirportDataCache) {
+        airportDataCache = it
+        _displayFlightsList2.updateFlightsList()
+    }
+
+    private fun initializeairportDataCache() {
+        viewModelScope.launch {
+            airportDataCache = airportRepository.getAirportDataCache()
         }
     }
 

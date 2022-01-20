@@ -24,10 +24,14 @@ import nl.joozd.logbookapp.data.dataclasses.Airport
 /**
  * Keeps a list of Airports and provides access to it.
  */
-class UpdateableAirportDataCache(private var airportsList: List<Airport>): AirportDataCache {
+class AirportDataCacheImpl(private var airportsList: List<Airport>): AirportDataCache {
     constructor(cache: AirportDataCache): this(
         cache.getAirports()
     )
+    private val icaoToIatamap: Map<String, String> by lazy { buildIcaoToIataMap() }
+    private val iataToIcaoMap: Map<String, String> by lazy { buildIataToIcaoMap() }
+
+
     override fun getAirports(): List<Airport> = airportsList
 
     override fun getAirportByIcaoIdentOrNull(icaoIdent: String): Airport? =
@@ -35,9 +39,17 @@ class UpdateableAirportDataCache(private var airportsList: List<Airport>): Airpo
             it.ident.equals(icaoIdent, ignoreCase = true)
         }
 
-    fun update(airports: List<Airport>){
-        this.airportsList = airports
-    }
+    override fun icaoToIata(icaoIdent: String): String? =
+        icaoToIatamap[icaoIdent]
+
+    override fun iataToIcao(iataIdent: String): String? =
+        iataToIcaoMap[iataIdent]
+
+    private fun buildIcaoToIataMap() =
+        airportsList.map { it.ident to it.iata_code }.toMap()
+
+    private fun buildIataToIcaoMap() =
+        airportsList.map { it.iata_code to it.ident }.toMap()
 
 
 }

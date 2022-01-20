@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.model.viewmodels.fragments
 
 import android.text.Editable
 import androidx.lifecycle.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -33,6 +34,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
@@ -45,14 +47,17 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val wf = flightRepository.getWorkingFlight()
     private var aircraftDataCache: AircraftDataCache? = null
     init{
-        viewModelScope.launch {
-            aircraftDataCache = aircraftRepository.getSelfUpdatingAircraftDataCache(viewModelScope)
-        }
+        makeAircraftDataCacheUpToDate()
     }
+
+    private var airportDataCache: AirportDataCache? = null
+    init{
+        makeAirportDataCacheUpToDate()
+    }
+
 
     private var cachedSortedRegistrationsList: List<String> = emptyList()
 
-    val airportDbLiveData = airportRepository.liveAirports
     val knownRegistrationsFlow = makeSortedRegistrationsFlowAndCacheIt().also{
         println("made $it")
     }
@@ -100,6 +105,46 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     //If this is true, if autoValues is off, the only reason for that is [checkAutovaluesForUnknownAirport] set it to off.
     //If checkAutovaluesForUnknownAirport decides it's ok again,  autoValues can be set to on again
     private var autoValuesOnlyOffBecauseOfUnknownAirport: Boolean = wf.autoFill
+
+    private fun makeAircraftDataCacheUpToDate() {
+        initializeAircraftDataCache()
+        collectNewAircraftDataCaches()
+    }
+
+    private fun makeAirportDataCacheUpToDate() {
+        initializeAirportDataCache()
+        collectNewAirportDataCaches()
+    }
+
+    private fun initializeAircraftDataCache() {
+        viewModelScope.launch {
+            aircraftDataCache = aircraftRepository.getAircraftDataCache()
+        }
+    }
+
+    private fun collectNewAircraftDataCaches() {
+        viewModelScope.launch {
+            aircraftRepository.aircraftDataCacheFlow().collect {
+                aircraftDataCache = it
+            }
+        }
+    }
+
+    private fun collectNewAirportDataCaches() {
+        viewModelScope.launch {
+            airportRepository.airportDataCacheFlow().collect {
+                airportDataCache = it
+            }
+        }
+    }
+
+    private fun initializeAirportDataCache() {
+        viewModelScope.launch {
+            airportDataCache = airportRepository.getAirportDataCache()
+        }
+    }
+
+
 
     private fun makeDateString(epochSecond: Long) =
         Instant.ofEpochSecond(epochSecond).toLocalDate().toDateString()
@@ -343,19 +388,6 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         }
     }
 
-    // TODO do this in [WorkingFlight]
-    init {
-        viewModelScope.launch {
-            wf.notifyAircraftDbUpdated()
-        }
-    }
-
-    // TODO do this in [WorkingFlight]
-    fun notifyAirportDbChanged(){
-        wf.notifyAirportDbUpdated()
-    }
-
-
     /*
      * If this edits a flight that doesn't end up as completed, it will either:
      *      - push back calendar sync if offBlocks is less than 30 minutes in the future
@@ -437,7 +469,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     )
 
     private fun makeSortedRegistrationsFlowAndCacheIt() =
-        combine(aircraftRepository.aircraftMapFlow,FlightRepository.getInstance().allFlightsFlow) {
+        combine(aircraftRepository.aircraftMapFlow(), FlightRepository.getInstance().allFlightsFlow) {
         regMap, allFlights ->
         makeSortedRegistrationsList(allFlights, regMap).also {
             cachedSortedRegistrationsList = it
@@ -455,6 +487,19 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         aircraftDataCache?.getAircraftFromRegistration(r)
         ?: aircraftDataCache?.getAircraftFromRegistration(findBestHitForRegistration(r,cachedSortedRegistrationsList))
 
+    //TODO Is there a way to have this done in WorkingFlight itself without leaking the Flow?
+    init {
+        viewModelScope.launch {
+            aircraftRepository.aircraftDataCacheFlow().collect {
+                wf.notifyAircraftDbUpdated()
+            }
+        }
+        viewModelScope.launch {
+            airportRepository.airportsFlow().collect {
+                wf.notifyAirportDbUpdated()
+            }
+        }
+    }
 
     companion object{
         const val NO_DATA_STRING = "…"

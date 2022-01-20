@@ -20,20 +20,14 @@
 package nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker
 
 import androidx.lifecycle.*
-import androidx.lifecycle.Transformations.distinctUntilChanged
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.*
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.utils.nonNullLiveData
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 
-//TODO make sure list gets filled straight away?
-//TODO sort airportsList based on ICAO/IATA prefs?
-
-//@ExperimentalCoroutinesApi
-abstract class AirportPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
+@ExperimentalCoroutinesApi
+abstract class AirportPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     /**
      * The picked airport
      */
@@ -54,39 +48,48 @@ abstract class AirportPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(
      */
     protected abstract val initialAirport: Airport?
 
-    private var currentSearchJob: Job = Job()
+    protected var airportDataCache: AirportDataCache? = null
 
-    private val _airportsList = MutableLiveData<List<Airport>>()
-    val airportsList: LiveData<List<Airport>> = nonNullLiveData(distinctUntilChanged(_airportsList))
-    init{
-        _airportsList.value = airportRepository.liveAirports.value
-    }
-
-
-
-
-    /**
-     * Do some search magic. Needs at least [MIN_CHARACTERS] characters for performance reasons
-     * TODO this doesn't cancel correctly
-     */
-    fun updateSearch(query: String){
-        if (query.length >= MIN_CHARACTERS) {
-            currentSearchJob.cancel()
-            currentSearchJob = viewModelScope.launch {
-                collectAirports(airportRepository.getQueryFlow(query))
+    init {
+        viewModelScope.launch {
+            airportDataCache = airportRepository.getAirportDataCache()
+        }
+        viewModelScope.launch {
+            airportRepository.airportDataCacheFlow().collect {
+                airportDataCache = it
             }
         }
-        //feedback(NOT_IMPLEMENTED)
     }
 
-    private suspend fun collectAirports(flow: Flow<List<Airport>>){
-        flow.conflate().collect {
-            _airportsList.value = it
-            delay(200)
+    private val currentQueryFlow = MutableStateFlow("")
+
+    val airportsListFlow: Flow<List<Airport>> =
+        combine(airportRepository.airportsFlow(), currentQueryFlow) { airports, query ->
+            airports to query
+        }.flatMapLatest {
+            makeAirportSearcherFlow(it.first, it.second)
         }
+
+    fun updateSearch(query: String){
+        currentQueryFlow.update { query }
     }
 
-    companion object{
-        const val MIN_CHARACTERS = 3
+
+    private fun makeAirportSearcherFlow(airports: List<Airport>, query: String?) = flow {
+        if (query == null) {
+            emit(airports)
+        } else {
+            var result = airports.filter { it.iata_code.contains(query, ignoreCase = true) }
+            emit(result)
+
+            result = result + airports.filter { it.ident.contains(query, ignoreCase = true) }
+            emit(result)
+
+            result = result + airports.filter { it.municipality.contains(query, ignoreCase = true) }
+            emit(result)
+
+            result = result + airports.filter { it.name.contains(query, ignoreCase = true) }
+            emit(result)
+        }
     }
 }

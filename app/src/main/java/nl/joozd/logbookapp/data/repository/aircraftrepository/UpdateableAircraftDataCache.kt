@@ -33,36 +33,24 @@ class UpdateableAircraftDataCache(
     constructor(aircraftDataCache: AircraftDataCache):
             this(aircraftDataCache.getAircraftTypes(), aircraftDataCache.getRegistrationToAircraftMap())
 
-    /**
-     * Update cached aircraft types
-     */
     fun updateTypes(types: List<AircraftType>) {
         this.types = types
     }
 
-    /**
-     * Update cached aircraft types
-     */
     fun updateAircraftMap(map: Map<String, Aircraft>) {
         registrationToAircraftMap = map
     }
 
-    /**
-     * Return a map with all currently loaded data
-     */
     override fun getRegistrationToAircraftMap(): Map<String, Aircraft> = registrationToAircraftMap
 
-    /**
-     * Return a list of all aircraft types, or an empty list if cache not loaded yet
-     */
     override fun getAircraftTypes(): List<AircraftType> = types
 
-    /**
-     * Get an aircraft from its registration.
-     * Should call [nl.joozd.logbookapp.data.repository.helpers.formatRegistration] on [registration]
-     */
     override fun getAircraftFromRegistration(registration: String?): Aircraft? =
         registration?.let {
             registrationToAircraftMap[formatRegistration(it)]
         }
+
+    override fun getAircraftTypeByShortName(shortName: String): AircraftType? =
+        types.firstOrNull { it.shortName == shortName }
+
 }

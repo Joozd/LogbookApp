@@ -46,25 +46,13 @@ interface AirportDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAirports(vararg airportData: Airport)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAirports(airportData: Collection<Airport>)
+
     @Query("DELETE FROM Airport")
     suspend fun clearDb()
 
-    /**
-     * Search 1 airport by a specific field, combine them in repository
-     */
     @Query("SELECT * FROM Airport WHERE :query LIKE ident LIMIT 1")
-    suspend fun searchAirportByIdent(query: String): List<Airport>
-
-    @Query("SELECT * FROM Airport WHERE :query LIKE iata_code LIMIT 1")
-    suspend fun searchAirportByIata(query: String): List<Airport>
-
-    @Query("SELECT * FROM Airport WHERE :query LIKE municipality LIMIT 1")
-    suspend fun searchAirportByMunicipality(query: String): List<Airport>
-
-    @Query("SELECT * FROM Airport WHERE :query LIKE name LIMIT 1")
-    suspend fun searchAirportByName(query: String): List<Airport>
-
-    @Query("SELECT DISTINCT * FROM Airport WHERE UPPER(ident) LIKE :query OR UPPER(iata_code) LIKE :query OR UPPER(municipality) LIKE :query OR UPPER(name) LIKE :query")
-    suspend fun searchAirports(query: String): List<Airport>
+    suspend fun searchAirportByIdent(query: String): Airport?
 
 }

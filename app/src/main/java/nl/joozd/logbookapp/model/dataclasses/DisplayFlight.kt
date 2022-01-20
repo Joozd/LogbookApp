@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.model.dataclasses
 
 import android.util.Log
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.toMonthYear
@@ -72,33 +73,36 @@ data class DisplayFlight(
 
 
     companion object{
-        fun of(f: Flight, icaoIataMap: Map<String, String>, useIATA: Boolean, error: Boolean) = DisplayFlight(
-            flightID = f.flightID,
-            orig = if (useIATA) icaoIataMap[f.orig]?.nullIfEmpty() ?: f.orig else f.orig,
-            dest = if (useIATA) icaoIataMap[f.dest]?.nullIfEmpty() ?: f.dest else f.dest,
-            timeOut = f.timeOutString(),
-            timeIn = f.timeInString(),
-            totalTime = f.durationString(),
-            dateDay = f.tOut().dayOfMonth.toString(),
-            monthAndYear = f.tOut().toMonthYear().uppercase(Locale.ROOT),
-            simTime = minutesToHoursAndMinutesString(f.simTime),
-            registration = f.registration,
-            type = f.aircraftType,
-            names = if (f.isSim) f.name2 else buildNames(f.name, f.name2),
-            takeoffsAndLandings = "${f.takeoffs()}/${f.landings()}",
-            flightNumber = f.flightNumber,
-            remarks = f.remarks,
-            augmented = Crew.of(f.augmentedCrew).size > 2,
-            ifr = f.ifrTime > 0,
-            dual = f.isDual,
-            picus = f.isPICUS,
-            pic = f.isPIC,
-            pf = f.isPF,
-            instructor = f.isInstructor,
-            sim = f.isSim,
-            planned = f.isPlanned,
-            markAsError = error
-        )
+        fun of(f: Flight, airportDataCache: AirportDataCache?, error: Boolean) =
+            DisplayFlight(
+                flightID = f.flightID,
+                orig = if (Preferences.useIataAirports) airportDataCache?.icaoToIata(f.orig)?.nullIfEmpty() ?: f.orig else f.orig,
+                dest = if (Preferences.useIataAirports) airportDataCache?.icaoToIata(f.dest)?.nullIfEmpty() ?: f.dest else f.dest,
+                timeOut = f.timeOutString(),
+                timeIn = f.timeInString(),
+                totalTime = f.durationString(),
+                dateDay = f.tOut().dayOfMonth.toString(),
+                monthAndYear = f.tOut().toMonthYear().uppercase(Locale.ROOT),
+                simTime = minutesToHoursAndMinutesString(f.simTime),
+                registration = f.registration,
+                type = f.aircraftType,
+                names = if (f.isSim) f.name2 else buildNames(f.name, f.name2),
+                takeoffsAndLandings = "${f.takeoffs()}/${f.landings()}",
+                flightNumber = f.flightNumber,
+                remarks = f.remarks,
+                augmented = Crew.of(f.augmentedCrew).size > 2,
+                ifr = f.ifrTime > 0,
+                dual = f.isDual,
+                picus = f.isPICUS,
+                pic = f.isPIC,
+                pf = f.isPF,
+                instructor = f.isInstructor,
+                sim = f.isSim,
+                planned = f.isPlanned,
+                markAsError = error
+            )
+
+
         private fun buildNames(vararg names: String): String{
             val nn  = names.filter{it.isNotBlank()}.map{
                 if (';' in it) it.split(';').map{it.trim()} else listOf(it)

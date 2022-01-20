@@ -31,14 +31,15 @@ import nl.joozd.serializing.unpackSerialized
 import nl.joozd.serializing.unwrapInt
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepositoryImpl
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.readUntilEOF
+import nl.joozd.logbookapp.utils.DispatcherProvider
 import java.net.URL
 
 class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
-    private val airportsRepository = AirportRepositoryImpl.getInstance()
+    private val airportsRepository = AirportRepository.getInstance()
     var progress: Int = 0
         set(p) {
             field = p
@@ -50,7 +51,6 @@ class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
      * Try to downlaod airport DB from server. If that fails, try to get it from WWW. If that fails, retry or fail.
      */
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        airportsRepository.acquireLock()
         try {
             val serverDbVersion = Cloud.getAirportDbVersion()
             Log.d("syncAirportsWorker", "server DB = $serverDbVersion, local DB = ${Preferences.airportDbVersion}")
@@ -72,10 +72,6 @@ class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
             Log.e("SyncAirportsWorker", "exception:\n${exception.stackTraceToString()}")
             Result.failure()
         }
-        finally {
-            //in finally so lock always gets released
-            airportsRepository.releaseLock()
-        }
 
     }.also{
         progress = -1
@@ -89,10 +85,10 @@ class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
     /**
      * Download airport DB over http. Return true if success, false if failed.
      */
-    private fun getFromWWWIfNeeded(): Boolean{
-        Log.d("XXXXXXXXXXXXX",  "started getfromWWW")
+    private suspend fun getFromWWWIfNeeded(): Boolean{
         if (Preferences.airportDbVersion == 0){ // only do this if no airport DB loaded yet
             val inputStream = try{
+                // all work in this class is done on Dispatchers.IO so blocking is OK
                 URL(AIRPORT_DATABASE_URL).openConnection().getInputStream()
             } catch (e: Exception) {
                 Log.w("SyncAirportsWorker", "Could not get Airport DB from http source")

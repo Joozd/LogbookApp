@@ -32,8 +32,12 @@ interface AirportDataCache {
      */
     fun getAirportByIcaoIdentOrNull(icaoIdent: String): Airport?
 
+    fun icaoToIata(icaoIdent: String): String?
+
+    fun iataToIcao(iataIdent: String): String?
+
 
     companion object{
-        fun make(airportList: List<Airport>) = UpdateableAirportDataCache(airportList)
+        fun make(airportList: List<Airport>) = AirportDataCacheImpl(airportList)
     }
 }

@@ -24,8 +24,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 
 import nl.joozd.logbookapp.R
@@ -47,10 +52,11 @@ import kotlin.math.abs
  * This will set correct value in ViewModel, recreation will call constructor without params
  * but viewModel will persist.
  */
-//@ExperimentalCoroutinesApi
+@ExperimentalCoroutinesApi
 abstract class AirportPicker: JoozdlogFragment() {
     protected abstract val workingOnOrig: Boolean // this must be set before first-time attachment
     protected abstract val viewModel: AirportPickerViewModel
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         DialogAirportsBinding.bind(inflater.inflate(R.layout.dialog_airports, container, false)).apply {
@@ -128,8 +134,12 @@ abstract class AirportPicker: JoozdlogFragment() {
             }
 
             //observe airportList for recyclerview
-            viewModel.airportsList.observe(viewLifecycleOwner){
-                airportPickerAdapter.submitList(it)
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    viewModel.airportsListFlow.collect {
+                        airportPickerAdapter.submitList(it)
+                    }
+                }
             }
 
             /**

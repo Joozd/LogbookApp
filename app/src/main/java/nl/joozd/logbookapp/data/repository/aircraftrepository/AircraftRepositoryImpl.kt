@@ -61,7 +61,10 @@ class AircraftRepositoryImpl(
 
     override fun registrationsFlow() = aircraftMapFlow().map { it.keys.toList() }
 
-
+    override fun aircraftDataCacheFlow(): Flow<AircraftDataCache> =
+        combine(aircraftTypesFlow(), aircraftMapFlow()){ types, map ->
+            AircraftDataCache.make(types, map)
+        }
 
     suspend fun registrationToAircraftMap(): Map<String, Aircraft> =
         makeAircraftMap(
@@ -69,9 +72,6 @@ class AircraftRepositoryImpl(
             getPreloadedRegistrations(),
             getRegistrationWithTypes()
         )
-
-    suspend fun getSelfUpdatingAircraftDataCache(coroutineScope: CoroutineScope): AircraftDataCache =
-        SelfUpdatingAircraftDataCache(coroutineScope, getAircraftDataCache())
 
     suspend fun getAircraftDataCache(): AircraftDataCache = AircraftDataCache.make(
         getAircraftTypes(),

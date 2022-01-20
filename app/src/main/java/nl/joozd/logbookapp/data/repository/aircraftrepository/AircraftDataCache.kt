@@ -39,6 +39,11 @@ interface AircraftDataCache {
      */
     fun getAircraftFromRegistration(registration: String?): Aircraft?
 
+    /**
+     * Get an aircraft type from its short name
+     */
+    fun getAircraftTypeByShortName(shortName: String): AircraftType?
+
     companion object{
         fun make(types: List<AircraftType>, aircraftMap: Map<String, Aircraft>): AircraftDataCache =
             UpdateableAircraftDataCache(types, aircraftMap)

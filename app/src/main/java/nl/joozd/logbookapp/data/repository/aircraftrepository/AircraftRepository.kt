@@ -58,6 +58,11 @@ interface AircraftRepository {
      */
     fun registrationsFlow(): Flow<List<String>>
 
+    /**
+     * Provide a Flow that emits a new AircraftDataCache object every time
+     * an updated one is available.
+     */
+    fun aircraftDataCacheFlow(): Flow<AircraftDataCache>
 
 
 

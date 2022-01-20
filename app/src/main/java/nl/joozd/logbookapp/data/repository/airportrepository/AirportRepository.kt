@@ -19,10 +19,8 @@
 
 package nl.joozd.logbookapp.data.repository.airportrepository
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 
 interface AirportRepository {
@@ -32,14 +30,39 @@ interface AirportRepository {
     fun airportsFlow(): Flow<List<Airport>>
 
     /**
-     * Provide a self-updating [AirportDataCache]
-     */
-    suspend fun getSelfUpdatingAirportDataCache(coroutineScope: CoroutineScope): AirportDataCache
-
-    /**
      * Provide an initialized [AirportDataCache]
      */
     suspend fun getAirportDataCache(): AirportDataCache
+
+    /**
+     * Provide a flow of updated AirportDataCaches
+     */
+    fun airportDataCacheFlow(): Flow<AirportDataCache>
+
+    /**
+     * Get last loaded AirportDataCache.
+     * As airportData doesn't change very often this should probably be usable
+     * but should be replaced with fresh data as soon as it can be loaded.
+     * Only meant to bridge the second or two that takes, as airportData can take a bit to load.
+     */
+    fun getStaleOrEmptyAirportDataCache(): AirportDataCache
+
+    suspend fun getAirportByIcaoIdentOrNull(ident: String): Airport?
+
+    /**
+     * Set the progress of an ongoing Airport Sync operation for [getAirportSyncProgressFlow] to emit
+     */
+    fun setAirportSyncProgress(progress: Int)
+
+    /**
+     * Get a flow that emits when [setAirportSyncProgress] has set progress
+     */
+    fun getAirportSyncProgressFlow(): Flow<Int>
+
+    /**
+     * Replace current airport database with [newAirports]
+     */
+    suspend fun replaceDbWith(newAirports: Collection<Airport>)
 
 
 

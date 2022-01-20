@@ -40,7 +40,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
 
     private val aircraftTypesFlow: Flow<List<AircraftType>> =
         println("AAAAA").let{
-        combine(aircraftRepository.aircraftTypesFlow, _typesSearchStringFlow) { types, query ->
+        combine(aircraftRepository.aircraftTypesFlow(), _typesSearchStringFlow) { types, query ->
             types.filter { type -> query inIgnoreCase type.name }
         }
     }
@@ -53,7 +53,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
         get() = aircraftTypesFlow.asLiveData()
 
     val knownRegistrationsLiveData =
-        aircraftRepository.aircraftFlow.asLiveData()
+        aircraftRepository.aircraftFlow().asLiveData()
         .map{ it.map{ ac -> ac.registration} }
 
     private var mAircraft: Aircraft

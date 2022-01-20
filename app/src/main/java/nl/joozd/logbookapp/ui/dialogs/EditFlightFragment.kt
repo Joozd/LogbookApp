@@ -517,14 +517,6 @@ class EditFlightFragment: JoozdlogFragment(){
     private fun LayoutEditFlightFragmentBinding.setSourceDataObservers() {
         observeNames()
         observeKnownAircraftRegistrations()
-
-
-        // Notify viewmodel that aircraft DB has changed. Triggered from here to keep
-        // LiveData lifecycle pattern intact and prevent using observeForever in viewModel
-        //TODO I don't like this
-        viewModel.airportDbLiveData.observe(viewLifecycleOwner) {
-            viewModel.notifyAirportDbChanged()
-        }
     }
 
     private fun LayoutEditFlightFragmentBinding.observeKnownAircraftRegistrations() {

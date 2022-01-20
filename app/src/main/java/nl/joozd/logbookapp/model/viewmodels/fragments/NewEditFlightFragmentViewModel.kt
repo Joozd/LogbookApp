@@ -22,7 +22,6 @@ package nl.joozd.logbookapp.model.viewmodels.fragments
 import android.text.Editable
 import androidx.lifecycle.*
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -43,7 +42,7 @@ import java.time.LocalTime
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val wf = flightRepository.getWorkingFlight()
-    private val aircraftDataCache = aircraftRepository.getAircraftDataCache(viewModelScope)
+    private val aircraftDataCache = aircraftRepository.getSelfUpdatingAircraftDataCache(viewModelScope)
 
     private var cachedSortedRegistrationsList: List<String> = emptyList()
 

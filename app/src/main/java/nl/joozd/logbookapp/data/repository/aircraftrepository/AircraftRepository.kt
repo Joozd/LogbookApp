@@ -30,7 +30,6 @@ import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.model.*
 import nl.joozd.logbookapp.utils.DispatcherProvider
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Repository for everything aircraft.
@@ -69,11 +68,14 @@ class AircraftRepository private constructor(private val dataBase: JoozdlogDatab
             getRegistrationWithTypes()
         )
 
-    fun getAircraftDataCache(coroutineScope: CoroutineScope): CloseableAircraftDataCache =
-        SelfUpdatingAircraftDataCache(coroutineScope)
+    suspend fun getSelfUpdatingAircraftDataCache(coroutineScope: CoroutineScope): AircraftDataCache =
+        SelfUpdatingAircraftDataCacheImpl(coroutineScope, getAircraftDataCache())
 
-    fun getAircraftDataCache(coroutineContext: CoroutineContext): CloseableAircraftDataCache =
-        SelfUpdatingAircraftDataCache(CoroutineScope(coroutineContext))
+    suspend fun getAircraftDataCache(): AircraftDataCache = AircraftDataCache.make(
+        getAircraftTypes(),
+        registrationToAircraftMap()
+    )
+
 
     suspend fun getAircraftTypes() =
         aircraftTypeDao.requestAllAircraftTypes().map { it.toAircraftType() }

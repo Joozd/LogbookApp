@@ -22,26 +22,47 @@ package nl.joozd.logbookapp.data.repository.aircraftrepository
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 
-interface AircraftDataCache {
+class UpdateableAircraftDataCache(
+    private var types: List<AircraftType>,
+    private var registrationToAircraftMap: Map<String, Aircraft>
+    ) : AircraftDataCache {
+    constructor(aircraftDataCache: AircraftDataCache):
+            this(aircraftDataCache.getAircraftTypes(), aircraftDataCache.getRegistrationToAircraftMap())
+
+    /**
+     * Update cached aircraft types
+     */
+    fun updateTypes(types: List<AircraftType>) {
+        this.types = types
+    }
+
+    /**
+     * Update cached aircraft types
+     */
+    fun updateAircraftMap(map: Map<String, Aircraft>) {
+        TODO("Not yet implemented")
+    }
+
     /**
      * Return a map with all currently loaded data
      */
-    fun getRegistrationToAircraftMap(): Map<String, Aircraft>
+    override fun getRegistrationToAircraftMap(): Map<String, Aircraft> {
+        TODO("Not yet implemented")
+    }
 
     /**
      * Return a list of all aircraft types, or an empty list if cache not loaded yet
      */
-    fun getAircraftTypes(): List<AircraftType>
+    override fun getAircraftTypes(): List<AircraftType> {
+        TODO("Not yet implemented")
+    }
 
     /**
      * Get an aircraft from its registration.
      * Should call [nl.joozd.logbookapp.data.repository.helpers.formatRegistration] on [registration]
      */
-    fun getAircraftFromRegistration(registration: String?): Aircraft?
-
-    companion object{
-        fun make(types: List<AircraftType>, aircraftMap: Map<String, Aircraft>): AircraftDataCache =
-            UpdateableAircraftDataCache(types, aircraftMap)
+    override fun getAircraftFromRegistration(registration: String?): Aircraft? {
+        TODO("Not yet implemented")
     }
 
 }

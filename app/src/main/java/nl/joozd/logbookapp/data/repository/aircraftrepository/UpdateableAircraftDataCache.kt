@@ -21,7 +21,11 @@ package nl.joozd.logbookapp.data.repository.aircraftrepository
 
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
 
+/**
+ * Use this for read-only scenarios, or update manually after writing to aircraft DB
+ */
 class UpdateableAircraftDataCache(
     private var types: List<AircraftType>,
     private var registrationToAircraftMap: Map<String, Aircraft>
@@ -40,29 +44,25 @@ class UpdateableAircraftDataCache(
      * Update cached aircraft types
      */
     fun updateAircraftMap(map: Map<String, Aircraft>) {
-        TODO("Not yet implemented")
+        registrationToAircraftMap = map
     }
 
     /**
      * Return a map with all currently loaded data
      */
-    override fun getRegistrationToAircraftMap(): Map<String, Aircraft> {
-        TODO("Not yet implemented")
-    }
+    override fun getRegistrationToAircraftMap(): Map<String, Aircraft> = registrationToAircraftMap
 
     /**
      * Return a list of all aircraft types, or an empty list if cache not loaded yet
      */
-    override fun getAircraftTypes(): List<AircraftType> {
-        TODO("Not yet implemented")
-    }
+    override fun getAircraftTypes(): List<AircraftType> = types
 
     /**
      * Get an aircraft from its registration.
      * Should call [nl.joozd.logbookapp.data.repository.helpers.formatRegistration] on [registration]
      */
-    override fun getAircraftFromRegistration(registration: String?): Aircraft? {
-        TODO("Not yet implemented")
-    }
-
+    override fun getAircraftFromRegistration(registration: String?): Aircraft? =
+        registration?.let {
+            registrationToAircraftMap[formatRegistration(it)]
+        }
 }

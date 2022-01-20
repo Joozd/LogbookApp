@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.model.viewmodels.fragments
 import android.text.Editable
 import androidx.lifecycle.*
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -32,7 +33,6 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.FlightData
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
@@ -43,11 +43,14 @@ import java.time.LocalTime
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val wf = flightRepository.getWorkingFlight()
+    private val aircraftDataCache = aircraftRepository.getAircraftDataCache(viewModelScope)
 
     private var cachedSortedRegistrationsList: List<String> = emptyList()
 
     val airportDbLiveData = airportRepository.liveAirports
-    val knownRegistrationsFlow = makeSortedRegistrationsFlowAndCacheIt()
+    val knownRegistrationsFlow = makeSortedRegistrationsFlowAndCacheIt().also{
+        println("made $it")
+    }
 
     val title: LiveData<String> = MutableLiveData(context.getString(if(wf.newFlight) R.string.add_flight else R.string.edit_flight))
 
@@ -429,12 +432,13 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     )
 
     private fun makeSortedRegistrationsFlowAndCacheIt() =
-        combine(aircraftRepository.aircraftMapFlow, FlightRepository.getInstance().allFlightsFlow){
-                regMap, allFlights ->
-            makeSortedRegistrationsList(allFlights, regMap).also{
-                cachedSortedRegistrationsList = it
-            }
+        combine(aircraftRepository.aircraftMapFlow,FlightRepository.getInstance().allFlightsFlow) {
+        regMap, allFlights ->
+        makeSortedRegistrationsList(allFlights, regMap).also {
+            cachedSortedRegistrationsList = it
         }
+    }
+
 
     private fun makeSortedRegistrationsList(
         allFlights: List<FlightData>,
@@ -445,8 +449,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     //I could make this suspended and use requireMap() and getAircraftFromRegistration()
     //Why is this done here anyway and not in WorkingFlight? TODO
     private fun getBestHitForPartialRegistration(r: String): Aircraft? =
-        aircraftRepository.getAircraftFromRegistrationCachedOnly(r)
-        ?: aircraftRepository.getMapWithCurrentCachedValues()[findBestHitForRegistration(r,cachedSortedRegistrationsList)]
+        aircraftDataCache.getAircraftFromRegistration(r)
+        ?: aircraftDataCache.getAircraftFromRegistration(findBestHitForRegistration(r,cachedSortedRegistrationsList))
 
 
     companion object{

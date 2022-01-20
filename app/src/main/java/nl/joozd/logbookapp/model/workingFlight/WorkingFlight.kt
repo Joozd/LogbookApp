@@ -31,6 +31,7 @@ import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
+import nl.joozd.logbookapp.data.room.model.toAircraft
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TwilightCalculator
@@ -150,30 +151,58 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
     }
 
     /**
-     * Function that retrieves aircraft from type and/or registration:
+     * Function that retrieves aircraft from type and/or registration.
      */
     private suspend fun getAircraft(): Aircraft {
         val reg = wf.registration
         val typeString = wf.aircraftType
         return if (typeString.isBlank()) {
-            aircraftRepository.getAircraftFromRegistration(reg).also{ ac ->
-                ac?.type?.let {
-                    aircraftType = it.shortName
-                }
-            } ?: Aircraft(reg)
+            findAircraftTypeFromRegistration(reg).also { ac ->
+                // if we are here, aircraftType was not set.
+                // It is set here if we found it from the registration.
+                // This will get this function to run again, but that's OK as no blank values
+                // will be written here.
+                updateAircraftTypeIfNotNullOrBlank(ac)
+            }
         } else {
-            Aircraft(
-                registration = reg,
-                type = aircraftRepository.getAircraftTypeByShortName(typeString) ?: AircraftType(
-                    "",
-                    typeString,
-                    multiPilot = isMultipilot,
-                    multiEngine = false
-                ), // If type not found, use entered data as type shortname (which is what will end up in logbook)
-                source = Aircraft.FLIGHT
-            )
+            makeAircraftFromDataInFlight(reg, typeString)
         }
     }
+
+    /*
+     * If an aircraftType was entered in flight, but its registration is not known in AircraftRepository
+     * (this can happen after an import, for instance), try to find the aircraft type in AircraftTypes dabatase,
+     * or make a new (temporary) aircraft with only a short name (which is what will end up in the PDF logbook)
+     *
+     */
+    private suspend fun makeAircraftFromDataInFlight(
+        reg: String,
+        typeString: String
+    ) = Aircraft(
+        registration = reg,
+        type = aircraftRepository.getAircraftTypeByShortName(typeString)
+            ?: makeUnknownAircraftType(typeString),
+        source = Aircraft.FLIGHT
+    )
+
+    private fun makeUnknownAircraftType(typeString: String) = AircraftType(
+        "",
+        typeString,
+        multiPilot = isMultipilot,
+        multiEngine = false
+    )
+
+    private fun updateAircraftTypeIfNotNullOrBlank(ac: Aircraft) {
+        ac.type?.shortName?.takeIf { it.isNotBlank() }?.let { aircraftType = it }
+    }
+
+    private suspend fun findAircraftTypeFromRegistration(reg: String) =
+        findAircraftByRegistrationFromRepositoryOrNull(reg)
+            ?: Aircraft(reg)
+
+    private suspend fun findAircraftByRegistrationFromRepositoryOrNull(reg: String) =
+        aircraftRepository.getAircraftFromRegistration(reg)?.toAircraft()
+
 
     /**
      * Returns multipilot time in minutes
@@ -979,7 +1008,6 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
             return withContext(Dispatchers.Main){WorkingFlight(f)
             }
         }
-
     }
 }
 

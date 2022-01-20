@@ -20,17 +20,17 @@
 package nl.joozd.logbookapp.data.repository.aircraftrepository
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import nl.joozd.joozdlogcommon.AircraftType
-import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
 import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
-import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
-import nl.joozd.logbookapp.data.room.model.toAircraftTypes
-import nl.joozd.logbookapp.data.room.model.toData
+import nl.joozd.logbookapp.data.room.model.*
 import nl.joozd.logbookapp.utils.DispatcherProvider
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Repository for everything aircraft.
@@ -42,61 +42,53 @@ class AircraftRepository private constructor(private val dataBase: JoozdlogDatab
     private val registrationDao get() = dataBase.registrationDao()
     private val preloadedRegistrationsDao get() = dataBase.preloadedRegistrationsDao()
 
-
-    //TODO move cache to model. Repository is not for caching but for retrieving.
-    private val cache = AircraftDataCache(
-        aircraftTypeDao,
-        registrationDao,
-        preloadedRegistrationsDao,
-        DispatcherProvider.io()
-    )
-
-    val aircraftMapFlow = cache.registrationToAircraftMapFlow
-
-    val aircraftFlow = cache.registrationToAircraftMapFlow.map { it.values }
-
     val aircraftTypesFlow = aircraftTypeDao.aircraftTypesFlow().map {
         it.toAircraftTypes()
     }
 
-    //null if not cached yet
-    val aircraftTypes: List<AircraftType>? get() = cache.cachedAircraftTypeData
+    val aircraftRegistrationsFlow = registrationDao.allRegistrationsFlow().map {
+        it.toAircraftRegistrationWithTypes()
+    }
 
-    /*
-    TODO this uses cachedSortedRegistrationsList which did not belong in here.
-        If it is used in more places than just EditFLightFragment I might make a
-        RegistrationsWorker or something class to deal with this
+    val preloadedRegistrationsFlow = preloadedRegistrationsDao.registrationsFlow()
+
+    val aircraftMapFlow = makeAircraftMapFlow()
+
+    val aircraftFlow = aircraftMapFlow.map {
+        it.values
+    }
+
+    val registrationsFlow = aircraftMapFlow.map { it.keys }
 
 
-    /**
-     * Searches for a match in order of priority in aircraftMap
-     * If nothing cached yet, it will return an empty list
-     */
-    fun getBestHitForPartialRegistration(r: String): Aircraft? =
-        cache.getRegistrationToAircraftMapOrEmptyMapIfNotLoadedYet()[findBestHitForRegistration(r, cachedSortedRegistrationsList)]
 
-     */
+    suspend fun registrationToAircraftMap(): Map<String, Aircraft> =
+        makeAircraftMap(
+            getAircraftTypes(),
+            getPreloadedRegistrations(),
+            getRegistrationWithTypes()
+        )
 
-    suspend fun requireMap() = cache.getRegistrationToAircraftMap()
+    fun getAircraftDataCache(coroutineScope: CoroutineScope): CloseableAircraftDataCache =
+        SelfUpdatingAircraftDataCache(coroutineScope)
 
-    //This gets whatever we have currently loaded. Might be nothing if its called really fast after starting app.
-    //Its not suspended though.
-    fun getMapWithCurrentCachedValues() =
-        cache.getRegistrationToAircraftMapOrEmptyMapIfNotLoadedYet()
+    fun getAircraftDataCache(coroutineContext: CoroutineContext): CloseableAircraftDataCache =
+        SelfUpdatingAircraftDataCache(CoroutineScope(coroutineContext))
 
-    suspend fun getAircraftFromRegistration(registration: String?): Aircraft? =
-        registration?.let {
-            cache.getRegistrationToAircraftMap()[formatRegistration(registration)]
-        }
+    suspend fun getAircraftTypes() =
+        aircraftTypeDao.requestAllAircraftTypes().map { it.toAircraftType() }
 
-    fun getAircraftFromRegistrationCachedOnly(registration: String?): Aircraft? =
-        registration?.let {
-            cache.getRegistrationToAircraftMapOrEmptyMapIfNotLoadedYet()[formatRegistration(registration)]
-        }
+    suspend fun getPreloadedRegistrations() =
+        preloadedRegistrationsDao.requestAllRegistrations()
 
+    suspend fun getRegistrationWithTypes() =
+        registrationDao.requestAllRegistrations().map { it.toAircraftRegistrationWithType() }
 
     suspend fun getAircraftTypeByShortName(shortName: String): AircraftType? =
-        cache.getAircraftTypes().firstOrNull { it.shortName == shortName }
+        aircraftTypeDao.getAircraftTypeFromShortName(shortName)?.toAircraftType()
+
+    suspend fun getAircraftFromRegistration(registration: String) =
+        registrationDao.getAircraftFromRegistration(registration)?.toAircraftRegistrationWithType()
 
     fun saveAircraft(aircraft: Aircraft) = launch(DispatcherProvider.io()) {
         if (aircraft.type?.name == null) return@launch // Don't save aircraft without type.
@@ -127,6 +119,31 @@ class AircraftRepository private constructor(private val dataBase: JoozdlogDatab
 
     private suspend fun savePreloadedRegs(preloaded: List<PreloadedRegistration>) {
         preloadedRegistrationsDao.save(preloaded)
+    }
+
+    private fun makeAircraftMapFlow(): Flow<Map<String, Aircraft>> =
+        combine(
+            aircraftTypesFlow,
+            aircraftRegistrationsFlow,
+            preloadedRegistrationsFlow
+        ) { aircraftTypes, registrationsWithTypes, preloaded ->
+            makeAircraftMap(aircraftTypes, preloaded, registrationsWithTypes)
+        }
+
+
+    private fun makeAircraftMap(
+        aircraftTypes: List<AircraftType>,
+        preloaded: List<PreloadedRegistration>,
+        registrationsWithTypes: List<AircraftRegistrationWithType>
+    ): HashMap<String, Aircraft> {
+        val map = HashMap<String, Aircraft>()
+        preloaded.forEach {
+            map[formatRegistration(it.registration)] = it.toAircraft(aircraftTypes)
+        }
+        registrationsWithTypes.forEach {
+            map[formatRegistration(it.registration)] = it.toAircraft()
+        }
+        return map
     }
 
     companion object{

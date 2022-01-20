@@ -23,6 +23,7 @@ import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedRoster
 import nl.joozd.logbookapp.data.repository.AirportRepository
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import kotlin.coroutines.coroutineContext
 
 /**
  * Roster Postprocessing
@@ -31,30 +32,35 @@ import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
  *  - Changing IATA to ICAO identifiers
  *  - Checking if registration is known, also searching for versions with/without spaces and/or hyphens and changing to known reg + type if found.
  */
-suspend fun Roster.postProcess(): ProcessedRoster {
-    val iataIcaoMap = AirportRepository.getInstance().getIataIcaoMapAsync().await()
-    val newFlights = flights.map{ flight ->
-        // In case airports are IATA format, switch them to ICAO.
-        // I think there is no need to have that set by RosterParser as there is no overlap between (4 letter) ICAO and (3 letter) IATA codes.
-        val orig = iataIcaoMap[flight.orig] ?: flight.orig
-        val dest = iataIcaoMap[flight.dest] ?: flight.dest
+suspend fun Roster.postProcess(): ProcessedRoster =
+    AircraftRepository.getInstance().getAircraftDataCache(coroutineContext).use { aircraftDataCache ->
+        val iataIcaoMap = AirportRepository.getInstance().getIataIcaoMapAsync().await()
 
-        /*
+        //Wait until aircraft data has been loaded
+        aircraftDataCache.waitForInitialDataLoad()
+
+        val newFlights = flights.map { flight ->
+            // In case airports are IATA format, switch them to ICAO.
+            // I think there is no need to have that set by RosterParser as there is no overlap between (4 letter) ICAO and (3 letter) IATA codes.
+            val orig = iataIcaoMap[flight.orig] ?: flight.orig
+            val dest = iataIcaoMap[flight.dest] ?: flight.dest
+
+            /*
          * Priority for aircraft data:
          * 1. If registration from [flight] found in AircraftRepository (Repo), use that registration with type from Repo, ignore any type from Flight
          * 2. Otherwise, use data from [flight]. Any unknown aircraft type data will be handled where it is used.
          */
-        val foundAircraft = AircraftRepository.getInstance().getAircraftFromRegistration(flight.registration)
+            val foundAircraft = aircraftDataCache.getAircraftFromRegistration(flight.registration)
 
-        // result of lambda:
-        flight.copy(
-            flightID = -1,
-            orig = orig,
-            dest = dest,
-            registration = foundAircraft?.registration ?: flight.registration,
-            aircraftType = foundAircraft?.type?.shortName ?: flight.aircraftType,
-            isPlanned = true
-        )
+            // result of lambda:
+            flight.copy(
+                flightID = -1,
+                orig = orig,
+                dest = dest,
+                registration = foundAircraft?.registration ?: flight.registration,
+                aircraftType = foundAircraft?.type?.shortName ?: flight.aircraftType,
+                isPlanned = true
+            )
+        }
+        return toProcessedRoster().copy(flights = newFlights)
     }
-    return toProcessedRoster().copy(flights =  newFlights)
-}

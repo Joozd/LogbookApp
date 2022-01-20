@@ -30,6 +30,7 @@ import androidx.core.view.marginTop
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.textfield.TextInputEditText
@@ -529,7 +530,7 @@ class EditFlightFragment: JoozdlogFragment(){
     private fun LayoutEditFlightFragmentBinding.observeKnownAircraftRegistrations() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.knownRegistrationsFlow.collect{ registrations ->
+                viewModel.knownRegistrationsFlow.asLiveData().observe(viewLifecycleOwner){ registrations ->
                     (flightAircraftField.adapter as AircraftAutoCompleteAdapter).apply {
                         setItems(registrations)
                     }

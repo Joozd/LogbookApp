@@ -20,10 +20,12 @@
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import androidx.lifecycle.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.extensions.inIgnoreCase
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
 import java.util.*
@@ -34,26 +36,21 @@ import java.util.*
  */
 class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     private val undoAircraft = workingFlight.aircraft
-    private val _typesSearchString = MutableLiveData("")
-    private val typesSearchString
-        get() = _typesSearchString.value ?: ""
+    private val _typesSearchStringFlow = MutableStateFlow("")
 
-    private val _aircraftTypes = MediatorLiveData<List<AircraftType>>().apply {
-        addSource(aircraftRepository.aircraftTypesFlow.asLiveData()){
-            // Create a list of names of all known aircraft matching [typesSearchString]
-            value = it.filter{type -> typesSearchString inIgnoreCase type.name}
-        }
-        addSource(_typesSearchString){
-            value = (aircraftRepository.aircraftTypes ?: emptyList()).filter{typesSearchString inIgnoreCase it.name}
+    private val aircraftTypesFlow: Flow<List<AircraftType>> =
+        println("AAAAA").let{
+        combine(aircraftRepository.aircraftTypesFlow, _typesSearchStringFlow) { types, query ->
+            types.filter { type -> query inIgnoreCase type.name }
         }
     }
-
 
     // Active aircraft in [workingFligght] or a placeholder [Aircraft] while workingFlight is loading data
     val selectedAircraft = workingFlight.aircraftLiveData.map { it ?: Aircraft("...")}
 
+    //TODO make this be collected as flow instead of as liveData
     val aircraftTypes: LiveData<List<AircraftType>>
-        get() = _aircraftTypes
+        get() = aircraftTypesFlow.asLiveData()
 
     val knownRegistrationsLiveData =
         aircraftRepository.aircraftFlow.asLiveData()
@@ -102,7 +99,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     }
 
     fun updateSearchString(query: String) {
-        _typesSearchString.value = query.uppercase(Locale.ROOT)
+        _typesSearchStringFlow.value = query.uppercase(Locale.ROOT)
     }
 
     /**

@@ -19,29 +19,6 @@
 
 package nl.joozd.logbookapp.data.repository.aircraftrepository
 
-import nl.joozd.joozdlogcommon.AircraftType
-import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import java.io.Closeable
 
-interface AircraftDataCache {
-    /**
-     * This function shall return after all data has been loaded.
-     */
-    suspend fun waitForInitialDataLoad()
-
-    /**
-     * Return a map with all currently loaded data
-     */
-    fun getRegistrationToAircraftMapOrEmptyMapIfNotLoadedYet(): Map<String, Aircraft>
-
-    /**
-     * Return a list of all aircraft types, or an empty list if cache not loaded yet
-     */
-    fun getAircraftTypes(): List<AircraftType>
-
-    /**
-     * Get an aircraft from its registration.
-     * Should call [nl.joozd.logbookapp.data.repository.helpers.formatRegistration] on [registration]
-     */
-    fun getAircraftFromRegistration(registration: String?): Aircraft?
-
-}
+interface CloseableAircraftDataCache: AircraftDataCache, Closeable

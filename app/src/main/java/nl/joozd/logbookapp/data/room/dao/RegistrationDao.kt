@@ -26,6 +26,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
+import nl.joozd.logbookapp.data.room.model.AircraftTypeData
 
 @Dao
 interface RegistrationDao {
@@ -37,6 +38,9 @@ interface RegistrationDao {
 
     @Query("SELECT * FROM AircraftRegistrationWithTypeData")
     fun requestLiveRegistrations(): LiveData<List<AircraftRegistrationWithTypeData>>
+
+    @Query("SELECT * FROM AircraftRegistrationWithTypeData where registration = :reg LIMIT 1")
+    suspend fun getAircraftFromRegistration(reg: String): AircraftRegistrationWithTypeData?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(vararg regs: AircraftRegistrationWithTypeData)

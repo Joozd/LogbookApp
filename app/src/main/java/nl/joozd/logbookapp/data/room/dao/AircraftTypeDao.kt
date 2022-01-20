@@ -39,7 +39,7 @@ interface AircraftTypeDao {
     fun getAircraftType(name: String): AircraftTypeData?
 
     @Query("SELECT * FROM AircraftTypeData where shortName = :name LIMIT 1")
-    fun getAircraftTypeFromShortName(name: String): AircraftTypeData?
+    suspend fun getAircraftTypeFromShortName(name: String): AircraftTypeData?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(vararg aircraftTypeData: AircraftTypeData)

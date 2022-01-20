@@ -32,6 +32,7 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.FlightData
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
@@ -42,7 +43,12 @@ import java.time.LocalTime
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val wf = flightRepository.getWorkingFlight()
-    private val aircraftDataCache = aircraftRepository.getSelfUpdatingAircraftDataCache(viewModelScope)
+    private var aircraftDataCache: AircraftDataCache? = null
+    init{
+        viewModelScope.launch {
+            aircraftDataCache = aircraftRepository.getSelfUpdatingAircraftDataCache(viewModelScope)
+        }
+    }
 
     private var cachedSortedRegistrationsList: List<String> = emptyList()
 
@@ -208,7 +214,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         wf.setAircraft(reg, type)
     }
 
-    //TODO this has work that should be done in WorkingFlight
+    //TODO think about if this work should be done here or in workingFLight
     private fun searchRegistrationAndSaveInWorkingFlight(regAndTypeString: String) {
         viewModelScope.launch {
             val bestRegistrationHit =
@@ -445,11 +451,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     ) = (allFlights.map { it.registration } + regMap.values.map { it.registration })
         .distinct()
 
-    //I could make this suspended and use requireMap() and getAircraftFromRegistration()
-    //Why is this done here anyway and not in WorkingFlight? TODO
     private fun getBestHitForPartialRegistration(r: String): Aircraft? =
-        aircraftDataCache.getAircraftFromRegistration(r)
-        ?: aircraftDataCache.getAircraftFromRegistration(findBestHitForRegistration(r,cachedSortedRegistrationsList))
+        aircraftDataCache?.getAircraftFromRegistration(r)
+        ?: aircraftDataCache?.getAircraftFromRegistration(findBestHitForRegistration(r,cachedSortedRegistrationsList))
 
 
     companion object{

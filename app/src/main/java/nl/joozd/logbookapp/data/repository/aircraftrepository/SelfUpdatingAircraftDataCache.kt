@@ -30,7 +30,7 @@ import nl.joozd.logbookapp.utils.DispatcherProvider
  * or this will leak.
  * If there is no suitable CoroutineScope available (like in a function), don't use this.
  */
-class SelfUpdatingAircraftDataCacheImpl(
+class SelfUpdatingAircraftDataCache(
     private val coroutineScope: CoroutineScope, // Use coroutineScope with same lifetime as creating object (e.g. viewModelScope) or this will leak.
     aircraftDataCache: AircraftDataCache
 ): AircraftDataCache {

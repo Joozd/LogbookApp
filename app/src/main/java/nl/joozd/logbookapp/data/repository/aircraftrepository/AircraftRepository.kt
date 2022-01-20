@@ -69,7 +69,7 @@ class AircraftRepository private constructor(private val dataBase: JoozdlogDatab
         )
 
     suspend fun getSelfUpdatingAircraftDataCache(coroutineScope: CoroutineScope): AircraftDataCache =
-        SelfUpdatingAircraftDataCacheImpl(coroutineScope, getAircraftDataCache())
+        SelfUpdatingAircraftDataCache(coroutineScope, getAircraftDataCache())
 
     suspend fun getAircraftDataCache(): AircraftDataCache = AircraftDataCache.make(
         getAircraftTypes(),

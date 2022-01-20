@@ -39,14 +39,6 @@ interface AirportRepository {
      */
     fun airportDataCacheFlow(): Flow<AirportDataCache>
 
-    /**
-     * Get last loaded AirportDataCache.
-     * As airportData doesn't change very often this should probably be usable
-     * but should be replaced with fresh data as soon as it can be loaded.
-     * Only meant to bridge the second or two that takes, as airportData can take a bit to load.
-     */
-    fun getStaleOrEmptyAirportDataCache(): AirportDataCache
-
     suspend fun getAirportByIcaoIdentOrNull(ident: String): Airport?
 
     /**
@@ -63,8 +55,6 @@ interface AirportRepository {
      * Replace current airport database with [newAirports]
      */
     suspend fun replaceDbWith(newAirports: Collection<Airport>)
-
-
 
     companion object {
         private var INSTANCE: AirportRepository? = null

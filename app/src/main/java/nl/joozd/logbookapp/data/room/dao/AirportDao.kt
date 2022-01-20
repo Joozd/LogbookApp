@@ -25,6 +25,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.dataclasses.Airport
 
 
@@ -38,6 +39,9 @@ interface AirportDao {
 
     @Query("SELECT * FROM Airport")
     fun requestLiveAirports(): LiveData<List<Airport>>
+
+    @Query("SELECT * FROM Airport")
+    fun airportsFlow(): Flow<List<Airport>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAirports(vararg airportData: Airport)

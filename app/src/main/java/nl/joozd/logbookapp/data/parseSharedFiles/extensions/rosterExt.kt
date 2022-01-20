@@ -21,8 +21,8 @@ package nl.joozd.logbookapp.data.parseSharedFiles.extensions
 
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedRoster
-import nl.joozd.logbookapp.data.repository.AirportRepository
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepositoryImpl
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepositoryImpl
 
 /**
  * Roster Postprocessing
@@ -32,8 +32,8 @@ import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
  *  - Checking if registration is known, also searching for versions with/without spaces and/or hyphens and changing to known reg + type if found.
  */
 suspend fun Roster.postProcess(): ProcessedRoster {
-    val aircraftDataCache = AircraftRepository.getInstance().getAircraftDataCache()
-    val iataIcaoMap = AirportRepository.getInstance().getIataIcaoMapAsync().await()
+    val aircraftDataCache = AircraftRepositoryImpl.getInstance().getAircraftDataCache()
+    val iataIcaoMap = AirportRepositoryImpl.getInstance().getIataIcaoMapAsync().await()
 
     val newFlights = flights.map { flight ->
         // In case airports are IATA format, switch them to ICAO.

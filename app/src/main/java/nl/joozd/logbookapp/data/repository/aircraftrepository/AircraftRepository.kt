@@ -19,140 +19,52 @@
 
 package nl.joozd.logbookapp.data.repository.aircraftrepository
 
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
-import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
-import nl.joozd.logbookapp.data.room.model.*
-import nl.joozd.logbookapp.utils.DispatcherProvider
+import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 
-/**
- * Repository for everything aircraft.
- * This takes care of storing/retrieving data from local DBs
- * Singleton instead of object so we can inject a mock database
- */
-class AircraftRepository private constructor(private val dataBase: JoozdlogDatabase = JoozdlogDatabase.getInstance()) : CoroutineScope by MainScope() {
-    private val aircraftTypeDao get() = dataBase.aircraftTypeDao()
-    private val registrationDao get() = dataBase.registrationDao()
-    private val preloadedRegistrationsDao get() = dataBase.preloadedRegistrationsDao()
+interface AircraftRepository {
+    /**
+     * Provide a Flow with updates to AircraftTypes in DB
+     */
+    fun aircraftTypesFlow(): Flow<List<AircraftType>>
 
-    val aircraftTypesFlow = aircraftTypeDao.aircraftTypesFlow().map {
-        it.toAircraftTypes()
-    }
+    /**
+     * Provide a Flow with updates to AircraftRegistrationWithTypeData in DB
+     */
+    fun aircraftRegistrationsFlow(): Flow<List<AircraftRegistrationWithType>>
 
-    val aircraftRegistrationsFlow = registrationDao.allRegistrationsFlow().map {
-        it.toAircraftRegistrationWithTypes()
-    }
+    /**
+     * Provide a Flow with updates to Preloaded Registrations in DB
+     */
+    fun preloadedRegistrationsFlow(): Flow<List<PreloadedRegistration>>
 
-    val preloadedRegistrationsFlow = preloadedRegistrationsDao.registrationsFlow()
+    /**
+     * Provide a Flow with updates to Registrations To Aircraft map
+     */
+    fun aircraftMapFlow(): Flow<Map<String, Aircraft>>
 
-    val aircraftMapFlow = makeAircraftMapFlow()
+    /**
+     * Provide a Flow with updates to known aircraft in DB
+     */
+    fun aircraftFlow(): Flow<List<Aircraft>>
 
-    val aircraftFlow = aircraftMapFlow.map {
-        it.values
-    }
-
-    val registrationsFlow = aircraftMapFlow.map { it.keys }
-
-
-
-    suspend fun registrationToAircraftMap(): Map<String, Aircraft> =
-        makeAircraftMap(
-            getAircraftTypes(),
-            getPreloadedRegistrations(),
-            getRegistrationWithTypes()
-        )
-
-    suspend fun getSelfUpdatingAircraftDataCache(coroutineScope: CoroutineScope): AircraftDataCache =
-        SelfUpdatingAircraftDataCache(coroutineScope, getAircraftDataCache())
-
-    suspend fun getAircraftDataCache(): AircraftDataCache = AircraftDataCache.make(
-        getAircraftTypes(),
-        registrationToAircraftMap()
-    )
+    /**
+     * Provide a Flow with updates to known registrations in DB
+     */
+    fun registrationsFlow(): Flow<List<String>>
 
 
-    suspend fun getAircraftTypes() =
-        aircraftTypeDao.requestAllAircraftTypes().map { it.toAircraftType() }
 
-    suspend fun getPreloadedRegistrations() =
-        preloadedRegistrationsDao.requestAllRegistrations()
-
-    suspend fun getRegistrationWithTypes() =
-        registrationDao.requestAllRegistrations().map { it.toAircraftRegistrationWithType() }
-
-    suspend fun getAircraftTypeByShortName(shortName: String): AircraftType? =
-        aircraftTypeDao.getAircraftTypeFromShortName(shortName)?.toAircraftType()
-
-    suspend fun getAircraftFromRegistration(registration: String) =
-        registrationDao.getAircraftFromRegistration(registration)?.toAircraftRegistrationWithType()
-
-    fun saveAircraft(aircraft: Aircraft) = launch(DispatcherProvider.io()) {
-        if (aircraft.type?.name == null) return@launch // Don't save aircraft without type.
-        val newAcrwt = AircraftRegistrationWithType(aircraft.registration, aircraft.type)
-        saveAircraftRegistrationWithType(newAcrwt)
-    }
-
-    fun replaceAllTypesWith(newTypes: List<AircraftType>) =
-        launch(DispatcherProvider.io() + NonCancellable) {
-            aircraftTypeDao.clearDb()
-            saveAircraftTypes(newTypes)
-        }
-
-    fun replaceAllPreloadedWith(newPreloaded: List<PreloadedRegistration>) =
-        launch(DispatcherProvider.io()) {
-            preloadedRegistrationsDao.clearDb()
-            savePreloadedRegs(newPreloaded)
-        }
-
-    private suspend fun saveAircraftTypes(types: List<AircraftType>) {
-        val typeData = types.map { it.toData() }
-        aircraftTypeDao.save(*typeData.toTypedArray())
-    }
-
-    private suspend fun saveAircraftRegistrationWithType(arwt: AircraftRegistrationWithType) {
-        registrationDao.save(arwt.toData())
-    }
-
-    private suspend fun savePreloadedRegs(preloaded: List<PreloadedRegistration>) {
-        preloadedRegistrationsDao.save(preloaded)
-    }
-
-    private fun makeAircraftMapFlow(): Flow<Map<String, Aircraft>> =
-        combine(
-            aircraftTypesFlow,
-            aircraftRegistrationsFlow,
-            preloadedRegistrationsFlow
-        ) { aircraftTypes, registrationsWithTypes, preloaded ->
-            makeAircraftMap(aircraftTypes, preloaded, registrationsWithTypes)
-        }
-
-
-    private fun makeAircraftMap(
-        aircraftTypes: List<AircraftType>,
-        preloaded: List<PreloadedRegistration>,
-        registrationsWithTypes: List<AircraftRegistrationWithType>
-    ): HashMap<String, Aircraft> {
-        val map = HashMap<String, Aircraft>()
-        preloaded.forEach {
-            map[formatRegistration(it.registration)] = it.toAircraft(aircraftTypes)
-        }
-        registrationsWithTypes.forEach {
-            map[formatRegistration(it.registration)] = it.toAircraft()
-        }
-        return map
-    }
 
     companion object{
-        private var INSTANCE: AircraftRepository? = null
-        fun getInstance() = INSTANCE ?: AircraftRepository().also { INSTANCE = it}
+        private var INSTANCE: AircraftRepositoryImpl? = null
+        fun getInstance() = INSTANCE ?: AircraftRepositoryImpl(JoozdlogDatabase.getInstance()).also { INSTANCE = it}
 
-        fun mock(mockDatabase: JoozdlogDatabase) = AircraftRepository(mockDatabase)
+        fun mock(mockDatabase: JoozdlogDatabase) = AircraftRepositoryImpl(mockDatabase)
     }
 }
-

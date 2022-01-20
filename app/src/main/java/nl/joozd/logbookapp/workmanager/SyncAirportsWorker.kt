@@ -31,14 +31,14 @@ import nl.joozd.serializing.unpackSerialized
 import nl.joozd.serializing.unwrapInt
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.repository.AirportRepository
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepositoryImpl
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.readUntilEOF
 import java.net.URL
 
 class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
-    private val airportsRepository = AirportRepository.getInstance()
+    private val airportsRepository = AirportRepositoryImpl.getInstance()
     var progress: Int = 0
         set(p) {
             field = p

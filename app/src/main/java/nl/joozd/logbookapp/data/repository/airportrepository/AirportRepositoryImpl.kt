@@ -17,29 +17,33 @@
  *
  */
 
-package nl.joozd.logbookapp.data.repository
+package nl.joozd.logbookapp.data.repository.airportrepository
 
-import android.content.SharedPreferences
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
+
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.sync.Mutex
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.repository.helpers.FlowingAirportSearcher
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
-import nl.joozd.logbookapp.data.room.dao.AirportDao
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.extensions.nullIfEmpty
-import nl.joozd.logbookapp.utils.reversed
-import java.lang.Exception
-import java.util.*
 
-class AirportRepository private constructor(private val airportDao: AirportDao, private val dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope by MainScope()  {
+class AirportRepositoryImpl(
+    private val dataBase: JoozdlogDatabase
+): AirportRepository, CoroutineScope by MainScope()  {
+    private val airportDao = dataBase.airportDao()
 
+    override fun airportsFlow() = airportDao.airportsFlow()
+
+    override suspend fun getSelfUpdatingAirportDataCache(coroutineScope: CoroutineScope): AirportDataCache =
+        SelfUpdatingAirportDataCache(coroutineScope, getAirportDataCache())
+
+    override suspend fun getAirportDataCache(): AirportDataCache = AirportDataCache.make(
+        getAirports()
+    )
+
+    suspend fun getAirports(): List<Airport> = airportDao.requestAllAirports()
+
+
+
+
+/*
     //Mutex lock to make sure forced and scheduled workers don't interfere with each other
     private val lockedForWorker = Mutex()
 
@@ -287,4 +291,7 @@ class AirportRepository private constructor(private val airportDao: AirportDao, 
         }
         const val MINIMUM_AIRPORT_CHECK_DELAY: Int = 0 * 60 // seconds
     }
+     */
+
 }
+

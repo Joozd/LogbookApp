@@ -25,7 +25,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepositoryImpl
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 
@@ -44,7 +44,7 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
         // var receiveConsensus: Job? = null // same
 
         Log.d(this::class.simpleName,"Started doWork()")
-        val aircraftRepository = AircraftRepository.getInstance()
+        val aircraftRepository = AircraftRepositoryImpl.getInstance()
 
         val serverTypesVersion = Cloud.getAircraftTypesVersion() ?: return@withContext Result.retry()
         val serverForcedVersion = Cloud.getForcedAircraftTypesVersion() ?: return@withContext Result.retry()

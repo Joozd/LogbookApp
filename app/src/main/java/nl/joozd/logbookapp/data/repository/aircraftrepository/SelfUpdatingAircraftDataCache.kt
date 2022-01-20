@@ -56,12 +56,12 @@ class SelfUpdatingAircraftDataCache(
         else UpdateableAircraftDataCache(cache)
 
     private fun launchAircraftTypeFlowCollector() =
-        AircraftRepository.getInstance().aircraftTypesFlow.onEach {
+        AircraftRepository.getInstance().aircraftTypesFlow().onEach {
             cache.updateTypes(it)
         }.launchIn(coroutineScope + DispatcherProvider.io())
 
     private fun launchAircraftMapCollector() =
-        AircraftRepository.getInstance().aircraftMapFlow.onEach {
+        AircraftRepository.getInstance().aircraftMapFlow().onEach {
             cache.updateAircraftMap(it)
         }.launchIn(coroutineScope + DispatcherProvider.io())
 }

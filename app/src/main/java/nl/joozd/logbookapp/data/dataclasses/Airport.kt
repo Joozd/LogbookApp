@@ -26,7 +26,7 @@ import nl.joozd.joozdlogcommon.BasicAirport
 @Entity
 data class Airport(
     @PrimaryKey val id: Int = 0,
-    val ident: String = "",
+    val ident: String = "", // ICAO ident
     val type: String = "",
     val name: String = "",
     val latitude_deg: Double = 0.0,

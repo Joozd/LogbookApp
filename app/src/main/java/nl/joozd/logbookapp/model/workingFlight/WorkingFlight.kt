@@ -26,8 +26,8 @@ import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
-import nl.joozd.logbookapp.data.repository.AirportRepository
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepositoryImpl
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepositoryImpl
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
@@ -55,7 +55,7 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
     private val job = Job()
     override val coroutineContext = Dispatchers.Main + job
 
-    private val aircraftRepository = AircraftRepository.getInstance()
+    private val aircraftRepository = AircraftRepositoryImpl.getInstance()
 
 
     // For undo purposes; if flightID < 0 this is a new flight so undo means delete
@@ -130,7 +130,7 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
      * Get airport from ICAO ID
      */
     private suspend fun getAirport(id: String): Airport? =
-        AirportRepository.getInstance().getAirportByIcaoIdentOrNull(id)
+        AirportRepositoryImpl.getInstance().getAirportByIcaoIdentOrNull(id)
 
     /**
      * Calculate night time. Doesn't check if autoValues is on.

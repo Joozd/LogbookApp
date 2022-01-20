@@ -35,7 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
-import nl.joozd.logbookapp.data.repository.AirportRepository
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.data.utils.flightAirportsToIata
 import nl.joozd.logbookapp.extensions.*

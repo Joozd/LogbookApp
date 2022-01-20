@@ -19,7 +19,8 @@
 
 package nl.joozd.logbookapp.data.repository.helpers
 
-import nl.joozd.logbookapp.data.repository.AirportRepository
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.atEndOfDay
 import nl.joozd.logbookapp.extensions.nullIfEmpty
@@ -132,18 +133,14 @@ fun Flight.mergeInto(other: Flight) = other.copy(
     isPlanned = isPlanned && other.isPlanned
 )
 
-/**
+/*
  * auto fills night time only for now
  */
-suspend fun Flight.autoValues(): Flight = if (!autoFill) this else {
-    val airportRepository = AirportRepository.getInstance()
-    val origAsync = airportRepository.getAirportByIcaoIdentOrNullAsync(orig)
-    val destAsync = airportRepository.getAirportByIcaoIdentOrNullAsync(dest)
-    val nightTime = TwilightCalculator(tOut()).minutesOfNight(origAsync.await(), destAsync.await(), tOut(), tIn())
+fun Flight.autoValues(airportDataCache: AirportDataCache): Flight = if (!autoFill) this else {
+    val origAirport = airportDataCache.getAirportByIcaoIdentOrNull(orig)
+    val destAirport = airportDataCache.getAirportByIcaoIdentOrNull(dest)
+    val nightTime = TwilightCalculator(tOut()).minutesOfNight(origAirport, destAirport, tOut(), tIn())
     this.copy(nightTime = nightTime)
 }
 
 fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.uppercase(Locale.ROOT).trim() == other.flightNumber.uppercase(Locale.ROOT).trim()
-
-
-fun Flight.shortString() = "$flightID: ${tOut()} $orig-$dest / $registration"

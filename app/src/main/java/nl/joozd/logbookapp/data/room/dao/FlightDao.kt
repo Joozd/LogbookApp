@@ -33,6 +33,9 @@ interface FlightDao {
     @Query("SELECT * FROM FlightData WHERE flightID = :id LIMIT 1")
     suspend fun getFlightById(id: Int): FlightData?
 
+    @Query("SELECT * FROM FlightData WHERE flightID IN (:ids)")
+    suspend fun getFlightsByID(ids: Collection<Int>): List<FlightData>
+
     @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
     suspend fun requestAllFlights(): List<FlightData>
 
@@ -68,6 +71,9 @@ interface FlightDao {
 
     @Delete
     suspend fun delete(flightData: FlightData)
+
+    @Delete
+    suspend fun delete(flightData: Collection<FlightData>)
 
     @Query("DELETE FROM FlightData where flightID in (:idsToDelete)")
     suspend fun deleteMultipleByID(idsToDelete: List<Int>)

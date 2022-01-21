@@ -23,9 +23,8 @@ package nl.joozd.logbookapp.data.repository.flightRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.data.dataclasses.FlightData
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess.Companion.MAX_SQL_BATCH_SIZE
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.model.toFlight
@@ -36,14 +35,16 @@ class FlightRepositoryImpl(
     database: JoozdlogDatabase
 ) : FlightRepositoryWithDirectAccess, CoroutineScope by MainScope() {
     private val flightDao = database.flightDao()
-    //Mutex to be locked in public function
-    private val writeMutex = Mutex()
 
     /**
      * Get a single flight by it's ID
      */
     override suspend fun getFlightByID(flightID: Int): Flight? =
         flightDao.getFlightById(flightID)?.toFlight()
+
+    override suspend fun getFlightsByID(ids: Collection<Int>): List<Flight> =
+        flightDao.getFlightsByID(ids).map{ it.toFlight() }
+
 
     /**
      * Get all flights (including deleted ones)
@@ -72,26 +73,39 @@ class FlightRepositoryImpl(
      */
     override fun save(flight: Flight) {
         launch {
-            writeMutex.withLock {
-                saveWithTimestamp(flight)
-            }
+            saveWithTimestamp(flight)
         }
     }
 
     /**
      * Save a collection of Flights to DB.
      */
+    //If size > max size, it will call itself with smaller chunks
     override fun save(flights: Collection<Flight>) {
-        TODO("Not yet implemented")
+        launch {
+            saveWithTimestamp(flights)
+        }
     }
 
     /**
      * Save a flight bypassing all updating that is usually done before saving
      * (e.g. updating timestamp)
      */
-    override suspend fun saveDirectToDB(flight: Flight) = withContext(DispatcherProvider.io()){
-        writeMutex.withLock {
+    override suspend fun saveDirectToDB(flight: Flight) =
+        withContext(DispatcherProvider.io()){
             flightDao.save(flight.toData())
+        }
+
+    /**
+     * Save a Collection<Flight> bypassing all updating that is usually done before saving
+     * (e.g. updating timestamp)
+     */
+    // If too big for Room, split it in chunks and try again.
+    override suspend fun saveDirectToDB(flights: Collection<Flight>) {
+        if (flights.size > MAX_SQL_BATCH_SIZE) {
+            flights.chunked(MAX_SQL_BATCH_SIZE).forEach { saveDirectToDB(it) }
+        } else withContext(DispatcherProvider.io()) {
+            flightDao.save(flights.map { it.toData() })
         }
     }
 
@@ -100,36 +114,68 @@ class FlightRepositoryImpl(
      */
     override fun delete(flight: Flight) {
         launch {
-            writeMutex.withLock {
                 if (flight.unknownToServer)
                     withContext(DispatcherProvider.io()) { deleteHard(flight) }
                 else
                     withContext(DispatcherProvider.io()) { deleteSoft(flight) }
             }
+    }
+
+    override fun delete(flights: Collection<Flight>) {
+        val flightsToDeleteHard = flights.filter { it.unknownToServer }
+        val flightsToDeleteSoft = flights.filter { !it.unknownToServer }
+        launch {
+            deleteHard(flightsToDeleteHard)
+            deleteSoft(flightsToDeleteSoft)
         }
+
     }
 
-
-
-
-
-    private fun List<FlightData>.toFlights() =
-        this.map { it.toFlight() }
-
-    private suspend fun saveWithTimestamp(flight: Flight){
-        val flightToSaveData = flight.copy(timeStamp = TimestampMaker().nowForSycPurposes).toData()
-        withContext(DispatcherProvider.io()) { flightDao.save(flightToSaveData) }
-    }
-
-    //deleteHard will actually delete from DB
+    /**
+     * Delete a flight hard from database
+     */
     override suspend fun deleteHard(flight: Flight) = withContext(DispatcherProvider.io()) {
-            flightDao.delete(flight.toData())
+        flightDao.delete(flight.toData())
+    }
+
+    /**
+     * Delete a collection of Flights hard from database
+     */
+    //If size too big, it will chunk and retry.
+    override suspend fun deleteHard(flights: Collection<Flight>) {
+        if (flights.size > MAX_SQL_BATCH_SIZE)
+            flights.chunked(MAX_SQL_BATCH_SIZE).forEach { deleteHard(it)}
+        else withContext(DispatcherProvider.io()) {
+            flightDao.delete(flights.map { it.toData() })
+        }
+
     }
 
     //deleteSoft will only set DELETEFLAG
     private suspend fun deleteSoft(flight: Flight) = withContext(DispatcherProvider.io()){
         val softDeletedFlight = flight.copy(DELETEFLAG = true)
         saveWithTimestamp(softDeletedFlight)
+    }
+
+    private suspend fun deleteSoft(flights: Collection<Flight>) = withContext(DispatcherProvider.io()){
+        val softDeletedFlights = flights.map {it.copy(DELETEFLAG = true) }
+        saveWithTimestamp(softDeletedFlights)
+    }
+
+    private fun List<FlightData>.toFlights() =
+        this.map { it.toFlight() }
+
+    private suspend fun saveWithTimestamp(flight: Flight){
+        val timestampedFlight = flight.copy(timeStamp = TimestampMaker().nowForSycPurposes)
+        saveDirectToDB(timestampedFlight)
+    }
+
+    private suspend fun saveWithTimestamp(flights: Collection<Flight>){
+        val now = TimestampMaker().nowForSycPurposes
+        val timestampedFlights = flights.map {
+            it.copy(timeStamp = now)
+        }
+        saveDirectToDB(timestampedFlights)
     }
 
 

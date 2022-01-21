@@ -33,6 +33,11 @@ interface FlightRepository {
     suspend fun getFlightByID(flightID: Int): Flight?
 
     /**
+     * Get a list of Flights by it's ID
+     */
+    suspend fun getFlightsByID(ids: Collection<Int>): List<Flight>
+
+    /**
      * Get all flights (including deleted ones)
      * For only usable flights, use [FlightDataCache.flights]
      */
@@ -58,13 +63,15 @@ interface FlightRepository {
      */
     fun save (flights: Collection<Flight>)
 
-
-
     /**
      * Delete a flight.
      */
     fun delete(flight: Flight)
 
+    /**
+     * Delete a collection of flights.
+     */
+    fun delete(flights: Collection<Flight>)
 
 
     companion object{

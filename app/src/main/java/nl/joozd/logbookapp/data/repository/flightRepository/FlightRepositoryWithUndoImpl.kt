@@ -25,14 +25,12 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.UndoableCommand
 import java.util.*
 
 class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by MainScope() {
-    val repositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance
+    private val repositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance
 
     private val undoStack = Stack<UndoableCommand>()
     private val redoStack = Stack<UndoableCommand>()
@@ -61,7 +59,6 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
      * Redo last operation
      */
     override fun redo() {
-        //Locked because this can be a write operation.
         launch {
             if (redoStack.empty())
                 Log.e(this::class.simpleName,"Trying to redo but redo stack is empty")
@@ -81,6 +78,10 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
      */
     override suspend fun getFlightByID(flightID: Int): Flight? =
         repositoryWithDirectAccess.getFlightByID(flightID)
+
+    override suspend fun getFlightsByID(ids: Collection<Int>): List<Flight> =
+        repositoryWithDirectAccess.getFlightsByID(ids)
+
 
     /**
      * Get all flights (including deleted ones)
@@ -106,39 +107,71 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
      */
     override fun save(flight: Flight) {
         launch {
-            saveWithUndo(flight)
-
-            // new save means any previous redo can no longer be done
-            _redoAvailable.value = false
+            saveWithUndo(listOf(flight))
+            _redoAvailable.value = false // new save means any previous redo can no longer be done
         }
     }
 
     /**
      * Save a collection of Flights to DB.
      */
-    override fun save(flights: Collection<Flight>) =
-        TODO("TODO")
+    override fun save(flights: Collection<Flight>) {
+        launch {
+            saveWithUndo(flights)
+            _redoAvailable.value = false // new save means any previous redo can no longer be done
+        }
+    }
 
     /**
      * Delete a flight.
      */
-    override fun delete(flight: Flight) =
-        TODO("TODO")
+    override fun delete(flight: Flight) {
+        launch {
+            deleteWithUndo(listOf(flight))
+            _redoAvailable.value = false // new delete means any previous redo can no longer be done
+        }
+    }
 
-    private suspend fun saveWithUndo(flightToSave: Flight){
-        val saveAction = generateSaveFlightAction(flightToSave)
+    override fun delete(flights: Collection<Flight>) {
+        launch {
+            deleteWithUndo(flights)
+            _redoAvailable.value = false // new delete means any previous redo can no longer be done
+        }
+    }
 
-        //If no flight with this ID in database yet, this will be null
-        val overwrittenFlight: Flight? = getFlightByID(flightToSave.flightID)
-        val undoAction = generateUndoSaveFlightAction(flightToSave, overwrittenFlight)
+    private suspend fun saveWithUndo(flightsToSave: Collection<Flight>){
+        val saveAction = generateSaveFlightsAction(flightsToSave)
+
+        val ids = flightsToSave.map { it.flightID }
+        val overwrittenFlights: List<Flight> = getFlightsByID(ids)
+        val undoAction = generateUndoSaveFlightsAction(flightsToSave, overwrittenFlights)
 
         val command = UndoableCommand(saveAction, undoAction)
         executeUndoableCommand(command)
     }
 
-    private fun generateSaveFlightAction(flightToSave: Flight): () -> Unit = {
+    private suspend fun deleteWithUndo(flightsToDelete: Collection<Flight>){
+        val deleteAction = generateDeleteFlightsAction(flightsToDelete)
+
+        // get flights from DB so we will restore original flights,
+        // as delete will only look at flightID
+        val ids = flightsToDelete.map { it.flightID }
+        val originalFlights = getFlightsByID(ids)
+        val undoAction = generateSaveFlightsAction(originalFlights)
+
+        val command = UndoableCommand(deleteAction, undoAction)
+        executeUndoableCommand(command)
+    }
+
+    private fun generateSaveFlightsAction(flightsToSave: Collection<Flight>): () -> Unit = {
         launch {
-            repositoryWithDirectAccess.save(flightToSave)
+            repositoryWithDirectAccess.save(flightsToSave)
+        }
+    }
+
+    private fun generateDeleteFlightsAction(flightsToSave: Collection<Flight>): () -> Unit = {
+        launch {
+            repositoryWithDirectAccess.delete(flightsToSave)
         }
     }
 
@@ -146,17 +179,17 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
      * The idea is that if a flight was overwritten, it can overwrite back.
      * If there was no flight overwritten (so "null" result), no flight will be saved on undo
      */
-    private fun generateUndoSaveFlightAction(newFlight: Flight, overwrittenFlight: Flight?): () -> Unit =
-        {
-            launch {
-                repositoryWithDirectAccess.deleteHard(newFlight)
-                overwrittenFlight?.let {
-                    withContext(DispatcherProvider.io()) {
-                        repositoryWithDirectAccess.saveDirectToDB(it) // bypasses new timestamp generation
-                    }
-                }
-            }
+    private fun generateUndoSaveFlightsAction(
+        newFlights: Collection<Flight>,
+        overwrittenFlights: Collection<Flight>
+    ): () -> Unit = {
+        launch {
+            repositoryWithDirectAccess.deleteHard(newFlights)
+            repositoryWithDirectAccess.saveDirectToDB(overwrittenFlights) // bypasses new timestamp generation
         }
+    }
+
+
 
     private fun executeUndoableCommand(command: UndoableCommand){
         undoStack.push(command)

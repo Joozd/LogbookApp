@@ -28,17 +28,29 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
  */
 interface FlightRepositoryWithDirectAccess: FlightRepository {
     /**
-     * Save a flight bypassing all updating that is usually done before saving
+     * Save a Flight bypassing all updating that is usually done before saving
      * (e.g. updating timestamp)
      */
     suspend fun saveDirectToDB(flight: Flight)
+
+    /**
+     * Save a collection of Flights bypassing all updating that is usually done before saving
+     * (e.g. updating timestamp)
+     */
+    suspend fun saveDirectToDB(flights: Collection<Flight>)
 
     /**
      * Delete a flight hard from database
      */
     suspend fun deleteHard(flight: Flight)
 
+    /**
+     * Delete a collection of Flights hard from database
+     */
+    suspend fun deleteHard(flights: Collection<Flight>)
+
     companion object{
         val instance: FlightRepositoryWithDirectAccess by lazy { FlightRepositoryImpl(JoozdlogDatabase.getInstance()) }
+        const val MAX_SQL_BATCH_SIZE = 999
     }
 }

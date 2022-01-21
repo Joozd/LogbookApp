@@ -45,4 +45,10 @@ interface FlightRepositoryWithUndo: FlightRepository {
      * Redo last operation
      */
     fun redo()
+
+    companion object{
+        // This has its own singleton instance that does NOT have direct access to database.
+        // Instead it delegates IO to FlightRepositoryWithDirectAccess
+        val instance: FlightRepositoryWithUndo by lazy { FlightRepositoryWithUndoImpl() }
+    }
 }

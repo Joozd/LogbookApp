@@ -25,7 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.DialogCloudSyncTermsBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
@@ -67,7 +67,7 @@ class CloudSyncTermsDialog(): JoozdlogFragment() {
                 setOnClickListener {
                     Preferences.acceptedCloudSyncTerms = true
                     Preferences.useCloud = true
-                    if (syncOnClose) FlightRepository.getInstance().syncIfNeeded() // this will also cause worker to create login data if none present
+                    if (syncOnClose) FlightRepositoryImpl.getInstance().syncIfNeeded() // this will also cause worker to create login data if none present
                     closeFragment()
                 }
                 val clickable = viewModel.waitedLongEnough.value ?: false

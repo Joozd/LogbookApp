@@ -17,18 +17,18 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs
+package nl.joozd.logbookapp.data.repository.flightRepository
 
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
-import java.time.LocalDate
+import nl.joozd.logbookapp.model.dataclasses.Flight
 
-/**
- * Update flight when a date is picked
- * [wf] will take care of exactly that happens
- */
-class LocalDatePickerDialog: LocalDatePickerFragment() {
-    private val wf = FlightRepositoryImpl.getInstance().getWorkingFlight()
-    override fun onDateSelectedListener(date: LocalDate?) {
-        date?.let { wf.date = it }
+interface FlightDataCache {
+    /**
+     * A list of all flights in this cache
+     */
+    val flights: List<Flight>
+
+    companion object{
+        fun make(flights: List<Flight>): FlightDataCache =
+            FlightDataCacheImpl(flights)
     }
 }

@@ -30,15 +30,13 @@ import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.repository.*
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepositoryImpl
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepositoryImpl
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 
 open class JoozdlogViewModel: ViewModel() {
-    protected val flightRepository = FlightRepository.getInstance()
+    protected val flightRepository = FlightRepositoryImpl.getInstance()
     protected val aircraftRepository = AircraftRepository.getInstance()
     protected val airportRepository = AirportRepository.getInstance()
     protected val balanceForwardRepository = BalanceForwardRepository.getInstance()

@@ -117,7 +117,7 @@ data class Flight(
         timeStamp,
         signature
     )
-    fun toModel() = FlightData(
+    fun toData() = FlightData(
         flightID,
         orig,
         dest,

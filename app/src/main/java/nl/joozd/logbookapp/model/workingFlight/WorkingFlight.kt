@@ -27,13 +27,10 @@ import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.crew.Crew
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepositoryImpl
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepositoryImpl
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.repository.helpers.isSameFlightAs
 import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
-import nl.joozd.logbookapp.data.room.model.toAircraft
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.DispatcherProvider
@@ -877,7 +874,7 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
      * Will (async) set isPIC and isIFR to same as in last completed flight
      */
     fun autoSetIfrAndPic(ifr: Boolean = true, pic: Boolean = true, names: Boolean = true) = launch {
-        FlightRepository.getInstance().getMostRecentFlightAsync().await()?.let{ lastCompleted ->
+        FlightRepositoryImpl.getInstance().getMostRecentFlightAsync().await()?.let{ lastCompleted ->
             if (pic) isPIC = lastCompleted.isPIC
             if (ifr) isIfr = lastCompleted.ifrTime > 0
             if (names) {
@@ -897,14 +894,14 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
 
     /**
      * Waits for all currently running jobs to finish, at which time [wf] should be ready to save
-     * Also tells [FlightRepository] to remove this flight when done.
+     * Also tells [FlightRepositoryImpl] to remove this flight when done.
      */
     fun saveAndClose(): Job {
         // All jobs running in [this]. Snapshotted here so next launch won't wait for itself to finish
         val runningTasks = job.children.toList()
         return launch {
             runningTasks.joinAll()
-            FlightRepository.getInstance().let { repo ->
+            FlightRepositoryImpl.getInstance().let { repo ->
                 repo.save(wf.prepareForSave(), addToUndo = true)
                 repo.changedFlight = originalFlight
 
@@ -997,7 +994,7 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
          * @return a [WorkingFlight] object of this flight and runs all updates on it.
          */
         suspend fun fromFlightID(id: Int) = withContext(Dispatchers.Main){
-            FlightRepository.getInstance().fetchFlightByID(id)?.let { WorkingFlight(it) }
+            FlightRepositoryImpl.getInstance().fetchFlightByID(id)?.let { WorkingFlight(it) }
         }
 
         /**
@@ -1005,7 +1002,7 @@ class WorkingFlight private constructor(flight: Flight): CoroutineScope {
          * If none found, creates an empty flight
          */
         suspend fun createNew(): WorkingFlight {
-            val repo = FlightRepository.getInstance()
+            val repo = FlightRepositoryImpl.getInstance()
             val fAsync = repo.getMostRecentFlightAsync()
             val f = fAsync.await()?.let { f ->
                 reverseFlight(f, repo.lowestFreeFlightID())

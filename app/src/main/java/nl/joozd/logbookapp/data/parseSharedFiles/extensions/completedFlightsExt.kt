@@ -19,17 +19,12 @@
 
 package nl.joozd.logbookapp.data.parseSharedFiles.extensions
 
-import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedCompleteFlights
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepositoryImpl
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepositoryImpl
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.repository.helpers.autoValues
-import nl.joozd.logbookapp.model.dataclasses.Flight
 
 /**
  * Process Completed Flights:
@@ -42,7 +37,7 @@ suspend fun CompletedFlights.postProcess(): ProcessedCompleteFlights {
     val aircraftDataCache = AircraftRepository.getInstance().getAircraftDataCache()
     val airportDataCache = AirportRepository.getInstance().getAirportDataCache()
 
-    val mrfAsync = FlightRepository.getInstance().getMostRecentFlightAsync()
+    val mrfAsync = FlightRepositoryImpl.getInstance().getMostRecentFlightAsync()
     val lastFlightWasIFR = (mrfAsync.await()?.ifrTime ?: 1) > 0
 
     val newFlights = flights.map { flight ->

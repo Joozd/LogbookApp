@@ -28,13 +28,13 @@ import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 
 class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
 
-    private val flightRepository = FlightRepository.getInstance()
+    private val flightRepository = FlightRepositoryImpl.getInstance()
     private var progress: Int = 0
         set(p) {
             field = p
@@ -45,7 +45,7 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
     override suspend fun doWork(): Result = try {
         Log.d("SyncFlightsWorker", "Started")
         withContext(Dispatchers.IO) {
-            val flightsRepository = FlightRepository.getInstance()
+            val flightsRepository = FlightRepositoryImpl.getInstance()
             if (makeNewLoginDataIfNeeded() != CloudFunctionResults.OK) return@withContext Result.retry()
 
             when(val result = Cloud.syncAllFlights(flightsRepository) { processDownloadProgress(it) }) {

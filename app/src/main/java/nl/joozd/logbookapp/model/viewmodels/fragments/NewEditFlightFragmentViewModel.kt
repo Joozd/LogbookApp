@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.model.viewmodels.fragments
 
 import android.text.Editable
 import androidx.lifecycle.*
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -35,7 +34,7 @@ import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
@@ -469,7 +468,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     )
 
     private fun makeSortedRegistrationsFlowAndCacheIt() =
-        combine(aircraftRepository.aircraftMapFlow(), FlightRepository.getInstance().allFlightsFlow) {
+        combine(aircraftRepository.aircraftMapFlow(), FlightRepositoryImpl.getInstance().allFlightsFlow) {
         regMap, allFlights ->
         makeSortedRegistrationsList(allFlights, regMap).also {
             cachedSortedRegistrationsList = it

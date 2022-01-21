@@ -17,18 +17,32 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs
+package nl.joozd.logbookapp.data.repository.flightRepository
 
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
-import java.time.LocalDate
+import kotlinx.coroutines.flow.Flow
 
 /**
- * Update flight when a date is picked
- * [wf] will take care of exactly that happens
+ * FlightRepositoryWithUndo should delegate all database operations to the Singleton
+ * [FlightRepositoryWithDirectAccess] instance.
  */
-class LocalDatePickerDialog: LocalDatePickerFragment() {
-    private val wf = FlightRepositoryImpl.getInstance().getWorkingFlight()
-    override fun onDateSelectedListener(date: LocalDate?) {
-        date?.let { wf.date = it }
-    }
+interface FlightRepositoryWithUndo: FlightRepository {
+    /**
+     * emit if undo is available or not
+     */
+    val undoAvailable: Flow<Boolean>
+
+    /**
+     * emit if redo is available or not
+     */
+    val redoAvailable: Flow<Boolean>
+
+    /**
+     * Undo last operation
+     */
+    fun undo()
+
+    /**
+     * Redo last operation
+     */
+    fun redo()
 }

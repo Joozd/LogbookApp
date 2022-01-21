@@ -30,7 +30,7 @@ import nl.joozd.joozdlogcommon.ForcedTypeData
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.data.utils.Encryption
 import nl.joozd.logbookapp.exceptions.NotAuthorizedException
@@ -300,7 +300,7 @@ object Cloud {
      * @return timestamp on success, -1 on critical fail (ie wrong credentials), null on server error (retry later)
      * Listsner will give an estimated completion percentage
      */
-    suspend fun syncAllFlights(flightRepository: FlightRepository, listener: (Int) -> Unit = {}): Long? = try {
+    suspend fun syncAllFlights(flightRepository: FlightRepositoryImpl, listener: (Int) -> Unit = {}): Long? = try {
         syncingFlights = true
         withContext(Dispatchers.IO) f@{
             listener(0)
@@ -374,7 +374,7 @@ object Cloud {
      * return Unit if login OK, null if not.
      * If login failed due to bad login data, set flag
      */
-    private fun checkLoginOK(flightRepository: FlightRepository, result: CloudFunctionResults): Unit?{
+    private fun checkLoginOK(flightRepository: FlightRepositoryImpl, result: CloudFunctionResults): Unit?{
         return when (result) {
             CloudFunctionResults.OK -> Unit
             CloudFunctionResults.UNKNOWN_USER_OR_PASS, CloudFunctionResults.NOT_LOGGED_IN -> {

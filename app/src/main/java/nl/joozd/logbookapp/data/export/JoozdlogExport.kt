@@ -25,11 +25,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import java.io.File
-import java.io.FileOutputStream
 import java.io.OutputStreamWriter
-import java.io.Writer
 import java.util.*
 
 object JoozdlogExport {
@@ -43,7 +41,7 @@ object JoozdlogExport {
         val file = File(cachePath, name)
         OutputStreamWriter(file.outputStream()).use{
             async(Dispatchers.IO) {
-                it.write(FlightsRepositoryExporter(FlightRepository.getInstance()).buildCsvString())
+                it.write(FlightsRepositoryExporter(FlightRepositoryImpl.getInstance()).buildCsvString())
             }.await()
         }
         FileProvider.getUriForFile(context, "nl.joozd.joozdlog.fileprovider", file)

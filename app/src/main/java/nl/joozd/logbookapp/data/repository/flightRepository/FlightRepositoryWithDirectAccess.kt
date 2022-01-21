@@ -17,18 +17,28 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs
+package nl.joozd.logbookapp.data.repository.flightRepository
 
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
-import java.time.LocalDate
+import nl.joozd.logbookapp.data.room.JoozdlogDatabase
+import nl.joozd.logbookapp.model.dataclasses.Flight
 
-/**
- * Update flight when a date is picked
- * [wf] will take care of exactly that happens
+/*
+ * FlightRepositoryWithDirectAccess should be the only [FlightRepository] with direct access
+ * to database, and should be initialized as a singleton.
  */
-class LocalDatePickerDialog: LocalDatePickerFragment() {
-    private val wf = FlightRepositoryImpl.getInstance().getWorkingFlight()
-    override fun onDateSelectedListener(date: LocalDate?) {
-        date?.let { wf.date = it }
+interface FlightRepositoryWithDirectAccess: FlightRepository {
+    /**
+     * Save a flight bypassing all updating that is usually done before saving
+     * (e.g. updating timestamp)
+     */
+    suspend fun saveDirectToDB(flight: Flight)
+
+    /**
+     * Delete a flight hard from database
+     */
+    suspend fun deleteHard(flight: Flight)
+
+    companion object{
+        val instance: FlightRepositoryWithDirectAccess by lazy { FlightRepositoryImpl(JoozdlogDatabase.getInstance()) }
     }
 }

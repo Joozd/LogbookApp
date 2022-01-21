@@ -17,18 +17,10 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs
+package nl.joozd.logbookapp.utils
 
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
-import java.time.LocalDate
+class UndoableCommand(private val action: () -> Unit, private val undoAction: () -> Unit){
+    operator fun invoke() = action()
 
-/**
- * Update flight when a date is picked
- * [wf] will take care of exactly that happens
- */
-class LocalDatePickerDialog: LocalDatePickerFragment() {
-    private val wf = FlightRepositoryImpl.getInstance().getWorkingFlight()
-    override fun onDateSelectedListener(date: LocalDate?) {
-        date?.let { wf.date = it }
-    }
+    fun undo() = undoAction()
 }

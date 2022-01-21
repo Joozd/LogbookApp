@@ -30,20 +30,23 @@ import nl.joozd.logbookapp.data.dataclasses.FlightData
 
 @Dao
 interface FlightDao {
+    @Query("SELECT * FROM FlightData WHERE flightID = :id LIMIT 1")
+    suspend fun getFlightById(id: Int): FlightData?
+
     @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
     suspend fun requestAllFlights(): List<FlightData>
 
     @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 ORDER BY timeOut DESC")
     suspend fun requestValidFlights(): List<FlightData>
 
+    @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 ORDER BY timeOut DESC")
+    fun validFlightsFlow(): Flow<List<FlightData>>
+
     @Query("SELECT * FROM FlightData WHERE timeStamp >= :timeStamp")
     suspend fun getFLightsWithTimestampAfter(timeStamp: Long): List<FlightData>
 
     @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
     fun requestLiveData(): LiveData<List<FlightData>>
-
-    @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
-    fun requestFlow(): Flow<List<FlightData>>
 
     @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 ORDER BY timeOut DESC")
     fun requestNonDeletedLiveData(): LiveData<List<FlightData>>
@@ -58,7 +61,10 @@ interface FlightDao {
     suspend fun getMostRecentCompleted(): FlightData?
 
     @Insert (onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertFlights(vararg flightData: FlightData)
+    suspend fun save(vararg flightData: FlightData)
+
+    @Insert (onConflict = OnConflictStrategy.REPLACE)
+    suspend fun save(flightData: Collection<FlightData>)
 
     @Delete
     suspend fun delete(flightData: FlightData)

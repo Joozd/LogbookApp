@@ -40,7 +40,7 @@ import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.*
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
@@ -65,7 +65,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Holds result of chrono import, null if no chrono was imported before this
      */
-    var chronoImportResult: FlightRepository.SaveCompleteFlightsResult? = null
+    var chronoImportResult: FlightRepositoryImpl.SaveCompleteFlightsResult? = null
         private set
 
     private val _statusLiveData = MutableLiveData(STARTING_UP)

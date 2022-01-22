@@ -178,6 +178,7 @@ data class Flight(
     fun durationString() = FlightDataPresentationFunctions.minutesToHoursAndMinutesString(duration())
 
     companion object{
-        fun createEmpty() = Flight(-1)
+        fun createEmpty() = Flight(FLIGHT_ID_NOT_INITIALIZED)
+        const val FLIGHT_ID_NOT_INITIALIZED = -1
     }
 }

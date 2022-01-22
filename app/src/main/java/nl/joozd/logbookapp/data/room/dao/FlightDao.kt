@@ -45,6 +45,9 @@ interface FlightDao {
     @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 ORDER BY timeOut DESC")
     fun validFlightsFlow(): Flow<List<FlightData>>
 
+    @Query("SELECT MAX(flightID) FROM FlightData")
+    fun highestUsedID(): Int
+
     @Query("SELECT * FROM FlightData WHERE timeStamp >= :timeStamp")
     suspend fun getFLightsWithTimestampAfter(timeStamp: Long): List<FlightData>
 
@@ -64,13 +67,7 @@ interface FlightDao {
     suspend fun getMostRecentCompleted(): FlightData?
 
     @Insert (onConflict = OnConflictStrategy.REPLACE)
-    suspend fun save(vararg flightData: FlightData)
-
-    @Insert (onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(flightData: Collection<FlightData>)
-
-    @Delete
-    suspend fun delete(flightData: FlightData)
 
     @Delete
     suspend fun delete(flightData: Collection<FlightData>)

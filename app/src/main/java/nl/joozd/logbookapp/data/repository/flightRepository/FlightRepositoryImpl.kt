@@ -35,6 +35,7 @@ class FlightRepositoryImpl(
     database: JoozdlogDatabase
 ) : FlightRepositoryWithDirectAccess, CoroutineScope by MainScope() {
     private val flightDao = database.flightDao()
+    private val idGenerator = IDGenerator()
 
     /**
      * Get a single flight by it's ID
@@ -71,40 +72,36 @@ class FlightRepositoryImpl(
     /**
      * Save a flight to DB.
      */
-    override fun save(flight: Flight) {
-        launch {
-            saveWithTimestamp(flight)
-        }
+    override suspend fun save(flight: Flight) {
+        save(listOf(flight))
     }
 
     /**
      * Save a collection of Flights to DB.
      */
-    //If size > max size, it will call itself with smaller chunks
-    override fun save(flights: Collection<Flight>) {
-        launch {
-            saveWithTimestamp(flights)
-        }
+    override suspend fun save(flights: Collection<Flight>) {
+        saveWithIDAndTimestamp(flights)
     }
 
     /**
      * Save a flight bypassing all updating that is usually done before saving
      * (e.g. updating timestamp)
      */
-    override suspend fun saveDirectToDB(flight: Flight) =
-        withContext(DispatcherProvider.io()){
-            flightDao.save(flight.toData())
-        }
+    override suspend fun saveDirectToDB(flight: Flight) {
+        saveDirectToDB(listOf(flight))
+    }
+
 
     /**
      * Save a Collection<Flight> bypassing all updating that is usually done before saving
      * (e.g. updating timestamp)
      */
-    // If too big for Room, split it in chunks and try again.
     override suspend fun saveDirectToDB(flights: Collection<Flight>) {
-        if (flights.size > MAX_SQL_BATCH_SIZE) {
+        //If size too big, it will chunk and retry.
+        if (flights.size > MAX_SQL_BATCH_SIZE)
             flights.chunked(MAX_SQL_BATCH_SIZE).forEach { saveDirectToDB(it) }
-        } else withContext(DispatcherProvider.io()) {
+
+        else withContext(DispatcherProvider.io()) {
             flightDao.save(flights.map { it.toData() })
         }
     }
@@ -112,84 +109,87 @@ class FlightRepositoryImpl(
     /**
      * Delete a flight.
      */
-    override fun delete(flight: Flight) {
-        launch {
-                if (flight.unknownToServer)
-                    withContext(DispatcherProvider.io()) { deleteHard(flight) }
-                else
-                    withContext(DispatcherProvider.io()) { deleteSoft(flight) }
-            }
+    override suspend fun delete(flight: Flight) {
+        delete(listOf(flight))
     }
 
-    override fun delete(flights: Collection<Flight>) {
+    /**
+     * Delete a collection of flights.
+     */
+    override suspend fun delete(flights: Collection<Flight>) {
         val flightsToDeleteHard = flights.filter { it.unknownToServer }
         val flightsToDeleteSoft = flights.filter { !it.unknownToServer }
-        launch {
-            deleteHard(flightsToDeleteHard)
-            deleteSoft(flightsToDeleteSoft)
-        }
-
+        deleteHard(flightsToDeleteHard)
+        deleteSoft(flightsToDeleteSoft)
     }
+
+    /**
+     * Generate a flight ID that can safely be used to save a new flight to DB at a later point.
+     */
+    override suspend fun generateAndReserveNewFlightID(): Int =
+        idGenerator.generateID()
 
     /**
      * Delete a flight hard from database
      */
-    override suspend fun deleteHard(flight: Flight) = withContext(DispatcherProvider.io()) {
-        flightDao.delete(flight.toData())
+    override suspend fun deleteHard(flight: Flight) {
+        deleteHard(listOf(flight))
     }
 
     /**
      * Delete a collection of Flights hard from database
      */
-    //If size too big, it will chunk and retry.
     override suspend fun deleteHard(flights: Collection<Flight>) {
+        //If size too big, it will chunk and retry.
         if (flights.size > MAX_SQL_BATCH_SIZE)
             flights.chunked(MAX_SQL_BATCH_SIZE).forEach { deleteHard(it)}
+
         else withContext(DispatcherProvider.io()) {
             flightDao.delete(flights.map { it.toData() })
         }
-
-    }
-
-    //deleteSoft will only set DELETEFLAG
-    private suspend fun deleteSoft(flight: Flight) = withContext(DispatcherProvider.io()){
-        val softDeletedFlight = flight.copy(DELETEFLAG = true)
-        saveWithTimestamp(softDeletedFlight)
     }
 
     private suspend fun deleteSoft(flights: Collection<Flight>) = withContext(DispatcherProvider.io()){
         val softDeletedFlights = flights.map {it.copy(DELETEFLAG = true) }
-        saveWithTimestamp(softDeletedFlights)
+        saveWithIDAndTimestamp(softDeletedFlights)
     }
 
     private fun List<FlightData>.toFlights() =
         this.map { it.toFlight() }
 
-    private suspend fun saveWithTimestamp(flight: Flight){
-        val timestampedFlight = flight.copy(timeStamp = TimestampMaker().nowForSycPurposes)
-        saveDirectToDB(timestampedFlight)
-    }
-
-    private suspend fun saveWithTimestamp(flights: Collection<Flight>){
+    /*
+     * - Adds timestamp to flight
+     * - if flightID is set to Flight.NOT_INITIALIZED it will generate a new ID and set it.
+     */
+    private suspend fun saveWithIDAndTimestamp(flights: Collection<Flight>){
         val now = TimestampMaker().nowForSycPurposes
         val timestampedFlights = flights.map {
-            it.copy(timeStamp = now)
+            val id = makeNewIDIfCurrentNotInitialized(it)
+            it.copy(flightID = id, timeStamp = now)
         }
         saveDirectToDB(timestampedFlights)
     }
 
-
-
-
-
-
-
-
+    private suspend fun makeNewIDIfCurrentNotInitialized(flight: Flight): Int =
+        if (flight.flightID == Flight.FLIGHT_ID_NOT_INITIALIZED)
+            idGenerator.generateID()
+        else flight.flightID
 
     private suspend fun getValidFlightsFromDao() =
         flightDao.requestValidFlights().toFlights()
 
+    /**
+     * Generate unique IDs.
+     */
+    private inner class IDGenerator{
+        private var mostRecentHighestID: Int = Flight.FLIGHT_ID_NOT_INITIALIZED
 
+        suspend fun generateID(): Int{
+            if (mostRecentHighestID == Flight.FLIGHT_ID_NOT_INITIALIZED)
+                mostRecentHighestID = flightDao.highestId() ?: 0
+            return ++mostRecentHighestID
+        }
+    }
 }
 
     /*

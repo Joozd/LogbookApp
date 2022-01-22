@@ -56,22 +56,27 @@ interface FlightRepository {
     /**
      * Save a flight to DB.
      */
-    fun save(flight: Flight)
+    suspend fun save(flight: Flight)
 
     /**
      * Save a collection of Flights to DB.
      */
-    fun save (flights: Collection<Flight>)
+    suspend fun save (flights: Collection<Flight>)
 
     /**
      * Delete a flight.
      */
-    fun delete(flight: Flight)
+    suspend fun delete(flight: Flight)
 
     /**
      * Delete a collection of flights.
      */
-    fun delete(flights: Collection<Flight>)
+    suspend fun delete(flights: Collection<Flight>)
+
+    /**
+     * Generate a flight ID that can safely be used to save a new flight to DB at a later point.
+     */
+    suspend fun generateAndReserveNewFlightID(): Int
 
 
     companion object{

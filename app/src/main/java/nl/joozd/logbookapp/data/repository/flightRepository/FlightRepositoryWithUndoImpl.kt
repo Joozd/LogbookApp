@@ -82,7 +82,6 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
     override suspend fun getFlightsByID(ids: Collection<Int>): List<Flight> =
         repositoryWithDirectAccess.getFlightsByID(ids)
 
-
     /**
      * Get all flights (including deleted ones)
      * For only usable flights, use [FlightDataCache.flights]
@@ -105,39 +104,33 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
     /**
      * Save a flight to DB.
      */
-    override fun save(flight: Flight) {
-        launch {
-            saveWithUndo(listOf(flight))
-            _redoAvailable.value = false // new save means any previous redo can no longer be done
-        }
+    override suspend fun save(flight: Flight) {
+        save(listOf(flight))
     }
 
     /**
      * Save a collection of Flights to DB.
      */
-    override fun save(flights: Collection<Flight>) {
-        launch {
-            saveWithUndo(flights)
-            _redoAvailable.value = false // new save means any previous redo can no longer be done
-        }
+    override suspend fun save(flights: Collection<Flight>) {
+        saveWithUndo(flights)
+        _redoAvailable.value = false // new save means any previous redo can no longer be done
     }
 
     /**
      * Delete a flight.
      */
-    override fun delete(flight: Flight) {
-        launch {
-            deleteWithUndo(listOf(flight))
-            _redoAvailable.value = false // new delete means any previous redo can no longer be done
-        }
+    override suspend fun delete(flight: Flight) {
+        delete(listOf(flight))
     }
 
-    override fun delete(flights: Collection<Flight>) {
-        launch {
-            deleteWithUndo(flights)
-            _redoAvailable.value = false // new delete means any previous redo can no longer be done
-        }
+    override suspend fun delete(flights: Collection<Flight>) {
+        deleteWithUndo(flights)
+        _redoAvailable.value = false // new delete means any previous redo can no longer be done
     }
+
+    override suspend fun generateAndReserveNewFlightID(): Int =
+        repositoryWithDirectAccess.generateAndReserveNewFlightID()
+
 
     private suspend fun saveWithUndo(flightsToSave: Collection<Flight>){
         val saveAction = generateSaveFlightsAction(flightsToSave)
@@ -185,7 +178,7 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
     ): () -> Unit = {
         launch {
             repositoryWithDirectAccess.deleteHard(newFlights)
-            repositoryWithDirectAccess.saveDirectToDB(overwrittenFlights) // bypasses new timestamp generation
+            repositoryWithDirectAccess.saveDirectToDB(overwrittenFlights) // bypasses new timestamp / ID generation
         }
     }
 

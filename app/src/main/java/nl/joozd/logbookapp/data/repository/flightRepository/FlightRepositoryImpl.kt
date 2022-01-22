@@ -52,7 +52,7 @@ class FlightRepositoryImpl(
      * For only usable flights, use [FlightDataCache.flights]
      */
     override suspend fun getAllFlightsInDB(): List<Flight> =
-        flightDao.requestAllFlights().map { it.toFlight() }
+        flightDao.getAllFlights().map { it.toFlight() }
 
 
     /**
@@ -176,7 +176,7 @@ class FlightRepositoryImpl(
         else flight.flightID
 
     private suspend fun getValidFlightsFromDao() =
-        flightDao.requestValidFlights().toFlights()
+        flightDao.getValidFlights().toFlights()
 
     /**
      * Generate unique IDs.
@@ -186,7 +186,7 @@ class FlightRepositoryImpl(
 
         suspend fun generateID(): Int{
             if (mostRecentHighestID == Flight.FLIGHT_ID_NOT_INITIALIZED)
-                mostRecentHighestID = flightDao.highestId() ?: 0
+                mostRecentHighestID = flightDao.highestUsedID() ?: 0
             return ++mostRecentHighestID
         }
     }

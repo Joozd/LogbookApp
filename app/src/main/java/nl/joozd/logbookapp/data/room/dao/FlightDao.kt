@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.data.room.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.dataclasses.FlightData
@@ -30,6 +29,9 @@ import nl.joozd.logbookapp.data.dataclasses.FlightData
 
 @Dao
 interface FlightDao {
+    @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 ORDER BY timeOut DESC")
+    fun validFlightsFlow(): Flow<List<FlightData>>
+
     @Query("SELECT * FROM FlightData WHERE flightID = :id LIMIT 1")
     suspend fun getFlightById(id: Int): FlightData?
 
@@ -37,31 +39,13 @@ interface FlightDao {
     suspend fun getFlightsByID(ids: Collection<Int>): List<FlightData>
 
     @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
-    suspend fun requestAllFlights(): List<FlightData>
+    suspend fun getAllFlights(): List<FlightData>
 
     @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 ORDER BY timeOut DESC")
-    suspend fun requestValidFlights(): List<FlightData>
-
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 ORDER BY timeOut DESC")
-    fun validFlightsFlow(): Flow<List<FlightData>>
+    suspend fun getValidFlights(): List<FlightData>
 
     @Query("SELECT MAX(flightID) FROM FlightData")
-    fun highestUsedID(): Int
-
-    @Query("SELECT * FROM FlightData WHERE timeStamp >= :timeStamp")
-    suspend fun getFLightsWithTimestampAfter(timeStamp: Long): List<FlightData>
-
-    @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
-    fun requestLiveData(): LiveData<List<FlightData>>
-
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 ORDER BY timeOut DESC")
-    fun requestNonDeletedLiveData(): LiveData<List<FlightData>>
-
-    @Query("SELECT MAX(flightID) from FlightData")
-    suspend fun highestId(): Int?
-
-    @Query("SELECT * FROM FlightData WHERE flightID = :id LIMIT 1")
-    suspend fun fetchFlightByID(id: Int): FlightData?
+    suspend fun highestUsedID(): Int?
 
     @Query("SELECT * FROM FlightData WHERE isPlanned = 0 AND DELETEFLAG = 0 ORDER BY timeIn LIMIT 1")
     suspend fun getMostRecentCompleted(): FlightData?
@@ -71,10 +55,4 @@ interface FlightDao {
 
     @Delete
     suspend fun delete(flightData: Collection<FlightData>)
-
-    @Query("DELETE FROM FlightData where flightID in (:idsToDelete)")
-    suspend fun deleteMultipleByID(idsToDelete: List<Int>)
-
-    @Query ("DELETE FROM FlightData")
-    suspend fun clearDb()
 }

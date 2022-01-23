@@ -30,5 +30,7 @@ interface FlightDataCache {
     companion object{
         fun make(flights: List<Flight>): FlightDataCache =
             FlightDataCacheImpl(flights)
+
+        fun empty() = make(emptyList())
     }
 }

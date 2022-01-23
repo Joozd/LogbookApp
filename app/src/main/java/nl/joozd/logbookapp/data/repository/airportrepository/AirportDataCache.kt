@@ -39,5 +39,6 @@ interface AirportDataCache {
 
     companion object{
         fun make(airportList: List<Airport>) = AirportDataCacheImpl(airportList)
+        fun empty() = make(emptyList())
     }
 }

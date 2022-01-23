@@ -23,7 +23,7 @@ import nl.joozd.serializing.unwrap
 import nl.joozd.serializing.wrap
 import nl.joozd.serializing.JoozdSerializable
 
-data class AircraftType(val name: String, val shortName: String, val multiPilot:Boolean, val multiEngine:Boolean):
+data class AircraftType(val name: String = "", val shortName: String = "", val multiPilot:Boolean = false, val multiEngine:Boolean = false):
     JoozdSerializable {
     object VERSION {
         const val version = 1

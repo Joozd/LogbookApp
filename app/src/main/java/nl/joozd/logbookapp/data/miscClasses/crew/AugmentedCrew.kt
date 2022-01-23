@@ -23,7 +23,6 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.getBit
 import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.extensions.setBit
-import nl.joozd.logbookapp.extensions.toInt
 import java.time.Duration
 
 /************************************************************************************
@@ -33,10 +32,10 @@ import java.time.Duration
  * bit 5: in seat on landing                                                        *
  * bit 6-31: amount of time reserved for takeoff/landing (standard in settings)     *
  ************************************************************************************/
-data class Crew(val size: Int = 2,
-           val takeoff: Boolean = true,
-           val landing: Boolean = true,
-           val times: Int = 0)
+data class AugmentedCrew(val size: Int = 2,
+                         val takeoff: Boolean = true,
+                         val landing: Boolean = true,
+                         val times: Int = 0)
 {
     fun toInt():Int {
         var value = if (size > 15) 15 else size
@@ -46,24 +45,24 @@ data class Crew(val size: Int = 2,
     }
 
     /**
-     * Returns a [Crew] object with [size] set to [crewSize]
+     * Returns a [AugmentedCrew] object with [size] set to [crewSize]
      */
-    fun withCrewSize(crewSize: Int): Crew = this.copy (size = crewSize)
+    fun withCrewSize(crewSize: Int): AugmentedCrew = this.copy (size = crewSize)
 
     /**
-     * Returns a [Crew] object with [landing] set to [didLanding]
+     * Returns a [AugmentedCrew] object with [landing] set to [didLanding]
      */
-    fun withLanding(didLanding: Boolean): Crew = this.copy (landing = didLanding)
+    fun withLanding(didLanding: Boolean): AugmentedCrew = this.copy (landing = didLanding)
 
     /**
-     * Returns a [Crew] object with [takeoff] set to [didTakeoff]
+     * Returns a [AugmentedCrew] object with [takeoff] set to [didTakeoff]
      */
-    fun withTakeoff(didTakeoff: Boolean): Crew = this.copy (takeoff = didTakeoff)
+    fun withTakeoff(didTakeoff: Boolean): AugmentedCrew = this.copy (takeoff = didTakeoff)
 
     /**
-     * Returns a [Crew] object with [times] set to [newTimes]
+     * Returns a [AugmentedCrew] object with [times] set to [newTimes]
      */
-    fun withTimes(newTimes: Int): Crew = this.copy (times = newTimes)
+    fun withTimes(newTimes: Int): AugmentedCrew = this.copy (times = newTimes)
 
 
     /**
@@ -80,14 +79,14 @@ data class Crew(val size: Int = 2,
 
     fun getLogTime(totalTime: Long, pic: Boolean): Long = getLogTime(totalTime.toInt(), pic).toLong()
 
-    fun getLogTime(totalTime: Duration, pic: Boolean): Duration{
-        if (pic || size <=2) return totalTime
-        return Duration.ofMinutes(getLogTime(totalTime.toMinutes(), pic))
+    fun getLogTime(totalTime: Duration, pic: Boolean): Int{
+        if (pic || size <=2) return totalTime.toMinutes().toInt()
+        return getLogTime(totalTime.toMinutes(), pic).toInt()
     }
 
-    operator fun inc(): Crew = this.copy (size = (size + 1).putInRange(MIN_CREW_SIZE..MAX_CREW_SIZE))
+    operator fun inc(): AugmentedCrew = this.copy (size = (size + 1).putInRange(MIN_CREW_SIZE..MAX_CREW_SIZE))
 
-    operator fun dec(): Crew = this.copy (size = (size - 1).putInRange(MIN_CREW_SIZE..MAX_CREW_SIZE))
+    operator fun dec(): AugmentedCrew = this.copy (size = (size - 1).putInRange(MIN_CREW_SIZE..MAX_CREW_SIZE))
 
     private fun Int.putInRange(range: IntRange): Int {
         require (!range.isEmpty()) { "cannot put an int in a range without elements"}
@@ -100,7 +99,7 @@ data class Crew(val size: Int = 2,
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other !is Crew) return false
+        if (other !is AugmentedCrew) return false
         return this.toInt() == other.toInt()
     }
 
@@ -112,16 +111,16 @@ data class Crew(val size: Int = 2,
         const val MIN_CREW_SIZE = 1
         const val MAX_CREW_SIZE = 15
 
-        val COCO: Crew
-            get() = Crew(3, takeoff = false, landing = false, times = Preferences.standardTakeoffLandingTimes)
+        val COCO: AugmentedCrew
+            get() = AugmentedCrew(3, takeoff = false, landing = false, times = Preferences.standardTakeoffLandingTimes)
 
-        fun of(value: Int) = if (value == 0) Crew() else Crew(
+        fun of(value: Int) = if (value == 0) AugmentedCrew() else AugmentedCrew(
             size = 15.and(value),
             takeoff = value.getBit(4),
             landing = value.getBit(5),
             times = value.ushr(6)
         )
-        fun of(crewSize: Int, didTakeoff: Boolean, didLanding: Boolean, nonStandardTimes: Int) = Crew(crewSize,didTakeoff,didLanding,nonStandardTimes)
+        fun of(crewSize: Int, didTakeoff: Boolean, didLanding: Boolean, nonStandardTimes: Int) = AugmentedCrew(crewSize,didTakeoff,didLanding,nonStandardTimes)
 
     }
 }

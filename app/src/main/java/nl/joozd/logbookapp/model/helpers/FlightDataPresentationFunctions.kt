@@ -45,7 +45,9 @@ object FlightDataPresentationFunctions {
         return time.format(timeFormatter)
     }
 
-    fun minutesToHoursAndMinutesString(minutes: Int): String = "${minutes/60}:${(minutes%60).toString().padStart(2,'0')}"
+    // 3 minutes will become "0:03", 6003 "100:03"
+    fun minutesToHoursAndMinutesString(minutes: Int): String =
+        "${minutes/60}:${(minutes%60).toString().padStart(2,'0')}"
 
     fun minutesToHoursAndMinutesString(minutes: Long) = minutesToHoursAndMinutesString(minutes.toInt())
 

@@ -37,7 +37,7 @@ import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
+import nl.joozd.logbookapp.model.workingFlight.WorkingFlightOld
 import java.time.Instant
 import java.time.LocalTime
 
@@ -188,7 +188,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         else -> DUAL_INSTRUCTOR_FLAG_NONE
     }
 
-    private fun WorkingFlight.isPicOrPicus(): Boolean =
+    private fun WorkingFlightOld.isPicOrPicus(): Boolean =
         isPIC || isPICUS
 
 

@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.ui.adapters.flightsadapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
 
@@ -30,13 +31,57 @@ import nl.joozd.logbookapp.databinding.ItemFlightCardBinding
 import nl.joozd.logbookapp.databinding.ItemSimBinding
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
+import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.ui.utils.customs.Swiper
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 /**
  * Adapter for RecyclerView for displaying Flights in JoozdLog
  * Needs
  * [itemClick]: Action to be performed onClick on an item
  */
+
+class FlightsAdapter(
+    var list: List<Flight> = emptyList()
+): RecyclerViewFastScroller.OnPopupTextUpdate, ListAdapter<Flight, RecyclerView.ViewHolder>(
+    FlightDiffCallback()) {
+    /**
+     * Text displayed when fastscrolling using RecyclerViewFastScroller
+     */
+    override fun onChange(position: Int): CharSequence =
+        list[position].dateString()
+
+
+    override fun getItemViewType(position: Int): Int = if(list[position].isSim) VIEW_TYPE_SIM else VIEW_TYPE_FLIGHT
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType){
+            VIEW_TYPE_SIM -> SimViewHolder(inflateSimListItemView(parent))
+            VIEW_TYPE_FLIGHT -> FlightViewHolder(inflateFlightListItemView(parent))
+            else -> error("SelectableStringAdapter error 0001: Type not SIM or FLIGHT")
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        (holder as ListItemViewHolder).bindItem(list[position], itemClick, onDelete)
+    }
+
+
+    private fun inflateFlightListItemView(parent: ViewGroup) =
+        LayoutInflater.from(parent.ctx).inflate(R.layout.item_flight_card, parent, false)
+
+    private fun inflateSimListItemView(parent: ViewGroup) =
+        LayoutInflater.from(parent.ctx).inflate(R.layout.item_sim, parent, false)
+
+    companion object{
+        const val VIEW_TYPE_FLIGHT = 1
+        const val VIEW_TYPE_SIM = 2
+    }
+
+
+}
+/*
 class FlightsAdapter(
     var list: List<DisplayFlight> = emptyList()
 ): RecyclerViewFastScroller.OnPopupTextUpdate, RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -44,83 +89,9 @@ class FlightsAdapter(
     var onDelete: (Int) -> Unit = {}
     var itemClick: (Int) -> Unit = {}
 
-    class SimViewHolder(containerView: View) : RecyclerView.ViewHolder(containerView) {
-        val binding = ItemSimBinding.bind(containerView)
-        fun bindItem(flight: DisplayFlight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
-            with(binding) {
-                with(flight) {
-                    Swiper(binding.simDeleteLayer).apply {
-                        simDeleteLayer.setOnClickListener {
-                            if (isOpen) {
-                                close()
-                                onDelete(flightID)
-                            }
-                        }
-                    }
-                    simLayout.setColorAccordingstatus(planned)
-                    simDateDayText.text = dateDay
-                    simDateMonthYearText.text = monthAndYear
-                    simNamesText.text = names
-                    simAircraftTypeText.text = type
-                    simRemarksText.text = remarks
-                    simTotalTimeText.text = simTime
-                    simTakeoffLandingsText.text = takeoffsAndLandings
-
-                    simLayout.translationZ = 10f
-
-                    simLayout.setOnClickListener { onClick(flightID) }
-                }
-            }
-        }
-    }
-
-    class FlightViewHolder(containerView: View) : RecyclerView.ViewHolder(containerView) {
-        val binding = ItemFlightCardBinding.bind(containerView)
-        fun bindItem(flight: DisplayFlight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
-            with (binding) {
-                with(flight) {
-                    Swiper(binding.deleteLayer).apply {
-                        deleteLayer.setOnClickListener {
-                            if (isOpen) {
-                                close()
-                                onDelete(flightID)
-                            }
-                        }
-                    }
-                    flightLayout.setColorAccordingstatus(planned, this.checkIfIncomplete())
-                    dateDayText.text = dateDay
-                    dateMonthYearText.text = monthAndYear
-                    namesText.text = names
-                    aircraftText.text = aircraftTextMerged
-                    remarksText.text = remarks
-                    flightNumberText.text = flightNumber
-                    origText.text = orig
-                    destText.text = dest
-                    timeOutText.text = timeOut
-                    totalTimeText.text = totalTime
-                    timeInText.text = timeIn
-                    takeoffLandingText.text = takeoffsAndLandings
-
-                    isAugmentedText.shouldBeVisible(augmented)
-                    isIFRText.shouldBeVisible(ifr)
-                    isDualText.shouldBeVisible(dual)
-                    isInstructorText.shouldBeVisible(instructor)
-                    isPicusText.shouldBeVisible(picus)
-                    isPicText.shouldBeVisible(pic)
-                    isPFText.shouldBeVisible(pf)
-                    remarksText.shouldBeVisible(remarks.isNotEmpty())
-                    flightLayout.translationZ = 10f
-                    flightLayout.setOnClickListener { onClick(flightID) }
-                }
-            }
-        }
-    }
-
     override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
         super.onViewAttachedToWindow(holder)
     }
-
-    override fun getItemViewType(position: Int): Int = if(list[position].sim) SIM else FLIGHT
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder.itemViewType){
@@ -156,3 +127,5 @@ class FlightsAdapter(
         return with (list[position]) { monthAndYear}
     }
 }
+
+ */

@@ -58,6 +58,24 @@ import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 //TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {
     private val viewModel: MainActivityViewModel by viewModels()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val binding = (ActivityMainNewBinding.inflate(layoutInflater)).apply {
+            setSupportActionBar(mainToolbar)
+        }
+        setContentView(binding.root)
+    }
+
+    private fun ActivityMainNewBinding.showBackupReminderLayoutIf(it: Boolean) {
+        backupReminderLayout.visibility = if (it) View.VISIBLE else View.GONE
+    }
+
+    private fun makeFlightsListAdapter() =
+        FlightsAdapter().apply {
+            onDelete = { id -> viewModel.deleteFlight(id) }
+            itemClick = { id -> viewModel.showFlight(id) }
+        }
+    /*
 
     private var airportSyncProgressBar: JoozdlogProgressBar? = null
     private var flightsSyncProgressBar: JoozdlogProgressBar? = null
@@ -588,4 +606,6 @@ class MainActivity : JoozdlogActivity() {
         const val LOGIN_DIALOG_TAG = "LOGIN_DIALOG"
         private const val CSV_MIME_TYPE = "text/csv"
     }
+
+     */
 }

@@ -39,6 +39,8 @@ import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions
 import java.time.*
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 data class Flight(
     val flightID: Int,
@@ -161,6 +163,16 @@ data class Flight(
     fun tIn(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeIn), ZoneId.of("UTC"))
     fun timeOutString(): String = tOut().format(FlightDataPresentationFunctions.flightTimeFormatter)
     fun timeInString(): String = tIn().format(FlightDataPresentationFunctions.flightTimeFormatter)
+    fun names(): List<String> =
+        (listOf(name) +  name2.split(";"))
+            .filter{ it.isNotBlank() }
+            .map { it.trim() }
+    fun dateString(): String {
+        val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+        return date().format(dateFormatter)
+    }
+    fun date(): LocalDate =
+        tOut().toLocalDate()
 
     //duration in minutes
     val calculatedDuration: Int

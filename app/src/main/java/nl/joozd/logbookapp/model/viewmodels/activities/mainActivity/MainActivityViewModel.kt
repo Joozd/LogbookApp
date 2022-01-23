@@ -49,7 +49,7 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
 import nl.joozd.logbookapp.model.helpers.FlightConflictChecker
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
+import nl.joozd.logbookapp.model.workingFlight.WorkingFlightOld
 import nl.joozd.logbookapp.utils.CoroutineTimerTask
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.time.*
@@ -245,7 +245,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     val flightSyncProgress: LiveData<Int>
         get() = flightRepository.syncProgress
 
-    val workingFlight: LiveData<WorkingFlight?>
+    val workingFlight: LiveData<WorkingFlightOld?>
         get() = flightRepository.workingFlight
 
     val showBackupNotice: LiveData<Boolean>
@@ -368,7 +368,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
     private val openingFlightMutex = Mutex()
     fun showFlight(flightId: Int) = viewModelScope.launch {
         openingFlightMutex.withLock {
-            WorkingFlight.fromFlightID(flightId)?.let {
+            WorkingFlightOld.fromFlightID(flightId)?.let {
                 flightRepository.setWorkingFlight(it, autoSetIfrAndPic = it.isPlanned)
                 // feedback(MainActivityEvents.SHOW_FLIGHT) this goes through livedata
             } ?: feedback(MainActivityEvents.FLIGHT_NOT_FOUND)
@@ -377,7 +377,7 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
 
     fun addFlight() {
         viewModelScope.launch(Dispatchers.IO) {
-            flightRepository.setWorkingFlight(WorkingFlight.createNew(), autoSetIfrAndPic = true)
+            flightRepository.setWorkingFlight(WorkingFlightOld.createNew(), autoSetIfrAndPic = true)
         }
     }
 

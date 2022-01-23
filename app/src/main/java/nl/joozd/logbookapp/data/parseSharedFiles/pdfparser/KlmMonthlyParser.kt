@@ -22,7 +22,7 @@ package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
-import nl.joozd.logbookapp.data.miscClasses.crew.Crew
+import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
 import nl.joozd.logbookapp.extensions.toInstantAtStartOfDay
 import nl.joozd.logbookapp.extensions.toLocalDate
@@ -94,7 +94,7 @@ class KlmMonthlyParser(private val inputStream: InputStream): CompletedFlights {
             if (it > tOut) it else it + ONE_DAY
         }
         val duration = Duration.between(Instant.ofEpochSecond(tOut), Instant.ofEpochSecond(tIn)).toMinutes().toInt()
-        val crew = if (function == COCO) Crew.COCO else Crew()
+        val crew = if (function == COCO) AugmentedCrew.COCO else AugmentedCrew()
         val isPIC = function == CAPTAIN
         val logTime = crew.getLogTime(duration, isPIC)
 

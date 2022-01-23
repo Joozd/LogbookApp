@@ -19,8 +19,7 @@
 
 package nl.joozd.logbookapp.model.dataclasses
 
-import android.util.Log
-import nl.joozd.logbookapp.data.miscClasses.crew.Crew
+import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfEmpty
@@ -90,7 +89,7 @@ data class DisplayFlight(
                 takeoffsAndLandings = "${f.takeoffs()}/${f.landings()}",
                 flightNumber = f.flightNumber,
                 remarks = f.remarks,
-                augmented = Crew.of(f.augmentedCrew).size > 2,
+                augmented = AugmentedCrew.of(f.augmentedCrew).size > 2,
                 ifr = f.ifrTime > 0,
                 dual = f.isDual,
                 picus = f.isPICUS,

@@ -34,7 +34,7 @@ package nl.joozd.logbookapp.model.dataclasses
  * -x rebuild user data, when in production make sure backwards compatibility is here!
  */
 
-import nl.joozd.logbookapp.data.miscClasses.crew.Crew
+import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions
@@ -64,7 +64,7 @@ data class Flight(
     val remarks: String = "",
     val isPIC: Boolean = false,
     val isPICUS: Boolean = false,
-    val isCoPilot: Boolean = false,
+    val isCoPilot: Boolean = false,                         // if true, entire flight time will also be logged as CoPilot
     val isDual: Boolean = false,
     val isInstructor: Boolean = false,
     val isSim: Boolean = false,
@@ -164,7 +164,7 @@ data class Flight(
 
     //duration in minutes
     val calculatedDuration: Int
-        get() = Crew.of(augmentedCrew).getLogTime(Duration.between(this.tOut(), this.tIn()).toMinutes().toInt(), this.isPIC)
+        get() = AugmentedCrew.of(augmentedCrew).getLogTime(Duration.between(this.tOut(), this.tIn()).toMinutes().toInt(), this.isPIC)
 
     /**
      * Get the logged duration of a flight in minutes (corrected for augmented crew and [correctedTotalTime])

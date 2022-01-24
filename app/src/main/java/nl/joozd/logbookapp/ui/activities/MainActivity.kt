@@ -20,50 +20,104 @@
 
 package nl.joozd.logbookapp.ui.activities
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import androidx.activity.viewModels
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
-import nl.joozd.logbookapp.extensions.*
-import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
-import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityFeedbackExtraData
-import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModel
+import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModelNew
 import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivity
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesActivity
 import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.dialogs.AboutDialog
-import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.dialogs.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
-import nl.joozd.logbookapp.ui.utils.customs.JoozdlogProgressBar
-import nl.joozd.logbookapp.ui.utils.longToast
-import nl.joozd.logbookapp.ui.utils.toast
-import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {
-    private val viewModel: MainActivityViewModel by viewModels()
+    private val viewModel: MainActivityViewModelNew by viewModels()
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean{
+        when (item.itemId) {
+            R.id.menu_settings -> startSettingsActivity()
+            R.id.menu_add_flight -> viewModel.menuSelectedAddFlight()
+            R.id.menu_undo -> viewModel.undo()
+            R.id.menu_redo -> viewModel.redo()
+            R.id.menu_total_times -> startTotalTimesActivity()
+            R.id.menu_balance_forward -> startBalanceForwardActivity()
+            R.id.app_bar_search -> viewModel.menuSelectedSearch()
+            R.id.menu_feedback -> startFeedbackActivity()
+            R.id.menu_about -> showAboutDialog()
+            R.id.menu_export_pdf -> startMakePdfActivity()
+            else -> return false
+        }
+        return true
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = (ActivityMainNewBinding.inflate(layoutInflater)).apply {
             setSupportActionBar(mainToolbar)
+
+            makeFlightsList()
+            collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded()
+            collectSearchFieldOpenAndOpenSearchFieldIfNeeded()
         }
         setContentView(binding.root)
+    }
+
+    private fun ActivityMainNewBinding.makeFlightsList(){
+        val adapter = makeFlightsListAdapter()
+
+        // flightsList.layoutManager = LinearLayoutManager(activity) // is this still needed?
+        flightsList.adapter = adapter
+
+        viewModel.flightsToDisplayFlow.launchCollectWhileLifecycleStateStarted {
+            adapter.submitList(it)
+        }
+    }
+
+    private fun collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded(){
+        viewModel.workingFlightFlow.launchCollectWhileLifecycleStateStarted{
+            killWorkingFlightEditingFragments()
+            if (it != null)
+                launchEditFlightFragment()
+        }
+    }
+
+    private fun ActivityMainNewBinding.collectSearchFieldOpenAndOpenSearchFieldIfNeeded(){
+        viewModel.searchFieldOpenFlow.launchCollectWhileLifecycleStateStarted{ open ->
+            if (open)
+                openSearchField()
+            else
+                closeSearchField()
+        }
+    }
+
+    private fun killWorkingFlightEditingFragments(){
+        supportFragmentManager.popBackStack(EDIT_FLIGHT_FRAGMENT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    }
+
+    private fun <T> Flow<T>.launchCollectWhileLifecycleStateStarted(collector: FlowCollector<T>){
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                collect(collector)
+            }
+        }
     }
 
     private fun ActivityMainNewBinding.showBackupReminderLayoutIf(it: Boolean) {
@@ -71,10 +125,90 @@ class MainActivity : JoozdlogActivity() {
     }
 
     private fun makeFlightsListAdapter() =
-        FlightsAdapter().apply {
-            onDelete = { id -> viewModel.deleteFlight(id) }
-            itemClick = { id -> viewModel.showFlight(id) }
+        FlightsAdapter(
+            onDelete = { flight -> viewModel.deleteFlight(flight) },
+            itemClick = { flight -> viewModel.showEditFlightDialog(flight) }
+        )
+
+    private fun ActivityMainNewBinding.closeSearchField() {
+        mainSearchField.setText("")
+        mainSearchField.clearFocus()
+        mainSearchField.hideKeyboard()
+        searchTypeSpinner.setSelection(0)
+        searchField.visibility = View.GONE
+    }
+
+    private fun ActivityMainNewBinding.openSearchField() {
+        searchField.visibility = View.VISIBLE
+        mainSearchField.requestFocus()
+        mainSearchField.showKeyboard()
+    }
+
+    private fun View.showKeyboard(){
+        val imm: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(this,0)
+    }
+
+    private fun View.hideKeyboard(){
+        val imm: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(windowToken, 0)
+    }
+
+    private fun launchEditFlightFragment() {
+        val eff = EditFlightFragment()
+        supportFragmentManager.commit {
+            add(R.id.mainActivityLayout, eff, EDIT_FLIGHT_FRAGMENT_TAG)
+            addToBackStack(EDIT_FLIGHT_FRAGMENT_TAG)
         }
+    }
+
+    private fun getRedoMenuItem(menu: Menu) =
+        menu.findItem(R.id.menu_redo)
+
+    private fun getUndoMenuItem(menu: Menu) =
+        menu.findItem(R.id.menu_undo)
+
+
+
+    private fun startMakePdfActivity() {
+        startActivity(Intent(this, MakePdfActivity::class.java))
+    }
+
+    private fun startFeedbackActivity() {
+        startActivity(Intent(this, FeedbackActivity::class.java))
+    }
+
+    private fun startBalanceForwardActivity() {
+        startActivity(Intent(this, BalanceForwardActivity::class.java))
+    }
+
+    private fun startTotalTimesActivity() {
+        startActivity(Intent(this, TotalTimesActivity::class.java))
+    }
+
+    private fun startSettingsActivity() {
+        startActivity(Intent(this, SettingsActivity::class.java))
+    }
+
+
+    private fun startNewUserActivityIfNewInstall() {
+        if (!Preferences.newUserActivityFinished)
+            startActivity(Intent(this, NewUserActivity::class.java))
+    }
+
+    private fun showAboutDialog() {
+        supportFragmentManager.commit{
+            add(R.id.mainActivityLayout, AboutDialog())
+            addToBackStack(null)
+        }
+    }
+
+
+
+    companion object{
+        const val EDIT_FLIGHT_FRAGMENT_TAG = "EDIT_FLIGHT_FRAGMENT_TAG"
+    }
+
     /*
 
     private var airportSyncProgressBar: JoozdlogProgressBar? = null
@@ -348,19 +482,7 @@ class MainActivity : JoozdlogActivity() {
         showDeletePlannedCalendarFlightDialog(flightID)
     }
 
-    private fun ActivityMainNewBinding.closeSearchField() {
-        mainSearchField.setText("")
-        mainSearchField.clearFocus()
-        mainSearchField.hideKeyboard()
-        searchTypeSpinner.setSelection(0)
-        searchField.visibility = View.GONE
-    }
 
-    private fun ActivityMainNewBinding.openSearchField() {
-        searchField.visibility = View.VISIBLE
-        mainSearchField.requestFocus()
-        mainSearchField.showKeyboard()
-    }
 
     private fun ActivityMainNewBinding.setBackupMessageText() {
         backupMessage.text =
@@ -425,44 +547,7 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    private fun getRedoMenuItem(menu: Menu) =
-        menu.findItem(R.id.menu_redo)
 
-    private fun getUndoMenuItem(menu: Menu) =
-        menu.findItem(R.id.menu_undo)
-
-
-
-    private fun startMakePdfActivity(): Boolean {
-        startActivity(Intent(this, MakePdfActivity::class.java))
-        return true
-    }
-
-    private fun startFeedbackActivity(): Boolean {
-        startActivity(Intent(this, FeedbackActivity::class.java))
-        return true
-    }
-
-    private fun startBalanceForwardActivity(): Boolean {
-        startActivity(Intent(this, BalanceForwardActivity::class.java))
-        return true
-    }
-
-    private fun startTotalTimesActivity(): Boolean {
-        startActivity(Intent(this, TotalTimesActivity::class.java))
-        return true
-    }
-
-    private fun startSettingsActivity(): Boolean {
-        startActivity(Intent(this, SettingsActivity::class.java))
-        return true
-    }
-
-
-    private fun startNewUserActivityIfNewInstall() {
-        if (!Preferences.newUserActivityFinished)
-            startActivity(Intent(this, NewUserActivity::class.java))
-    }
 
 
     /**
@@ -551,12 +636,7 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    private fun showAboutDialog(){
-        supportFragmentManager.commit{
-            add(R.id.mainActivityLayout, AboutDialog())
-            addToBackStack(null)
-        }
-    }
+
 
     private fun showBadLoginDataDialog(){
         JoozdlogAlertDialog().show(activity){
@@ -590,15 +670,9 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    private fun View.showKeyboard(){
-        val imm: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(this,0)
-    }
 
-    private fun View.hideKeyboard(){
-        val imm: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(windowToken, 0)
-    }
+
+
 
     companion object{
         const val EDIT_FLIGHT_TAG = "EDIT_FLIGHT_TAG"

@@ -30,11 +30,11 @@ import nl.joozd.logbookapp.extensions.atDate
 import nl.joozd.logbookapp.extensions.plusDays
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.TwilightCalculator
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
-import kotlin.reflect.KProperty
 
 /**
  * Initialize with a flight; dummy classes (Airport, Aircraft) will be made to keep data.
@@ -105,30 +105,30 @@ class WorkingFlightImpl(flight: Flight): WorkingFlight {
     /*
      * Shortcuts for functions
      */
-    private var _flightNumber: String by CastToMutableFlowShortcut(flightNumberFlow)
-    private var _orig: Airport by CastToMutableFlowShortcut(origFlow)
-    private var _dest: Airport by CastToMutableFlowShortcut(destFlow)
-    private var _timeOut: Instant by CastToMutableFlowShortcut(timeOutFlow)
-    private var _timeIn: Instant by CastToMutableFlowShortcut(timeInFlow)
-    private var _aircraft: Aircraft by CastToMutableFlowShortcut(aircraftFlow)
-    private var _takeOffLandings: TakeoffLandings by CastToMutableFlowShortcut(takeoffLandingsFlow)
-    private var _name: String by CastToMutableFlowShortcut(nameFlow)
-    private var _name2: List<String> by CastToMutableFlowShortcut(name2Flow)
-    private var _remarks: String by CastToMutableFlowShortcut(remarksFlow)
-    private var _multiPilotTime: Int by CastToMutableFlowShortcut(multiPilotTimeFlow)
-    private var _ifrTime: Int by CastToMutableFlowShortcut(ifrTimeFlow)
-    private var _nightTime: Int by CastToMutableFlowShortcut(nightTimeFlow)
-    private var _correctedTotalTime: Int by CastToMutableFlowShortcut(correctedTotalTimeFlow) // this is always 0 when autoValues
-    private var _augmentedCrew: AugmentedCrew by CastToMutableFlowShortcut(augmentedCrewFlow)
-    private var _isSim: Boolean by CastToMutableFlowShortcut(isSimFlow)
-    private var _signature: String by CastToMutableFlowShortcut(signatureFlow)
-    private var _isDual: Boolean by CastToMutableFlowShortcut(isDualFlow)
-    private var _isInstructor: Boolean by CastToMutableFlowShortcut(isInstructorFlow)
-    private var _isPIC: Boolean by CastToMutableFlowShortcut(isPicFlow)
-    private var _isPICUS: Boolean by CastToMutableFlowShortcut(isPicusFlow)
-    private var _isCopilot: Boolean by CastToMutableFlowShortcut(isCopilotFlow)
-    private var _isPF: Boolean by CastToMutableFlowShortcut(isPfFlow)
-    private var _isAutoValues: Boolean by CastToMutableFlowShortcut(isAutoValuesFlow)
+    private var _flightNumber: String by CastFlowToMutableFlowShortcut(flightNumberFlow)
+    private var _orig: Airport by CastFlowToMutableFlowShortcut(origFlow)
+    private var _dest: Airport by CastFlowToMutableFlowShortcut(destFlow)
+    private var _timeOut: Instant by CastFlowToMutableFlowShortcut(timeOutFlow)
+    private var _timeIn: Instant by CastFlowToMutableFlowShortcut(timeInFlow)
+    private var _aircraft: Aircraft by CastFlowToMutableFlowShortcut(aircraftFlow)
+    private var _takeOffLandings: TakeoffLandings by CastFlowToMutableFlowShortcut(takeoffLandingsFlow)
+    private var _name: String by CastFlowToMutableFlowShortcut(nameFlow)
+    private var _name2: List<String> by CastFlowToMutableFlowShortcut(name2Flow)
+    private var _remarks: String by CastFlowToMutableFlowShortcut(remarksFlow)
+    private var _multiPilotTime: Int by CastFlowToMutableFlowShortcut(multiPilotTimeFlow)
+    private var _ifrTime: Int by CastFlowToMutableFlowShortcut(ifrTimeFlow)
+    private var _nightTime: Int by CastFlowToMutableFlowShortcut(nightTimeFlow)
+    private var _correctedTotalTime: Int by CastFlowToMutableFlowShortcut(correctedTotalTimeFlow) // this is always 0 when autoValues
+    private var _augmentedCrew: AugmentedCrew by CastFlowToMutableFlowShortcut(augmentedCrewFlow)
+    private var _isSim: Boolean by CastFlowToMutableFlowShortcut(isSimFlow)
+    private var _signature: String by CastFlowToMutableFlowShortcut(signatureFlow)
+    private var _isDual: Boolean by CastFlowToMutableFlowShortcut(isDualFlow)
+    private var _isInstructor: Boolean by CastFlowToMutableFlowShortcut(isInstructorFlow)
+    private var _isPIC: Boolean by CastFlowToMutableFlowShortcut(isPicFlow)
+    private var _isPICUS: Boolean by CastFlowToMutableFlowShortcut(isPicusFlow)
+    private var _isCopilot: Boolean by CastFlowToMutableFlowShortcut(isCopilotFlow)
+    private var _isPF: Boolean by CastFlowToMutableFlowShortcut(isPfFlow)
+    private var _isAutoValues: Boolean by CastFlowToMutableFlowShortcut(isAutoValuesFlow)
 
     private val _isIFR: Boolean
         get() = _ifrTime > 0
@@ -350,15 +350,6 @@ class WorkingFlightImpl(flight: Flight): WorkingFlight {
             multiPilot = flight.multiPilotTime > 0,
             multiEngine = false
         )
-
-    private class CastToMutableFlowShortcut<T>(private val flowToCast: Flow<T>){
-        operator fun getValue(wf: WorkingFlightImpl, property: KProperty<*>): T =
-            (flowToCast as MutableStateFlow).value
-
-        operator fun setValue(wf: WorkingFlightImpl, property: KProperty<*>, newValue: T) {
-            (flowToCast as MutableStateFlow).value = newValue
-        }
-    }
 }
 
 

@@ -28,14 +28,14 @@ import nl.joozd.logbookapp.ui.utils.customs.Swiper
 
 class SimViewHolder(containerView: View) : ListItemViewHolder(containerView) {
     val binding = ItemSimBinding.bind(containerView)
-    override fun bindItem(flight: Flight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
+    override fun bindItem(flight: Flight, onClick: (Flight) -> Unit, onDelete: (Flight) -> Unit) {
         with(binding) {
             with(flight) {
                 Swiper(binding.simDeleteLayer).apply {
                     simDeleteLayer.setOnClickListener {
                         if (isOpen) {
                             close()
-                            onDelete(flightID)
+                            onDelete(flight)
                         }
                     }
                 }
@@ -50,7 +50,7 @@ class SimViewHolder(containerView: View) : ListItemViewHolder(containerView) {
 
                 simLayout.translationZ = 10f
 
-                simLayout.setOnClickListener { onClick(flightID) }
+                simLayout.setOnClickListener { onClick(flight) }
             }
         }
     }

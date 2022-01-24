@@ -32,7 +32,7 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
 abstract class ListItemViewHolder(containerView: View): RecyclerView.ViewHolder(containerView) {
-    abstract fun bindItem(flight: Flight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit)
+    abstract fun bindItem(flight: Flight, onClick: (Flight) -> Unit, onDelete: (Flight) -> Unit)
 
     protected fun Flight.checkIfIncomplete(checkNames: Boolean = Preferences.picNameNeedsToBeSet): Boolean =
         orig.isBlank()

@@ -25,6 +25,8 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.UndoableCommand
 import java.util.*
@@ -41,17 +43,20 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
     override val undoAvailable: Flow<Boolean> = _undoAvailable
     override val redoAvailable: Flow<Boolean> = _redoAvailable
 
+    private val undoRedoMutex = Mutex()
     /**
      * Undo last operation
      */
     override fun undo() {
         launch {
-            val command = undoStack.pop()
-            _undoAvailable.value = !undoStack.empty()
+            undoRedoMutex.withLock {
+                val command = undoStack.pop()
+                _undoAvailable.value = !undoStack.empty()
 
-            command.undo()
-            redoStack.push(command)
-            _redoAvailable.value = true
+                command.undo()
+                redoStack.push(command)
+                _redoAvailable.value = true
+            }
         }
     }
 
@@ -60,15 +65,17 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
      */
     override fun redo() {
         launch {
-            if (redoStack.empty())
-                Log.e(this::class.simpleName,"Trying to redo but redo stack is empty")
-            else{
-                val command = redoStack.pop()
-                _redoAvailable.value = !redoStack.empty()
+            undoRedoMutex.withLock {
+                if (redoStack.empty())
+                    Log.e(this::class.simpleName, "Trying to redo but redo stack is empty")
+                else {
+                    val command = redoStack.pop()
+                    _redoAvailable.value = !redoStack.empty()
 
-                command()
-                undoStack.push(command)
-                _undoAvailable.value = true
+                    command()
+                    undoStack.push(command)
+                    _undoAvailable.value = true
+                }
             }
         }
     }

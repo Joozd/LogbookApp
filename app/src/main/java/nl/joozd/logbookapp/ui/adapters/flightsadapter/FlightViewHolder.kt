@@ -27,14 +27,14 @@ import nl.joozd.logbookapp.ui.utils.customs.Swiper
 
 class FlightViewHolder(containerView: View) : ListItemViewHolder(containerView) {
     val binding = ItemFlightCardBinding.bind(containerView)
-    override fun bindItem(flight: Flight, onClick: (Int) -> Unit, onDelete: (Int) -> Unit) {
+    override fun bindItem(flight: Flight, onClick: (Flight) -> Unit, onDelete: (Flight) -> Unit) {
         binding.apply {
             with(flight) {
                 Swiper(binding.deleteLayer).apply {
                     deleteLayer.setOnClickListener {
                         if (isOpen) {
                             close()
-                            onDelete(flightID)
+                            onDelete(flight)
                         }
                     }
                 }
@@ -61,7 +61,7 @@ class FlightViewHolder(containerView: View) : ListItemViewHolder(containerView) 
                 isPFText.shouldBeVisible(isPF)
                 remarksText.shouldBeVisible(remarks.isNotEmpty())
                 flightLayout.translationZ = 10f
-                flightLayout.setOnClickListener { onClick(flightID) }
+                flightLayout.setOnClickListener { onClick(flight) }
             }
         }
     }

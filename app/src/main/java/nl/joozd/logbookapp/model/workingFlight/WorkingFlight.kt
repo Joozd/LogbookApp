@@ -20,10 +20,12 @@
 package nl.joozd.logbookapp.model.workingFlight
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.time.Instant
 import java.time.LocalDate
 
@@ -271,7 +273,21 @@ interface WorkingFlight {
     fun setIsAutoValues(isAutoValues: Boolean)
 
     companion object{
-        fun ofFlight(flight: Flight): WorkingFlight =
-            WorkingFlightImpl(flight)
+        val instanceFlow: Flow<WorkingFlight?> = MutableStateFlow(null)
+        private var INSTANCE: WorkingFlight? by CastFlowToMutableFlowShortcut(instanceFlow)
+
+        // NOTE this is not a singleton. Take care to close any dialogs editing this WorkingFlight
+        // when instanceFlow emits.
+        val instance: WorkingFlight? get() = INSTANCE
+
+        fun setFromFlight(flight: Flight) {
+            INSTANCE = WorkingFlightImpl(flight)
+        }
+
+        fun setNewflight() = setFromFlight(Flight.createEmpty())
+
+        fun close() {
+            INSTANCE = null
+        }
     }
 }

@@ -20,47 +20,150 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.mainActivity
 
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightDataCache
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
+import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
+import java.util.*
 
 class MainActivityViewModelNew: JoozdlogViewModel() {
-    // We keep an up-to-date reference to all airports, flights and aircraft in this viewModel.
-    // Fragments can take them from here and pass them on to their own viewModel.
-    var airportDataCache: AirportDataCache = AirportDataCache.empty(); private set
-    var flightDataCache: FlightDataCache = FlightDataCache.empty(); private set
-    var aircraftDataCache: AircraftDataCache = AircraftDataCache.empty(); private set
-    private val cacheUpdateJobs = listOf( // I like knowing where to find those even if val is not used.
-        collectUpdatedFlightDataCaches(),
-        collectUpdatedAirportDataCaches(),
-        collectUpdatedAircraftDataCaches()
-    )
-
-    // Using the List from flightDataCache saves us from keeping the same list twice in memory
-    val flightsToDisplay = flightRepository.flightDataCacheFlow().map { it.flights }
-
-
-    private fun collectUpdatedFlightDataCaches() =
-        viewModelScope.launch {
-            flightRepository.flightDataCacheFlow().collect {
-                flightDataCache = it
-            }
-        }
-
-    private fun collectUpdatedAirportDataCaches() =
-        viewModelScope.launch {
-            airportRepository.airportDataCacheFlow().collect {
+    private var airportDataCache: AirportDataCache = AirportDataCache.empty().apply{
+        // This will keep airportDataCache up-to-date, even when app is not in the foreground.
+        // Only time that happens thouhg is after and Airport DB update, which happens so rarely
+        // that this doesn't warrant putting in back-and-forth lifecycle checking with Activity.
+        viewModelScope.launch{
+            AirportRepository.getInstance().airportDataCacheFlow().collect{
                 airportDataCache = it
             }
         }
+    }
 
-    private fun collectUpdatedAircraftDataCaches() =
-        viewModelScope.launch {
-            aircraftRepository.aircraftDataCacheFlow().collect {
-                aircraftDataCache = it
-            }
+    val workingFlightFlow: Flow<WorkingFlight?> = MutableStateFlow<WorkingFlight?>(null)
+    val searchFieldOpenFlow: Flow<Boolean> = MutableStateFlow(false)
+    private val searchQueryFlow: Flow<String> = MutableStateFlow("")
+    private val searchTypeFlow: Flow<Int> = MutableStateFlow(SEARCH_ALL)
+    val flightsToDisplayFlow: Flow<List<Flight>> = combine(
+        flightRepository.flightDataCacheFlow().map { it.flights },
+        searchQueryFlow,
+        searchTypeFlow
+    ){ allFlights, query, searchType ->
+        searchFlights(allFlights, query, searchType)
+    }
+
+    private var _workingFlight: WorkingFlight? by CastFlowToMutableFlowShortcut(workingFlightFlow)
+    private var searchFieldOpen: Boolean by CastFlowToMutableFlowShortcut(searchFieldOpenFlow)
+    private var searchQuery: String by CastFlowToMutableFlowShortcut(searchQueryFlow)
+    private var searchType: Int by CastFlowToMutableFlowShortcut(searchTypeFlow)
+
+
+
+    fun deleteFlight(flight: Flight){
+        viewModelScope.launch{
+            flightRepository.delete(flight)
         }
+    }
+
+    // This will create a new WorkingFlight instance in _workingFlight.
+    // MainActivity should collect this an launch an Edit Flight dialog
+    fun showEditFlightDialog(flight: Flight){
+        WorkingFlight.setFromFlight(flight)
+    }
+
+    fun menuSelectedAddFlight(){
+        WorkingFlight.setNewflight()
+    }
+
+    fun menuSelectedSearch(): Boolean {
+        toggleSearchField()
+        return true
+    }
+
+    private fun toggleSearchField() {
+        if (searchFieldOpen)
+            closeSearchField()
+        else {
+            searchFieldOpen = true
+        }
+    }
+
+    //returns true so we can use it straight from Menu in Activity
+    fun undo(){
+        flightRepository.undo()
+    }
+
+    //returns true so we can use it straight from Menu in Activity
+    fun redo(){
+        flightRepository.redo()
+    }
+
+    private fun closeSearchField() {
+        feedback(FeedbackEvents.MainActivityEvents.CLOSE_SEARCH_FIELD)
+        searchQuery = ""
+        searchFieldOpen = false
+    }
+
+
+    private suspend fun searchFlights(flights: List<Flight>?, query: String, searchType: Int): List<Flight> {
+        if (flights == null) return emptyList()
+        if (!searchFieldOpen) return flights
+        return when (searchType) {
+            SEARCH_ALL -> searchAll(flights, query)
+            SEARCH_AIRPORTS -> searchAirports(flights, query)
+            SEARCH_AIRCRAFT -> searchAircraft(flights, query)
+            SEARCH_NAMES -> searchNames(flights, query)
+            SEARCH_FLIGHTNUMBER -> searchFlightnumber(flights, query)
+            else -> flights
+        }
+    }
+
+    private fun searchAll(fff: List<Flight>, query: String) = fff.filter {
+        query in it.name.uppercase(Locale.ROOT)
+                || query in it.name2.uppercase(Locale.ROOT)
+                || query in it.flightNumber.uppercase(Locale.ROOT)
+                || query in it.registration.uppercase(Locale.ROOT)
+                || query in it.orig.uppercase(Locale.ROOT)
+                || query in it.dest.uppercase(Locale.ROOT)
+                || query in airportDataCache.icaoToIata(it.orig)?.uppercase(Locale.ROOT) ?: ""
+                || query in airportDataCache.icaoToIata(it.dest)?.uppercase(Locale.ROOT) ?: ""
+    }
+
+    private fun searchAirports(fff: List<Flight>, query: String) = fff.filter {
+        query in it.orig.uppercase(Locale.ROOT)
+                || query in it.dest.uppercase(Locale.ROOT)
+                || query in airportDataCache.icaoToIata(it.orig)?.uppercase(Locale.ROOT) ?: ""
+                || query in airportDataCache.icaoToIata(it.dest)?.uppercase(Locale.ROOT) ?: ""
+    }
+
+
+    private suspend fun searchAircraft(fff: List<Flight>, query: String) = fff.filter {
+        val ac = aircraftRepository.getAircraftTypeByShortName(it.aircraftType)
+        query in it.registration.uppercase(Locale.ROOT)
+                || ac?.shortName?.uppercase(Locale.ROOT)?.contains(query) ?: false
+                || ac?.name?.uppercase(Locale.ROOT)?.contains(query) ?: false
+    }
+
+    private fun searchNames(fff: List<Flight>, query: String) = fff.filter {
+        query in it.name.uppercase(Locale.ROOT)
+                || query in it.name2.uppercase(Locale.ROOT)
+    }
+
+    private fun searchFlightnumber(fff: List<Flight>, query: String) = fff.filter {
+        query in it.flightNumber.uppercase(Locale.ROOT)
+    }
+
+    companion object {
+        const val SEARCH_ALL = 0
+        const val SEARCH_AIRPORTS = 1
+        const val SEARCH_AIRCRAFT = 2
+        const val SEARCH_NAMES = 3
+        const val SEARCH_FLIGHTNUMBER = 4
+    }
 }

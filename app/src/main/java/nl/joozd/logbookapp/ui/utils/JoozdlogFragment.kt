@@ -41,11 +41,9 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
  * viewModel,
  * repository, and
  * supportFragmentManager
- * Also, this takes care of keeping track of an undo-function that can be accessed by calling
- * undoChanges() or undoAndClose()
  */
 //TODO remove things and replace with viewModel per fragment
-open class JoozdlogFragment: Fragment(),  CoroutineScope by MainScope() {
+abstract class JoozdlogFragment: Fragment(),  CoroutineScope by MainScope() {
     protected val supportFragmentManager: FragmentManager by lazy { requireActivity().supportFragmentManager }
     protected val fragment: JoozdlogFragment
         get() = this

@@ -43,7 +43,9 @@ import java.time.format.FormatStyle
  */
 
 class FlightsAdapter(
-    var list: List<Flight> = emptyList()
+    var list: List<Flight> = emptyList(),
+    val onDelete: (Flight) -> Unit,
+    val itemClick: (Flight) -> Unit
 ): RecyclerViewFastScroller.OnPopupTextUpdate, ListAdapter<Flight, RecyclerView.ViewHolder>(
     FlightDiffCallback()) {
     /**

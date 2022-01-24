@@ -31,6 +31,7 @@ import nl.joozd.logbookapp.data.room.model.toFlight
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.TimestampMaker
 
+//TODO DB changes should schedule an update after a minute.
 class FlightRepositoryImpl(
     database: JoozdlogDatabase
 ) : FlightRepositoryWithDirectAccess, CoroutineScope by MainScope() {
@@ -126,8 +127,8 @@ class FlightRepositoryImpl(
     /**
      * Generate a flight ID that can safely be used to save a new flight to DB at a later point.
      */
-    override suspend fun generateAndReserveNewFlightID(): Int =
-        idGenerator.generateID()
+    override suspend fun generateAndReserveNewFlightID(highestTakenID: Int): Int =
+        idGenerator.generateID(highestTakenID)
 
     /**
      * Delete a flight hard from database
@@ -172,7 +173,7 @@ class FlightRepositoryImpl(
 
     private suspend fun makeNewIDIfCurrentNotInitialized(flight: Flight): Int =
         if (flight.flightID == Flight.FLIGHT_ID_NOT_INITIALIZED)
-            idGenerator.generateID()
+            idGenerator.generateID(0)
         else flight.flightID
 
     private suspend fun getValidFlightsFromDao() =
@@ -184,9 +185,10 @@ class FlightRepositoryImpl(
     private inner class IDGenerator{
         private var mostRecentHighestID: Int = Flight.FLIGHT_ID_NOT_INITIALIZED
 
-        suspend fun generateID(): Int{
+        suspend fun generateID(highestTakenID: Int): Int{
             if (mostRecentHighestID == Flight.FLIGHT_ID_NOT_INITIALIZED)
                 mostRecentHighestID = flightDao.highestUsedID() ?: 0
+            mostRecentHighestID = maxOf(mostRecentHighestID, highestTakenID)
             return ++mostRecentHighestID
         }
     }

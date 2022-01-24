@@ -19,6 +19,10 @@
 
 package nl.joozd.logbookapp.utils
 
+import androidx.work.ListenableWorker
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.maxOfThisAnd
 import java.time.Instant
@@ -32,4 +36,17 @@ class TimestampMaker(private val mock: Boolean = false) {
     val nowForSycPurposes: Long
         get() = if (mock) Instant.now().epochSecond
                 else (Instant.now().epochSecond + Preferences.serverTimeOffset).maxOfThisAnd(Preferences.lastUpdateTime+1)
+
+    companion object{
+        /**
+         * Save time offset between device and server to [Preferences]
+         * @return offset if success, null if failed.
+         */
+        suspend fun getAndSaveTimeOffset(): Long? {
+            val serverTime = Cloud.getTime() ?: return null
+            val now = Instant.now().epochSecond
+            Preferences.serverTimeOffset = serverTime - now
+            return Preferences.serverTimeOffset
+        }
+    }
 }

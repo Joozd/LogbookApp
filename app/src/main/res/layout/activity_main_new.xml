@@ -17,13 +17,6 @@
   ~      along with this program.  If not, see https://www.gnu.org/licenses
   ~
   -->
-<layout>
-    <data>
-        <variable
-            name="viewmodel"
-            type="nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModelNew" />
-    </data>
-
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -233,4 +226,3 @@
         app:tint="@null"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-</layout>

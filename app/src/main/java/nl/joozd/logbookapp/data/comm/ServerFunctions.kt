@@ -35,8 +35,11 @@ import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.extensions.toCloudFunctionResults
 import java.security.MessageDigest
 
+// NOTE: ALL THESE FUNCTIONS MUST BE CALLED FROM SUSPENDED FUNCTION DUE TO BLOCKING CALLS
+// If properly used in a Client().use{} block that should always be the case as Client() has
+// blocking code in its constructor.
 object ServerFunctions {
-    const val TAG = "ServerFunctions"
+    private const val TAG = "ServerFunctions"
     /**
      * sends a REQUEST TIMESTAMP to server
      * Expects server to reply with a single Long (8 Bytes)
@@ -149,16 +152,6 @@ object ServerFunctions {
         }
     }
 
-    /**
-     * Gets consensus data from server
-     * If success, will return a Map<Registration to ByteArray>. ByteArray is a serialized AircraftType.
-     */
-    fun getConsensus(client: Client, listener: (Int) -> Unit = {}): Map<String, ByteArray>?{
-        client.sendRequest(JoozdlogCommsKeywords.REQUEST_AIRCRAFT_CONSENSUS)
-        return client.readFromServer(listener)?.let{
-            mapFromBytes(it)
-        }
-    }
 
     /**
      * Logs a user in. User will remain logged in until connection with [client] is lost.
@@ -432,15 +425,6 @@ object ServerFunctions {
      */
     fun sendTimeStamp(client: Client, timeStamp: Long): CloudFunctionResults =
         client.sendRequest(JoozdlogCommsKeywords.ADD_TIMESTAMP, wrap(timeStamp)).toCloudFunctionResults()
-
-    /**
-     * Send consensus data to server
-     */
-    fun sendConsensus(client: Client, consensus: List<ConsensusData>): Boolean{
-        client.sendRequest(JoozdlogCommsKeywords.SENDING_AIRCRAFT_CONSENSUS, packSerializable(consensus))
-        return client.readFromServer()?.contentEquals(JoozdlogCommsKeywords.OK.toByteArray(Charsets.UTF_8)) ?: false
-    }
-
 
     /**
      * Send feedback to server

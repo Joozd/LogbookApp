@@ -31,6 +31,7 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.UndoableCommand
 import java.util.*
 
+//NOTE TO SELF: This is not where I take care of syncing.
 class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by MainScope() {
     private val repositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance
 
@@ -135,8 +136,8 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
         _redoAvailable.value = false // new delete means any previous redo can no longer be done
     }
 
-    override suspend fun generateAndReserveNewFlightID(): Int =
-        repositoryWithDirectAccess.generateAndReserveNewFlightID()
+    override suspend fun generateAndReserveNewFlightID(highestTakenID: Int): Int =
+        repositoryWithDirectAccess.generateAndReserveNewFlightID(highestTakenID)
 
 
     private suspend fun saveWithUndo(flightsToSave: Collection<Flight>){

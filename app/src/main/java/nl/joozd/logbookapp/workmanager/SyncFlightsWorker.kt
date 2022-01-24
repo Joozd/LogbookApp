@@ -28,43 +28,27 @@ import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 
 class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
 
-    private val flightRepository = FlightRepositoryImpl.getInstance()
-    private var progress: Int = 0
-        set(p) {
-            field = p
-            flightRepository.setSyncProgress(p)
-        }
+    private val flightRepository = FlightRepository.instance
 
-
-    override suspend fun doWork(): Result = try {
-        Log.d("SyncFlightsWorker", "Started")
-        withContext(Dispatchers.IO) {
-            val flightsRepository = FlightRepositoryImpl.getInstance()
-            if (makeNewLoginDataIfNeeded() != CloudFunctionResults.OK) return@withContext Result.retry()
-
-            when(val result = Cloud.syncAllFlights(flightsRepository) { processDownloadProgress(it) }) {
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        if (makeNewLoginDataIfNeeded() != CloudFunctionResults.OK)
+            Result.retry()
+        else
+            when (val result = Cloud.syncAllFlights(flightRepository)) {
                 null -> Result.retry()
                 -1L -> Result.failure()
                 else -> {
                     Preferences.lastUpdateTime = result
-                    progress = 100
                     Result.success()
                 }
             }
-        }
-    } finally{
-        progress = -1
-        Log.d("SyncFlightsWorker", "Done")
-    }
-
-    private fun processDownloadProgress(p: Int){
-        progress = p*99/100
     }
 
     /**

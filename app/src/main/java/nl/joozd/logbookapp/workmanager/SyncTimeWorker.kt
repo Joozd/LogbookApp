@@ -26,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.utils.TimestampMaker
 import java.time.Instant
 
 
@@ -54,9 +55,7 @@ import java.time.Instant
 class SyncTimeWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        val serverTime = Cloud.getTime() ?: return@withContext Result.retry()
-        val now = Instant.now().epochSecond
-        Preferences.serverTimeOffset = serverTime - now
+        TimestampMaker.getAndSaveTimeOffset()
         Result.success()
     }
 }

@@ -23,26 +23,35 @@ import android.util.Log
 import androidx.work.*
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.utils.TimestampMaker
 import java.time.Duration
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 
+/**
+ * Central point for all things worker.
+ */
 object JoozdlogWorkersHub {
     /**
      * Constants for influencing behaviour
      */
     private const val MIN_DELAY_FOR_OUTBOUND_SYNC: Long = 1 // minutes
     private const val DELAY_FOR_OVERWRITE_MINUTES: Long = 1 // minutes
+    private const val INBOUND_SYNC_MINIMUM_INTERVAL: Long = 15*60 // seconds
 
-
+    private var lastSyncInstantEpochSeconds = 0 // on cold app restart, always sync.
 
     /**
-     * These will be set to true if a forced update job is scheduled.
-     * If set to true, a periodic job will not be scheduled.
-     * A forced job should set this to false after completing and schedule a periodic job.
+     * Sync Flights when needed.
+     * Needed means: Last sync not inside last INBOUND_SYNC_MINIMUM_INTERVAL minutes.
+     * This should be called from MainActivity.onResume() so it is checked when app is opened.
+     * TODO Outbound sync is scheduled from Repository.
      */
-    var forcedAirportWork: Boolean = false
-    var forcedAircraftWork: Boolean = false
-
+    fun syncTimeAndFlightsIfNeeded(){
+        val elapsedSinceLastSync = Instant.now().epochSecond - lastSyncInstantEpochSeconds
+        if (elapsedSinceLastSync < INBOUND_SYNC_MINIMUM_INTERVAL) return
+        synchronizeFlights(true)
+    }
 
     /**
      * Synchronizes time with server, stores offset in SharedPrefs through [Preferences]

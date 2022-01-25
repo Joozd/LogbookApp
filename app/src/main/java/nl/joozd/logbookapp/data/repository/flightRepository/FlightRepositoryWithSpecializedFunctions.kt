@@ -17,28 +17,20 @@
  *
  */
 
-package nl.joozd.logbookapp.data.repository.airportrepository
+package nl.joozd.logbookapp.data.repository.flightRepository
 
-import nl.joozd.logbookapp.data.dataclasses.Airport
-
-interface AirportDataCache {
+/**
+ * Expanded interface with specific functions to get specific data from DB
+ *  e.g. "most recent timestamp of a completed flight"
+ */
+interface FlightRepositoryWithSpecializedFunctions {
     /**
-     * Provide a List of all known airports
+     * Get most recent timestamp of a completed flight.
+     * If none found, returns null.
      */
-    fun getAirports(): List<Airport>
-
-    /**
-     * Get an airport by its ICAO ident. Should not be case sensitive.
-     */
-    fun getAirportByIcaoIdentOrNull(icaoIdent: String): Airport?
-
-    fun icaoToIata(icaoIdent: String): String?
-
-    fun iataToIcao(iataIdent: String): String?
-
+    suspend fun getMostRecentTimestampOfACompletedFlight(): Long?
 
     companion object{
-        fun make(airportList: List<Airport>): AirportDataCache = AirportDataCacheImpl(airportList)
-        fun empty(): AirportDataCache = make(emptyList())
+        val instance: FlightRepositoryWithSpecializedFunctions get() = FlightRepositoryImpl.instance
     }
 }

@@ -24,17 +24,17 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import nl.joozd.logbookapp.data.dataclasses.FlightData
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess.Companion.MAX_SQL_BATCH_SIZE
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
+import nl.joozd.logbookapp.data.room.dao.FlightDao
 import nl.joozd.logbookapp.data.room.model.toFlight
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.TimestampMaker
 
-//TODO DB changes should schedule an update after a minute.
+
 class FlightRepositoryImpl(
     database: JoozdlogDatabase
-) : FlightRepositoryWithDirectAccess, CoroutineScope by MainScope() {
+) : FlightRepositoryWithDirectAccess, FlightRepositoryWithSpecializedFunctions, CoroutineScope by MainScope() {
     private val flightDao = database.flightDao()
     private val idGenerator = IDGenerator()
 
@@ -55,6 +55,11 @@ class FlightRepositoryImpl(
     override suspend fun getAllFlightsInDB(): List<Flight> =
         flightDao.getAllFlights().map { it.toFlight() }
 
+    /**
+     * Get a Flow of all valid (DELETEFLAG = false) Flights
+     */
+    override fun getAllFlightsFlow(): Flow<List<Flight>> =
+        flightDao.validFlightsFlow().map { it.toFlights() }
 
     /**
      * suspend fun getFlightDataCache
@@ -155,6 +160,12 @@ class FlightRepositoryImpl(
         saveWithIDAndTimestamp(softDeletedFlights)
     }
 
+    override suspend fun getMostRecentTimestampOfACompletedFlight(): Long? =
+        withContext(DispatcherProvider.io()) {
+            flightDao.getMostRecentTimestampOfACompletedFlight()
+        }
+
+
     private fun List<FlightData>.toFlights() =
         this.map { it.toFlight() }
 
@@ -191,6 +202,11 @@ class FlightRepositoryImpl(
             mostRecentHighestID = maxOf(mostRecentHighestID, highestTakenID)
             return ++mostRecentHighestID
         }
+    }
+
+    companion object{
+        const val MAX_SQL_BATCH_SIZE = 999
+        val instance by lazy { FlightRepositoryImpl(JoozdlogDatabase.getInstance()) }
     }
 }
 

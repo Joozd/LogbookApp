@@ -21,16 +21,19 @@ package nl.joozd.logbookapp.workmanager
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.ui.utils.toast
 
 class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
@@ -46,6 +49,7 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
                 -1L -> Result.failure()
                 else -> {
                     Preferences.lastUpdateTime = result
+                    toast(R.string.flights_synced)
                     Result.success()
                 }
             }

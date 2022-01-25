@@ -26,21 +26,10 @@ import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
 /**
  * Use this for read-only scenarios, or update manually after writing to aircraft DB
  */
-class UpdateableAircraftDataCache(
+class AircraftDataCacheImpl(
     private var types: List<AircraftType>,
     private var registrationToAircraftMap: Map<String, Aircraft>
     ) : AircraftDataCache {
-    constructor(aircraftDataCache: AircraftDataCache):
-            this(aircraftDataCache.getAircraftTypes(), aircraftDataCache.getRegistrationToAircraftMap())
-
-    fun updateTypes(types: List<AircraftType>) {
-        this.types = types
-    }
-
-    fun updateAircraftMap(map: Map<String, Aircraft>) {
-        registrationToAircraftMap = map
-    }
-
     override fun getRegistrationToAircraftMap(): Map<String, Aircraft> = registrationToAircraftMap
 
     override fun getAircraftTypes(): List<AircraftType> = types
@@ -52,5 +41,4 @@ class UpdateableAircraftDataCache(
 
     override fun getAircraftTypeByShortName(shortName: String): AircraftType? =
         types.firstOrNull { it.shortName == shortName }
-
 }

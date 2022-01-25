@@ -38,8 +38,8 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 
 open class JoozdlogViewModel: ViewModel() {
     protected val flightRepository = FlightRepositoryWithUndo.instance // Assumption: Any changes to FlightRepo from UI will be undoable
-    protected val aircraftRepository = AircraftRepository.getInstance()
-    protected val airportRepository = AirportRepository.getInstance()
+    protected val aircraftRepository = AircraftRepository.instance
+    protected val airportRepository = AirportRepository.instance
     protected val balanceForwardRepository = BalanceForwardRepository.getInstance()
 
     protected val applicationScope

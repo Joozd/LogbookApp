@@ -21,9 +21,12 @@ package nl.joozd.logbookapp.workmanager
 
 import android.util.Log
 import androidx.work.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.utils.TimestampMaker
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit
@@ -45,12 +48,24 @@ object JoozdlogWorkersHub {
      * Sync Flights when needed.
      * Needed means: Last sync not inside last INBOUND_SYNC_MINIMUM_INTERVAL minutes.
      * This should be called from MainActivity.onResume() so it is checked when app is opened.
-     * TODO Outbound sync is scheduled from Repository.
      */
-    fun syncTimeAndFlightsIfNeeded(){
+    fun syncTimeAndFlightsIfEnoughTimePassed(){
         val elapsedSinceLastSync = Instant.now().epochSecond - lastSyncInstantEpochSeconds
         if (elapsedSinceLastSync < INBOUND_SYNC_MINIMUM_INTERVAL) return
-        synchronizeFlights(true)
+        synchronizeTimeAndFlights()
+    }
+
+    /**
+     * Sync flights when updated flights found.
+     * Updated means: Timestamp more recent than [lastSyncInstantEpochSeconds] and !isPlanned
+     * This should be called from MainActivity.onPause() so it updates when app moves to background.
+     */
+    @DelicateCoroutinesApi // This is executed on app close, don't want app to wait closing for it, and it will nog hang as it is just a DB lookup and launching of a worker.
+    fun syncTimeAndFlightsIfFlightsUpdated(){
+        GlobalScope.launch {
+            if (lastSyncInstantEpochSeconds < FlightRepositoryWithSpecializedFunctions.instance.getMostRecentTimestampOfACompletedFlight() ?: Long.MIN_VALUE)
+                synchronizeTimeAndFlights()
+        }
     }
 
     /**
@@ -73,12 +88,10 @@ object JoozdlogWorkersHub {
      * Synchronizes all flights with server (worker uses FlightRepository)
      * If another Worker is already trying to do that, that one is replaced
      */
-    fun synchronizeFlights(delay: Boolean = true){
+    private fun synchronizeTimeAndFlights(){
         if (Preferences.useCloud) {
             val task = OneTimeWorkRequestBuilder<SyncFlightsWorker>().apply {
                 setConstraints(makeConstraintsNeedNetwork())
-                if (delay)
-                    setInitialDelay(MIN_DELAY_FOR_OUTBOUND_SYNC, TimeUnit.MINUTES)
                 addTag(SYNC_FLIGHTS)
             }.build()
 

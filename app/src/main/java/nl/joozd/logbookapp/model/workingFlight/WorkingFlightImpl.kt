@@ -42,8 +42,7 @@ import java.time.LocalDate
  * after being instantiated.
  */
 class WorkingFlightImpl(flight: Flight): WorkingFlight {
-
-
+    override val isNewFlight: Boolean = flight.flightID == Flight.FLIGHT_ID_NOT_INITIALIZED
 
     override val flightNumberFlow = MutableStateFlow(flight.flightNumber)
 

@@ -56,6 +56,7 @@ import java.time.*
 import java.util.*
 
 class MainActivityViewModel: JoozdlogActivityViewModel() {
+    /*
 
     /*********************************************************************************************
      * Private parts
@@ -569,5 +570,9 @@ class MainActivityViewModel: JoozdlogActivityViewModel() {
         const val NAMES = 3
         const val FLIGHTNUMBER = 4
     }
+
+     */
 }
+
+
 

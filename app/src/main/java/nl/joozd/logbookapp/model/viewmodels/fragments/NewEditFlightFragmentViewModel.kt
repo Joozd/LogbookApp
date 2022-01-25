@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.model.viewmodels.fragments
 
 import android.text.Editable
 import androidx.lifecycle.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -31,29 +32,19 @@ import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinute
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.dataclasses.FlightData
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
+import nl.joozd.logbookapp.data.repository.SelfUpdatingDataCache
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
+import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlightOld
 import java.time.Instant
 import java.time.LocalTime
 
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
-    private val wf = flightRepository.getWorkingFlight()
-    private var aircraftDataCache: AircraftDataCache? = null
-    init{
-        makeAircraftDataCacheUpToDate()
-    }
-
-    private var airportDataCache: AirportDataCache? = null
-    init{
-        makeAirportDataCacheUpToDate()
-    }
-
+    private val wf = WorkingFlight.instance!! // this Fragment should not have launched if wf is null
+    private val dataCache = SelfUpdatingDataCache(viewModelScope)
 
     private var cachedSortedRegistrationsList: List<String> = emptyList()
 
@@ -61,10 +52,10 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         println("made $it")
     }
 
-    val title: LiveData<String> = MutableLiveData(context.getString(if(wf.newFlight) R.string.add_flight else R.string.edit_flight))
+    val isNewFlight = wf.isNewFlight
 
-    val dualInstructor: LiveData<Int> = makeDualInstructorMediatorLivedata()
-    val aircraft: LiveData<String> = makeAircraftDisplayNameMediatorLiveData()
+    val dualInstructorFlow: Flow<Int> = makeDualInstructorFlow()
+    val aircraftStringFlow: Flow<String> = makeAircraftDisplayNameFlow()
     val isPic: LiveData<Boolean> = makePicOrPicusMediatorLiveData()
     val picPicusText: LiveData<String> = makePicPicusTextMediatorLiveData()
 
@@ -148,10 +139,10 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private fun makeDateString(epochSecond: Long) =
         Instant.ofEpochSecond(epochSecond).toLocalDate().toDateString()
 
-    private fun makeAircraftDisplayNameMediatorLiveData() =
-        MediatorLiveData<String>().apply {
-            addSource(wf.aircraftLiveData) { value = getAircraftDisplayName() }
-            addSource(wf.isSimLiveData) { value = getAircraftDisplayName() }
+    private fun makeAircraftDisplayNameFlow() =
+        combine(wf.aircraftFlow, wf.isSimFlow){ aircraft, isSim ->
+            (if (isSim) aircraft.type?.shortName else aircraft.toString())
+                ?: NO_DATA_STRING
         }
 
     private fun makePicOrPicusMediatorLiveData() =
@@ -171,22 +162,14 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         (if (isSim) wf.aircraftLiveData.value?.type?.shortName else wf.aircraftLiveData.value?.toString())
             ?: NO_DATA_STRING
 
-    private fun makeDualInstructorMediatorLivedata() =
-        MediatorLiveData<Int>().apply {
-            value = DUAL_INSTRUCTOR_FLAG_NONE
-            addSource(wf.isDualLiveData) {
-                value = makeDualOrInstructorFlag()
-            }
-            addSource(wf.isInstructorLiveData) {
-                value = makeDualOrInstructorFlag()
+    private fun makeDualInstructorFlow() =
+        combine(wf.isDualFlow, wf.isInstructorFlow) { isDual, isInstructor ->
+            when {
+                isDual -> DUAL_INSTRUCTOR_FLAG_DUAL
+                isInstructor -> DUAL_INSTRUCTOR_FLAG_INSTRUCTOR
+                else -> DUAL_INSTRUCTOR_FLAG_NONE
             }
         }
-
-    private fun makeDualOrInstructorFlag() = when {
-        wf.isDualLiveData.value == true -> DUAL_INSTRUCTOR_FLAG_DUAL
-        wf.isInstructorLiveData.value == true -> DUAL_INSTRUCTOR_FLAG_INSTRUCTOR
-        else -> DUAL_INSTRUCTOR_FLAG_NONE
-    }
 
     private fun WorkingFlightOld.isPicOrPicus(): Boolean =
         isPIC || isPICUS
@@ -319,7 +302,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     }
 
     fun toggleDualInstructorNone(){
-        when (dualInstructor.value){
+        when (dualInstructorFlow.value){
             DUAL_INSTRUCTOR_FLAG_NONE -> wf.isDual = true
             DUAL_INSTRUCTOR_FLAG_DUAL -> {
                 wf.isDual = false
@@ -468,7 +451,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     )
 
     private fun makeSortedRegistrationsFlowAndCacheIt() =
-        combine(aircraftRepository.aircraftMapFlow(), FlightRepositoryImpl.getInstance().allFlightsFlow) {
+        combine(aircraftRepository.aircraftMapFlow(), FlightRepository.instance.getAllFlightsFlow()) {
         regMap, allFlights ->
         makeSortedRegistrationsList(allFlights, regMap).also {
             cachedSortedRegistrationsList = it
@@ -477,7 +460,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
 
     private fun makeSortedRegistrationsList(
-        allFlights: List<FlightData>,
+        allFlights: List<Flight>,
         regMap: Map<String, Aircraft>
     ) = (allFlights.map { it.registration } + regMap.values.map { it.registration })
         .distinct()

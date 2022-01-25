@@ -67,8 +67,9 @@ interface AircraftRepository {
 
 
     companion object{
-        private var INSTANCE: AircraftRepositoryImpl? = null
-        fun getInstance() = INSTANCE ?: AircraftRepositoryImpl(JoozdlogDatabase.getInstance()).also { INSTANCE = it}
+        val instance: AircraftRepositoryImpl by lazy {
+            AircraftRepositoryImpl(JoozdlogDatabase.getInstance())
+        }
 
         fun mock(mockDatabase: JoozdlogDatabase) = AircraftRepositoryImpl(mockDatabase)
     }

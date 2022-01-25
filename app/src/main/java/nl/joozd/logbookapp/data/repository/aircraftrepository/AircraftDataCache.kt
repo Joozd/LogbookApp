@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.data.repository.aircraftrepository
 
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightDataCache
 
 interface AircraftDataCache {
     /**
@@ -47,9 +46,9 @@ interface AircraftDataCache {
 
     companion object{
         fun make(types: List<AircraftType>, aircraftMap: Map<String, Aircraft>): AircraftDataCache =
-            UpdateableAircraftDataCache(types, aircraftMap)
+            AircraftDataCacheImpl(types, aircraftMap)
 
-        fun empty() = make(emptyList(), emptyMap())
+        fun empty(): AircraftDataCache = make(emptyList(), emptyMap())
     }
 
 }

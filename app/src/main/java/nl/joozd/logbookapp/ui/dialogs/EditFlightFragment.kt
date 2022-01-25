@@ -25,12 +25,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat
 import androidx.core.view.marginTop
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.textfield.TextInputEditText
@@ -62,6 +62,7 @@ class EditFlightFragment: JoozdlogFragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val inflatedLayout = inflater.inflate(R.layout.layout_edit_flight_fragment, container, false)
         val binding = LayoutEditFlightFragmentBinding.bind(inflatedLayout).apply {
+            setDialogTitle()
             setAndattachAdaptersForAutocompleteFields()
 
             setLongPressListenersForHelpDialogs()
@@ -80,6 +81,11 @@ class EditFlightFragment: JoozdlogFragment(){
                 showWelcomeMessage()
         }
         return binding.root
+    }
+
+    private fun @NonNull LayoutEditFlightFragmentBinding.setDialogTitle() {
+        flightInfoText.text =
+            getString(if (viewModel.isNewFlight) R.string.add_flight else R.string.edit_flight)
     }
 
     private fun LayoutEditFlightFragmentBinding.observeLiveData() {
@@ -556,7 +562,7 @@ class EditFlightFragment: JoozdlogFragment(){
             setSimOrNormalLayout(isSim)
         }
 
-        viewModel.dualInstructor.observe(viewLifecycleOwner) { flag ->
+        viewModel.dualInstructorFlow.observe(viewLifecycleOwner) { flag ->
             setDualInstructorField(flag)
         }
 
@@ -651,7 +657,7 @@ class EditFlightFragment: JoozdlogFragment(){
             flighttInStringField.setTextIfNotFocused(it)
         }
 
-        viewModel.aircraft.observe(viewLifecycleOwner) {
+        viewModel.aircraftStringFlow.observe(viewLifecycleOwner) {
             flightAircraftField.setTextIfNotFocused(it)
         }
 

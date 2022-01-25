@@ -57,9 +57,9 @@ interface AirportRepository {
     suspend fun replaceDbWith(newAirports: Collection<Airport>)
 
     companion object {
-        private var INSTANCE: AirportRepository? = null
-        fun getInstance() =
-            INSTANCE ?: AirportRepositoryImpl(JoozdlogDatabase.getInstance()).also { INSTANCE = it }
+        val instance: AirportRepository by lazy {
+            AirportRepositoryImpl(JoozdlogDatabase.getInstance())
+        }
 
         fun mock(mockDatabase: JoozdlogDatabase) = AirportRepositoryImpl(mockDatabase)
     }

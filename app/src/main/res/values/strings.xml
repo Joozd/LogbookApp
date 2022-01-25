@@ -109,7 +109,7 @@
     <string name="sim">Sim</string>
     <string name="sign">Sign</string>
     <string name="savePdf">Save to PDF</string>>
-    <string name="loadingFlights">Syncing Flights…</string>
+    <string name="flights_synced">Joozdlog Flights Synchronized with Cloud</string>
     <string name="searchAircraft">SearchAircraft</string>
     <string name="loadingAirports">Loading Airports</string>
     <string name="title_activity_login">Sign in</string>

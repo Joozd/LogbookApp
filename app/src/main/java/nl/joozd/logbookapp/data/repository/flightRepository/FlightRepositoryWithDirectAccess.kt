@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.data.repository.flightRepository
 
-import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
 /*
@@ -50,7 +49,6 @@ interface FlightRepositoryWithDirectAccess: FlightRepository {
     suspend fun deleteHard(flights: Collection<Flight>)
 
     companion object{
-        val instance: FlightRepositoryWithDirectAccess by lazy { FlightRepositoryImpl(JoozdlogDatabase.getInstance()) }
-        const val MAX_SQL_BATCH_SIZE = 999
+        val instance: FlightRepositoryWithDirectAccess get() = FlightRepositoryImpl.instance
     }
 }

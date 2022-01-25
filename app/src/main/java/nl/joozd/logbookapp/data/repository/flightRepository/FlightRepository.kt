@@ -39,9 +39,13 @@ interface FlightRepository {
 
     /**
      * Get all flights (including deleted ones)
-     * For only usable flights, use [FlightDataCache.flights]
      */
     suspend fun getAllFlightsInDB(): List<Flight>
+
+    /**
+     * Get a Flow of all valid (DELETEFLAG = false) Flights
+     */
+    fun getAllFlightsFlow(): Flow<List<Flight>>
 
     /**
      * make a [FlightDataCache] with snapshot flight data

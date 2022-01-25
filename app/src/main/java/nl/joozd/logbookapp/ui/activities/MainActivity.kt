@@ -45,6 +45,7 @@ import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.dialogs.AboutDialog
 import nl.joozd.logbookapp.ui.dialogs.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {
@@ -67,7 +68,6 @@ class MainActivity : JoozdlogActivity() {
         return true
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = (ActivityMainNewBinding.inflate(layoutInflater)).apply {
@@ -78,6 +78,11 @@ class MainActivity : JoozdlogActivity() {
             collectSearchFieldOpenAndOpenSearchFieldIfNeeded()
         }
         setContentView(binding.root)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        JoozdlogWorkersHub.syncTimeAndFlightsIfEnoughTimePassed()
     }
 
     private fun ActivityMainNewBinding.makeFlightsList(){

@@ -38,6 +38,11 @@ import java.time.LocalDate
  */
 interface WorkingFlight {
     /**
+     * True if this is a new flight, false if it is an existing flight
+     */
+    val isNewFlight: Boolean
+
+    /**
      * Date of flight in UTC Flow
      */
     val dateFlow: Flow<LocalDate>

@@ -129,6 +129,8 @@ class WorkingFlightImpl(flight: Flight): WorkingFlight {
     private var _isPF: Boolean by CastFlowToMutableFlowShortcut(isPfFlow)
     private var _isAutoValues: Boolean by CastFlowToMutableFlowShortcut(isAutoValuesFlow)
 
+    val crew get() = _augmentedCrew
+
     private val _isIFR: Boolean
         get() = _ifrTime > 0
     private val _isMultiPilot: Boolean
@@ -176,7 +178,6 @@ class WorkingFlightImpl(flight: Flight): WorkingFlight {
     // Influences auto-values (MultiPilot time)
     override fun setAircraft(aircraft: Aircraft) {
         _aircraft = aircraft
-        autoUpdateValuesIfAutovaluesEnabled()
     }
 
     override fun setTakeoffLandings(takeoffLandings: TakeoffLandings) {
@@ -232,6 +233,11 @@ class WorkingFlightImpl(flight: Flight): WorkingFlight {
     override fun setIsPF(isPF: Boolean) {
         _isPF = isPF
         updateTakeOffLandingsIfRequired()
+    }
+
+    override fun setAugmentedCrew(augmentedCrew: AugmentedCrew) {
+        _augmentedCrew = augmentedCrew
+        autoUpdateValuesIfAutovaluesEnabled()
     }
 
     override fun setIsAutoValues(isAutoValues: Boolean) {

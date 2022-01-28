@@ -27,5 +27,5 @@ import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
  * For non-WorkingFlight viewModel use JoozdlogDialogViewModel()
  */
 abstract class JoozdlogDialogViewModelWithWorkingFlight: JoozdlogDialogViewModel() {
-    protected val workingFlight = WorkingFlight.instance
+    protected val workingFlight = WorkingFlight.instance!!
 }

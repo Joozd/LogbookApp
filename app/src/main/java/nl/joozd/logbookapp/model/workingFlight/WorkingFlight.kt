@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.time.Instant
@@ -170,7 +169,7 @@ interface WorkingFlight {
     /**
      * Augmented Crew data Flow
      */
-    val augmentedCrewFlow: Flow<AugmentedCrew>
+    val augmentedCrewFlow: Flow<Int>
 
     /**
      * emits true if flight is auto-calculating values, false if not
@@ -271,6 +270,11 @@ interface WorkingFlight {
      * Set isSim toggle for this flight
      */
     fun setIsPF(isPF: Boolean)
+
+    /**
+     * Set the augmented crew status
+     */
+    fun setAugmentedCrew(augmentedCrew: Int)
 
     /**
      * Set isAutoValues toggle for this flight

@@ -35,7 +35,6 @@ import java.util.*
  * ViewModel for AircraftPicker and SimTypePicker fragments
  */
 class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
-    private val undoAircraft = workingFlight.aircraft
     private val _typesSearchStringFlow = MutableStateFlow("")
 
     private val aircraftTypesFlow: Flow<List<AircraftType>> =
@@ -46,7 +45,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     }
 
     // Active aircraft in [workingFligght] or a placeholder [Aircraft] while workingFlight is loading data
-    val selectedAircraft = workingFlight.aircraftLiveData.map { it ?: Aircraft("...")}
+    val selectedAircraft = workingFlight.aircraftFlow.asLiveData().map { it ?: Aircraft("...")}
 
     //TODO make this be collected as flow instead of as liveData
     val aircraftTypes: LiveData<List<AircraftType>>
@@ -59,7 +58,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     private var mAircraft: Aircraft
         get() = selectedAircraft.value!!
         set(newAircraft){
-            workingFlight.setAircraftHard(newAircraft)
+            workingFlight.setAircraft(newAircraft)
         }
 
 
@@ -85,10 +84,10 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
 
     /**
      * Called when user is typing in registrationField in UI.
-     * workingFlight will look for aircraft to match registration or will create one with null type
+     * look for aircraft to match registration or will create one with null type
      */
     fun updateRegistration(reg: String){
-        workingFlight.registration = reg
+        TODO("not implemented" )
     }
 
     /**
@@ -101,12 +100,4 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     fun updateSearchString(query: String) {
         _typesSearchStringFlow.value = query.uppercase(Locale.ROOT)
     }
-
-    /**
-     * Revert aircraft to what it was when this viewModel was created
-     */
-    override fun undo() {
-        workingFlight.setAircraftHard(undoAircraft)
-    }
-
 }

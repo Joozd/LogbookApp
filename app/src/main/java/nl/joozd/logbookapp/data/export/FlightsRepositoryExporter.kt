@@ -26,6 +26,7 @@ import kotlinx.coroutines.async
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogcommon.BasicFlight_version4
 import nl.joozd.joozdlogcommon.legacy.basicflight.BasicFlightVersionFunctions.upgrade4to5
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
@@ -37,8 +38,8 @@ import java.time.Instant
  * @param flightRepository: Flight Repository to use
  * @param mock: True if testing without Android environment (bypasses Preferences)
  */
-class FlightsRepositoryExporter(val flightRepository: FlightRepositoryImpl, private val mock: Boolean = false): CoroutineScope by MainScope() {
-    private val allFlightsAsync = async { flightRepository.getAllFlights().filter{ !it.isPlanned} }
+class FlightsRepositoryExporter(val flightRepository: FlightRepository, private val mock: Boolean = false): CoroutineScope by MainScope() {
+    private val allFlightsAsync = async { flightRepository.getFLightDataCache().flights.filter{ !it.isPlanned} }
 
     suspend fun buildCsvString(): String = (listOf(FIRST_LINE_V5)  +
         allFlightsAsync.await().map{ it.toCsvV5() }).joinToString("\n")

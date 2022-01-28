@@ -64,6 +64,11 @@ interface AircraftRepository {
      */
     fun aircraftDataCacheFlow(): Flow<AircraftDataCache>
 
+    /**
+     * Get an [AircraftType] from it's short name from DB, null if not found.
+     */
+    suspend fun getAircraftTypeByShortName(typeShortName: String): AircraftType?
+
 
 
     companion object{

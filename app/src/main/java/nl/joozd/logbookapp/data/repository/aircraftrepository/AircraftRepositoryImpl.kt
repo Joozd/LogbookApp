@@ -88,8 +88,8 @@ class AircraftRepositoryImpl(
     suspend fun getRegistrationWithTypes() =
         registrationDao.requestAllRegistrations().map { it.toAircraftRegistrationWithType() }
 
-    suspend fun getAircraftTypeByShortName(shortName: String): AircraftType? =
-        aircraftTypeDao.getAircraftTypeFromShortName(shortName)?.toAircraftType()
+    override suspend fun getAircraftTypeByShortName(typeShortName: String): AircraftType? =
+        aircraftTypeDao.getAircraftTypeFromShortName(typeShortName)?.toAircraftType()
 
     suspend fun getAircraftFromRegistration(registration: String) =
         registrationDao.getAircraftFromRegistration(registration)?.toAircraftRegistrationWithType()

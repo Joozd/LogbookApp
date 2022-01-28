@@ -30,7 +30,7 @@ data class Aircraft(val registration: String = "", val type: AircraftType? = nul
         const val NONE = 999
         const val KNOWN = 1         // user has set it this way
         const val FLIGHT= 2         // Type was in [Flight]
-        const val FLIGHT_CONFLICTING = 20         // Type was in [Flight] but not all occurences agree
+        const val FLIGHT_CONFLICTING = 20         // Type was in [Flight] but not all occurrences agree
         const val PRELOADED = 3     // Set from server's forcedType
         const val CONSENSUS = 4     // Set from server's consensus
         const val PREVIOUS = 5      // Set because previously selected was this type

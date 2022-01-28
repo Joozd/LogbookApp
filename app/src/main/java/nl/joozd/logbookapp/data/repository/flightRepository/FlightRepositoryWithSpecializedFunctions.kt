@@ -19,6 +19,8 @@
 
 package nl.joozd.logbookapp.data.repository.flightRepository
 
+import nl.joozd.logbookapp.model.dataclasses.Flight
+
 /**
  * Expanded interface with specific functions to get specific data from DB
  *  e.g. "most recent timestamp of a completed flight"
@@ -29,6 +31,12 @@ interface FlightRepositoryWithSpecializedFunctions {
      * If none found, returns null.
      */
     suspend fun getMostRecentTimestampOfACompletedFlight(): Long?
+
+    /**
+     * Get most recent timestamp of a completed flight.
+     * If none found, returns null.
+     */
+    suspend fun getMostRecentCompletedFlight(): Flight?
 
     companion object{
         val instance: FlightRepositoryWithSpecializedFunctions get() = FlightRepositoryImpl.instance

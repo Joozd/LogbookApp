@@ -165,6 +165,11 @@ class FlightRepositoryImpl(
             flightDao.getMostRecentTimestampOfACompletedFlight()
         }
 
+    override suspend fun getMostRecentCompletedFlight(): Flight? =
+        withContext(DispatcherProvider.io()){
+            flightDao.getMostRecentCompleted()?.toFlight()
+    }
+
 
     private fun List<FlightData>.toFlights() =
         this.map { it.toFlight() }

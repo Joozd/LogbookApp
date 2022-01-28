@@ -24,7 +24,7 @@ import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedCompleteFlig
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
-import nl.joozd.logbookapp.data.repository.helpers.autoValues
+import nl.joozd.logbookapp.data.repository.helpers.setNightTime
 
 /**
  * Process Completed Flights:
@@ -34,11 +34,10 @@ import nl.joozd.logbookapp.data.repository.helpers.autoValues
  * - Save to model Class so original CompletedFlights can be closed
  */
 suspend fun CompletedFlights.postProcess(): ProcessedCompleteFlights {
-    val aircraftDataCache = AircraftRepository.getInstance().getAircraftDataCache()
-    val airportDataCache = AirportRepository.getInstance().getAirportDataCache()
+    val aircraftDataCache = AircraftRepository.instance.getAircraftDataCache()
+    val airportDataCache = AirportRepository.instance.getAirportDataCache()
 
-    val mrfAsync = FlightRepositoryImpl.getInstance().getMostRecentFlightAsync()
-    val lastFlightWasIFR = (mrfAsync.await()?.ifrTime ?: 1) > 0
+    val lastFlightWasIFR = mostRecentCompletedFlightInRepositoryIsIFR()
 
     val newFlights = flights.map { flight ->
         // In case airports are IATA format, switch them to ICAO.
@@ -46,11 +45,6 @@ suspend fun CompletedFlights.postProcess(): ProcessedCompleteFlights {
         val orig = airportDataCache.iataToIcao(flight.orig) ?: flight.orig
         val dest = airportDataCache.iataToIcao(flight.dest) ?: flight.dest
 
-        /*
-         * Priority for aircraft data:
-         * 1. If registration from [flight] found in AircraftRepository (Repo), use that registration with type from Repo, ignore any type from Flight
-         * 2. Otherwise, use data from [flight]. Any unknown aircraft type data will be handled where it is used.
-         */
         val foundAircraft = aircraftDataCache.getAircraftFromRegistration(flight.registration)
 
         // result of lambda:
@@ -61,9 +55,12 @@ suspend fun CompletedFlights.postProcess(): ProcessedCompleteFlights {
             aircraftType = foundAircraft?.type?.shortName ?: flight.aircraftType,
             ifrTime = if (lastFlightWasIFR || flight.ifrTime > 0) flight.calculatedDuration else 0,
             isPlanned = false
-        ).autoValues(airportDataCache)
+        ).setNightTime(airportDataCache)
     }
     return toProcessedCompletedFlights().copy(flights = newFlights)
 }
+
+private suspend fun mostRecentCompletedFlightInRepositoryIsIFR() =
+    (FlightRepositoryImpl.instance.getMostRecentCompletedFlight()?.ifrTime ?: 1) > 0
 
 

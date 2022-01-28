@@ -136,11 +136,11 @@ fun Flight.mergeInto(other: Flight) = other.copy(
 /*
  * auto fills night time only for now
  */
-fun Flight.autoValues(airportDataCache: AirportDataCache): Flight = if (!autoFill) this else {
+fun Flight.setNightTime(airportDataCache: AirportDataCache): Flight {
     val origAirport = airportDataCache.getAirportByIcaoIdentOrNull(orig)
     val destAirport = airportDataCache.getAirportByIcaoIdentOrNull(dest)
     val nightTime = TwilightCalculator(tOut()).minutesOfNight(origAirport, destAirport, tOut(), tIn())
-    this.copy(nightTime = nightTime)
+    return this.copy(nightTime = nightTime)
 }
 
 fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.uppercase(Locale.ROOT).trim() == other.flightNumber.uppercase(Locale.ROOT).trim()

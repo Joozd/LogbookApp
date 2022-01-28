@@ -25,11 +25,9 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
 import nl.joozd.logbookapp.data.calendar.parsers.KlmKlcCalendarFlightsParser
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.AutoRetrievedCalendar
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
+import nl.joozd.logbookapp.data.importing.interfaces.AutoRetrievedCalendar
+import nl.joozd.logbookapp.data.importing.interfaces.Roster
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.atStartOfDay
-import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.Duration
 import java.time.Instant
 

@@ -17,14 +17,14 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
+package nl.joozd.logbookapp.data.importing.pdfparser
 
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
 import java.io.InputStream
 import nl.joozd.joozdlogfiletypedetector.TypeIdentifiers.KLC_MONTHLY
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
+import nl.joozd.logbookapp.data.importing.interfaces.CompletedFlights
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.*
 import java.time.format.DateTimeFormatter

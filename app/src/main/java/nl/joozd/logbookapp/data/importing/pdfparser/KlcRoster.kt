@@ -17,14 +17,14 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
+package nl.joozd.logbookapp.data.importing.pdfparser
 
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
+import nl.joozd.logbookapp.data.importing.interfaces.Roster
 import nl.joozd.logbookapp.extensions.plusDays
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight

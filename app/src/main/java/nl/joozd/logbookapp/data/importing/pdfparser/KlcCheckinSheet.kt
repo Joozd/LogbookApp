@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
+package nl.joozd.logbookapp.data.importing.pdfparser
 
 import android.util.Log
 import androidx.core.text.isDigitsOnly
@@ -26,7 +26,7 @@ import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
+import nl.joozd.logbookapp.data.importing.interfaces.Roster
 import nl.joozd.logbookapp.extensions.atEndOfDay
 import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.model.dataclasses.Flight

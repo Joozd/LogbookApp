@@ -17,12 +17,12 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.importsParser
+package nl.joozd.logbookapp.data.importing.importsParser
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
+import nl.joozd.logbookapp.data.importing.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.extensions.atEndOfDay
 import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.model.dataclasses.Flight

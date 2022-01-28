@@ -17,19 +17,17 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
+package nl.joozd.logbookapp.data.importing.interfaces
 
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import java.time.Instant
+interface ImportedLogbook: CompletedFlights {
+    /**
+     * Set to true if flights need cleaning (iata to icao, registrations matched to types,
+     * night times calculated
+     * @see nl.joozd.logbookapp.data.importing.extensions.postProcess
+     */
+    val needsCleaning: Boolean
 
-/**
- * Model class for processed data from any [CompletedFlights] source.
- * TODO This class can be given to repository for saving/replacing data
- */
-data class ProcessedCompleteFlights(override val isValid: Boolean, override val flights: List<Flight>, override val period: ClosedRange<Instant>): CompletedFlights{
-    override fun close() {
-        // intentionally left blank
-    }
+    val validImportedLogbook: Boolean
+
+    val errorLines: List<String>?
 }

@@ -17,11 +17,10 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.interfaces
+package nl.joozd.logbookapp.data.importing.interfaces
 
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedRoster
+import nl.joozd.logbookapp.data.importing.pdfparser.ProcessedRoster
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import java.io.Closeable
 import java.time.Instant
 /**
  *a Roster to be used for parsing anything into flights

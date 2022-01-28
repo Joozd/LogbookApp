@@ -17,13 +17,21 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.interfaces
+package nl.joozd.logbookapp.data.importing
 
-import java.time.Instant
+import nl.joozd.logbookapp.data.importing.interfaces.Roster
+import nl.joozd.logbookapp.data.importing.pdfparser.ProcessedCompleteFlights
+import nl.joozd.logbookapp.data.importing.results.SaveCompleteFlightsResult
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 
-interface AutoRetrievedCalendar: Roster {
-    /**
-     * This [Roster] is valid until this moment (eg a calendar scrape from local phone is 15 minutes, a KLM Ical has a REFRESH-INTERVAL value (typically 2 hours)
-     */
-    val validUntil: Instant
+interface ImportedRosterSaver {
+    fun saveRoster(rosterToSave: Roster)
+
+    fun saveCompletedFlights(completedFlights: ProcessedCompleteFlights): SaveCompleteFlightsResult
+
+    companion object{
+        fun make(repositoryWithUndo: FlightRepositoryWithUndo): ImportedRosterSaver{
+            TODO("todo")
+        }
+    }
 }

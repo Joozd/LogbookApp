@@ -17,29 +17,31 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.extensions
+package nl.joozd.logbookapp.data.importing.extensions
 
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedRoster
+import nl.joozd.logbookapp.data.importing.interfaces.CompletedFlights
+import nl.joozd.logbookapp.data.importing.pdfparser.ProcessedCompleteFlights
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepositoryImpl
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepositoryImpl
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
+import nl.joozd.logbookapp.data.repository.helpers.setNightTime
 
 /**
- * Roster Postprocessing
- * From [Roster]:
- *  * Post-processing (not done in Roster but in whatever uses the Roster) should include:
- *  - Changing IATA to ICAO identifiers
- *  - Checking if registration is known, also searching for versions with/without spaces and/or hyphens and changing to known reg + type if found.
+ * Process Completed Flights:
+ * - make sure Airports are ICAO format
+ * - Look for aircraft registrations/types
+ * - set isPlanned flag to false
+ * - Save to model Class so original CompletedFlights can be closed
  */
-suspend fun Roster.postProcess(): ProcessedRoster {
+suspend fun CompletedFlights.postProcess(): ProcessedCompleteFlights {
     val aircraftDataCache = AircraftRepository.instance.getAircraftDataCache()
     val airportDataCache = AirportRepository.instance.getAirportDataCache()
 
+    val lastFlightWasIFR = mostRecentCompletedFlightInRepositoryIsIFR()
+
     val newFlights = flights.map { flight ->
         // In case airports are IATA format, switch them to ICAO.
-        // There is no need to have that set by RosterParser as there is no overlap between (4 letter) ICAO and (3 letter) IATA codes.
+        // I think there is no need to have that set by RosterParser as there is no overlap between (4 letter) ICAO and (3 letter) IATA codes.
         val orig = airportDataCache.iataToIcao(flight.orig) ?: flight.orig
         val dest = airportDataCache.iataToIcao(flight.dest) ?: flight.dest
 
@@ -47,14 +49,18 @@ suspend fun Roster.postProcess(): ProcessedRoster {
 
         // result of lambda:
         flight.copy(
-            flightID = -1,
             orig = orig,
             dest = dest,
             registration = foundAircraft?.registration ?: flight.registration,
             aircraftType = foundAircraft?.type?.shortName ?: flight.aircraftType,
-            isPlanned = true
-        )
+            ifrTime = if (lastFlightWasIFR || flight.ifrTime > 0) flight.calculatedDuration else 0,
+            isPlanned = false
+        ).setNightTime(airportDataCache)
     }
-    return toProcessedRoster().copy(flights = newFlights)
+    return toProcessedCompletedFlights().copy(flights = newFlights)
 }
+
+private suspend fun mostRecentCompletedFlightInRepositoryIsIFR() =
+    (FlightRepositoryImpl.instance.getMostRecentCompletedFlight()?.ifrTime ?: 1) > 0
+
 

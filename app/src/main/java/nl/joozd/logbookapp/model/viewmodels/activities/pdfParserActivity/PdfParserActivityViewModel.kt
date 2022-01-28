@@ -32,14 +32,16 @@ import nl.joozd.joozdlogfiletypedetector.CsvTypeDetector
 import nl.joozd.joozdlogfiletypedetector.PdfTypeDetector
 import nl.joozd.joozdlogfiletypedetector.SupportedTypes
 import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.data.parseSharedFiles.extensions.postProcess
-import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.JoozdlogParser
-import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.LogTenProParser
-import nl.joozd.logbookapp.data.parseSharedFiles.importsParser.MccPilotLogCsvParser
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.ImportedLogbook
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.CompletedFlights
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.*
+import nl.joozd.logbookapp.data.importing.ImportedRosterSaver
+import nl.joozd.logbookapp.data.importing.extensions.postProcess
+import nl.joozd.logbookapp.data.importing.importsParser.JoozdlogParser
+import nl.joozd.logbookapp.data.importing.importsParser.LogTenProParser
+import nl.joozd.logbookapp.data.importing.importsParser.MccPilotLogCsvParser
+import nl.joozd.logbookapp.data.importing.interfaces.ImportedLogbook
+import nl.joozd.logbookapp.data.importing.interfaces.CompletedFlights
+import nl.joozd.logbookapp.data.importing.interfaces.Roster
+import nl.joozd.logbookapp.data.importing.pdfparser.*
+import nl.joozd.logbookapp.data.importing.results.SaveCompleteFlightsResult
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
@@ -59,13 +61,15 @@ import java.time.Instant
  * - Fixes conflicts when importing Monthlies
  */
 class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
+    private val rosterSaver get() = ImportedRosterSaver.make(flightRepository)
+
     val statusLiveData: LiveData<Int>
         get() = _statusLiveData
 
     /**
      * Holds result of chrono import, null if no chrono was imported before this
      */
-    var chronoImportResult: FlightRepositoryImpl.SaveCompleteFlightsResult? = null
+    var chronoImportResult: SaveCompleteFlightsResult? = null
         private set
 
     private val _statusLiveData = MutableLiveData(STARTING_UP)
@@ -165,7 +169,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
              * Ask Repository to save this roster.
              * @see flightRepository -> saveRoster
              */
-            flightRepository.saveRoster(processedRoster, canUndo = true)
+            rosterSaver.saveRoster(processedRoster)
             feedback(PdfParserActivityEvents.ROSTER_SUCCESSFULLY_ADDED)
         } ?: run{
             feedback(PdfParserActivityEvents.FILE_NOT_FOUND)
@@ -188,7 +192,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
 
             // Repository will save flights and return how many conflicts were found. User can fix them in MainActivity
             // TODO or undo this whole thing (make undo logic in repository)
-            flightRepository.saveCompletedFlights(processedCompleteFlights).let{result ->
+            rosterSaver.saveCompletedFlights(processedCompleteFlights).let{result ->
                 chronoImportResult = result
                 when {
                     result.conflicts != 0 && result.plannedRemaining != 0 ->
@@ -223,7 +227,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                 Log.w(this::class.simpleName, "Unsupported file 004")
                 return
             }
-            flightRepository.saveCompletedFlights(completeLogbook.postProcess())
+            rosterSaver.saveCompletedFlights(completeLogbook.postProcess())
             feedback(PdfParserActivityEvents.CHRONO_SUCCESSFULLY_ADDED)
         } ?: run{
             feedback(PdfParserActivityEvents.FILE_NOT_FOUND) // TODO handle this in Activity

@@ -17,19 +17,31 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.interfaces
+package nl.joozd.logbookapp.data.importing.interfaces
 
+import nl.joozd.logbookapp.data.importing.pdfparser.ProcessedCompleteFlights
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import java.io.Closeable
+import java.time.Instant
 
-interface ImportedLogbook: CompletedFlights {
+interface CompletedFlights: Closeable {
     /**
-     * Set to true if flights need cleaning (iata to icao, registrations matched to types,
-     * night times calculated
-     * @see nl.joozd.logbookapp.data.parseSharedFiles.extensions.postProcess
+     * true if this seems to be a valid monthly overview (gross error check)
      */
-    val needsCleaning: Boolean
+    val isValid: Boolean
 
-    val validImportedLogbook: Boolean
+    val isInvalid
+        get() = !isValid
 
-    val errorLines: List<String>?
+    /**
+     * List of flights in this Monthly Overview (to be cleaned)
+     */
+    val flights: List<Flight>
+
+    /**
+     * Period that this Monthly Overview applies to
+     */
+    val period: ClosedRange<Instant>
+
+    fun toProcessedCompletedFlights(): ProcessedCompleteFlights = ProcessedCompleteFlights(isValid, flights, period)
 }

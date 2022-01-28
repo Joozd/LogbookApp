@@ -17,9 +17,9 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.pdfparser
+package nl.joozd.logbookapp.data.importing.pdfparser
 
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
+import nl.joozd.logbookapp.data.importing.interfaces.Roster
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.Instant
 

@@ -17,31 +17,13 @@
  *
  */
 
-package nl.joozd.logbookapp.data.parseSharedFiles.interfaces
+package nl.joozd.logbookapp.data.importing.interfaces
 
-import nl.joozd.logbookapp.data.parseSharedFiles.pdfparser.ProcessedCompleteFlights
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import java.io.Closeable
 import java.time.Instant
 
-interface CompletedFlights: Closeable {
+interface AutoRetrievedCalendar: Roster {
     /**
-     * true if this seems to be a valid monthly overview (gross error check)
+     * This [Roster] is valid until this moment (eg a calendar scrape from local phone is 15 minutes, a KLM Ical has a REFRESH-INTERVAL value (typically 2 hours)
      */
-    val isValid: Boolean
-
-    val isInvalid
-        get() = !isValid
-
-    /**
-     * List of flights in this Monthly Overview (to be cleaned)
-     */
-    val flights: List<Flight>
-
-    /**
-     * Period that this Monthly Overview applies to
-     */
-    val period: ClosedRange<Instant>
-
-    fun toProcessedCompletedFlights(): ProcessedCompleteFlights = ProcessedCompleteFlights(isValid, flights, period)
+    val validUntil: Instant
 }

@@ -19,14 +19,11 @@
 
 package nl.joozd.logbookapp.data.calendar.parsers
 
-import android.util.Log
 import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendarEvent
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.AutoRetrievedCalendar
+import nl.joozd.logbookapp.data.importing.interfaces.AutoRetrievedCalendar
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.Roster
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.plusMinutes
 import java.time.Instant
 
 /**

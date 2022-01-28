@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.data.calendar.parsers
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.data.parseSharedFiles.interfaces.AutoRetrievedCalendar
+import nl.joozd.logbookapp.data.importing.interfaces.AutoRetrievedCalendar
 import nl.joozd.logbookapp.extensions.atEndOfDay
 import nl.joozd.logbookapp.extensions.plusMinutes
 import nl.joozd.logbookapp.model.dataclasses.Flight

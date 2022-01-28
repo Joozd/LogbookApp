@@ -21,24 +21,25 @@ package nl.joozd.logbookapp.workmanager
 
 import android.util.Log
 import androidx.work.*
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.utils.DispatcherProvider
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Central point for all things worker.
  */
-object JoozdlogWorkersHub {
+object JoozdlogWorkersHub: CoroutineScope {
+    override val coroutineContext: CoroutineContext
+        get() = DispatcherProvider.default() + SupervisorJob()
     /**
      * Constants for influencing behaviour
      */
-    private const val MIN_DELAY_FOR_OUTBOUND_SYNC: Long = 1 // minutes
     private const val DELAY_FOR_OVERWRITE_MINUTES: Long = 1 // minutes
     private const val INBOUND_SYNC_MINIMUM_INTERVAL: Long = 15*60 // seconds
 
@@ -60,9 +61,8 @@ object JoozdlogWorkersHub {
      * Updated means: Timestamp more recent than [lastSyncInstantEpochSeconds] and !isPlanned
      * This should be called from MainActivity.onPause() so it updates when app moves to background.
      */
-    @DelicateCoroutinesApi // This is executed on app close, don't want app to wait closing for it, and it will nog hang as it is just a DB lookup and launching of a worker.
     fun syncTimeAndFlightsIfFlightsUpdated(){
-        GlobalScope.launch {
+        launch {
             if (lastSyncInstantEpochSeconds < FlightRepositoryWithSpecializedFunctions.instance.getMostRecentTimestampOfACompletedFlight() ?: Long.MIN_VALUE)
                 synchronizeTimeAndFlights()
         }

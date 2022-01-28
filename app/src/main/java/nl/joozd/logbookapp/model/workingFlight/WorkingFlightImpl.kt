@@ -44,46 +44,11 @@ import java.time.LocalDate
 class WorkingFlightImpl(flight: Flight): WorkingFlight {
     override val isNewFlight: Boolean = flight.flightID == Flight.FLIGHT_ID_NOT_INITIALIZED
 
-    override val flightNumberFlow = MutableStateFlow(flight.flightNumber)
 
-    override val origFlow: Flow<Airport> = MutableStateFlow(makeDummyAirport(flight.orig))
 
-    override val destFlow: Flow<Airport> = MutableStateFlow(makeDummyAirport(flight.dest))
 
-    override val timeOutFlow: Flow<Instant> = MutableStateFlow(Instant.ofEpochSecond(flight.timeOut))
 
-    override val timeInFlow: Flow<Instant> = MutableStateFlow(Instant.ofEpochSecond(flight.timeIn))
 
-    // Not a StateFlow!
-    override val dateFlow = timeOutFlow.map { it.toLocalDate() }
-
-    override val aircraftFlow: Flow<Aircraft> = MutableStateFlow(makeDummyAircraft(flight))
-
-    override val takeoffLandingsFlow: Flow<TakeoffLandings> = MutableStateFlow(TakeoffLandings.fromFlight(flight))
-
-    override val nameFlow: Flow<String> = MutableStateFlow(flight.name)
-
-    override val name2Flow: Flow<List<String>> = MutableStateFlow(flight.name2.split(";"))
-
-    override val remarksFlow: Flow<String> = MutableStateFlow(flight.remarks)
-
-    override val multiPilotTimeFlow: Flow<Int> = MutableStateFlow(flight.multiPilotTime)
-
-    override val ifrTimeFlow: Flow<Int> = MutableStateFlow(flight.ifrTime)
-
-    override val nightTimeFlow: Flow<Int> = MutableStateFlow(flight.nightTime)
-
-    override val correctedTotalTimeFlow: Flow<Int> = MutableStateFlow(flight.duration())
-
-    override val augmentedCrewFlow: Flow<AugmentedCrew> = MutableStateFlow(AugmentedCrew.of(flight.augmentedCrew))
-
-    override val isSimFlow: Flow<Boolean> = MutableStateFlow(flight.isSim)
-
-    override val signatureFlow: Flow<String> = MutableStateFlow(flight.signature)
-
-    override val isDualFlow: Flow<Boolean> = MutableStateFlow(flight.isDual)
-
-    override val isInstructorFlow: Flow<Boolean> = MutableStateFlow(flight.isInstructor)
 
     // Not a StateFlow!
     override val isMultiPilotFlow: Flow<Boolean> = aircraftFlow.map { it.type?.multiPilot ?: false }
@@ -91,43 +56,74 @@ class WorkingFlightImpl(flight: Flight): WorkingFlight {
     // Not a StateFlow!
     override val isIfrFlow: Flow<Boolean> = ifrTimeFlow.map{ it > 0 }
 
-    override val isPicFlow: Flow<Boolean> = MutableStateFlow(flight.isPIC)
+    override val isPicFlow: Flow<Boolean> = MutableStateFlow()
 
-    override val isPicusFlow: Flow<Boolean> = MutableStateFlow(flight.isPICUS)
+    override val isPicusFlow: Flow<Boolean> = MutableStateFlow()
 
-    override val isCopilotFlow: Flow<Boolean> = MutableStateFlow(flight.isCoPilot)
+    override val isCopilotFlow: Flow<Boolean> = MutableStateFlow()
 
-    override val isPfFlow: Flow<Boolean> = MutableStateFlow(flight.isPF)
+    override val isPfFlow: Flow<Boolean> = MutableStateFlow()
 
-    override val isAutoValuesFlow: Flow<Boolean> = MutableStateFlow(flight.autoFill)
+    override val isAutoValuesFlow: Flow<Boolean> = MutableStateFlow()
 
     /*
      * Shortcuts for functions
      */
-    private var _flightNumber: String by CastFlowToMutableFlowShortcut(flightNumberFlow)
-    private var _orig: Airport by CastFlowToMutableFlowShortcut(origFlow)
-    private var _dest: Airport by CastFlowToMutableFlowShortcut(destFlow)
-    private var _timeOut: Instant by CastFlowToMutableFlowShortcut(timeOutFlow)
-    private var _timeIn: Instant by CastFlowToMutableFlowShortcut(timeInFlow)
-    private var _aircraft: Aircraft by CastFlowToMutableFlowShortcut(aircraftFlow)
-    private var _takeOffLandings: TakeoffLandings by CastFlowToMutableFlowShortcut(takeoffLandingsFlow)
-    private var _name: String by CastFlowToMutableFlowShortcut(nameFlow)
-    private var _name2: List<String> by CastFlowToMutableFlowShortcut(name2Flow)
-    private var _remarks: String by CastFlowToMutableFlowShortcut(remarksFlow)
-    private var _multiPilotTime: Int by CastFlowToMutableFlowShortcut(multiPilotTimeFlow)
-    private var _ifrTime: Int by CastFlowToMutableFlowShortcut(ifrTimeFlow)
-    private var _nightTime: Int by CastFlowToMutableFlowShortcut(nightTimeFlow)
-    private var _correctedTotalTime: Int by CastFlowToMutableFlowShortcut(correctedTotalTimeFlow) // this is always 0 when autoValues
-    private var _augmentedCrew: AugmentedCrew by CastFlowToMutableFlowShortcut(augmentedCrewFlow)
-    private var _isSim: Boolean by CastFlowToMutableFlowShortcut(isSimFlow)
-    private var _signature: String by CastFlowToMutableFlowShortcut(signatureFlow)
-    private var _isDual: Boolean by CastFlowToMutableFlowShortcut(isDualFlow)
-    private var _isInstructor: Boolean by CastFlowToMutableFlowShortcut(isInstructorFlow)
-    private var _isPIC: Boolean by CastFlowToMutableFlowShortcut(isPicFlow)
-    private var _isPICUS: Boolean by CastFlowToMutableFlowShortcut(isPicusFlow)
-    private var _isCopilot: Boolean by CastFlowToMutableFlowShortcut(isCopilotFlow)
-    private var _isPF: Boolean by CastFlowToMutableFlowShortcut(isPfFlow)
-    private var _isAutoValues: Boolean by CastFlowToMutableFlowShortcut(isAutoValuesFlow)
+    override var flightNumber: String = flight.flightNumber
+
+    override var orig: Airport = makeDummyAirport(flight.orig)
+        set(orig) {
+            field = orig
+            autoUpdateValuesIfAutovaluesEnabled()
+        }
+
+    override var dest: Airport = makeDummyAirport(flight.dest)
+        set(dest) {
+            field = dest
+            autoUpdateValuesIfAutovaluesEnabled()
+        }
+
+    override var timeOut: Instant = Instant.ofEpochSecond(flight.timeOut)
+        set(timeOut) {
+            field = timeOut
+            autoUpdateValuesIfAutovaluesEnabled()
+        }
+
+    override var timeIn: Instant = Instant.ofEpochSecond(flight.timeIn)
+        set(timeIn) {
+            field = timeIn
+            autoUpdateValuesIfAutovaluesEnabled()
+        }
+    override var date: LocalDate
+        get() = timeOut.toLocalDate()
+        set(date) {
+            timeOut = timeOut.atDate(date)
+            timeIn = timeIn.atDate(date).let{
+                if (it > timeOut) it
+                else it.plusDays(1)
+            }
+            autoUpdateValuesIfAutovaluesEnabled()
+        }
+
+    override var aircraft: Aircraft = makeDummyAircraft(flight)
+    override var takeoffLandings = TakeoffLandings.fromFlight(flight)
+    override var name: String = flight.name
+    override var name2: List<String> = flight.name2.split(";")
+    override var remarks: String = flight.remarks
+    override var multiPilotTime: Int = flight.multiPilotTime
+    override var ifrTime: Int = flight.ifrTime
+    override var nightTime: Int = flight.nightTime
+    override var correctedTotalTime: Int = flight.correctedTotalTime            // this is always 0 when autoValues
+    override var augmentedCrew: Int = flight.augmentedCrew                      // parse this in ViewModel
+    override var isSim: Boolean = flight.isSim
+    override var signature: String = flight.signature
+    override var isDual: Boolean = flight.isDual
+    override var isInstructor: Boolean = flight.isInstructor
+    override var isPIC: Boolean = flight.isPIC
+    override var isPICUS: Boolean = flight.isPICUS
+    override var isCopilot: Boolean = flight.isCoPilot
+    override var isPF: Boolean = flight.isPF
+    override var isAutoValues: Boolean = flight.autoFill
 
     val crew get() = _augmentedCrew
 
@@ -138,75 +134,23 @@ class WorkingFlightImpl(flight: Flight): WorkingFlight {
 
 
     // Influences auto-values (Night time)
-    override fun setDate(date: LocalDate) {
-        _timeOut = _timeOut.atDate(date)
-        _timeIn = _timeIn.atDate(date).let{
-            if (it > _timeOut) it
-            else it.plusDays(1)
-        }
-        autoUpdateValuesIfAutovaluesEnabled()
-    }
+    override fun
 
-    override fun setFlightNumber(flightNumber: String) {
-        _flightNumber = flightNumber
-    }
 
-    // Influences auto-values (Night time)
-    override fun setOrig(orig: Airport) {
-        _orig = orig
-        autoUpdateValuesIfAutovaluesEnabled()
-    }
 
-    // Influences auto-values (Night time)
-    override fun setDest(dest: Airport) {
-        _dest = dest
-        autoUpdateValuesIfAutovaluesEnabled()
-    }
 
     // Influences auto-values
-    override fun setTimeOut(timeOut: Instant) {
-        _timeOut = timeOut
-        autoUpdateValuesIfAutovaluesEnabled()
-    }
+    override
 
     // Influences auto-values
-    override fun setTimeIn(timeIn: Instant) {
-        _timeIn = timeIn
-        autoUpdateValuesIfAutovaluesEnabled()
-    }
+    override fun
 
     // Influences auto-values (MultiPilot time)
     override fun setAircraft(aircraft: Aircraft) {
         _aircraft = aircraft
+        autoUpdateValuesIfAutovaluesEnabled()
     }
 
-    override fun setTakeoffLandings(takeoffLandings: TakeoffLandings) {
-        _takeOffLandings = takeoffLandings
-    }
-
-    override fun setName(name: String) {
-        _name = name
-    }
-
-    override fun setName2(names: List<String>) {
-        _name2 = names
-    }
-
-    override fun setRemarks(remarks: String) {
-        _remarks = remarks
-    }
-
-    override fun setSignature(signature: String) {
-        _signature = signature
-    }
-
-    override fun setIsDual(isDual: Boolean) {
-        _isDual = isDual
-    }
-
-    override fun setIsInstructor(isInstructor: Boolean) {
-        _isInstructor = isInstructor
-    }
 
     //This value also calculated automatically
     override fun setMultiPilotTime(multiPilotTime: Int) {

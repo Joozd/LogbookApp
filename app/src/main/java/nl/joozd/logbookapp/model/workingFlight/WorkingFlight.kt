@@ -42,244 +42,124 @@ interface WorkingFlight {
     val isNewFlight: Boolean
 
     /**
-     * Date of flight in UTC Flow
+     * A flow of the Flight we are currently working on
      */
-    val dateFlow: Flow<LocalDate>
+    val flightFlow: Flow<Flight>
 
     /**
-     * Flightnumber Flow
+     * Get/Set date for this flight without changing times
      */
-    val flightNumberFlow: Flow<String>
+    var date: LocalDate
 
     /**
-     * Origin airport
+     * Flight Number for this flight
      */
-    val origFlow: Flow<Airport>
+    var flightNumber: String
 
     /**
-     * Destination Flow
+     * Origin for this flight
      */
-    val destFlow: Flow<Airport>
+    var orig: Airport
 
     /**
-     * Instant of departure Flow
+     * Destination for this flight
      */
-    val timeOutFlow: Flow<Instant>
+    var dest: Airport
 
     /**
-     * Instant of departure Flow
+     * timeOut for this flight
      */
-    val timeInFlow: Flow<Instant>
+    var timeOut: Instant
 
     /**
-     * Aircraft used for this flight Flow
+     * timeIn for this flight
      */
-    val aircraftFlow: Flow<Aircraft>
+    var timeIn: Instant
 
     /**
-     * Takeoffs and landings Flow
+     * [Aircraft] for this flight
      */
-    val takeoffLandingsFlow: Flow<TakeoffLandings>
+    var aircraft: Aircraft
 
     /**
-     * Name of PIC flow
+     * [TakeoffLandings] for this flight
      */
-    val nameFlow: Flow<String>
+    var takeoffLandings: TakeoffLandings
 
     /**
-     * Names of other crewmembers
+     * PIC Name for this flight
      */
-    val name2Flow: Flow<List<String>>
+    var name: String
 
     /**
-     * Remarks Flow
+     * other names for this flight
      */
-    val remarksFlow: Flow<String>
+    var name2: List<String>
 
     /**
-     * emits true if set to Sim, false if not
+     * Remarks for this flight
      */
-    val isSimFlow: Flow<Boolean>
+    var remarks: String
 
     /**
-     * Signature SVG String or empty string if not signed
+     * signature for this flight
      */
-    val signatureFlow: Flow<String>
+    var signature: String
 
     /**
-     * emits true if flight is Dual, false if not
+     * isDual toggle for this flight
      */
-    val isDualFlow: Flow<Boolean>
+    var isDual: Boolean
 
     /**
-     * emits true if flight is Dual, false if not
+     * isInstructor toggle for this flight
      */
-    val isInstructorFlow: Flow<Boolean>
+    var isInstructor: Boolean
 
     /**
-     * emits true if flight is MultiPilot, false if not
+     * isMultiPilot toggle for this flight
      */
-    val isMultiPilotFlow: Flow<Boolean>
+    var multiPilotTime: Int
 
     /**
-     * emits true if flight is (partially) IFR, false if not
+     * IFR Time toggle for this flight
      */
-    val isIfrFlow: Flow<Boolean>
+    var ifrTime: Int
 
     /**
-     * emits true if flight is logged as PIC, false if not
+     * Night time for this flight
      */
-    val isPicFlow: Flow<Boolean>
+    var nightTime: Int
 
     /**
-     * emits true if flight is logged as PICUS, false if not
+     * Corrected Total Time time for this flight
      */
-    val isPicusFlow: Flow<Boolean>
+    var correctedTotalTime: Int
 
     /**
-     * emits true if flight is logged as Copilot, false if not
+     * isPIC toggle for this flight
      */
-    val isCopilotFlow: Flow<Boolean>
+    var isPIC: Boolean
 
     /**
-     * emits true if flight is logged as PF, false if not
+     * isPICUS toggle for this flight
      */
-    val isPfFlow: Flow<Boolean>
+    var isPICUS: Boolean
 
     /**
-     * MultiPilot Time in minutes Flow
+     * isSim toggle for this flight
      */
-    val multiPilotTimeFlow: Flow<Int>
+    var isPF: Boolean
 
     /**
-     * IFR Time in minutes Flow
+     * the augmented crew status
      */
-    val ifrTimeFlow: Flow<Int>
-
-    /**
-     * Night Time in minutes Flow
-     */
-    val nightTimeFlow: Flow<Int>
-
-    /**
-     * Total Time in minutes Flow
-     */
-    val correctedTotalTimeFlow: Flow<Int>
-
-    /**
-     * Augmented Crew data Flow
-     */
-    val augmentedCrewFlow: Flow<Int>
-
-    /**
-     * emits true if flight is auto-calculating values, false if not
-     */
-    val isAutoValuesFlow: Flow<Boolean>
-
-    /**
-     * Set date for this flight without changing times
-     */
-    fun setDate(date: LocalDate)
-
-    /**
-     * Set Flight Number for this flight
-     */
-    fun setFlightNumber(flightNumber: String)
-
-    /**
-     * Set Origin for this flight
-     */
-    fun setOrig(orig: Airport)
-
-    /**
-     * Set Destination for this flight
-     */
-    fun setDest(dest: Airport)
-
-    /**
-     * Set timeOut for this flight
-     */
-    fun setTimeOut(timeOut: Instant)
-
-    /**
-     * Set timeIn for this flight
-     */
-    fun setTimeIn(timeIn: Instant)
-
-    /**
-     * Set [Aircraft] for this flight
-     */
-    fun setAircraft(aircraft: Aircraft)
-
-    /**
-     * Set [TakeoffLandings] for this flight
-     */
-    fun setTakeoffLandings(takeoffLandings: TakeoffLandings)
-
-    /**
-     * Set PIC Name for this flight
-     */
-    fun setName(name: String)
-
-    /**
-     * Set other names for this flight
-     */
-    fun setName2(names: List<String>)
-
-    /**
-     * Set Remarks for this flight
-     */
-    fun setRemarks(remarks: String)
-
-    /**
-     * Set signature for this flight
-     */
-    fun setSignature(signature: String)
-
-    /**
-     * Set isDual toggle for this flight
-     */
-    fun setIsDual(isDual: Boolean)
-
-    /**
-     * Set isInstructor toggle for this flight
-     */
-    fun setIsInstructor(isInstructor: Boolean)
-
-    /**
-     * Set isMultiPilot toggle for this flight
-     */
-    fun setMultiPilotTime(multiPilotTime: Int)
-
-    /**
-     * Set isIFR toggle for this flight
-     */
-    fun setIfrTime(ifrTime: Int)
-
-    /**
-     * Set isPIC toggle for this flight
-     */
-    fun setIsPIC(isPIC: Boolean)
-
-    /**
-     * Set isPICUS toggle for this flight
-     */
-    fun setIsPICUS(isPICUS: Boolean)
-
-    /**
-     * Set isSim toggle for this flight
-     */
-    fun setIsPF(isPF: Boolean)
-
-    /**
-     * Set the augmented crew status
-     */
-    fun setAugmentedCrew(augmentedCrew: Int)
+    var augmentedCrew: Int
 
     /**
      * Set isAutoValues toggle for this flight
      */
-    fun setIsAutoValues(isAutoValues: Boolean)
+    var isAutoValues: Boolean
 
     companion object{
         val instanceFlow: Flow<WorkingFlight?> = MutableStateFlow(null)

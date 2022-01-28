@@ -19,20 +19,6 @@
 
 package nl.joozd.logbookapp.model.dataclasses
 
-/*****************
- * ADDING/REMOVING FIELDS: change:
- * -x this
- * -x flightDbHelper - also update table version!
- * -x FlightTable (in Tables.kt)
- * -x FlightData in DbClasses.kt
- * -x DbDataMapper: convertFlightsToDomain and convertFlightsFromDomain
- *
- * ON SERVER:
- * -x Flight.py
- * -x PdfWorker buildFlight
- *
- * -x rebuild user data, when in production make sure backwards compatibility is here!
- */
 
 import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.joozdlogcommon.BasicFlight
@@ -43,7 +29,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 data class Flight(
-    val flightID: Int,
+    val flightID: Int = FLIGHT_ID_NOT_INITIALIZED,
     val orig: String = "",
     val dest: String = "",
     val timeOut: Long = Instant.now().epochSecond -3600,    // timeOut and timeIn are seconds since epoch
@@ -51,7 +37,7 @@ data class Flight(
     val correctedTotalTime: Int = 0,                        //  if 0 it will be disregarded
     val multiPilotTime: Int = 0,
     val nightTime: Int = 0,
-    val ifrTime: Int = 0,                                    // 0 means 0 minutes, -1 means this is a VFR flight
+    val ifrTime: Int = 0,                                   // 0 means 0 minutes, -1 means this is a VFR flight
     val simTime: Int = 0,
     val aircraftType: String = "",                          // overrides standard AircraftType that goes with registration
     val registration: String = "",
@@ -192,5 +178,7 @@ data class Flight(
     companion object{
         fun createEmpty() = Flight(FLIGHT_ID_NOT_INITIALIZED)
         const val FLIGHT_ID_NOT_INITIALIZED = -1
+        const val FLIGHT_IS_VFR = -1
+        const val NO_TIMESTAMP = 0L
     }
 }

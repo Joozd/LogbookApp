@@ -30,6 +30,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import java.util.*
 
 class NewUserActivityViewModel: JoozdlogActivityViewModel() {
@@ -182,8 +183,8 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         feedback(NewUserActivityEvents.FINISHED)
     }
 
-    fun syncFlights(){
-        flightRepository.syncIfNeeded()
+    private fun syncFlights(){
+        JoozdlogWorkersHub.syncTimeAndFlightsIfFlightsUpdated()
     }
 
     /**

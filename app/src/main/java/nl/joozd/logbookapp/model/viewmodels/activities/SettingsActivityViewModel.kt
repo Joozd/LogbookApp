@@ -325,7 +325,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
             UserManagement.signedIn -> {
                 Preferences.lastUpdateTime = 0
                 Preferences.useCloud = true
-                flightRepository.syncIfNeeded()
+                JoozdlogWorkersHub.syncTimeAndFlightsIfFlightsUpdated()
             }
 
             // Activity will take care of showing &Cs if needed
@@ -364,7 +364,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     fun dontPostponeCalendarSync(){
         Preferences.calendarDisabledUntil = 0
-        flightRepository.syncIfNeeded()
+        JoozdlogWorkersHub.syncTimeAndFlightsIfFlightsUpdated()
     }
 
     private fun makeTimeString(instant: Long): String =

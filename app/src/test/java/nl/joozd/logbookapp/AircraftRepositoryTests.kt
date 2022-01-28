@@ -41,11 +41,9 @@ import org.junit.Test
  */
 @ExperimentalCoroutinesApi
 class AircraftRepositoryTests {
-
     @Before
     fun setUp(){
-        DispatcherProvider.switchToTestDispatchers(UnconfinedTestDispatcher(TestCoroutineScheduler()))
-    }
+        DispatcherProvider.switchToTestDispatchers(UnconfinedTestDispatcher(TestCoroutineScheduler()))    }
 
     @After
     fun cleanUp(){
@@ -59,7 +57,7 @@ class AircraftRepositoryTests {
             val aircraftRepository = AircraftRepository.mock(MockDatabase())
                 // DispatcherProvider.default() provides UnconfinedTestDispatcher(TestCoroutineScheduler()) for my test.
             launch(DispatcherProvider.default()) {
-                aircraftRepository.aircraftTypesFlow.collect {
+                aircraftRepository.aircraftTypesFlow().collect {
                     println("emitted ${it.size} flights: $it")
                     currentTypesList = it
                 }

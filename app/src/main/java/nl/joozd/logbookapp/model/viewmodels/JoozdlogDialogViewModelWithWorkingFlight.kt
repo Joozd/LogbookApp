@@ -19,22 +19,13 @@
 
 package nl.joozd.logbookapp.model.viewmodels
 
+import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
+
 /**
  * This gets to be used for when a workingFlight must be set.
  * If it is not set, it will cause a NullPointerException.
  * For non-WorkingFlight viewModel use JoozdlogDialogViewModel()
  */
 abstract class JoozdlogDialogViewModelWithWorkingFlight: JoozdlogDialogViewModel() {
-    protected val workingFlight = flightRepository.wf
-    /**
-     * Set undo values on initial construction
-     * If multiple Dialogs are opened at the same time, this will get overwritten
-     */
-    protected val snapshot = workingFlight.toFlight()
-
-    /**
-     * Undo all changes made after starting this dialog (including changes made in other dialogs or EditFlightFragment)
-     * Can be overridden by a custom undo function
-     */
-    open fun undo() = workingFlight.setFromFlight(snapshot)
+    protected val workingFlight = WorkingFlight.instance
 }

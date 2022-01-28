@@ -40,7 +40,7 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         // Only time that happens thouhg is after and Airport DB update, which happens so rarely
         // that this doesn't warrant putting in back-and-forth lifecycle checking with Activity.
         viewModelScope.launch{
-            AirportRepository.getInstance().airportDataCacheFlow().collect{
+            AirportRepository.instance.airportDataCacheFlow().collect{
                 airportDataCache = it
             }
         }

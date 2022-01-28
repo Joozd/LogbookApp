@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels
 
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
+import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 
 /**
  * This gets to be used for when a workingFlight must be set.
@@ -27,5 +27,5 @@ import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
  * For non-WorkingFlight viewModel use JoozdlogDialogViewModel()
  */
 abstract class JoozdlogDialogViewModelWithWorkingFlight: JoozdlogDialogViewModel() {
-    protected val workingFlight = WorkingFlight.instance!!
+    protected val workingFlight = FlightEditor.instance!!
 }

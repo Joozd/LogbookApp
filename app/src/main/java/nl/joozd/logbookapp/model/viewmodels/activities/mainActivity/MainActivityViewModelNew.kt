@@ -30,7 +30,7 @@ import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
+import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.util.*
 
@@ -46,7 +46,7 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         }
     }
 
-    val workingFlightFlow: Flow<WorkingFlight?> = MutableStateFlow<WorkingFlight?>(null)
+    val flightEditorFlow: Flow<FlightEditor?> = MutableStateFlow<FlightEditor?>(null)
     val searchFieldOpenFlow: Flow<Boolean> = MutableStateFlow(false)
     private val searchQueryFlow: Flow<String> = MutableStateFlow("")
     private val searchTypeFlow: Flow<Int> = MutableStateFlow(SEARCH_ALL)
@@ -58,7 +58,7 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         searchFlights(allFlights, query, searchType)
     }
 
-    private var _workingFlight: WorkingFlight? by CastFlowToMutableFlowShortcut(workingFlightFlow)
+    private var _FlightEditor: FlightEditor? by CastFlowToMutableFlowShortcut(flightEditorFlow)
     private var searchFieldOpen: Boolean by CastFlowToMutableFlowShortcut(searchFieldOpenFlow)
     private var searchQuery: String by CastFlowToMutableFlowShortcut(searchQueryFlow)
     private var searchType: Int by CastFlowToMutableFlowShortcut(searchTypeFlow)
@@ -74,11 +74,11 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
     // This will create a new WorkingFlight instance in _workingFlight.
     // MainActivity should collect this an launch an Edit Flight dialog
     fun showEditFlightDialog(flight: Flight){
-        WorkingFlight.setFromFlight(flight)
+        FlightEditor.setFromFlight(flight)
     }
 
     fun menuSelectedAddFlight(){
-        WorkingFlight.setNewflight()
+        FlightEditor.setNewflight()
     }
 
     fun menuSelectedSearch(): Boolean {

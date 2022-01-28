@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.utils
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlightImpl
 import kotlin.reflect.KProperty
 
 /**

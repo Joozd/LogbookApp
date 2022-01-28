@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.model.workingFlight
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -30,7 +29,6 @@ import nl.joozd.logbookapp.extensions.atDate
 import nl.joozd.logbookapp.extensions.plusDays
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.TwilightCalculator
 import java.time.Duration
 import java.time.Instant
@@ -41,7 +39,7 @@ import java.time.LocalDate
  * Data should be filled with actual classes for calculating things like night time from viewModel
  * after being instantiated.
  */
-class WorkingFlightImpl(flight: Flight): WorkingFlight {
+class FlightEditorImpl(flight: Flight): FlightEditor {
     override val isNewFlight: Boolean = flight.flightID == Flight.FLIGHT_ID_NOT_INITIALIZED
 
 

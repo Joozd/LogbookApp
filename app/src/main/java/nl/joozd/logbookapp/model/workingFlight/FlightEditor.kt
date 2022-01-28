@@ -35,7 +35,7 @@ import java.time.LocalDate
  * Implementation should take care of updating related data
  *  (eg. IFR if aircraft changes, night time if times or airport changes)
  */
-interface WorkingFlight {
+interface FlightEditor {
     /**
      * True if this is a new flight, false if it is an existing flight
      */
@@ -162,15 +162,15 @@ interface WorkingFlight {
     var isAutoValues: Boolean
 
     companion object{
-        val instanceFlow: Flow<WorkingFlight?> = MutableStateFlow(null)
-        private var INSTANCE: WorkingFlight? by CastFlowToMutableFlowShortcut(instanceFlow)
+        val instanceFlow: Flow<FlightEditor?> = MutableStateFlow(null)
+        private var INSTANCE: FlightEditor? by CastFlowToMutableFlowShortcut(instanceFlow)
 
         // NOTE this is not a singleton. Take care to close any dialogs editing this WorkingFlight
         // when instanceFlow emits.
-        val instance: WorkingFlight? get() = INSTANCE
+        val instance: FlightEditor? get() = INSTANCE
 
         fun setFromFlight(flight: Flight) {
-            INSTANCE = WorkingFlightImpl(flight)
+            INSTANCE = FlightEditorImpl(flight)
         }
 
         fun setNewflight() = setFromFlight(Flight.createEmpty())

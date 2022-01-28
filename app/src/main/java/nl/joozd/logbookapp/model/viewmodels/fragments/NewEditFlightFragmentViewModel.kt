@@ -36,14 +36,14 @@ import nl.joozd.logbookapp.data.repository.SelfUpdatingDataCache
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlight
+import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlightOld
 import java.time.Instant
 import java.time.LocalTime
 
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
-    private val wf = WorkingFlight.instance!! // this Fragment should not have launched if wf is null
+    private val wf = FlightEditor.instance!! // this Fragment should not have launched if wf is null
     private val dataCache = SelfUpdatingDataCache(viewModelScope)
 
     private var cachedSortedRegistrationsList: List<String> = emptyList()

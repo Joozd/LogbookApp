@@ -97,7 +97,7 @@ class MainActivity : JoozdlogActivity() {
     }
 
     private fun collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded(){
-        viewModel.workingFlightFlow.launchCollectWhileLifecycleStateStarted{
+        viewModel.flightEditorFlow.launchCollectWhileLifecycleStateStarted{
             killWorkingFlightEditingFragments()
             if (it != null)
                 launchEditFlightFragment()

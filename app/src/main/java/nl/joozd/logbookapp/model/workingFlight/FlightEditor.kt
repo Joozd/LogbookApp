@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
+import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.time.Instant
@@ -44,7 +45,7 @@ interface FlightEditor {
     /**
      * A flow of the Flight we are currently working on
      */
-    val flightFlow: Flow<Flight>
+    val flightFlow: Flow<ModelFlight>
 
     /**
      * Get/Set date for this flight without changing times
@@ -117,6 +118,12 @@ interface FlightEditor {
     var isInstructor: Boolean
 
     /**
+     * isSim toggle for this flight
+     */
+    var isSim: Boolean
+
+
+    /**
      * isMultiPilot toggle for this flight
      */
     var multiPilotTime: Int
@@ -159,7 +166,12 @@ interface FlightEditor {
     /**
      * Set isAutoValues toggle for this flight
      */
-    var isAutoValues: Boolean
+    var autoFill: Boolean
+
+    /**
+     * Save flight to DB
+     */
+    suspend fun save()
 
     companion object{
         val instanceFlow: Flow<FlightEditor?> = MutableStateFlow(null)
@@ -169,11 +181,11 @@ interface FlightEditor {
         // when instanceFlow emits.
         val instance: FlightEditor? get() = INSTANCE
 
-        fun setFromFlight(flight: Flight) {
+        fun setFromFlight(flight: ModelFlight) {
             INSTANCE = FlightEditorImpl(flight)
         }
 
-        fun setNewflight() = setFromFlight(Flight.createEmpty())
+        fun setNewflight() = setFromFlight(ModelFlight.createEmpty())
 
         fun close() {
             INSTANCE = null

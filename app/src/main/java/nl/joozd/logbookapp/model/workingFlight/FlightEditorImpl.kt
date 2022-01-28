@@ -25,278 +25,178 @@ import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.extensions.atDate
 import nl.joozd.logbookapp.extensions.plusDays
 import nl.joozd.logbookapp.extensions.toLocalDate
+import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.TwilightCalculator
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 
 /**
- * Initialize with a flight; dummy classes (Airport, Aircraft) will be made to keep data.
- * Data should be filled with actual classes for calculating things like night time from viewModel
- * after being instantiated.
+ * This holds a ModelFlight with entries to edit it.
  */
-class FlightEditorImpl(flight: Flight): FlightEditor {
+class FlightEditorImpl(flight: ModelFlight): FlightEditor {
     override val isNewFlight: Boolean = flight.flightID == Flight.FLIGHT_ID_NOT_INITIALIZED
 
+    override val flightFlow: Flow<ModelFlight> = MutableStateFlow(flight)
+
+    private var _flight: ModelFlight by CastFlowToMutableFlowShortcut(flightFlow)
 
 
-
-
-
-
-    // Not a StateFlow!
-    override val isMultiPilotFlow: Flow<Boolean> = aircraftFlow.map { it.type?.multiPilot ?: false }
-
-    // Not a StateFlow!
-    override val isIfrFlow: Flow<Boolean> = ifrTimeFlow.map{ it > 0 }
-
-    override val isPicFlow: Flow<Boolean> = MutableStateFlow()
-
-    override val isPicusFlow: Flow<Boolean> = MutableStateFlow()
-
-    override val isCopilotFlow: Flow<Boolean> = MutableStateFlow()
-
-    override val isPfFlow: Flow<Boolean> = MutableStateFlow()
-
-    override val isAutoValuesFlow: Flow<Boolean> = MutableStateFlow()
-
-    /*
-     * Shortcuts for functions
-     */
     override var flightNumber: String = flight.flightNumber
 
-    override var orig: Airport = makeDummyAirport(flight.orig)
+    override var orig: Airport
+        get() = _flight.orig
         set(orig) {
-            field = orig
-            autoUpdateValuesIfAutovaluesEnabled()
+            _flight = _flight.copy (orig = orig).autoValues()
         }
 
-    override var dest: Airport = makeDummyAirport(flight.dest)
+    override var dest: Airport
+        get() = _flight.dest
         set(dest) {
-            field = dest
-            autoUpdateValuesIfAutovaluesEnabled()
+            _flight = _flight.copy (dest = dest).autoValues()
         }
 
-    override var timeOut: Instant = Instant.ofEpochSecond(flight.timeOut)
+    override var timeOut: Instant
+        get() = _flight.timeOut
         set(timeOut) {
-            field = timeOut
-            autoUpdateValuesIfAutovaluesEnabled()
+            _flight = _flight.copy (timeOut = timeOut).autoValues()
         }
 
-    override var timeIn: Instant = Instant.ofEpochSecond(flight.timeIn)
+    override var timeIn: Instant
+        get() = _flight.timeIn
         set(timeIn) {
-            field = timeIn
-            autoUpdateValuesIfAutovaluesEnabled()
+            _flight = _flight.copy (timeIn = timeIn).autoValues()
         }
+
     override var date: LocalDate
         get() = timeOut.toLocalDate()
         set(date) {
-            timeOut = timeOut.atDate(date)
-            timeIn = timeIn.atDate(date).let{
+            val tOut = timeOut.atDate(date)
+            val tIn = timeIn.atDate(date).let{
                 if (it > timeOut) it
                 else it.plusDays(1)
             }
-            autoUpdateValuesIfAutovaluesEnabled()
+            _flight = _flight.copy (timeOut = tOut, timeIn = tIn).autoValues()
         }
 
-    override var aircraft: Aircraft = makeDummyAircraft(flight)
-    override var takeoffLandings = TakeoffLandings.fromFlight(flight)
-    override var name: String = flight.name
-    override var name2: List<String> = flight.name2.split(";")
-    override var remarks: String = flight.remarks
-    override var multiPilotTime: Int = flight.multiPilotTime
-    override var ifrTime: Int = flight.ifrTime
-    override var nightTime: Int = flight.nightTime
-    override var correctedTotalTime: Int = flight.correctedTotalTime            // this is always 0 when autoValues
-    override var augmentedCrew: Int = flight.augmentedCrew                      // parse this in ViewModel
-    override var isSim: Boolean = flight.isSim
-    override var signature: String = flight.signature
-    override var isDual: Boolean = flight.isDual
-    override var isInstructor: Boolean = flight.isInstructor
-    override var isPIC: Boolean = flight.isPIC
-    override var isPICUS: Boolean = flight.isPICUS
-    override var isCopilot: Boolean = flight.isCoPilot
-    override var isPF: Boolean = flight.isPF
-    override var isAutoValues: Boolean = flight.autoFill
-
-    val crew get() = _augmentedCrew
-
-    private val _isIFR: Boolean
-        get() = _ifrTime > 0
-    private val _isMultiPilot: Boolean
-        get() = _aircraft.type?.multiPilot ?: false
-
-
-    // Influences auto-values (Night time)
-    override fun
-
-
-
-
-    // Influences auto-values
-    override
-
-    // Influences auto-values
-    override fun
-
-    // Influences auto-values (MultiPilot time)
-    override fun setAircraft(aircraft: Aircraft) {
-        _aircraft = aircraft
-        autoUpdateValuesIfAutovaluesEnabled()
-    }
-
-
-    //This value also calculated automatically
-    override fun setMultiPilotTime(multiPilotTime: Int) {
-        _multiPilotTime = multiPilotTime
-        disableAutoValuesIfConflicting()
-    }
-
-    //This value also calculated automatically
-    override fun setIfrTime(ifrTime: Int) {
-        _ifrTime = ifrTime
-        disableAutoValuesIfConflicting()
-    }
-
-    // Influences auto-values (PIC matters for Augmented crew logged time)
-    override fun setIsPIC(isPIC: Boolean) {
-        _isPIC = isPIC
-        autoUpdateValuesIfAutovaluesEnabled()
-    }
-
-    override fun setIsPICUS(isPICUS: Boolean) {
-        _isPICUS = isPICUS
-    }
-
-    override fun setIsPF(isPF: Boolean) {
-        _isPF = isPF
-        updateTakeOffLandingsIfRequired()
-    }
-
-    override fun setAugmentedCrew(augmentedCrew: AugmentedCrew) {
-        _augmentedCrew = augmentedCrew
-        autoUpdateValuesIfAutovaluesEnabled()
-    }
-
-    override fun setIsAutoValues(isAutoValues: Boolean) {
-        _isAutoValues = isAutoValues
-        autoUpdateValuesIfAutovaluesEnabled()
-    }
-
-    private fun autoUpdateValuesIfAutovaluesEnabled(){
-        if (_isAutoValues){
-            autoValues()
+    override var aircraft: Aircraft
+        get() = _flight.aircraft
+        set(aircraft) {
+            _flight = _flight.copy (aircraft = aircraft).autoValues()
         }
-    }
 
-    /**
-     * If [_isPF] and [_takeOffLandings] do not match, updates _takeOffLandings if it was 1/1 or 0/0
-     */
-    private fun updateTakeOffLandingsIfRequired(){
-        when{
-            oneTakeoffOneLanding() && !_isPF -> _takeOffLandings = TakeoffLandings(0,0)
-            noTakeoffNoLanding() && _isPF -> {
-                _takeOffLandings = TakeoffLandings(1,1)
-                updateTakeoffLandingsForNightTime()
-            }
-            // else -> do nothing
+    override var takeoffLandings: TakeoffLandings
+        get() = _flight.takeoffLandings
+        set(takeoffLandings) {
+            _flight = _flight.copy (takeoffLandings = takeoffLandings).autoValues()
         }
-    }
 
-
-
-
-
-    /*
-     * Autovalues makes sure all related values change if a certain field is changed.
-     * Values that need to be calculated:
-     * - IFR time (depends on isSim, isIFR, timeOut, timeIn, augmentedCrew)
-     * - Night time (depends on isSim, orig, dest, timeOut, timeIn, augmentedCrew)
-     * - isCopilot (depends on aircraft, isPic)
-     */
-    private fun autoValues(){
-        // NOTE TO SELF:
-        // Run all autoValues calculations every time. Fast enough and makes program much more simple.
-        // If it is not fast enough after all certain parts (i.e. night time) can be done async.
-        _correctedTotalTime = 0
-        _nightTime = calculateNightTime()
-        _takeOffLandings = updateTakeoffLandingsForNightTime()
-        _ifrTime = calculateIfrTime()
-        _multiPilotTime = calculateMultiPilotTime()
-    }
-
-    /*
-     * Disables autovalues if it was enabled and IFR, MultiPilot or Night time don't match with
-     * calculated values.
-     * Call this when changing a value that is also auto-calculated
-     */
-    private fun disableAutoValuesIfConflicting(){
-        _isAutoValues =
-            _isAutoValues &&
-            calculateIfrTime() == _ifrTime &&
-            calculateMultiPilotTime() == _multiPilotTime &&
-            calculateNightTime() == _nightTime
-    }
-
-    private fun calculateNightTime(): Int =
-        TwilightCalculator(_timeOut).minutesOfNight(_orig, _dest, _timeOut, _timeIn)
-
-    /**
-     * Will only work for 1/1 takeoff/landing, otheriwse will do nothing.
-     */
-    private fun updateTakeoffLandingsForNightTime(): TakeoffLandings =
-        if (oneTakeoffOneLanding()){
-            val takeoffDuringDay = TwilightCalculator(_timeOut).itIsDayAt(_orig, _timeOut)
-            val landingDuringDay = TwilightCalculator(_timeIn).itIsDayAt(_dest, _timeIn)
-            val toDay = if (takeoffDuringDay) 1 else 0
-            val toNight = 1 - toDay
-            val ldgDay = if (landingDuringDay) 1 else 0
-            val ldgNight = 1 - ldgDay
-            TakeoffLandings(toDay, toNight, ldgDay, ldgNight, _takeOffLandings.autoLand)
+    override var name: String
+        get() = _flight.name
+        set(name) {
+            _flight = _flight.copy (name = name).autoValues()
         }
-        else _takeOffLandings
 
-    private fun oneTakeoffOneLanding() =
-        _takeOffLandings.takeOffs == 1 && _takeOffLandings.landings == 1
+    override var name2: List<String>
+        get() = _flight.name2
+        set(name2) {
+            _flight = _flight.copy (name2 = name2).autoValues()
+        }
 
-    private fun noTakeoffNoLanding() =
-        _takeOffLandings.takeOffs == 0 && _takeOffLandings.landings == 0
+    override var remarks: String
+        get() = _flight.remarks
+        set(remarks) {
+            _flight = _flight.copy (remarks = remarks).autoValues()
+        }
 
+    override var multiPilotTime: Int
+        get() = _flight.multiPilotTime
+        set(multiPilotTime) {
+            _flight = _flight.copy (multiPilotTime = multiPilotTime).autoValues()
+        }
 
-    private fun calculateIfrTime() =
-        if (_isIFR) calculateTotalTime()
-        else 0
+    override var ifrTime: Int
+        get() = _flight.ifrTime
+        set(ifrTime){
+            if (ifrTime != _flight.ifrTime)
+            _flight = _flight.copy(ifrTime = ifrTime, autoFill = false).autoValues()
+        }
 
-    private fun calculateMultiPilotTime() =
-        if (_isMultiPilot) calculateTotalTime()
-        else 0
+    override var nightTime: Int
+        get() = _flight.nightTime
+        set(nightTime) {
+            _flight = _flight.copy (nightTime = nightTime).autoValues()
+        }
 
-    private fun calculateTotalTime(): Int =
-        if (_isSim) 0
-        else _augmentedCrew.getLogTime(getDurationOfFlight(), _isPIC)
+    override var correctedTotalTime: Int            // this is always 0 when autoValues
+        get() = _flight.correctedTotalTime
+        set(correctedTotalTime) {
+            _flight = _flight.copy (correctedTotalTime = correctedTotalTime).autoValues()
+        }
 
+    override var augmentedCrew: Int                    // parse this in ViewModel
+        get() = _flight.augmentedCrew
+        set(augmentedCrew) {
+            _flight = _flight.copy (augmentedCrew = augmentedCrew).autoValues()
+        }
 
-    private fun getDurationOfFlight(): Duration =
-        Duration.between(_timeOut, _timeIn)
+    override var isSim: Boolean
+        get() = _flight.isSim
+        set(isSim) {
+            _flight = _flight.copy (isSim = isSim).autoValues()
+        }
 
+    override var signature: String
+        get() = _flight.signature
+        set(signature) {
+            _flight = _flight.copy (signature = signature).autoValues()
+        }
 
-    private fun makeDummyAirport(ident: String): Airport =
-        Airport(ident = ident)
+    override var isDual: Boolean
+        get() = _flight.isDual
+        set(isDual) {
+            _flight = _flight.copy (isDual = isDual).autoValues()
+        }
 
-    private fun makeDummyAircraft(flight: Flight): Aircraft =
-        Aircraft(registration = flight.registration, type = makeDummyAircraftType(flight))
+    override var isInstructor: Boolean
+        get() = _flight.isInstructor
+        set(isInstructor) {
+            _flight = _flight.copy (isInstructor = isInstructor).autoValues()
+        }
 
-    private fun makeDummyAircraftType(flight: Flight): AircraftType =
-        AircraftType(
-            name = "Dummy Aircraft",
-            shortName = flight.aircraftType,
-            multiPilot = flight.multiPilotTime > 0,
-            multiEngine = false
-        )
+    override var isPIC: Boolean
+        get() = _flight.isPIC
+        set(isPIC) {
+            _flight = _flight.copy (isPIC = isPIC).autoValues()
+        }
+
+    override var isPICUS: Boolean
+        get() = _flight.isPICUS
+        set(isPICUS) {
+            _flight = _flight.copy (isPICUS = isPICUS).autoValues()
+        }
+
+    override var isPF: Boolean
+        get() = _flight.isPF
+        set(isPF) {
+            _flight = _flight.copy (isPF = isPF).autoValues()
+        }
+
+    override var autoFill: Boolean
+        get() = _flight.autoFill
+        set(isAutoValues) {
+            _flight = _flight.copy (autoFill = isAutoValues).autoValues()
+        }
+
+    override suspend fun save() {
+        FlightRepositoryWithUndo.instance.save(_flight.toFlight())
+    }
 }
 
 

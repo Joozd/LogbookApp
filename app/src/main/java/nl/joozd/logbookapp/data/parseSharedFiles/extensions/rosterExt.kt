@@ -34,20 +34,15 @@ import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
  *  - Checking if registration is known, also searching for versions with/without spaces and/or hyphens and changing to known reg + type if found.
  */
 suspend fun Roster.postProcess(): ProcessedRoster {
-    val aircraftDataCache = AircraftRepository.getInstance().getAircraftDataCache()
-    val airportDataCache = AirportRepository.getInstance().getAirportDataCache()
+    val aircraftDataCache = AircraftRepository.instance.getAircraftDataCache()
+    val airportDataCache = AirportRepository.instance.getAirportDataCache()
 
     val newFlights = flights.map { flight ->
         // In case airports are IATA format, switch them to ICAO.
-        // I think there is no need to have that set by RosterParser as there is no overlap between (4 letter) ICAO and (3 letter) IATA codes.
+        // There is no need to have that set by RosterParser as there is no overlap between (4 letter) ICAO and (3 letter) IATA codes.
         val orig = airportDataCache.iataToIcao(flight.orig) ?: flight.orig
         val dest = airportDataCache.iataToIcao(flight.dest) ?: flight.dest
 
-        /*
-         * Priority for aircraft data:
-         * 1. If registration from [flight] found in AircraftRepository (Repo), use that registration with type from Repo, ignore any type from Flight
-         * 2. Otherwise, use data from [flight]. Any unknown aircraft type data will be handled where it is used.
-         */
         val foundAircraft = aircraftDataCache.getAircraftFromRegistration(flight.registration)
 
         // result of lambda:

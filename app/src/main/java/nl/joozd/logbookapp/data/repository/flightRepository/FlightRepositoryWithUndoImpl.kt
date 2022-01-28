@@ -97,6 +97,9 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
     override suspend fun getAllFlightsInDB(): List<Flight> =
         repositoryWithDirectAccess.getAllFlightsInDB()
 
+    override fun getAllFlightsFlow(): Flow<List<Flight>> =
+        repositoryWithDirectAccess.getAllFlightsFlow()
+
     /**
      * make a [FlightDataCache] with snapshot flight data
      */

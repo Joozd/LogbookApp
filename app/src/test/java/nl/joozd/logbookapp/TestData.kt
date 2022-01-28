@@ -20,10 +20,16 @@
 package nl.joozd.logbookapp
 
 import nl.joozd.joozdlogcommon.AircraftType
+import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
+import nl.joozd.logbookapp.model.dataclasses.Flight
+import java.io.File
 
 object TestData {
     val aircraftTypes = listOf(
         AircraftType("Test Aircraft 1 (MP/ME)", "TAC1", multiPilot = true, multiEngine = true),
         AircraftType("Test Aircraft 2 (SP/SE)", "TAC2", multiPilot = false, multiEngine = false)
     )
+
+    fun parseFlightsFile(): List<Flight> = FlightsRepositoryExporter.csvToFlights(File("C:\\temp\\joozdlog\\flights.csv").readText(), mock = true)
+    fun flightsFileLines(): List<String> = File("C:\\temp\\joozdlog\\flights.csv").readLines()
 }

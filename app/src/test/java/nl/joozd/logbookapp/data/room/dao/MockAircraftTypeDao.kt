@@ -23,10 +23,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import nl.joozd.logbookapp.data.room.model.AircraftTypeData
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
 class MockAircraftTypeDao: AircraftTypeDao {
     private val simulatedDatabase = ArrayList<AircraftTypeData>()
-    private val simulatedFlow = MutableStateFlow<List<AircraftTypeData>>(listOf(AircraftTypeData("aap", "noot", false, multiEngine = false)))
+    private val simulatedFlow = MutableStateFlow<List<AircraftTypeData>>(emptyList())
+    private var _flow by CastFlowToMutableFlowShortcut(simulatedFlow)
 
     override suspend fun requestAllAircraftTypes(): List<AircraftTypeData> = simulatedDatabase
 
@@ -39,22 +41,17 @@ class MockAircraftTypeDao: AircraftTypeDao {
     }
 
     override suspend fun clearDb() {
-        println("${this::class.simpleName} Clear DB")
         simulatedDatabase.clear()
         emit()
     }
 
     private fun emit(){
-        println("emit() should emit ${simulatedDatabase.size} items")
-        simulatedFlow.update { simulatedDatabase.toList() } // also tried: simulatedFlow.value = simulatedDatabase.toList()
-        println("simulatedFlow.value is now ${simulatedFlow.value.size}")
+        _flow = simulatedDatabase.toList()
     }
 
     override fun getAircraftType(name: String): AircraftTypeData? =
         simulatedDatabase.firstOrNull { it.name == name }
 
-    override fun getAircraftTypeFromShortName(name: String): AircraftTypeData? =
+    override suspend fun getAircraftTypeFromShortName(name: String): AircraftTypeData? =
         simulatedDatabase.firstOrNull { it.shortName == name }
-
-
 }

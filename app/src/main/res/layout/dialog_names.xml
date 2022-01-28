@@ -137,15 +137,7 @@
                         tools:Text="Henk de Vries" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <TextView
-                android:id="@+id/cancelTextView"
-                style="@style/DialogButtonText"
-                android:text="@android:string/cancel"
-                app:layout_constraintBottom_toBottomOf="@+id/saveTextView"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/saveTextView" />
-
-            <TextView
+                <TextView
                 android:id="@+id/saveTextView"
                 style="@style/DialogButtonText"
                 android:layout_marginTop="24dp"

@@ -171,14 +171,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/timeForTakeoffLandingEditTextLayout" />
 
-                <TextView
-                    android:id="@+id/cancelCrewDialogButton"
-                    style="@style/DialogButtonText"
-                    android:text="@android:string/cancel"
-                    android:textAlignment="center"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/saveCrewDialogButon" />
-
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

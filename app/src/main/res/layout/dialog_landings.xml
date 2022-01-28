@@ -289,14 +289,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/autolandCard" />
 
-                <TextView
-                    android:id="@+id/cancelTextButton"
-                    style="@style/DialogButtonText"
-                    android:text="@android:string/cancel"
-                    android:textAlignment="center"
-                    app:layout_constraintBottom_toBottomOf="@+id/saveTextButon"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/saveTextButon" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

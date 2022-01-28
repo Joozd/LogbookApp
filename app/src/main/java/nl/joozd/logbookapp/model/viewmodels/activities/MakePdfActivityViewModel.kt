@@ -35,6 +35,7 @@ import nl.joozd.logbookapp.utils.pdf.PdfLogbookDrawing
 import nl.joozd.logbookapp.utils.pdf.PdfLogbookMakerValues
 import java.util.*
 
+//TODO migrate to Flow
 class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
     /***********************************************************************************************
      * private parts

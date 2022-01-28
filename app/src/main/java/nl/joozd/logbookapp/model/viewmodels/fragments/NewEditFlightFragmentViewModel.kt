@@ -466,7 +466,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         .distinct()
 
     private fun getBestHitForPartialRegistration(r: String): Aircraft? =
-        aircraftDataCache?.getAircraftFromRegistration(r)
+        dataCache.aircraftDataCache.getAircraftFromRegistration(r)
         ?: aircraftDataCache?.getAircraftFromRegistration(findBestHitForRegistration(r,cachedSortedRegistrationsList))
 
     //TODO Is there a way to have this done in WorkingFlight itself without leaking the Flow?

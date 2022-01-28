@@ -48,6 +48,11 @@ interface FlightRepository {
     fun getAllFlightsFlow(): Flow<List<Flight>>
 
     /**
+     * Get all valid (DELETEFLAG = false) Flights
+     */
+    suspend fun getAllFlights(): List<Flight>
+
+    /**
      * make a [FlightDataCache] with snapshot flight data
      */
     suspend fun getFLightDataCache(): FlightDataCache

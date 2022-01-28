@@ -38,70 +38,41 @@ class FlightRepositoryImpl(
     private val flightDao = database.flightDao()
     private val idGenerator = IDGenerator()
 
-    /**
-     * Get a single flight by it's ID
-     */
     override suspend fun getFlightByID(flightID: Int): Flight? =
         flightDao.getFlightById(flightID)?.toFlight()
 
     override suspend fun getFlightsByID(ids: Collection<Int>): List<Flight> =
         flightDao.getFlightsByID(ids).map{ it.toFlight() }
 
-
-    /**
-     * Get all flights (including deleted ones)
-     * For only usable flights, use [FlightDataCache.flights]
-     */
     override suspend fun getAllFlightsInDB(): List<Flight> =
         flightDao.getAllFlights().map { it.toFlight() }
 
-    /**
-     * Get a Flow of all valid (DELETEFLAG = false) Flights
-     */
     override fun getAllFlightsFlow(): Flow<List<Flight>> =
         flightDao.validFlightsFlow().map { it.toFlights() }
 
-    /**
-     * suspend fun getFlightDataCache
-     */
+    override suspend fun getAllFlights(): List<Flight> =
+        getValidFlightsFromDao()
+
     override suspend fun getFLightDataCache(): FlightDataCache =
         FlightDataCache.make(getValidFlightsFromDao())
 
-    /**
-     * Get a flow of updated FlightDataCaches
-     */
     override fun flightDataCacheFlow(): Flow<FlightDataCache> =
         flightDao.validFlightsFlow().map {
             FlightDataCache.make(it.toFlights())
         }
 
-    /**
-     * Save a flight to DB.
-     */
     override suspend fun save(flight: Flight) {
         save(listOf(flight))
     }
 
-    /**
-     * Save a collection of Flights to DB.
-     */
     override suspend fun save(flights: Collection<Flight>) {
         saveWithIDAndTimestamp(flights)
     }
 
-    /**
-     * Save a flight bypassing all updating that is usually done before saving
-     * (e.g. updating timestamp)
-     */
     override suspend fun saveDirectToDB(flight: Flight) {
         saveDirectToDB(listOf(flight))
     }
 
-
-    /**
-     * Save a Collection<Flight> bypassing all updating that is usually done before saving
-     * (e.g. updating timestamp)
-     */
     override suspend fun saveDirectToDB(flights: Collection<Flight>) {
         //If size too big, it will chunk and retry.
         if (flights.size > MAX_SQL_BATCH_SIZE)
@@ -112,16 +83,10 @@ class FlightRepositoryImpl(
         }
     }
 
-    /**
-     * Delete a flight.
-     */
     override suspend fun delete(flight: Flight) {
         delete(listOf(flight))
     }
 
-    /**
-     * Delete a collection of flights.
-     */
     override suspend fun delete(flights: Collection<Flight>) {
         val flightsToDeleteHard = flights.filter { it.unknownToServer }
         val flightsToDeleteSoft = flights.filter { !it.unknownToServer }
@@ -129,22 +94,13 @@ class FlightRepositoryImpl(
         deleteSoft(flightsToDeleteSoft)
     }
 
-    /**
-     * Generate a flight ID that can safely be used to save a new flight to DB at a later point.
-     */
     override suspend fun generateAndReserveNewFlightID(highestTakenID: Int): Int =
         idGenerator.generateID(highestTakenID)
 
-    /**
-     * Delete a flight hard from database
-     */
     override suspend fun deleteHard(flight: Flight) {
         deleteHard(listOf(flight))
     }
 
-    /**
-     * Delete a collection of Flights hard from database
-     */
     override suspend fun deleteHard(flights: Collection<Flight>) {
         //If size too big, it will chunk and retry.
         if (flights.size > MAX_SQL_BATCH_SIZE)

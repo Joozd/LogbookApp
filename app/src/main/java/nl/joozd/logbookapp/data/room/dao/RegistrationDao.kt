@@ -19,14 +19,12 @@
 
 package nl.joozd.logbookapp.data.room.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
-import nl.joozd.logbookapp.data.room.model.AircraftTypeData
 
 @Dao
 interface RegistrationDao {

@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.joozd.logbookapp.AircraftTestData
+import nl.joozd.logbookapp.data.room.model.toAircraftRegistrationWithType
 import nl.joozd.logbookapp.data.room.model.toAircraftType
 import nl.joozd.logbookapp.data.room.model.toData
 import nl.joozd.logbookapp.data.room.model.toFlight
@@ -47,7 +48,7 @@ class MockDatabaseTests {
     }
 
     @Test
-    fun testFlightDao(){
+    fun testMockFlightDao(){
         val dao = db.flightDao()
         runTest {
             // test validFlightsFlow
@@ -86,12 +87,12 @@ class MockDatabaseTests {
 
                 cancelAndConsumeRemainingEvents()
             }
-            println("testFlightDao OK")
+            println("testMockFlightDao OK")
         }
     }
 
     @Test
-    fun testAirportDao(){
+    fun testMockAirportDao(){
         val dao = db.airportDao()
         runTest {
             dao.airportsFlow().test {
@@ -116,6 +117,7 @@ class MockDatabaseTests {
                 assertEquals(0, awaitItem().size)
 
                 cancelAndConsumeRemainingEvents()
+                println("testMockAirportDao OK")
             }
 
         }
@@ -151,6 +153,34 @@ class MockDatabaseTests {
 
                 cancelAndConsumeRemainingEvents()
                 println("testMockAircraftTypeDao OK")
+            }
+        }
+    }
+
+    @Test
+    fun testMockRegistrationDao(){
+        val dao = db.registrationDao()
+        runTest {
+            //test flow
+            dao.allRegistrationsFlow().test{
+                // mock DAO starts empty
+                assert(awaitItem().isEmpty())
+
+                //test save
+                dao.save(AircraftTestData.arwt1.toData())
+                assertEquals(1, awaitItem().size)
+                dao.save(AircraftTestData.arwt2.toData())
+                assertEquals(2, awaitItem().size)
+
+                //test requestAllRegistrations
+                assertEquals(AircraftTestData.regsWithTypes, dao.requestAllRegistrations().map { it.toAircraftRegistrationWithType() })
+
+                //test save overwrite
+                dao.save(AircraftTestData.updatedArwt1.toData())
+                assertEquals(2, awaitItem().size)
+
+                cancelAndConsumeRemainingEvents()
+                println("testMockRegistrationDao OK")
             }
         }
     }

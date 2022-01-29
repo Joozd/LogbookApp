@@ -20,15 +20,23 @@
 package nl.joozd.logbookapp
 
 import nl.joozd.joozdlogcommon.AircraftType
+import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
 import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
+import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.io.File
 import java.time.Instant
 
 object AircraftTestData {
     val aircraftType1 = AircraftType("Test Aircraft 1 (MP/ME)", "TAC1", multiPilot = true, multiEngine = true)
+    val aircraftType2 = AircraftType("Test Aircraft 2 (SP/SE)", "TAC2", multiPilot = false, multiEngine = false)
     val aircraftTypes = listOf(
         aircraftType1,
-        AircraftType("Test Aircraft 2 (SP/SE)", "TAC2", multiPilot = false, multiEngine = false)
+        aircraftType2
     )
+
+    val arwt1 = AircraftRegistrationWithType("PH-EZE", aircraftType1)
+    val arwt2 = AircraftRegistrationWithType("PH-EZB", aircraftType2)
+    val updatedArwt1 = AircraftRegistrationWithType("PH-EZE", aircraftType2)
+    val regsWithTypes = listOf(arwt1, arwt2)
 }

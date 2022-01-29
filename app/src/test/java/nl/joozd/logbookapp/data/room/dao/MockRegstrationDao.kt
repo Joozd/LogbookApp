@@ -19,29 +19,35 @@
 
 package nl.joozd.logbookapp.data.room.dao
 
-import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
-import nl.joozd.logbookapp.data.room.model.AircraftTypeData
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
 class MockRegstrationDao: RegistrationDao {
-    private val simulatedDatabase = ArrayList<AircraftRegistrationWithTypeData>()
-    private val simulatedFlow = MutableStateFlow(simulatedDatabase)
+    private val simulatedDatabase = LinkedHashMap<String, AircraftRegistrationWithTypeData>()
+    private val simulatedFlow = MutableStateFlow<List<AircraftRegistrationWithTypeData>>(emptyList())
+    private var _flow by CastFlowToMutableFlowShortcut(simulatedFlow)
 
-    override suspend fun requestAllRegistrations(): List<AircraftRegistrationWithTypeData> = simulatedDatabase
+    override suspend fun requestAllRegistrations(): List<AircraftRegistrationWithTypeData> =
+        simulatedDatabase.values.toList()
 
     override fun allRegistrationsFlow(): Flow<List<AircraftRegistrationWithTypeData>> = simulatedFlow
-
-    override fun requestLiveRegistrations(): LiveData<List<AircraftRegistrationWithTypeData>> {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun getAircraftFromRegistration(reg: String): AircraftRegistrationWithTypeData? {
         TODO("Not yet implemented")
     }
 
     override suspend fun save(vararg regs: AircraftRegistrationWithTypeData) {
-        TODO("Not yet implemented")
+        regs.forEach {
+            simulatedDatabase[it.registration] = it
+        }
+        emit()
     }
+
+    private fun emit(){
+        _flow = makeList()
+    }
+
+    private fun makeList() = simulatedDatabase.values.toList()
 }

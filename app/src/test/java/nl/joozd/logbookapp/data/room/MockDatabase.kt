@@ -34,15 +34,17 @@ class MockDatabase: JoozdlogDatabase() {
     override fun registrationDao(): RegistrationDao = MockRegstrationDao()
 
     override fun aircraftTypeConsensusDao(): AircraftTypeConsensusDao {
-        TODO("Not yet implemented") // not used at the moment but don't want to run updates on DB
+        TODO("Not used at the moment") // not used at the moment but don't want to run updates on DB
     }
 
     override fun preloadedRegistrationsDao(): PreloadedRegistrationsDao = MockPreloadedRegistrationsDao()
 
-    override fun balanceForwardDao(): BalanceForwardDao = MockBalanceForwardDao()
+    override fun balanceForwardDao(): BalanceForwardDao {
+        TODO("Not testable yet")
+    }
 
     override fun createOpenHelper(config: DatabaseConfiguration?): SupportSQLiteOpenHelper {
-        TODO("Not yet implemented") // not used in mock
+        TODO("Not implemented") // not used in mock
     }
 
     override fun createInvalidationTracker(): InvalidationTracker {
@@ -50,6 +52,6 @@ class MockDatabase: JoozdlogDatabase() {
     }
 
     override fun clearAllTables() {
-        TODO("Not yet implemented") // not used in mock
+        TODO("Not implemented") // not used in mock
     }
 }

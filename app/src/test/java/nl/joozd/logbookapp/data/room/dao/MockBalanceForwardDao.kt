@@ -20,28 +20,22 @@
 package nl.joozd.logbookapp.data.room.dao
 
 import androidx.lifecycle.LiveData
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
-import nl.joozd.logbookapp.data.room.model.AircraftTypeData
+import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 
-class MockRegstrationDao: RegistrationDao {
-    private val simulatedDatabase = ArrayList<AircraftRegistrationWithTypeData>()
-    private val simulatedFlow = MutableStateFlow(simulatedDatabase)
-
-    override suspend fun requestAllRegistrations(): List<AircraftRegistrationWithTypeData> = simulatedDatabase
-
-    override fun allRegistrationsFlow(): Flow<List<AircraftRegistrationWithTypeData>> = simulatedFlow
-
-    override fun requestLiveRegistrations(): LiveData<List<AircraftRegistrationWithTypeData>> {
+class MockBalanceForwardDao: BalanceForwardDao {
+    override suspend fun requestAll(): List<BalanceForward> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getAircraftFromRegistration(reg: String): AircraftRegistrationWithTypeData? {
+    override fun requestLiveBalancesForward(): LiveData<List<BalanceForward>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun save(vararg regs: AircraftRegistrationWithTypeData) {
+    override suspend fun save(vararg balanceForwards: BalanceForward) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun delete(bf: BalanceForward) {
         TODO("Not yet implemented")
     }
 }

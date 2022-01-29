@@ -17,33 +17,14 @@
  *
  */
 
-package nl.joozd.logbookapp.data.room.dao
+package nl.joozd.logbookapp.data.room
 
-
-import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.dataclasses.Airport
 
+object AirportsTestData {
+    val airport1 = Airport(1, "EHAM", "big airport", "Schiphol", 10.0, 20.0, -20, "Amsterdam", "AMS")
+    val airport2 = Airport(3, "EBBR", "big airport", "Zaventem", 12.3, 45.6, 200, "Brussels", "BRU")
+    val airport3 = Airport(17, "EHHV", "smol airport", "Hilversum Airfield", 1.0, 2.0, 0, "Hilversum", "")
 
-@Dao
-interface AirportDao {
-    @Query("SELECT * FROM Airport")
-    suspend fun requestAllAirports(): List<Airport>
-
-    @Query("SELECT * FROM Airport")
-    fun airportsFlow(): Flow<List<Airport>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun save(airportData: Collection<Airport>)
-
-    @Query("DELETE FROM Airport")
-    suspend fun clearDb()
-
-    @Query("SELECT * FROM Airport WHERE :query LIKE ident LIMIT 1")
-    suspend fun searchAirportByIdent(query: String): Airport?
-
+    val airports = listOf(airport1, airport2, airport3)
 }

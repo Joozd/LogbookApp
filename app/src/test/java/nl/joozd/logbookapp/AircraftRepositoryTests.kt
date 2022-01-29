@@ -62,7 +62,7 @@ class AircraftRepositoryTests {
                     currentTypesList = it
                 }
             }
-            aircraftRepository.replaceAllTypesWith(TestData.aircraftTypes)
+            aircraftRepository.replaceAllTypesWith(AircraftTestData.aircraftTypes)
             delay(500)
             println("Done waiting")
             assertEquals (2, currentTypesList.size)

@@ -17,33 +17,18 @@
  *
  */
 
-package nl.joozd.logbookapp.data.room.dao
+package nl.joozd.logbookapp
 
+import nl.joozd.joozdlogcommon.AircraftType
+import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
+import nl.joozd.logbookapp.model.dataclasses.Flight
+import java.io.File
+import java.time.Instant
 
-import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
-import nl.joozd.logbookapp.data.dataclasses.Airport
-
-
-@Dao
-interface AirportDao {
-    @Query("SELECT * FROM Airport")
-    suspend fun requestAllAirports(): List<Airport>
-
-    @Query("SELECT * FROM Airport")
-    fun airportsFlow(): Flow<List<Airport>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun save(airportData: Collection<Airport>)
-
-    @Query("DELETE FROM Airport")
-    suspend fun clearDb()
-
-    @Query("SELECT * FROM Airport WHERE :query LIKE ident LIMIT 1")
-    suspend fun searchAirportByIdent(query: String): Airport?
-
+object AircraftTestData {
+    val aircraftType1 = AircraftType("Test Aircraft 1 (MP/ME)", "TAC1", multiPilot = true, multiEngine = true)
+    val aircraftTypes = listOf(
+        aircraftType1,
+        AircraftType("Test Aircraft 2 (SP/SE)", "TAC2", multiPilot = false, multiEngine = false)
+    )
 }

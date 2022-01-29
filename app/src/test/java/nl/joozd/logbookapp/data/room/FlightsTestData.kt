@@ -17,18 +17,23 @@
  *
  */
 
-package nl.joozd.logbookapp
+package nl.joozd.logbookapp.data.room
 
-import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.io.File
+import java.time.Instant
 
-object TestData {
-    val aircraftTypes = listOf(
-        AircraftType("Test Aircraft 1 (MP/ME)", "TAC1", multiPilot = true, multiEngine = true),
-        AircraftType("Test Aircraft 2 (SP/SE)", "TAC2", multiPilot = false, multiEngine = false)
-    )
+object FlightsTestData {
+    private val prototypeFlight = Flight().copy (isPlanned = false)
+    private val now = Instant.now().epochSecond
+    val flight1 = prototypeFlight.copy(flightID = 1, orig = "EHAM", dest = "EBBR", timeStamp = 1000, unknownToServer = false)
+    val flight2 = prototypeFlight.copy(flightID = 2, orig = "EHGG", dest = "EHHV", timeOut = now - 10000, timeIn = now - 7000, timeStamp = 2000, unknownToServer = false)
+    val deletedFlight = prototypeFlight.copy(flightID = 3, timeOut = now + 6000, timeIn = now + 9000, DELETEFLAG = true, timeStamp = 5000, unknownToServer = false)
+    val unknownToServerFlight = flight2.copy(flightID = 7, unknownToServer = true, timeStamp = 4000)
+    val plannedFlight = flight2.copy(flightID = 8, timeOut = now + 10000, timeIn = now + 12000, unknownToServer = true, isPlanned = true, timeStamp = 10000)
+
+    val flights = listOf(flight1, flight2, deletedFlight, unknownToServerFlight, plannedFlight)
 
     fun parseFlightsFile(): List<Flight> = FlightsRepositoryExporter.csvToFlights(File("C:\\temp\\joozdlog\\flights.csv").readText(), mock = true)
     fun flightsFileLines(): List<String> = File("C:\\temp\\joozdlog\\flights.csv").readLines()

@@ -60,7 +60,7 @@ class AirportRepositoryImpl(
      */
     override suspend fun replaceDbWith(newAirports: Collection<Airport>) {
         airportDao.clearDb()
-        airportDao.insertAirports(newAirports)
+        airportDao.save(newAirports)
     }
 
     private suspend fun getAirports(): List<Airport> = airportDao.requestAllAirports()

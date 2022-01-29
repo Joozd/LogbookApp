@@ -26,17 +26,20 @@ import nl.joozd.logbookapp.data.room.model.AircraftTypeData
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
 class MockAircraftTypeDao: AircraftTypeDao {
-    private val simulatedDatabase = ArrayList<AircraftTypeData>()
+    private val simulatedDatabase = LinkedHashMap<String,AircraftTypeData>()
     private val simulatedFlow = MutableStateFlow<List<AircraftTypeData>>(emptyList())
     private var _flow by CastFlowToMutableFlowShortcut(simulatedFlow)
 
-    override suspend fun requestAllAircraftTypes(): List<AircraftTypeData> = simulatedDatabase
+    override suspend fun requestAllAircraftTypes(): List<AircraftTypeData> =
+        makeList()
 
     override fun aircraftTypesFlow(): Flow<List<AircraftTypeData>> = simulatedFlow
 
     override suspend fun save(vararg aircraftTypeData: AircraftTypeData) {
         //println("${this::class.simpleName} Saving ${aircraftTypeData.size} type data")
-        simulatedDatabase.addAll(aircraftTypeData)
+        aircraftTypeData.forEach {
+            simulatedDatabase[it.name] = it
+        }
         emit()
     }
 
@@ -45,13 +48,15 @@ class MockAircraftTypeDao: AircraftTypeDao {
         emit()
     }
 
-    private fun emit(){
-        _flow = simulatedDatabase.toList()
-    }
-
     override fun getAircraftType(name: String): AircraftTypeData? =
-        simulatedDatabase.firstOrNull { it.name == name }
+        simulatedDatabase[name]
 
     override suspend fun getAircraftTypeFromShortName(name: String): AircraftTypeData? =
-        simulatedDatabase.firstOrNull { it.shortName == name }
+        simulatedDatabase.values.firstOrNull { it.shortName.equals(name, ignoreCase = true) }
+
+    private fun emit(){
+        _flow = makeList()
+    }
+
+    private fun makeList() = simulatedDatabase.values.toList()
 }

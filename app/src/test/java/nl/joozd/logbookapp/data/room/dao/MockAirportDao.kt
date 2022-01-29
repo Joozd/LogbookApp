@@ -19,40 +19,42 @@
 
 package nl.joozd.logbookapp.data.room.dao
 
-import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import nl.joozd.logbookapp.data.dataclasses.Airport
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
 class MockAirportDao: AirportDao {
-    override suspend fun requestAllAirports(): List<Airport> {
-        TODO("Not yet implemented")
-    }
+    private val simulatedDatabase = LinkedHashMap<Int, Airport>()
+    private val simulatedFlow = MutableStateFlow<List<Airport>>(emptyList())
+    private var _flow by CastFlowToMutableFlowShortcut(simulatedFlow)
 
-    override suspend fun requestAllIdents(): List<String> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun requestAllAirports(): List<Airport> =
+        simulatedDatabase.values.toList()
 
-    override fun requestLiveAirports(): LiveData<List<Airport>> {
-        TODO("Not yet implemented")
-    }
 
-    override fun airportsFlow(): Flow<List<Airport>> {
-        TODO("Not yet implemented")
-    }
+    override fun airportsFlow(): Flow<List<Airport>> =
+        simulatedFlow
 
-    override suspend fun insertAirports(vararg airportData: Airport) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun insertAirports(airportData: Collection<Airport>) {
-        TODO("Not yet implemented")
+    override suspend fun save(airportData: Collection<Airport>) {
+        airportData.forEach {
+            simulatedDatabase[it.id] = it
+        }
+        emit()
     }
 
     override suspend fun clearDb() {
-        TODO("Not yet implemented")
+        simulatedDatabase.clear()
+        emit()
     }
 
-    override suspend fun searchAirportByIdent(query: String): Airport? {
-        TODO("Not yet implemented")
+    override suspend fun searchAirportByIdent(query: String): Airport? =
+        requestAllAirports().firstOrNull { it.ident.equals(query, ignoreCase = true) }
+
+
+    private fun emit(){
+        _flow = makeList()
     }
+
+    private fun makeList() = simulatedDatabase.values.toList()
 }

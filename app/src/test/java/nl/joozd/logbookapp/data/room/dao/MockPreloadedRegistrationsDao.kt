@@ -19,33 +19,38 @@
 
 package nl.joozd.logbookapp.data.room.dao
 
-import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
 class MockPreloadedRegistrationsDao: PreloadedRegistrationsDao {
-    private val simulatedDatabase = ArrayList<PreloadedRegistration>()
-    private val simulatedFlow = MutableStateFlow(simulatedDatabase)
+    private val simulatedDatabase = LinkedHashMap<String, PreloadedRegistration>()
+    private val simulatedFlow = MutableStateFlow<List<PreloadedRegistration>>(emptyList())
+    private var _flow by CastFlowToMutableFlowShortcut(simulatedFlow)
 
-    override suspend fun requestAllRegistrations(): List<PreloadedRegistration> = simulatedDatabase
+    override suspend fun requestAllRegistrations(): List<PreloadedRegistration> =
+        simulatedDatabase.values.toList()
 
-    override fun requestLiveRegistrations(): LiveData<List<PreloadedRegistration>> {
-        TODO("Not yet implemented")
-    }
 
-    override fun registrationsFlow(): Flow<List<PreloadedRegistration>> = simulatedFlow
-
-    override suspend fun save(vararg regs: PreloadedRegistration) {
-        TODO("Not yet implemented")
-    }
+    override fun registrationsFlow(): Flow<List<PreloadedRegistration>> =
+        simulatedFlow
 
     override suspend fun save(regs: List<PreloadedRegistration>) {
-        TODO("Not yet implemented")
+        regs.forEach {
+            simulatedDatabase[it.registration] = it
+        }
+        emit()
     }
 
     override suspend fun clearDb() {
-        TODO("Not yet implemented")
+        simulatedDatabase.clear()
+        emit()
     }
+
+    private fun emit(){
+        _flow = makeList()
+    }
+
+    private fun makeList() = simulatedDatabase.values.toList()
 }

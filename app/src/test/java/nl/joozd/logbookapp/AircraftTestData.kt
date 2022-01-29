@@ -23,6 +23,7 @@ import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
 import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
+import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.io.File
 import java.time.Instant
@@ -36,7 +37,11 @@ object AircraftTestData {
     )
 
     val arwt1 = AircraftRegistrationWithType("PH-EZE", aircraftType1)
-    val arwt2 = AircraftRegistrationWithType("PH-EZB", aircraftType2)
+    val arwt2 = AircraftRegistrationWithType("PH-EZF", aircraftType2)
     val updatedArwt1 = AircraftRegistrationWithType("PH-EZE", aircraftType2)
     val regsWithTypes = listOf(arwt1, arwt2)
+
+    val preloaded1 = PreloadedRegistration("PH-EZA", aircraftType1.name)
+    val preloaded2 = PreloadedRegistration("PH-EZB", aircraftType2.name)
+    val preloadedList = listOf(preloaded1, preloaded2)
 }

@@ -185,5 +185,30 @@ class MockDatabaseTests {
         }
     }
 
+    @Test
+    fun testMockPreloadedRegistrationDao() {
+        val dao = db.preloadedRegistrationsDao()
+        runTest {
+            //test flow
+            dao.registrationsFlow().test {
+                // mock DAO starts empty
+                assert(awaitItem().isEmpty())
+
+                //test save
+                dao.save(AircraftTestData.preloadedList)
+                assertEquals(2, awaitItem().size)
+
+                // test requestAllRegistrations
+                assertEquals(AircraftTestData.preloadedList, dao.requestAllRegistrations())
+
+                // test clearDB
+                dao.clearDb()
+                assertEquals(0, awaitItem().size)
+
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+    }
+
 
 }

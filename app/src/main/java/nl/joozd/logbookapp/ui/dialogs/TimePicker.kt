@@ -110,11 +110,6 @@ open class TimePicker: JoozdlogFragment() {
              * If cancelled or clicked outside dialog, undo changes and close Fragment
              */
             timePickerDialogBackground.setOnClickListener {
-                viewModel.undo()
-                closeFragment()
-            }
-            cancelTimeDialog.setOnClickListener {
-                viewModel.undo()
                 closeFragment()
             }
 
@@ -149,9 +144,12 @@ open class TimePicker: JoozdlogFragment() {
 
             viewModel.nightTime.observe(viewLifecycleOwner) { nightTimeText.setText(it) }
 
+            /*
             viewModel.isAugmentedCrew.observe(viewLifecycleOwner) {
                 augmentedTextView.showAsActiveIf(it)
             }
+
+             */
 
             viewModel.isPic.observe(viewLifecycleOwner) {
                 picTextView.showAsActiveIf(it)

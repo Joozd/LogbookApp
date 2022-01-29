@@ -51,8 +51,10 @@ import java.util.*
  * @NOTE
  */
 class WorkingFlightOld private constructor(flight: Flight): CoroutineScope {
-    private val job = SupervisorJob()
     override val coroutineContext = Dispatchers.Main + SupervisorJob()
+    /*
+    private val job = SupervisorJob()
+
 
     private val airportRepository = AirportRepository.getInstance()
 
@@ -1011,5 +1013,7 @@ class WorkingFlightOld private constructor(flight: Flight): CoroutineScope {
             }
         }
     }
+
+     */
 }
 

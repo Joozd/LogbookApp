@@ -31,6 +31,7 @@ import nl.joozd.logbookapp.databinding.DialogCloudSyncTermsBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.model.viewmodels.dialogs.CloudSyncTermsDialogViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 /**
  * This dialog will show terms and conditions for Cloud.
@@ -67,7 +68,7 @@ class CloudSyncTermsDialog(): JoozdlogFragment() {
                 setOnClickListener {
                     Preferences.acceptedCloudSyncTerms = true
                     Preferences.useCloud = true
-                    if (syncOnClose) FlightRepositoryImpl.getInstance().syncIfNeeded() // this will also cause worker to create login data if none present
+                    if (syncOnClose) JoozdlogWorkersHub.syncTimeAndFlightsIfEnoughTimePassed()
                     closeFragment()
                 }
                 val clickable = viewModel.waitedLongEnough.value ?: false

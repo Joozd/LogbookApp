@@ -23,6 +23,7 @@ import android.text.Editable
 import androidx.lifecycle.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
@@ -35,6 +36,7 @@ import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.SelfUpdatingDataCache
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
+import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
 import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 import nl.joozd.logbookapp.model.workingFlight.WorkingFlightOld
@@ -43,8 +45,12 @@ import java.time.LocalTime
 
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
-    private val wf = FlightEditor.instance!! // this Fragment should not have launched if wf is null
+    /*
+    private val flightEditor = FlightEditor.instance!! // this Fragment should not have launched if wf is null
+    private val flightFlow get() = flightEditor.flightFlow
     private val dataCache = SelfUpdatingDataCache(viewModelScope)
+    private val aircraftDataCache get() = dataCache.aircraftDataCache
+    private val airportDataCache get() = dataCache.airportDataCache
 
     private var cachedSortedRegistrationsList: List<String> = emptyList()
 
@@ -52,14 +58,17 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         println("made $it")
     }
 
-    val isNewFlight = wf.isNewFlight
+    val isNewFlight = flightEditor.isNewFlight
+
+    //
 
     val dualInstructorFlow: Flow<Int> = makeDualInstructorFlow()
     val aircraftStringFlow: Flow<String> = makeAircraftDisplayNameFlow()
-    val isPic: LiveData<Boolean> = makePicOrPicusMediatorLiveData()
+    val isPic: Flow<Boolean> = makePicOrPicusFlow()
     val picPicusText: LiveData<String> = makePicPicusTextMediatorLiveData()
 
-    val dateStringLiveData = wf.timeOutLiveData.map{ makeDateString(it) }
+
+    val dateStringLiveData = flightEditor.timeOutLiveData.map{ makeDateString(it) }
     val flightNumberLiveData = wf.flightNumberLiveData
     val origin = Transformations.map(wf.originLiveData) { getAirportString(it)}
     val destination = Transformations.map(wf.destinationLiveData) { getAirportString(it)}
@@ -145,10 +154,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
                 ?: NO_DATA_STRING
         }
 
-    private fun makePicOrPicusMediatorLiveData() =
-        MediatorLiveData<Boolean>().apply {
-            addSource(wf.isPICLiveData) { value = wf.isPicOrPicus() }
-            addSource(wf.isPICUSLiveData) { value = wf.isPicOrPicus() }
+    private fun makePicOrPicusFlow() =
+        flightFlow.map{
+            it.isPIC || it.isPICUS
         }
 
     private fun makePicPicusTextMediatorLiveData() =
@@ -159,14 +167,13 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
 
     private fun getAircraftDisplayName() =
-        (if (isSim) wf.aircraftLiveData.value?.type?.shortName else wf.aircraftLiveData.value?.toString())
+        (if (isSim) flightEditor.aircraft.type?.shortName else flightEditor.aircraft.toString())
             ?: NO_DATA_STRING
 
-    private fun makeDualInstructorFlow() =
-        combine(wf.isDualFlow, wf.isInstructorFlow) { isDual, isInstructor ->
+    private fun makeDualInstructorFlow() = flightFlow.map{
             when {
-                isDual -> DUAL_INSTRUCTOR_FLAG_DUAL
-                isInstructor -> DUAL_INSTRUCTOR_FLAG_INSTRUCTOR
+                it.isDual -> DUAL_INSTRUCTOR_FLAG_DUAL
+                it.isInstructor -> DUAL_INSTRUCTOR_FLAG_INSTRUCTOR
                 else -> DUAL_INSTRUCTOR_FLAG_NONE
             }
         }
@@ -179,13 +186,13 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         newFlightNumber?.toString()?.let{
             // If new flightnumber is not the old one minus all the digits (eg KL1234 becomes KL)
             if (it.isNotOldValueWithDigitsRemoved())
-                wf.flightNumber = it
+                flightEditor.flightNumber = it
         }
     }
 
     // true if all digits are removed from wf.flightNumber and nothing else changed, eg. KL1234 became KL
     private fun String.isNotOldValueWithDigitsRemoved() =
-        this != (wf.flightNumber).removeTrailingDigits()
+        this != (flightEditor.flightNumber).removeTrailingDigits()
 
 
     fun setOrig(origEditable: Editable?) = origEditable?.let { setOrig(it.toString()) }
@@ -447,7 +454,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         }
 
     private fun getPicOrPicusString(): String = getString(
-        if(wf.isPICUS) R.string.picus else R.string.pic
+        if(flightEditor.isPICUS) R.string.picus else R.string.pic
     )
 
     private fun makeSortedRegistrationsFlowAndCacheIt() =
@@ -492,5 +499,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
         private const val THIRTY_MINUTES_IN_SECONDS = 30*60
     }
+
+     */
 
 }

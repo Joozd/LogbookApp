@@ -20,28 +20,21 @@
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import com.caverock.androidsvg.SVG
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 
-class SignatureDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
-    private val wf = flightRepository.wf
-    private var _signature: String = wf.signatureLiveData.value ?: ""
-    val signature: String
-        get() = _signature
-
-    private val undoSignature = signature
+class SignatureDialogViewModel: JoozdlogDialogViewModel() {
+    var signature: String get() = flightEditor.signature
+    private set (s: String){
+        flightEditor.signature = s
+    }
 
     val signatureSvg: SVG
         get() = SVG.getFromString(signature)
 
-
     fun updateSignature(newSignature: String){
-        _signature = newSignature
-        wf.signature = newSignature
+        signature = newSignature
     }
 
     fun signatureCleared() = updateSignature("")
-
-    override fun undo() {
-        wf.signature = undoSignature
-    }
 }

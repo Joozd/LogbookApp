@@ -22,8 +22,10 @@ package nl.joozd.logbookapp.model.viewmodels
 import android.content.Context
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
+import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 
 abstract class JoozdlogDialogViewModel: JoozdlogViewModel() {
+    protected val flightEditor get() = FlightEditor.instance!!
     //protected val context: Context
     //    get() = App.instance.ctx
 }

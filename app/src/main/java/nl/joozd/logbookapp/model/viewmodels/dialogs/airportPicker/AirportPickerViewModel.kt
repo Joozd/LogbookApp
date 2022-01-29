@@ -24,10 +24,10 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
 @ExperimentalCoroutinesApi
-abstract class AirportPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
+abstract class AirportPickerViewModel: JoozdlogDialogViewModel() {
     /**
      * The picked airport
      */

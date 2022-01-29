@@ -27,14 +27,15 @@ import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.extensions.inIgnoreCase
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 import java.util.*
 
 
 /**
  * ViewModel for AircraftPicker and SimTypePicker fragments
  */
-class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
+class AircraftPickerViewModel: JoozdlogDialogViewModel(){
     private val _typesSearchStringFlow = MutableStateFlow("")
 
     private val aircraftTypesFlow: Flow<List<AircraftType>> =
@@ -45,7 +46,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     }
 
     // Active aircraft in [workingFligght] or a placeholder [Aircraft] while workingFlight is loading data
-    val selectedAircraft = workingFlight.aircraftFlow.asLiveData().map { it ?: Aircraft("...")}
+    val selectedAircraft = MutableLiveData(Aircraft("...")) // flightEditor.aircraftFlow.asLiveData().map { it ?: Aircraft("...")}
 
     //TODO make this be collected as flow instead of as liveData
     val aircraftTypes: LiveData<List<AircraftType>>
@@ -58,7 +59,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModelWithWorkingFlight(){
     private var mAircraft: Aircraft
         get() = selectedAircraft.value!!
         set(newAircraft){
-            workingFlight.setAircraft(newAircraft)
+            flightEditor.aircraft = newAircraft
         }
 
 

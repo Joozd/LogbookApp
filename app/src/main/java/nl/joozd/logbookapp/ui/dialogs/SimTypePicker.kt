@@ -79,11 +79,6 @@ class SimTypePicker: JoozdlogFragment(){
              * save or cancel
              ******************************************************************************/
 
-            aircraftPickerCancel.setOnClickListener {
-                viewModel.undo()
-                closeFragment()
-            }
-
             /**
              * A bit more complex than other JoozdlogDialogs:
              * - save AircraftRegistrationWithTypeData

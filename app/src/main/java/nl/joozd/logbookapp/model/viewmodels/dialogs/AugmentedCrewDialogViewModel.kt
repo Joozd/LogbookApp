@@ -22,30 +22,36 @@ package nl.joozd.logbookapp.model.viewmodels.dialogs
 import android.text.Editable
 import android.util.Log
 import androidx.core.text.isDigitsOnly
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
+import kotlinx.coroutines.flow.map
+import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.extensions.toInt
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 
-class AugmentedCrewDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
+class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
+    fun crewDown() {
+      TODO("WIP")
+    }
 
-    fun crewDown() = workingFlight.crew-- // = crew-- but works on a val
-
-    fun crewUp() = workingFlight.crew++ // = crew++ but works on a val
-
+    fun crewUp() {
+        TODO("WIP")
+    }
     /**
      * Set whether pilot did takeoff in seat or not
      */
     fun setTakeoff(didTakeoff: Boolean) {
-        workingFlight.crew = workingFlight.crew.withTakeoff(didTakeoff)
+        TODO("WIP")
     }
 
     /**
      * Set whether pilot did landing in seat or not
      */
-    fun setLanding(didLanding: Boolean){
-        workingFlight.crew = workingFlight.crew.withLanding(didLanding)
+    fun setLanding(didLanding: Boolean) {
+        TODO("WIP")
     }
 
     /**
@@ -54,8 +60,7 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
      * @return [time]
      */
     fun setTakeoffLandingTime(time: Int) {
-        workingFlight.crew = workingFlight.crew.withTimes(time)
-        time.nullIfZero()?.let { Preferences.standardTakeoffLandingTimes = it }
+        TODO("WIP")
     }
 
     /**
@@ -78,16 +83,17 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
     /**
      * Observables:
      */
+    private val tempCrewLiveData = flightEditor.flightFlow.map { AugmentedCrew.of(it.augmentedCrew)}.asLiveData()
 
     val crewSizeLiveData
-        get() = workingFlight.crewLiveData.map { it.size }
+        get() = tempCrewLiveData.map { it.size }
 
     val didTakeoffLiveData
-        get() = workingFlight.crewLiveData.map {it.takeoff}
+        get() = tempCrewLiveData.map {it.takeoff}
 
     val didLandingLiveData
-        get() = workingFlight.crewLiveData.map {it.landing}
+        get() = tempCrewLiveData.map {it.landing}
 
     val takeoffLandingTimesLiveData
-        get() = workingFlight.crewLiveData.map {(it.times.nullIfZero() ?: Preferences.standardTakeoffLandingTimes).toString()}
+        get() = tempCrewLiveData.map {(it.times.nullIfZero() ?: Preferences.standardTakeoffLandingTimes).toString()}
 }

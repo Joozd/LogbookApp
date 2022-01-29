@@ -76,12 +76,7 @@ class SignatureDialog: JoozdlogFragment() {
              * UI related buttons:
              */
 
-            cancelTextView.setOnClickListener {
-                viewModel.undo()
-                closeFragment()
-            }
             signatureBackground.setOnClickListener {
-                viewModel.undo()
                 closeFragment()
             }
             saveTextView.setOnClickListener {

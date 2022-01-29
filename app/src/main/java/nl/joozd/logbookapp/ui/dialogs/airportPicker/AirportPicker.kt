@@ -98,13 +98,9 @@ abstract class AirportPicker: JoozdlogFragment() {
             bodyLayout.setOnClickListener {  }
 
             airportPickerDialogBackground.setOnClickListener {
-                viewModel.undo()
                 closeFragment()
             }
-            cancelAirportDialog.setOnClickListener {
-                viewModel.undo()
-                closeFragment()
-            }
+
 
             saveAirportDialog.setOnClickListener{
                 closeFragment()
@@ -135,7 +131,7 @@ abstract class AirportPicker: JoozdlogFragment() {
 
             //observe airportList for recyclerview
             lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     viewModel.airportsListFlow.collect {
                         airportPickerAdapter.submitList(it)
                     }

@@ -83,13 +83,7 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
                 closeFragment()
             }
 
-            //on cancel, revert to previous flight, set viewModel.namePickerWorkingOnName1 to null and close
-            cancelTextView.setOnClickListener {
-                viewModel.undo()
-                closeFragment()
-            }
             namesDialogBackground.setOnClickListener {
-                viewModel.undo()
                 closeFragment()
             }
 

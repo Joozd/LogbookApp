@@ -141,13 +141,8 @@ class AircraftPicker: JoozdlogFragment(){
              * save or cancel
              ******************************************************************************/
 
-            aircraftPickerCancel.setOnClickListener {
-                viewModel.undo()
-                closeFragment()
-            }
 
             aircraftPickerDialogBackground.setOnClickListener {
-                viewModel.undo()
                 closeFragment()
             }
 

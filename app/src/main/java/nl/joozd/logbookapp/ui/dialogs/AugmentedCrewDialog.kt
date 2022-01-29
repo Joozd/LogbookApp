@@ -78,12 +78,8 @@ class AugmentedCrewDialog: JoozdlogFragment(){
             /**
              * Buttons
              */
-            cancelCrewDialogButton.setOnClickListener {
-                viewModel.undo()
-                closeFragment()
-            }
+
             augmentedCrewDialogBackground.setOnClickListener {
-                viewModel.undo()
                 closeFragment()
             }
             saveCrewDialogButon.setOnClickListener {

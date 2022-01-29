@@ -55,7 +55,7 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 class EditFlightFragment: JoozdlogFragment(){
     private val viewModel: NewEditFlightFragmentViewModel by viewModels()
 
-
+/*
     /**
      * Will define all listeners etc, and set initial
      */
@@ -83,7 +83,7 @@ class EditFlightFragment: JoozdlogFragment(){
         return binding.root
     }
 
-    private fun @NonNull LayoutEditFlightFragmentBinding.setDialogTitle() {
+    private fun LayoutEditFlightFragmentBinding.setDialogTitle() {
         flightInfoText.text =
             getString(if (viewModel.isNewFlight) R.string.add_flight else R.string.edit_flight)
     }
@@ -800,4 +800,6 @@ class EditFlightFragment: JoozdlogFragment(){
             Preferences.editFlightFragmentWelcomeMessageShouldBeDisplayed = false
         }
     }
+
+ */
 }

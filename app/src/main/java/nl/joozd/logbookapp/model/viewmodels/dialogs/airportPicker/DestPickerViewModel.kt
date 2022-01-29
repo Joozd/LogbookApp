@@ -19,32 +19,28 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker
 
+import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.joozd.logbookapp.data.dataclasses.Airport
 
+@ExperimentalCoroutinesApi
 class DestPickerViewModel: AirportPickerViewModel(){
     override val pickedAirport
-        get() = workingFlight.destinationLiveData
+        get() = MutableLiveData(Airport())
 
     override fun pickAirport(airport: Airport) {
-        workingFlight.dest = airport.ident
+        flightEditor.dest = airport
     }
 
 
 
     override fun setCustomAirport(airport: String) {
-        workingFlight.dest = airport
+        flightEditor.dest = Airport(ident = airport)
     }
 
     /**
      * The airport that is set in [workingFlight] when viewmodel is initialized
      */
-    override val initialAirport: Airport? = workingFlight.destinationLiveData.value
-
-    /**
-     * Set [initialAirport] back to [workingFlight]
-     */
-    override fun undo() {
-        initialAirport?.ident?.let { workingFlight.dest = it }
-    }
+    override val initialAirport: Airport = flightEditor.dest
 
 }

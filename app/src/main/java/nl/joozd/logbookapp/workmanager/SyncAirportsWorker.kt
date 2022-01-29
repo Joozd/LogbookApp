@@ -39,7 +39,7 @@ import java.net.URL
 
 class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
-    private val airportsRepository = AirportRepository.getInstance()
+    private val airportsRepository = AirportRepository.instance
     var progress: Int = 0
         set(p) {
             field = p

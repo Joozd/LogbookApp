@@ -22,9 +22,9 @@ package nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModelWithWorkingFlight
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
-abstract class NamesDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() {
+abstract class NamesDialogViewModel: JoozdlogDialogViewModel() {
     /**
      * Set to true if working on PIC, or false if working on other names (name2)
      */
@@ -55,7 +55,7 @@ abstract class NamesDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() 
         set(n) { _manualName.value = n }
 
     private val takenNames: List<String>
-        get() = workingFlight.allNamesListLiveData.value ?: emptyList()
+        get() = emptyList() // TODO
 
     /**
      * One string with all names we are working on now, separated by '\n'
@@ -69,6 +69,7 @@ abstract class NamesDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() 
     private val _allNames = MediatorLiveData<List<String>>()
     val allNames: LiveData<List<String>>
         get() = _allNames
+    /*
     init{
         _allNames.addSource(flightRepository.allNamesLiveData){
             _allNames.value = filterNames(it)
@@ -81,6 +82,8 @@ abstract class NamesDialogViewModel: JoozdlogDialogViewModelWithWorkingFlight() 
             _allNames.value = filterNames((flightRepository.allNamesLiveData.value ?: emptyList()))
         }
     }
+
+     */
 
     /**
      * Add a name to the list of names, or replace it if only one name allowed

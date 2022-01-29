@@ -36,6 +36,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.CalendarSyncDialogEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
     // Private flags
@@ -202,8 +203,6 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
         Preferences.useCalendarSync = (mCalendarSyncType != CalendarSyncTypes.CALENDAR_SYNC_NONE).also{
             if (it) {
                 Preferences.nextCalendarCheckTime = 0
-                if (sync)
-                    flightRepository.syncIfNeeded()
             }
         }
         feedback(CalendarSyncDialogEvents.DONE)

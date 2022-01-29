@@ -325,7 +325,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
             UserManagement.signedIn -> {
                 Preferences.lastUpdateTime = 0
                 Preferences.useCloud = true
-                JoozdlogWorkersHub.syncTimeAndFlightsIfFlightsUpdated()
+                JoozdlogWorkersHub.syncTimeAndFlightsIfEnoughTimePassed()
             }
 
             // Activity will take care of showing &Cs if needed
@@ -364,6 +364,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     fun dontPostponeCalendarSync(){
         Preferences.calendarDisabledUntil = 0
+        // TODO actually sync calendar
         JoozdlogWorkersHub.syncTimeAndFlightsIfFlightsUpdated()
     }
 

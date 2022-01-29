@@ -70,13 +70,7 @@ class LandingsDialog: JoozdlogFragment() {
             headerLayout.setOnClickListener {  }
             bodyLayout.setOnClickListener {  }
 
-            //set cancel functions
-            cancelTextButton.setOnClickListener {
-                landingsDialogViewModel.undo()
-                closeFragment()
-            }
             landingsDialogBackground.setOnClickListener {
-                landingsDialogViewModel.undo()
                 closeFragment()
             }
 

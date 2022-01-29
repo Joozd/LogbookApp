@@ -34,6 +34,7 @@ import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.util.*
 
+//TODO this is still WIP
 class MainActivityViewModelNew: JoozdlogViewModel() {
     private var airportDataCache: AirportDataCache = AirportDataCache.empty().apply{
         // This will keep airportDataCache up-to-date, even when app is not in the foreground.
@@ -46,7 +47,8 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         }
     }
 
-    val flightEditorFlow: Flow<FlightEditor?> = MutableStateFlow<FlightEditor?>(null)
+    val flightEditorFlow = FlightEditor.instanceFlow
+
     val searchFieldOpenFlow: Flow<Boolean> = MutableStateFlow(false)
     private val searchQueryFlow: Flow<String> = MutableStateFlow("")
     private val searchTypeFlow: Flow<Int> = MutableStateFlow(SEARCH_ALL)
@@ -58,7 +60,6 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         searchFlights(allFlights, query, searchType)
     }
 
-    private var _FlightEditor: FlightEditor? by CastFlowToMutableFlowShortcut(flightEditorFlow)
     private var searchFieldOpen: Boolean by CastFlowToMutableFlowShortcut(searchFieldOpenFlow)
     private var searchQuery: String by CastFlowToMutableFlowShortcut(searchQueryFlow)
     private var searchType: Int by CastFlowToMutableFlowShortcut(searchTypeFlow)
@@ -71,10 +72,14 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         }
     }
 
-    // This will create a new WorkingFlight instance in _workingFlight.
-    // MainActivity should collect this an launch an Edit Flight dialog
+    /**
+     * This will create a new FlightEditor.
+     * [flightEditorFlow] will emit after a new FlightEditor is made.
+     */
     fun showEditFlightDialog(flight: Flight){
-        FlightEditor.setFromFlight(flight)
+        viewModelScope.launch {
+            FlightEditor.setFromFlight(flight)
+        }
     }
 
     fun menuSelectedAddFlight(){

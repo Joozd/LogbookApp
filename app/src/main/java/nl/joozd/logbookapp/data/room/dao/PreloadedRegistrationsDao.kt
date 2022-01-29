@@ -33,14 +33,7 @@ interface PreloadedRegistrationsDao {
     suspend fun requestAllRegistrations(): List<PreloadedRegistration>
 
     @Query("SELECT * FROM PreloadedRegistration")
-    fun requestLiveRegistrations(): LiveData<List<PreloadedRegistration>>
-
-    @Query("SELECT * FROM PreloadedRegistration")
     fun registrationsFlow(): Flow<List<PreloadedRegistration>>
-
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun save(vararg regs: PreloadedRegistration)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(regs: List<PreloadedRegistration>)

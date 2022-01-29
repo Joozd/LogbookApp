@@ -41,6 +41,7 @@ class MockRegstrationDao: RegistrationDao {
     override suspend fun save(vararg regs: AircraftRegistrationWithTypeData) {
         regs.forEach {
             simulatedDatabase[it.registration] = it
+            println("added ${it.registration}: ${simulatedDatabase.keys}")
         }
         emit()
     }

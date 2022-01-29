@@ -20,10 +20,8 @@
 package nl.joozd.logbookapp.data.repository.aircraftrepository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 
@@ -34,29 +32,10 @@ interface AircraftRepository {
     fun aircraftTypesFlow(): Flow<List<AircraftType>>
 
     /**
-     * Provide a Flow with updates to AircraftRegistrationWithTypeData in DB
-     */
-    fun aircraftRegistrationsFlow(): Flow<List<AircraftRegistrationWithType>>
-
-    /**
-     * Provide a Flow with updates to Preloaded Registrations in DB
-     */
-    fun preloadedRegistrationsFlow(): Flow<List<PreloadedRegistration>>
-
-    /**
      * Provide a Flow with updates to Registrations To Aircraft map
+     * This map holds all known registrations in DB paired with their [Aircraft] data
      */
     fun aircraftMapFlow(): Flow<Map<String, Aircraft>>
-
-    /**
-     * Provide a Flow with updates to known aircraft in DB
-     */
-    fun aircraftFlow(): Flow<List<Aircraft>>
-
-    /**
-     * Provide a Flow with updates to known registrations in DB
-     */
-    fun registrationsFlow(): Flow<List<String>>
 
     /**
      * Provide a Flow that emits a new AircraftDataCache object every time
@@ -64,15 +43,27 @@ interface AircraftRepository {
      */
     fun aircraftDataCacheFlow(): Flow<AircraftDataCache>
 
+    suspend fun getAircraftDataCache(): AircraftDataCache
+
     /**
      * Get an [AircraftType] from it's short name from DB, null if not found.
      */
     suspend fun getAircraftTypeByShortName(typeShortName: String): AircraftType?
 
+    /**
+     * Replace entire Types DB with [newTypes]
+     */
+    suspend fun replaceAllTypesWith(newTypes: List<AircraftType>)
+
+    /**
+     * Replace entire Preloaded Registrations DB with [newPreloaded]
+     */
+    suspend fun replaceAllPreloadedWith(newPreloaded: List<PreloadedRegistration>)
+
 
 
     companion object{
-        val instance: AircraftRepositoryImpl by lazy {
+        val instance: AircraftRepository by lazy {
             AircraftRepositoryImpl(JoozdlogDatabase.getInstance())
         }
 

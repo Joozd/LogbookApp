@@ -53,8 +53,8 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
         get() = aircraftTypesFlow.asLiveData()
 
     val knownRegistrationsLiveData =
-        aircraftRepository.aircraftFlow().asLiveData()
-        .map{ it.map{ ac -> ac.registration} }
+        aircraftRepository.aircraftMapFlow().asLiveData()
+        .map{ it.map { entry -> entry.value.registration} }
 
     private var mAircraft: Aircraft
         get() = selectedAircraft.value!!
@@ -95,7 +95,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
      * Save aircraft to repository
      */
     fun saveAircraftToRepository() {
-        aircraftRepository.saveAircraft(mAircraft)
+        TODO("Not implemented")
     }
 
     fun updateSearchString(query: String) {

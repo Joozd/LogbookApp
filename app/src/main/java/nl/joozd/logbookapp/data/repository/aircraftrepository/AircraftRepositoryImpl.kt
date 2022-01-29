@@ -37,34 +37,33 @@ import nl.joozd.logbookapp.utils.DispatcherProvider
  * Singleton instead of object so we can inject a mock database
  */
 class AircraftRepositoryImpl(
-    private val dataBase: JoozdlogDatabase
+    dataBase: JoozdlogDatabase
 ): AircraftRepository, CoroutineScope by MainScope() {
-    private val aircraftTypeDao get() = dataBase.aircraftTypeDao()
-    private val registrationDao get() = dataBase.registrationDao()
-    private val preloadedRegistrationsDao get() = dataBase.preloadedRegistrationsDao()
+    private val aircraftTypeDao = dataBase.aircraftTypeDao()
+    private val registrationDao = dataBase.registrationDao()
+    private val preloadedRegistrationsDao = dataBase.preloadedRegistrationsDao()
 
     override fun aircraftTypesFlow() = aircraftTypeDao.aircraftTypesFlow().map {
         it.toAircraftTypes()
     }
 
-    override fun aircraftRegistrationsFlow() = registrationDao.allRegistrationsFlow().map {
+    private fun aircraftRegistrationsFlow() = registrationDao.allRegistrationsFlow().map {
         it.toAircraftRegistrationWithTypes()
     }
 
-    override fun preloadedRegistrationsFlow() = preloadedRegistrationsDao.registrationsFlow()
+    private  fun preloadedRegistrationsFlow() = preloadedRegistrationsDao.registrationsFlow()
 
     override fun aircraftMapFlow() = makeAircraftMapFlow()
-
-    override fun aircraftFlow() = aircraftMapFlow().map {
-        it.values.toList()
-    }
-
-    override fun registrationsFlow() = aircraftMapFlow().map { it.keys.toList() }
 
     override fun aircraftDataCacheFlow(): Flow<AircraftDataCache> =
         combine(aircraftTypesFlow(), aircraftMapFlow()){ types, map ->
             AircraftDataCache.make(types, map)
         }
+
+    override suspend fun getAircraftDataCache(): AircraftDataCache = AircraftDataCache.make(
+        getAircraftTypes(),
+        registrationToAircraftMap()
+    )
 
     suspend fun registrationToAircraftMap(): Map<String, Aircraft> =
         makeAircraftMap(
@@ -73,10 +72,7 @@ class AircraftRepositoryImpl(
             getRegistrationWithTypes()
         )
 
-    suspend fun getAircraftDataCache(): AircraftDataCache = AircraftDataCache.make(
-        getAircraftTypes(),
-        registrationToAircraftMap()
-    )
+
 
 
     suspend fun getAircraftTypes() =
@@ -97,20 +93,23 @@ class AircraftRepositoryImpl(
     fun saveAircraft(aircraft: Aircraft) = launch(DispatcherProvider.io()) {
         if (aircraft.type?.name == null) return@launch // Don't save aircraft without type.
         val newAcrwt = AircraftRegistrationWithType(aircraft.registration, aircraft.type)
+        println("NEWAIRCRAFT: $newAcrwt")
         saveAircraftRegistrationWithType(newAcrwt)
     }
 
-    fun replaceAllTypesWith(newTypes: List<AircraftType>) =
-        launch(DispatcherProvider.io() + NonCancellable) {
+    override suspend fun replaceAllTypesWith(newTypes: List<AircraftType>) =
+        withContext(DispatcherProvider.io()+ NonCancellable){
             aircraftTypeDao.clearDb()
             saveAircraftTypes(newTypes)
         }
 
-    fun replaceAllPreloadedWith(newPreloaded: List<PreloadedRegistration>) =
-        launch(DispatcherProvider.io()) {
+
+    override suspend fun replaceAllPreloadedWith(newPreloaded: List<PreloadedRegistration>) =
+        withContext(DispatcherProvider.io()+ NonCancellable){
             preloadedRegistrationsDao.clearDb()
             savePreloadedRegs(newPreloaded)
         }
+
 
     private suspend fun saveAircraftTypes(types: List<AircraftType>) {
         val typeData = types.map { it.toData() }
@@ -135,6 +134,9 @@ class AircraftRepositoryImpl(
         }
 
 
+    /*
+     * First load Preloaded, then regWithTypes. This way, regWithTypes overrules preloaded.
+     */
     private fun makeAircraftMap(
         aircraftTypes: List<AircraftType>,
         preloaded: List<PreloadedRegistration>,

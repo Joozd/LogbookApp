@@ -36,9 +36,6 @@ interface RegistrationDao {
     @Query("SELECT * FROM AircraftRegistrationWithTypeData")
     fun allRegistrationsFlow(): Flow<List<AircraftRegistrationWithTypeData>>
 
-    @Query("SELECT * FROM AircraftRegistrationWithTypeData")
-    fun requestLiveRegistrations(): LiveData<List<AircraftRegistrationWithTypeData>>
-
     @Query("SELECT * FROM AircraftRegistrationWithTypeData where registration = :reg LIMIT 1")
     suspend fun getAircraftFromRegistration(reg: String): AircraftRegistrationWithTypeData?
 

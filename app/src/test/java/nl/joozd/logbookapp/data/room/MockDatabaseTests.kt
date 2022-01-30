@@ -25,15 +25,13 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.joozd.logbookapp.AircraftTestData
-import nl.joozd.logbookapp.data.room.model.toAircraftRegistrationWithType
-import nl.joozd.logbookapp.data.room.model.toAircraftType
-import nl.joozd.logbookapp.data.room.model.toData
-import nl.joozd.logbookapp.data.room.model.toFlight
+import nl.joozd.logbookapp.data.room.model.*
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import java.util.*
 
 @ExperimentalCoroutinesApi
 class MockDatabaseTests {
@@ -175,6 +173,14 @@ class MockDatabaseTests {
                 //test requestAllRegistrations
                 assertEquals(AircraftTestData.regsWithTypes, dao.requestAllRegistrations().map { it.toAircraftRegistrationWithType() })
 
+                //test getAircraftFromRegistration
+                val regToFind = AircraftTestData.arwt1.registration
+                val regToFindLowerCase = AircraftTestData.arwt1.registration.lowercase()
+                val expectedAircraft = AircraftTestData.arwt1.toAircraft()
+                assertEquals(expectedAircraft, dao.getAircraftFromRegistration(regToFind)?.toAircraftRegistrationWithType()?.toAircraft())
+                assertEquals(expectedAircraft, dao.getAircraftFromRegistration(regToFindLowerCase)?.toAircraftRegistrationWithType()?.toAircraft())
+                assertEquals(null, dao.getAircraftFromRegistration("BOGUS DATA"))
+
                 //test save overwrite
                 dao.save(AircraftTestData.updatedArwt1.toData())
                 assertEquals(2, awaitItem().size)
@@ -200,6 +206,14 @@ class MockDatabaseTests {
 
                 // test requestAllRegistrations
                 assertEquals(AircraftTestData.preloadedList, dao.requestAllRegistrations())
+
+                // test getAircraftFromRegistration()
+                val regToFind = AircraftTestData.preloaded1.registration
+                val regToFindLowerCase = AircraftTestData.preloaded1.registration.lowercase()
+                val expectedAircraft = AircraftTestData.preloaded1
+                assertEquals(expectedAircraft, dao.getAircraftFromRegistration(regToFind))
+                assertEquals(expectedAircraft, dao.getAircraftFromRegistration(regToFindLowerCase))
+                assertEquals(null, dao.getAircraftFromRegistration("BOGUS DATA"))
 
                 // test clearDB
                 dao.clearDb()

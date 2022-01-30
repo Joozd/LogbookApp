@@ -38,6 +38,9 @@ interface PreloadedRegistrationsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(regs: List<PreloadedRegistration>)
 
+    @Query("SELECT * FROM PreloadedRegistration where registration = :reg LIMIT 1")
+    suspend fun getAircraftFromRegistration(reg: String): PreloadedRegistration?
+
     @Query ("DELETE FROM PreloadedRegistration")
     suspend fun clearDb()
 }

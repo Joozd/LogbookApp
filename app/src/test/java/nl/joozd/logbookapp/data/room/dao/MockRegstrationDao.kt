@@ -34,9 +34,9 @@ class MockRegstrationDao: RegistrationDao {
 
     override fun allRegistrationsFlow(): Flow<List<AircraftRegistrationWithTypeData>> = simulatedFlow
 
-    override suspend fun getAircraftFromRegistration(reg: String): AircraftRegistrationWithTypeData? {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getAircraftFromRegistration(reg: String): AircraftRegistrationWithTypeData? =
+        simulatedDatabase[reg] ?: simulatedDatabase.values.firstOrNull { it.registration.equals(reg, ignoreCase = true) }
+
 
     override suspend fun save(vararg regs: AircraftRegistrationWithTypeData) {
         regs.forEach {

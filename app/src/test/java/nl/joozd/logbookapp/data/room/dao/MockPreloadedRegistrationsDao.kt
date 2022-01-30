@@ -43,6 +43,9 @@ class MockPreloadedRegistrationsDao: PreloadedRegistrationsDao {
         emit()
     }
 
+    override suspend fun getAircraftFromRegistration(reg: String): PreloadedRegistration? =
+        simulatedDatabase[reg] ?: simulatedDatabase.values.firstOrNull { it.registration.equals(reg, ignoreCase = true) }
+
     override suspend fun clearDb() {
         simulatedDatabase.clear()
         emit()

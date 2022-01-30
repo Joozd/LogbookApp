@@ -38,6 +38,7 @@ object AircraftTestData {
 
     val arwt1 = AircraftRegistrationWithType("PH-EZE", aircraftType1)
     val arwt2 = AircraftRegistrationWithType("PH-EZF", aircraftType2)
+    val overrulingFlight = AircraftRegistrationWithType("PH-EZA", aircraftType2)
     val updatedArwt1 = AircraftRegistrationWithType("PH-EZE", aircraftType2)
     val regsWithTypes = listOf(arwt1, arwt2)
 

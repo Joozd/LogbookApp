@@ -25,7 +25,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.AircraftTestData
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.room.MockDatabase
@@ -46,7 +45,8 @@ import org.junit.Test
 class AircraftRepositoryTests {
     @Before
     fun setUp(){
-        DispatcherProvider.switchToTestDispatchers(UnconfinedTestDispatcher(TestCoroutineScheduler()))    }
+        DispatcherProvider.switchToTestDispatchers(UnconfinedTestDispatcher(TestCoroutineScheduler()))
+    }
 
     @After
     fun cleanUp(){
@@ -94,11 +94,26 @@ class AircraftRepositoryTests {
             //test aircraftDataCacheFlow
             repo.aircraftDataCacheFlow().test{
                 assertEquals(expectedSize, awaitItem().getRegistrationToAircraftMap().size)
+                cancelAndConsumeRemainingEvents()
             }
 
             //test getAircraftDataCache
             val adc = repo.getAircraftDataCache()
             assertEquals(AircraftTestData.aircraftTypes.size, adc.getAircraftTypes().size)
+
+            //test getAircraftFromRegistration
+            val testAircraft = AircraftTestData.arwt1.toAircraft()
+            //- with bogus data
+            assertEquals(null, repo.getAircraftFromRegistration("BOGUS DATA"))
+            //- with correct case
+            assertEquals(testAircraft, repo.getAircraftFromRegistration(testAircraft.registration))
+            //- with incorrect case
+            assertEquals(testAircraft, repo.getAircraftFromRegistration(testAircraft.registration.lowercase()))
+            //- with conflicting Preloaded/ARWT flights
+            val a = AircraftTestData.overrulingAircraft.toAircraft()
+            assert(repo.getAircraftFromRegistration(a.registration) != a)
+            repo.saveAircraft(a)
+            assertEquals(a, repo.getAircraftFromRegistration(a.registration))
         }
     }
 }

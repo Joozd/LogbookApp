@@ -38,6 +38,12 @@ interface AircraftRepository {
     fun aircraftMapFlow(): Flow<Map<String, Aircraft>>
 
     /**
+     * Provide a Registrations To Aircraft map
+     * This map holds all known registrations in DB paired with their [Aircraft] data
+     */
+    suspend fun registrationToAircraftMap(): Map<String, Aircraft>
+
+    /**
      * Provide a Flow that emits a new AircraftDataCache object every time
      * an updated one is available.
      */
@@ -60,13 +66,21 @@ interface AircraftRepository {
      */
     suspend fun replaceAllPreloadedWith(newPreloaded: List<PreloadedRegistration>)
 
+    /**
+     * Get an aircraft from its registration
+     */
+    suspend fun getAircraftFromRegistration(registration: String): Aircraft?
 
+    /**
+     * Save and aircraft to DB
+     */
+    suspend fun saveAircraft(aircraft: Aircraft)
 
     companion object{
         val instance: AircraftRepository by lazy {
             AircraftRepositoryImpl(JoozdlogDatabase.getInstance())
         }
 
-        fun mock(mockDatabase: JoozdlogDatabase) = AircraftRepositoryImpl(mockDatabase)
+        fun mock(mockDatabase: JoozdlogDatabase): AircraftRepository = AircraftRepositoryImpl(mockDatabase)
     }
 }

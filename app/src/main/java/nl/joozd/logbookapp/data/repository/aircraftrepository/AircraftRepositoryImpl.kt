@@ -65,7 +65,7 @@ class AircraftRepositoryImpl(
         registrationToAircraftMap()
     )
 
-    suspend fun registrationToAircraftMap(): Map<String, Aircraft> =
+    override suspend fun registrationToAircraftMap(): Map<String, Aircraft> =
         makeAircraftMap(
             getAircraftTypes(),
             getPreloadedRegistrations(),
@@ -87,11 +87,18 @@ class AircraftRepositoryImpl(
     override suspend fun getAircraftTypeByShortName(typeShortName: String): AircraftType? =
         aircraftTypeDao.getAircraftTypeFromShortName(typeShortName)?.toAircraftType()
 
-    suspend fun getAircraftFromRegistration(registration: String) =
-        registrationDao.getAircraftFromRegistration(registration)?.toAircraftRegistrationWithType()
+    override suspend fun getAircraftFromRegistration(registration: String): Aircraft? =
+        registrationDao.getAircraftFromRegistration(registration)
+                ?.toAircraftRegistrationWithType()
+                ?.toAircraft()
+            ?: preloadedRegistrationsDao.getAircraftFromRegistration(registration)
+                ?.let{
+                    val type = aircraftTypeDao.getAircraftType(it.type)?.toAircraftType()
+                    Aircraft(it.registration, type, Aircraft.PRELOADED)
+                }
 
-    fun saveAircraft(aircraft: Aircraft) = launch(DispatcherProvider.io()) {
-        if (aircraft.type?.name == null) return@launch // Don't save aircraft without type.
+    override suspend fun saveAircraft(aircraft: Aircraft) = withContext(DispatcherProvider.io()) {
+        if (aircraft.type?.name == null) return@withContext // Don't save aircraft without type.
         val newAcrwt = AircraftRegistrationWithType(aircraft.registration, aircraft.type)
         println("NEWAIRCRAFT: $newAcrwt")
         saveAircraftRegistrationWithType(newAcrwt)

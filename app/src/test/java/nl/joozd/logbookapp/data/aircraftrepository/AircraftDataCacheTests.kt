@@ -19,5 +19,67 @@
 
 package nl.joozd.logbookapp.data.aircraftrepository
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import nl.joozd.logbookapp.AircraftTestData
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import nl.joozd.logbookapp.data.room.MockDatabase
+import nl.joozd.logbookapp.data.room.model.toAircraft
+import nl.joozd.logbookapp.utils.DispatcherProvider
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+
+@ExperimentalCoroutinesApi
 class AircraftDataCacheTests {
+    private val repo = AircraftRepository.mock(MockDatabase())
+
+    //Fill repo with some flights and types
+    @Before
+    fun setup(){
+        DispatcherProvider.switchToTestDispatchers(
+            UnconfinedTestDispatcher(TestCoroutineScheduler())
+        )
+
+        runBlocking {
+            repo.replaceAllTypesWith(AircraftTestData.aircraftTypes)
+            repo.replaceAllPreloadedWith(AircraftTestData.preloadedList)
+            val ac = AircraftTestData.regsWithTypes.first().toAircraft()
+            repo.saveAircraft(ac)
+        }
+    }
+
+    @After
+    fun cleanUp(){
+        DispatcherProvider.switchToNormalDispatchers()
+    }
+
+    @Test
+    fun testAircraftDataCache(){
+        runTest{
+            with(repo.getAircraftDataCache()) {
+                // test getAircraftTypes()
+                assertEquals(AircraftTestData.aircraftTypes, getAircraftTypes())
+
+                //test getRegistrationToAircraftMap()
+                assertEquals(repo.registrationToAircraftMap(), getRegistrationToAircraftMap())
+
+                //test getAircraftFromRegistration()
+                val regToFind1 = AircraftTestData.preloaded1.registration
+                val regToFind2 = AircraftTestData.arwt1.registration
+                assertEquals(repo.getAircraftFromRegistration(regToFind1), getAircraftFromRegistration(regToFind1))
+                assertEquals(repo.getAircraftFromRegistration(regToFind2), getAircraftFromRegistration(regToFind2))
+
+                //test getAircraftTypeByShortName
+                val t = AircraftTestData.aircraftType2
+                assertEquals(t, getAircraftTypeByShortName(t.shortName))
+            }
+            println("testAircraftDataCache Done")
+        }
+
+    }
 }

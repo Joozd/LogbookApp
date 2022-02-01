@@ -24,6 +24,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.room.AirportsTestData
 import nl.joozd.logbookapp.data.room.MockDatabase
@@ -62,7 +63,18 @@ class AirportRepositoryTests {
                 expectedSize += AirportsTestData.airports.size
 
                 assertEquals(expectedSize, expectMostRecentItem().size)
+
+                cancelAndConsumeRemainingEvents()
             }
+            //test airportDataCacheFlow
+            repo.airportDataCacheFlow().test{
+                assertEquals(expectedSize, expectMostRecentItem().getAirports().size)
+
+                cancelAndConsumeRemainingEvents()
+            }
+
+            // test getAirportDataCache()
+            assertEquals(expectedSize, repo.getAirportDataCache().getAirports().size)
         }
     }
 }

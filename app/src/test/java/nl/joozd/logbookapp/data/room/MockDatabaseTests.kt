@@ -56,17 +56,20 @@ class MockDatabaseTests {
                 //test save(collection) + getAllFlights
                 dao.save(FlightsTestData.flights.map { it.toData() })
 
+                val allFlightsSize = FlightsTestData.flights.size
+                val validFlightsSize = allFlightsSize - FlightsTestData.flights.filter { it.DELETEFLAG }.size
                 // should not emit item with DELETEFLAG
-                assertEquals(4, awaitItem().size )
+                assertEquals(validFlightsSize, awaitItem().size )
 
                 // 4 flights should be saved
-                assertEquals (5, dao.getAllFlights().size)
+                assertEquals (allFlightsSize, dao.getAllFlights().size)
 
                 //getValidFlights
-                assertEquals(4, dao.getValidFlights().size)
+                assertEquals(validFlightsSize, dao.getValidFlights().size)
 
                 //getFlightByID
                 val f1 = FlightsTestData.flight1
+                println("id: ${f1.flightID}")
                 assertEquals(f1, dao.getFlightById(f1.flightID)?.toFlight())
 
                 //getFlightsByID
@@ -81,6 +84,11 @@ class MockDatabaseTests {
 
                 //getMostRecentTimestampOfACompletedFlight
                 assertEquals(4000L, dao.getMostRecentTimestampOfACompletedFlight())
+
+                //delete
+                dao.delete(listOf(f1.toData()))
+                assertEquals(null, dao.getFlightById(f1.flightID)?.toFlight())
+
 
                 cancelAndConsumeRemainingEvents()
             }

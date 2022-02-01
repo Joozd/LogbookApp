@@ -64,21 +64,29 @@ interface FlightRepository {
 
     /**
      * Save a flight to DB.
+     * Saving a flight updates its timestamp
+     * and assigns an ID if it is set to [Flight.FLIGHT_ID_NOT_INITIALIZED]
      */
     suspend fun save(flight: Flight)
 
     /**
      * Save a collection of Flights to DB.
+     * Saving a flight updates its timestamp.
+     * and assigns an ID if it is set to [Flight.FLIGHT_ID_NOT_INITIALIZED]
      */
     suspend fun save (flights: Collection<Flight>)
 
     /**
      * Delete a flight.
+     * If flight is not known to server, this will remove it from DB,
+     * else it will set [Flight.DELETEFLAG] to true and save.
      */
     suspend fun delete(flight: Flight)
 
     /**
      * Delete a collection of flights.
+     * If flight is not known to server, this will remove it from DB,
+     * else it will set [Flight.DELETEFLAG] to true and save.
      */
     suspend fun delete(flights: Collection<Flight>)
 

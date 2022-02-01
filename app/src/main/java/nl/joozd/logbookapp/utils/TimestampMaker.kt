@@ -35,7 +35,7 @@ class TimestampMaker(private val mock: Boolean = false) {
      */
     val nowForSycPurposes: Long
         get() = if (mock) Instant.now().epochSecond
-                else (Instant.now().epochSecond + Preferences.serverTimeOffset).maxOfThisAnd(Preferences.lastUpdateTime+1)
+                else maxOf(Instant.now().epochSecond + Preferences.serverTimeOffset, Preferences.lastUpdateTime+1)
 
     companion object{
         /**

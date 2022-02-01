@@ -32,8 +32,9 @@ object FlightsTestData {
     val deletedFlight = prototypeFlight.copy(flightID = 3, timeOut = now + 6000, timeIn = now + 9000, DELETEFLAG = true, timeStamp = 5000, unknownToServer = false)
     val unknownToServerFlight = flight2.copy(flightID = 7, unknownToServer = true, timeStamp = 4000)
     val plannedFlight = flight2.copy(flightID = 8, timeOut = now + 10000, timeIn = now + 12000, unknownToServer = true, isPlanned = true, timeStamp = 10000)
+    val flightWithoutID = prototypeFlight.copy(flightID = Flight.FLIGHT_ID_NOT_INITIALIZED, orig = "EHAM", dest = "EBBR", timeStamp = 1000, unknownToServer = false)
 
-    val flights = listOf(flight1, flight2, deletedFlight, unknownToServerFlight, plannedFlight)
+    val flights = listOf(flight1, flight2, deletedFlight, unknownToServerFlight, plannedFlight, flightWithoutID)
 
     fun parseFlightsFile(): List<Flight> = FlightsRepositoryExporter.csvToFlights(File("C:\\temp\\joozdlog\\flights.csv").readText(), mock = true)
     fun flightsFileLines(): List<String> = File("C:\\temp\\joozdlog\\flights.csv").readLines()

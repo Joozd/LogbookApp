@@ -26,15 +26,19 @@ import kotlinx.coroutines.flow.map
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
-import nl.joozd.logbookapp.data.room.dao.FlightDao
 import nl.joozd.logbookapp.data.room.model.toFlight
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.TimestampMaker
 
 
 class FlightRepositoryImpl(
-    database: JoozdlogDatabase
+    injectedDatabase: JoozdlogDatabase?
 ) : FlightRepositoryWithDirectAccess, FlightRepositoryWithSpecializedFunctions, CoroutineScope by MainScope() {
+    private constructor(): this (null)
+    //mock tracking is needed temporarily for TimestampMaker testing
+    private val mock = injectedDatabase != null
+    private val database = injectedDatabase ?: JoozdlogDatabase.getInstance() // this way we can detect if a DB is injected
+
     private val flightDao = database.flightDao()
     private val idGenerator = IDGenerator()
 
@@ -135,7 +139,7 @@ class FlightRepositoryImpl(
      * - if flightID is set to Flight.NOT_INITIALIZED it will generate a new ID and set it.
      */
     private suspend fun saveWithIDAndTimestamp(flights: Collection<Flight>){
-        val now = TimestampMaker().nowForSycPurposes
+        val now = TimestampMaker(mock).nowForSycPurposes
         val timestampedFlights = flights.map {
             val id = makeNewIDIfCurrentNotInitialized(it)
             it.copy(flightID = id, timeStamp = now)
@@ -167,7 +171,7 @@ class FlightRepositoryImpl(
 
     companion object{
         const val MAX_SQL_BATCH_SIZE = 999
-        val instance by lazy { FlightRepositoryImpl(JoozdlogDatabase.getInstance()) }
+        val instance by lazy { FlightRepositoryImpl() }
     }
 }
 

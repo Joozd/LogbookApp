@@ -20,18 +20,13 @@
 package nl.joozd.logbookapp.data.flightRepository
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.room.FlightsTestData
 import nl.joozd.logbookapp.data.room.MockDatabase
 import nl.joozd.logbookapp.testUtils.CoroutineTestingClass
-import nl.joozd.logbookapp.utils.DispatcherProvider
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -39,18 +34,15 @@ import org.junit.Test
 @ExperimentalCoroutinesApi
 class FlightRepositoryWithSpecializedFunctionsTests: CoroutineTestingClass() {
     private val repo = FlightRepositoryWithSpecializedFunctions.mock(MockDatabase())
-    private var expectedItems = 0
 
     @Before
     fun injectFlightsIntoDB(){
         with (repo as FlightRepositoryWithDirectAccess){
             runBlocking{
-                saveDirectToDB(FlightsTestData.flights)
+                saveDirectToDB(FlightsTestData.injectableFlights)
             }
         }
     }
-
-
 
     @Test
     fun testFlightRepositoryWithSpecializedFunctionsFunctions(){
@@ -60,6 +52,9 @@ class FlightRepositoryWithSpecializedFunctionsTests: CoroutineTestingClass() {
 
             //test getMostRecentCompletedFlight
             assertEquals(FlightsTestData.mostRecentCompletedFlight, repo.getMostRecentCompletedFlight())
+
+            //Test FlightRepository implementations
+            FlightRepositoryTests().testFlightRepo(repo)
         }
     }
 }

@@ -23,6 +23,8 @@ package nl.joozd.logbookapp.data.repository.flightRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
@@ -141,6 +143,8 @@ class FlightRepositoryImpl(
      */
     private suspend fun saveWithIDAndTimestamp(flights: Collection<Flight>){
         val now = TimestampMaker(mock).nowForSycPurposes
+        //make sure generated fLightIDs are incremented far enough
+        idGenerator.setMostRecentHighestIdToAtLeast(flights.maxOf{it.flightID})
         val timestampedFlights = flights.map {
             val id = makeNewIDIfCurrentNotInitialized(it)
             it.copy(flightID = id, timeStamp = now)
@@ -149,9 +153,9 @@ class FlightRepositoryImpl(
     }
 
     private suspend fun makeNewIDIfCurrentNotInitialized(flight: Flight): Int =
-        if (flight.flightID == Flight.FLIGHT_ID_NOT_INITIALIZED)
+        (if (flight.flightID == Flight.FLIGHT_ID_NOT_INITIALIZED)
             idGenerator.generateID(0)
-        else flight.flightID
+        else flight.flightID)
 
     private suspend fun getValidFlightsFromDao() =
         flightDao.getValidFlights().toFlights()
@@ -162,11 +166,19 @@ class FlightRepositoryImpl(
     private inner class IDGenerator{
         private var mostRecentHighestID: Int = Flight.FLIGHT_ID_NOT_INITIALIZED
 
+        private val mutex = Mutex()
+
         suspend fun generateID(highestTakenID: Int): Int{
-            if (mostRecentHighestID == Flight.FLIGHT_ID_NOT_INITIALIZED)
-                mostRecentHighestID = flightDao.highestUsedID() ?: 0
-            mostRecentHighestID = maxOf(mostRecentHighestID, highestTakenID)
-            return ++mostRecentHighestID
+            mutex.withLock {
+                if (mostRecentHighestID == Flight.FLIGHT_ID_NOT_INITIALIZED)
+                    mostRecentHighestID = flightDao.highestUsedID() ?: 0
+                mostRecentHighestID = maxOf(mostRecentHighestID, highestTakenID)
+                return (++mostRecentHighestID)
+            }
+        }
+
+        fun setMostRecentHighestIdToAtLeast(minimumHigestID: Int){
+            mostRecentHighestID = maxOf(mostRecentHighestID, minimumHigestID)
         }
     }
 

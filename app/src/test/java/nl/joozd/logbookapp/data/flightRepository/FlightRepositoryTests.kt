@@ -63,9 +63,11 @@ class FlightRepositoryTests {
     }
 
     fun testFlightRepo(repo: FlightRepository){
-        //mock db starts empty
         var expectedSize = 0
         runTest {
+            //mock db should start empty, so we make sure:
+            repo.delete(repo.getAllFlights())
+
             //test getAllFlightsFlow
             repo.getAllFlightsFlow().test {
                 assertEquals(expectedSize, expectMostRecentItem().size)
@@ -112,9 +114,12 @@ class FlightRepositoryTests {
                 assertEquals(null, repo.getFlightByID(Int.MIN_VALUE))
 
                 //should find a saved flight
-                val f2 = FlightsTestData.flightWithoutID
-                val found = repo.getFlightByID(2)
-                assertEquals(f2.withTimestampOf(found!!).copy(flightID = 2), found)
+                val f = FlightsTestData.flightWithoutID
+                repo.save(f)
+                expectedSize++
+                val lastSavedFlightID = savedFlights.last().flightID // last saved flight was
+                val found = repo.getFlightByID(lastSavedFlightID)
+                assertEquals(f.withTimestampOf(found!!).copy(flightID = lastSavedFlightID), found)
 
                 //test delete(Collection)
                 val ff = repo.getAllFlights()
@@ -153,8 +158,6 @@ class FlightRepositoryTests {
             repo.save(FlightsTestData.flightWithoutID)
             expectedSize++
             assertEquals(expectedSize, repo.getFLightDataCache().flights.size)
-
-            println("Tested $repo")
         }
 
     }

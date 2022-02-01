@@ -49,15 +49,7 @@ class FlightRepositoryWithDirectAccessTests {
 
     @Test
     fun testFlightRepositoryWithDirectAccessFunctions() {
-
-        //test FlightRepository implementation
-        FlightRepositoryTests().testFlightRepo(repo)
-
         runTest {
-            //try to clear DB as FlightRepositoryTests left Repo with a bunch of soft-deleted flights
-            repo.deleteHard(repo.getAllFlightsInDB())
-            assertEquals(expectedItems, repo.getAllFlightsInDB().size)
-
             //test saveDirectToDb and getAllFlightsInDB - this should only save one flight and not update its timestamp or ID
             val f = FlightsTestData.flightWithoutID
             repeat(3){
@@ -79,6 +71,9 @@ class FlightRepositoryWithDirectAccessTests {
             //test delete(Collection)
             repo.deleteHard(FlightsTestData.flights)
             assertEquals(0, repo.getAllFlightsInDB().size)
+
+            //test FlightRepository implementation
+            FlightRepositoryTests().testFlightRepo(repo)
         }
     }
 }

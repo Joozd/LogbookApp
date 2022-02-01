@@ -284,7 +284,7 @@ object Cloud {
      *         -1 on critical fail (ie wrong credentials),
      *         null on server error (retry later)
      */
-    suspend fun syncAllFlights(flightRepository: FlightRepository): Long? =
+    suspend fun syncAllFlights(flightRepository: FlightRepositoryWithDirectAccess): Long? =
         withContext(DispatcherProvider.io()) {
             Client.getInstance().use { server ->
                 with(ServerFunctions) {

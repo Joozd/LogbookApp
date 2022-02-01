@@ -90,13 +90,6 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
     override suspend fun getFlightsByID(ids: Collection<Int>): List<Flight> =
         repositoryWithDirectAccess.getFlightsByID(ids)
 
-    /**
-     * Get all flights (including deleted ones)
-     * For only usable flights, use [FlightDataCache.flights]
-     */
-    override suspend fun getAllFlightsInDB(): List<Flight> =
-        repositoryWithDirectAccess.getAllFlightsInDB()
-
     override fun getAllFlightsFlow(): Flow<List<Flight>> =
         repositoryWithDirectAccess.getAllFlightsFlow()
 

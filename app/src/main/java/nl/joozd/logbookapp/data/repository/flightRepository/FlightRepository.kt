@@ -38,11 +38,6 @@ interface FlightRepository {
     suspend fun getFlightsByID(ids: Collection<Int>): List<Flight>
 
     /**
-     * Get all flights (including deleted ones)
-     */
-    suspend fun getAllFlightsInDB(): List<Flight>
-
-    /**
      * Get a Flow of all valid (DELETEFLAG = false) Flights
      */
     fun getAllFlightsFlow(): Flow<List<Flight>>

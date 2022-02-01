@@ -32,13 +32,14 @@ import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.ui.utils.toast
 
 class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
 
-    private val flightRepository = FlightRepository.instance
+    private val flightRepository = FlightRepositoryWithDirectAccess.instance
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         if (makeNewLoginDataIfNeeded() != CloudFunctionResults.OK)

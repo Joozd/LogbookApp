@@ -49,6 +49,11 @@ interface FlightRepositoryWithDirectAccess: FlightRepository {
      */
     suspend fun deleteHard(flights: Collection<Flight>)
 
+    /**
+     * Get all flights (including deleted ones)
+     */
+    suspend fun getAllFlightsInDB(): List<Flight>
+
     companion object{
         val instance: FlightRepositoryWithDirectAccess get() = FlightRepositoryImpl.instance
 

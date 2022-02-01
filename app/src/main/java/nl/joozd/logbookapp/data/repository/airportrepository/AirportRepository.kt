@@ -42,16 +42,6 @@ interface AirportRepository {
     suspend fun getAirportByIcaoIdentOrNull(ident: String): Airport?
 
     /**
-     * Set the progress of an ongoing Airport Sync operation for [getAirportSyncProgressFlow] to emit
-     */
-    fun setAirportSyncProgress(progress: Int)
-
-    /**
-     * Get a flow that emits when [setAirportSyncProgress] has set progress
-     */
-    fun getAirportSyncProgressFlow(): Flow<Int>
-
-    /**
      * Replace current airport database with [newAirports]
      */
     suspend fun replaceDbWith(newAirports: Collection<Airport>)
@@ -61,6 +51,7 @@ interface AirportRepository {
             AirportRepositoryImpl(JoozdlogDatabase.getInstance())
         }
 
-        fun mock(mockDatabase: JoozdlogDatabase) = AirportRepositoryImpl(mockDatabase)
+        fun mock(mockDatabase: JoozdlogDatabase): AirportRepository =
+            AirportRepositoryImpl(mockDatabase)
     }
 }

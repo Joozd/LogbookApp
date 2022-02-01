@@ -35,9 +35,6 @@ class AirportRepositoryImpl(
     // used for getStaleOrEmptyAirportDataCache
     private var mostRecentlyLoadedAirportDataCache: AirportDataCache = AirportDataCache.make(emptyList())
 
-    // a progress of -1 means no airport sync in progress.
-    private val airportSyncProgressMutableStateFlow = MutableStateFlow(-1)
-
     override fun airportsFlow() = airportDao.airportsFlow()
 
     override suspend fun getAirportDataCache(): AirportDataCache =
@@ -48,12 +45,6 @@ class AirportRepositoryImpl(
 
     override suspend fun getAirportByIcaoIdentOrNull(ident: String): Airport? =
         airportDao.searchAirportByIdent(ident)
-
-    override fun setAirportSyncProgress(progress: Int) {
-        airportSyncProgressMutableStateFlow.update { progress }
-    }
-
-    override fun getAirportSyncProgressFlow(): Flow<Int> = airportSyncProgressMutableStateFlow
 
     /**
      * Replace current airport database with [newAirports]

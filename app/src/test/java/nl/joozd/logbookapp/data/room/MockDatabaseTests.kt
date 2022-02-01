@@ -71,10 +71,12 @@ class MockDatabaseTests {
                 val f1 = FlightsTestData.flight1
                 println("id: ${f1.flightID}")
                 assertEquals(f1, dao.getFlightById(f1.flightID)?.toFlight())
+                assertEquals(null, dao.getFlightById(FlightsTestData.deletedFlight.flightID))
 
                 //getFlightsByID
-                assertEquals(2, dao.getFlightsByID((1..2).toList()).size)
-                assertEquals(3, dao.getFlightsByID((1..5).toList()).size)
+                assertEquals(2, dao.getFlightsByID((1..2).toList()).size) // get both 1 and 2
+                assertEquals(2, dao.getFlightsByID((1..3).toList()).size) // don't get deleted
+                assertEquals(3, dao.getFlightsByID((1..7).toList()).size) // 4, 5 and 6 don't exist
 
                 //highestUsedID
                 assertEquals(8, dao.highestUsedID())

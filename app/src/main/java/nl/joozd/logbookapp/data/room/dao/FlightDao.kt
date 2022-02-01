@@ -32,10 +32,10 @@ interface FlightDao {
     @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 ORDER BY timeOut DESC")
     fun validFlightsFlow(): Flow<List<FlightData>>
 
-    @Query("SELECT * FROM FlightData WHERE flightID = :id LIMIT 1")
+    @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 AND flightID = :id LIMIT 1")
     suspend fun getFlightById(id: Int): FlightData?
 
-    @Query("SELECT * FROM FlightData WHERE flightID IN (:ids)")
+    @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 AND flightID IN (:ids)")
     suspend fun getFlightsByID(ids: Collection<Int>): List<FlightData>
 
     @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")

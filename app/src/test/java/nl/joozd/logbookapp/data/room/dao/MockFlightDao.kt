@@ -33,13 +33,11 @@ class MockFlightDao: FlightDao {
     override fun validFlightsFlow(): Flow<List<FlightData>> =
         simulatedFlow.map { it.filter { f -> !f.DELETEFLAG }}
 
-    override suspend fun getFlightById(id: Int): FlightData? {
-        println("Lookin up flight #$id")
-        return simulatedDatabase[id]
-    }
+    override suspend fun getFlightById(id: Int): FlightData? =
+        simulatedDatabase[id]?.takeIf { !it.DELETEFLAG }
 
     override suspend fun getFlightsByID(ids: Collection<Int>): List<FlightData> =
-        ids.mapNotNull { simulatedDatabase[it] }
+        ids.mapNotNull { simulatedDatabase[it] }.filter { !it.DELETEFLAG }
 
     override suspend fun getAllFlights(): List<FlightData> =
         simulatedDatabase.values.toList()
@@ -61,7 +59,6 @@ class MockFlightDao: FlightDao {
 
     override suspend fun save(flightData: Collection<FlightData>) {
         flightData.forEach {
-            println("saving $it")
             simulatedDatabase[it.flightID] = it
         }
         emit()

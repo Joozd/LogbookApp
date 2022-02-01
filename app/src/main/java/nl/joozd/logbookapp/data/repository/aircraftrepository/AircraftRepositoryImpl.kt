@@ -30,6 +30,7 @@ import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.model.*
 import nl.joozd.logbookapp.utils.DispatcherProvider
+import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 /**
  * Repository for everything aircraft.
@@ -38,7 +39,7 @@ import nl.joozd.logbookapp.utils.DispatcherProvider
  */
 class AircraftRepositoryImpl(
     dataBase: JoozdlogDatabase
-): AircraftRepository, CoroutineScope by MainScope() {
+): AircraftRepository, CoroutineScope by dispatchersProviderMainScope() {
     private val aircraftTypeDao = dataBase.aircraftTypeDao()
     private val registrationDao = dataBase.registrationDao()
     private val preloadedRegistrationsDao = dataBase.preloadedRegistrationsDao()

@@ -22,15 +22,14 @@ package nl.joozd.logbookapp.data.repository.airportrepository
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
+import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 class AirportRepositoryImpl(
     dataBase: JoozdlogDatabase
-): AirportRepository, CoroutineScope by MainScope()  {
+): AirportRepository, CoroutineScope by dispatchersProviderMainScope()  {
     private val airportDao = dataBase.airportDao()
     // used for getStaleOrEmptyAirportDataCache
     private var mostRecentlyLoadedAirportDataCache: AirportDataCache = AirportDataCache.make(emptyList())

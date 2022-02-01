@@ -90,7 +90,7 @@ interface FlightRepository {
      * @param highestTakenID: Lowest ID that can be accepted for any new flight.
      *      Any generated new ID can be equal or higher than this, but not lower.
      */
-    suspend fun generateAndReserveNewFlightID(highestTakenID: Int): Int
+    suspend fun generateAndReserveNewFlightID(highestTakenID: Int = 1): Int
 
 
     companion object{

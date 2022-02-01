@@ -21,19 +21,24 @@ package nl.joozd.logbookapp.data.repository.flightRepository
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.UndoableCommand
+import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 import java.util.*
 
-//NOTE TO SELF: This is not where I take care of syncing.
-class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by MainScope() {
-    private val repositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance
+class FlightRepositoryWithUndoImpl(mockDataBase: JoozdlogDatabase?
+): FlightRepositoryWithUndo, CoroutineScope by dispatchersProviderMainScope() {
+    private constructor(): this (null)
+
+    private val repositoryWithDirectAccess =
+        if (mockDataBase == null)FlightRepositoryWithDirectAccess.instance
+        else FlightRepositoryWithDirectAccess.mock(mockDataBase)
 
     private val undoStack = Stack<UndoableCommand>()
     private val redoStack = Stack<UndoableCommand>()
@@ -196,5 +201,10 @@ class FlightRepositoryWithUndoImpl: FlightRepositoryWithUndo, CoroutineScope by 
         redoStack.clear()
         _undoAvailable.value = true
         command()
+    }
+
+    companion object{
+        val instance by lazy { FlightRepositoryWithUndoImpl() }
+        fun mock(mockDataBase: JoozdlogDatabase) = FlightRepositoryWithUndoImpl(mockDataBase)
     }
 }

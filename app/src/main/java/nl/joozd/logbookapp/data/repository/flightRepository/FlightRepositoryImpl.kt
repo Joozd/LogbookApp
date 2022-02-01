@@ -29,11 +29,12 @@ import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.model.toFlight
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.TimestampMaker
+import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 
 class FlightRepositoryImpl(
     injectedDatabase: JoozdlogDatabase?
-) : FlightRepositoryWithDirectAccess, FlightRepositoryWithSpecializedFunctions, CoroutineScope by MainScope() {
+) : FlightRepositoryWithDirectAccess, FlightRepositoryWithSpecializedFunctions, CoroutineScope by dispatchersProviderMainScope() {
     private constructor(): this (null)
     //mock tracking is needed temporarily for TimestampMaker testing
     private val mock = injectedDatabase != null

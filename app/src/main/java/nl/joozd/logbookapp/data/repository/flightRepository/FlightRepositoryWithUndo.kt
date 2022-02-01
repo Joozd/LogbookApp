@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.data.repository.flightRepository
 
 import kotlinx.coroutines.flow.Flow
+import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 
 /**
  * FlightRepositoryWithUndo should delegate all database operations to the Singleton
@@ -49,6 +50,9 @@ interface FlightRepositoryWithUndo: FlightRepository {
     companion object{
         // This has its own singleton instance that does NOT have direct access to database.
         // Instead it delegates IO to FlightRepositoryWithDirectAccess
-        val instance: FlightRepositoryWithUndo by lazy { FlightRepositoryWithUndoImpl() }
+        val instance: FlightRepositoryWithUndo get() = FlightRepositoryWithUndoImpl.instance
+
+        fun mock(mockDataBase: JoozdlogDatabase): FlightRepositoryWithUndo =
+            FlightRepositoryWithUndoImpl.mock(mockDataBase)
     }
 }

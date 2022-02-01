@@ -25,7 +25,6 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.room.FlightsTestData
@@ -74,7 +73,7 @@ class FlightRepositoryTests {
 
                 //test save(Flight)
                 val now = TimestampMaker(mock = true).nowForSycPurposes
-                repo.save(FlightsTestData.flight1)
+                repo.save(FlightsTestData.mostRecentCompletedFlight)
 
                 //check correct number of flights (1) saved
                 expectedSize++
@@ -85,10 +84,10 @@ class FlightRepositoryTests {
 
                 //check saved flights get timestamp
                 assert(firstSavedFlight.timeStamp in (now-3..now+3))
-                assert(firstSavedFlight.timeStamp != FlightsTestData.flight1.timeStamp)
+                assert(firstSavedFlight.timeStamp != FlightsTestData.mostRecentCompletedFlight.timeStamp)
 
                 //check saved flight is same as orignial flight apart from timestamp
-                assertEquals(FlightsTestData.flight1.withTimestampOf(firstSavedFlight), firstSavedFlight)
+                assertEquals(FlightsTestData.mostRecentCompletedFlight.withTimestampOf(firstSavedFlight), firstSavedFlight)
 
                 //check flights without ID get a new ID assigned and are saved
                 repeat(3){

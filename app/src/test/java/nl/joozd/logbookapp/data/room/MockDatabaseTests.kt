@@ -68,7 +68,7 @@ class MockDatabaseTests {
                 assertEquals(validFlightsSize, dao.getValidFlights().size)
 
                 //getFlightByID
-                val f1 = FlightsTestData.flight1
+                val f1 = FlightsTestData.mostRecentCompletedFlight
                 println("id: ${f1.flightID}")
                 assertEquals(f1, dao.getFlightById(f1.flightID)?.toFlight())
                 assertEquals(null, dao.getFlightById(FlightsTestData.deletedFlight.flightID))

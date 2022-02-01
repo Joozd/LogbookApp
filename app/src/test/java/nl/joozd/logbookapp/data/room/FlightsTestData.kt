@@ -27,14 +27,14 @@ import java.time.Instant
 object FlightsTestData {
     private val prototypeFlight = Flight().copy (isPlanned = false)
     private val now = Instant.now().epochSecond
-    val flight1 = prototypeFlight.copy(flightID = 1, orig = "EHAM", dest = "EBBR", timeStamp = 1000, unknownToServer = false)
-    val flight2 = prototypeFlight.copy(flightID = 2, orig = "EHGG", dest = "EHHV", timeOut = now - 10000, timeIn = now - 7000, timeStamp = 2000, unknownToServer = false)
+    val mostRecentCompletedFlight = prototypeFlight.copy(flightID = 1, orig = "EHAM", dest = "EBBR", timeOut = now + 999999, timeIn = now + 999999 + 3600, timeStamp = 1000, unknownToServer = false)
+    val mostRecentTimestampFlight = prototypeFlight.copy(flightID = 2, orig = "EHGG", dest = "EHHV", timeOut = now - 10000, timeIn = now - 7000, timeStamp = 999999, unknownToServer = false)
     val deletedFlight = prototypeFlight.copy(flightID = 3, timeOut = now + 6000, timeIn = now + 9000, DELETEFLAG = true, timeStamp = 5000, unknownToServer = false)
-    val unknownToServerFlight = flight2.copy(flightID = 7, unknownToServer = true, timeStamp = 4000)
-    val plannedFlight = flight2.copy(flightID = 8, timeOut = now + 10000, timeIn = now + 12000, unknownToServer = true, isPlanned = true, timeStamp = 10000)
+    val unknownToServerFlight = mostRecentTimestampFlight.copy(flightID = 7, unknownToServer = true, timeStamp = 4000)
+    val plannedFlight = mostRecentTimestampFlight.copy(flightID = 8, timeOut = now + 10000, timeIn = now + 12000, unknownToServer = true, isPlanned = true, timeStamp = 10000)
     val flightWithoutID = prototypeFlight.copy(flightID = Flight.FLIGHT_ID_NOT_INITIALIZED, orig = "EHAM", dest = "EBBR", timeStamp = 1000, unknownToServer = false)
 
-    val flights = listOf(flight1, flight2, deletedFlight, unknownToServerFlight, plannedFlight, flightWithoutID)
+    val flights = listOf(mostRecentCompletedFlight, mostRecentTimestampFlight, deletedFlight, unknownToServerFlight, plannedFlight, flightWithoutID)
 
     fun parseFlightsFile(): List<Flight> = FlightsRepositoryExporter.csvToFlights(File("C:\\temp\\joozdlog\\flights.csv").readText(), mock = true)
     fun flightsFileLines(): List<String> = File("C:\\temp\\joozdlog\\flights.csv").readLines()

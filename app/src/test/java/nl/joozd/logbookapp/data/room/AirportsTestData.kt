@@ -22,9 +22,9 @@ package nl.joozd.logbookapp.data.room
 import nl.joozd.logbookapp.data.dataclasses.Airport
 
 object AirportsTestData {
-    val airport1 = Airport(1, "EHAM", "big airport", "Schiphol", 10.0, 20.0, -20, "Amsterdam", "AMS")
-    val airport2 = Airport(3, "EBBR", "big airport", "Zaventem", 12.3, 45.6, 200, "Brussels", "BRU")
-    val airport3 = Airport(17, "EHHV", "smol airport", "Hilversum Airfield", 1.0, 2.0, 0, "Hilversum", "")
+    val eham = Airport(1, "EHAM", "big airport", "Schiphol", 10.0, 20.0, -20, "Amsterdam", "AMS")
+    val ebbr = Airport(3, "EBBR", "big airport", "Zaventem", 12.3, 45.6, 200, "Brussels", "BRU")
+    val ehhv = Airport(17, "EHHV", "smol airport", "Hilversum Airfield", 1.0, 2.0, 0, "Hilversum", "")
 
-    val airports = listOf(airport1, airport2, airport3)
+    val airports = listOf(eham, ebbr, ehhv)
 }

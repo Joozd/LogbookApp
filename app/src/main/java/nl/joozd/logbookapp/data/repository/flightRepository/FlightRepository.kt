@@ -91,6 +91,10 @@ interface FlightRepository {
 
 
     companion object{
+        //If changing concrete class, change it in mock() as well!
         val instance: FlightRepository get() = FlightRepositoryWithDirectAccess.instance
+
+        fun mock(mockDataBase: JoozdlogDatabase): FlightRepository =
+            FlightRepositoryWithDirectAccess.mock(mockDataBase)
     }
 }

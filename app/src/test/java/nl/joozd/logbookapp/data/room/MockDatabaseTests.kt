@@ -31,7 +31,6 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import java.util.*
 
 @ExperimentalCoroutinesApi
 class MockDatabaseTests {
@@ -94,8 +93,8 @@ class MockDatabaseTests {
         val dao = db.airportDao()
         runTest {
             dao.airportsFlow().test {
-                val ap1 = AirportsTestData.airport1
-                val ap2 = AirportsTestData.airport2
+                val ap1 = AirportsTestData.eham
+                val ap2 = AirportsTestData.ebbr
                 //mock dao starts empty
                 assert(awaitItem().isEmpty())
 

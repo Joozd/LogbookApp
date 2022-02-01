@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.repository.flightRepository
 
+import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
 /*
@@ -50,5 +51,8 @@ interface FlightRepositoryWithDirectAccess: FlightRepository {
 
     companion object{
         val instance: FlightRepositoryWithDirectAccess get() = FlightRepositoryImpl.instance
+
+        fun mock(mockDataBase: JoozdlogDatabase): FlightRepositoryWithDirectAccess =
+            FlightRepositoryImpl(mockDataBase)
     }
 }

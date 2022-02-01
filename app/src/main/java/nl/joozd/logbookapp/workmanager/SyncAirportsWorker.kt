@@ -43,7 +43,7 @@ class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
     var progress: Int = 0
         set(p) {
             field = p
-            airportsRepository.setAirportSyncProgress(p)
+            //airportsRepository.setAirportSyncProgress(p)
         }
 
 

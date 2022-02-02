@@ -21,11 +21,16 @@ package nl.joozd.logbookapp.data.dataclasses
 
 import kotlinx.coroutines.*
 import nl.joozd.joozdlogcommon.AircraftType
+import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 /**
  * This is one specific Aircraft. It has a [registration], a [type], and a [source] for that type
  */
-data class Aircraft(val registration: String = "", val type: AircraftType? = null, val source: Int = NONE): CoroutineScope by MainScope() {
+data class Aircraft(
+    val registration: String = "",
+    val type: AircraftType? = null,
+    val source: Int = NONE
+): CoroutineScope by dispatchersProviderMainScope() {
     companion object{
         const val NONE = 999
         const val KNOWN = 1         // user has set it this way

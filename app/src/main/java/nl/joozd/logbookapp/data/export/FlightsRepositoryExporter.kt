@@ -30,6 +30,7 @@ import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
+import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 import java.time.Instant
 
 
@@ -38,7 +39,10 @@ import java.time.Instant
  * @param flightRepository: Flight Repository to use
  * @param mock: True if testing without Android environment (bypasses Preferences)
  */
-class FlightsRepositoryExporter(val flightRepository: FlightRepository, private val mock: Boolean = false): CoroutineScope by MainScope() {
+class FlightsRepositoryExporter(
+    val flightRepository: FlightRepository,
+    private val mock: Boolean = false
+): CoroutineScope by dispatchersProviderMainScope() {
     private val allFlightsAsync = async { flightRepository.getFLightDataCache().flights.filter{ !it.isPlanned} }
 
     suspend fun buildCsvString(): String = (listOf(FIRST_LINE_V5)  +

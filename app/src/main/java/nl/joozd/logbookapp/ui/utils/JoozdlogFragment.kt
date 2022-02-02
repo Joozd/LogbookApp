@@ -34,6 +34,7 @@ import kotlinx.coroutines.cancel
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.extensions.getColorFromAttr
+import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 /**
  * Contains boilerplate used in all my fragments, including
@@ -43,7 +44,7 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
  * supportFragmentManager
  */
 //TODO remove things and replace with viewModel per fragment
-abstract class JoozdlogFragment: Fragment(),  CoroutineScope by MainScope() {
+abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProviderMainScope() {
     protected val supportFragmentManager: FragmentManager by lazy { requireActivity().supportFragmentManager }
     protected val fragment: JoozdlogFragment
         get() = this

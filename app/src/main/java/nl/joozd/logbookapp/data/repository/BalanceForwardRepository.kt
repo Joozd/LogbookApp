@@ -24,8 +24,12 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.dao.BalanceForwardDao
+import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
-class BalanceForwardRepository private constructor(private val balanceforwardDao: BalanceForwardDao, private val dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope by MainScope()  {
+class BalanceForwardRepository private constructor(
+    private val balanceforwardDao: BalanceForwardDao,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+): CoroutineScope by dispatchersProviderMainScope()  {
 
     /**********************************************************************************************
      * Private parts

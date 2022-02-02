@@ -31,6 +31,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 
 /**
@@ -40,7 +41,7 @@ import nl.joozd.logbookapp.App
  * Observable variables:
  * [internetAvailableLiveData]: true if at least one network available with NET_CAPABILITY_INTERNET
  */
-object InternetStatus: CoroutineScope by MainScope() {
+object InternetStatus: CoroutineScope by dispatchersProviderMainScope() {
     /*******************************************************************************************
      * Private parts
      *******************************************************************************************/

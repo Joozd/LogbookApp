@@ -40,12 +40,12 @@ interface FlightRepositoryWithUndo: FlightRepository {
     /**
      * Undo last operation
      */
-    fun undo()
+    suspend fun undo()
 
     /**
      * Redo last operation
      */
-    fun redo()
+    suspend fun redo()
 
     companion object{
         // This has its own singleton instance that does NOT have direct access to database.

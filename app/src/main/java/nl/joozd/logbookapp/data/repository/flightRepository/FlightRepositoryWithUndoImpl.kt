@@ -53,38 +53,37 @@ class FlightRepositoryWithUndoImpl(mockDataBase: JoozdlogDatabase?
     /**
      * Undo last operation
      */
-    override fun undo() {
-        launch {
-            undoRedoMutex.withLock {
-                val command = undoStack.pop()
-                _undoAvailable.value = !undoStack.empty()
+    override suspend fun undo() {
+        undoRedoMutex.withLock {
+            val command = undoStack.pop()
+            _undoAvailable.value = !undoStack.empty()
 
-                command.undo()
-                redoStack.push(command)
-                _redoAvailable.value = true
-            }
+            command.undo()
+            redoStack.push(command)
+            _redoAvailable.value = true
         }
     }
+
 
     /**
      * Redo last operation
      */
-    override fun redo() {
-        launch {
-            undoRedoMutex.withLock {
-                if (redoStack.empty())
-                    Log.e(this::class.simpleName, "Trying to redo but redo stack is empty")
-                else {
-                    val command = redoStack.pop()
-                    _redoAvailable.value = !redoStack.empty()
+    override suspend fun redo() {
+        undoRedoMutex.withLock {
+            if (redoStack.empty())
+                Log.e(this::class.simpleName, "Trying to redo but redo stack is empty")
+            else {
+                val command = redoStack.pop()
+                _redoAvailable.value = !redoStack.empty()
 
-                    command()
-                    undoStack.push(command)
-                    _undoAvailable.value = true
-                }
+                command()
+                undoStack.push(command)
+                _undoAvailable.value = true
             }
         }
     }
+
+
 
     /**
      * Get a single flight by it's ID
@@ -145,11 +144,12 @@ class FlightRepositoryWithUndoImpl(mockDataBase: JoozdlogDatabase?
 
 
     private suspend fun saveWithUndo(flightsToSave: Collection<Flight>){
-        val saveAction = generateSaveFlightsAction(flightsToSave)
+        val flightsWithIDs = updateFlightIDs(flightsToSave)
+        val saveAction = generateSaveFlightsAction(flightsWithIDs)
 
         val ids = flightsToSave.map { it.flightID }
         val overwrittenFlights: List<Flight> = getFlightsByID(ids)
-        val undoAction = generateUndoSaveFlightsAction(flightsToSave, overwrittenFlights)
+        val undoAction = generateUndoSaveFlightsAction(flightsWithIDs, overwrittenFlights)
 
         val command = UndoableCommand(saveAction, undoAction)
         executeUndoableCommand(command)
@@ -166,6 +166,17 @@ class FlightRepositoryWithUndoImpl(mockDataBase: JoozdlogDatabase?
 
         val command = UndoableCommand(deleteAction, undoAction)
         executeUndoableCommand(command)
+    }
+
+    private suspend fun updateFlightIDs(
+        flightsToSave: Collection<Flight>
+    ): List<Flight> {
+        val highestIdInCollection = flightsToSave.maxOfOrNull { it.flightID } ?: 0
+        return flightsToSave.map {
+            if (it.flightID == Flight.FLIGHT_ID_NOT_INITIALIZED)
+                it.copy(flightID = generateAndReserveNewFlightID(highestIdInCollection))
+            else it
+        }
     }
 
     private fun generateSaveFlightsAction(flightsToSave: Collection<Flight>): () -> Unit = {
@@ -197,7 +208,7 @@ class FlightRepositoryWithUndoImpl(mockDataBase: JoozdlogDatabase?
 
 
     private fun executeUndoableCommand(command: UndoableCommand){
-        undoStack.push(command)
+        undoStack.push(command).also{ println("pushed $it, size now ${undoStack.size}")}
         redoStack.clear()
         _undoAvailable.value = true
         command()

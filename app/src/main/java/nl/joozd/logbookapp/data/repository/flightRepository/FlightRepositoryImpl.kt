@@ -144,12 +144,16 @@ class FlightRepositoryImpl(
     private suspend fun saveWithIDAndTimestamp(flights: Collection<Flight>){
         val now = TimestampMaker(mock).nowForSycPurposes
         //make sure generated fLightIDs are incremented far enough
-        idGenerator.setMostRecentHighestIdToAtLeast(flights.maxOf{it.flightID})
+        forceLowestFreeIdToBeHigherThanHighestIdIn(flights)
         val timestampedFlights = flights.map {
             val id = makeNewIDIfCurrentNotInitialized(it)
             it.copy(flightID = id, timeStamp = now)
         }
         saveDirectToDB(timestampedFlights)
+    }
+
+    private fun forceLowestFreeIdToBeHigherThanHighestIdIn(flights: Collection<Flight>) {
+        flights.maxOfOrNull { it.flightID }?.let { idGenerator.setMostRecentHighestIdToAtLeast(it) }
     }
 
     private suspend fun makeNewIDIfCurrentNotInitialized(flight: Flight): Int =

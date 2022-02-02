@@ -35,6 +35,7 @@ import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.TwilightCalculator
+import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 import nl.joozd.logbookapp.utils.reverseFlight
 import java.time.Duration
 import java.time.Instant
@@ -50,8 +51,7 @@ import java.util.*
  * @param flight: The flight to edit. Will be considered "new" if flightID < 0 (for undo purposes)
  * @NOTE
  */
-class WorkingFlightOld private constructor(flight: Flight): CoroutineScope {
-    override val coroutineContext = Dispatchers.Main + SupervisorJob()
+class WorkingFlightOld private constructor(flight: Flight): CoroutineScope by dispatchersProviderMainScope() {
     /*
     private val job = SupervisorJob()
 

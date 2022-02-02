@@ -34,9 +34,6 @@ import org.junit.Test
 
 @ExperimentalCoroutinesApi
 class FlightRepositoryWithDirectAccessTests {
-    private val repo = FlightRepositoryWithDirectAccess.mock(MockDatabase())
-    private var expectedItems = 0
-
     @Before
     fun setUp(){
         DispatcherProvider.switchToTestDispatchers(UnconfinedTestDispatcher(TestCoroutineScheduler()))
@@ -49,13 +46,16 @@ class FlightRepositoryWithDirectAccessTests {
 
     @Test
     fun testFlightRepositoryWithDirectAccessFunctions() {
+        val repo = FlightRepositoryWithDirectAccess.mock(MockDatabase())
+        var expectedItems = 0
+
         runTest {
             //test saveDirectToDb and getAllFlightsInDB - this should only save one flight and not update its timestamp or ID
             val f = FlightsTestData.flightWithoutID
             repeat(3){
                 repo.saveDirectToDB(f)
             }
-            expectedItems = 1
+            expectedItems++
             assertEquals(expectedItems, repo.getAllFlightsInDB().size)
             assertEquals(f, repo.getAllFlightsInDB().first())
 

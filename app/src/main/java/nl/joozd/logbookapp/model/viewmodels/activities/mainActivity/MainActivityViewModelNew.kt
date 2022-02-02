@@ -101,12 +101,12 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
 
     //returns true so we can use it straight from Menu in Activity
     fun undo(){
-        flightRepository.undo()
+        viewModelScope.launch { flightRepository.undo() }
     }
 
     //returns true so we can use it straight from Menu in Activity
     fun redo(){
-        flightRepository.redo()
+        viewModelScope.launch { flightRepository.redo() }
     }
 
     private fun closeSearchField() {

@@ -33,7 +33,7 @@ data class Aircraft(
         query.uppercase() in registration.uppercase()
 
     infix fun matchesIncludingType(query: String): Boolean =
-        query in registration
+        this matches query
         || type != null && type matches query
 
 

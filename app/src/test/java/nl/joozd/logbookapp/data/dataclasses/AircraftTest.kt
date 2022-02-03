@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.data.dataclasses
 
-import nl.joozd.logbookapp.AircraftTestData
+import nl.joozd.logbookapp.data.AircraftTestData
 import nl.joozd.logbookapp.data.room.model.toAircraft
 import org.junit.Test
 
@@ -28,15 +28,32 @@ class AircraftTest {
     @Test
     fun testAircraftFunctions(){
         val testPartialRegQuery = testAircraft.registration
-        val failRegQuery = "FAIL"
-        val testTypeQuery = "Test Aircraft 1"
-        val failTypeQuery = "Test Aircraft 2"
+
         assert(testAircraft matches testAircraft.registration)
         assert(testAircraft matches testPartialRegQuery)
+        assert(testAircraft matches testPartialRegQuery.lowercase())
+        assert(testAircraft matches testPartialRegQuery.uppercase())
+
+        val failRegQuery = "FAIL"
         assert(!(testAircraft matches failRegQuery))
 
-        assert(!(testAircraft matches testTypeQuery))
-        assert(testAircraft matchesIncludingType testTypeQuery)
+        //test match aircraft type name only in matchesIncludingType
+        val testTypeQuery1 = "Test Aircraft 1"
+        assert(!(testAircraft matches testTypeQuery1))
+        assert(testAircraft matchesIncludingType testTypeQuery1)
+        assert(testAircraft matchesIncludingType testTypeQuery1.lowercase())
+
+        //test match aircraft type short name only in matchesIncludingType
+        val testTypeQuery2 = "TAC1"
+        assert(!(testAircraft matches testTypeQuery2))
+        assert(testAircraft matchesIncludingType testTypeQuery2)
+        assert(testAircraft matchesIncludingType testTypeQuery2.lowercase())
+
+        //test wrong queries do not match
+        val failTypeQuery = "Test Aircraft 2"
+        val failTypeQuery2 = "tac2"
         assert(!(testAircraft matchesIncludingType failTypeQuery))
+        assert(!(testAircraft matchesIncludingType failTypeQuery2))
+        assert(!(testAircraft matchesIncludingType failRegQuery))
     }
 }

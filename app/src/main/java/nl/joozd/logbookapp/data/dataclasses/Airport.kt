@@ -46,6 +46,19 @@ data class Airport(
 ){
     constructor(a: BasicAirport): this(a.id, a.ident, a.type, a.name, a.latitude_deg, a.longitude_deg, a.elevation_ft, a.municipality, a.iata_code)
 
+    infix fun identMatches(query: String): Boolean{
+        val q = query.uppercase()
+        return q in ident.uppercase() || q in iata_code.uppercase()
+    }
+
+    infix fun matches(query: String): Boolean{
+        val q = query.uppercase()
+        return q in ident.uppercase()
+                || q in iata_code.uppercase()
+                || q in name.uppercase()
+                || q in municipality.uppercase()
+    }
+
     fun toBasicAirport() = BasicAirport(id, ident, type, name, latitude_deg, longitude_deg, elevation_ft, municipality, iata_code)
 
     companion object{

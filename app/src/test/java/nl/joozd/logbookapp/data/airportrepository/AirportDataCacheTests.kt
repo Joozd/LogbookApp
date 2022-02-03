@@ -20,9 +20,8 @@
 package nl.joozd.logbookapp.data.airportrepository
 
 
-import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
-import nl.joozd.logbookapp.data.room.AirportsTestData
+import nl.joozd.logbookapp.data.AirportsTestData
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

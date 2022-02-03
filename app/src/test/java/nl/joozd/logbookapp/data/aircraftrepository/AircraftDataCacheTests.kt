@@ -24,7 +24,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.joozd.logbookapp.AircraftTestData
+import nl.joozd.logbookapp.data.AircraftTestData
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.room.MockDatabase
 import nl.joozd.logbookapp.data.room.model.toAircraft

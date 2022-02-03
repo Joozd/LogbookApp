@@ -24,13 +24,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.room.AirportsTestData
+import nl.joozd.logbookapp.data.AirportsTestData
 import nl.joozd.logbookapp.data.room.MockDatabase
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import org.junit.After
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

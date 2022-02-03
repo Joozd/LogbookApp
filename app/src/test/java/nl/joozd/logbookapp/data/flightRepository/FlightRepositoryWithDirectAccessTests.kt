@@ -24,7 +24,7 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
-import nl.joozd.logbookapp.data.room.FlightsTestData
+import nl.joozd.logbookapp.data.FlightsTestData
 import nl.joozd.logbookapp.data.room.MockDatabase
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import org.junit.After

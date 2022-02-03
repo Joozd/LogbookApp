@@ -27,7 +27,7 @@ import kotlinx.coroutines.test.runTest
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
-import nl.joozd.logbookapp.data.room.FlightsTestData
+import nl.joozd.logbookapp.data.FlightsTestData
 import nl.joozd.logbookapp.data.room.MockDatabase
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.DispatcherProvider

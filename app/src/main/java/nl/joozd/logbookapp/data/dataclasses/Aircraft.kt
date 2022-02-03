@@ -19,9 +19,7 @@
 
 package nl.joozd.logbookapp.data.dataclasses
 
-import kotlinx.coroutines.*
 import nl.joozd.joozdlogcommon.AircraftType
-import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 /**
  * This is one specific Aircraft. It has a [registration], a [type], and a [source] for that type
@@ -30,7 +28,15 @@ data class Aircraft(
     val registration: String = "",
     val type: AircraftType? = null,
     val source: Int = NONE
-): CoroutineScope by dispatchersProviderMainScope() {
+) {
+    infix fun matches(query: String): Boolean =
+        query.uppercase() in registration.uppercase()
+
+    infix fun matchesIncludingType(query: String): Boolean =
+        query in registration
+        || type != null && type matches query
+
+
     companion object{
         const val NONE = 999
         const val KNOWN = 1         // user has set it this way

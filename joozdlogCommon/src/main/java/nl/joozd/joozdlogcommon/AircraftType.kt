@@ -40,6 +40,12 @@ data class AircraftType(val name: String = "", val shortName: String = "", val m
         return serialized
     }
 
+    infix fun matches(query: String): Boolean {
+        val q = query.uppercase()
+        return q in name.uppercase()
+                || q in shortName.uppercase()
+    }
+
     companion object: JoozdSerializable.Deserializer<AircraftType> {
 
         override fun deserialize(source: ByteArray): AircraftType {

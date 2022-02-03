@@ -60,7 +60,7 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
         get() = _selectedCalendar.value
         set(it) { _selectedCalendar.value = it }
 
-    private val calendarScraper = CalendarScraper(context)
+    private val calendarScraper = CalendarScraper(context!!)
 
     private val _foundCalendars = MutableLiveData<List<JoozdCalendar>?>() // null until initialized with [fillCalendarsList]
     private val _selectedCalendar = MutableLiveData<JoozdCalendar?>() // null until initialized with [fillCalendarsList]
@@ -79,7 +79,7 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
         }
     }
 
-    private val clipboard: ClipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    private val clipboard: ClipboardManager = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     /**
      * To support other companies etc add extra regexes here and use them in [getLinkFromClipboard]

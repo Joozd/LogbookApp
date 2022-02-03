@@ -19,29 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
-import android.text.Editable
-import androidx.lifecycle.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.*
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
-import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
-import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.repository.SelfUpdatingDataCache
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
-import nl.joozd.logbookapp.model.workingFlight.FlightEditor
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlightOld
-import java.time.Instant
-import java.time.LocalTime
 
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {

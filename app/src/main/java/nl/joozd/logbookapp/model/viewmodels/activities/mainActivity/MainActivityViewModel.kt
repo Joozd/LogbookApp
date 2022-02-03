@@ -21,39 +21,7 @@ package nl.joozd.logbookapp.model.viewmodels.activities.mainActivity
 
 
 
-import android.content.Intent
-import android.content.Intent.ACTION_VIEW
-import android.net.Uri
-import android.util.Log
-import androidx.lifecycle.*
-import androidx.lifecycle.Transformations.distinctUntilChanged
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.comm.InternetStatus
-import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.comm.CloudFunctionResults
-import nl.joozd.logbookapp.data.export.JoozdlogExport
-import nl.joozd.logbookapp.data.repository.GeneralRepository
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
-import nl.joozd.logbookapp.data.repository.helpers.overlaps
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
-import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
-import nl.joozd.logbookapp.extensions.*
-import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MainActivityEvents
-import nl.joozd.logbookapp.model.helpers.FlightConflictChecker
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.model.workingFlight.WorkingFlightOld
-import nl.joozd.logbookapp.utils.CoroutineTimerTask
-import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
-import java.time.*
-import java.util.*
 
 class MainActivityViewModel: JoozdlogActivityViewModel() {
     /*

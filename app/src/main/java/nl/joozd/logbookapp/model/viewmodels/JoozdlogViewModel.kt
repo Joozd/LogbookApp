@@ -31,19 +31,19 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.repository.*
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 
-open class JoozdlogViewModel: ViewModel() {
-    protected val flightRepository = FlightRepositoryWithUndo.instance // Assumption: Any changes to FlightRepo from UI will be undoable
-    protected val aircraftRepository = AircraftRepository.instance
-    protected val airportRepository = AirportRepository.instance
-    protected val balanceForwardRepository = BalanceForwardRepository.getInstance()
-
-    protected val applicationScope
-        get() = App.instance.applicationScope
+open class JoozdlogViewModel(
+    protected val flightRepository: FlightRepositoryWithUndo = FlightRepositoryWithUndo.instance, // Assumption: Any changes to FlightRepo from UI will be undoable
+    protected val aircraftRepository: AircraftRepository = AircraftRepository.instance,
+    protected val airportRepository: AirportRepository = AirportRepository.instance,
+    protected val balanceForwardRepository: BalanceForwardRepository = BalanceForwardRepository.getInstance(),
+    protected val mock: Boolean = false
+): ViewModel(){
 
     private val _feedbackEvent = MutableLiveData<FeedbackEvent>()
     val feedbackEvent: LiveData<FeedbackEvent>
@@ -52,8 +52,8 @@ open class JoozdlogViewModel: ViewModel() {
     /**
      * App context. Can be used in viewModels for application-wide context, do not use for anything UI related.
      */
-    protected val context: Context
-        get() = App.instance.ctx
+    protected val context: Context?
+        get() = if (mock) null else App.instance.ctx
 
     /**
      * Gives feedback to activity.
@@ -75,5 +75,5 @@ open class JoozdlogViewModel: ViewModel() {
             viewModelScope.launch(Dispatchers.Main) { feedbackEvent.value = it }
         }
 
-    protected fun getString(resID: Int) = context.getString(resID)
+    protected fun getString(resID: Int) = context?.getString(resID)
 }

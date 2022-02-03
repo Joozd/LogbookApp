@@ -147,7 +147,7 @@ class TimePickerViewModel: JoozdlogDialogViewModel() {
      */
     private fun getPicPicusString(): String = getString(
         if(flightEditor.isPICUS) R.string.picus else R.string.pic
-        )
+        ) ?: "ERROR: NO CONTEXT"
 
     /**
      * Gets the correct string for when flight is marked as dual, instructor or neither
@@ -156,7 +156,7 @@ class TimePickerViewModel: JoozdlogDialogViewModel() {
         flightEditor.isDual -> R.string.dualString
         flightEditor.isInstructor -> R.string.instructorString
         else -> R.string.dualInstructorString
-    })
+    }) ?: "ERROR: NO CONTEXT"
 
     /**
      * Undo all changes made in this dialog

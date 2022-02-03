@@ -186,7 +186,7 @@ interface FlightEditor {
         }
 
         suspend fun setFromFlight(flight: Flight) {
-            INSTANCE = FlightEditorImpl(ModelFlight.ofFlight(flight))
+            INSTANCE = FlightEditorImpl(ModelFlight.ofFlightAndRepositories(flight))
         }
 
         fun setNewflight() = setFromFlight(ModelFlight.createEmpty())

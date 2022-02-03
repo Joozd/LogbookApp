@@ -25,7 +25,7 @@ import java.io.File
 import java.time.Instant
 
 object FlightsTestData {
-    private val prototypeFlight = Flight().copy (isPlanned = false)
+    val prototypeFlight = Flight().copy (isPlanned = false)
     private val now = Instant.now().epochSecond
     val mostRecentCompletedFlight = prototypeFlight.copy(flightID = 1, orig = "EHAM", dest = "EBBR", timeOut = now + 999999, timeIn = now + 999999 + 3600, timeStamp = 1000, unknownToServer = false)
     val mostRecentTimestampFlight = prototypeFlight.copy(flightID = 2, orig = "EHGG", dest = "EHHV", timeOut = now - 10000, timeIn = now - 7000, timeStamp = 999999, unknownToServer = false)

@@ -91,9 +91,11 @@ class MainActivity : JoozdlogActivity() {
         // flightsList.layoutManager = LinearLayoutManager(activity) // is this still needed?
         flightsList.adapter = adapter
 
-        viewModel.flightsToDisplayFlow.launchCollectWhileLifecycleStateStarted {
+        /*viewModel.flightsToDisplayFlow.launchCollectWhileLifecycleStateStarted {
             adapter.submitList(it)
         }
+
+         */
     }
 
     private fun collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded(){

@@ -25,8 +25,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.data.repository.BalanceForwardRepository
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
+import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
@@ -35,7 +39,15 @@ import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.util.*
 
 //TODO this is still WIP
-class MainActivityViewModelNew: JoozdlogViewModel() {
+class MainActivityViewModelNew(
+    flightRepository: FlightRepositoryWithUndo = FlightRepositoryWithUndo.instance, // Assumption: Any changes to FlightRepo from UI will be undoable
+    aircraftRepository: AircraftRepository = AircraftRepository.instance,
+    airportRepository: AirportRepository = AirportRepository.instance,
+    balanceForwardRepository: BalanceForwardRepository = BalanceForwardRepository.getInstance(),
+    mock: Boolean = false
+): JoozdlogViewModel(flightRepository, aircraftRepository, airportRepository, balanceForwardRepository, mock) {
+    val flightsFlow: Flow<List<ModelFlight>> = makeFlightsFlowCombiner()
+
     private var airportDataCache: AirportDataCache = AirportDataCache.empty().apply{
         // This will keep airportDataCache up-to-date, even when app is not in the foreground.
         // Only time that happens thouhg is after and Airport DB update, which happens so rarely
@@ -52,13 +64,6 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
     val searchFieldOpenFlow: Flow<Boolean> = MutableStateFlow(false)
     private val searchQueryFlow: Flow<String> = MutableStateFlow("")
     private val searchTypeFlow: Flow<Int> = MutableStateFlow(SEARCH_ALL)
-    val flightsToDisplayFlow: Flow<List<Flight>> = combine(
-        flightRepository.flightDataCacheFlow().map { it.flights },
-        searchQueryFlow,
-        searchTypeFlow
-    ){ allFlights, query, searchType ->
-        searchFlights(allFlights, query, searchType)
-    }
 
     private var searchFieldOpen: Boolean by CastFlowToMutableFlowShortcut(searchFieldOpenFlow)
     private var searchQuery: String by CastFlowToMutableFlowShortcut(searchQueryFlow)
@@ -115,8 +120,19 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         searchFieldOpen = false
     }
 
+    private fun makeFlightsFlowCombiner() = combine(
+        flightRepository.getAllFlightsFlow(),
+        aircraftRepository.aircraftDataCacheFlow(),
+        airportRepository.airportDataCacheFlow(),
+        searchQueryFlow,
+        searchTypeFlow
+    ){ flights, aircraftData, airportsData, query, searchType ->
+        val modelFlights = flights.map{ ModelFlight.ofFlightAndDataCaches(it, airportsData, aircraftData) }
+        searchFlights(modelFlights, query, searchType)
+    }
 
-    private suspend fun searchFlights(flights: List<Flight>?, query: String, searchType: Int): List<Flight> {
+
+    private suspend fun searchFlights(flights: List<ModelFlight>?, query: String, searchType: Int): List<ModelFlight> {
         if (flights == null) return emptyList()
         if (!searchFieldOpen) return flights
         return when (searchType) {
@@ -129,38 +145,34 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         }
     }
 
-    private fun searchAll(fff: List<Flight>, query: String) = fff.filter {
+    private fun searchAll(fff: List<ModelFlight>, query: String) = fff.filter {
         query in it.name.uppercase(Locale.ROOT)
-                || query in it.name2.uppercase(Locale.ROOT)
+                || it.name2.any { n-> query in n.uppercase(Locale.ROOT) }
                 || query in it.flightNumber.uppercase(Locale.ROOT)
-                || query in it.registration.uppercase(Locale.ROOT)
-                || query in it.orig.uppercase(Locale.ROOT)
-                || query in it.dest.uppercase(Locale.ROOT)
-                || query in airportDataCache.icaoToIata(it.orig)?.uppercase(Locale.ROOT) ?: ""
-                || query in airportDataCache.icaoToIata(it.dest)?.uppercase(Locale.ROOT) ?: ""
+                || it.aircraft matches query
+                || it.orig identMatches query
+                || it.dest identMatches query
     }
 
-    private fun searchAirports(fff: List<Flight>, query: String) = fff.filter {
+    private fun searchAirports(fff: List<ModelFlight>, query: String) = fff /*.filter {
         query in it.orig.uppercase(Locale.ROOT)
                 || query in it.dest.uppercase(Locale.ROOT)
                 || query in airportDataCache.icaoToIata(it.orig)?.uppercase(Locale.ROOT) ?: ""
                 || query in airportDataCache.icaoToIata(it.dest)?.uppercase(Locale.ROOT) ?: ""
     }
+    */
 
 
-    private suspend fun searchAircraft(fff: List<Flight>, query: String) = fff.filter {
-        val ac = aircraftRepository.getAircraftTypeByShortName(it.aircraftType)
-        query in it.registration.uppercase(Locale.ROOT)
-                || ac?.shortName?.uppercase(Locale.ROOT)?.contains(query) ?: false
-                || ac?.name?.uppercase(Locale.ROOT)?.contains(query) ?: false
+    private suspend fun searchAircraft(fff: List<ModelFlight>, query: String) = fff.filter {
+        it.aircraft matchesIncludingType query
     }
 
-    private fun searchNames(fff: List<Flight>, query: String) = fff.filter {
+    private fun searchNames(fff: List<ModelFlight>, query: String) = fff.filter {
         query in it.name.uppercase(Locale.ROOT)
-                || query in it.name2.uppercase(Locale.ROOT)
+                || it.name2.any { n-> query in n.uppercase(Locale.ROOT) }
     }
 
-    private fun searchFlightnumber(fff: List<Flight>, query: String) = fff.filter {
+    private fun searchFlightnumber(fff: List<ModelFlight>, query: String) = fff.filter {
         query in it.flightNumber.uppercase(Locale.ROOT)
     }
 

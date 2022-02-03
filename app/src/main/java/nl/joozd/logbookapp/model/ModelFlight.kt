@@ -22,7 +22,9 @@ package nl.joozd.logbookapp.model
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
@@ -34,7 +36,7 @@ import java.time.Instant
  * Flight with actual Airport and Aircraft
  * Used for manipulating a Flight in model layer.
  * Can be converted back to [Flight]
- * or constructed with [ofFlight] or [createEmpty]
+ * or constructed with [ofFlightAndRepositories] or [createEmpty]
  */
 data class ModelFlight(
     val flightID: Int,
@@ -176,7 +178,7 @@ data class ModelFlight(
         Duration.between(timeOut, timeIn)
 
     companion object{
-        suspend fun ofFlight(
+        suspend fun ofFlightAndRepositories(
             flight: Flight,
             aircraftRepository: AircraftRepository = AircraftRepository.instance,
             airportRepository: AirportRepository = AirportRepository.instance
@@ -188,7 +190,17 @@ data class ModelFlight(
                     ?: Airport(ident = dest)
                 val aircraft = makeAircraft(flight, aircraftRepository)
 
+                return makeModelFlight(origin, destination, aircraft)
+            }
+        }
 
+        fun ofFlightAndDataCaches(flight: Flight, airportDataCache: AirportDataCache, aircraftDataCache: AircraftDataCache): ModelFlight{
+            with (flight) {
+                val origin = airportDataCache.getAirportByIcaoIdentOrNull(orig)
+                    ?: Airport(ident = flight.orig)
+                val destination = airportDataCache.getAirportByIcaoIdentOrNull(dest)
+                    ?: Airport(ident = dest)
+                val aircraft = makeAircraft(flight, aircraftDataCache)
 
                 return makeModelFlight(origin, destination, aircraft)
             }
@@ -238,6 +250,15 @@ data class ModelFlight(
 
         private suspend fun makeAircraft(flight: Flight, aircraftRepository: AircraftRepository): Aircraft{
             val type = aircraftRepository.getAircraftTypeByShortName(flight.aircraftType)
+            return Aircraft(
+                registration = flight.registration,
+                type = type,
+                source = Aircraft.FLIGHT
+            )
+        }
+
+        private fun makeAircraft(flight: Flight, aircraftDataCache: AircraftDataCache): Aircraft{
+            val type = aircraftDataCache.getAircraftTypeByShortName(flight.aircraftType)
             return Aircraft(
                 registration = flight.registration,
                 type = type,

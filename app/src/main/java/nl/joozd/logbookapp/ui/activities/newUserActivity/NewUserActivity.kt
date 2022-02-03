@@ -111,7 +111,7 @@ class NewUserActivity : JoozdlogActivity() {
         /**
          * Text for the left button. Null for default text, empty string for hidden button.
          */
-        override fun previousButtonText(position: Int): String = viewModel.skipButtonText(position)
+        override fun previousButtonText(position: Int): String = viewModel.skipButtonText(position) ?: "ERROR: NO CONTEXT"
 
         /**
          * OnClickListener for the left button. Null for default action.

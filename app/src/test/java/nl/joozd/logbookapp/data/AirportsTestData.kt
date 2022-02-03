@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.data.room
+package nl.joozd.logbookapp.data
 
 import nl.joozd.logbookapp.data.dataclasses.Airport
 

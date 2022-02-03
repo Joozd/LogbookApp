@@ -17,16 +17,11 @@
  *
  */
 
-package nl.joozd.logbookapp
+package nl.joozd.logbookapp.data
 
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
-import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
-import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import java.io.File
-import java.time.Instant
 
 object AircraftTestData {
     val aircraftType1 = AircraftType("Test Aircraft 1 (MP/ME)", "TAC1", multiPilot = true, multiEngine = true)

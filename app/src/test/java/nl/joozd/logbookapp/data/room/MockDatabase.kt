@@ -39,9 +39,7 @@ class MockDatabase: JoozdlogDatabase() {
 
     override fun preloadedRegistrationsDao(): PreloadedRegistrationsDao = MockPreloadedRegistrationsDao()
 
-    override fun balanceForwardDao(): BalanceForwardDao {
-        TODO("Not testable yet")
-    }
+    override fun balanceForwardDao(): BalanceForwardDao = MockBalanceForwardDao()
 
     override fun createOpenHelper(config: DatabaseConfiguration?): SupportSQLiteOpenHelper {
         TODO("Not implemented") // not used in mock

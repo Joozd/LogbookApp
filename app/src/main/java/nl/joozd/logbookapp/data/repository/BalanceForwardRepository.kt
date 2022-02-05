@@ -24,12 +24,13 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.dao.BalanceForwardDao
+import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 class BalanceForwardRepository private constructor(
-    private val balanceforwardDao: BalanceForwardDao,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val balanceforwardDao: BalanceForwardDao
 ): CoroutineScope by dispatchersProviderMainScope()  {
+    private val dispatcher = DispatcherProvider.io()
 
     /**********************************************************************************************
      * Private parts
@@ -114,6 +115,8 @@ class BalanceForwardRepository private constructor(
                     singletonInstance!!
                 }
         }
+
+        fun mock(db: JoozdlogDatabase) = BalanceForwardRepository(db.balanceForwardDao())
     }
 
 

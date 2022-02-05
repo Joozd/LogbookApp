@@ -26,6 +26,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
@@ -46,6 +48,7 @@ import nl.joozd.logbookapp.ui.dialogs.AboutDialog
 import nl.joozd.logbookapp.ui.dialogs.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
+import nl.joozd.logbookapp.extensions.onTextChanged
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {
@@ -72,10 +75,10 @@ class MainActivity : JoozdlogActivity() {
         super.onCreate(savedInstanceState)
         val binding = (ActivityMainNewBinding.inflate(layoutInflater)).apply {
             setSupportActionBar(mainToolbar)
-
             makeFlightsList()
             collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded()
             collectSearchFieldOpenAndOpenSearchFieldIfNeeded()
+            initializeSearchFieldViews()
         }
         setContentView(binding.root)
     }
@@ -115,6 +118,11 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
+    private fun ActivityMainNewBinding.initializeSearchFieldViews(){
+        initializeSearchTypeSpinner()
+        addOnTextChangedListenerToMainSearchField()
+    }
+
     private fun killWorkingFlightEditingFragments(){
         supportFragmentManager.popBackStack(EDIT_FLIGHT_FRAGMENT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     }
@@ -149,6 +157,38 @@ class MainActivity : JoozdlogActivity() {
         searchField.visibility = View.VISIBLE
         mainSearchField.requestFocus()
         mainSearchField.showKeyboard()
+    }
+
+    private fun ActivityMainNewBinding.initializeSearchTypeSpinner() {
+        addAdapterToSearchTypeSpinner()
+        addOnItemSelectedListenerToSearchTypeSpinner()
+    }
+
+    private fun ActivityMainNewBinding.addOnTextChangedListenerToMainSearchField() {
+        mainSearchField.onTextChanged { viewModel.updateQuery(it) }
+    }
+
+    private fun ActivityMainNewBinding.addAdapterToSearchTypeSpinner() {
+        val adapter = ArrayAdapter.createFromResource(
+            activity, R.array.search_options, android.R.layout.simple_spinner_item
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        searchTypeSpinner.adapter = adapter
+    }
+
+    private fun ActivityMainNewBinding.addOnItemSelectedListenerToSearchTypeSpinner() {
+        searchTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                viewModel.pickSearchType(position)
+            }
+        }
     }
 
     private fun View.showKeyboard(){

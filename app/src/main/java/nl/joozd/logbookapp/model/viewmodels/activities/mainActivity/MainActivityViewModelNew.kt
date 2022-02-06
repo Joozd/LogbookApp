@@ -28,6 +28,7 @@ import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -37,34 +38,28 @@ import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
 //TODO this is still WIP
-class MainActivityViewModelNew(): JoozdlogViewModel() {
+class MainActivityViewModelNew: JoozdlogViewModel() {
     private val flightRepository = FlightRepositoryWithUndo.instance
     private val aircraftRepository = AircraftRepository.instance
     private val airportRepository = AirportRepository.instance
 
-    val flightsFlow: Flow<List<ModelFlight>> = makeFlightsFlowCombiner()
+    private val searchQueryFlow: Flow<String> = MutableStateFlow("")
+    private var searchQuery: String by CastFlowToMutableFlowShortcut(searchQueryFlow)
 
-    private var airportDataCache: AirportDataCache = AirportDataCache.empty().apply{
-        // This will keep airportDataCache up-to-date, even when app is not in the foreground.
-        // Only time that happens thouhg is after and Airport DB update, which happens so rarely
-        // that this doesn't warrant putting in back-and-forth lifecycle checking with Activity.
-        viewModelScope.launch{
-            AirportRepository.instance.airportDataCacheFlow().collect{
-                airportDataCache = it
-            }
-        }
-    }
+    private val searchTypeFlow: Flow<Int> = MutableStateFlow(SEARCH_ALL)
+    private var searchType: Int by CastFlowToMutableFlowShortcut(searchTypeFlow)
+
+    val searchFieldOpenFlow: Flow<Boolean> = MutableStateFlow(false)
+    private var searchFieldOpen: Boolean by CastFlowToMutableFlowShortcut(searchFieldOpenFlow)
 
     val flightEditorFlow = FlightEditor.instanceFlow
 
-    val searchFieldOpenFlow: Flow<Boolean> = MutableStateFlow(false)
-    private val searchQueryFlow: Flow<String> = MutableStateFlow("")
-    private val searchTypeFlow: Flow<Int> = MutableStateFlow(SEARCH_ALL)
+    val flightsFlow: Flow<List<ModelFlight>> = makeFlightsFlowCombiner()
 
-    private var searchFieldOpen: Boolean by CastFlowToMutableFlowShortcut(searchFieldOpenFlow)
-    private var searchQuery: String by CastFlowToMutableFlowShortcut(searchQueryFlow)
-    private var searchType: Int by CastFlowToMutableFlowShortcut(searchTypeFlow)
+    val undoRedoStatusChangedFlow = makeUndoRedoStatusChangedFlow()
 
+    val undoAvailable get() = flightRepository.undoAvailable
+    val redoAvailable get() = flightRepository.redoAvailable
 
 
     fun deleteFlight(flight: ModelFlight){
@@ -78,9 +73,8 @@ class MainActivityViewModelNew(): JoozdlogViewModel() {
      * [flightEditorFlow] will emit after a new FlightEditor is made.
      */
     fun showEditFlightDialog(flight: ModelFlight){
-        viewModelScope.launch {
-            FlightEditor.setFromFlight(flight.toFlight())
-        }
+        println("Setting from flight: $flight")
+        FlightEditor.setFromFlight(flight)
     }
 
     fun menuSelectedAddFlight(){
@@ -124,12 +118,23 @@ class MainActivityViewModelNew(): JoozdlogViewModel() {
         flightRepository.getAllFlightsFlow(),
         aircraftRepository.aircraftDataCacheFlow(),
         airportRepository.airportDataCacheFlow(),
+
         searchQueryFlow,
         searchTypeFlow
     ){ flights, aircraftData, airportsData, query, searchType ->
         flights.toModelFlights(airportsData, aircraftData)
-            .filterByQuery(query, searchType)
+            .filterByQuery(query , searchType)
     }
+
+    /**
+     * Emites a pair of (undoAvail, redoAvail) so it will emit always when either changes.
+     */
+    private fun makeUndoRedoStatusChangedFlow() =
+        combine(flightRepository.undoAvailableFlow, flightRepository.redoAvailableFlow){
+            u, r -> Pair(u,r)
+        }
+
+
 
     private fun List<Flight>.toModelFlights(
         airportsData: AirportDataCache,

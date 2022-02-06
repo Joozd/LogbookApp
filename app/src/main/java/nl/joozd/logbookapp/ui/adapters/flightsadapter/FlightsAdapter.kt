@@ -36,7 +36,6 @@ import nl.joozd.logbookapp.model.ModelFlight
  */
 
 class FlightsAdapter(
-    var list: List<ModelFlight> = emptyList(),
     val onDelete: (ModelFlight) -> Unit,
     val itemClick: (ModelFlight) -> Unit
 ): RecyclerViewFastScroller.OnPopupTextUpdate, ListAdapter<ModelFlight, RecyclerView.ViewHolder>(
@@ -45,10 +44,10 @@ class FlightsAdapter(
      * Text displayed when fastscrolling using RecyclerViewFastScroller
      */
     override fun onChange(position: Int): CharSequence =
-        list[position].dateString()
+        getItem(position).dateString()
 
 
-    override fun getItemViewType(position: Int): Int = if(list[position].isSim) VIEW_TYPE_SIM else VIEW_TYPE_FLIGHT
+    override fun getItemViewType(position: Int): Int = if(getItem(position).isSim) VIEW_TYPE_SIM else VIEW_TYPE_FLIGHT
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType){
@@ -59,7 +58,7 @@ class FlightsAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as ListItemViewHolder).bindItem(list[position], itemClick, onDelete)
+        (holder as ListItemViewHolder).bindItem(getItem(position), itemClick, onDelete)
     }
 
 

@@ -30,12 +30,22 @@ interface FlightRepositoryWithUndo: FlightRepository {
     /**
      * emit if undo is available or not
      */
-    val undoAvailable: Flow<Boolean>
+    val undoAvailableFlow: Flow<Boolean>
 
     /**
      * emit if redo is available or not
      */
-    val redoAvailable: Flow<Boolean>
+    val redoAvailableFlow: Flow<Boolean>
+
+    /**
+     * emit if undo is available or not
+     */
+    val undoAvailable: Boolean
+
+    /**
+     * emit if redo is available or not
+     */
+    val redoAvailable: Boolean
 
     /**
      * Undo last operation

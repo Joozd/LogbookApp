@@ -38,7 +38,7 @@ class FlightRepositoryWithUndoTest: CoroutineTestingClass() {
     fun testFlightRepositoryWithUndoSaveFunctions(){
         val repo = FlightRepositoryWithUndo.mock(MockDatabase())
         //combine flows so we can check both in a single Turbine
-        val combinedUndoRedoFlow = combine(repo.undoAvailable, repo.redoAvailable){ u, r ->
+        val combinedUndoRedoFlow = combine(repo.undoAvailableFlow, repo.redoAvailableFlow){ u, r ->
             u to r
         }
         var expectedSize = 0
@@ -92,7 +92,7 @@ class FlightRepositoryWithUndoTest: CoroutineTestingClass() {
     fun testFlightRepositoryWithUndoDeleteFunctions() {
         val repo = FlightRepositoryWithUndo.mock(MockDatabase())
         //combine flows so we can check both in a single Turbine
-        val combinedUndoRedoFlow = combine(repo.undoAvailable, repo.redoAvailable) { u, r ->
+        val combinedUndoRedoFlow = combine(repo.undoAvailableFlow, repo.redoAvailableFlow) { u, r ->
             u to r
         }
         var expectedSize = 0

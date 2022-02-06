@@ -30,11 +30,13 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListAdapter
 import androidx.activity.viewModels
+import androidx.annotation.NonNull
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
@@ -73,14 +75,26 @@ class MainActivity : JoozdlogActivity() {
         return true
     }
 
+    /*
+     * Shows menu, as well as undo and redo icons if needed.
+     */
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        getUndoMenuItem(menu).apply{
+            isVisible = viewModel.undoAvailable
+        }
+        getRedoMenuItem(menu).apply{
+            isVisible = viewModel.redoAvailable
+        }
+        return true
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = (ActivityMainNewBinding.inflate(layoutInflater)).apply {
             setSupportActionBar(mainToolbar)
             makeFlightsList()
-            collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded()
-            collectSearchFieldOpenAndOpenSearchFieldIfNeeded()
-            collectFlightsListFlow()
+            startCollectors()
             initializeSearchFieldViews()
         }
         setContentView(binding.root)
@@ -94,7 +108,7 @@ class MainActivity : JoozdlogActivity() {
     private fun ActivityMainNewBinding.makeFlightsList(){
         val adapter = makeFlightsListAdapter()
 
-        // flightsList.layoutManager = LinearLayoutManager(activity) // is this still needed?
+        flightsList.layoutManager = LinearLayoutManager(activity) // won't layout without manager
         flightsList.adapter = adapter
 
         /*viewModel.flightsToDisplayFlow.launchCollectWhileLifecycleStateStarted {
@@ -104,8 +118,16 @@ class MainActivity : JoozdlogActivity() {
          */
     }
 
+    private fun ActivityMainNewBinding.startCollectors() {
+        collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded()
+        collectSearchFieldOpenAndOpenSearchFieldIfNeeded()
+        collectFlightsListFlow()
+        collectUndoRedoChangedFlow()
+    }
+
     private fun collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded(){
         viewModel.flightEditorFlow.launchCollectWhileLifecycleStateStarted{
+            println("Collected flightEditorFlow $it")
             killWorkingFlightEditingFragments()
             if (it != null)
                 launchEditFlightFragment()
@@ -124,6 +146,13 @@ class MainActivity : JoozdlogActivity() {
     private fun ActivityMainNewBinding.collectFlightsListFlow(){
         viewModel.flightsFlow.launchCollectWhileLifecycleStateStarted{ flights ->
             (flightsList.adapter as FlightsAdapter).submitList(flights)
+        }
+    }
+
+    //Whenever undo/redo icons state changes, redraw menu
+    private fun collectUndoRedoChangedFlow(){
+        viewModel.undoRedoStatusChangedFlow.launchCollectWhileLifecycleStateStarted{
+            invalidateOptionsMenu()
         }
     }
 
@@ -238,6 +267,7 @@ class MainActivity : JoozdlogActivity() {
 
     private fun launchEditFlightFragment() {
         val eff = EditFlightFragment()
+        println("Launching EFF $eff")
         supportFragmentManager.commit {
             add(R.id.mainActivityLayout, eff, EDIT_FLIGHT_FRAGMENT_TAG)
             addToBackStack(EDIT_FLIGHT_FRAGMENT_TAG)

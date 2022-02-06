@@ -28,6 +28,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.UndoableCommand
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 import java.util.*
@@ -46,8 +47,15 @@ class FlightRepositoryWithUndoImpl(mockDataBase: JoozdlogDatabase?
     private val _undoAvailable = MutableStateFlow(false)
     private val _redoAvailable = MutableStateFlow(false)
 
-    override val undoAvailable: Flow<Boolean> = _undoAvailable
-    override val redoAvailable: Flow<Boolean> = _redoAvailable
+    override var undoAvailable: Boolean by CastFlowToMutableFlowShortcut(_undoAvailable)
+        private set
+
+    override var redoAvailable: Boolean by CastFlowToMutableFlowShortcut(_redoAvailable)
+        private set
+
+
+    override val undoAvailableFlow: Flow<Boolean> = _undoAvailable
+    override val redoAvailableFlow: Flow<Boolean> = _redoAvailable
 
     private val undoRedoMutex = Mutex()
     /**

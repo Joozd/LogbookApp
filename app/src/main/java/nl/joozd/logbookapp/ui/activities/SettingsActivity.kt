@@ -40,7 +40,7 @@ import nl.joozd.logbookapp.databinding.ActivitySettingsBinding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
 import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.*
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
@@ -527,9 +527,9 @@ class SettingsActivity : JoozdlogActivity() {
         }
 
         private fun format(value: Int): String = when (value) {
-            in (0..THIRTY) -> minutesToHoursAndMinutesString(value)
-            in (THIRTY..NINETY) -> minutesToHoursAndMinutesString(30 + (value- THIRTY)*5)
-            else -> minutesToHoursAndMinutesString(maxOf(90 + (value- NINETY)*15, 0))
+            in (0..THIRTY) -> value.minutesToHoursAndMinutesString()
+            in (THIRTY..NINETY) -> (30 + (value- THIRTY)*5).minutesToHoursAndMinutesString()
+            else -> maxOf(90 + (value- NINETY)*15, 0).minutesToHoursAndMinutesString()
         }
 
         private fun unFormat(value: Int) = when (value) {

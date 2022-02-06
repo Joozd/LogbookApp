@@ -20,12 +20,13 @@
 package nl.joozd.logbookapp.ui.adapters.flightsadapter
 
 import androidx.recyclerview.widget.DiffUtil
+import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
-class FlightDiffCallback: DiffUtil.ItemCallback<Flight>() {
-    override fun areItemsTheSame(oldItem: Flight, newItem: Flight): Boolean =
+class FlightDiffCallback: DiffUtil.ItemCallback<ModelFlight>() {
+    override fun areItemsTheSame(oldItem: ModelFlight, newItem: ModelFlight): Boolean =
         oldItem.flightID == newItem.flightID
 
-    override fun areContentsTheSame(oldItem: Flight, newItem: Flight): Boolean =
+    override fun areContentsTheSame(oldItem: ModelFlight, newItem: ModelFlight): Boolean =
         oldItem == newItem
 }

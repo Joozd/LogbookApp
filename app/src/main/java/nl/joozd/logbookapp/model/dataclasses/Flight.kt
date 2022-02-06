@@ -23,10 +23,8 @@ package nl.joozd.logbookapp.model.dataclasses
 import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.logbookapp.data.dataclasses.FlightData
-import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import java.time.*
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 data class Flight(
     val flightID: Int = FLIGHT_ID_NOT_INITIALIZED,
@@ -68,7 +66,7 @@ data class Flight(
     //can be constructed as (Flight(BasicFlight))
     constructor(b: BasicFlight): this(b.flightID, b.orig, b.dest, b.timeOut, b.timeIn, b.correctedTotalTime, b.multiPilotTime, b.nightTime, b.ifrTime, b.simTime, b.aircraft, b.registration, b.name, b.name2, b.takeOffDay, b.takeOffNight, b.landingDay, b.landingNight, b.autoLand, b.flightNumber, b.remarks, b.isPIC, b.isPICUS, b.isCoPilot, b.isDual, b.isInstructor, b.isSim, b.isPF, b.isPlanned, b.changed, b.autoFill, b.augmentedCrew, b.DELETEFLAG, b.timeStamp, b.signature)
 
-    private val flightTimeFormatter get() = DateTimeFormatter.ofPattern("HH:mm")
+
 
     fun toBasicFlight() = BasicFlight(
         flightID,
@@ -153,16 +151,13 @@ data class Flight(
     fun tOut(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeOut), ZoneId.of("UTC"))
     fun tIn(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeIn), ZoneId.of("UTC"))
 
-    fun timeOutString(): String = tOut().format(flightTimeFormatter)
-    fun timeInString(): String = tIn().format(flightTimeFormatter)
+    fun timeOutString(): String = tOut().format(DateTimeFormatter.ofPattern("HH:mm"))
+    fun timeInString(): String = tIn().format(DateTimeFormatter.ofPattern("HH:mm"))
     fun names(): List<String> =
         (listOf(name) +  name2.split(";"))
             .filter{ it.isNotBlank() }
             .map { it.trim() }
-    fun dateString(): String {
-        val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-        return date().format(dateFormatter)
-    }
+
     fun date(): LocalDate =
         tOut().toLocalDate()
 
@@ -174,12 +169,8 @@ data class Flight(
      * Get the logged duration of a flight in minutes (corrected for augmented crew and [correctedTotalTime])
      */
     fun duration(): Int = (if (correctedTotalTime != 0) correctedTotalTime else calculatedDuration).let{
-        // if (it > 0) it else ((it+24*60).also { Log.w("FLIGHT", "NEGATIVE TIME, FIXING AT RUNTIME FOR FLIGHT $this") })
         if (it >= 0 ) it else it+86400
-
     }
-
-    fun durationString() = duration().minutesToHoursAndMinutesString()
 
     companion object{
         const val FLIGHT_ID_NOT_INITIALIZED = -1

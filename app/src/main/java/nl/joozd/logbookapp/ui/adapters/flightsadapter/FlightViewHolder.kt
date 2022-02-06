@@ -20,14 +20,18 @@
 package nl.joozd.logbookapp.ui.adapters.flightsadapter
 
 import android.view.View
+import nl.joozd.logbookapp.data.dataclasses.Airport
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ItemFlightCardBinding
+import nl.joozd.logbookapp.extensions.toLocalTimeString
 import nl.joozd.logbookapp.extensions.toMonthYear
-import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.model.ModelFlight
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.utils.customs.Swiper
 
 class FlightViewHolder(containerView: View) : ListItemViewHolder(containerView) {
     val binding = ItemFlightCardBinding.bind(containerView)
-    override fun bindItem(flight: Flight, onClick: (Flight) -> Unit, onDelete: (Flight) -> Unit) {
+    override fun bindItem(flight: ModelFlight, onClick: (ModelFlight) -> Unit, onDelete: (ModelFlight) -> Unit) {
         binding.apply {
             with(flight) {
                 Swiper(binding.deleteLayer).apply {
@@ -40,17 +44,17 @@ class FlightViewHolder(containerView: View) : ListItemViewHolder(containerView) 
                 }
                 flightLayout.setTextViewChildrenColorAccordingstatus(isPlanned, this.checkIfIncomplete())
                 dateDayText.text = date().dayOfMonth.toString()
-                dateMonthYearText.text = tOut().toMonthYear()
+                dateMonthYearText.text = timeOut.toMonthYear()
                 namesText.text = namesString()
-                aircraftText.text = aircraftString()
+                aircraftText.text = aircraft.toString()
                 remarksText.text = remarks
                 flightNumberText.text = flightNumber
-                origText.text = orig
-                destText.text = dest
-                timeOutText.text = timeOutString()
-                totalTimeText.text = durationString()
-                timeInText.text = timeInString()
-                takeoffLandingText.text = takeOffLandingString()
+                origText.text = orig.displayString()
+                destText.text = dest.displayString()
+                timeOutText.text = timeOut.toLocalTimeString()
+                totalTimeText.text = calculateTotalTime().minutesToHoursAndMinutesString()
+                timeInText.text = timeOut.toLocalTimeString()
+                takeoffLandingText.text = takeoffLandings.toString()
 
                 isAugmentedText.shouldBeVisible(isAugmented())
                 isIFRText.shouldBeVisible(isIfr())
@@ -65,4 +69,9 @@ class FlightViewHolder(containerView: View) : ListItemViewHolder(containerView) 
             }
         }
     }
+
+    private fun Airport.displayString(): String =
+        if (Preferences.useIataAirports)
+            iata_code
+        else ident
 }

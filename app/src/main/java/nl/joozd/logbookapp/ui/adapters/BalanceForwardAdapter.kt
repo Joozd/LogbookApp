@@ -28,7 +28,7 @@ import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ListElementTotalsBinding
 import nl.joozd.logbookapp.databinding.ListGroupBalanceForwardBinding
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 
 class BalanceForwardAdapter(private val activity: Activity, private var list: List<BalanceForward> = emptyList()): BaseExpandableListAdapter() {
     private val layoutInflater = activity.layoutInflater
@@ -190,17 +190,17 @@ class BalanceForwardAdapter(private val activity: Activity, private var list: Li
     override fun getGroupCount(): Int = list.size
 
     private fun BalanceForward.timesToStringPairs(): List<Pair<String, String>> = with (activity) { listOf(
-        getString(R.string.multipilotTime) to minutesToHoursAndMinutesString(multiPilotTime),
-        getString(R.string.totalTimeOfFlight) to minutesToHoursAndMinutesString(aircraftTime),
+        getString(R.string.multipilotTime) to multiPilotTime.minutesToHoursAndMinutesString(),
+        getString(R.string.totalTimeOfFlight) to aircraftTime.minutesToHoursAndMinutesString(),
         getString(R.string.landingDay) to landingDay.toString(),
         getString(R.string.landingNight) to landingNight.toString(),
-        getString(R.string.nightTime) to minutesToHoursAndMinutesString(nightTime),
-        getString(R.string.ifrTime) to minutesToHoursAndMinutesString(ifrTime),
-        getString(R.string.picIncludingPicus) to minutesToHoursAndMinutesString(picTime),
-        getString(R.string.copilot) to minutesToHoursAndMinutesString(copilotTime),
-        getString(R.string.dualTime) to minutesToHoursAndMinutesString(dualTime),
-        getString(R.string.instructorTime) to minutesToHoursAndMinutesString(instructortime),
-        getString(R.string.simtTime) to minutesToHoursAndMinutesString(simTime)
+        getString(R.string.nightTime) to nightTime.minutesToHoursAndMinutesString(),
+        getString(R.string.ifrTime) to ifrTime.minutesToHoursAndMinutesString(),
+        getString(R.string.picIncludingPicus) to picTime.minutesToHoursAndMinutesString(),
+        getString(R.string.copilot) to copilotTime.minutesToHoursAndMinutesString(),
+        getString(R.string.dualTime) to dualTime.minutesToHoursAndMinutesString(),
+        getString(R.string.instructorTime) to instructortime.minutesToHoursAndMinutesString(),
+        getString(R.string.simtTime) to simTime.minutesToHoursAndMinutesString()
     )
 
         /*val aircraftTime: Int,

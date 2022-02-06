@@ -22,7 +22,7 @@ package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listB
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesListItem
 
@@ -53,7 +53,7 @@ class TimesPerRegistration(flights: List<Flight>): TotalTimesList {
             reg to flights.filter { it.registration == reg }.sumOf { it.duration() }
         }.toMap()
         return regsToTimes.keys.sorted().map { reg ->
-            TotalTimesListItem(reg, FlightDataPresentationFunctions.minutesToHoursAndMinutesString(regsToTimes[reg] ?: -1), regsToTimes[reg] ?: -1, 0)
+            TotalTimesListItem(reg, (regsToTimes[reg] ?: -1).minutesToHoursAndMinutesString(), regsToTimes[reg] ?: -1, 0)
         }
     }
 }

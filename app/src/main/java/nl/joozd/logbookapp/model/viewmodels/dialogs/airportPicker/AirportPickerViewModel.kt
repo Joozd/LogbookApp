@@ -24,6 +24,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
 @ExperimentalCoroutinesApi
@@ -52,10 +53,10 @@ abstract class AirportPickerViewModel: JoozdlogDialogViewModel() {
 
     init {
         viewModelScope.launch {
-            airportDataCache = airportRepository.getAirportDataCache()
+            airportDataCache = AirportRepository.instance.getAirportDataCache()
         }
         viewModelScope.launch {
-            airportRepository.airportDataCacheFlow().collect {
+            AirportRepository.instance.airportDataCacheFlow().collect {
                 airportDataCache = it
             }
         }
@@ -64,7 +65,7 @@ abstract class AirportPickerViewModel: JoozdlogDialogViewModel() {
     private val currentQueryFlow = MutableStateFlow("")
 
     val airportsListFlow: Flow<List<Airport>> =
-        combine(airportRepository.airportsFlow(), currentQueryFlow) { airports, query ->
+        combine(AirportRepository.instance.airportsFlow(), currentQueryFlow) { airports, query ->
             airports to query
         }.flatMapLatest {
             makeAirportSearcherFlow(it.first, it.second)

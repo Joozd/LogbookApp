@@ -63,6 +63,12 @@ fun Instant.toTimeString(
 ): String =
     this.toLocalTime(zoneOffset).format(formatter)
 
+fun Instant.toMonthYear(zoneOffset: ZoneOffset = ZoneOffset.UTC): String =
+    LocalDateTime.ofInstant(this, zoneOffset).toMonthYear()
+
+fun Instant.toLocalTimeString(zoneOffset: ZoneOffset = ZoneOffset.UTC): String =
+    LocalDateTime.ofInstant(this, zoneOffset).toLocalTimeString()
+
 /**
  * Rounds an instant down to the previous round hour
  * eg 12:34:56.789 becomes 12:00 on same date

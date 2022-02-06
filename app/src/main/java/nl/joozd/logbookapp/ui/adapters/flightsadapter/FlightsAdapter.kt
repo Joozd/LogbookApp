@@ -20,21 +20,14 @@
 package nl.joozd.logbookapp.ui.adapters.flightsadapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
 
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.databinding.ItemFlightCardBinding
-import nl.joozd.logbookapp.databinding.ItemSimBinding
 import nl.joozd.logbookapp.extensions.ctx
-import nl.joozd.logbookapp.model.dataclasses.DisplayFlight
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.ui.utils.customs.Swiper
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
+import nl.joozd.logbookapp.model.ModelFlight
 
 /**
  * Adapter for RecyclerView for displaying Flights in JoozdLog
@@ -43,10 +36,10 @@ import java.time.format.FormatStyle
  */
 
 class FlightsAdapter(
-    var list: List<Flight> = emptyList(),
-    val onDelete: (Flight) -> Unit,
-    val itemClick: (Flight) -> Unit
-): RecyclerViewFastScroller.OnPopupTextUpdate, ListAdapter<Flight, RecyclerView.ViewHolder>(
+    var list: List<ModelFlight> = emptyList(),
+    val onDelete: (ModelFlight) -> Unit,
+    val itemClick: (ModelFlight) -> Unit
+): RecyclerViewFastScroller.OnPopupTextUpdate, ListAdapter<ModelFlight, RecyclerView.ViewHolder>(
     FlightDiffCallback()) {
     /**
      * Text displayed when fastscrolling using RecyclerViewFastScroller

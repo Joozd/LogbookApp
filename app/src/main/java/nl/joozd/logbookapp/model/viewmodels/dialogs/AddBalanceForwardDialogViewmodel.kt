@@ -28,9 +28,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
+import nl.joozd.logbookapp.data.repository.BalanceForwardRepository
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardDialogEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import java.lang.NumberFormatException
 
@@ -69,10 +70,10 @@ class AddBalanceForwardDialogViewmodel: JoozdlogDialogViewModel() {
         get() = Transformations.map(_balanceForward) { it.logbookName }
 
     val multiPilot: LiveData<String>
-        get() = Transformations.map(_balanceForward) { minutesToHoursAndMinutesString(it.multiPilotTime)}
+        get() = Transformations.map(_balanceForward) { it.multiPilotTime.minutesToHoursAndMinutesString()}
 
     val totalTimeOfFlight: LiveData<String>
-        get() = Transformations.map(_balanceForward) { minutesToHoursAndMinutesString(it.aircraftTime)}
+        get() = Transformations.map(_balanceForward) { it.aircraftTime.minutesToHoursAndMinutesString()}
 
     val landingDay: LiveData<String>
         get() = Transformations.map(_balanceForward) { it.landingDay.toString()}
@@ -80,25 +81,25 @@ class AddBalanceForwardDialogViewmodel: JoozdlogDialogViewModel() {
         get() = Transformations.map(_balanceForward) { it.landingNight.toString()}
 
     val nightTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { minutesToHoursAndMinutesString(it.nightTime)}
+        get() = Transformations.map(_balanceForward) { it.nightTime.minutesToHoursAndMinutesString()}
 
     val ifrTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { minutesToHoursAndMinutesString(it.ifrTime)}
+        get() = Transformations.map(_balanceForward) { it.ifrTime.minutesToHoursAndMinutesString()}
 
     val picTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { minutesToHoursAndMinutesString(it.picTime)}
+        get() = Transformations.map(_balanceForward) { it.picTime.minutesToHoursAndMinutesString()}
 
     val copilotTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { minutesToHoursAndMinutesString(it.copilotTime)}
+        get() = Transformations.map(_balanceForward) { it.copilotTime.minutesToHoursAndMinutesString()}
 
     val dualTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { minutesToHoursAndMinutesString(it.dualTime)}
+        get() = Transformations.map(_balanceForward) { it.dualTime.minutesToHoursAndMinutesString()}
 
     val instructorTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { minutesToHoursAndMinutesString(it.instructortime)}
+        get() = Transformations.map(_balanceForward) { it.instructortime.minutesToHoursAndMinutesString()}
 
     val simTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { minutesToHoursAndMinutesString(it.simTime)}
+        get() = Transformations.map(_balanceForward) { it.simTime.minutesToHoursAndMinutesString()}
 
 
 
@@ -201,7 +202,7 @@ class AddBalanceForwardDialogViewmodel: JoozdlogDialogViewModel() {
 
     fun saveBalanceForward(){
         viewModelScope.launch(Dispatchers.IO + NonCancellable) {
-            balanceForwardRepository.save(balanceForwardSetter)
+            BalanceForwardRepository.instance.save(balanceForwardSetter)
             feedback(BalanceForwardDialogEvents.CLOSE_DIALOG)
         }
     }

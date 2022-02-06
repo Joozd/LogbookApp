@@ -42,7 +42,9 @@ import nl.joozd.logbookapp.data.importing.interfaces.CompletedFlights
 import nl.joozd.logbookapp.data.importing.interfaces.Roster
 import nl.joozd.logbookapp.data.importing.pdfparser.*
 import nl.joozd.logbookapp.data.importing.results.SaveCompleteFlightsResult
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
@@ -61,7 +63,7 @@ import java.time.Instant
  * - Fixes conflicts when importing Monthlies
  */
 class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
-    private val rosterSaver get() = ImportedRosterSaver.make(flightRepository)
+    private val rosterSaver get() = ImportedRosterSaver.make(FlightRepositoryWithUndo.instance)
 
     val statusLiveData: LiveData<Int>
         get() = _statusLiveData

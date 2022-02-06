@@ -41,7 +41,6 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.LayoutEditFlightFragmentBinding
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.utils.toast
 
 import nl.joozd.logbookapp.model.viewmodels.fragments.NewEditFlightFragmentViewModel

@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.ui.adapters.flightsadapter
 
-import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -29,36 +28,28 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.getColorFromAttr
-import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.model.ModelFlight
 
 abstract class ListItemViewHolder(containerView: View): RecyclerView.ViewHolder(containerView) {
-    abstract fun bindItem(flight: Flight, onClick: (Flight) -> Unit, onDelete: (Flight) -> Unit)
+    abstract fun bindItem(flight: ModelFlight, onClick: (ModelFlight) -> Unit, onDelete: (ModelFlight) -> Unit)
 
-    protected fun Flight.checkIfIncomplete(checkNames: Boolean = Preferences.picNameNeedsToBeSet): Boolean =
-        orig.isBlank()
-                || dest.isBlank()
-                || aircraftType.isBlank()
-                || registration.isBlank()
+    protected fun ModelFlight.checkIfIncomplete(checkNames: Boolean = Preferences.picNameNeedsToBeSet): Boolean =
+        orig.ident.isBlank()
+                || dest.ident.isBlank()
+                || aircraft.type == null
+                || aircraft.registration.isBlank()
                 || (checkNames && name.isBlank())
 
-    protected fun Flight.namesString(): String{
-        val names = names()
+    protected fun ModelFlight.namesString(): String{
+        val names = listOf(name) + name2
         return if (names.size <=2) names.joinToString(", ")
         else names.take(2).joinToString(", ") + " + ${names.size - 2}"
     }
 
-    protected fun Flight.aircraftString() =
-        listOf(registration, aircraftType)
-            .filter{it.isNotBlank()}
-            .joinToString(" - ")
-
-    protected fun Flight.takeOffLandingString() =
-        "${takeoffs()}/${landings()}"
-
-    protected fun Flight.isAugmented() =
+    protected fun ModelFlight.isAugmented() =
         AugmentedCrew.of(augmentedCrew).size > 2
 
-    protected fun Flight.isIfr() =
+    protected fun ModelFlight.isIfr() =
         ifrTime > 0
 
     protected fun ViewGroup.setTextViewChildrenColorAccordingstatus(planned: Boolean, warning: Boolean = false){

@@ -21,13 +21,12 @@ package nl.joozd.logbookapp.model.viewmodels.activities
 
 import androidx.lifecycle.LiveData
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
+import nl.joozd.logbookapp.data.repository.BalanceForwardRepository
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 
 class BalanceForwardActivityViewmodel: JoozdlogActivityViewModel() {
-    /**********************************************************************************************
-     * Public parts
-     **********************************************************************************************/
+    private val balanceForwardRepository = BalanceForwardRepository.instance
 
     val balancesForward: LiveData<List<BalanceForward>> = balanceForwardRepository.getLive()
 

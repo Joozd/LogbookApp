@@ -22,13 +22,13 @@ package nl.joozd.logbookapp.ui.adapters.flightsadapter
 import android.view.View
 import nl.joozd.logbookapp.databinding.ItemSimBinding
 import nl.joozd.logbookapp.extensions.toMonthYear
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
+import nl.joozd.logbookapp.model.ModelFlight
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.utils.customs.Swiper
 
 class SimViewHolder(containerView: View) : ListItemViewHolder(containerView) {
     val binding = ItemSimBinding.bind(containerView)
-    override fun bindItem(flight: Flight, onClick: (Flight) -> Unit, onDelete: (Flight) -> Unit) {
+    override fun bindItem(flight: ModelFlight, onClick: (ModelFlight) -> Unit, onDelete: (ModelFlight) -> Unit) {
         with(binding) {
             with(flight) {
                 Swiper(binding.simDeleteLayer).apply {
@@ -41,12 +41,12 @@ class SimViewHolder(containerView: View) : ListItemViewHolder(containerView) {
                 }
                 simLayout.setTextViewChildrenColorAccordingstatus(isPlanned)
                 simDateDayText.text = date().dayOfMonth.toString()
-                simDateMonthYearText.text = tOut().toMonthYear()
+                simDateMonthYearText.text = timeOut.toMonthYear()
                 simNamesText.text = namesString()
-                simAircraftTypeText.text = aircraftType
+                simAircraftTypeText.text = aircraft.type?.shortName ?: ""
                 simRemarksText.text = remarks
-                simTotalTimeText.text = minutesToHoursAndMinutesString(simTime)
-                simTakeoffLandingsText.text = takeOffLandingString()
+                simTotalTimeText.text = simTime.minutesToHoursAndMinutesString()
+                simTakeoffLandingsText.text = takeoffLandings.toString()
 
                 simLayout.translationZ = 10f
 

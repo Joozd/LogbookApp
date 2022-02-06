@@ -104,16 +104,10 @@ class BalanceForwardRepository private constructor(
      **********************************************************************************************/
 
     companion object {
-        @Volatile
-        private var singletonInstance: BalanceForwardRepository? = null
-        fun getInstance(): BalanceForwardRepository = synchronized(this) {
-            singletonInstance
-                ?: run {
-                    val dataBase = JoozdlogDatabase.getInstance()
-                    val balanceForwardDao = dataBase.balanceForwardDao()
-                    singletonInstance = BalanceForwardRepository(balanceForwardDao)
-                    singletonInstance!!
-                }
+        val instance: BalanceForwardRepository by lazy {
+            val dataBase = JoozdlogDatabase.getInstance()
+            val balanceForwardDao = dataBase.balanceForwardDao()
+            BalanceForwardRepository(balanceForwardDao)
         }
 
         fun mock(db: JoozdlogDatabase) = BalanceForwardRepository(db.balanceForwardDao())

@@ -27,7 +27,6 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.TimePickerEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 

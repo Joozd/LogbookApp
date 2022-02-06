@@ -24,7 +24,7 @@ import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesListItem
 
@@ -81,7 +81,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             list.add(
                 TotalTimesListItem(
                 categories[TOTAL_TIME_INDEX],
-                minutesToHoursAndMinutesString(t+consolidatedBalancesForward.grandTotal),
+                    (t+consolidatedBalancesForward.grandTotal).minutesToHoursAndMinutesString(),
                 t+consolidatedBalancesForward.grandTotal, TOTAL_TIME_INDEX)
             )
         }
@@ -90,7 +90,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             list.add(
                 TotalTimesListItem(
                 categories[FLIGHT_TIME_INDEX],
-                minutesToHoursAndMinutesString(t+consolidatedBalancesForward.aircraftTime),
+                    (t+consolidatedBalancesForward.aircraftTime).minutesToHoursAndMinutesString(),
                 t+consolidatedBalancesForward.aircraftTime, FLIGHT_TIME_INDEX)
             )
         }
@@ -99,7 +99,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             list.add(
                 TotalTimesListItem(
                 categories[SIM_TIME_INDEX],
-                minutesToHoursAndMinutesString(t+consolidatedBalancesForward.simTime),
+                    (t+consolidatedBalancesForward.simTime).minutesToHoursAndMinutesString(),
                 t+consolidatedBalancesForward.simTime, SIM_TIME_INDEX)
             )
         }
@@ -109,7 +109,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
                 list.add(
                     TotalTimesListItem(
                         categories[MULTIPILOT_TIME_INDEX],
-                        minutesToHoursAndMinutesString(t+consolidatedBalancesForward.multiPilotTime),
+                        (t+consolidatedBalancesForward.multiPilotTime).minutesToHoursAndMinutesString(),
                         t+consolidatedBalancesForward.multiPilotTime, MULTIPILOT_TIME_INDEX)
                 )
             }
@@ -119,7 +119,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             list.add(
                 TotalTimesListItem(
                 categories[NIGHT_TIME_INDEX],
-                minutesToHoursAndMinutesString(t+consolidatedBalancesForward.nightTime),
+                    (t+consolidatedBalancesForward.nightTime).minutesToHoursAndMinutesString(),
                 t+consolidatedBalancesForward.nightTime, NIGHT_TIME_INDEX)
             )
         }
@@ -128,7 +128,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             list.add(
                 TotalTimesListItem(
                 categories[IFR_TIME_INDEX],
-                minutesToHoursAndMinutesString(t+consolidatedBalancesForward.ifrTime),
+                    (t+consolidatedBalancesForward.ifrTime).minutesToHoursAndMinutesString(),
                 t+consolidatedBalancesForward.ifrTime, IFR_TIME_INDEX)
             )
         }
@@ -137,7 +137,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             list.add(
                 TotalTimesListItem(
                 categories[PIC_TIME_INDEX],
-                minutesToHoursAndMinutesString(t+consolidatedBalancesForward.picTime),
+                    (t+consolidatedBalancesForward.picTime).minutesToHoursAndMinutesString(),
                 t+consolidatedBalancesForward.picTime, PIC_TIME_INDEX)
             )
         }
@@ -146,7 +146,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             list.add(
                 TotalTimesListItem(
                 categories[COPILOT_TIME_INDEX],
-                minutesToHoursAndMinutesString(t+consolidatedBalancesForward.copilotTime),
+                    (t+consolidatedBalancesForward.copilotTime).minutesToHoursAndMinutesString(),
                 t+consolidatedBalancesForward.copilotTime, COPILOT_TIME_INDEX)
             )
         }
@@ -155,7 +155,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             list.add(
                 TotalTimesListItem(
                 categories[DUAL_TIME_INDEX],
-                minutesToHoursAndMinutesString(t+consolidatedBalancesForward.dualTime),
+                    (t+consolidatedBalancesForward.dualTime).minutesToHoursAndMinutesString(),
                 t+consolidatedBalancesForward.dualTime, DUAL_TIME_INDEX)
             )
         }
@@ -164,7 +164,7 @@ class TotalTimes(flights: List<Flight>, balancesForward: List<BalanceForward>): 
             list.add(
                 TotalTimesListItem(
                 categories[INSTRUCTOR_TIME_INDEX],
-                minutesToHoursAndMinutesString(t+consolidatedBalancesForward.instructortime),
+                    (t+consolidatedBalancesForward.instructortime).minutesToHoursAndMinutesString(),
                 t+consolidatedBalancesForward.instructortime, INSTRUCTOR_TIME_INDEX)
             )
         }

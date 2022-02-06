@@ -22,7 +22,7 @@ package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listB
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesListItem
 import java.time.LocalDateTime
@@ -55,9 +55,9 @@ class TimesPerYear(flights: List<Flight>): TotalTimesList {
             year to flights.filter { it.tOut().year == year }.sumOf { it.duration() }
         }.toMap()
         return listOf(flights.filter { it.tOut() >= LocalDateTime.now().minusYears(1) }.sumOf { it.duration() }.let { rollingTime ->
-            TotalTimesListItem(App.instance.getString(R.string.last_12_months), minutesToHoursAndMinutesString(rollingTime), rollingTime, 0)
+            TotalTimesListItem(App.instance.getString(R.string.last_12_months), rollingTime.minutesToHoursAndMinutesString(), rollingTime, 0)
         }) + yearsToTimes.keys.sorted().map { year ->
-            TotalTimesListItem(year.toString(), minutesToHoursAndMinutesString(yearsToTimes[year] ?: -1), yearsToTimes[year] ?: -1, 0)
+            TotalTimesListItem(year.toString(), (yearsToTimes[year] ?: -1).minutesToHoursAndMinutesString(), yearsToTimes[year] ?: -1, 0)
         }
     }
 

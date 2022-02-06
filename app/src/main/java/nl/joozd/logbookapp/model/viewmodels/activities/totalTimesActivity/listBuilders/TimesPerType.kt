@@ -22,7 +22,7 @@ package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listB
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesListItem
 
@@ -54,7 +54,7 @@ class TimesPerType(flights: List<Flight>): TotalTimesList {
         }.toMap()
         return typesToTimes.keys.sorted().map { type ->
             val typeLongName: String = /* AircraftRepository.getAircraftTypeByShortName(type)?.name ?: */ type // TODO getAircraftByShortName is suspend, gotta fix that
-            TotalTimesListItem(typeLongName, FlightDataPresentationFunctions.minutesToHoursAndMinutesString(typesToTimes[type] ?: -1), typesToTimes[type] ?: -1, 0)
+            TotalTimesListItem(typeLongName, (typesToTimes[type] ?: -1).minutesToHoursAndMinutesString(), typesToTimes[type] ?: -1, 0)
         }
     }
 }

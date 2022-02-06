@@ -26,11 +26,15 @@ import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
 import nl.joozd.logbookapp.utils.TwilightCalculator
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 /**
  * Flight with actual Airport and Aircraft
@@ -126,6 +130,13 @@ data class ModelFlight(
             isCoPilot = isMultiPilot(multiPilotTime)
         )
 
+    fun date(): LocalDate = timeOut.toLocalDate()
+
+    fun dateString(): String {
+        val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+        return date().format(dateFormatter)
+    }
+
 
     private fun isMultiPilot(multiPilotTime: Int) = multiPilotTime != 0 && !isPIC
 
@@ -170,7 +181,7 @@ data class ModelFlight(
         if (aircraft.type?.multiPilot == true) calculateTotalTime()
         else 0
 
-    private fun calculateTotalTime(): Int =
+    fun calculateTotalTime(): Int =
         if (isSim) 0
         else AugmentedCrew.of(augmentedCrew).getLogTime(getDurationOfFlight(), isPIC)
 

@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.extensions.inIgnoreCase
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import nl.joozd.logbookapp.model.workingFlight.FlightEditor
@@ -36,6 +37,7 @@ import java.util.*
  * ViewModel for AircraftPicker and SimTypePicker fragments
  */
 class AircraftPickerViewModel: JoozdlogDialogViewModel(){
+    private val aircraftRepository = AircraftRepository.instance
     private val _typesSearchStringFlow = MutableStateFlow("")
 
     private val aircraftTypesFlow: Flow<List<AircraftType>> =

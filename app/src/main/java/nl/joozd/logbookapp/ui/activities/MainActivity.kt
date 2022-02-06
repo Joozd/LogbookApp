@@ -28,6 +28,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.ListAdapter
 import androidx.activity.viewModels
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
@@ -49,6 +50,7 @@ import nl.joozd.logbookapp.ui.dialogs.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import nl.joozd.logbookapp.extensions.onTextChanged
+import nl.joozd.logbookapp.model.ModelFlight
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {
@@ -78,6 +80,7 @@ class MainActivity : JoozdlogActivity() {
             makeFlightsList()
             collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded()
             collectSearchFieldOpenAndOpenSearchFieldIfNeeded()
+            collectFlightsListFlow()
             initializeSearchFieldViews()
         }
         setContentView(binding.root)
@@ -115,6 +118,12 @@ class MainActivity : JoozdlogActivity() {
                 openSearchField()
             else
                 closeSearchField()
+        }
+    }
+
+    private fun ActivityMainNewBinding.collectFlightsListFlow(){
+        viewModel.flightsFlow.launchCollectWhileLifecycleStateStarted{ flights ->
+            (flightsList.adapter as FlightsAdapter).submitList(flights)
         }
     }
 
@@ -191,6 +200,32 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
+    private fun ActivityMainNewBinding.scrollToFirstCompletedFlight(
+        flights: List<ModelFlight>
+    ) {
+        val positionToScrollTo = findIndexOfTopFlightOnScreenAfterScrolling(flights)
+        flightsList.scrollToPosition(positionToScrollTo)
+
+        // scroll by another 30 dp
+        if (positionToScrollTo != 0) flightsList.scrollBy(0, -30.dpToPixels().toInt())
+    }
+
+    /*
+     * Get index of first completed flight (i), with a minimum of PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED.
+     * Then, subtract PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED.
+     * This way, the top flight on screen is always either 0 if (i)<= 3, or (i)-3 if (i) > 3
+     */
+    private fun findIndexOfTopFlightOnScreenAfterScrolling(
+        flights: List<ModelFlight>
+    ): Int {
+        val i = flights.firstOrNull { !it.isPlanned }?.let { f -> flights.indexOf(f) }
+            ?: 0 // index of first completed flight or 0 if no planned flight found
+        val iWithMinValue =  maxOf( i, PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED)
+        return iWithMinValue - PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED
+    }
+
+
+
     private fun View.showKeyboard(){
         val imm: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(this,0)
@@ -254,6 +289,7 @@ class MainActivity : JoozdlogActivity() {
 
     companion object{
         const val EDIT_FLIGHT_FRAGMENT_TAG = "EDIT_FLIGHT_FRAGMENT_TAG"
+        const val PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED = 3
     }
 
     /*

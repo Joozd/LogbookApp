@@ -28,6 +28,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.miscClasses.TotalsForward
+import nl.joozd.logbookapp.data.repository.BalanceForwardRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.extensions.popFirstNElements
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MakePdfActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
@@ -37,6 +39,8 @@ import java.util.*
 
 //TODO migrate to Flow
 class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
+    private val balanceForwardRepository = BalanceForwardRepository.instance
+    private val flightRepository = FlightRepository.instance
     /***********************************************************************************************
      * private parts
      ***********************************************************************************************/

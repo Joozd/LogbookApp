@@ -36,6 +36,7 @@ private val dateAndTimeFormatter =  DateTimeFormatter.ofPattern("dd MMM yyyy HH:
 fun LocalDate.toDateString(): String = this.format(dateFormatter)
 fun LocalDate.toDateStringForFiles(): String = this.format(dateFormatterForFiles)
 fun LocalDateTime.toLogbookDate(): String = this.format(dateFormatterTwoDigitYear)
+fun LocalDateTime.toLocalTimeString(): String = this.format(timeFormatter)
 fun LocalDateTime.toDateStringLocalized(): String = this.format(dateFormatterLocalized)
 fun LocalDateTime.toTimeStringLocalized(): String = this.format(timeFormatterLocalized)
 fun LocalDateTime.toMonthYear() = this.format(monthYearFormatter).filter {it != '.'} // I don't want "MRT. 2020" but "MRT 2020"

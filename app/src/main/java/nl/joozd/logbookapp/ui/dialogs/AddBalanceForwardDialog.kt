@@ -29,7 +29,7 @@ import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogAddBalanceForwardBinding
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardDialogEvents
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AddBalanceForwardDialogViewmodel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
@@ -194,16 +194,16 @@ class AddBalanceForwardDialog: JoozdlogFragment() {
      */
     private fun DialogAddBalanceForwardBinding.fillFields(){
         logbookNameText.setText(bf.logbookName)
-        multiPilotTimeEditText.setText(minutesToHoursAndMinutesString(bf.multiPilotTime))
-        totalTimeOfFlightEditText.setText(minutesToHoursAndMinutesString(bf.aircraftTime))
+        multiPilotTimeEditText.setText(bf.multiPilotTime.minutesToHoursAndMinutesString())
+        totalTimeOfFlightEditText.setText(bf.aircraftTime.minutesToHoursAndMinutesString())
         landingDayText.setText(bf.landingDay.toString())
         landingNightText.setText(bf.landingNight.toString())
-        nightTimeText.setText(minutesToHoursAndMinutesString(bf.nightTime))
-        ifrTimeText.setText(minutesToHoursAndMinutesString(bf.ifrTime))
-        picText.setText(minutesToHoursAndMinutesString(bf.picTime))
-        copilotText.setText(minutesToHoursAndMinutesString(bf.copilotTime))
-        dualText.setText(minutesToHoursAndMinutesString(bf.dualTime))
-        instructorText.setText(minutesToHoursAndMinutesString(bf.instructortime))
-        simulatorTimeEditText.setText(minutesToHoursAndMinutesString(bf.simTime))
+        nightTimeText.setText(bf.nightTime.minutesToHoursAndMinutesString())
+        ifrTimeText.setText(bf.ifrTime.minutesToHoursAndMinutesString())
+        picText.setText(bf.picTime.minutesToHoursAndMinutesString())
+        copilotText.setText(bf.copilotTime.minutesToHoursAndMinutesString())
+        dualText.setText(bf.dualTime.minutesToHoursAndMinutesString())
+        instructorText.setText(bf.instructortime.minutesToHoursAndMinutesString())
+        simulatorTimeEditText.setText(bf.simTime.minutesToHoursAndMinutesString())
     }
 }

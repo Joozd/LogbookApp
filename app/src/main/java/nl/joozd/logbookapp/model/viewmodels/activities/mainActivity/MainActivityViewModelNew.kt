@@ -24,13 +24,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.model.helpers.ModelFlightsSearcher
+import nl.joozd.logbookapp.model.helpers.filterByQuery
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
@@ -40,7 +41,6 @@ class MainActivityViewModelNew(): JoozdlogViewModel() {
     private val flightRepository = FlightRepositoryWithUndo.instance
     private val aircraftRepository = AircraftRepository.instance
     private val airportRepository = AirportRepository.instance
-    private val modelFlightsSearcher = ModelFlightsSearcher()
 
     val flightsFlow: Flow<List<ModelFlight>> = makeFlightsFlowCombiner()
 
@@ -67,9 +67,9 @@ class MainActivityViewModelNew(): JoozdlogViewModel() {
 
 
 
-    fun deleteFlight(flight: Flight){
+    fun deleteFlight(flight: ModelFlight){
         viewModelScope.launch{
-            flightRepository.delete(flight)
+            flightRepository.delete(flight.toFlight())
         }
     }
 
@@ -77,9 +77,9 @@ class MainActivityViewModelNew(): JoozdlogViewModel() {
      * This will create a new FlightEditor.
      * [flightEditorFlow] will emit after a new FlightEditor is made.
      */
-    fun showEditFlightDialog(flight: Flight){
+    fun showEditFlightDialog(flight: ModelFlight){
         viewModelScope.launch {
-            FlightEditor.setFromFlight(flight)
+            FlightEditor.setFromFlight(flight.toFlight())
         }
     }
 
@@ -127,21 +127,14 @@ class MainActivityViewModelNew(): JoozdlogViewModel() {
         searchQueryFlow,
         searchTypeFlow
     ){ flights, aircraftData, airportsData, query, searchType ->
-        val modelFlights = flights.map{ ModelFlight.ofFlightAndDataCaches(it, airportsData, aircraftData) }
-        modelFlightsSearcher.searchFlights(modelFlights, query, searchType)
+        flights.toModelFlights(airportsData, aircraftData)
+            .filterByQuery(query, searchType)
     }
 
-
-
-    private fun searchAirports(fff: List<ModelFlight>, query: String) = fff /*.filter {
-        query in it.orig.uppercase(Locale.ROOT)
-                || query in it.dest.uppercase(Locale.ROOT)
-                || query in airportDataCache.icaoToIata(it.orig)?.uppercase(Locale.ROOT) ?: ""
-                || query in airportDataCache.icaoToIata(it.dest)?.uppercase(Locale.ROOT) ?: ""
-    }
-    */
-
-
+    private fun List<Flight>.toModelFlights(
+        airportsData: AirportDataCache,
+        aircraftData: AircraftDataCache
+    ) = this.map { ModelFlight.ofFlightAndDataCaches(it, airportsData, aircraftData) }
 
 
     companion object {

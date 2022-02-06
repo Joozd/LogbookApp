@@ -95,7 +95,6 @@ class AircraftAutoCompleteAdapter(val context: Context, private val resource: In
                 notifyDataSetInvalidated()
             }
         }
-
     }
 
     /**
@@ -150,14 +149,8 @@ class AircraftAutoCompleteAdapter(val context: Context, private val resource: In
                     else -> null
                 } ?: throw (IllegalStateException("No textview found"))
             } catch (e: ClassCastException) {
-                Log.e(
-                    this::class.simpleName,
-                    "You must provide a textview or a ViewGroup containing a TextView"
-                )
                 throw(IllegalStateException(
-                    "${this::class.simpleName} requires the resource ID to be a TextView",
-                    e
-                ))
+                    "${this::class.simpleName} - You must provide a textview or a ViewGroup containing a TextView", e))
             }
             textview.text = getItem(position)
         }

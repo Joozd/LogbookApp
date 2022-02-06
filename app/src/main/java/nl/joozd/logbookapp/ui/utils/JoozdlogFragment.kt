@@ -28,9 +28,15 @@ import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.extensions.getColorFromAttr
@@ -86,4 +92,13 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
         supportFragmentManager.commit{ detach(fragment) }
         supportFragmentManager.commit{ attach(fragment) }
     }
+
+    protected  fun <T> Flow<T>.launchCollectWhileLifecycleStateStarted(collector: FlowCollector<T>){
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                collect(collector)
+            }
+        }
+    }
+
 }

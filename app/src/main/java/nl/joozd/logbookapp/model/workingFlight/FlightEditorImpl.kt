@@ -21,10 +21,8 @@ package nl.joozd.logbookapp.model.workingFlight
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.extensions.atDate
 import nl.joozd.logbookapp.extensions.plusDays
@@ -32,8 +30,6 @@ import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import nl.joozd.logbookapp.utils.TwilightCalculator
-import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 
@@ -45,33 +41,32 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
 
     override val flightFlow: Flow<ModelFlight> = MutableStateFlow(flight)
 
-    private var _flight: ModelFlight by CastFlowToMutableFlowShortcut(flightFlow)
-
+    private var flight: ModelFlight by CastFlowToMutableFlowShortcut(flightFlow)
 
     override var flightNumber: String = flight.flightNumber
 
     override var orig: Airport
-        get() = _flight.orig
+        get() = flight.orig
         set(orig) {
-            _flight = _flight.copy (orig = orig).autoValues()
+            flight = flight.copy (orig = orig).autoValues()
         }
 
     override var dest: Airport
-        get() = _flight.dest
+        get() = flight.dest
         set(dest) {
-            _flight = _flight.copy (dest = dest).autoValues()
+            flight = flight.copy (dest = dest).autoValues()
         }
 
     override var timeOut: Instant
-        get() = _flight.timeOut
+        get() = flight.timeOut
         set(timeOut) {
-            _flight = _flight.copy (timeOut = timeOut).autoValues()
+            flight = flight.copy (timeOut = timeOut).autoValues()
         }
 
     override var timeIn: Instant
-        get() = _flight.timeIn
+        get() = flight.timeIn
         set(timeIn) {
-            _flight = _flight.copy (timeIn = timeIn).autoValues()
+            flight = flight.copy (timeIn = timeIn).autoValues()
         }
 
     override var date: LocalDate
@@ -82,121 +77,149 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
                 if (it > timeOut) it
                 else it.plusDays(1)
             }
-            _flight = _flight.copy (timeOut = tOut, timeIn = tIn).autoValues()
+            flight = flight.copy (timeOut = tOut, timeIn = tIn).autoValues()
         }
 
     override var aircraft: Aircraft
-        get() = _flight.aircraft
+        get() = flight.aircraft
         set(aircraft) {
-            _flight = _flight.copy (aircraft = aircraft).autoValues()
+            flight = flight.copy (aircraft = aircraft).autoValues()
         }
 
     override var takeoffLandings: TakeoffLandings
-        get() = _flight.takeoffLandings
+        get() = flight.takeoffLandings
         set(takeoffLandings) {
-            _flight = _flight.copy (takeoffLandings = takeoffLandings).autoValues()
+            flight = flight.copy (takeoffLandings = takeoffLandings).autoValues()
         }
 
     override var name: String
-        get() = _flight.name
+        get() = flight.name
         set(name) {
-            _flight = _flight.copy (name = name).autoValues()
+            flight = flight.copy (name = name).autoValues()
         }
 
     override var name2: List<String>
-        get() = _flight.name2
+        get() = flight.name2
         set(name2) {
-            _flight = _flight.copy (name2 = name2).autoValues()
+            flight = flight.copy (name2 = name2).autoValues()
         }
 
     override var remarks: String
-        get() = _flight.remarks
+        get() = flight.remarks
         set(remarks) {
-            _flight = _flight.copy (remarks = remarks).autoValues()
+            flight = flight.copy (remarks = remarks).autoValues()
         }
 
     override var multiPilotTime: Int
-        get() = _flight.multiPilotTime
+        get() = flight.multiPilotTime
         set(multiPilotTime) {
-            _flight = _flight.copy (multiPilotTime = multiPilotTime).autoValues()
+            var newFlight = flight.copy (multiPilotTime = multiPilotTime)
+            if (!checkAutoValuesStillOK(newFlight)) newFlight = newFlight.copy(autoFill = false)
+            flight = newFlight.autoValues()
         }
 
     override var ifrTime: Int
-        get() = _flight.ifrTime
+        get() = flight.ifrTime
         set(ifrTime){
-            if (ifrTime != _flight.ifrTime)
-            _flight = _flight.copy(ifrTime = ifrTime, autoFill = false).autoValues()
+            //if IFR time changed to anything other than totalFlightTime or FLIGHT_IS_VFR, this disables autoFill.
+            if (ifrTime != totalFlightTime)
+            flight = flight.copy(ifrTime = ifrTime, autoFill = (ifrTime != Flight.FLIGHT_IS_VFR)).autoValues()
         }
 
     override var nightTime: Int
-        get() = _flight.nightTime
+        get() = flight.nightTime
         set(nightTime) {
-            _flight = _flight.copy (nightTime = nightTime).autoValues()
+            var newFlight = flight.copy (nightTime = nightTime)
+            if (!checkAutoValuesStillOK(newFlight)) newFlight = newFlight.copy(autoFill = false)
+            flight = newFlight.autoValues()
         }
 
-    override var correctedTotalTime: Int            // this is always 0 when autoValues
-        get() = _flight.correctedTotalTime
+    //This will give actual calculated elapsed time, with augmented crew and all
+    //If set, will always disable autofill.
+    override var totalFlightTime: Int
+        get() = flight.calculateTotalTime()
         set(correctedTotalTime) {
-            _flight = _flight.copy (correctedTotalTime = correctedTotalTime).autoValues()
+            flight = flight.copy (correctedTotalTime = correctedTotalTime, autoFill = false).autoValues()
         }
 
     override var augmentedCrew: Int                    // parse this in ViewModel
-        get() = _flight.augmentedCrew
+        get() = flight.augmentedCrew
         set(augmentedCrew) {
-            _flight = _flight.copy (augmentedCrew = augmentedCrew).autoValues()
+            flight = flight.copy (augmentedCrew = augmentedCrew).autoValues()
         }
 
     override var isSim: Boolean
-        get() = _flight.isSim
+        get() = flight.isSim
         set(isSim) {
-            _flight = _flight.copy (isSim = isSim).autoValues()
+            flight = flight.copy (isSim = isSim).autoValues()
         }
 
     override var signature: String
-        get() = _flight.signature
+        get() = flight.signature
         set(signature) {
-            _flight = _flight.copy (signature = signature).autoValues()
+            flight = flight.copy (signature = signature).autoValues()
         }
 
     override var isDual: Boolean
-        get() = _flight.isDual
+        get() = flight.isDual
         set(isDual) {
-            _flight = _flight.copy (isDual = isDual).autoValues()
+            flight = flight.copy (isDual = isDual).autoValues()
         }
 
     override var isInstructor: Boolean
-        get() = _flight.isInstructor
+        get() = flight.isInstructor
         set(isInstructor) {
-            _flight = _flight.copy (isInstructor = isInstructor).autoValues()
+            flight = flight.copy (isInstructor = isInstructor).autoValues()
         }
 
     override var isPIC: Boolean
-        get() = _flight.isPIC
+        get() = flight.isPIC
         set(isPIC) {
-            _flight = _flight.copy (isPIC = isPIC).autoValues()
+            flight = flight.copy (isPIC = isPIC).autoValues()
         }
 
     override var isPICUS: Boolean
-        get() = _flight.isPICUS
+        get() = flight.isPICUS
         set(isPICUS) {
-            _flight = _flight.copy (isPICUS = isPICUS).autoValues()
+            flight = flight.copy (isPICUS = isPICUS).autoValues()
         }
 
     override var isPF: Boolean
-        get() = _flight.isPF
+        get() = flight.isPF
         set(isPF) {
-            _flight = _flight.copy (isPF = isPF).autoValues()
+            flight = flight.copy (isPF = isPF).autoValues()
         }
 
     override var autoFill: Boolean
-        get() = _flight.autoFill
+        get() = flight.autoFill
         set(isAutoValues) {
-            _flight = _flight.copy (autoFill = isAutoValues).autoValues()
+            flight = flight.copy (autoFill = isAutoValues).autoValues()
         }
 
-    override suspend fun save() {
-        FlightRepositoryWithUndo.instance.save(_flight.toFlight())
+    override fun toggleDualInstructorNeither() {
+        val becomesDual = isDual == isInstructor // either both true or both false will make becomesDual true
+        val becomesInstructor = isDual && !isInstructor //
+        // if it was !isDual && isInstructor, both will be false
+        flight = flight.copy (isDual = becomesDual, isInstructor = becomesInstructor).autoValues()
     }
+
+    override fun togglePicusPicNeither() {
+        val becomesPICUS = isPICUS == isPIC
+        val becomesPIC = isPICUS && !isPIC
+        // if it was !isPICUS && isPIC, both will be false
+        flight = flight.copy(isPICUS = becomesPICUS, isPIC = becomesPIC)
+    }
+
+    override suspend fun save() {
+        FlightRepositoryWithUndo.instance.save(flight.toFlight())
+    }
+
+    /*
+     * Use this when a value that can disable autoFill is changed.
+     * If a changed value is actually changed it will return false.
+     */
+    private fun checkAutoValuesStillOK(updatedFlight: ModelFlight): Boolean =
+        updatedFlight == flight
 }
 
 

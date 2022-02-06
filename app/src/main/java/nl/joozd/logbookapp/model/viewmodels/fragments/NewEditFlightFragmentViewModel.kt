@@ -19,26 +19,83 @@
 
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.extensions.toLocalDate
+import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.model.helpers.makeNamesList
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
+import nl.joozd.logbookapp.model.workingFlight.FlightEditor
+import java.time.LocalDate
 
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
-    /*
     private val flightEditor = FlightEditor.instance!! // this Fragment should not have launched if wf is null
+    private val airportRepository = AirportRepository.instance
+    private val aircraftRepository = AircraftRepository.instance
+    private val flightRepository = FlightRepository.instance
+
     private val flightFlow get() = flightEditor.flightFlow
-    private val dataCache = SelfUpdatingDataCache(viewModelScope)
-    private val aircraftDataCache get() = dataCache.aircraftDataCache
-    private val airportDataCache get() = dataCache.airportDataCache
-
-    private var cachedSortedRegistrationsList: List<String> = emptyList()
-
-    val knownRegistrationsFlow = makeSortedRegistrationsFlowAndCacheIt().also{
-        println("made $it")
-    }
 
     val isNewFlight = flightEditor.isNewFlight
 
-    //
+    val localDate: LocalDate get() = flightEditor.timeOut.toLocalDate()
+
+    val isSim: Boolean get() = flightEditor.isSim
+
+    fun sortedRegistrationsFlow() =
+        combine(aircraftRepository.aircraftMapFlow(), flightRepository.getAllFlightsFlow()) {
+                regMap, allFlights ->
+            makeSortedRegistrationsList(allFlights, regMap)
+        }
+
+    fun namesFlow() = flightRepository.getAllFlightsFlow().map{
+        it.makeNamesList()
+    }
+
+    private fun makeSortedRegistrationsList(allFlights: List<Flight>, regMap: Map<String, Aircraft>) =
+        (allFlights.map { it.registration } + regMap.values.map { it.registration })
+            .distinct()
+
+    fun toggleSim(){
+        flightEditor.isSim = !flightEditor.isSim
+    }
+
+    fun toggleDualInstructorNone(){
+        flightEditor.toggleDualInstructorNeither()
+    }
+
+    fun togglePicusPicNone(){
+        flightEditor.togglePicusPicNeither()
+    }
+
+    fun toggleMultiPilot(){
+        flightEditor.multiPilotTime =
+        if (flightEditor.multiPilotTime == 0)
+             flightEditor.totalFlightTime
+        else 0
+    }
+
+    fun toggleIFR(){
+        flightEditor.ifrTime =
+            if(flightEditor.ifrTime >= 0) Flight.FLIGHT_IS_VFR
+        else flightEditor.totalFlightTime
+    }
+
+    fun togglePF(){
+        flightEditor.isPF = !flightEditor.isPF
+    }
+
+    fun toggleAutoValues(){
+        flightEditor.autoFill = !flightEditor.autoFill
+    }
+
+    /*
 
     val dualInstructorFlow: Flow<Int> = makeDualInstructorFlow()
     val aircraftStringFlow: Flow<String> = makeAircraftDisplayNameFlow()
@@ -93,27 +150,6 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         collectNewAirportDataCaches()
     }
 
-    private fun initializeAircraftDataCache() {
-        viewModelScope.launch {
-            aircraftDataCache = aircraftRepository.getAircraftDataCache()
-        }
-    }
-
-    private fun collectNewAircraftDataCaches() {
-        viewModelScope.launch {
-            aircraftRepository.aircraftDataCacheFlow().collect {
-                aircraftDataCache = it
-            }
-        }
-    }
-
-    private fun collectNewAirportDataCaches() {
-        viewModelScope.launch {
-            airportRepository.airportDataCacheFlow().collect {
-                airportDataCache = it
-            }
-        }
-    }
 
     private fun initializeAirportDataCache() {
         viewModelScope.launch {
@@ -286,19 +322,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         wf.isSim = force ?: !isSim
     }
 
-    fun toggleDualInstructorNone(){
-        when (dualInstructorFlow.value){
-            DUAL_INSTRUCTOR_FLAG_NONE -> wf.isDual = true
-            DUAL_INSTRUCTOR_FLAG_DUAL -> {
-                wf.isDual = false
-                wf.isInstructor = true
-            }
-            else -> {
-                wf.isDual = false
-                wf.isInstructor =false
-            }
-        }
-    }
+
 
     fun toggleMultiPilot(){
         wf.isMultipilot = !wf.isMultipilot
@@ -435,20 +459,14 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         if(flightEditor.isPICUS) R.string.picus else R.string.pic
     )
 
-    private fun makeSortedRegistrationsFlowAndCacheIt() =
+    private fun makeSortedRegistrationsFlowAnd() =
         combine(aircraftRepository.aircraftMapFlow(), FlightRepository.instance.getAllFlightsFlow()) {
         regMap, allFlights ->
-        makeSortedRegistrationsList(allFlights, regMap).also {
-            cachedSortedRegistrationsList = it
-        }
+        makeSortedRegistrationsList(allFlights, regMap).
     }
 
 
-    private fun makeSortedRegistrationsList(
-        allFlights: List<Flight>,
-        regMap: Map<String, Aircraft>
-    ) = (allFlights.map { it.registration } + regMap.values.map { it.registration })
-        .distinct()
+
 
     private fun getBestHitForPartialRegistration(r: String): Aircraft? =
         dataCache.aircraftDataCache.getAircraftFromRegistration(r)

@@ -34,7 +34,7 @@ import java.time.LocalDate
  * Has Flows with data to display in UI
  * Has functions to receive data from UI
  * Implementation should take care of updating related data
- *  (eg. IFR if aircraft changes, night time if times or airport changes)
+ *  (eg. MultiPilot if aircraft changes, night time if times or airport changes)
  */
 interface FlightEditor {
     /**
@@ -141,7 +141,7 @@ interface FlightEditor {
     /**
      * Corrected Total Time time for this flight
      */
-    var correctedTotalTime: Int
+    var totalFlightTime: Int
 
     /**
      * isPIC toggle for this flight
@@ -167,6 +167,18 @@ interface FlightEditor {
      * Set isAutoValues toggle for this flight
      */
     var autoFill: Boolean
+
+    /**
+     * Toggle between Dual, Instructor or neither.
+     * if isDual && isInstructor, will togle to isDual.
+     */
+    fun toggleDualInstructorNeither()
+
+    /**
+     * Toggle between PICUS, PIC or neither.
+     * if isPICUS && isPIC, will togle to isDual.
+     */
+    fun togglePicusPicNeither()
 
     /**
      * Save flight to DB

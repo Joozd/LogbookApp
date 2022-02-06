@@ -24,23 +24,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.EditText
-import androidx.annotation.NonNull
-import androidx.core.content.ContextCompat
-import androidx.core.view.marginTop
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import com.google.android.material.textfield.TextInputEditText
-import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.LayoutEditFlightFragmentBinding
 import nl.joozd.logbookapp.extensions.*
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.EditFlightFragmentEvents
 import nl.joozd.logbookapp.ui.utils.toast
 
 import nl.joozd.logbookapp.model.viewmodels.fragments.NewEditFlightFragmentViewModel
@@ -51,35 +40,39 @@ import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
-class EditFlightFragment: JoozdlogFragment(){
+class EditFlightFragment: JoozdlogFragment() {
     private val viewModel: NewEditFlightFragmentViewModel by viewModels()
 
-/*
-    /**
-     * Will define all listeners etc, and set initial
-     */
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val inflatedLayout = inflater.inflate(R.layout.layout_edit_flight_fragment, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val inflatedLayout =
+            inflater.inflate(R.layout.layout_edit_flight_fragment, container, false)
         val binding = LayoutEditFlightFragmentBinding.bind(inflatedLayout).apply {
             setDialogTitle()
-            setAndattachAdaptersForAutocompleteFields()
-
             setLongPressListenersForHelpDialogs()
-
+            setAndattachAdaptersForAutocompleteFields()
             setOnClickListeners()
-
             setOnFocusChangedListeners()
-
-            observeLiveData()
-
-            setFeedbackObserver()
-
+            startFlowCollectors()
             catchAndIgnoreClicksOnEmptyPartOfDialog()
-
             if (Preferences.editFlightFragmentWelcomeMessageShouldBeDisplayed)
                 showWelcomeMessage()
+
+
         }
         return binding.root
+    }
+
+    private fun clearFocus() {
+        activity?.currentFocus?.clearFocus()
+    }
+
+    private fun toastNotImplementedYet() {
+        clearFocus()
+        toast("Not implemented yet!")
     }
 
     private fun LayoutEditFlightFragmentBinding.setDialogTitle() {
@@ -87,65 +80,200 @@ class EditFlightFragment: JoozdlogFragment(){
             getString(if (viewModel.isNewFlight) R.string.add_flight else R.string.edit_flight)
     }
 
-    private fun LayoutEditFlightFragmentBinding.observeLiveData() {
-        setObserversForEditTextContents()
+    private fun LayoutEditFlightFragmentBinding.setLongPressListenersForHelpDialogs() {
+        flightDateField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_date_help) }
+        flightFlightNumberField     .setOnLongClickListener { showHelpMessage(R.string.edit_flight_flight_number_help) }
+        flightOrigField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_orig_help) }
+        flightDestField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_dest_help) }
+        flighttOutStringField       .setOnLongClickListener { showHelpMessage(R.string.edit_flight_time_out_help) }
+        flighttInStringField        .setOnLongClickListener { showHelpMessage(R.string.edit_flight_time_in_help) }
+        flightAircraftField         .setOnLongClickListener { showHelpMessage(R.string.edit_flight_aircraft_help) }
+        flightTakeoffLandingField   .setOnLongClickListener { showHelpMessage(R.string.edit_flight_takeoff_landing_help) }
+        flightNameField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_name_help) }
+        flightName2Field            .setOnLongClickListener { showHelpMessage(R.string.edit_flight_name2_help) }
+        flightRemarksField          .setOnLongClickListener { showHelpMessage(R.string.edit_flight_remarks_help) }
+        simSelector                 .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_help) }
+        signSelector                .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sign_help) }
+        dualInstructorSelector      .setOnLongClickListener { showHelpMessage(R.string.edit_flight_dual_instructor_help) }
+        multiPilotSelector          .setOnLongClickListener { showHelpMessage(R.string.edit_flight_multipilot_help) }
+        ifrSelector                 .setOnLongClickListener { showHelpMessage(R.string.edit_flight_ifr_help) }
+        picSelector                 .setOnLongClickListener { showHelpMessage(R.string.edit_flight_pic_help) }
+        pfSelector                  .setOnLongClickListener { showHelpMessage(R.string.edit_flight_pf_help) }
+        autoFillCheckBox            .setOnLongClickListener { showHelpMessage(R.string.edit_flight_autovalues_help) }
+    }
+    private fun showHelpMessage(message: Int): Boolean{
+        supportFragmentManager.commit {
+            add(R.id.editFlightFragmentBackground, MessageDialog.make(message))
+            addToBackStack(null)
+        }
+        return true
+    }
 
-        setObserversForToggleButtons()
-
-        //Handle changed source data (airports, names, etc)
-        setSourceDataObservers()
+    private fun LayoutEditFlightFragmentBinding.setAndattachAdaptersForAutocompleteFields() {
+        flightNameField.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))
+        flightName2Field.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))
+        flightAircraftField.setAdapter(AircraftAutoCompleteAdapter(requireActivity(), R.layout.item_custom_autocomplete))
     }
 
     private fun LayoutEditFlightFragmentBinding.setOnClickListeners() {
         setToggleSwitchOnClickListeners()
-
         setDialogLaunchingOnClickListeners()
-
         setClosingOnClickListeners()
-
     }
 
-    private fun LayoutEditFlightFragmentBinding.catchAndIgnoreClicksOnEmptyPartOfDialog() {
-        flightBox.setOnClickListener { }
+    private fun LayoutEditFlightFragmentBinding.setToggleSwitchOnClickListeners() {
+
+        simSelector.setOnClickListener {
+            clearFocus()
+            viewModel.toggleSim()
+        }
+
+        dualInstructorSelector.setOnClickListener {
+            clearFocus()
+            viewModel.toggleDualInstructorNone()
+        }
+
+        multiPilotSelector.setOnClickListener {
+            clearFocus()
+            viewModel.toggleMultiPilot()
+        }
+
+        ifrSelector.setOnClickListener {
+            clearFocus()
+            viewModel.toggleIFR()
+        }
+
+        picSelector.setOnClickListener {
+            clearFocus()
+            viewModel.togglePicusPicNone()
+        }
+
+        pfSelector.setOnClickListener {
+            clearFocus()
+            viewModel.togglePF()
+        }
+
+        autoFillCheckBox.setOnClickListener {
+            clearFocus()
+            viewModel.toggleAutoValues()
+        }
     }
 
-    /**
-     * Functions that handle closing fragments.
-     */
-    private fun LayoutEditFlightFragmentBinding.setClosingOnClickListeners() {
-        //click on empty part == cancel
-        editFlightFragmentBackground.setOnClickListener {
-            cancelAndClose()
+    private fun LayoutEditFlightFragmentBinding.setDialogLaunchingOnClickListeners() {
+        signSelector.setOnClickListener { launchSignatureDialog() }
+
+        flightDateSelector.setOnClickListener(makeLaunchDateDialogOnClickListener())
+
+        // flightDateField has an onClickListener, not an onFocusChanged as it always uses dialog
+        flightDateField.setOnClickListener(makeLaunchDateDialogOnClickListener())
+
+        flightFlightNumberSelector.setOnClickListener {
+            toastNotImplementedYet()
         }
 
-        flightCancelButton2.setOnClickListener {
-            cancelAndClose()
-        }
+        //also: this might not work after rotation etc
+        flightOrigSelector.setOnClickListener { showOrigPicker() }
 
-        flightSaveButton.setOnClickListener {
-            saveAndClose()
-        }
+        flightDestSelector.setOnClickListener { showDestPicker() }
+
+        flighttOutSelector.setOnClickListener(makeLaunchTimePickerOnClickListener())
+
+        flighttInSelector.setOnClickListener(makeLaunchTimePickerOnClickListener())
+
+        flightAcRegSelector.setOnClickListener { launchSimOrAircraftPicker() }
+
+        flightTakeoffLandingSelector.setOnClickListener { launchLandingsDialog() }
+
+        flightNameSelector.setOnClickListener { launchName1Dialog() }
+
+        flightName2Selector.setOnClickListener { launchName2Dialog() }
     }
 
-    /**
-     * Close fragment, and save working flight to DB
-     */
-    private fun saveAndClose() {
+    private fun makeLaunchDateDialogOnClickListener() = View.OnClickListener {
         clearFocus()
-        viewModel.saveWorkingFlightAndCloseFragment()
+        supportFragmentManager.commit {
+            add(
+                R.id.mainActivityLayout,
+                LocalDatePickerDialog().apply { selectedDate = viewModel.localDate },
+                "datePicker"
+            )
+            addToBackStack(null)
+        }
     }
 
-    /**
-     * Close fragment, ignore all changes
-     */
-    private fun cancelAndClose() {
-        //If I wanted some "undo cancel" function (SnackBar?) this might be a good place to add it
-        viewModel.closeWithoutSaving()
+    private fun makeLaunchTimePickerOnClickListener() = View.OnClickListener {
+        clearFocus()
+        // Get timePicker dialog, update flight in that dialog.
+        supportFragmentManager.commit {
+            add(R.id.mainActivityLayout, TimePicker())
+            addToBackStack(null)
+        }
     }
 
-    /**
-     * onFocusChangedListeners to handle inputs in EditTexts
-     */
+    private fun launchSignatureDialog() {
+        clearFocus()
+        supportFragmentManager.commit {
+            add(R.id.mainActivityLayout, SignatureDialog())
+            addToBackStack(null)
+        }
+    }
+
+    // Launch dialog to edit name for PIC
+    private fun launchName1Dialog() {
+        clearFocus()
+        supportFragmentManager.commit {
+            add(
+                R.id.mainActivityLayout,
+                Name1Dialog()
+            )
+            addToBackStack(null)
+        }
+    }
+    // Launch dialog to edit name(s) for other crew
+    private fun launchName2Dialog() {
+        clearFocus()
+        supportFragmentManager.commit {
+            add(R.id.mainActivityLayout, Name2Dialog())
+            addToBackStack(null)
+        }
+    }
+
+    private fun launchLandingsDialog() {
+        clearFocus()
+        supportFragmentManager.commit {
+            add(R.id.mainActivityLayout, LandingsDialog())
+            addToBackStack(null)
+        }
+    }
+
+    private fun launchSimOrAircraftPicker() {
+        clearFocus()
+        supportFragmentManager.commit {
+            add(
+                R.id.mainActivityLayout,
+                if (viewModel.isSim) SimTypePicker() else AircraftPicker()
+            )
+            addToBackStack(null)
+        }
+    }
+
+    private fun showDestPicker() {
+        clearFocus()
+        supportFragmentManager.commit {
+            add(R.id.mainActivityLayout, DestPicker())
+            addToBackStack(null)
+        }
+    }
+
+    private fun showOrigPicker() {
+        clearFocus()
+        supportFragmentManager.commit {
+            //It's okay to have a parameter in this fragment constructor (see [AirportPicker])
+            add(R.id.mainActivityLayout, OrigPicker())
+            addToBackStack(null)
+        }
+    }
+
     private fun LayoutEditFlightFragmentBinding.setOnFocusChangedListeners() {
         // flightDateField has an onClickListener, not an onFocusChanged as it always uses dialog
 
@@ -193,84 +321,39 @@ class EditFlightFragment: JoozdlogFragment(){
         }
     }
 
-    private fun LayoutEditFlightFragmentBinding.handleRemarksFocusChanged(
-        hasFocus: Boolean
-    ) {
-        if (!hasFocus)
-            viewModel.setRemarks(flightRemarksField.text.toString())
-    }
-
-    private fun LayoutEditFlightFragmentBinding.handleName2FocusChanged(
-        hasFocus: Boolean
-    ) {
-        if (!hasFocus)
-            viewModel.setName2(flightName2Field.text.toString())
-    }
-
-    private fun LayoutEditFlightFragmentBinding.handleNameFocusChanged(
-        hasFocus: Boolean
-    ) {
-        if (!hasFocus)
-            viewModel.setName(flightNameField.text.toString())
-    }
-
-    private fun LayoutEditFlightFragmentBinding.handleTakeoffLandingFocusChanged(
-        hasFocus: Boolean
-    ) {
-        if (!hasFocus)
-            flightTakeoffLandingField.text?.let {
-                if (it.isBlank())
-                    flightTakeoffLandingField.setText(viewModel.landingsLiveData.value)
-                else
-                    viewModel.setTakeoffLandings(it.toString().trim())
-            }
-    }
-
-    private fun LayoutEditFlightFragmentBinding.handleAircraftFocusChanged(
-        hasFocus: Boolean
-    ) {
+    private fun LayoutEditFlightFragmentBinding.handleAircraftFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
             viewModel.setRegAndType(flightAircraftField.text)
     }
 
-    private fun LayoutEditFlightFragmentBinding.handleSimTimeFocusChanged(
-        hasFocus: Boolean
-    ) {
+    private fun LayoutEditFlightFragmentBinding.handleSimTimeFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
             viewModel.setSimTime(flightSimTimeField.text)
     }
 
-    private fun LayoutEditFlightFragmentBinding.handleTimeInFocusChanged(
-        hasFocus: Boolean
-    ) {
+    private fun LayoutEditFlightFragmentBinding.handleTimeInFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
             viewModel.setTimeIn(flighttInStringField.text)
     }
 
-    private fun LayoutEditFlightFragmentBinding.handleTimeOutFocusChanged(
-        hasFocus: Boolean
-    ) {
+    private fun LayoutEditFlightFragmentBinding.handleTimeOutFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
             viewModel.setTimeOut(flighttOutStringField.text)
     }
 
-    private fun LayoutEditFlightFragmentBinding.handleDestFocusChanged(
-        hasFocus: Boolean
-    ) {
+    private fun LayoutEditFlightFragmentBinding.handleDestFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
             viewModel.setDest(flightDestField.text)
     }
 
-    private fun LayoutEditFlightFragmentBinding.handleOrigFocusChanged(
-        hasFocus: Boolean
-    ) {
+    private fun LayoutEditFlightFragmentBinding.handleOrigFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
             viewModel.setOrig(flightOrigField.text)
     }
 
-    private fun LayoutEditFlightFragmentBinding.handleFlightNumberFocusChanged(
-        hasFocus: Boolean
-    ) {
+    //This one either sends entered data to viewModel when focus lost,
+    //or removes trailing digits when focus gained.
+    private fun LayoutEditFlightFragmentBinding.handleFlightNumberFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
             viewModel.setFlightNumber(flightFlightNumberField.text)
         else {
@@ -278,212 +361,183 @@ class EditFlightFragment: JoozdlogFragment(){
         }
     }
 
+    private fun LayoutEditFlightFragmentBinding.handleRemarksFocusChanged(hasFocus: Boolean) {
+        if (!hasFocus)
+            viewModel.setRemarks(flightRemarksField.text.toString())
+    }
+
+    private fun LayoutEditFlightFragmentBinding.handleName2FocusChanged(hasFocus: Boolean) {
+        if (!hasFocus)
+            viewModel.setName2(flightName2Field.text.toString())
+    }
+
+    private fun LayoutEditFlightFragmentBinding.handleNameFocusChanged(hasFocus: Boolean) {
+        if (!hasFocus)
+            viewModel.setName(flightNameField.text.toString())
+    }
+
+    private fun LayoutEditFlightFragmentBinding.handleTakeoffLandingFocusChanged(hasFocus: Boolean) {
+        if (!hasFocus)
+            viewModel.setTakeoffLandings(flightTakeoffLandingField.text.toString().trim())
+    }
+
+        private fun LayoutEditFlightFragmentBinding.startFlowCollectors(){
+            collectNamesForAutoCompleteTextViews()
+            collectRegistrationsForAutoCompleteTextView()
+    }
+
+    private fun LayoutEditFlightFragmentBinding.collectNamesForAutoCompleteTextViews() {
+        viewModel.namesFlow().launchCollectWhileLifecycleStateStarted {
+            @Suppress("UNCHECKED_CAST")
+            (flightNameField.adapter as ArrayAdapter<String>).apply {
+                clear()
+                addAll(it)
+            }
+            @Suppress("UNCHECKED_CAST")
+            (flightName2Field.adapter as ArrayAdapter<String>).apply {
+                clear()
+                addAll(it)
+            }
+        }
+    }
+
+    private fun LayoutEditFlightFragmentBinding.collectRegistrationsForAutoCompleteTextView(){
+        viewModel.sortedRegistrationsFlow().launchCollectWhileLifecycleStateStarted{
+            (flightAircraftField.adapter as AircraftAutoCompleteAdapter).apply {
+                setItems(it)
+            }
+        }
+    }
+
+
+    private fun LayoutEditFlightFragmentBinding.setClosingOnClickListeners() {
+        //click on empty part == cancel
+        editFlightFragmentBackground.setOnClickListener {
+            cancelAndClose()
+        }
+        flightCancelButton2.setOnClickListener {
+            cancelAndClose()
+        }
+        flightSaveButton.setOnClickListener {
+            saveAndClose()
+        }
+    }
+
+    private fun saveAndClose() {
+        clearFocus()
+        viewModel.saveWorkingFlightAndCloseFragment()
+    }
+    private fun cancelAndClose() {
+        viewModel.closeWithoutSaving()
+    }
+
+    private fun showWelcomeMessage() = JoozdlogAlertDialog().show(requireActivity()){
+        titleResource = R.string.edit_flight_welcome_title
+        messageResource = R.string.edit_flight_welcome_message
+        setPositiveButton(android.R.string.ok){
+            Preferences.editFlightFragmentWelcomeMessageShouldBeDisplayed = false
+        }
+    }
+
+    private fun LayoutEditFlightFragmentBinding.catchAndIgnoreClicksOnEmptyPartOfDialog() {
+        flightBox.setOnClickListener { }
+    }
+
+
+
+
+}
+
+/*
+
+
+    /**
+     * Will define all listeners etc, and set initial
+     */
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val inflatedLayout = inflater.inflate(R.layout.layout_edit_flight_fragment, container, false)
+        val binding = LayoutEditFlightFragmentBinding.bind(inflatedLayout).apply {
+
+            observeLiveData()
+
+            setFeedbackObserver()
+        }
+        return binding.root
+    }
+
+
+
+    private fun LayoutEditFlightFragmentBinding.observeLiveData() {
+        setObserversForEditTextContents()
+
+        setObserversForToggleButtons()
+
+        //Handle changed source data (airports, names, etc)
+        setSourceDataObservers()
+    }
+
+
+
+
+
+    /**
+     * Functions that handle closing fragments.
+     */
+
+
+    /**
+     * Close fragment, and save working flight to DB
+     */
+
+
+    /**
+     * onFocusChangedListeners to handle inputs in EditTexts
+     */
+
+
+
+
+
+
     /**
      * Set OnClickListeners that launch a dialog
      * (mostly for the LSK buttons at the side of this dialog, also for flightDateField)
      */
-    private fun LayoutEditFlightFragmentBinding.setDialogLaunchingOnClickListeners() {
-        flightDateSelector.setOnClickListener(makeLaunchDateDialogOnClickListener())
 
-        // flightDateField has an onClickListener, not an onFocusChanged as it always uses dialog
-        flightDateField.setOnClickListener(makeLaunchDateDialogOnClickListener())
 
-        flightFlightNumberSelector.setOnClickListener {
-            toastNotImplementedYet()
-        }
 
-        //also: this might not work after rotation etc
-        flightOrigSelector.setOnClickListener { showOrigPicker() }
 
-        flightDestSelector.setOnClickListener { showDestPicker() }
 
-        flighttOutSelector.setOnClickListener(makeLaunchTimePickerOnClickListener())
-
-        flighttInSelector.setOnClickListener(makeLaunchTimePickerOnClickListener())
-
-        flightAcRegSelector.setOnClickListener { launchSimOrAircraftPicker() }
-
-        flightTakeoffLandingSelector.setOnClickListener { launchLandingsDialog() }
-
-        flightNameSelector.setOnClickListener { launchName1Dialog() }
-
-        flightName2Selector.setOnClickListener { launchName2Dialog() }
-    }
-
-    // Launch dialog to edit name(s) for other crew
-    private fun launchName2Dialog() {
-        clearFocus()
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, Name2Dialog())
-            addToBackStack(null)
-        }
-    }
-
-    // Launch dialog to edit name for PIC
-    private fun launchName1Dialog() {
-        clearFocus()
-        supportFragmentManager.commit {
-            add(
-                R.id.mainActivityLayout,
-                Name1Dialog()
-            )
-            addToBackStack(null)
-        }
-    }
-
-    private fun launchLandingsDialog() {
-        clearFocus()
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, LandingsDialog())
-            addToBackStack(null)
-        }
-    }
-
-    private fun launchSimOrAircraftPicker() {
-        clearFocus()
-        supportFragmentManager.commit {
-            add(
-                R.id.mainActivityLayout,
-                if (viewModel.isSim) SimTypePicker() else AircraftPicker()
-            )
-            addToBackStack(null)
-        }
-    }
-
-    private fun showDestPicker() {
-        clearFocus()
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, DestPicker())
-            addToBackStack(null)
-        }
-    }
-
-    private fun showOrigPicker() {
-        clearFocus()
-        supportFragmentManager.commit {
-            //It's okay to have a parameter in this fragment constructor (see [AirportPicker])
-            add(R.id.mainActivityLayout, OrigPicker())
-            addToBackStack(null)
-        }
-    }
-
-    private fun toastNotImplementedYet() {
-        clearFocus()
-        toast("Not implemented yet!")
-    }
 
     /**
      * get a [TimePicker] dialog which will update WorkingFlight
      */
-    private fun makeLaunchTimePickerOnClickListener() = View.OnClickListener {
-        clearFocus()
-        // Get timePicker dialog, update flight in that dialog.
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, TimePicker())
-            addToBackStack(null)
-        }
-    }
+
 
     /**
      * OnClickListener that launches a [LocalDatePickerDialog]
      */
-    private fun makeLaunchDateDialogOnClickListener() = View.OnClickListener {
-        clearFocus()
-        supportFragmentManager.commit {
-            add(
-                R.id.mainActivityLayout,
-                LocalDatePickerDialog().apply { selectedDate = viewModel.localDate },
-                "datePicker"
-            )
-            addToBackStack(null)
-        }
-    }
+
 
     /**
      * Set Toggle Switches onClickListeners
      */
-    private fun LayoutEditFlightFragmentBinding.setToggleSwitchOnClickListeners() {
-        //Signature set or not is only changed through a SignatureDialog
-        signSelector.setOnClickListener { launchSignatureDialog() }
 
-        simSelector.setOnClickListener {
-            clearFocus()
-            viewModel.toggleSim()
-        }
-
-        dualInstructorSelector.setOnClickListener {
-            clearFocus()
-            viewModel.toggleDualInstructorNone()
-        }
-
-        multiPilotSelector.setOnClickListener {
-            clearFocus()
-            viewModel.toggleMultiPilot()
-        }
-
-        ifrSelector.setOnClickListener {
-            clearFocus()
-            viewModel.toggleIfr()
-        }
-
-        picSelector.setOnClickListener {
-            clearFocus()
-            viewModel.togglePicusPicNone()
-        }
-
-        pfSelector.setOnClickListener {
-            clearFocus()
-            viewModel.togglePF()
-        }
-
-        autoFillCheckBox.setOnClickListener {
-            clearFocus()
-            viewModel.toggleAutoValues()
-        }
-    }
 
     /**
      * Clear focus for this Activity
      */
-    private fun clearFocus() {
-        activity?.currentFocus?.clearFocus()
-    }
+
 
     /**
      * Launch a Signature dialog
      */
-    private fun launchSignatureDialog() {
-        clearFocus()
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, SignatureDialog())
-            addToBackStack(null)
-        }
-    }
+
 
     /**
      * Set Long-press help dialogs:
      */
-    private fun LayoutEditFlightFragmentBinding.setLongPressListenersForHelpDialogs() {
-        flightDateField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_date_help) }
-        flightFlightNumberField     .setOnLongClickListener { showHelpMessage(R.string.edit_flight_flight_number_help) }
-        flightOrigField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_orig_help) }
-        flightDestField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_dest_help) }
-        flighttOutStringField       .setOnLongClickListener { showHelpMessage(R.string.edit_flight_time_out_help) }
-        flighttInStringField        .setOnLongClickListener { showHelpMessage(R.string.edit_flight_time_in_help) }
-        flightAircraftField         .setOnLongClickListener { showHelpMessage(R.string.edit_flight_aircraft_help) }
-        flightTakeoffLandingField   .setOnLongClickListener { showHelpMessage(R.string.edit_flight_takeoff_landing_help) }
-        flightNameField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_name_help) }
-        flightName2Field            .setOnLongClickListener { showHelpMessage(R.string.edit_flight_name2_help) }
-        flightRemarksField          .setOnLongClickListener { showHelpMessage(R.string.edit_flight_remarks_help) }
-        simSelector                 .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_help) }
-        signSelector                .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sign_help) }
-        dualInstructorSelector      .setOnLongClickListener { showHelpMessage(R.string.edit_flight_dual_instructor_help) }
-        multiPilotSelector          .setOnLongClickListener { showHelpMessage(R.string.edit_flight_multipilot_help) }
-        ifrSelector                 .setOnLongClickListener { showHelpMessage(R.string.edit_flight_ifr_help) }
-        picSelector                 .setOnLongClickListener { showHelpMessage(R.string.edit_flight_pic_help) }
-        pfSelector                  .setOnLongClickListener { showHelpMessage(R.string.edit_flight_pf_help) }
-        autoFillCheckBox            .setOnLongClickListener { showHelpMessage(R.string.edit_flight_autovalues_help) }
-    }
+
 
     /**
      * Event handler observer
@@ -707,13 +761,7 @@ class EditFlightFragment: JoozdlogFragment(){
     /**
      * Add adapters to fields that have an adapter (autocomplee fields)
      */
-    private fun LayoutEditFlightFragmentBinding.setAndattachAdaptersForAutocompleteFields() {
-        flightNameField.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))
 
-        flightName2Field.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))
-
-        flightAircraftField.setAdapter(AircraftAutoCompleteAdapter(requireActivity(), R.layout.item_custom_autocomplete))
-    }
 
     /**
      * Switch layout for edit_flight View to sim
@@ -764,13 +812,7 @@ class EditFlightFragment: JoozdlogFragment(){
         autoFillCheckBox.isEnabled = true
     }
 
-    private fun showHelpMessage(message: Int): Boolean{
-        supportFragmentManager.commit {
-            add(R.id.editFlightFragmentBackground, MessageDialog.make(message))
-            addToBackStack(null)
-        }
-        return true
-    }
+
 
     /**************************************************************************
      * Dialogs:
@@ -792,13 +834,6 @@ class EditFlightFragment: JoozdlogFragment(){
         }
     }
 
-    private fun showWelcomeMessage() = JoozdlogAlertDialog().show(requireActivity()){
-        titleResource = R.string.edit_flight_welcome_title
-        messageResource = R.string.edit_flight_welcome_message
-        setPositiveButton(android.R.string.ok){
-            Preferences.editFlightFragmentWelcomeMessageShouldBeDisplayed = false
-        }
-    }
+
 
  */
-}

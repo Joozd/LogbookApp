@@ -23,43 +23,42 @@ import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModelNew
 import java.util.*
 
-class ModelFlightsSearcher {
-    fun searchFlights(flights: List<ModelFlight>?, query: String, searchType: Int): List<ModelFlight> {
-        if (flights == null) return emptyList()
-        if (query.isBlank()) return flights
-        return when (searchType) {
-            MainActivityViewModelNew.SEARCH_ALL -> searchAll(flights, query)
-            MainActivityViewModelNew.SEARCH_AIRPORTS -> searchAirport(flights, query)
-            MainActivityViewModelNew.SEARCH_AIRCRAFT -> searchAircraft(flights, query)
-            MainActivityViewModelNew.SEARCH_NAMES -> searchNames(flights, query)
-            MainActivityViewModelNew.SEARCH_FLIGHTNUMBER -> searchFlightnumber(flights, query)
-            else -> flights
-        }
-    }
 
-    private fun searchAll(fff: List<ModelFlight>, query: String) = fff.filter {
-        query in it.name.uppercase(Locale.ROOT)
-                || it.name2.any { n-> query in n.uppercase(Locale.ROOT) }
-                || query in it.flightNumber.uppercase(Locale.ROOT)
-                || it.aircraft matches query
-                || it.orig identMatches query
-                || it.dest identMatches query
+fun List<ModelFlight>?.filterByQuery(query: String, searchType: Int): List<ModelFlight> {
+    if (this == null) return emptyList()
+    if (query.isBlank()) return this
+    return when (searchType) {
+        MainActivityViewModelNew.SEARCH_ALL -> searchAll(this, query)
+        MainActivityViewModelNew.SEARCH_AIRPORTS -> searchAirport(this, query)
+        MainActivityViewModelNew.SEARCH_AIRCRAFT -> searchAircraft(this, query)
+        MainActivityViewModelNew.SEARCH_NAMES -> searchNames(this, query)
+        MainActivityViewModelNew.SEARCH_FLIGHTNUMBER -> searchFlightnumber(this, query)
+        else -> this
     }
+}
 
-    private fun searchNames(fff: List<ModelFlight>, query: String) = fff.filter {
-        query in it.name.uppercase(Locale.ROOT)
-                || it.name2.any { n-> query in n.uppercase(Locale.ROOT) }
-    }
+private fun searchAll(fff: List<ModelFlight>, query: String) = fff.filter {
+    query in it.name.uppercase(Locale.ROOT)
+            || it.name2.any { n-> query in n.uppercase(Locale.ROOT) }
+            || query in it.flightNumber.uppercase(Locale.ROOT)
+            || it.aircraft matches query
+            || it.orig identMatches query
+            || it.dest identMatches query
+}
 
-    private fun searchFlightnumber(fff: List<ModelFlight>, query: String) = fff.filter {
-        query in it.flightNumber.uppercase(Locale.ROOT)
-    }
+private fun searchNames(fff: List<ModelFlight>, query: String) = fff.filter {
+    query in it.name.uppercase(Locale.ROOT)
+            || it.name2.any { n-> query in n.uppercase(Locale.ROOT) }
+}
 
-    private fun searchAircraft(fff: List<ModelFlight>, query: String) = fff.filter {
-        it.aircraft matchesIncludingType query
-    }
+private fun searchFlightnumber(fff: List<ModelFlight>, query: String) = fff.filter {
+    query in it.flightNumber.uppercase(Locale.ROOT)
+}
 
-    private fun searchAirport(fff: List<ModelFlight>, query: String) = fff.filter {
-        it.orig matches query || it.dest matches query
-    }
+private fun searchAircraft(fff: List<ModelFlight>, query: String) = fff.filter {
+    it.aircraft matchesIncludingType query
+}
+
+private fun searchAirport(fff: List<ModelFlight>, query: String) = fff.filter {
+    it.orig matches query || it.dest matches query
 }

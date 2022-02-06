@@ -23,7 +23,7 @@ package nl.joozd.logbookapp.model.dataclasses
 import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.logbookapp.data.dataclasses.FlightData
-import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -67,6 +67,8 @@ data class Flight(
 ){
     //can be constructed as (Flight(BasicFlight))
     constructor(b: BasicFlight): this(b.flightID, b.orig, b.dest, b.timeOut, b.timeIn, b.correctedTotalTime, b.multiPilotTime, b.nightTime, b.ifrTime, b.simTime, b.aircraft, b.registration, b.name, b.name2, b.takeOffDay, b.takeOffNight, b.landingDay, b.landingNight, b.autoLand, b.flightNumber, b.remarks, b.isPIC, b.isPICUS, b.isCoPilot, b.isDual, b.isInstructor, b.isSim, b.isPF, b.isPlanned, b.changed, b.autoFill, b.augmentedCrew, b.DELETEFLAG, b.timeStamp, b.signature)
+
+    private val flightTimeFormatter get() = DateTimeFormatter.ofPattern("HH:mm")
 
     fun toBasicFlight() = BasicFlight(
         flightID,
@@ -143,12 +145,16 @@ data class Flight(
         signature
     )
 
+
+
+
     fun landings() = "${landingDay + landingNight}"
     fun takeoffs() = "${takeOffDay + takeOffNight}"
     fun tOut(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeOut), ZoneId.of("UTC"))
     fun tIn(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeIn), ZoneId.of("UTC"))
-    fun timeOutString(): String = tOut().format(FlightDataPresentationFunctions.flightTimeFormatter)
-    fun timeInString(): String = tIn().format(FlightDataPresentationFunctions.flightTimeFormatter)
+
+    fun timeOutString(): String = tOut().format(flightTimeFormatter)
+    fun timeInString(): String = tIn().format(flightTimeFormatter)
     fun names(): List<String> =
         (listOf(name) +  name2.split(";"))
             .filter{ it.isNotBlank() }
@@ -173,7 +179,7 @@ data class Flight(
 
     }
 
-    fun durationString() = FlightDataPresentationFunctions.minutesToHoursAndMinutesString(duration())
+    fun durationString() = duration().minutesToHoursAndMinutesString()
 
     companion object{
         const val FLIGHT_ID_NOT_INITIALIZED = -1

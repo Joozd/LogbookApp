@@ -66,6 +66,15 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/flightInfoText" />
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/flight_input_fields_layout"
+            app:layout_constraintTop_toBottomOf="@+id/flightInfoText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/autoFillCheckBox"
+            android:layout_marginBottom="16dp"
+            tools:visibility="gone">
+
 
             <ImageView
                 android:id="@+id/flightDateSelector"
@@ -79,10 +88,10 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flightDateWrapper"
                 style="@style/EditFlightInputLayout.HorizontalSpacing"
-                android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toStartOf="@+id/flightFlightNumberWrapper"
                 app:layout_constraintStart_toEndOf="@+id/flightDateSelector"
-                app:layout_constraintTop_toBottomOf="@+id/flightInfoText">
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="8dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/flightDateField"
@@ -183,24 +192,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/flighttOutStringWrapper"
                 app:srcCompat="@drawable/lsk_button" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/flightSimTimeWrapper"
-                style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
-                android:visibility="gone"
-                app:layout_constraintEnd_toStartOf="@+id/flighttInSelector"
-                app:layout_constraintStart_toEndOf="@+id/flighttOutSelector"
-                app:layout_constraintTop_toBottomOf="@+id/flightOrigWrapper">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/flightSimTimeField"
-                    style="@style/EditFlightEditText"
-                    android:hint="@string/simtTime"
-                    android:inputType="time"
-                    android:nextFocusForward="@id/flightAircraftField"
-                    android:selectAllOnFocus="true"
-                    tools:text="12:34" />
-            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/flighttOutStringWrapper"
@@ -437,11 +428,225 @@
                 app:layout_constraintStart_toEndOf="@+id/picSelector"
                 app:layout_constraintTop_toTopOf="@+id/simSelector" />
 
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/sim_input_fields_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/flightInfoText"
+                app:layout_constraintBottom_toTopOf="@+id/autoFillCheckBox"
+                android:layout_marginBottom="16dp"
+                tools:visibility="visible">
+
+
+                <ImageView
+                    android:id="@+id/simDateSelector_left"
+                    style="@style/LSK"
+                    app:layout_constraintBottom_toBottomOf="@+id/simDateWrapper"
+                    app:layout_constraintEnd_toStartOf="@+id/simDateWrapper"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/simDateWrapper"
+                    app:srcCompat="@drawable/lsk_button" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/simDateWrapper"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing"
+                    app:layout_constraintEnd_toStartOf="@+id/simDateSelector_rightt"
+                    app:layout_constraintStart_toEndOf="@+id/simDateSelector_left"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginTop="8dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/simDateField"
+                        style="@style/EditFlightEditText"
+                        android:focusable="false"
+                        android:hint="@string/dateHint"
+                        android:includeFontPadding="true"
+                        android:inputType="date"
+                        android:nextFocusForward="@id/sim_time_field"
+                        tools:text="1 Jan. 2020" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/simDateSelector_rightt"
+                    style="@style/LSK"
+                    app:layout_constraintBottom_toBottomOf="@+id/simDateWrapper"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/simDateWrapper"
+                    app:layout_constraintTop_toTopOf="@+id/simDateWrapper"
+                    app:srcCompat="@drawable/lsk_button" />
+
+
+                <ImageView
+                    android:id="@+id/simTimeSelector_left"
+                    style="@style/LSK"
+                    app:layout_constraintBottom_toBottomOf="@+id/sim_time_wrapper"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/sim_time_wrapper"
+                    app:srcCompat="@drawable/lsk_button" />
+
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/sim_time_wrapper"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
+                    app:layout_constraintEnd_toStartOf="@+id/simTimeSelector_right"
+                    app:layout_constraintStart_toEndOf="@+id/simTimeSelector_left"
+                    app:layout_constraintTop_toBottomOf="@+id/simDateWrapper">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/sim_time_field"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/simTime"
+                        android:inputType="time"
+                        android:nextFocusForward="@id/simAircraftField"
+                        android:selectAllOnFocus="true"
+                        tools:text="12:34" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/simTimeSelector_right"
+                    style="@style/LSK"
+                    app:layout_constraintBottom_toBottomOf="@+id/sim_time_wrapper"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/sim_time_wrapper"
+                    app:srcCompat="@drawable/lsk_button" />
+
+                <ImageView
+                    android:id="@+id/simAcSelector_left"
+                    style="@style/LSK"
+                    app:layout_constraintBottom_toBottomOf="@+id/simAircraftWrapper"
+                    app:layout_constraintEnd_toStartOf="@+id/simAircraftWrapper"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/simAircraftWrapper"
+                    app:srcCompat="@drawable/lsk_button" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/simAircraftWrapper"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
+                    app:layout_constraintEnd_toStartOf="@+id/simTakeoffLandingWrapper"
+                    app:layout_constraintStart_toEndOf="@+id/simAcSelector_left"
+                    app:layout_constraintTop_toBottomOf="@+id/sim_time_wrapper"
+                    app:layout_goneMarginTop="4dp">
+
+                    <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                        android:id="@+id/simAircraftField"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/aircraft"
+                        android:inputType="textNoSuggestions|textCapCharacters"
+                        android:nextFocusForward="@id/simNamesField"
+                        android:selectAllOnFocus="true"
+                        tools:text="PH-NXA" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/simTakeoffLandingWrapper"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing"
+                    android:layout_marginStart="4dp"
+                    app:layout_constraintEnd_toStartOf="@+id/simTakeoffLandingSelector"
+                    app:layout_constraintStart_toEndOf="@+id/simAircraftWrapper"
+                    app:layout_constraintTop_toTopOf="@+id/simAircraftWrapper">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/simTakeoffLandingField"
+                        style="@style/EditFlightEditText"
+                        android:digits="AND/1234567890"
+                        android:hint="@string/takeoffs_landings"
+                        android:inputType="number|textCapCharacters"
+                        android:nextFocusForward="@id/simNamesField"
+                        android:selectAllOnFocus="true"
+                        tools:text="1/1" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/simTakeoffLandingSelector"
+                    style="@style/LSK"
+                    app:layout_constraintBottom_toBottomOf="@+id/simAircraftWrapper"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/simTakeoffLandingWrapper"
+                    app:layout_constraintTop_toTopOf="@+id/simAircraftWrapper"
+                    app:srcCompat="@drawable/lsk_button" />
+
+                <ImageView
+                    android:id="@+id/simNameSelector_left"
+                    style="@style/LSK"
+                    app:layout_constraintBottom_toBottomOf="@+id/simNamesWrapper"
+                    app:layout_constraintEnd_toStartOf="@+id/simNamesWrapper"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/simNamesWrapper"
+                    app:srcCompat="@drawable/lsk_button" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/simNamesWrapper"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
+                    android:layout_marginStart="4dp"
+                    app:layout_constraintEnd_toStartOf="@+id/simName2Selector"
+                    app:layout_constraintStart_toEndOf="@+id/simNameSelector_left"
+                    app:layout_constraintTop_toBottomOf="@+id/simAircraftWrapper">
+
+                    <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                        android:id="@+id/simNamesField"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/namePilot2"
+                        android:inputType="textPersonName"
+                        android:nextFocusForward="@id/simRemarksField"
+                        android:selectAllOnFocus="true"
+                        tools:text="de Broer van Henk de Vries" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/simName2Selector"
+                    style="@style/LSK"
+                    app:layout_constraintBottom_toBottomOf="@+id/simNamesWrapper"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/simNamesWrapper"
+                    app:layout_constraintTop_toTopOf="@+id/simNamesWrapper"
+                    app:srcCompat="@drawable/lsk_button" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/simRemarksLayout"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing.VerticalSpaced"
+                    app:layout_constraintEnd_toStartOf="@+id/simName2Selector"
+                    app:layout_constraintStart_toEndOf="@+id/simNameSelector_left"
+                    app:layout_constraintTop_toBottomOf="@+id/simNamesWrapper"> <!-- left one is GONE when in SimLayout -->
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/simRemarksField"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/remarks"
+                        android:imeOptions="actionDone"
+                        android:inputType="text"
+                        android:selectAllOnFocus="true"
+                        tools:text="Hier had uw advertnetie kunnen staan!" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/sim_simSelector"
+                    style="@style/SelectorStyleInactive"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/sim"
+                    app:layout_constraintEnd_toStartOf="@+id/sim_signSelector"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
+                    app:layout_constraintStart_toStartOf="@+id/simRemarksLayout"
+                    app:layout_constraintTop_toBottomOf="@+id/simRemarksLayout" />
+
+                <TextView
+                    android:id="@+id/sim_signSelector"
+                    style="@style/SelectorStyleInactive"
+                    android:text="@string/sign"
+                    app:layout_constraintBottom_toBottomOf="@+id/sim_simSelector"
+                    app:layout_constraintEnd_toEndOf="@+id/simRemarksLayout"
+                    app:layout_constraintStart_toEndOf="@+id/sim_simSelector"
+                    app:layout_constraintTop_toTopOf="@+id/sim_simSelector" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <CheckBox
                 android:id="@+id/autoFillCheckBox"
                 style="@style/EditFlightCheckBox"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
                 android:text="@string/autovalue"
 
@@ -450,7 +655,7 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintStart_toStartOf="@+id/flightInfoText"
-                app:layout_constraintTop_toBottomOf="@+id/simSelector" />
+                />
 
             <TextView
                 android:id="@+id/flightCancelButton2"
@@ -475,6 +680,7 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/flightCancelButton2"
                 app:layout_constraintTop_toTopOf="@+id/flightCancelButton2" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

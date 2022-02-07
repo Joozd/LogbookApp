@@ -296,9 +296,6 @@ class EditFlightFragment: JoozdlogFragment() {
         flighttInStringField.setOnFocusChangeListener { _, hasFocus ->
             handleTimeInFocusChanged(hasFocus)
         }
-        flightSimTimeField.setOnFocusChangeListener { _, hasFocus ->
-            handleSimTimeFocusChanged(hasFocus)
-        }
 
         flightAircraftField.setOnFocusChangeListener { _, hasFocus ->
             handleAircraftFocusChanged(hasFocus)
@@ -384,6 +381,7 @@ class EditFlightFragment: JoozdlogFragment() {
         private fun LayoutEditFlightFragmentBinding.startFlowCollectors(){
             collectNamesForAutoCompleteTextViews()
             collectRegistrationsForAutoCompleteTextView()
+            collectFlightPropertyFlows()
     }
 
     private fun LayoutEditFlightFragmentBinding.collectNamesForAutoCompleteTextViews() {
@@ -405,6 +403,23 @@ class EditFlightFragment: JoozdlogFragment() {
         viewModel.sortedRegistrationsFlow().launchCollectWhileLifecycleStateStarted{
             (flightAircraftField.adapter as AircraftAutoCompleteAdapter).apply {
                 setItems(it)
+            }
+        }
+    }
+
+    private fun LayoutEditFlightFragmentBinding.collectFlightPropertyFlows(){
+        collectIsSimFlow()
+    }
+
+    private fun LayoutEditFlightFragmentBinding.collectIsSimFlow(){
+        viewModel.isSimFlow().launchCollectWhileLifecycleStateStarted{ isSim ->
+            if (isSim){
+                flightInputFieldsLayout.visibility = View.GONE
+                simInputFieldsLayout.visibility = View.VISIBLE
+            }
+            else{
+                flightInputFieldsLayout.visibility = View.VISIBLE
+                simInputFieldsLayout.visibility = View.GONE
             }
         }
     }

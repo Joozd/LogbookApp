@@ -35,7 +35,7 @@ import java.time.LocalDate
 
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
-    private val flightEditor = FlightEditor.instance!! // this Fragment should not have launched if wf is null
+    private val flightEditor = FlightEditor.instance!! // this Fragment should not have launched if flightEditor is null
     private val airportRepository = AirportRepository.instance
     private val aircraftRepository = AircraftRepository.instance
     private val flightRepository = FlightRepository.instance
@@ -47,6 +47,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     val localDate: LocalDate get() = flightEditor.timeOut.toLocalDate()
 
     val isSim: Boolean get() = flightEditor.isSim
+
+    fun isSimFlow() = flightEditor.flightFlow.map { it.isSim }
 
     fun sortedRegistrationsFlow() =
         combine(aircraftRepository.aircraftMapFlow(), flightRepository.getAllFlightsFlow()) {

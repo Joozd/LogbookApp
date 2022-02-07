@@ -20,7 +20,6 @@
 package nl.joozd.logbookapp.ui.adapters
 
 import android.app.Activity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
@@ -200,7 +199,7 @@ class BalanceForwardAdapter(private val activity: Activity, private var list: Li
         getString(R.string.copilot) to copilotTime.minutesToHoursAndMinutesString(),
         getString(R.string.dualTime) to dualTime.minutesToHoursAndMinutesString(),
         getString(R.string.instructorTime) to instructortime.minutesToHoursAndMinutesString(),
-        getString(R.string.simtTime) to simTime.minutesToHoursAndMinutesString()
+        getString(R.string.simTime) to simTime.minutesToHoursAndMinutesString()
     )
 
         /*val aircraftTime: Int,

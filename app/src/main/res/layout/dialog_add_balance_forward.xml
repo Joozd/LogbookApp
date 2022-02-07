@@ -290,7 +290,7 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/simulatorTimeEditText"
                         style="@style/EditFlightEditText"
-                        android:hint="@string/simtTime"
+                        android:hint="@string/simTime"
                         android:inputType="number"
                         android:selectAllOnFocus="true"
                         tools:text="0:00" />

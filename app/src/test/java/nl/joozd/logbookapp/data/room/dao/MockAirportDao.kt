@@ -51,6 +51,8 @@ class MockAirportDao: AirportDao {
     override suspend fun searchAirportByIdent(query: String): Airport? =
         requestAllAirports().firstOrNull { it.ident.equals(query, ignoreCase = true) }
 
+    override suspend fun searchAirportByIata(query: String): Airport? =
+        requestAllAirports().firstOrNull { it.iata_code.equals(query, ignoreCase = true) }
 
     private fun emit(){
         _flow = makeList()

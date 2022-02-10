@@ -41,6 +41,8 @@ interface AirportRepository {
 
     suspend fun getAirportByIcaoIdentOrNull(ident: String): Airport?
 
+    suspend fun getAirportByIataIdentOrNull(ident: String): Airport?
+
     /**
      * Replace current airport database with [newAirports]
      */

@@ -45,6 +45,9 @@ class AirportRepositoryImpl(
     override suspend fun getAirportByIcaoIdentOrNull(ident: String): Airport? =
         airportDao.searchAirportByIdent(ident)
 
+    override suspend fun getAirportByIataIdentOrNull(ident: String): Airport? =
+        airportDao.searchAirportByIata(ident)
+
     /**
      * Replace current airport database with [newAirports]
      */

@@ -46,4 +46,7 @@ interface AirportDao {
     @Query("SELECT * FROM Airport WHERE :query LIKE ident LIMIT 1")
     suspend fun searchAirportByIdent(query: String): Airport?
 
+    @Query("SELECT * FROM Airport WHERE :query LIKE ident LIMIT 1")
+    suspend fun searchAirportByIata(query: String): Airport?
+
 }

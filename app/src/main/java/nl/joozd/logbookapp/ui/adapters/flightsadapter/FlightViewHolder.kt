@@ -25,6 +25,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ItemFlightCardBinding
 import nl.joozd.logbookapp.extensions.toLocalTimeString
 import nl.joozd.logbookapp.extensions.toMonthYear
+import nl.joozd.logbookapp.extensions.toTimeString
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.utils.customs.Swiper
@@ -51,9 +52,9 @@ class FlightViewHolder(containerView: View) : ListItemViewHolder(containerView) 
                 flightNumberText.text = flightNumber
                 origText.text = orig.displayString()
                 destText.text = dest.displayString()
-                timeOutText.text = timeOut.toLocalTimeString()
+                timeOutText.text = timeOut.toTimeString()
                 totalTimeText.text = calculateTotalTime().minutesToHoursAndMinutesString()
-                timeInText.text = timeOut.toLocalTimeString()
+                timeInText.text = timeOut.toTimeString()
                 takeoffLandingText.text = takeoffLandings.toString()
 
                 isAugmentedText.shouldBeVisible(isAugmented())

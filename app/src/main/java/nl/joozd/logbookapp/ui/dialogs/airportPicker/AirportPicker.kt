@@ -25,14 +25,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -43,10 +37,7 @@ import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.ui.adapters.AirportPickerAdapter
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
-import nl.joozd.logbookapp.ui.utils.longToast
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.AirportPickerEvents
 
-import java.util.*
 import kotlin.math.abs
 
 /**
@@ -54,7 +45,6 @@ import kotlin.math.abs
  * This will set correct value in ViewModel, recreation will call constructor without params
  * but viewModel will persist.
  */
-@ExperimentalCoroutinesApi
 abstract class AirportPicker: JoozdlogFragment() {
     protected abstract val dialogTitle: String
     protected abstract val viewModel: AirportPickerViewModel

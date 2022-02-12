@@ -113,11 +113,6 @@ class AircraftPicker: JoozdlogFragment(){
                         errorText.setTextColor(normalColor)
                     }
 
-                    Aircraft.CONSENSUS -> {
-                        errorText.text = getString(R.string.aircraft_type_in_consensus)
-                        errorText.setTextColor(ContextCompat.getColor(errorText.context, R.color.orange))
-                    }
-
                     Aircraft.NONE -> {
                         errorText.text = getString(R.string.aircraft_type_not_found)
                         errorText.setTextColor(ContextCompat.getColor(errorText.context, R.color.red))

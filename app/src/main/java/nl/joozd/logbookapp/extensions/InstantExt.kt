@@ -54,19 +54,13 @@ fun Instant.plusDays(daysToAdd: Int): Instant =
 fun Instant.plusMinutes(minutesToAdd: Int): Instant =
     this.plusSeconds(minutesToAdd * 60L)
 
-/**
- * Return a string containing only the time part when converted to local time.
- */
-fun Instant.toTimeString(
-    zoneOffset: ZoneOffset = ZoneOffset.UTC,
-    formatter: DateTimeFormatter? = DateTimeFormatter.ofPattern("HH:mm")
-): String =
-    this.toLocalTime(zoneOffset).format(formatter)
-
 fun Instant.toMonthYear(zoneOffset: ZoneOffset = ZoneOffset.UTC): String =
     LocalDateTime.ofInstant(this, zoneOffset).toMonthYear()
 
-fun Instant.toLocalTimeString(zoneOffset: ZoneOffset = ZoneOffset.UTC): String =
+/**
+ * Return a string containing only the time part when converted to local time.
+ */
+fun Instant.toTimeString(zoneOffset: ZoneOffset = ZoneOffset.UTC): String =
     LocalDateTime.ofInstant(this, zoneOffset).toLocalTimeString()
 
 /**

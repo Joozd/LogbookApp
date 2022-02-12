@@ -43,7 +43,7 @@ data class Aircraft(
         const val FLIGHT= 2         // Type was in [Flight]
         const val FLIGHT_CONFLICTING = 20         // Type was in [Flight] but not all occurrences agree
         const val PRELOADED = 3     // Set from server's forcedType
-        const val CONSENSUS = 4     // Set from server's consensus
+        const val UNKNOWN = 4       // Looked but didn't find aircraft data (trigger for dialog)
         const val PREVIOUS = 5      // Set because previously selected was this type
     }
 

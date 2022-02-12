@@ -122,6 +122,11 @@ interface FlightEditor {
      */
     var isSim: Boolean
 
+    /**
+     * isSim toggle for this flight
+     */
+    var simTime: Int
+
 
     /**
      * isMultiPilot toggle for this flight
@@ -154,7 +159,7 @@ interface FlightEditor {
     var isPICUS: Boolean
 
     /**
-     * isSim toggle for this flight
+     * isPF toggle for this flight
      */
     var isPF: Boolean
 
@@ -184,6 +189,11 @@ interface FlightEditor {
      * Save flight to DB
      */
     suspend fun save()
+
+    /**
+     * close this editor, should call [FlightEditor.close]
+     */
+    fun close()
 
     companion object{
         val instanceFlow: Flow<FlightEditor?> = MutableStateFlow(null)

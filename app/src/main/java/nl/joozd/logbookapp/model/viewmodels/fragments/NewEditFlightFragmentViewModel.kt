@@ -19,18 +19,27 @@
 
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
-import kotlinx.coroutines.flow.MutableStateFlow
+import android.text.Editable
+import android.util.Log
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.extensions.toDateString
 import nl.joozd.logbookapp.extensions.toLocalDate
+import nl.joozd.logbookapp.extensions.toTimeString
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.model.enumclasses.DualInstructorFlag
+import nl.joozd.logbookapp.model.enumclasses.PicPicusFlag
 import nl.joozd.logbookapp.model.helpers.makeNamesList
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.model.workingFlight.FlightEditor
+import nl.joozd.logbookapp.model.workingFlight.FlightEditorDataParser
 import java.time.LocalDate
 
 
@@ -40,6 +49,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val aircraftRepository = AircraftRepository.instance
     private val flightRepository = FlightRepository.instance
 
+    //use this for any data that needs parsing
+    private val flightEditorDataParser = FlightEditorDataParser(flightEditor)
+
     private val flightFlow get() = flightEditor.flightFlow
 
     val isNewFlight = flightEditor.isNewFlight
@@ -48,7 +60,34 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     val isSim: Boolean get() = flightEditor.isSim
 
-    fun isSimFlow() = flightEditor.flightFlow.map { it.isSim }
+    fun dateFlow() = flightFlow.map { it.date() }
+    fun timeOutFlow() = flightFlow.map { it.timeOut }
+    fun timeInFlow() = flightFlow.map { it.timeIn }
+    fun origFlow() = flightFlow.map { it.orig }
+    fun destFlow() = flightFlow.map { it.dest }
+    fun aircraftFlow() = flightFlow.map { it.aircraft }
+    fun takeoffLandingsFlow() = flightFlow.map{ it.takeoffLandings }
+    fun nameFlow() = flightFlow.map { it.name }
+    fun name2Flow() = flightFlow.map { it.name2 }
+    fun remarksFlow() = flightFlow.map { it.remarks }
+
+    fun isSimFlow() = flightFlow.map { it.isSim }
+    fun isSignedFlow() = flightFlow.map { it.signature.isNotBlank() }
+    fun dualInstructorFlow() = flightFlow.map { when {
+        it.isDual -> DualInstructorFlag.DUAL
+        it.isInstructor -> DualInstructorFlag.INSTRUCTOR
+        else -> DualInstructorFlag.NONE
+    }   }
+    fun isMultiPilotFlow() = flightFlow.map { it.multiPilotTime > 0 }
+    fun isIfrFlow() = flightFlow.map { it.ifrTime >= 0 } // IFR time of -1 means VFR
+    fun picPicusFlow() = flightFlow.map { when{
+        it.isPIC -> PicPicusFlag.PIC
+        it.isPICUS -> PicPicusFlag.PICUS
+        else -> PicPicusFlag.NONE
+
+    }    }
+    fun isPfFlow() = flightFlow.map { it.isPF }
+
 
     fun sortedRegistrationsFlow() =
         combine(aircraftRepository.aircraftMapFlow(), flightRepository.getAllFlightsFlow()) {
@@ -95,6 +134,89 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     fun toggleAutoValues(){
         flightEditor.autoFill = !flightEditor.autoFill
+    }
+
+    fun setFlightNumber(flightNumber: Editable?){
+        flightNumber?.toString()?.let{
+            flightEditor.flightNumber = it
+        }
+    }
+
+    fun setOrig(orig: Editable?){
+        orig?.let {
+            flightEditorDataParser.setOrig(it.toString())
+        } ?: Log.w(this::class.simpleName, "setOrig() received null param")
+    }
+
+    fun setDest(dest: Editable?){
+        dest?.let {
+            flightEditorDataParser.setDest(it.toString())
+        } ?: Log.w(this::class.simpleName, "setDest() received null param")
+    }
+
+    fun setTimeOut(timeOut: Editable?){
+        timeOut?.toString()?.let {
+            flightEditorDataParser.setTimeOut(it)
+        }
+    }
+
+    fun setTimeIn(timeIn: Editable?){
+        timeIn?.toString()?.let {
+            flightEditorDataParser.setTimeIn(it)
+        }
+    }
+
+    fun setRegAndType(regAndType: Editable?){
+        regAndType?.toString()?.let{ flightEditorDataParser.setAircraft(it) }
+    }
+
+    fun setTakeoffLandings(toLandingData: Editable?){
+        toLandingData?.toString()?.let{
+            flightEditorDataParser.setTakeoffLandings(it)
+        }
+    }
+
+
+    fun setName(name: Editable?){
+        name?.toString()?.let{
+            flightEditor.name = it
+        }
+    }
+
+    fun setName2(names: Editable?){
+        names?.toString()?.let{
+            flightEditor.name2 = splitAndTrimNames(it)
+        }
+    }
+
+    fun setRemarks(remarks: Editable?){
+        remarks?.toString()?.let{
+            flightEditor.flightNumber = it
+        }
+    }
+
+    fun setSimTime(simTime: Editable?){
+        flightEditorDataParser.setSimTimeFromString(simTime?.toString())
+    }
+
+    fun setSimAircraft(aircraft: Editable?){
+        aircraft?.toString()?.let {
+            flightEditorDataParser.setSimAircraftType(it)
+        }
+    }
+
+
+    private fun splitAndTrimNames(namesString: String) =
+        namesString.split(";").map { it.trim() }
+
+    fun saveAndClose(){
+        viewModelScope.launch {
+            flightEditorDataParser.saveAndClose()
+        }
+    }
+
+    fun closeWithoutSaving(){
+        flightEditorDataParser.close()
     }
 
     /*

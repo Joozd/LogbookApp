@@ -153,6 +153,11 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
         set(isSim) {
             flight = flight.copy (isSim = isSim).autoValues()
         }
+    override var simTime: Int
+        get() = flight.simTime
+        set(simTime) {
+            flight = flight.copy(simTime = simTime).autoValues()
+        }
 
     override var signature: String
         get() = flight.signature
@@ -212,6 +217,10 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
 
     override suspend fun save() {
         FlightRepositoryWithUndo.instance.save(flight.toFlight())
+    }
+
+    override fun close() {
+        FlightEditor.close()
     }
 
     /*

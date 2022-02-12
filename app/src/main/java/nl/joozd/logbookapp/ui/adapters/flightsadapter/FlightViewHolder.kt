@@ -54,7 +54,7 @@ class FlightViewHolder(containerView: View) : ListItemViewHolder(containerView) 
                 destText.text = dest.displayString()
                 timeOutText.text = timeOut.toTimeString()
                 totalTimeText.text = calculateTotalTime().minutesToHoursAndMinutesString()
-                timeInText.text = timeOut.toTimeString()
+                timeInText.text = timeIn.toTimeString()
                 takeoffLandingText.text = takeoffLandings.toString()
 
                 isAugmentedText.shouldBeVisible(isAugmented())

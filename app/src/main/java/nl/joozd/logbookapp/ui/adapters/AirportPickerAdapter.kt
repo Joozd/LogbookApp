@@ -23,6 +23,8 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -31,10 +33,8 @@ import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.findActivity
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
-class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerView.Adapter<AirportPickerAdapter.APViewHolder>() {
-    var airports =emptyList<Airport>()
-
-    private var pickedAirport = ""
+class AirportPickerAdapter(private val itemClick: (Airport) -> Unit)
+    : ListAdapter<Pair<Airport, Boolean>, AirportPickerAdapter.APViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): APViewHolder {
         val view = LayoutInflater.from(parent.ctx).inflate(R.layout.item_airport_picker, parent, false)
@@ -42,11 +42,13 @@ class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerVi
     }
 
     override fun onBindViewHolder(holder: APViewHolder, position: Int) {
-        val airport = airports[position]
+        val airportToPicked = getItem(position)
+        val airport = airportToPicked.first
+        val picked = airportToPicked.second
         holder.bindAirport(airport)
         with (holder.binding) {
             backgroundLayout.findActivity()?.let {
-                if (airport.ident == pickedAirport) {
+                if (picked) {
                     backgroundLayout.setBackgroundColor(it.getColorFromAttr(android.R.attr.colorPrimaryDark))
                     identifier.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
                     cityName.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
@@ -58,8 +60,6 @@ class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerVi
             }
         }
     }
-
-    override fun getItemCount(): Int = airports.size
 
     class APViewHolder(containerView: View, private val itemClick: (Airport) -> Unit) :
         RecyclerView.ViewHolder(containerView) {
@@ -77,13 +77,14 @@ class AirportPickerAdapter(private val itemClick: (Airport) -> Unit): RecyclerVi
         }
     }
 
-    fun submitList(l: List<Airport>) {
-        airports = l
-        notifyDataSetChanged()
-    }
+    companion object{
+        private val DIFF_CALLBACK = object: DiffUtil.ItemCallback<Pair<Airport, Boolean>>() {
+            override fun areItemsTheSame(oldItem: Pair<Airport, Boolean>, newItem: Pair<Airport, Boolean>): Boolean =
+                oldItem.first.ident == newItem.first.ident
 
-    fun pickAirport(airport: Airport){
-        pickedAirport = airport.ident
-        notifyDataSetChanged()
+
+            override fun areContentsTheSame(oldItem: Pair<Airport, Boolean>, newItem: Pair<Airport, Boolean>): Boolean =
+                oldItem.first == newItem.first && oldItem.second == newItem.second
+        }
     }
 }

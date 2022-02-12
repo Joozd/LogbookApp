@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.databinding.DialogAirportsBinding
 import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.AirportPickerViewModel
 
@@ -54,117 +56,91 @@ import kotlin.math.abs
  */
 @ExperimentalCoroutinesApi
 abstract class AirportPicker: JoozdlogFragment() {
-    protected abstract val workingOnOrig: Boolean // this must be set before first-time attachment
+    protected abstract val dialogTitle: String
     protected abstract val viewModel: AirportPickerViewModel
+
+
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         DialogAirportsBinding.bind(inflater.inflate(R.layout.dialog_airports, container, false)).apply {
-            //Set background color for title bar
-            /**
-             * Initialize recyclerView and it's stuff
-             */
+            //touch undo to (lazy) initialize it
+            viewModel.undoAirport
+
+            airportPickerTitle.text = dialogTitle
+
             val airportPickerAdapter = AirportPickerAdapter { airport ->
                 viewModel.pickAirport(airport)
             }
-            airportsPickerList.layoutManager = LinearLayoutManager(context)
-            airportsPickerList.adapter = airportPickerAdapter
+            setupAirportsPickerList(airportPickerAdapter)
+            setOnTextChangedListeners()
+            catchClicksOnBackground()
 
+            //could make a cancel button by saving first value of [airport] in viewModel
 
-            /**
-             * Things that this dialog actually does:
-             */
-
-            // Update recyclerView while typing
-            airportsSearchField.onTextChanged { t ->
-                viewModel.updateSearch(t)
-            }
-
-
-            /**
-             * Set the current text as an airport
-             */
-            setCurrentTextButton.setOnClickListener {
-                airportsSearchField.text.toString().nullIfEmpty()?.let {
-                    viewModel.setCustomAirport(it)
-                }
-            }
-
-            /**
-             * Save/cancel functions
-             */
-            //no action is misclicked on window
-            headerLayout.setOnClickListener { }
-            bodyLayout.setOnClickListener {  }
-
-            airportPickerDialogBackground.setOnClickListener {
-                closeFragment()
-            }
-
-
-            saveAirportDialog.setOnClickListener{
-                closeFragment()
-            }
-
-
-            /**
-             * observers:
-             */
-            //observer events
-            viewModel.feedbackEvent.observe(viewLifecycleOwner){
-                //if event already consumed, it.getEvent() == null
-                when(it.getEvent()){
-                    AirportPickerEvents.ORIG_OR_DEST_NOT_SELECTED -> {
-                        longToast("AirportPicker error")
-                        closeFragment()
-                    }
-                    AirportPickerEvents.CUSTOM_AIRPORT_NOT_EDITED -> {
-                        JoozdlogAlertDialog().show(requireActivity()) {
-                            titleResource = R.string.warning
-                            messageResource = R.string.custom_airport_caution_text // TODO remove TODO from string once no longer necessary
-                            setPositiveButton(android.R.string.ok)
-                        }
-                    }
-                    AirportPickerEvents.NOT_IMPLEMENTED -> longToast("Not Implemented in viewModel")
-                }
-            }
-
-            //observe airportList for recyclerview
-            lifecycleScope.launch {
-                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    viewModel.airportsListFlow.collect {
-                        airportPickerAdapter.submitList(it)
-                    }
-                }
-            }
-
-            /**
-             * Set text in search field, as well as in "selected" airport.
-             * Only set search field if it is blank.
-             * TODO make that happen in a better way.
-             */
-            viewModel.pickedAirport.observe(viewLifecycleOwner) { ap ->
-                ap?.let{
-                    airportPickerAdapter.pickAirport(it)
-
-                    // if ((airportsSearchField.text?.toString() ?: "null").isBlank()) airportsSearchField.setText(it.ident)
-                    airportPickerTitle.text =
-                        if (workingOnOrig) getString(R.string.origin).uppercase(Locale.ROOT)
-                        else getString(R.string.destination).uppercase(Locale.ROOT)
-                    @SuppressLint("SetTextI18n")
-                    icaoIataField.text = "${it.ident} - ${it.iata_code}"
-                    if (airportsSearchField.text?.isBlank() == true) airportsSearchField.setText(it.ident)
-                    @SuppressLint("SetTextI18n")
-                    cityAirportNameField.text = "${it.municipality} - ${it.name}"
-                    val latString = latToString(it.latitude_deg)
-                    val lonString = lonToString(it.longitude_deg)
-                    @SuppressLint("SetTextI18n")
-                    latLonField.text = "$latString - $lonString"
-
-                    altitudeField.text = getString(R.string.alt_with_placeholder, it.elevation_ft.toString()) // "alt: ${it.elevation_ft}\'"
-                }
-            }
+            setOnClickListeners()
+            launchCollectors(airportPickerAdapter)
         }.root
+
+    private fun DialogAirportsBinding.setOnClickListeners() {
+        setCurrentTextButton.setOnClickListener {
+            airportsSearchField.text.toString().nullIfEmpty()?.let {
+                viewModel.setCustomAirport(it)
+            }
+        }
+
+        airportDialogSaveTextview.setOnClickListener {
+            closeFragment()
+        }
+
+        airportDialogCancelTextview.setOnClickListener{
+            viewModel.undo()
+            closeFragment()
+        }
+    }
+
+    private fun DialogAirportsBinding.catchClicksOnBackground() {
+        headerLayout.setOnClickListener { }
+        bodyLayout.setOnClickListener { }
+        airportPickerDialogBackground.setOnClickListener { }
+    }
+
+    private fun DialogAirportsBinding.setOnTextChangedListeners() {
+        airportsSearchField.onTextChanged { t ->
+            viewModel.updateSearch(t)
+        }
+    }
+
+    private fun DialogAirportsBinding.setupAirportsPickerList(
+        airportPickerAdapter: AirportPickerAdapter
+    ) {
+        airportsPickerList.layoutManager = LinearLayoutManager(context)
+        airportsPickerList.adapter = airportPickerAdapter
+    }
+
+    private fun DialogAirportsBinding.launchCollectors(airportPickerAdapter: AirportPickerAdapter){
+        viewModel.pickedAirportFlow.launchCollectWhileLifecycleStateStarted{
+            airportsSearchField.setTextIfBlank(it.ident)
+            setPickedAircraftBoxData(it)
+        }
+
+        viewModel.airportsToIsPickedListFlow.launchCollectWhileLifecycleStateStarted {
+            airportPickerAdapter.submitList(it)
+        }
+    }
+
+    private fun EditText.setTextIfBlank(t: String) {
+        if (text?.isBlank() == true) setText(t)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun DialogAirportsBinding.setPickedAircraftBoxData(ap: Airport) {
+        icaoIataField.text = "${ap.ident} - ${ap.iata_code}"
+        cityAirportNameField.text = "${ap.municipality} - ${ap.name}"
+        val latString = latToString(ap.latitude_deg)
+        val lonString = lonToString(ap.longitude_deg)
+        latLonField.text = "$latString - $lonString"
+    }
 
 
     private fun latToString(latitude: Double): String =

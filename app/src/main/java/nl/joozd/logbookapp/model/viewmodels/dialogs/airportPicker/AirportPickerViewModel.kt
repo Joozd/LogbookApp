@@ -19,78 +19,91 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker
 
-import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 
 @ExperimentalCoroutinesApi
 abstract class AirportPickerViewModel: JoozdlogDialogViewModel() {
+    private val currentQueryFlow = MutableStateFlow("")
+
+    //The FlightEditor we use. Can be assumed to be not null.
+    protected val editor = FlightEditor.instance
     /**
-     * The picked airport
+     * Override this with getter and setter that changes orig or dest in target
      */
-    abstract val pickedAirport: LiveData<Airport?>
+    abstract var airport: Airport
+
+    /**
+     * Flow that emits the currently active airport
+     */
+    abstract val airportFlow: Flow<Airport>
 
     /**
      * Pick an airport and set that as Airport
      */
-    abstract fun pickAirport(airport: Airport)
+    fun pickAirport(pickedAirport: Airport){
+        airport = pickedAirport
+    }
+
+    /**
+     * touch this in Fragment onCreateView() to initialize it
+     */
+    val undoAirport by lazy { airport }
 
     /**
      * Set a custom value as Icao Identifier for in logbook.
      */
-    abstract fun setCustomAirport(airport: String)
-
-    /**
-     * The airport that is set in [workingFlight] when viewmodel is initialized
-     */
-    protected abstract val initialAirport: Airport?
-
-    protected var airportDataCache: AirportDataCache? = null
-
-    init {
-        viewModelScope.launch {
-            airportDataCache = AirportRepository.instance.getAirportDataCache()
-        }
-        viewModelScope.launch {
-            AirportRepository.instance.airportDataCacheFlow().collect {
-                airportDataCache = it
-            }
-        }
+    fun setCustomAirport(identifier: String){
+        airport = Airport(ident = identifier)
     }
 
-    private val currentQueryFlow = MutableStateFlow("")
+    val pickedAirportFlow: Flow<Airport> get() = airportFlow
 
-    val airportsListFlow: Flow<List<Airport>> =
-        combine(AirportRepository.instance.airportsFlow(), currentQueryFlow) { airports, query ->
-            airports to query
+    val airportsToIsPickedListFlow: Flow<List<Pair<Airport, Boolean>>> =
+        combine(AirportRepository.instance.airportsFlow(), currentQueryFlow, pickedAirportFlow) { airports, query, pickedAirport ->
+            AirportsQueryPicked(airports, query, pickedAirport)
         }.flatMapLatest {
-            makeAirportSearcherFlow(it.first, it.second)
+            makeAirportSearcherFlow(it)
         }
 
     fun updateSearch(query: String){
         currentQueryFlow.update { query }
     }
 
+    fun undo(){
+        airport = undoAirport
+    }
 
-    private fun makeAirportSearcherFlow(airports: List<Airport>, query: String?) = flow {
-        if (query == null) {
-            emit(airports)
+
+    private fun makeAirportSearcherFlow(aqp: AirportsQueryPicked) = flow {
+        val query = aqp.query
+        val airports = aqp.airports
+        val picked = aqp.picked
+        if (query.isBlank()) {
+            emit(airportsToIsPicked(airports, picked))
         } else {
             var result = airports.filter { it.iata_code.contains(query, ignoreCase = true) }
-            emit(result)
+            emit(airportsToIsPicked(result, picked))
 
-            result = result + airports.filter { it.ident.contains(query, ignoreCase = true) }
-            emit(result)
+            result = result + airports.filter { it !in result && it.ident.contains(query, ignoreCase = true) }
+            emit(airportsToIsPicked(result, picked))
 
-            result = result + airports.filter { it.municipality.contains(query, ignoreCase = true) }
-            emit(result)
+            result = result + airports.filter { it !in result && it.municipality.contains(query, ignoreCase = true) }
+            emit(airportsToIsPicked(result, picked))
 
-            result = result + airports.filter { it.name.contains(query, ignoreCase = true) }
-            emit(result)
+            result = result + airports.filter { it !in result && it.name.contains(query, ignoreCase = true) }
+            emit(airportsToIsPicked(result, picked))
         }
     }
+
+    private fun airportsToIsPicked(
+        airports: List<Airport>,
+        picked: Airport
+    ) = airports.map { it to (it == picked) }
+
+    private class AirportsQueryPicked(val airports: List<Airport>, val query: String, val picked: Airport)
 }

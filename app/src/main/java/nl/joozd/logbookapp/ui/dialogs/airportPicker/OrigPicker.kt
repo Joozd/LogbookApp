@@ -21,12 +21,16 @@ package nl.joozd.logbookapp.ui.dialogs.airportPicker
 
 import androidx.fragment.app.viewModels
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.OrigPickerViewmodel
+import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.OrigPickerViewModel
+import java.util.*
 
 /**
  * Airport picker that works on Origin
  */
+@ExperimentalCoroutinesApi // for Flow.FlatMapLatest
 class OrigPicker: AirportPicker() {
-    override val workingOnOrig = true
-    override val viewModel: OrigPickerViewmodel by viewModels()
+    override val dialogTitle: String
+        get() = getString(R.string.origin).uppercase(Locale.ROOT)
+    override val viewModel: OrigPickerViewModel by viewModels()
 }

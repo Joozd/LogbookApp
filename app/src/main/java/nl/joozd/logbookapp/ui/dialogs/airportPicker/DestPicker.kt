@@ -21,14 +21,16 @@ package nl.joozd.logbookapp.ui.dialogs.airportPicker
 
 import androidx.fragment.app.viewModels
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.DestPickerViewModel
 
 
 /**
  * Airport picker that works on Destination
  */
-//@ExperimentalCoroutinesApi
+@ExperimentalCoroutinesApi
 class DestPicker: AirportPicker() {
-    override val workingOnOrig = false
+    override val dialogTitle: String
+        get() = getString(R.string.destination)
     override val viewModel: DestPickerViewModel by viewModels()
 }

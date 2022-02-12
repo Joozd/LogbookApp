@@ -20,23 +20,17 @@
 package nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker
 
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import nl.joozd.logbookapp.data.dataclasses.Airport
 
-class OrigPickerViewmodel: AirportPickerViewModel(){
-    override val pickedAirport
-        get() = MutableLiveData(Airport())
+@ExperimentalCoroutinesApi
+class OrigPickerViewModel: AirportPickerViewModel(){
+    override var airport: Airport
+        get() = flightEditor.orig
+        set(it) { flightEditor.orig = it }
 
-    override fun pickAirport(airport: Airport) {
-        flightEditor.orig = airport
-    }
-
-    override fun setCustomAirport(airport: String) {
-        flightEditor.orig = Airport(ident = airport)
-    }
-
-    /**
-     * The airport that is set in [workingFlight] when viewmodel is initialized
-     */
-    override val initialAirport: Airport = flightEditor.orig
-
+    override val airportFlow: Flow<Airport>
+        get() = editor!!.flightFlow.map { it.orig }
 }

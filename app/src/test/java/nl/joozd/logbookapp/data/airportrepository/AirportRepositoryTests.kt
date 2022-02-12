@@ -73,6 +73,16 @@ class AirportRepositoryTests {
 
             // test getAirportDataCache()
             assertEquals(expectedSize, repo.getAirportDataCache().getAirports().size)
+
+            //test getAirportByIataIdentOrNull
+            val eham = AirportsTestData.eham
+            assertEquals(eham, repo.getAirportByIataIdentOrNull(eham.iata_code))
+            assertEquals(null, repo.getAirportByIataIdentOrNull("INVALID DATA"))
+
+            //test getAirportByIcaoIdentOrNull
+            assertEquals(eham, repo.getAirportByIcaoIdentOrNull(eham.ident))
+            assertEquals(null, repo.getAirportByIataIdentOrNull("INVALID DATA"))
+
         }
     }
 }

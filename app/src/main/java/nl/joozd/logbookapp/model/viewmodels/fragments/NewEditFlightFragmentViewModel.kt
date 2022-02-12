@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.model.viewmodels.fragments
 
-import android.text.Editable
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.combine
@@ -29,10 +28,7 @@ import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.toDateString
 import nl.joozd.logbookapp.extensions.toLocalDate
-import nl.joozd.logbookapp.extensions.toTimeString
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.enumclasses.DualInstructorFlag
 import nl.joozd.logbookapp.model.enumclasses.PicPicusFlag
@@ -61,6 +57,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     val isSim: Boolean get() = flightEditor.isSim
 
     fun dateFlow() = flightFlow.map { it.date() }
+    fun flightNumberFlow() = flightFlow.map { it.flightNumber }
     fun timeOutFlow() = flightFlow.map { it.timeOut }
     fun timeInFlow() = flightFlow.map { it.timeIn }
     fun origFlow() = flightFlow.map { it.orig }
@@ -87,6 +84,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     }    }
     fun isPfFlow() = flightFlow.map { it.isPF }
+
+    fun isAutoValuesFlow() = flightFlow.map { it.autoFill }
 
 
     fun sortedRegistrationsFlow() =
@@ -136,71 +135,71 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         flightEditor.autoFill = !flightEditor.autoFill
     }
 
-    fun setFlightNumber(flightNumber: Editable?){
-        flightNumber?.toString()?.let{
+    fun setFlightNumber(flightNumber: String?){
+        flightNumber?.let{
             flightEditor.flightNumber = it
         }
     }
 
-    fun setOrig(orig: Editable?){
+    fun setOrig(orig: String?){
         orig?.let {
-            flightEditorDataParser.setOrig(it.toString())
+            flightEditorDataParser.setOrig(it)
         } ?: Log.w(this::class.simpleName, "setOrig() received null param")
     }
 
-    fun setDest(dest: Editable?){
+    fun setDest(dest: String?){
         dest?.let {
-            flightEditorDataParser.setDest(it.toString())
+            flightEditorDataParser.setDest(it)
         } ?: Log.w(this::class.simpleName, "setDest() received null param")
     }
 
-    fun setTimeOut(timeOut: Editable?){
-        timeOut?.toString()?.let {
+    fun setTimeOut(timeOut: String?){
+        timeOut?.let {
             flightEditorDataParser.setTimeOut(it)
         }
     }
 
-    fun setTimeIn(timeIn: Editable?){
-        timeIn?.toString()?.let {
+    fun setTimeIn(timeIn: String?){
+        timeIn?.let {
             flightEditorDataParser.setTimeIn(it)
         }
     }
 
-    fun setRegAndType(regAndType: Editable?){
-        regAndType?.toString()?.let{ flightEditorDataParser.setAircraft(it) }
+    fun setRegAndType(regAndType: String?){
+        regAndType?.let{ flightEditorDataParser.setAircraft(it) }
     }
 
-    fun setTakeoffLandings(toLandingData: Editable?){
-        toLandingData?.toString()?.let{
+    fun setTakeoffLandings(toLandingData: String?){
+        toLandingData?.let{
             flightEditorDataParser.setTakeoffLandings(it)
         }
     }
 
 
-    fun setName(name: Editable?){
-        name?.toString()?.let{
+    fun setName(name: String?){
+        name?.let{
             flightEditor.name = it
         }
     }
 
-    fun setName2(names: Editable?){
-        names?.toString()?.let{
+    fun setName2(names: String?){
+        names?.let{
             flightEditor.name2 = splitAndTrimNames(it)
         }
     }
 
-    fun setRemarks(remarks: Editable?){
-        remarks?.toString()?.let{
+    fun setRemarks(remarks: String?){
+        remarks?.let{
             flightEditor.flightNumber = it
         }
     }
 
-    fun setSimTime(simTime: Editable?){
-        flightEditorDataParser.setSimTimeFromString(simTime?.toString())
+    fun setSimTime(simTime: String?){
+        flightEditorDataParser.setSimTimeFromString(simTime)
     }
 
-    fun setSimAircraft(aircraft: Editable?){
-        aircraft?.toString()?.let {
+    fun setSimAircraft(aircraft: String?){
+        aircraft?.let {
             flightEditorDataParser.setSimAircraftType(it)
         }
     }

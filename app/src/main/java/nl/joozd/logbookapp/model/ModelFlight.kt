@@ -26,6 +26,7 @@ import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.extensions.checkIfValidCoordinates
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
@@ -171,7 +172,8 @@ data class ModelFlight(
         takeOffs == 0 && landings == 0
 
     private fun calculateNightTime(): Int =
-        TwilightCalculator(timeOut).minutesOfNight(orig, dest, timeOut, timeIn)
+        if(!orig.checkIfValidCoordinates() || !dest.checkIfValidCoordinates()) 0
+        else TwilightCalculator(timeOut).minutesOfNight(orig, dest, timeOut, timeIn)
 
     private fun calculateIfrTime() =
         if (ifrTime != Flight.FLIGHT_IS_VFR)  calculateTotalTime()

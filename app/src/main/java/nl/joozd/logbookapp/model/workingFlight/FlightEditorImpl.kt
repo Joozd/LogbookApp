@@ -44,7 +44,11 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
 
     private var flight: ModelFlight by CastFlowToMutableFlowShortcut(flightFlow)
 
-    override var flightNumber: String = flight.flightNumber
+    override var flightNumber: String
+        get() = flight.flightNumber
+        set(flightNumber){
+            flight = flight.copy(flightNumber = flightNumber)
+        }
 
     override var orig: Airport
         get() = flight.orig

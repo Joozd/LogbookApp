@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.ui.dialogs
 
 import android.os.Bundle
+import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -376,72 +377,78 @@ class EditFlightFragment: JoozdlogFragment() {
     //or removes trailing digits when focus gained.
     private fun LayoutEditFlightFragmentBinding.handleFlightNumberFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
-            viewModel.setFlightNumber(flightFlightNumberField.text)
+            viewModel.setFlightNumber(flightFlightNumberField.text?.toString())
         else {
             flightFlightNumberField.removeTrailingDigits()
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.handleOrigFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setOrig(flightOrigEditText.text)
+        flightOrigEditText.hideTextOnFocusAndReplaceIfNothingEnteredElseDo(hasFocus) {
+            viewModel.setOrig(text?.toString())
+        }
     }
 
     private fun LayoutEditFlightFragmentBinding.handleDestFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setDest(flightDestEditText.text)
+        flightDestEditText.hideTextOnFocusAndReplaceIfNothingEnteredElseDo(hasFocus) {
+            viewModel.setDest(text?.toString())
+        }
     }
+
 
     private fun LayoutEditFlightFragmentBinding.handleTimeOutFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setTimeOut(flightTimeOutEditText.text)
+        flightTimeOutEditText.hideTextOnFocusAndReplaceIfNothingEnteredElseDo(hasFocus) {
+            viewModel.setTimeOut(text?.toString())
+        }
     }
 
+    private var prevTimeInText = ""
     private fun LayoutEditFlightFragmentBinding.handleTimeInFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setTimeIn(flightTimeInEditText.text)
+        flightTimeInEditText.hideTextOnFocusAndReplaceIfNothingEnteredElseDo(hasFocus) {
+            viewModel.setTimeIn(text?.toString())
+        }
     }
 
     private fun LayoutEditFlightFragmentBinding.handleAircraftFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
-            viewModel.setRegAndType(flightAircraftField.text)
+            viewModel.setRegAndType(flightAircraftField.text?.toString())
     }
 
     private fun LayoutEditFlightFragmentBinding.handleTakeoffLandingFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
-            viewModel.setTakeoffLandings(flightTakeoffLandingField.text)
+            viewModel.setTakeoffLandings(flightTakeoffLandingField.text?.toString())
     }
 
     private fun LayoutEditFlightFragmentBinding.handleNameFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
-            viewModel.setName(flightNameField.text)
+            viewModel.setName(flightNameField.text?.toString())
     }
 
     private fun EditText.handleNamesFieldFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
-            viewModel.setName2(text)
+            viewModel.setName2(text?.toString())
     }
 
     private fun EditText.handleRemarksFieldFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
-            viewModel.setRemarks(text)
+            viewModel.setRemarks(text?.toString())
     }
 
 
 
     private fun EditText.handleSimTimeFocusChanged(hasFocus: Boolean) {
         if (!hasFocus)
-            viewModel.setSimTime(text)
+            viewModel.setSimTime(text?.toString())
     }
 
     private fun EditText.handleSimAircraftFieldFocusChanged(hasFocus: Boolean) {
         if(!hasFocus)
-            viewModel.setSimAircraft(text)
+            viewModel.setSimAircraft(text?.toString())
     }
 
     private fun EditText.handleSimTakeoffLandingsFieldFocusChanged(hasFocus: Boolean) {
         if(!hasFocus)
-            viewModel.setTakeoffLandings(text)
+            viewModel.setTakeoffLandings(text?.toString())
     }
 
 
@@ -476,6 +483,7 @@ class EditFlightFragment: JoozdlogFragment() {
 
     private fun LayoutEditFlightFragmentBinding.collectFlightPropertyFlows(){
         collectDateFlow()
+        collectFlightNumberFlow()
         collectOrigFLow()
         collectDestFlow()
         collectTimeOutFlow()
@@ -486,6 +494,7 @@ class EditFlightFragment: JoozdlogFragment() {
         collectName2Flow()
         collectRemarksFlow()
 
+        collectIsSimFlow()
         collectIsSignedFlow()
         collectDualInstructorFlow()
         collectIsMultiPilotFlow()
@@ -493,8 +502,8 @@ class EditFlightFragment: JoozdlogFragment() {
         collectPicPicusFlow()
         collectIsPfFlow()
 
+        collectIsAutoValuesFlow()
 
-        collectIsSimFlow()
     }
 
     private fun LayoutEditFlightFragmentBinding.collectDateFlow(){
@@ -502,6 +511,12 @@ class EditFlightFragment: JoozdlogFragment() {
             val s = it.toDateString()
             simDateField.setText(s)
             flightDateField.setText(s)
+        }
+    }
+
+    private fun LayoutEditFlightFragmentBinding.collectFlightNumberFlow(){
+        viewModel.flightNumberFlow().launchCollectWhileLifecycleStateStarted{
+            flightFlightNumberField.setText(it)
         }
     }
 
@@ -631,6 +646,12 @@ class EditFlightFragment: JoozdlogFragment() {
         }
     }
 
+    private fun LayoutEditFlightFragmentBinding.collectIsAutoValuesFlow() {
+        viewModel.isAutoValuesFlow().launchCollectWhileLifecycleStateStarted {
+            autoFillCheckBox.isChecked = it
+        }
+    }
+
 
 
 
@@ -689,7 +710,7 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun getAirportIdent(airport: Airport) =
-        if (Preferences.useIataAirports) airport.iata_code
+        if (Preferences.useIataAirports && airport.iata_code.isNotBlank()) airport.iata_code
         else airport.ident
 
     private fun TextInputEditText.setAirportFieldToValidOrInvalidLayout(airport: Airport) {
@@ -703,6 +724,21 @@ class EditFlightFragment: JoozdlogFragment() {
             drawable,
             null
         )
+    }
+
+    // When an editText gains focus, save its contents in here.
+    // When it loses focus and no new text is entered, replace it with this.
+    private var textToBeReplacedWhenNoDataEntered: Editable? = null
+    private fun TextInputEditText.hideTextOnFocusAndReplaceIfNothingEnteredElseDo(hasFocus: Boolean, action: TextInputEditText.() -> Unit) {
+        val t: String? = text?.toString()
+        if (!hasFocus) {
+            if (t.isNullOrBlank()) textToBeReplacedWhenNoDataEntered?.let { text = it }
+            else action()
+        }
+        else{
+            textToBeReplacedWhenNoDataEntered = text
+            setText("")
+        }
     }
 }
 

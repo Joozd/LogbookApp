@@ -26,6 +26,7 @@ import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.extensions.atDate
 import nl.joozd.logbookapp.extensions.plusDays
+import nl.joozd.logbookapp.extensions.plusMinutes
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -216,7 +217,8 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
     }
 
     override suspend fun save() {
-        FlightRepositoryWithUndo.instance.save(flight.toFlight())
+        val f = flight.toFlight().copy(isPlanned = flight.isPlanned())
+        FlightRepositoryWithUndo.instance.save(f)
     }
 
     override fun close() {
@@ -229,6 +231,10 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
      */
     private fun checkAutoValuesStillOK(updatedFlight: ModelFlight): Boolean =
         updatedFlight == flight
+
+    // A flight is planned when it is edited to start in the future (or less than 5 minutes before now)
+    private fun ModelFlight.isPlanned(): Boolean =
+        (timeOut > Instant.now().plusMinutes(-5))
 }
 
 

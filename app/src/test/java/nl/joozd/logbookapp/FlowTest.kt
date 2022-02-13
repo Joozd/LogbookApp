@@ -19,21 +19,21 @@
 
 package nl.joozd.logbookapp
 
+import kotlinx.coroutines.flow.flow
 import org.junit.Test
-import org.junit.Assert.assertEquals
+import kotlin.random.Random
 
-class ManualTest {
+class FlowTest {
     @Test
-    fun manualTest(){
-        val ll = listOf("one", "two", "three")
-        val ll2 = listOf("one", "four", "three")
-        val lhm = LinkedHashMap<Int, String>()
-        lhm[1] = ll[0]
-        lhm[2] = ll[1]
-        lhm[3] = ll[2]
-        assertEquals(ll, lhm.values.toList())
-        lhm[2] = ll2[1]
-        assertEquals(ll2, lhm.values.toList())
+    fun testFlatMap(){
+
     }
 
+    fun makeFlow(i: Int, s: String) = flow {
+        emit("1. Doing something without using $i and $s")
+        Array(10000){ Random.nextDouble() }.sorted()
+        emit("2. Doing something without $i and $s")
+        Array(10000){ Random.nextDouble() }.sorted()
+        emit("3. Doing something without $i and $s")
+    }
 }

@@ -27,6 +27,8 @@ import android.view.ViewGroup
 import android.widget.EditText
 
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Airport
@@ -35,8 +37,10 @@ import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.AirportPickerV
 
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.onTextChanged
+import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.AirportPickerConstants.MAX_RESULT_SIZE
 import nl.joozd.logbookapp.ui.adapters.AirportPickerAdapter
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
+import nl.joozd.logbookapp.utils.DispatcherProvider
 
 import kotlin.math.abs
 
@@ -97,6 +101,7 @@ abstract class AirportPicker: JoozdlogFragment() {
 
     private fun DialogAirportsBinding.setOnTextChangedListeners() {
         airportsSearchField.onTextChanged { t ->
+            println("Text: $t")
             viewModel.updateSearch(t)
         }
     }
@@ -114,8 +119,11 @@ abstract class AirportPicker: JoozdlogFragment() {
             setPickedAircraftBoxData(it)
         }
 
-        viewModel.airportsToIsPickedListFlow.launchCollectWhileLifecycleStateStarted {
-            airportPickerAdapter.submitList(it)
+        viewModel.airportsToIsPickedListFlow.launchCollectWhileLifecycleStateStarted(DispatcherProvider.default()) {
+            launch(DispatcherProvider.main()) {
+                airportPickerAdapter.submitList(it.take(MAX_RESULT_SIZE))
+                println("submitted list with ${it.size} items")
+            }
         }
     }
 

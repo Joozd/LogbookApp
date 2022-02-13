@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.*
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.AirportPickerConstants.MAX_RESULT_SIZE
 import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 
 @ExperimentalCoroutinesApi
@@ -68,7 +69,7 @@ abstract class AirportPickerViewModel: JoozdlogDialogViewModel() {
             AirportsQueryPicked(airports, query, pickedAirport)
         }.flatMapLatest {
             makeAirportSearcherFlow(it)
-        }
+        }.conflate()
 
     fun updateSearch(query: String){
         currentQueryFlow.update { query }
@@ -79,24 +80,33 @@ abstract class AirportPickerViewModel: JoozdlogDialogViewModel() {
     }
 
 
-    private fun makeAirportSearcherFlow(aqp: AirportsQueryPicked) = flow {
+    private fun makeAirportSearcherFlow(aqp: AirportsQueryPicked): Flow<List<Pair<Airport, Boolean>>> = flow {
         val query = aqp.query
         val airports = aqp.airports
         val picked = aqp.picked
         if (query.isBlank()) {
             emit(airportsToIsPicked(airports, picked))
+            println("Emitted full list")
         } else {
+            println("looking for $query")
             var result = airports.filter { it.iata_code.contains(query, ignoreCase = true) }
             emit(airportsToIsPicked(result, picked))
+            println("$query emitted 1 (${result.size} results)")
+            if (result.size > MAX_RESULT_SIZE) return@flow
 
             result = result + airports.filter { it !in result && it.ident.contains(query, ignoreCase = true) }
             emit(airportsToIsPicked(result, picked))
+            println("$query emitted 2 (${result.size} results)")
+            if (result.size > MAX_RESULT_SIZE) return@flow
 
             result = result + airports.filter { it !in result && it.municipality.contains(query, ignoreCase = true) }
             emit(airportsToIsPicked(result, picked))
+            println("$query emitted 3 (${result.size} results)")
+            if (result.size > MAX_RESULT_SIZE) return@flow
 
             result = result + airports.filter { it !in result && it.name.contains(query, ignoreCase = true) }
             emit(airportsToIsPicked(result, picked))
+            println("$query emitted 4 (${result.size} results)")
         }
     }
 
@@ -106,4 +116,9 @@ abstract class AirportPickerViewModel: JoozdlogDialogViewModel() {
     ) = airports.map { it to (it == picked) }
 
     private class AirportsQueryPicked(val airports: List<Airport>, val query: String, val picked: Airport)
+
+    companion object{
+
+
+    }
 }

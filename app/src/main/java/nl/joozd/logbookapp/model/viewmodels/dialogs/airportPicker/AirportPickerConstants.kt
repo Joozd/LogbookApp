@@ -17,23 +17,9 @@
  *
  */
 
-package nl.joozd.logbookapp
+package nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker
 
-import org.junit.Test
-import org.junit.Assert.assertEquals
-
-class ManualTest {
-    @Test
-    fun manualTest(){
-        val ll = listOf("one", "two", "three")
-        val ll2 = listOf("one", "four", "three")
-        val lhm = LinkedHashMap<Int, String>()
-        lhm[1] = ll[0]
-        lhm[2] = ll[1]
-        lhm[3] = ll[2]
-        assertEquals(ll, lhm.values.toList())
-        lhm[2] = ll2[1]
-        assertEquals(ll2, lhm.values.toList())
-    }
-
+object AirportPickerConstants {
+    const val MINIMUM_QUERY_LENGTH = 2
+    const val MAX_RESULT_SIZE = 500
 }

@@ -143,4 +143,26 @@ fun Flight.setNightTime(airportDataCache: AirportDataCache): Flight {
     return this.copy(nightTime = nightTime)
 }
 
+fun Flight.revert(): Flight {
+    val now = ZonedDateTime.now().withSecond(0)
+    val nowRoundedDownToFiveMinutes = now.withMinute((now.minute/5) * 5).toEpochSecond()
+    return copy(
+        flightID = Flight.FLIGHT_ID_NOT_INITIALIZED,
+        orig = dest,
+        dest = orig,
+        flightNumber = increaseFlightnumberByOne(flightNumber),
+        timeOut = nowRoundedDownToFiveMinutes,
+        timeIn = nowRoundedDownToFiveMinutes + 3600,
+        isPlanned = true
+    )
+}
+
+//increase the last number in a string
+//eg KL1234 becomes KL1235, HB901D becomes HB902D and HV999 becomes HV1000
+private fun increaseFlightnumberByOne(fn: String): String {
+    val regex = """\d+""".toRegex()
+    val lastHit = regex.findAll(fn).lastOrNull()?.value ?: return fn
+    return fn.replace(lastHit, (lastHit.toInt() + 1).toString())
+}
+
 fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.uppercase(Locale.ROOT).trim() == other.flightNumber.uppercase(Locale.ROOT).trim()

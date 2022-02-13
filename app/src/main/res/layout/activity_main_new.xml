@@ -218,7 +218,7 @@
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addButton"
+        android:id="@+id/add_button"
         style="@style/FloatingAddButton"
         android:contentDescription="@string/add_flight"
         app:backgroundTint="?attr/colorPrimary"

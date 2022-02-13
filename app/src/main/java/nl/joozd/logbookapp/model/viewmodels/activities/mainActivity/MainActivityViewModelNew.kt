@@ -29,7 +29,9 @@ import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
+import nl.joozd.logbookapp.data.repository.helpers.revert
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.helpers.filterByQuery
@@ -77,8 +79,13 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         FlightEditor.setFromFlight(flight)
     }
 
-    fun menuSelectedAddFlight(){
-        FlightEditor.setNewflight()
+    fun newFlight(){
+        viewModelScope.launch {
+            FlightRepositoryWithSpecializedFunctions.instance.getMostRecentCompletedFlight()
+                ?.revert()?.let{ f ->
+                    FlightEditor.setFromFlight(f)
+                } ?: FlightEditor.setNewflight()
+        }
     }
 
     fun menuSelectedSearch(): Boolean {

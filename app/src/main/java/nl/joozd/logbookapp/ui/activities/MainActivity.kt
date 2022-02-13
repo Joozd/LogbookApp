@@ -28,9 +28,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ListAdapter
 import androidx.activity.viewModels
-import androidx.annotation.NonNull
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
@@ -61,7 +59,7 @@ class MainActivity : JoozdlogActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean{
         when (item.itemId) {
             R.id.menu_settings -> startSettingsActivity()
-            R.id.menu_add_flight -> viewModel.menuSelectedAddFlight()
+            R.id.menu_add_flight -> viewModel.newFlight()
             R.id.menu_undo -> viewModel.undo()
             R.id.menu_redo -> viewModel.redo()
             R.id.menu_total_times -> startTotalTimesActivity()
@@ -96,6 +94,7 @@ class MainActivity : JoozdlogActivity() {
             makeFlightsList()
             startCollectors()
             initializeSearchFieldViews()
+            setOnClickListeners()
         }
         setContentView(binding.root)
     }
@@ -159,6 +158,12 @@ class MainActivity : JoozdlogActivity() {
     private fun ActivityMainNewBinding.initializeSearchFieldViews(){
         initializeSearchTypeSpinner()
         addOnTextChangedListenerToMainSearchField()
+    }
+
+    private fun ActivityMainNewBinding.setOnClickListeners(){
+        addButton.setOnClickListener {
+            viewModel.newFlight()
+        }
     }
 
     private fun killWorkingFlightEditingFragments(){

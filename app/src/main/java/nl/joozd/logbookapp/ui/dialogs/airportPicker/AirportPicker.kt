@@ -101,7 +101,6 @@ abstract class AirportPicker: JoozdlogFragment() {
 
     private fun DialogAirportsBinding.setOnTextChangedListeners() {
         airportsSearchField.onTextChanged { t ->
-            println("Text: $t")
             viewModel.updateSearch(t)
         }
     }
@@ -122,7 +121,6 @@ abstract class AirportPicker: JoozdlogFragment() {
         viewModel.airportsToIsPickedListFlow.launchCollectWhileLifecycleStateStarted(DispatcherProvider.default()) {
             launch(DispatcherProvider.main()) {
                 airportPickerAdapter.submitList(it.take(MAX_RESULT_SIZE))
-                println("submitted list with ${it.size} items")
             }
         }
     }

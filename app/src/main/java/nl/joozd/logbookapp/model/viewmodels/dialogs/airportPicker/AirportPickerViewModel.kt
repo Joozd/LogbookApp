@@ -86,27 +86,21 @@ abstract class AirportPickerViewModel: JoozdlogDialogViewModel() {
         val picked = aqp.picked
         if (query.isBlank()) {
             emit(airportsToIsPicked(airports, picked))
-            println("Emitted full list")
         } else {
-            println("looking for $query")
             var result = airports.filter { it.iata_code.contains(query, ignoreCase = true) }
             emit(airportsToIsPicked(result, picked))
-            println("$query emitted 1 (${result.size} results)")
             if (result.size > MAX_RESULT_SIZE) return@flow
 
             result = result + airports.filter { it !in result && it.ident.contains(query, ignoreCase = true) }
             emit(airportsToIsPicked(result, picked))
-            println("$query emitted 2 (${result.size} results)")
             if (result.size > MAX_RESULT_SIZE) return@flow
 
             result = result + airports.filter { it !in result && it.municipality.contains(query, ignoreCase = true) }
             emit(airportsToIsPicked(result, picked))
-            println("$query emitted 3 (${result.size} results)")
             if (result.size > MAX_RESULT_SIZE) return@flow
 
             result = result + airports.filter { it !in result && it.name.contains(query, ignoreCase = true) }
             emit(airportsToIsPicked(result, picked))
-            println("$query emitted 4 (${result.size} results)")
         }
     }
 

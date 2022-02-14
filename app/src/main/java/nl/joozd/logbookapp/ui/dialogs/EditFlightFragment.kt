@@ -20,13 +20,11 @@
 package nl.joozd.logbookapp.ui.dialogs
 
 import android.os.Bundle
-import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
@@ -37,7 +35,6 @@ import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.LayoutEditFlightFragmentBinding
 import nl.joozd.logbookapp.extensions.*
-import nl.joozd.logbookapp.model.enumclasses.DualInstructorFlag
 import nl.joozd.logbookapp.ui.utils.toast
 
 import nl.joozd.logbookapp.model.viewmodels.fragments.NewEditFlightFragmentViewModel
@@ -385,75 +382,73 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun EditText.handleOrigFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-            viewModel.setOrig(text?.toString())
+        separateDataDisplayAndEntry(hasFocus) {
+            viewModel.setOrig(it?.toString())
         }
     }
 
     private fun EditText.handleDestFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-            viewModel.setDest(text?.toString())
+        separateDataDisplayAndEntry(hasFocus) {
+            viewModel.setDest(it?.toString())
         }
     }
 
 
     private fun EditText.handleTimeOutFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-            viewModel.setTimeOut(text?.toString())
+        separateDataDisplayAndEntry(hasFocus) {
+            viewModel.setTimeOut(it?.toString())
         }
     }
 
     private fun EditText.handleTimeInFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-            viewModel.setTimeIn(text?.toString())
+        separateDataDisplayAndEntry(hasFocus) {
+            viewModel.setTimeIn(it?.toString())
         }
     }
 
     private fun EditText.handleAircraftFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-            viewModel.setRegAndType(text?.toString())
+        separateDataDisplayAndEntry(hasFocus) {
+            viewModel.setRegAndType(it?.toString())
         }
     }
 
     private fun EditText.handleTakeoffLandingFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-            viewModel.setTakeoffLandings(text?.toString())
+        separateDataDisplayAndEntry(hasFocus) {
+            viewModel.setTakeoffLandings(it?.toString())
         }
     }
 
     private fun EditText.handleNameFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-            viewModel.setName(text?.toString())
+        separateDataDisplayAndEntry(hasFocus) {
+            viewModel.setName(it?.toString())
         }
     }
 
     private fun EditText.handleNamesFieldFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
+        if (!hasFocus)
             viewModel.setName2(text?.toString())
-        }
     }
 
     private fun EditText.handleRemarksFieldFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
+        if (!hasFocus)
             viewModel.setRemarks(text?.toString())
-        }
     }
 
     private fun EditText.handleSimTimeFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-            viewModel.setSimTime(text?.toString())
+        separateDataDisplayAndEntry(hasFocus) {
+            viewModel.setSimTime(it?.toString())
         }
     }
 
     private fun EditText.handleSimAircraftFieldFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-            viewModel.setSimAircraft(text?.toString())
+        separateDataDisplayAndEntry(hasFocus) {
+            viewModel.setSimAircraft(it?.toString())
         }
     }
 
     private fun EditText.handleSimTakeoffLandingsFieldFocusChanged(hasFocus: Boolean) {
-        hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-            viewModel.setTakeoffLandings(text?.toString())
+        separateDataDisplayAndEntry(hasFocus) {
+            viewModel.setTakeoffLandings(it?.toString())
         }
     }
 

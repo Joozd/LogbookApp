@@ -32,6 +32,7 @@ import nl.joozd.logbookapp.R
 
 import nl.joozd.logbookapp.databinding.DialogTimesInOutBinding
 import nl.joozd.logbookapp.extensions.ctx
+import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.extensions.showAsActiveIf
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.dialogs.TimePickerViewModel
@@ -139,29 +140,31 @@ open class TimePicker: JoozdlogFragment() {
         setIfrTimeTextViewOnFocusChangedListener()
     }
 
-    private fun DialogTimesInOutBinding.setIfrTimeTextViewOnFocusChangedListener() {
-        ifrTimeTextview.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            ifrTimeTextview.hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-                viewModel.setIfrTime(text?.toString())
+    private fun DialogTimesInOutBinding.settTotalTimeOfFLightTextViewOnFocusChangedListener() {
+        totalTimeOfFlightTextview.onFocusChangeListener =
+            View.OnFocusChangeListener { _, hasFocus ->
+                totalTimeOfFlightTextview.separateDataDisplayAndEntry(hasFocus) {
+                    viewModel.setTotalTimeOfFlight(it?.toString()?.nullIfBlank())
+                }
             }
-        }
     }
 
     private fun DialogTimesInOutBinding.setNightTimeTextViewOnFocusChangedListener() {
         nightTimeTextview.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            nightTimeTextview.hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-                viewModel.setNightTime(text?.toString())
+            nightTimeTextview.separateDataDisplayAndEntry(hasFocus) {
+                viewModel.setNightTime(it?.toString())
             }
         }
     }
 
-    private fun DialogTimesInOutBinding.settTotalTimeOfFLightTextViewOnFocusChangedListener() {
-        totalTimeOfFlightTextview.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            totalTimeOfFlightTextview.hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
-                viewModel.setTotalTimeOfFlight(text?.toString())
+    private fun DialogTimesInOutBinding.setIfrTimeTextViewOnFocusChangedListener() {
+        ifrTimeTextview.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+            ifrTimeTextview.separateDataDisplayAndEntry(hasFocus) {
+                viewModel.setIfrTime(it?.toString())
             }
         }
     }
+
 
     private fun DialogTimesInOutBinding.hideKeyboardWhenPressingEnterInLastField() {
         ifrTimeTextview.setOnEditorActionListener { v, actionId, _ ->

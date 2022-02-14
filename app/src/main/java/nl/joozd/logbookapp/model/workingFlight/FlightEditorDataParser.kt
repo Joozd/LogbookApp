@@ -118,6 +118,7 @@ class FlightEditorDataParser(
         }
 
     private fun parseTakeoffLandingString(trimmed: String) = when {
+        trimmed.isEmpty() -> TakeoffLandings(0)
         trimmed.any { it !in "0123456789/" } -> TakeoffLandings(0)
         '/' in trimmed -> trimmed.split('/').let { parts ->
             TakeoffLandings(parts[0].toInt(), parts[1].toInt())

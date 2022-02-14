@@ -28,6 +28,7 @@ import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.extensions.removeTrailingDigits
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.enumclasses.DualInstructorFlag
@@ -136,7 +137,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     fun setFlightNumber(flightNumber: String?){
         flightNumber?.let{
-            flightEditor.flightNumber = it
+            if (it != flightEditor.flightNumber.removeTrailingDigits())
+                flightEditor.flightNumber = it
         }
     }
 
@@ -189,7 +191,7 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     fun setRemarks(remarks: String?){
         remarks?.let{
-            flightEditor.flightNumber = it
+            flightEditor.remarks = it
         }
     }
 

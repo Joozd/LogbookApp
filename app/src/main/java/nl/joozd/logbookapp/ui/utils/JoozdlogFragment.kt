@@ -109,14 +109,26 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
         }
     }
 
-    // When an editText gains focus, save its contents in here.
-    // When it loses focus and no new text is entered, replace it with this.
     protected var textToBeReplacedWhenNoDataEntered: Editable? = null
-    protected inline fun EditText.hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus: Boolean, action: EditText.() -> Unit) {
-        val t: String? = text?.toString()
+    /**
+     * When an editText gains focus, save its contents in here.
+     * When it loses focus, replace it again.
+     * The idea is that data in editTexts will only be changed from viewModel,
+     * and entering anything is meant as data to be sent to viewModel, not for displaying.
+     * If any data is entered, do [action] on it.
+     * This is to be placed in an [EditText.onFocusChanged] block.
+     * NOTE: No text entered means no action, so don't use this for fields that can be made empty.
+     * @param hasFocus -> true if View gained focus, false it lost focus
+     * @param action -> action to be performed when any text is entered.
+     */
+    protected inline fun EditText.separateDataDisplayAndEntry(
+        hasFocus: Boolean,
+        action: (Editable?) -> Unit
+    ) {
         if (!hasFocus) {
-            if (t.isNullOrBlank()) textToBeReplacedWhenNoDataEntered?.let { text = it }
-            else action()
+            if (!text.isNullOrBlank())
+                action(text)
+            textToBeReplacedWhenNoDataEntered?.let { text = it }
         }
         else{
             textToBeReplacedWhenNoDataEntered = text

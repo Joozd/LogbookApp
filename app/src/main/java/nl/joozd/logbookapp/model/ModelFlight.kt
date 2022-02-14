@@ -128,7 +128,7 @@ data class ModelFlight(
             nightTime = calculateNightTime(),
             takeoffLandings = makeTakeoffLandings().updateTakeoffLandingsForNightTime(),
             multiPilotTime = calculateMultiPilotTime(),
-            isCoPilot = isMultiPilot(multiPilotTime)
+            isCoPilot = isCopilot()
         )
 
     fun date(): LocalDate = timeOut.toLocalDate()
@@ -139,7 +139,7 @@ data class ModelFlight(
     }
 
 
-    private fun isMultiPilot(multiPilotTime: Int) = multiPilotTime != 0 && !isPIC
+    private fun isCopilot() = multiPilotTime != 0 && !isPIC
 
     private fun makeTakeoffLandings(): TakeoffLandings =
         when{

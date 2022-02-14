@@ -26,16 +26,15 @@ import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.extensions.plusDays
+import nl.joozd.logbookapp.model.helpers.hoursAndMinutesStringToInt
 import java.time.*
 import kotlin.coroutines.CoroutineContext
 
 //This class takes input strings and provides model data for a FlightEditor
 class FlightEditorDataParser(
     private val editor: FlightEditor,
-    private val flightRepository: FlightRepository = FlightRepository.instance,
     private val airportRepository: AirportRepository = AirportRepository.instance,
     private val aircraftRepository: AircraftRepository = AircraftRepository.instance
 ): CoroutineScope {
@@ -83,7 +82,7 @@ class FlightEditorDataParser(
     }
 
     fun setSimTimeFromString(s: String?){
-        editor.simTime = hoursAndMinutesStringToInt(s) ?: 0
+        editor.simTime = s?.hoursAndMinutesStringToInt() ?: 0
     }
 
     fun setSimAircraftType(type: String){
@@ -108,26 +107,7 @@ class FlightEditorDataParser(
             ?: airportRepository.getAirportByIataIdentOrNull(ident)
             ?: Airport.placeholderWithIdentOnly(ident))
 
-    private fun hoursAndMinutesStringToInt(hoursAndMinutes: String?): Int? {
-        if (hoursAndMinutes == null || hoursAndMinutes.isBlank()) return null
 
-        val hoursAndMinutesSplits = splitIntoHoursAndMinutes(hoursAndMinutes)
-
-        val hoursAndMinutesInts = try {
-            hoursAndMinutesSplits.map{it.toInt()}
-        } catch (e: NumberFormatException) { return null } // if not only digits left,
-
-        if (hoursAndMinutesInts.isEmpty()) return null // This happens when only characters in "+- :/.h" were in string
-
-        return if (hoursAndMinutesInts.size == 1) {
-            val v = hoursAndMinutesInts.first()
-            // last two digits are minutes, any before that are hours (so 123456 == 1234:56)
-            // 76 minutes is fine, 104 is 64 minutes.
-            // users will probably enter something like 330 when they mean 3:30
-            if (v <= 99) v
-            else v%100 + v/100*60
-        } else hoursAndMinutesInts[0]*60 + hoursAndMinutesInts[1]
-    }
 
     private fun parseTimeStringToInstant(s: String, date: LocalDate): Instant =
         s.filter{it.isDigit()}.padStart(4, '0').take(4).toInt().let{
@@ -144,11 +124,6 @@ class FlightEditorDataParser(
         }
         else -> TakeoffLandings(trimmed.toInt())
     }
-
-    private fun splitIntoHoursAndMinutes(hoursAndMinutes: String) =
-        hoursAndMinutes.trim()
-            .split(*"+- :/.h".toCharArray())
-            .filter { it.isNotBlank() } // remove any excess blank spaces that might have been in here
 
     private suspend fun searchRegistration(regAndTypeString: String): Aircraft {
         val adc = aircraftRepository.getAircraftDataCache()

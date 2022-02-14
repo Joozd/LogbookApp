@@ -44,6 +44,8 @@ data class AugmentedCrew(val size: Int = 2,
         return value
     }
 
+    fun isAugmented() = size > 2
+
     /**
      * Returns a [AugmentedCrew] object with [size] set to [crewSize]
      */

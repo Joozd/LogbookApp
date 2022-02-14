@@ -33,10 +33,11 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogTimesInOutBinding
 import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.showAsActiveIf
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.TimePickerEvents
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.dialogs.TimePickerViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
-import nl.joozd.logbookapp.ui.utils.toast
+import nl.joozd.logbookapp.ui.utils.setDualInstructorField
+import nl.joozd.logbookapp.ui.utils.setPicPicusField
 
 open class TimePicker: JoozdlogFragment() {
     private val viewModel: TimePickerViewModel by viewModels()
@@ -45,152 +46,138 @@ open class TimePicker: JoozdlogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogTimesInOutBinding.bind(inflater.inflate(R.layout.dialog_times_in_out, container, false)).apply{
-
-            /***************************************************************************************
-             * onFocusChangedListeners for EditTexts
-             ***************************************************************************************/
-
-            ttofText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus) {
-                    viewModel.setTotalTimeOfFlight(ttofText.text.toString())
-                }
-            }
-
-            nightTimeText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus) {
-                    viewModel.setNightTime(nightTimeText.text.toString())
-                }
-            }
-
-            ifrTimeText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus) {
-                    viewModel.setIfrTime(ifrTimeText.text.toString())
-                }
-            }
-
-            /***************************************************************************************
-             * onClicks for toggles
-             ***************************************************************************************/
-
-            augmentedTextView.setOnClickListener {
-                supportFragmentManager.commit {
-                    add(R.id.mainActivityLayout, AugmentedCrewDialog())
-                    addToBackStack(null)
-                }
-            }
-
-            picTextView.setOnClickListener {
-                viewModel.togglePic()
-            }
-
-            coPilotTextView.setOnClickListener {
-                viewModel.toggleCopilot()
-            }
-
-            instructorTextView.setOnClickListener {
-                viewModel.toggleDualInstructor()
-            }
-
-
-            /**
-             * Hide softKeyboard on pressing Enter
-             */
-            ifrTimeText.setOnEditorActionListener { v, actionId, _ ->
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    val imm: InputMethodManager =
-                        v.ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(v.windowToken, 0)
-                    v.clearFocus()
-                }
-                true
-            }
-
-
-            /**
-             * If cancelled or clicked outside dialog, undo changes and close Fragment
-             */
-            timePickerDialogBackground.setOnClickListener {
-                closeFragment()
-            }
-
-            /**
-             * No need to save anything as viewModel is updated realtime
-             */
-            saveTimeDialog.setOnClickListener {
-                closeFragment()
-            }
-
-            //empty onClickListener to block clicks on lower layers
-            headerLayout.setOnClickListener { }
-            bodyLayout.setOnClickListener { }
-
-
-            /**
-             * observers:
-             */
-
-            viewModel.feedbackEvent.observe(viewLifecycleOwner) {
-                when (it.getEvent()) {
-                    TimePickerEvents.NOT_IMPLEMENTED -> context?.toast("Not implemented")
-                    TimePickerEvents.TOTAL_TIME_GREATER_THAN_DURATION -> context?.toast(R.string.total_time_too_large)
-                    TimePickerEvents.INVALID_TOTAL_TIME -> context?.toast(R.string.invalid_total_time)
-                    //TODO handle other events
-                }
-            }
-
-            viewModel.totalTime.observe(viewLifecycleOwner) { ttofText.setText(it) }
-
-            viewModel.ifrTime.observe(viewLifecycleOwner) { ifrTimeText.setText(it) }
-
-            viewModel.nightTime.observe(viewLifecycleOwner) { nightTimeText.setText(it) }
-
-            /*
-            viewModel.isAugmentedCrew.observe(viewLifecycleOwner) {
-                augmentedTextView.showAsActiveIf(it)
-            }
-
-             */
-
-            viewModel.isPic.observe(viewLifecycleOwner) {
-                picTextView.showAsActiveIf(it)
-            }
-
-            viewModel.picPicusText.observe(viewLifecycleOwner){
-                picTextView.text = it
-            }
-
-
-            viewModel.coPilot.observe(viewLifecycleOwner) {
-                coPilotTextView.showAsActiveIf(it)
-            }
-
-            viewModel.dualInstructorActive.observe(viewLifecycleOwner) {
-                instructorTextView.showAsActiveIf(it)
-            }
-
-            viewModel.dualInstructorText.observe(viewLifecycleOwner){
-                instructorTextView.text = it
-            }
+            launchFlowCollectors()
+            setOnClickListeners()
+            setOnFocusChangedListeners()
+            hideKeyboardWhenPressingEnterInLastField()
+            catchStrayClicks()
         }.root
 
-    /*
-    private val paddedMinutes = IntArray(60) { it }.map { v -> v.toString().padStart(2, '0') }.toTypedArray()
-    private val paddedHours = IntArray(24) { it }.map { v -> v.toString().padStart(2, '0') }.toTypedArray()
-
-    private fun NumberPicker.setSpinnervaluesForMinutes() {
-        minValue = 0
-        maxValue = 59
-        displayedValues = paddedMinutes
+    private fun DialogTimesInOutBinding.launchFlowCollectors(){
+        collectTotalTimeFlowToTotalTimeView()
+        collectNightTimeFlowToNightTimeView()
+        collectIfrTimeFlowToIfrTimeView()
+        collectAugmentedCrewFlowToToggle()
+        collectPicPicusFlowToToggle()
+        collectCopilotFlowToToggle()
+        collectDualInstructorFlowToToggle()
     }
 
-    private fun NumberPicker.setSpinnervaluesForHours() {
-        minValue = 0
-        maxValue = 23
-        displayedValues = paddedHours
+    private fun DialogTimesInOutBinding.collectTotalTimeFlowToTotalTimeView() {
+        viewModel.totalTimeFlow().launchCollectWhileLifecycleStateStarted {
+            totalTimeOfFlightTextview.setText(it.minutesToHoursAndMinutesString())
+        }
     }
-    */
+    private fun DialogTimesInOutBinding.collectNightTimeFlowToNightTimeView() {
+        viewModel.nightTimeFlow().launchCollectWhileLifecycleStateStarted {
+            nightTimeTextview.setText(it.minutesToHoursAndMinutesString())
+        }
+    }
+    private fun DialogTimesInOutBinding.collectIfrTimeFlowToIfrTimeView() {
+        viewModel.ifrTimeFlow().launchCollectWhileLifecycleStateStarted {
+            ifrTimeTextview.setText(it.minutesToHoursAndMinutesString())
+        }
+    }
 
-    companion object {
+    private fun DialogTimesInOutBinding.collectAugmentedCrewFlowToToggle(){
+        viewModel.augmentedCrewFlow().launchCollectWhileLifecycleStateStarted{
+            augmentedTextView.showAsActiveIf(it.isAugmented())
+        }
+    }
 
+    private fun DialogTimesInOutBinding.collectPicPicusFlowToToggle(){
+        viewModel.picPicusFlow().launchCollectWhileLifecycleStateStarted{
+            timesDialogPicPicusTextview.setPicPicusField(it)
+        }
+    }
+
+    private fun DialogTimesInOutBinding.collectCopilotFlowToToggle(){
+        viewModel.copilotFlow().launchCollectWhileLifecycleStateStarted{
+            coPilotTextView.showAsActiveIf(it)
+        }
+    }
+
+    private fun DialogTimesInOutBinding.collectDualInstructorFlowToToggle(){
+        viewModel.dualInstructorFlow().launchCollectWhileLifecycleStateStarted{
+            timesDialogDualInstructorTextview.setDualInstructorField(it)
+        }
+    }
+
+    private fun DialogTimesInOutBinding.setOnClickListeners(){
+        augmentedTextView.setOnClickListener {
+            supportFragmentManager.commit {
+                add(R.id.mainActivityLayout, AugmentedCrewDialog())
+                addToBackStack(null)
+            }
+        }
+
+        timesDialogPicPicusTextview.setOnClickListener {
+            viewModel.togglePicusPicNone()
+        }
+
+        coPilotTextView.setOnClickListener {
+            viewModel.toggleCopilot()
+        }
+
+        timesDialogDualInstructorTextview.setOnClickListener {
+            viewModel.toggleDualInstructorNone()
+        }
+
+        timesDialogSaveTextview.setOnClickListener {
+            closeFragment()
+        }
+
+        timesDialogCancelTextview.setOnClickListener {
+            viewModel.undo()
+            closeFragment()
+        }
+    }
+
+    private fun DialogTimesInOutBinding.setOnFocusChangedListeners(){
+        settTotalTimeOfFLightTextViewOnFocusChangedListener()
+        setNightTimeTextViewOnFocusChangedListener()
+        setIfrTimeTextViewOnFocusChangedListener()
+    }
+
+    private fun DialogTimesInOutBinding.setIfrTimeTextViewOnFocusChangedListener() {
+        ifrTimeTextview.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+            ifrTimeTextview.hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
+                viewModel.setIfrTime(text?.toString())
+            }
+        }
+    }
+
+    private fun DialogTimesInOutBinding.setNightTimeTextViewOnFocusChangedListener() {
+        nightTimeTextview.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+            nightTimeTextview.hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
+                viewModel.setNightTime(text?.toString())
+            }
+        }
+    }
+
+    private fun DialogTimesInOutBinding.settTotalTimeOfFLightTextViewOnFocusChangedListener() {
+        totalTimeOfFlightTextview.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+            totalTimeOfFlightTextview.hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus) {
+                viewModel.setTotalTimeOfFlight(text?.toString())
+            }
+        }
+    }
+
+    private fun DialogTimesInOutBinding.hideKeyboardWhenPressingEnterInLastField() {
+        ifrTimeTextview.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val imm: InputMethodManager =
+                    v.ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(v.windowToken, 0)
+                v.clearFocus()
+            }
+            true
+        }
+    }
+
+    private fun DialogTimesInOutBinding.catchStrayClicks(){
+        timePickerDialogBackground.setOnClickListener {
+            //do nothing
+        }
     }
 }

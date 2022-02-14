@@ -144,9 +144,17 @@ interface FlightEditor {
     var nightTime: Int
 
     /**
-     * Corrected Total Time time for this flight
+     * get: Actual total time for this flight (either correctedTotalTime or calculated total time).
+     * set: correctedTotalTime. Setting this to anything other than 0 disables autoFill.
+     * Corrected Total Time time for this flight.
      */
     var totalFlightTime: Int
+
+    /**
+     * Corrected Total Time time for this flight, 0 if not used.
+     * Setting this to anything other than 0 disables autoFill.
+     */
+    var correctedTotalTime: Int
 
     /**
      * isPIC toggle for this flight
@@ -157,6 +165,12 @@ interface FlightEditor {
      * isPICUS toggle for this flight
      */
     var isPICUS: Boolean
+
+    /**
+     * isCopilot for this flight. Will disable autoFill when set.
+     * Normally autofill takes care of this.
+     */
+    var isCoPilot: Boolean
 
     /**
      * isPF toggle for this flight

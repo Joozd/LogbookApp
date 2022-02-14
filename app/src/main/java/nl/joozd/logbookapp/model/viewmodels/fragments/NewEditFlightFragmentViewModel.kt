@@ -81,7 +81,6 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
         it.isPIC -> PicPicusFlag.PIC
         it.isPICUS -> PicPicusFlag.PICUS
         else -> PicPicusFlag.NONE
-
     }    }
     fun isPfFlow() = flightFlow.map { it.isPF }
 

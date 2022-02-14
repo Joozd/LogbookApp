@@ -38,7 +38,6 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.LayoutEditFlightFragmentBinding
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.enumclasses.DualInstructorFlag
-import nl.joozd.logbookapp.model.enumclasses.PicPicusFlag
 import nl.joozd.logbookapp.ui.utils.toast
 
 import nl.joozd.logbookapp.model.viewmodels.fragments.NewEditFlightFragmentViewModel
@@ -48,6 +47,8 @@ import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.setDualInstructorField
+import nl.joozd.logbookapp.ui.utils.setPicPicusField
 
 class EditFlightFragment: JoozdlogFragment() {
     private val viewModel: NewEditFlightFragmentViewModel by viewModels()
@@ -693,27 +694,6 @@ class EditFlightFragment: JoozdlogFragment() {
         flightBox.setOnClickListener { }
     }
 
-    private fun TextView.setDualInstructorField(flag: DualInstructorFlag) {
-        showAsActiveIf(flag != DualInstructorFlag.NONE)
-        text = getDualInstructorStringForFlag(flag)
-    }
-
-    private fun getDualInstructorStringForFlag(flag: DualInstructorFlag?) = when (flag) {
-        DualInstructorFlag.DUAL -> getString(R.string.dualString)
-        DualInstructorFlag.INSTRUCTOR -> getString(R.string.instructorString)
-        else -> getString(R.string.dualInstructorString)
-    }
-
-    private fun TextView.setPicPicusField(flag: PicPicusFlag){
-        showAsActiveIf(flag != PicPicusFlag.NONE)
-        text = getPicPicusStringForFlag(flag)
-    }
-
-    private fun getPicPicusStringForFlag(flag: PicPicusFlag) = when(flag){
-        PicPicusFlag.PICUS -> getString(R.string.picus)
-        else -> getString(R.string.pic)
-    }
-
     private fun getAirportIdent(airport: Airport) =
         if (Preferences.useIataAirports && airport.iata_code.isNotBlank()) airport.iata_code
         else airport.ident
@@ -729,21 +709,6 @@ class EditFlightFragment: JoozdlogFragment() {
             drawable,
             null
         )
-    }
-
-    // When an editText gains focus, save its contents in here.
-    // When it loses focus and no new text is entered, replace it with this.
-    private var textToBeReplacedWhenNoDataEntered: Editable? = null
-    private inline fun EditText.hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus: Boolean, action: EditText.() -> Unit) {
-        val t: String? = text?.toString()
-        if (!hasFocus) {
-            if (t.isNullOrBlank()) textToBeReplacedWhenNoDataEntered?.let { text = it }
-            else action()
-        }
-        else{
-            textToBeReplacedWhenNoDataEntered = text
-            setText("")
-        }
     }
 }
 

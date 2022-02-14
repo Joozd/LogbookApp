@@ -23,7 +23,9 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
+import android.text.Editable
 import android.view.View
+import android.widget.EditText
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -104,6 +106,21 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 collect(collector)
             }
+        }
+    }
+
+    // When an editText gains focus, save its contents in here.
+    // When it loses focus and no new text is entered, replace it with this.
+    protected var textToBeReplacedWhenNoDataEntered: Editable? = null
+    protected inline fun EditText.hideTextOnFocusAndIfNothingEnteredReplaceElseDo(hasFocus: Boolean, action: EditText.() -> Unit) {
+        val t: String? = text?.toString()
+        if (!hasFocus) {
+            if (t.isNullOrBlank()) textToBeReplacedWhenNoDataEntered?.let { text = it }
+            else action()
+        }
+        else{
+            textToBeReplacedWhenNoDataEntered = text
+            setText("")
         }
     }
 

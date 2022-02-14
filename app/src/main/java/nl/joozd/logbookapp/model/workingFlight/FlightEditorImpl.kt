@@ -144,8 +144,22 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
     override var totalFlightTime: Int
         get() = flight.calculateTotalTime()
         set(correctedTotalTime) {
-            flight = flight.copy (correctedTotalTime = correctedTotalTime, autoFill = false).autoValues()
+            flight = flightWithNewCorrectedTotalTimeAndAutofillDisabledIfNotZero(correctedTotalTime).autoValues()
         }
+
+    //This will always give correctedTotalTime, useful for undo functions
+    override var correctedTotalTime: Int
+        get() = flight.correctedTotalTime
+        set(correctedTotalTime) {
+            flight = flightWithNewCorrectedTotalTimeAndAutofillDisabledIfNotZero(correctedTotalTime).autoValues()
+        }
+
+    private fun flightWithNewCorrectedTotalTimeAndAutofillDisabledIfNotZero(correctedTotalTime: Int) =
+        flight.copy(
+            correctedTotalTime = correctedTotalTime,
+            autoFill = autoFill && correctedTotalTime == 0
+        )
+
 
     override var augmentedCrew: Int                    // parse this in ViewModel
         get() = flight.augmentedCrew
@@ -192,6 +206,13 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
         get() = flight.isPICUS
         set(isPICUS) {
             flight = flight.copy (isPICUS = isPICUS).autoValues()
+        }
+
+    //Normally autoValues takes care of this, so overriding this disables autovalues.
+    override var isCoPilot: Boolean
+        get() = flight.isCoPilot
+        set(isCoPilot){
+            flight = flight.copy(isCoPilot = isCoPilot, autoFill = false)
         }
 
     override var isPF: Boolean

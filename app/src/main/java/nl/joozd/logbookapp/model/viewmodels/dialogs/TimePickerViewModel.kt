@@ -19,145 +19,85 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
-import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.TimePickerEvents
-import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
+import kotlinx.coroutines.flow.map
+import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
+import nl.joozd.logbookapp.model.enumclasses.DualInstructorFlag
+import nl.joozd.logbookapp.model.enumclasses.PicPicusFlag
+import nl.joozd.logbookapp.model.helpers.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
-import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 
 /**
  * Does not support changing orig or dest during this dialog open
  */
 class TimePickerViewModel: JoozdlogDialogViewModel() {
-    private val tempLivedataBoolean = MutableLiveData(false)
-    private val tempLivedataString = MutableLiveData("REMOVE THIS")
-    private val tempLiveDataInt = MutableLiveData(Int.MIN_VALUE)
+    private val undoCorrectedTotalTime = flightEditor.correctedTotalTime
+    private val undoNightTime = flightEditor.nightTime
+    private val undoIfrTime = flightEditor.ifrTime
+    private val undoAugmentedCrew = flightEditor.augmentedCrew
+    private val undoAutoFill = flightEditor.autoFill
 
-    /**
-     * Livedata objects:
-     */
-    val isAugmentedCrew // LiveData<Boolean>
-        get() = false // WIP
+    private val f get() = flightEditor.flightFlow
 
-    private val _isPicOrPicus = tempLivedataBoolean
-    val isPic: LiveData<Boolean> get() = _isPicOrPicus
+    fun totalTimeFlow() = f.map { it.calculateTotalTime() } // this shows calculated time even when correctedTotalTime is zero.
+    fun nightTimeFlow() = f.map { it.nightTime }
+    fun ifrTimeFlow() = f.map { it.ifrTime }
+    fun augmentedCrewFlow() = f.map { AugmentedCrew.of(it.augmentedCrew) }
+    fun picPicusFlow() = f.map { when {
+        it.isPIC -> PicPicusFlag.PIC
+        it.isPICUS -> PicPicusFlag.PICUS
+        else -> PicPicusFlag.NONE
+    }    }
+    fun copilotFlow() = f.map { it.isCoPilot }
+    fun dualInstructorFlow() = f.map { when {
+        it.isDual -> DualInstructorFlag.DUAL
+        it.isInstructor -> DualInstructorFlag.INSTRUCTOR
+        else -> DualInstructorFlag.NONE
+    }   }
 
-    private val _picPicusText = tempLivedataString
-    val picPicusText: LiveData<String> get() = _picPicusText
+    fun undo(){
+        flightEditor.apply {
 
-    val coPilot
-        get() = tempLivedataBoolean
+            // set to avoid unnecessary autoValues calculations
+            // It is reset to undoAutoFill at the end which will do all the autoValues if needed.
+            autoFill = false
 
-    val totalTime = tempLiveDataInt
-
-    val ifrTime = tempLiveDataInt
-
-    val nightTime = tempLiveDataInt
-
-    private val _dualInstructorText = tempLivedataString
-    val dualInstructorText: LiveData<String> get() = _dualInstructorText
-
-    private val _dualInstructorActive = tempLivedataBoolean
-    val dualInstructorActive: LiveData<Boolean> get() = _dualInstructorActive
-
-    fun setIfrTime(enteredTime: String) {
-        TODO("WIP")
-    }
-
-    fun setNightTime(enteredTime: String) {
-        TODO("WIP")
-    }
-
-    /**
-     * set correctedTotalTime
-     * if autoValues is true: workingFlight will Set IFR and Night as same ratio
-     * set autoValues to false of not 0
-     */
-    fun setTotalTimeOfFlight(enteredTime: String) {
-        TODO("WIP")
-    }
-
-    /**
-     * Toggle PICUS -> PIC -> NONE -> PICUS -> etc
-     */
-    fun togglePic() {
-        TODO("WIP")
-    }
-
-    /*
-     when {
-
-        workingFlight.isPIC -> {
-            workingFlight.isPIC = false
-            workingFlight.isPICUS = false
-        }
-        workingFlight.isPICUS -> {
-            workingFlight.isPIC = true
-            workingFlight.isPICUS = false
-        }
-        else -> {
-            workingFlight.isPICUS = true
-            workingFlight.isPIC = false
+            correctedTotalTime = undoCorrectedTotalTime
+            nightTime = undoNightTime
+            ifrTime = undoIfrTime
+            augmentedCrew = undoAugmentedCrew
+            autoFill = undoAutoFill
         }
     }
 
-     */
+    fun setIfrTime(enteredTime: String?) {
+        enteredTime?.hoursAndMinutesStringToInt()?.let{
+            flightEditor.ifrTime = it.maxedAtTotalTime()
+        }
+    }
 
+    fun setNightTime(enteredTime: String?) {
+        enteredTime?.hoursAndMinutesStringToInt()?.let{
+            flightEditor.nightTime = it.maxedAtTotalTime()
+        }
+    }
 
+    fun setTotalTimeOfFlight(enteredTime: String?) {
+        enteredTime?.hoursAndMinutesStringToInt()?.let{
+            flightEditor.totalFlightTime = it
+        }
+    }
 
-    /**
-     * Toggle isCopilot
-     * If Aircraft or isPic is changed, this will automatically be set again
-     */
+    fun togglePicusPicNone(){
+        flightEditor.togglePicusPicNeither()
+    }
+
     fun toggleCopilot() {
-        TODO("WIP")
+        flightEditor.isCoPilot = !flightEditor.isCoPilot
     }
 
-    /**
-     * Toggle isDual - instructor - none
-     */
-    fun toggleDualInstructor() {
-        TODO("WIP")
-    }
-    /*= when{
-        workingFlight.isDual -> {
-            workingFlight.isInstructor = true
-            workingFlight.isDual = false
-        }
-        workingFlight.isInstructor -> {
-            workingFlight.isInstructor = false
-            workingFlight.isDual = false
-        }
-        else  -> {
-            workingFlight.isInstructor = false
-            workingFlight.isDual = true
-        }
+    fun toggleDualInstructorNone() {
+        flightEditor.toggleDualInstructorNeither()
     }
 
-     */
-
-    /**
-     * Gets the correct string for when flight is marked as PIC, PICUS or neither
-     */
-    private fun getPicPicusString(): String = getString(
-        if(flightEditor.isPICUS) R.string.picus else R.string.pic
-        ) ?: "ERROR: NO CONTEXT"
-
-    /**
-     * Gets the correct string for when flight is marked as dual, instructor or neither
-     */
-    private fun getDualInstructorString(): String = getString(when{
-        flightEditor.isDual -> R.string.dualString
-        flightEditor.isInstructor -> R.string.instructorString
-        else -> R.string.dualInstructorString
-    }) ?: "ERROR: NO CONTEXT"
-
-    /**
-     * Undo all changes made in this dialog
-     */
+    private fun Int.maxedAtTotalTime() = maxOf(this, flightEditor.totalFlightTime)
 }

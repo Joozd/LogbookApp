@@ -22,7 +22,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/DialogBackground"
-    android:id="@+id/timePickerDialogBackground"
+    android:id="@+id/time_picker_dialog_background"
     tools:theme="@style/AppTheme">
 
     <ScrollView
@@ -77,11 +77,11 @@
                     app:layout_constraintTop_toTopOf="parent">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/ttofText"
+                        android:id="@+id/total_time_of_flight_textview"
                         style="@style/EditFlightEditText"
                         android:hint="@string/totalTime"
                         android:inputType="time"
-                        android:nextFocusForward="@id/nightTimeText"
+                        android:nextFocusForward="@id/night_time_textview"
                         android:selectAllOnFocus="true" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -95,11 +95,11 @@
                     app:layout_constraintTop_toTopOf="@+id/ttofTextInputLayout">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/nightTimeText"
+                        android:id="@+id/night_time_textview"
                         style="@style/EditFlightEditText"
                         android:hint="@string/nightTime"
                         android:inputType="time"
-                        android:nextFocusForward="@id/ifrTimeText"
+                        android:nextFocusForward="@id/ifr_time_textview"
                         android:selectAllOnFocus="true" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -112,7 +112,7 @@
                     app:layout_constraintTop_toTopOf="@+id/ttofTextInputLayout">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/ifrTimeText"
+                        android:id="@+id/ifr_time_textview"
                         style="@style/EditFlightEditText"
                         android:hint="@string/ifrTime"
                         android:inputType="time"
@@ -126,13 +126,13 @@
                     style="@style/SelectorStyleInactive"
                     android:layout_marginTop="16dp"
                     android:text="@string/augmented"
-                    app:layout_constraintEnd_toStartOf="@+id/picTextView"
+                    app:layout_constraintEnd_toStartOf="@+id/times_dialog_pic_picus_textview"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/ttofTextInputLayout" />
 
                 <TextView
-                    android:id="@+id/picTextView"
+                    android:id="@+id/times_dialog_pic_picus_textview"
                     style="@style/SelectorStyleInactive"
                     android:text="@string/pic"
                     app:layout_constraintEnd_toStartOf="@+id/coPilotTextView"
@@ -143,33 +143,38 @@
                     android:id="@+id/coPilotTextView"
                     style="@style/SelectorStyleInactive"
                     android:text="@string/copilot"
-                    app:layout_constraintEnd_toStartOf="@+id/instructorTextView"
-                    app:layout_constraintStart_toEndOf="@+id/picTextView"
+                    app:layout_constraintEnd_toStartOf="@+id/times_dialog_dual_instructor_textview"
+                    app:layout_constraintStart_toEndOf="@+id/times_dialog_pic_picus_textview"
                     app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
 
 
                 <TextView
-                    android:id="@+id/instructorTextView"
+                    android:id="@+id/times_dialog_dual_instructor_textview"
                     style="@style/SelectorStyleInactive"
-                    android:text="@string/instructorString"
+                    android:text="@string/dualInstructorString"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/coPilotTextView"
                     app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
 
                 <TextView
-                    android:id="@+id/saveTimeDialog"
-                    android:layout_width="100dp"
-                    android:layout_height="30dp"
+                    android:id="@+id/times_dialog_save_textview"
+                    style="@style/DialogButtonText"
                     android:layout_marginTop="24dp"
                     android:layout_marginEnd="24dp"
-                    android:gravity="center"
                     android:text="@android:string/ok"
-                    android:textAllCaps="true"
-                    android:textColor="?attr/colorAccent"
-                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/instructorTextView" />
+                    app:layout_constraintTop_toBottomOf="@+id/times_dialog_dual_instructor_textview" />
+
+                <TextView
+                    android:id="@+id/times_dialog_cancel_textview"
+                    style="@style/DialogButtonText"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginEnd="24dp"
+                    android:text="@android:string/cancel"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/times_dialog_dual_instructor_textview" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 

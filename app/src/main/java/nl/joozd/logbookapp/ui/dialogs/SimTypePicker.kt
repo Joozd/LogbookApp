@@ -40,7 +40,6 @@ class SimTypePicker: JoozdlogFragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogPickSimTypeBinding.bind(inflater.inflate(R.layout.dialog_pick_sim_type, container, false)).apply{
             val typesPickerAdapter = AircraftPickerAdapter {
-                Log.d(this::class.simpleName, "clicked on $it")
                 viewModel.selectAircraftType(it)
             }.also {
                 typesPickerRecyclerView.layoutManager = LinearLayoutManager(context)

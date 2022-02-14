@@ -28,7 +28,6 @@ import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.extensions.removeTrailingDigits
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.enumclasses.DualInstructorFlag
@@ -89,12 +88,12 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
 
     fun sortedRegistrationsFlow() =
-        combine(aircraftRepository.aircraftMapFlow(), flightRepository.getAllFlightsFlow()) {
+        combine(aircraftRepository.aircraftMapFlow(), flightRepository.allFlightsFlow()) {
                 regMap, allFlights ->
             makeSortedRegistrationsList(allFlights, regMap)
         }
 
-    fun namesFlow() = flightRepository.getAllFlightsFlow().map{
+    fun namesFlow() = flightRepository.allFlightsFlow().map{
         it.makeNamesList()
     }
 

@@ -69,12 +69,12 @@ interface AircraftRepository {
     /**
      * Get an aircraft from its registration
      */
-    suspend fun getAircraftFromRegistration(registration: String): Aircraft?
+    //suspend fun getAircraftFromRegistration(registration: String): Aircraft?
 
     /**
      * Save and aircraft to DB
      */
-    suspend fun saveAircraft(aircraft: Aircraft)
+    //suspend fun saveAircraft(aircraft: Aircraft)
 
     companion object{
         val instance: AircraftRepository by lazy {

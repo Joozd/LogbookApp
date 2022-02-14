@@ -102,8 +102,8 @@ class FlightRepositoryWithUndoImpl(mockDataBase: JoozdlogDatabase?
     override suspend fun getFlightsByID(ids: Collection<Int>): List<Flight> =
         repositoryWithDirectAccess.getFlightsByID(ids)
 
-    override fun getAllFlightsFlow(): Flow<List<Flight>> =
-        repositoryWithDirectAccess.getAllFlightsFlow()
+    override fun allFlightsFlow(): Flow<List<Flight>> =
+        repositoryWithDirectAccess.allFlightsFlow()
 
     override suspend fun getAllFlights(): List<Flight> =
         repositoryWithDirectAccess.getAllFlights()

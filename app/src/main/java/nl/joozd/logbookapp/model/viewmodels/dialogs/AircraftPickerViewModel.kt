@@ -23,13 +23,14 @@ import androidx.lifecycle.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.extensions.inIgnoreCase
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
-import nl.joozd.logbookapp.model.workingFlight.FlightEditor
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.util.*
 
 
@@ -38,51 +39,40 @@ import java.util.*
  */
 class AircraftPickerViewModel: JoozdlogDialogViewModel(){
     private val aircraftRepository = AircraftRepository.instance
-    private val _typesSearchStringFlow = MutableStateFlow("")
+    private val _query = MutableStateFlow("")
+    private var query: String by CastFlowToMutableFlowShortcut(_query)
 
-    private val aircraftTypesFlow: Flow<List<AircraftType>> =
-        println("AAAAA").let{
-        combine(aircraftRepository.aircraftTypesFlow(), _typesSearchStringFlow) { types, query ->
-            types.filter { type -> query inIgnoreCase type.name }
-        }
+    private val selectedType get() = flightEditor.aircraft.type
+
+    fun aircraftTypesFlow(): Flow<List<Pair<AircraftType, Boolean>>> =
+        combine(aircraftRepository.aircraftTypesFlow(), _query) { types, query ->
+            types.filter { type -> query inIgnoreCase type.name || query inIgnoreCase type.shortName }
+                .map { it to (it == selectedType) }
     }
 
-    // Active aircraft in [workingFligght] or a placeholder [Aircraft] while workingFlight is loading data
-    val selectedAircraft = MutableLiveData(Aircraft("...")) // flightEditor.aircraftFlow.asLiveData().map { it ?: Aircraft("...")}
-
-    //TODO make this be collected as flow instead of as liveData
-    val aircraftTypes: LiveData<List<AircraftType>>
-        get() = aircraftTypesFlow.asLiveData()
-
     val knownRegistrationsLiveData =
-        aircraftRepository.aircraftMapFlow().asLiveData()
-        .map{ it.map { entry -> entry.value.registration} }
-
-    private var mAircraft: Aircraft
-        get() = selectedAircraft.value!!
-        set(newAircraft){
-            flightEditor.aircraft = newAircraft
+        aircraftRepository.aircraftMapFlow().map{
+            it.keys.toList()
         }
-
 
     /**
      * Update selected aircaft's registration, type or source
      */
     private fun updatedSelectedAircraft(registration: String? = null, type: AircraftType? = null, source: Int? = null) {
-        mAircraft = mAircraft.copy(
-                registration = registration ?: mAircraft.registration,
-                type = type ?: mAircraft.type,
-                source = source ?: mAircraft.source)
+        flightEditor.aircraft = Aircraft(
+            registration = registration ?:flightEditor.aircraft.registration,
+            type = type,
+            source = Aircraft.KNOWN
+        )
     }
-
-    val selectedAircraftType: LiveData<AircraftType?> = Transformations.map(selectedAircraft) { it.type }
 
     fun selectAircraftType(type: AircraftType){
         viewModelScope.launch {
             updatedSelectedAircraft(type = type)
         }
 
-        //TODO set AircraftRegistrationWithTypeData
+        //TODO save AircraftRegistrationWithTypeData? Or will we just grab this from flights?
+        //Why do I even have that ARWT database?
     }
 
     /**
@@ -100,7 +90,7 @@ class AircraftPickerViewModel: JoozdlogDialogViewModel(){
         TODO("Not implemented")
     }
 
-    fun updateSearchString(query: String) {
-        _typesSearchStringFlow.value = query.uppercase(Locale.ROOT)
+    fun updateSearchString(searchString: String) {
+        query = searchString.uppercase(Locale.ROOT)
     }
 }

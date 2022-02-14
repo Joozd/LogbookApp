@@ -40,7 +40,7 @@ interface FlightRepository {
     /**
      * Get a Flow of all valid (DELETEFLAG = false) Flights
      */
-    fun getAllFlightsFlow(): Flow<List<Flight>>
+    fun allFlightsFlow(): Flow<List<Flight>>
 
     /**
      * Get all valid (DELETEFLAG = false) Flights

@@ -28,7 +28,6 @@ import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.repository.helpers.revert
@@ -122,7 +121,7 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
     }
 
     private fun makeFlightsFlowCombiner() = combine(
-        flightRepository.getAllFlightsFlow(),
+        flightRepository.allFlightsFlow(),
         aircraftRepository.aircraftDataCacheFlow(),
         airportRepository.airportDataCacheFlow(),
 

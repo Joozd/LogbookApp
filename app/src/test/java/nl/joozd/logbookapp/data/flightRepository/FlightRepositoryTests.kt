@@ -69,7 +69,7 @@ class FlightRepositoryTests {
             repo.delete(repo.getAllFlights())
 
             //test getAllFlightsFlow
-            repo.getAllFlightsFlow().test {
+            repo.allFlightsFlow().test {
                 assertEquals(expectedSize, expectMostRecentItem().size)
 
 

@@ -25,10 +25,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.model.*
+import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
@@ -37,20 +38,24 @@ import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
  * This takes care of storing/retrieving data from local DBs
  * Singleton instead of object so we can inject a mock database
  */
+// TODO finish getting aircraft from flights
 class AircraftRepositoryImpl(
     dataBase: JoozdlogDatabase
 ): AircraftRepository, CoroutineScope by dispatchersProviderMainScope() {
     private val aircraftTypeDao = dataBase.aircraftTypeDao()
-    private val registrationDao = dataBase.registrationDao()
+    //private val registrationDao = dataBase.registrationDao()
     private val preloadedRegistrationsDao = dataBase.preloadedRegistrationsDao()
+    private val flightRepository = FlightRepository.instance
 
     override fun aircraftTypesFlow() = aircraftTypeDao.aircraftTypesFlow().map {
         it.toAircraftTypes()
     }
 
+    /*
     private fun aircraftRegistrationsFlow() = registrationDao.allRegistrationsFlow().map {
         it.toAircraftRegistrationWithTypes()
     }
+    */
 
     private  fun preloadedRegistrationsFlow() = preloadedRegistrationsDao.registrationsFlow()
 
@@ -70,11 +75,8 @@ class AircraftRepositoryImpl(
         makeAircraftMap(
             getAircraftTypes(),
             getPreloadedRegistrations(),
-            getRegistrationWithTypes()
+            //getRegistrationWithTypes()
         )
-
-
-
 
     suspend fun getAircraftTypes() =
         aircraftTypeDao.requestAllAircraftTypes().map { it.toAircraftType() }
@@ -82,12 +84,15 @@ class AircraftRepositoryImpl(
     suspend fun getPreloadedRegistrations() =
         preloadedRegistrationsDao.requestAllRegistrations()
 
+    /*
     suspend fun getRegistrationWithTypes() =
         registrationDao.requestAllRegistrations().map { it.toAircraftRegistrationWithType() }
+     */
 
     override suspend fun getAircraftTypeByShortName(typeShortName: String): AircraftType? =
         aircraftTypeDao.getAircraftTypeFromShortName(typeShortName)?.toAircraftType()
 
+    /*
     override suspend fun getAircraftFromRegistration(registration: String): Aircraft? =
         registrationDao.getAircraftFromRegistration(registration)
                 ?.toAircraftRegistrationWithType()
@@ -98,12 +103,16 @@ class AircraftRepositoryImpl(
                     Aircraft(it.registration, type, Aircraft.PRELOADED)
                 }
 
+     */
+
+    /*
     override suspend fun saveAircraft(aircraft: Aircraft) = withContext(DispatcherProvider.io()) {
         if (aircraft.type?.name == null) return@withContext // Don't save aircraft without type.
         val newAcrwt = AircraftRegistrationWithType(aircraft.registration, aircraft.type)
         println("NEWAIRCRAFT: $newAcrwt")
         saveAircraftRegistrationWithType(newAcrwt)
     }
+    */
 
     override suspend fun replaceAllTypesWith(newTypes: List<AircraftType>) =
         withContext(DispatcherProvider.io()+ NonCancellable){
@@ -124,9 +133,11 @@ class AircraftRepositoryImpl(
         aircraftTypeDao.save(*typeData.toTypedArray())
     }
 
+    /*
     private suspend fun saveAircraftRegistrationWithType(arwt: AircraftRegistrationWithType) {
         registrationDao.save(arwt.toData())
     }
+    */
 
     private suspend fun savePreloadedRegs(preloaded: List<PreloadedRegistration>) {
         preloadedRegistrationsDao.save(preloaded)
@@ -135,29 +146,58 @@ class AircraftRepositoryImpl(
     private fun makeAircraftMapFlow(): Flow<Map<String, Aircraft>> =
         combine(
             aircraftTypesFlow(),
-            aircraftRegistrationsFlow(),
-            preloadedRegistrationsFlow()
-        ) { aircraftTypes, registrationsWithTypes, preloaded ->
-            makeAircraftMap(aircraftTypes, preloaded, registrationsWithTypes)
+            //aircraftRegistrationsFlow(),
+            preloadedRegistrationsFlow(),
+            flightRepository.allFlightsFlow()
+        ) { aircraftTypes /*, registrationsWithTypes */, preloaded, allFlights ->
+            makeAircraftMap(aircraftTypes,
+                preloaded,
+                allFlights
+                //registrationsWithTypes
+            )
         }
 
 
     /*
      * First load Preloaded, then regWithTypes. This way, regWithTypes overrules preloaded.
      */
-    private fun makeAircraftMap(
+    private suspend fun makeAircraftMap(
         aircraftTypes: List<AircraftType>,
         preloaded: List<PreloadedRegistration>,
-        registrationsWithTypes: List<AircraftRegistrationWithType>
+        allFlights: List<Flight>
+        //registrationsWithTypes: List<AircraftRegistrationWithType>
     ): HashMap<String, Aircraft> {
         val map = HashMap<String, Aircraft>()
+        val aircraftFromFlightsMap = buildAircraftMapFromFlights(allFlights)
         preloaded.forEach {
             map[formatRegistration(it.registration)] = it.toAircraft(aircraftTypes)
         }
+        aircraftFromFlightsMap.forEach{
+            if (it.value.type != null || map[it.key] == null)
+                map[it.key] = it.value
+        }
+
+        /*
         registrationsWithTypes.forEach {
             map[formatRegistration(it.registration)] = it.toAircraft()
         }
+        */
         return map
     }
+
+    // This is a rather large operation so it is given to DispatcherProvider.default()
+    private suspend fun buildAircraftMapFromFlights(flights: List<Flight>, aircraftTypes: List<AircraftType>): Map<String, Aircraft> =
+        withContext(DispatcherProvider.default()){
+            val typesMap = aircraftTypes.map{ it.shortName.uppercase() to it }.toMap()
+            val registrations = flights.map { it.registration }.toSet()
+            val map = LinkedHashMap<String, Aircraft>(registrations.size)
+            registrations.forEach {  reg ->
+                val ff = flights.filter {it.registration == reg }
+                val counts = ff.groupingBy { it.aircraftType }.eachCount().toList()
+                val consensus = counts.maxByOrNull { it.second }?.first?.uppercase()
+                map[reg] = Aircraft(registration = reg, type = typesMap[consensus]?: consensus?.let { AircraftType(shortName = it) })
+            }
+            return@withContext map
+        }
 }
 

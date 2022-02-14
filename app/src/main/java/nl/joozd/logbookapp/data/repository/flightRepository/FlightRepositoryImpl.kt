@@ -54,7 +54,7 @@ class FlightRepositoryImpl(
     override suspend fun getAllFlightsInDB(): List<Flight> =
         flightDao.getAllFlights().map { it.toFlight() }
 
-    override fun getAllFlightsFlow(): Flow<List<Flight>> =
+    override fun allFlightsFlow(): Flow<List<Flight>> =
         flightDao.validFlightsFlow().map { it.toFlights() }
 
     override suspend fun getAllFlights(): List<Flight> =

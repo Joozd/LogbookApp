@@ -373,10 +373,15 @@ class EditFlightFragment: JoozdlogFragment() {
 
     //This one either sends entered data to viewModel when focus lost,
     //or removes trailing digits when focus gained.
+    private var previousEntry = ""
     private fun EditText.handleFlightNumberFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setFlightNumber(text?.toString())
-        else {
+        if (!hasFocus) {
+            val t = text?.toString()
+            setText(previousEntry)// reset previous entry; any text changes must come from viewModel.
+            if (t != previousEntry.removeTrailingDigits())
+                viewModel.setFlightNumber(t)
+        } else {
+            previousEntry = text.toString()
             removeTrailingDigits()
         }
     }

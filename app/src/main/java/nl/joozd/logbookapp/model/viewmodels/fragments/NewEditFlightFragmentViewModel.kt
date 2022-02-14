@@ -136,9 +136,9 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     }
 
     fun setFlightNumber(flightNumber: String?){
+        println("setFlightNumber Received $flightNumber")
         flightNumber?.let{
-            if (it != flightEditor.flightNumber.removeTrailingDigits())
-                flightEditor.flightNumber = it
+            flightEditor.flightNumber = it
         }
     }
 

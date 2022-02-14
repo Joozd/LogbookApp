@@ -241,7 +241,7 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
         val becomesPICUS = isPICUS == isPIC
         val becomesPIC = isPICUS && !isPIC
         // if it was !isPICUS && isPIC, both will be false
-        flight = flight.copy(isPICUS = becomesPICUS, isPIC = becomesPIC)
+        flight = flight.copy(isPICUS = becomesPICUS, isPIC = becomesPIC).autoValues()
     }
 
     override suspend fun save() {

@@ -171,9 +171,13 @@ data class ModelFlight(
     private fun TakeoffLandings.noTakeoffNoLanding() =
         takeOffs == 0 && landings == 0
 
-    private fun calculateNightTime(): Int =
-        if(!orig.checkIfValidCoordinates() || !dest.checkIfValidCoordinates()) 0
-        else TwilightCalculator(timeOut).minutesOfNight(orig, dest, timeOut, timeIn)
+    private fun calculateNightTime(): Int {
+        if (!orig.checkIfValidCoordinates() || !dest.checkIfValidCoordinates()) return 0
+        val totalNightMinutes =
+            TwilightCalculator(timeOut).minutesOfNight(orig, dest, timeOut, timeIn)
+        //correct for multicrew
+        return totalNightMinutes * calculateTotalTime() / getDurationOfFlight().toMinutes().toInt()
+    }
 
     private fun calculateIfrTime() =
         if (ifrTime != Flight.FLIGHT_IS_VFR)  calculateTotalTime()

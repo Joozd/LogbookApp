@@ -24,7 +24,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogAugmentedCrewBinding
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString

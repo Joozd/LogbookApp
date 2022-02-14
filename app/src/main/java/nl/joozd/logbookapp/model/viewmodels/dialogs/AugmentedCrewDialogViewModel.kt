@@ -29,38 +29,40 @@ import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.extensions.toInt
+import nl.joozd.logbookapp.model.helpers.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 
 class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
+    private val undoCrew = flightEditor.augmentedCrew
+
+    private var crew = AugmentedCrew.of(flightEditor.augmentedCrew)
+
+    val crewFlow = flightEditor.flightFlow.map { AugmentedCrew.of(it.augmentedCrew) }
+
+    fun crewSizeFlow() = crewFlow.map { it.size }
+    fun didTakeoffFlow() = crewFlow.map { it.takeoff }
+    fun didLandingFlow() = crewFlow.map { it.landing }
+    fun takeoffLandingTimeFlow() = crewFlow.map { it.times }
+
     fun crewDown() {
-      TODO("WIP")
+        crew--
+        updateCrewInFlightEditor()
     }
 
     fun crewUp() {
-        TODO("WIP")
-    }
-    /**
-     * Set whether pilot did takeoff in seat or not
-     */
-    fun setTakeoff(didTakeoff: Boolean) {
-        TODO("WIP")
+        crew++
+        updateCrewInFlightEditor()
     }
 
-    /**
-     * Set whether pilot did landing in seat or not
-     */
-    fun setLanding(didLanding: Boolean) {
-        TODO("WIP")
+    fun toggleTakeoff() {
+        crew = crew.withTakeoff(!crew.takeoff)
+        updateCrewInFlightEditor()
     }
 
-    /**
-     * Set time for takeoff and landing.
-     * Will also save that amount of time to [Preferences.standardTakeoffLandingTimes]
-     * @return [time]
-     */
-    fun setTakeoffLandingTime(time: Int) {
-        TODO("WIP")
+    fun toggleLanding() {
+        crew = crew.withLanding(!crew.landing)
+        updateCrewInFlightEditor()
     }
 
     /**
@@ -68,32 +70,26 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
      * Else, will set it to whatever is entered.
      * Needs to be able to do Editable.toInt() or will throw exception.
      */
-    fun setTakeoffLandingTime(time: Editable?) {
+    fun setTakeoffLandingTime(time: String?) {
         if (time == null){
-            Log.w("setTakeOffLanding()", "called with null reference for time, ignoring.")
             return
         }
-        if (!time.isDigitsOnly()){
-            Log.w("setTakeOffLanding()", "called with bad time: $time, must be digits only, ignoring.")
-            return
+        time.hoursAndMinutesStringToInt()?.let { t ->
+            setTakeoffLandingTime(t)
         }
-        setTakeoffLandingTime(if (time.isBlank()) 0 else time.toInt())
     }
 
-    /**
-     * Observables:
-     */
-    private val tempCrewLiveData = flightEditor.flightFlow.map { AugmentedCrew.of(it.augmentedCrew)}.asLiveData()
+    fun undo(){
+        flightEditor.augmentedCrew = undoCrew
+    }
 
-    val crewSizeLiveData
-        get() = tempCrewLiveData.map { it.size }
+    private fun setTakeoffLandingTime(time: Int) {
+        crew = crew.withTimes(time)
+        updateCrewInFlightEditor()
+    }
 
-    val didTakeoffLiveData
-        get() = tempCrewLiveData.map {it.takeoff}
-
-    val didLandingLiveData
-        get() = tempCrewLiveData.map {it.landing}
-
-    val takeoffLandingTimesLiveData
-        get() = tempCrewLiveData.map {(it.times.nullIfZero() ?: Preferences.standardTakeoffLandingTimes).toString()}
+    private fun updateCrewInFlightEditor() {
+        flightEditor.augmentedCrew = crew.toInt()
+    }
 }
+

@@ -24,8 +24,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogAugmentedCrewBinding
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AugmentedCrewDialogViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
@@ -33,60 +35,80 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 class AugmentedCrewDialog: JoozdlogFragment(){
     private val viewModel: AugmentedCrewDialogViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        with(DialogAugmentedCrewBinding.bind(inflater.inflate(R.layout.dialog_augmented_crew, container, false))){
-            crewDownButton.setOnClickListener {
-                viewModel.crewDown()
-            }
-            crewUpButton.setOnClickListener {
-                viewModel.crewUp()
-            }
-            didTakeoffCheckbox.setOnCheckedChangeListener { _, b ->
-                viewModel.setTakeoff(b)
-            }
-            didLandingCheckbox.setOnCheckedChangeListener { _, b ->
-                viewModel.setLanding(b)
-            }
-
-            timeForTakeoffLandingEditText.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus){
-                    println("FOCUS CHANGED for takeoffLandingTimes")
-                    viewModel.setTakeoffLandingTime(timeForTakeoffLandingEditText.text)
-                }
-            }
-
-            /**
-             * observers:
-             */
-            viewModel.crewSizeLiveData.observe(viewLifecycleOwner) {
-                crewSizeEditText.setText(it.toString())
-            }
-
-            viewModel.didTakeoffLiveData.observe(viewLifecycleOwner) {
-                didTakeoffCheckbox.isChecked = it
-            }
-
-            viewModel.didLandingLiveData.observe(viewLifecycleOwner) {
-                didLandingCheckbox.isChecked = it
-            }
-
-            viewModel.takeoffLandingTimesLiveData.observe(viewLifecycleOwner) { t ->
-                timeForTakeoffLandingEditText.setText(t)
-            }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        DialogAugmentedCrewBinding.bind(inflater.inflate(R.layout.dialog_augmented_crew, container, false)).apply {
+            launchFlowCollectors()
+            setOnClickListeners()
+            setOnFocusChangedListeners()
+        }.root
 
 
-            /**
-             * Buttons
-             */
+    private fun DialogAugmentedCrewBinding.launchFlowCollectors(){
+        collectCrewSizeFlow()
+        collectDidTakeoffFlow()
+        collectDidLandingFlow()
+        collectTakeoffLandingTimeFlow()
+    }
 
-            augmentedCrewDialogBackground.setOnClickListener {
-                closeFragment()
+    private fun DialogAugmentedCrewBinding.setOnClickListeners(){
+        crewDownButton                  .setOnClickListener { viewModel.crewDown() }
+        crewUpButton                    .setOnClickListener { viewModel.crewUp() }
+        didTakeoffCheckbox              .setOnClickListener { viewModel.toggleTakeoff() }
+        didLandingCheckbox              .setOnClickListener { viewModel.toggleLanding() }
+        augmentedCrewDialogBackground   .setOnClickListener { /*do nothing*/ }
+        setCancelButtonOnclickListener()
+        setSaveButtonOnClickListener()
+    }
+
+    private fun DialogAugmentedCrewBinding.setOnFocusChangedListeners(){
+        setTimeForTakeoffLandingOnFocusChangedListener()
+    }
+
+    private fun DialogAugmentedCrewBinding.setSaveButtonOnClickListener() {
+        saveCrewDialogButon.setOnClickListener {
+            it.requestFocus()
+            closeFragment()
+        }
+    }
+
+    private fun DialogAugmentedCrewBinding.setCancelButtonOnclickListener() {
+        cancelCrewDialogButon.setOnClickListener {
+            viewModel.undo()
+            closeFragment()
+        }
+    }
+
+
+
+    private fun DialogAugmentedCrewBinding.setTimeForTakeoffLandingOnFocusChangedListener() {
+        timeForTakeoffLandingEditText.setOnFocusChangeListener { _, hasFocus ->
+            timeForTakeoffLandingEditText.separateDataDisplayAndEntry(hasFocus) {
+                viewModel.setTakeoffLandingTime(it?.toString())
             }
-            saveCrewDialogButon.setOnClickListener {
-                it.requestFocus()
-                closeFragment()
-            }
-            return root
+        }
+    }
+
+    private fun DialogAugmentedCrewBinding.collectCrewSizeFlow() {
+        viewModel.crewSizeFlow().launchCollectWhileLifecycleStateStarted {
+            crewSizeEditText.setText(it.toString())
+        }
+    }
+
+    private fun DialogAugmentedCrewBinding.collectDidLandingFlow() {
+        viewModel.didLandingFlow().launchCollectWhileLifecycleStateStarted {
+            didLandingCheckbox.isChecked = it
+        }
+    }
+
+    private fun DialogAugmentedCrewBinding.collectDidTakeoffFlow() {
+        viewModel.didTakeoffFlow().launchCollectWhileLifecycleStateStarted {
+            didTakeoffCheckbox.isChecked = it
+        }
+    }
+
+    private fun DialogAugmentedCrewBinding.collectTakeoffLandingTimeFlow() {
+        viewModel.takeoffLandingTimeFlow().launchCollectWhileLifecycleStateStarted {
+            timeForTakeoffLandingEditText.setText(it.minutesToHoursAndMinutesString())
         }
     }
 }

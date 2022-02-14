@@ -81,7 +81,8 @@
                     android:layout_marginEnd="8dp"
                     app:layout_constraintBottom_toBottomOf="@+id/crewUpButton"
                     app:layout_constraintEnd_toStartOf="@+id/crewSizeEditText"
-                    app:srcCompat="@drawable/minus_button" />
+                    app:srcCompat="@drawable/minus_button"
+                    android:contentDescription="@string/reduce_crew" />
 
                 <EditText
                     android:id="@+id/crewSizeEditText"
@@ -89,14 +90,17 @@
                     android:layout_marginEnd="8dp"
                     app:layout_constraintBottom_toBottomOf="@+id/crewUpButton"
                     app:layout_constraintEnd_toStartOf="@+id/crewUpButton"
-                    app:layout_constraintTop_toTopOf="@+id/crewUpButton" />
+                    app:layout_constraintTop_toTopOf="@+id/crewUpButton"
+                    android:importantForAutofill="no"
+                    tools:ignore="LabelFor" />
 
                 <ImageButton
                     android:id="@+id/crewUpButton"
                     style="@style/PlusMinusButton"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/plus_button" />
+                    app:srcCompat="@drawable/plus_button"
+                    android:contentDescription="@string/reduce_crew" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/checkboxesLayout"
@@ -169,6 +173,14 @@
                     android:text="@android:string/ok"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/timeForTakeoffLandingEditTextLayout" />
+                <TextView
+                    android:id="@+id/cancelCrewDialogButon"
+                    style="@style/DialogButtonText"
+                    android:layout_marginTop="24dp"
+                    android:text="@android:string/cancel"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/timeForTakeoffLandingEditTextLayout" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

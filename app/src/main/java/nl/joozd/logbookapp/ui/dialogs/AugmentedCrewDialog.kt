@@ -30,7 +30,6 @@ import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AugmentedCrewDialogViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
-//TODO doesn't work yet, just skeleton
 class AugmentedCrewDialog: JoozdlogFragment(){
     private val viewModel: AugmentedCrewDialogViewModel by viewModels()
 

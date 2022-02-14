@@ -163,7 +163,7 @@
                         style="@style/EditFlightEditText"
                         android:hint="@string/multipilotTime"
                         android:inputType="time"
-                        android:nextFocusForward="@id/nightTimeText"
+                        android:nextFocusForward="@id/night_time_textview"
                         android:selectAllOnFocus="true"
                         tools:text="0:00" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -177,11 +177,11 @@
                     app:layout_constraintTop_toTopOf="@+id/multiPilotLayout">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/nightTimeText"
+                        android:id="@+id/night_time_textview"
                         style="@style/EditFlightEditText"
                         android:hint="@string/nightTime"
                         android:inputType="time"
-                        android:nextFocusForward="@id/ifrTimeText"
+                        android:nextFocusForward="@id/ifr_time_textview"
                         android:selectAllOnFocus="true"
                         tools:text="0:00" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -196,7 +196,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/multiPilotLayout">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/ifrTimeText"
+                        android:id="@+id/ifr_time_textview"
                         style="@style/EditFlightEditText"
                         android:hint="@string/ifrTime"
                         android:inputType="time"

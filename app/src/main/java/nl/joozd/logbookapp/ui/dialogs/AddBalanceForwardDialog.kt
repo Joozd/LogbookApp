@@ -68,13 +68,13 @@ class AddBalanceForwardDialog: JoozdlogFragment() {
                 if (!hasFocus)
                     viewModel.setLandingsNight(landingNightText.text)
             }
-            nightTimeText.setOnFocusChangeListener { _, hasFocus ->
+            nightTimeTextview.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
-                    viewModel.setNightTime(nightTimeText.text)
+                    viewModel.setNightTime(nightTimeTextview.text)
             }
-            ifrTimeText.setOnFocusChangeListener { _, hasFocus ->
+            ifrTimeTextview.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
-                    viewModel.setIfrTime(ifrTimeText.text)
+                    viewModel.setIfrTime(ifrTimeTextview.text)
             }
             picText.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus)
@@ -154,11 +154,11 @@ class AddBalanceForwardDialog: JoozdlogFragment() {
             }
 
             viewModel.nightTime.observe(viewLifecycleOwner) {
-                nightTimeText.setText(it)
+                nightTimeTextview.setText(it)
             }
 
             viewModel.ifrTime.observe(viewLifecycleOwner) {
-                ifrTimeText.setText(it)
+                ifrTimeTextview.setText(it)
             }
 
             viewModel.picTime.observe(viewLifecycleOwner) {
@@ -198,8 +198,8 @@ class AddBalanceForwardDialog: JoozdlogFragment() {
         totalTimeOfFlightEditText.setText(bf.aircraftTime.minutesToHoursAndMinutesString())
         landingDayText.setText(bf.landingDay.toString())
         landingNightText.setText(bf.landingNight.toString())
-        nightTimeText.setText(bf.nightTime.minutesToHoursAndMinutesString())
-        ifrTimeText.setText(bf.ifrTime.minutesToHoursAndMinutesString())
+        nightTimeTextview.setText(bf.nightTime.minutesToHoursAndMinutesString())
+        ifrTimeTextview.setText(bf.ifrTime.minutesToHoursAndMinutesString())
         picText.setText(bf.picTime.minutesToHoursAndMinutesString())
         copilotText.setText(bf.copilotTime.minutesToHoursAndMinutesString())
         dualText.setText(bf.dualTime.minutesToHoursAndMinutesString())

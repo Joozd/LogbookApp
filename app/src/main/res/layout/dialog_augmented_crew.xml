@@ -157,7 +157,7 @@
                         android:id="@+id/timeForTakeoffLandingEditText"
                         style="@style/EditFlightEditText"
                         android:inputType="time"
-                        android:nextFocusForward="@id/nightTimeText"
+                        android:nextFocusForward="@id/night_time_textview"
                         android:selectAllOnFocus="true"
                         tools:text="0:30" />
                 </com.google.android.material.textfield.TextInputLayout>

@@ -126,9 +126,10 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
         action: (Editable?) -> Unit
     ) {
         if (!hasFocus) {
-            if (!text.isNullOrBlank())
-                action(text)
+            val newText = text
             textToBeReplacedWhenNoDataEntered?.let { text = it }
+            if (!newText.isNullOrBlank())
+                action(newText)
         }
         else{
             textToBeReplacedWhenNoDataEntered = text

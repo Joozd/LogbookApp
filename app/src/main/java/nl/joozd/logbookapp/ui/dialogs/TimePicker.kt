@@ -28,6 +28,8 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 
 import nl.joozd.logbookapp.databinding.DialogTimesInOutBinding
@@ -62,6 +64,12 @@ open class TimePicker: JoozdlogFragment() {
         collectPicPicusFlowToToggle()
         collectCopilotFlowToToggle()
         collectDualInstructorFlowToToggle()
+        launch {
+            viewModel.debugF.collect {
+                println("collected $it")
+            }
+        }
+
     }
 
     private fun DialogTimesInOutBinding.collectTotalTimeFlowToTotalTimeView() {
@@ -76,6 +84,7 @@ open class TimePicker: JoozdlogFragment() {
     }
     private fun DialogTimesInOutBinding.collectIfrTimeFlowToIfrTimeView() {
         viewModel.ifrTimeFlow().launchCollectWhileLifecycleStateStarted {
+            println("collected $it for IFR Time")
             ifrTimeTextview.setText(it.minutesToHoursAndMinutesString())
         }
     }

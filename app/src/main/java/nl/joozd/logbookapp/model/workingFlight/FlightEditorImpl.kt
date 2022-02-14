@@ -126,9 +126,12 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
     override var ifrTime: Int
         get() = flight.ifrTime
         set(ifrTime){
+            println("FlightEditor setting IFR time to $ifrTime (it was ${flight.ifrTime})")
             //if IFR time changed to anything other than totalFlightTime or FLIGHT_IS_VFR, this disables autoFill.
-            if (ifrTime != totalFlightTime)
-            flight = flight.copy(ifrTime = ifrTime, autoFill = (ifrTime != Flight.FLIGHT_IS_VFR)).autoValues()
+            val af = ifrTime == totalFlightTime || ifrTime == Flight.FLIGHT_IS_VFR
+            println("af = $af")
+            flight = flight.copy(ifrTime = ifrTime, autoFill = af && autoFill).autoValues()
+            println("Done, flight IFR time is now ${flight.ifrTime}.")
         }
 
     override var nightTime: Int

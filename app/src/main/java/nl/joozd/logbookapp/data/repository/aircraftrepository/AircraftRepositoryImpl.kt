@@ -75,6 +75,7 @@ class AircraftRepositoryImpl(
         makeAircraftMap(
             getAircraftTypes(),
             getPreloadedRegistrations(),
+            flightRepository.getAllFlights()
             //getRegistrationWithTypes()
         )
 
@@ -168,11 +169,11 @@ class AircraftRepositoryImpl(
         //registrationsWithTypes: List<AircraftRegistrationWithType>
     ): HashMap<String, Aircraft> {
         val map = HashMap<String, Aircraft>()
-        val aircraftFromFlightsMap = buildAircraftMapFromFlights(allFlights)
+        val aircraftFromFlightsMapAsync = buildAircraftMapFromFlightsAsync(allFlights, aircraftTypes)
         preloaded.forEach {
             map[formatRegistration(it.registration)] = it.toAircraft(aircraftTypes)
         }
-        aircraftFromFlightsMap.forEach{
+        aircraftFromFlightsMapAsync.await().forEach{
             if (it.value.type != null || map[it.key] == null)
                 map[it.key] = it.value
         }
@@ -185,19 +186,32 @@ class AircraftRepositoryImpl(
         return map
     }
 
-    // This is a rather large operation so it is given to DispatcherProvider.default()
-    private suspend fun buildAircraftMapFromFlights(flights: List<Flight>, aircraftTypes: List<AircraftType>): Map<String, Aircraft> =
-        withContext(DispatcherProvider.default()){
-            val typesMap = aircraftTypes.map{ it.shortName.uppercase() to it }.toMap()
+
+    private fun buildAircraftMapFromFlightsAsync(flights: List<Flight>, aircraftTypes: List<AircraftType>): Deferred<Map<String, Aircraft>> =
+        async(DispatcherProvider.default()){
+            val sortedFlights = flights.sortedByDescending { it.timeOut }
+            val typesMap = aircraftTypes.associateBy { it.shortName.uppercase() }
             val registrations = flights.map { it.registration }.toSet()
             val map = LinkedHashMap<String, Aircraft>(registrations.size)
             registrations.forEach {  reg ->
-                val ff = flights.filter {it.registration == reg }
-                val counts = ff.groupingBy { it.aircraftType }.eachCount().toList()
-                val consensus = counts.maxByOrNull { it.second }?.first?.uppercase()
-                map[reg] = Aircraft(registration = reg, type = typesMap[consensus]?: consensus?.let { AircraftType(shortName = it) })
+                val f = sortedFlights.first { it.registration == reg }
+                map[reg] = Aircraft(registration = reg, type = getAircraftTypeFromMapAndFlight(typesMap, f))
             }
-            return@withContext map
+            return@async map // explicit return only for readability
         }
+
+    private fun getAircraftTypeFromMapAndFlight(
+        map: Map<String, AircraftType>,
+        flight: Flight
+    ): AircraftType? = with(flight) {
+        if (aircraftType.isBlank()) null
+        else map[aircraftType] ?: makeAircraftTypeFromFlight()
+    }
+
+    private fun Flight.makeAircraftTypeFromFlight() =
+        AircraftType(
+            shortName = aircraftType,
+            multiPilot = multiPilotTime > 0
+        )
 }
 

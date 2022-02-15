@@ -262,7 +262,8 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
 
     // A flight is planned when it is edited to start in the future (or less than 5 minutes before now)
     private fun ModelFlight.isPlanned(): Boolean =
-        (timeOut > Instant.now().plusMinutes(-5))
+        if (isSim) date() > LocalDate.now()
+        else (timeOut > Instant.now().plusMinutes(-5))
 }
 
 

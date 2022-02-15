@@ -278,11 +278,9 @@ class EditFlightFragment: JoozdlogFragment() {
 
     private fun launchSimOrAircraftPicker() {
         clearFocus()
+        val picker: BaseAircraftPicker = if (viewModel.isSim) SimTypePicker() else AircraftPicker()
         supportFragmentManager.commit {
-            add(
-                R.id.mainActivityLayout,
-                if (viewModel.isSim) SimTypePicker() else AircraftPicker()
-            )
+            add(R.id.mainActivityLayout, picker)
             addToBackStack(null)
         }
     }

@@ -24,6 +24,7 @@ import android.graphics.Color.TRANSPARENT
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -38,7 +39,8 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
  * Will highlight AircraftTypes that are marked with "true"
  */
 class AircraftPickerAdapter(
-    private val itemClick: AircraftPickerOnCLickListener
+    private val onListChangedListener: ListChangedListener = ListChangedListener{ },
+    private val itemClick: OnCLickListener
 ): ListAdapter<Pair<AircraftType, Boolean>, AircraftPickerAdapter.ViewHolder>( DIFF_CALLBACK ) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(inflateAircraftTypePickerItem(parent), itemClick)
@@ -47,10 +49,17 @@ class AircraftPickerAdapter(
         holder.bindItem(getItem(position))
     }
 
+    override fun onCurrentListChanged(
+        previousList: MutableList<Pair<AircraftType, Boolean>>,
+        currentList: MutableList<Pair<AircraftType, Boolean>>
+    ) {
+        onListChangedListener(currentList)
+    }
+
     private fun inflateAircraftTypePickerItem(parent: ViewGroup) =
         LayoutInflater.from(parent.ctx).inflate(R.layout.item_picker_aircraft_type, parent, false)
 
-    class ViewHolder(containerView: View, private val itemClick: AircraftPickerOnCLickListener) :
+    class ViewHolder(containerView: View, private val itemClick: OnCLickListener) :
         RecyclerView.ViewHolder(containerView) {
         val binding = ItemPickerAircraftTypeBinding.bind(containerView)
 
@@ -72,8 +81,12 @@ class AircraftPickerAdapter(
         }
     }
 
-    fun interface AircraftPickerOnCLickListener {
+    fun interface OnCLickListener {
         operator fun invoke(aircraftType: AircraftType)
+    }
+
+    fun interface ListChangedListener {
+        operator fun invoke(newList: List<Pair<AircraftType, Boolean>>)
     }
 
     companion object{

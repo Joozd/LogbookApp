@@ -23,7 +23,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/DialogBackground"
     android:id="@+id/landingsDialogBackground"
-    tools:theme="@style/AppTheme">
+    tools:theme="@style/AppTheme"
+    tools:ignore="ContentDescription, LabelFor" >
 
     <ScrollView
         android:layout_width="match_parent"
@@ -104,7 +105,8 @@
                         android:layout_marginEnd="8dp"
                         app:layout_constraintBottom_toBottomOf="@+id/toDayUpButton"
                         app:layout_constraintEnd_toStartOf="@+id/toDayUpButton"
-                        app:layout_constraintTop_toTopOf="@+id/toDayUpButton" />
+                        app:layout_constraintTop_toTopOf="@+id/toDayUpButton"
+                        android:importantForAutofill="no" />
 
                     <ImageButton
                         android:id="@+id/toDayUpButton"
@@ -136,7 +138,8 @@
                         android:layout_marginEnd="8dp"
                         app:layout_constraintBottom_toBottomOf="@+id/toNightUpButton"
                         app:layout_constraintEnd_toStartOf="@+id/toNightUpButton"
-                        app:layout_constraintTop_toTopOf="@+id/toNightUpButton" />
+                        app:layout_constraintTop_toTopOf="@+id/toNightUpButton"
+                        android:importantForAutofill="no" />
 
                     <ImageButton
                         android:id="@+id/toNightUpButton"
@@ -189,7 +192,8 @@
                         android:layout_marginEnd="8dp"
                         app:layout_constraintBottom_toBottomOf="@+id/ldgDayUpButton"
                         app:layout_constraintEnd_toStartOf="@+id/ldgDayUpButton"
-                        app:layout_constraintTop_toTopOf="@+id/ldgDayUpButton" />
+                        app:layout_constraintTop_toTopOf="@+id/ldgDayUpButton"
+                        android:importantForAutofill="no"/>
 
                     <ImageButton
                         android:id="@+id/ldgDayUpButton"
@@ -212,7 +216,8 @@
                         android:layout_marginEnd="8dp"
                         app:layout_constraintBottom_toBottomOf="@+id/ldgNightUpButton"
                         app:layout_constraintEnd_toStartOf="@+id/ldgNightUpButton"
-                        app:layout_constraintTop_toTopOf="@+id/ldgNightUpButton" />
+                        app:layout_constraintTop_toTopOf="@+id/ldgNightUpButton"
+                        android:importantForAutofill="no"/>
 
                     <ImageButton
                         android:id="@+id/ldgNightUpButton"
@@ -260,7 +265,8 @@
 
                         app:layout_constraintBottom_toBottomOf="@+id/autolandUpButton"
                         app:layout_constraintEnd_toStartOf="@+id/autolandUpButton"
-                        app:layout_constraintTop_toTopOf="@+id/autolandUpButton" />
+                        app:layout_constraintTop_toTopOf="@+id/autolandUpButton"
+                        android:importantForAutofill="no" />
 
                     <TextView
                         android:id="@+id/textView22"
@@ -281,12 +287,21 @@
 
 
                 <TextView
-                    android:id="@+id/saveTextButon"
+                    android:id="@+id/save_landings_dialog_textview"
                     style="@style/DialogButtonText"
                     android:layout_marginTop="24dp"
                     android:text="@android:string/ok"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/autolandCard" />
+
+                <TextView
+                    android:id="@+id/cancel_landings_dialog_textview"
+                    style="@style/DialogButtonText"
+                    android:layout_marginTop="24dp"
+                    android:text="@android:string/cancel"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/autolandCard" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

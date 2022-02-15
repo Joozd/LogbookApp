@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.NonNull
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogLandingsBinding
@@ -30,52 +31,54 @@ import nl.joozd.logbookapp.model.viewmodels.dialogs.LandingsDialogViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 class LandingsDialog: JoozdlogFragment() {
-    private val landingsDialogViewModel: LandingsDialogViewModel by viewModels()
+    private val viewModel: LandingsDialogViewModel by viewModels()
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogLandingsBinding.bind(inflater.inflate(R.layout.dialog_landings, container, false)).apply{
-
-            toDayUpButton.setOnClickListener { landingsDialogViewModel.toDayUpButtonClick() }
-            toNightUpButton.setOnClickListener { landingsDialogViewModel.toNightUpButtonClick() }
-            ldgDayUpButton.setOnClickListener { landingsDialogViewModel.ldgDayUpButtonClick() }
-            ldgNightUpButton.setOnClickListener { landingsDialogViewModel.ldgNightUpButtonClick() }
-            autolandUpButton.setOnClickListener { landingsDialogViewModel.autolandUpButtonClick() }
-
-            toDayDownButton.setOnClickListener { landingsDialogViewModel.toDayDownButtonClick() }
-            toNightDownButton.setOnClickListener { landingsDialogViewModel.toNightDownButtonClick() }
-            ldgDayDownButton.setOnClickListener { landingsDialogViewModel.ldgDayDownButtonClick() }
-            ldgNightDownButton.setOnClickListener { landingsDialogViewModel.ldgNightDownButtonClick() }
-            autolandDownButton.setOnClickListener { landingsDialogViewModel.autolandDownButtonClick() }
-
-
-            /**
-             * observers
-             */
-            landingsDialogViewModel.toDay.observe(viewLifecycleOwner) {
-                toDayField.setText(it.toString())
-            }
-            landingsDialogViewModel.toNight.observe(viewLifecycleOwner) {
-                toNightField.setText(it.toString())
-            }
-            landingsDialogViewModel.ldgDay.observe(viewLifecycleOwner ){
-                ldgDayField.setText(it.toString())
-            }
-            landingsDialogViewModel.ldgNight.observe(viewLifecycleOwner) {
-                ldgNightField.setText(it.toString())
-            }
-            landingsDialogViewModel.autoland.observe(viewLifecycleOwner){
-                autolandField.setText(it.toString())
-            }
-
-            //catch clicks on empty parts of dialog
-            headerLayout.setOnClickListener {  }
-            bodyLayout.setOnClickListener {  }
-
-            landingsDialogBackground.setOnClickListener {
-                closeFragment()
-            }
-
-            saveTextButon.setOnClickListener {
-                closeFragment()
-            }
+            setOnClickListeners()
+            launchFlowCollectors()
         }.root
+
+    private fun DialogLandingsBinding.setOnClickListeners() {
+        setUpDownButtonOnClickListeners()
+        setInterfaceOnClickListeners()
+    }
+
+    private fun DialogLandingsBinding.launchFlowCollectors() {
+        viewModel.takeoffLandingsFlow.launchCollectWhileLifecycleStateStarted { t ->
+            toDayField.setText(t.takeoffDay.toString())
+            toNightField.setText(t.takeoffNight.toString())
+            ldgDayField.setText(t.landingDay.toString())
+            ldgNightField.setText(t.landingNight.toString())
+            autolandField.setText(t.autoLand.toString())
+        }
+    }
+
+    private fun DialogLandingsBinding.setInterfaceOnClickListeners() {
+        landingsDialogBackground.setOnClickListener {
+            //do nothing
+        }
+
+        saveLandingsDialogTextview.setOnClickListener {
+            closeFragment()
+        }
+
+        cancelLandingsDialogTextview.setOnClickListener {
+            viewModel.undo()
+            closeFragment()
+        }
+    }
+
+    private fun DialogLandingsBinding.setUpDownButtonOnClickListeners() {
+        toDayUpButton.setOnClickListener { viewModel.toDayUpButtonClick() }
+        toNightUpButton.setOnClickListener { viewModel.toNightUpButtonClick() }
+        ldgDayUpButton.setOnClickListener { viewModel.ldgDayUpButtonClick() }
+        ldgNightUpButton.setOnClickListener { viewModel.ldgNightUpButtonClick() }
+        autolandUpButton.setOnClickListener { viewModel.autolandUpButtonClick() }
+
+        toDayDownButton.setOnClickListener { viewModel.toDayDownButtonClick() }
+        toNightDownButton.setOnClickListener { viewModel.toNightDownButtonClick() }
+        ldgDayDownButton.setOnClickListener { viewModel.ldgDayDownButtonClick() }
+        ldgNightDownButton.setOnClickListener { viewModel.ldgNightDownButtonClick() }
+        autolandDownButton.setOnClickListener { viewModel.autolandDownButtonClick() }
+    }
 }

@@ -34,7 +34,11 @@ object FlightsTestData {
     val plannedFlight = mostRecentTimestampFlight.copy(flightID = 8, timeOut = now + 10000, timeIn = now + 12000, unknownToServer = true, isPlanned = true, timeStamp = 10000)
     val flightWithoutID = prototypeFlight.copy(flightID = Flight.FLIGHT_ID_NOT_INITIALIZED, orig = "EHAM", dest = "EBBR", timeStamp = 1000, unknownToServer = false)
 
+    val flightWithAircraft = mostRecentCompletedFlight.copy(registration = "PH-ABC", aircraftType = "A332")
+    val flightWithUnknownAircraft = mostRecentTimestampFlight.copy(registration = "PH-CDE", aircraftType = "UNKNOWN_AIRCRAFT")
+
     val flights = listOf(mostRecentCompletedFlight, mostRecentTimestampFlight, deletedFlight, unknownToServerFlight, plannedFlight, flightWithoutID)
+    val flightsWithAircraft = listOf(flightWithAircraft, flightWithUnknownAircraft)
 
     val injectableFlights = listOf(mostRecentCompletedFlight, mostRecentTimestampFlight, deletedFlight, unknownToServerFlight, plannedFlight)
 

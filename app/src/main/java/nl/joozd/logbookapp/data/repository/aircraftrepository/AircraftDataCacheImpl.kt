@@ -27,8 +27,8 @@ import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
  * Use this for read-only scenarios, or update manually after writing to aircraft DB
  */
 class AircraftDataCacheImpl(
-    private var types: List<AircraftType>,
-    private var registrationToAircraftMap: Map<String, Aircraft>
+    private val types: List<AircraftType>,
+    private val registrationToAircraftMap: Map<String, Aircraft>
     ) : AircraftDataCache {
     override fun getRegistrationToAircraftMap(): Map<String, Aircraft> = registrationToAircraftMap
 

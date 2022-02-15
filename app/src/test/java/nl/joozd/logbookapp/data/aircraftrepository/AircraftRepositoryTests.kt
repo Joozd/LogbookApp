@@ -26,7 +26,10 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.joozd.logbookapp.data.AircraftTestData
+import nl.joozd.logbookapp.data.FlightsTestData
+import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.room.MockDatabase
 import nl.joozd.logbookapp.data.room.model.toAircraft
 import nl.joozd.logbookapp.utils.DispatcherProvider
@@ -43,9 +46,15 @@ import org.junit.Test
  */
 @ExperimentalCoroutinesApi
 class AircraftRepositoryTests {
+    private val mockDB = MockDatabase()
+    private val mockFlightRepo = FlightRepository.mock(mockDB)
     @Before
     fun setUp(){
         DispatcherProvider.switchToTestDispatchers(UnconfinedTestDispatcher(TestCoroutineScheduler()))
+        runBlocking{
+            mockFlightRepo.save(FlightsTestData.flightWithAircraft)
+            mockFlightRepo.save(FlightsTestData.flightWithUnknownAircraft)
+        }
     }
 
     @After
@@ -55,7 +64,7 @@ class AircraftRepositoryTests {
 
     @Test
     fun testAircraftRepositoryFunctions() {
-        val repo = AircraftRepository.mock(MockDatabase())
+        val repo = AircraftRepository.mock(mockDB, mockFlightRepo)
         var expectedSize = 0
 
         runTest {
@@ -82,12 +91,6 @@ class AircraftRepositoryTests {
                 expectedSize += AircraftTestData.preloadedList.size
                 assertEquals(expectedSize, expectMostRecentItem().size)
 
-                //test saveAircraft
-                val ac = AircraftTestData.regsWithTypes.first().toAircraft()
-                repo.saveAircraft(ac)
-                expectedSize ++
-                assertEquals(expectedSize, expectMostRecentItem().size)
-
                 cancelAndConsumeRemainingEvents()
             }
 
@@ -101,19 +104,7 @@ class AircraftRepositoryTests {
             val adc = repo.getAircraftDataCache()
             assertEquals(AircraftTestData.aircraftTypes.size, adc.getAircraftTypes().size)
 
-            //test getAircraftFromRegistration
-            val testAircraft = AircraftTestData.arwt1.toAircraft()
-            //- with bogus data
-            assertEquals(null, repo.getAircraftFromRegistration("BOGUS DATA"))
-            //- with correct case
-            assertEquals(testAircraft, repo.getAircraftFromRegistration(testAircraft.registration))
-            //- with incorrect case
-            assertEquals(testAircraft, repo.getAircraftFromRegistration(testAircraft.registration.lowercase()))
-            //- with conflicting Preloaded/ARWT flights
-            val a = AircraftTestData.overrulingAircraft.toAircraft()
-            assert(repo.getAircraftFromRegistration(a.registration) != a)
-            repo.saveAircraft(a)
-            assertEquals(a, repo.getAircraftFromRegistration(a.registration))
+            //TODO make test for aircraft from flights
         }
     }
 }

@@ -40,12 +40,12 @@ import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
  */
 // TODO finish getting aircraft from flights
 class AircraftRepositoryImpl(
-    dataBase: JoozdlogDatabase
+    dataBase: JoozdlogDatabase,
+    private val flightRepository: FlightRepository = FlightRepository.instance
 ): AircraftRepository, CoroutineScope by dispatchersProviderMainScope() {
     private val aircraftTypeDao = dataBase.aircraftTypeDao()
     //private val registrationDao = dataBase.registrationDao()
     private val preloadedRegistrationsDao = dataBase.preloadedRegistrationsDao()
-    private val flightRepository = FlightRepository.instance
 
     override fun aircraftTypesFlow() = aircraftTypeDao.aircraftTypesFlow().map {
         it.toAircraftTypes()
@@ -79,11 +79,13 @@ class AircraftRepositoryImpl(
             //getRegistrationWithTypes()
         )
 
-    private suspend fun getAircraftTypes() =
+    private suspend fun getAircraftTypes() = withContext(Dispatchers.IO) {
         aircraftTypeDao.requestAllAircraftTypes().map { it.toAircraftType() }
+    }
 
-    private suspend fun getPreloadedRegistrations() =
+    private suspend fun getPreloadedRegistrations() = withContext(Dispatchers.IO) {
         preloadedRegistrationsDao.requestAllRegistrations()
+    }
 
     /*
     suspend fun getRegistrationWithTypes() =
@@ -93,18 +95,24 @@ class AircraftRepositoryImpl(
     override suspend fun getAircraftTypeByShortName(typeShortName: String): AircraftType? =
         aircraftTypeDao.getAircraftTypeFromShortName(typeShortName)?.toAircraftType()
 
-    /*
-    override suspend fun getAircraftFromRegistration(registration: String): Aircraft? =
-        registrationDao.getAircraftFromRegistration(registration)
-                ?.toAircraftRegistrationWithType()
-                ?.toAircraft()
-            ?: preloadedRegistrationsDao.getAircraftFromRegistration(registration)
-                ?.let{
-                    val type = aircraftTypeDao.getAircraftType(it.type)?.toAircraftType()
-                    Aircraft(it.registration, type, Aircraft.PRELOADED)
-                }
 
-     */
+    override suspend fun getAircraftFromRegistration(registration: String): Aircraft? =
+        registrationToAircraftMap()[formatRegistration(registration)]
+
+    private fun findKeyIgnoreCase(
+        map: Map<String, Aircraft>,
+        registration: String
+    ) = map.keys.firstOrNull { it.equals(registration, ignoreCase = true) }
+
+    private fun findKeyLettersOnly(
+        map: Map<String, Aircraft>,
+        registration: String
+    ) = map.keys.firstOrNull {
+        it.lettersOnly().equals(registration.lettersOnly(), ignoreCase = true)
+    }
+
+    private fun String.lettersOnly() = filter { it.isLetter() }
+
 
     /*
     override suspend fun saveAircraft(aircraft: Aircraft) = withContext(DispatcherProvider.io()) {
@@ -175,7 +183,7 @@ class AircraftRepositoryImpl(
         }
         aircraftFromFlightsMapAsync.await().forEach{
             if (it.value.type != null || map[it.key] == null)
-                map[it.key] = it.value
+                map[formatRegistration(it.key)] = it.value
         }
 
         /*
@@ -195,7 +203,7 @@ class AircraftRepositoryImpl(
             val map = LinkedHashMap<String, Aircraft>(registrations.size)
             registrations.forEach {  reg ->
                 val f = sortedFlights.first { it.registration == reg }
-                map[reg] = Aircraft(registration = reg, type = getAircraftTypeFromMapAndFlight(typesMap, f))
+                map[reg] = Aircraft(registration = reg, type = getAircraftTypeFromMapAndFlight(typesMap, f), source = Aircraft.FLIGHT)
             }
             return@async map // explicit return only for readability
         }

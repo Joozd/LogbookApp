@@ -23,4 +23,4 @@ internal fun formatRegistration(registration: String) =
     uppercaseOnlyAtoZOrDigit(registration)
 
 private fun uppercaseOnlyAtoZOrDigit(registration: String) =
-    registration.uppercase().filter { it in 'A'..'Z' || it.isDigit() }
+    registration.uppercase().filter { it.isLetter() || it.isDigit() }

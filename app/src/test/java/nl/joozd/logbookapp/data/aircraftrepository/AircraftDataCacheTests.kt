@@ -25,7 +25,9 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.joozd.logbookapp.data.AircraftTestData
+import nl.joozd.logbookapp.data.FlightsTestData
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.room.MockDatabase
 import nl.joozd.logbookapp.data.room.model.toAircraft
 import nl.joozd.logbookapp.utils.DispatcherProvider
@@ -36,7 +38,9 @@ import org.junit.Test
 
 @ExperimentalCoroutinesApi
 class AircraftDataCacheTests {
-    private val repo = AircraftRepository.mock(MockDatabase())
+    private val mockDB = MockDatabase()
+    private val mockFlightRepo = FlightRepository.mock(mockDB)
+    private val repo = AircraftRepository.mock(mockDB, mockFlightRepo)
 
     //Fill repo with some flights and types
     @Before
@@ -48,8 +52,7 @@ class AircraftDataCacheTests {
         runBlocking {
             repo.replaceAllTypesWith(AircraftTestData.aircraftTypes)
             repo.replaceAllPreloadedWith(AircraftTestData.preloadedList)
-            val ac = AircraftTestData.regsWithTypes.first().toAircraft()
-            repo.saveAircraft(ac)
+            mockFlightRepo.save(FlightsTestData.flightsWithAircraft)
         }
     }
 

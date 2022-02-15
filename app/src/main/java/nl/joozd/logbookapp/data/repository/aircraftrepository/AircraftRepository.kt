@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.data.repository.aircraftrepository
 import kotlinx.coroutines.flow.Flow
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 
@@ -57,6 +58,11 @@ interface AircraftRepository {
     suspend fun getAircraftTypeByShortName(typeShortName: String): AircraftType?
 
     /**
+     * Get and aircraft by registration
+     */
+    suspend fun getAircraftFromRegistration(registration: String): Aircraft?
+
+    /**
      * Replace entire Types DB with [newTypes]
      */
     suspend fun replaceAllTypesWith(newTypes: List<AircraftType>)
@@ -81,6 +87,8 @@ interface AircraftRepository {
             AircraftRepositoryImpl(JoozdlogDatabase.getInstance())
         }
 
-        fun mock(mockDatabase: JoozdlogDatabase): AircraftRepository = AircraftRepositoryImpl(mockDatabase)
+        fun mock(mockDatabase: JoozdlogDatabase,
+                 mockFlightRepository: FlightRepository = FlightRepository.mock(mockDatabase)
+        ): AircraftRepository = AircraftRepositoryImpl(mockDatabase, mockFlightRepository)
     }
 }

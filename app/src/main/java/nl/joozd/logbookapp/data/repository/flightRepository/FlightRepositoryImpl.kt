@@ -161,8 +161,9 @@ class FlightRepositoryImpl(
             idGenerator.generateID(0)
         else flight.flightID)
 
-    private suspend fun getValidFlightsFromDao() =
+    private suspend fun getValidFlightsFromDao() = withContext(Dispatchers.IO) {
         flightDao.getValidFlights().toFlights()
+    }
 
     /**
      * Generate unique IDs.

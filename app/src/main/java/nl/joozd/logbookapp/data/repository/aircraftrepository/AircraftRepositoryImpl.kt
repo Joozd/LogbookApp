@@ -79,10 +79,10 @@ class AircraftRepositoryImpl(
             //getRegistrationWithTypes()
         )
 
-    suspend fun getAircraftTypes() =
+    private suspend fun getAircraftTypes() =
         aircraftTypeDao.requestAllAircraftTypes().map { it.toAircraftType() }
 
-    suspend fun getPreloadedRegistrations() =
+    private suspend fun getPreloadedRegistrations() =
         preloadedRegistrationsDao.requestAllRegistrations()
 
     /*

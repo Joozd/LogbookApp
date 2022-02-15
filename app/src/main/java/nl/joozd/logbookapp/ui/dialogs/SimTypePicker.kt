@@ -36,7 +36,7 @@ import nl.joozd.logbookapp.ui.adapters.AircraftPickerAdapter
 
 class SimTypePicker: JoozdlogFragment(){
     private val viewModel: AircraftPickerViewModel by viewModels()
-
+/*
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogPickSimTypeBinding.bind(inflater.inflate(R.layout.dialog_pick_sim_type, container, false)).apply{
             val typesPickerAdapter = AircraftPickerAdapter {
@@ -92,4 +92,6 @@ class SimTypePicker: JoozdlogFragment(){
             bodyLayout.setOnClickListener { }
 
         }.root // end of inflater.inflate(...).apply
+
+ */
 }

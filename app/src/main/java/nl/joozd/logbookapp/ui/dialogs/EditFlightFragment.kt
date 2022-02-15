@@ -35,6 +35,7 @@ import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.LayoutEditFlightFragmentBinding
 import nl.joozd.logbookapp.extensions.*
+import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.utils.toast
 
 import nl.joozd.logbookapp.model.viewmodels.fragments.NewEditFlightFragmentViewModel
@@ -213,6 +214,10 @@ class EditFlightFragment: JoozdlogFragment() {
         simTimeSelectorLeft.setOnClickListener{ toastNotImplementedYet() }
 
         simTimeSelectorRight.setOnClickListener{ toastNotImplementedYet() }
+
+        simAircraftSelectorLeft.setOnClickListener { launchSimOrAircraftPicker() }
+
+        simTakeoffLandingSelector.setOnClickListener { launchLandingsDialog() }
 
         simNamesSelectorLeft.setOnClickListener { launchName2Dialog() }
 
@@ -506,6 +511,8 @@ class EditFlightFragment: JoozdlogFragment() {
         collectPicPicusFlow()
         collectIsPfFlow()
 
+        collectSimTimeFlow()
+
         collectIsAutoValuesFlow()
 
     }
@@ -562,7 +569,7 @@ class EditFlightFragment: JoozdlogFragment() {
         viewModel.aircraftFlow().launchCollectWhileLifecycleStateStarted{
             if(it.source == Aircraft.UNKNOWN) launchSimOrAircraftPicker()
             flightAircraftField.setText(it.toString())
-            simAircraftField.setText(it.type?.toString() ?: "")
+            simAircraftField.setText(it.type?.shortName ?: "")
         }
     }
 
@@ -647,6 +654,12 @@ class EditFlightFragment: JoozdlogFragment() {
     private fun LayoutEditFlightFragmentBinding.collectIsPfFlow() {
         viewModel.isPfFlow().launchCollectWhileLifecycleStateStarted {
             pfSelector.showAsActiveIf(it)
+        }
+    }
+
+    private fun LayoutEditFlightFragmentBinding.collectSimTimeFlow() {
+        viewModel.simTimeFlow().launchCollectWhileLifecycleStateStarted{
+            simTimeField.setText(it.minutesToHoursAndMinutesString())
         }
     }
 

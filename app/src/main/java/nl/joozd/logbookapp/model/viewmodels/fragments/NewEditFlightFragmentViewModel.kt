@@ -84,6 +84,8 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     }    }
     fun isPfFlow() = flightFlow.map { it.isPF }
 
+    fun simTimeFlow() = flightFlow.map { it.simTime }
+
     fun isAutoValuesFlow() = flightFlow.map { it.autoFill }
 
 

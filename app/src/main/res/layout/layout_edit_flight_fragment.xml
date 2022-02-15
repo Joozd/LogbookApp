@@ -44,8 +44,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                android:padding = "0dp"
                 android:gravity="center"
+                android:padding="0dp"
                 android:text="@string/add_flight"
                 android:textColor="@color/white"
                 android:textSize="20sp"
@@ -73,7 +73,7 @@
                 android:layout_marginBottom="16dp"
                 app:layout_constraintBottom_toTopOf="@+id/autoFillCheckBox"
                 app:layout_constraintTop_toBottomOf="@+id/flightInfoText"
-                tools:visibility="visible">
+                tools:visibility="gone">
 
 
                 <ImageView
@@ -438,7 +438,7 @@
                 android:layout_marginBottom="16dp"
                 app:layout_constraintBottom_toTopOf="@+id/autoFillCheckBox"
                 app:layout_constraintTop_toBottomOf="@+id/flightInfoText"
-                tools:visibility="gone">
+                tools:visibility="visible">
 
 
                 <ImageView
@@ -659,8 +659,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/flightCancelButton2"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
-                app:layout_constraintStart_toStartOf="@+id/flightInfoText"
-                />
+                app:layout_constraintStart_toStartOf="@+id/flightInfoText" />
 
             <TextView
                 android:id="@+id/flightCancelButton2"

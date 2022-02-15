@@ -23,7 +23,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/DialogBackground"
     android:id="@+id/editFlightFragmentBackground"
-    tools:theme="@style/AppTheme">
+    tools:theme="@style/AppTheme"
+    tools:ignore="ContentDescription">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -345,7 +346,8 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/flightName2Wrapper"
                     app:layout_constraintTop_toTopOf="@+id/flightName2Wrapper"
-                    app:srcCompat="@drawable/lsk_button" />
+                    app:srcCompat="@drawable/lsk_button"
+                     />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/flightRemarksLayout"

@@ -19,18 +19,21 @@
 
 package nl.joozd.logbookapp.data.importing
 
-import nl.joozd.logbookapp.data.importing.interfaces.Roster
 import nl.joozd.logbookapp.data.importing.pdfparser.ProcessedCompleteFlights
+import nl.joozd.logbookapp.data.importing.pdfparser.ProcessedRoster
 import nl.joozd.logbookapp.data.importing.results.SaveCompleteFlightsResult
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 
 interface ImportedRosterSaver {
-    fun saveRoster(rosterToSave: Roster)
+    fun saveRoster(rosterToSave: ProcessedRoster)
 
     fun saveCompletedFlights(completedFlights: ProcessedCompleteFlights): SaveCompleteFlightsResult
 
     companion object{
-        fun make(repositoryWithUndo: FlightRepositoryWithUndo): ImportedRosterSaver{
+        fun make(
+            repository: FlightRepository = FlightRepositoryWithUndo.instance
+        ): ImportedRosterSaver{
             TODO("todo")
         }
     }

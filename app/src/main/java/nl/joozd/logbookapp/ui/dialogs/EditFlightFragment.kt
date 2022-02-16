@@ -45,7 +45,7 @@ import nl.joozd.logbookapp.ui.dialogs.aircraftPicker.BaseAircraftPicker
 import nl.joozd.logbookapp.ui.dialogs.aircraftPicker.SimTypePicker
 import nl.joozd.logbookapp.ui.dialogs.airportPicker.DestPicker
 import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
-import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog
+import nl.joozd.logbookapp.ui.dialogs.namesDialog.PicNameDialog
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.setDualInstructorField
@@ -262,7 +262,7 @@ class EditFlightFragment: JoozdlogFragment() {
         supportFragmentManager.commit {
             add(
                 R.id.mainActivityLayout,
-                Name1Dialog()
+                PicNameDialog()
             )
             addToBackStack(null)
         }

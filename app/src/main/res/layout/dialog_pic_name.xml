@@ -22,7 +22,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/DialogBackground"
-    android:id="@+id/namesDialogBackground"
+    android:id="@+id/picNameDialogBackground"
     tools:theme="@style/AppTheme">
 
     <ScrollView
@@ -48,15 +48,15 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_chainStyle="packed">
 
-            <TextView
-                android:id="@+id/airportPickerTitle"
-                style="@style/DialogHeaderText"
-                android:text="@string/namePilot2"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/airportPickerTitle"
+                    style="@style/DialogHeaderText"
+                    android:text="@string/namePic"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/bodyLayout"
@@ -70,7 +70,7 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInputLayout16"
                     style="@style/EditFlightInputLayout.HorizontalSpacing"
-                    app:layout_constraintEnd_toStartOf="@+id/add_search_field_name_button"
+                    app:layout_constraintEnd_toStartOf="@+id/addCurrentTextButton"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
@@ -80,19 +80,19 @@
                         android:digits="0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM ./!@#$%^&amp;&quot;*():&lt;&gt;?~"
                         android:hint="@string/anyName"
                         android:inputType="textPersonName" />
+
+
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <ImageButton
-                    android:id="@+id/add_search_field_name_button"
+                <Button
+                    android:id="@+id/addCurrentTextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:src="@drawable/arrow_down"
+                    android:layout_weight="1"
+                    android:text="@string/setThis"
                     app:layout_constraintBottom_toBottomOf="@+id/textInputLayout16"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/textInputLayout16"
-                    app:layout_constraintTop_toTopOf="@+id/textInputLayout16"
-                    android:contentDescription="@string/addThis" />
+                    app:layout_constraintTop_toTopOf="@+id/textInputLayout16" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/namesPickerList"
@@ -103,36 +103,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textInputLayout16" />
 
-
-                <ImageButton
-                    android:id="@+id/add_name_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/arrow_down"
-                    app:layout_constraintBottom_toBottomOf="@+id/remove_name_button"
-                    app:layout_constraintStart_toStartOf="@+id/namesPickerList"
-                    app:layout_constraintTop_toTopOf="@+id/remove_name_button"
-                    android:contentDescription="@string/addThis" />
-
-                <ImageButton
-                    android:id="@+id/remove_name_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:src="@drawable/arrow_up"
-                    app:layout_constraintEnd_toEndOf="@+id/namesPickerList"
-                    app:layout_constraintTop_toBottomOf="@+id/namesPickerList"
-                    android:contentDescription="@string/remove" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/pickedNamesList"
-                    style="@style/DataBox"
-                    android:layout_height="100dp"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/remove_name_button" />
-
                 <TextView
                     android:id="@+id/cancel_names_dialog_textview"
                     style="@style/DialogButtonText"
@@ -140,7 +110,7 @@
                     android:text="@android:string/cancel"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/pickedNamesList" />
+                    app:layout_constraintTop_toBottomOf="@+id/namesPickerList" />
 
                 <TextView
                     android:id="@+id/save_names_dialog_textview"
@@ -149,9 +119,9 @@
                     android:text="@android:string/ok"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/pickedNamesList" />
+                    app:layout_constraintTop_toBottomOf="@+id/namesPickerList" />
 
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -25,7 +25,7 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
  * Make a list of names from a list of flights, sorted by recency of flight with that person
  */
 fun List<Flight>.makeNamesList(): List<String> =
-    this.sortedBy { it.timeOut }
+    this.sortedByDescending { it.timeOut }
         .map{ it.names()}
         .flatten()
         .distinct()

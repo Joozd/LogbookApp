@@ -17,8 +17,8 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs
+package nl.joozd.logbookapp.ui.dialogs.aircraftPicker
 
-class SimTypePicker: BaseAircraftPicker() {
-    override val isSimPicker = true
+class AircraftPicker: BaseAircraftPicker() {
+    override val isSimPicker = false
 }

@@ -6,6 +6,11 @@
         <entry key="..\:/Users/joozd/AndroidStudioProjects/LogbookApp/app/src/main/res/layout/activity_main_new.xml" value="0.19972826086956522" />
         <entry key="..\:/Users/joozd/AndroidStudioProjects/LogbookApp/app/src/main/res/layout/dialog_about.xml" value="0.21145833333333333" />
         <entry key="..\:/Users/joozd/AndroidStudioProjects/LogbookApp/app/src/main/res/layout/layout_edit_flight_fragment.xml" value="0.19972826086956522" />
+        <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/drawable/arrow_back_24dp.xml" value="0.289" />
+        <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/drawable/arrow_down.xml" value="0.289" />
+        <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/drawable/arrow_up.xml" value="0.289" />
+        <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/drawable/lsk_button.xml" value="0.289" />
+        <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/drawable/minus_button.xml" value="0.289" />
         <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/layout/activity_main_new.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/layout/datepicker_dialog_day.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/layout/dialog_about.xml" value="0.20416666666666666" />
@@ -16,7 +21,7 @@
         <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/layout/dialog_datepicker.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/layout/dialog_email_address.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/layout/dialog_landings.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/layout/dialog_names.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/layout/dialog_names.xml" value="0.33" />
         <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/layout/dialog_number_picker.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/layout/dialog_pick_aircraft_type.xml" value="0.5" />
         <entry key="..\:/Users/joozd/StudioProjects/LogbookApp/app/src/main/res/layout/dialog_pick_sim_type.xml" value="0.5" />

@@ -19,45 +19,71 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog
 
-import android.util.Log
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
-import nl.joozd.logbookapp.R
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.model.helpers.makeNamesList
+import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
-class Name2DialogViewModel: NamesDialogViewModel() {
+class Name2DialogViewModel: JoozdlogDialogViewModel() {
+    private val undoNames = flightEditor.name2
+    private val repo = FlightRepository.instance
+    private val pickedNewNameFlow = MutableStateFlow<String?>(null)
+    private var pickedNewName: String? by CastFlowToMutableFlowShortcut(pickedNewNameFlow)
 
-    /**
-     * Set to true if working on PIC, or false if working on other names (name2)
-     */
-    override val workingOnName1 = false
+    private val pickedSelectedNameFlow = MutableStateFlow<String?>(null)
+    private var pickedSelectedName: String? by CastFlowToMutableFlowShortcut(pickedSelectedNameFlow)
 
-    /**
-     * One string with all names we are working on now, separated by '\n'
-     */
-    override val currentNames = MutableLiveData("") // workingFlight.name2ListLiveData.map{ it.joinToString("\n")}
+    private val queryFlow = MutableStateFlow("")
+    private var query: String by CastFlowToMutableFlowShortcut(queryFlow)
 
-    /**
-     * Add a selected name to the list of names, or replace name if only one name allowed
-     */
-    override fun addName(name: String) {
-        flightEditor.name2 += name
+    private val allAvailableNamesFlow: Flow<List<String>> = repo.allFlightsFlow().map{
+        it.makeNamesList()
+    }
+    private val currentNamesFlow: Flow<List<String>> = flightEditor.flightFlow.map { it.name2 }
+    fun pickableNamesListFlow() = combine(allAvailableNamesFlow, currentNamesFlow, queryFlow, pickedNewNameFlow) { all, current, query, picked ->
+        all.filter{ it !in current && query in it}.map {
+            it to (it == picked)
+        }
+    }
+    fun currentNamesListFlow() = combine (currentNamesFlow, pickedSelectedNameFlow) { current, picked ->
+        current.map { name -> name to (name == picked) }
     }
 
-    /**
-     * Remove the last name from the list. If no names left, set names to [""]
-     */
-    override fun removeLastName() {
-        flightEditor.name2 = flightEditor.name2.dropLast(1)
+    fun pickNewName(name: String){
+        pickedNewName = name
     }
 
-    /**
-     * Set correct labels for this dialog
-     */
-    init {
-        mutableAddSearchFieldNameButtonTextResource.value = R.string.addThis
-        mutableAddSelectedNameButtonTextResource.value = R.string.addThis
-        mutableRemoveLastButonTextResource.value = R.string.remove
+    fun pickSelectedName(name: String){
+        pickedSelectedName = name
     }
 
+    fun addSelectedName(){
+        pickedNewName?.let {
+            pickedNewName = null
+            flightEditor.name2 += it
+        }
+    }
 
+    fun removeSelectedName(){
+        pickedSelectedName?.let{ n ->
+            pickedSelectedName = null
+            flightEditor.name2 = flightEditor.name2.filter { it != n}
+        }
+    }
+
+    fun addQueryAsName(){
+        if (query.isNotBlank()) flightEditor.name2 += query
+    }
+
+    fun updateQuery(q: String?){
+        query = q ?: ""
+    }
+
+    fun undo(){
+        flightEditor.name2 = undoNames
+    }
 }

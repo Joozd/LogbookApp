@@ -19,10 +19,14 @@
 
 package nl.joozd.logbookapp.ui.adapters
 
+import android.graphics.Color.TRANSPARENT
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ItemPickerDialogBinding
 import nl.joozd.logbookapp.extensions.ctx
@@ -31,61 +35,56 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
 /**
  * Adapter for RecyclerView that can highlight one entry
  * Needs
- * @param color: the color of [itemBackground] will be set to this value for [selectedEntry]
- * @param itemLayout: Layout to be used for an item. MUST have a view named [itemBackground]
+ * @param color: the color of 'item_background' will be set to this value for entries marked as "true"
+ * @param itemLayout: Layout to be used for an item. MUST have a view named 'item_background'
  * @param itemClick: Action to be performed onClick on an item
- * itemLayout must have a field named [itemBackground]
+
  */
 class SelectableStringAdapter(
-    var list: List<String> = emptyList(),
-    var color: Int? = null,
+    private val color: Int? = null,
     private val itemLayout: Int = R.layout.item_picker_dialog,
     private val itemClick: (String) -> Unit
-): RecyclerView.Adapter<SelectableStringAdapter.ViewHolder>() {
-    private var selectedEntry: String? = null
+): ListAdapter<Pair<String, Boolean>, SelectableStringAdapter.ViewHolder>(DIFF_CALLBACK) {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(list[position])
+        val item = getItem(position)
+        holder.bindItem(item, color)
         with(holder.binding) {
             itemBackground.setOnClickListener {
                 itemClick(nameTextView.text.toString())
             }
-            itemBackground.setBackgroundColor(if (nameTextView.text.toString() == selectedEntry) color
-                ?: itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary) else 0x00000000)
         }
     }
-
-    override fun getItemCount(): Int = list.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.ctx).inflate(itemLayout, parent, false)
         return ViewHolder(view)
     }
 
-    fun updateList(l: List<String>){
-        list = l
-        notifyDataSetChanged()
-    }
-
-    /**
-     * Select [activeItem] as ative item, or select nothing as active if null
-     */
-    fun selectActiveItem(activeItem: String?) {
-        val previousIndex = list.indexOf(selectedEntry)
-        val foundIndex = list.indexOf(activeItem)
-        selectedEntry = activeItem
-        if (previousIndex >= 0)
-            notifyItemChanged(previousIndex)
-        if (foundIndex >= 0) // if activeItem not found (because it is null, for example), don't notify an invalid item as changed
-            notifyItemChanged(foundIndex)
-    }
-
     class ViewHolder(containerView: View) :
         RecyclerView.ViewHolder(containerView) {
         val binding = ItemPickerDialogBinding.bind(containerView)
 
-        fun bindItem(name: String) {
-            binding.nameTextView.text = name
+        fun bindItem(item: Pair<String, Boolean>, color: Int?) {
+            binding.apply {
+                nameTextView.text = item.first
+                itemBackground.setBackgroundColor(
+                    if (item.second)
+                        color ?: itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary)
+                    else
+                        TRANSPARENT
+                )
+            }
+        }
+    }
+
+    companion object{
+        private val DIFF_CALLBACK = object: DiffUtil.ItemCallback<Pair<String, Boolean>>() {
+            override fun areItemsTheSame(oldItem: Pair<String, Boolean>, newItem: Pair<String, Boolean>): Boolean =
+                oldItem.first == newItem.first
+
+            override fun areContentsTheSame(oldItem: Pair<String, Boolean>, newItem: Pair<String, Boolean>): Boolean =
+                oldItem.first == newItem.first && oldItem.second == newItem.second
         }
     }
 }

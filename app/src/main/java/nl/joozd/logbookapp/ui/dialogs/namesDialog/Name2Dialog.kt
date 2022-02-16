@@ -19,17 +19,99 @@
 
 package nl.joozd.logbookapp.ui.dialogs.namesDialog
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.DialogNamesBinding
+import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog.Name2DialogViewModel
+import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
-class Name2Dialog : NamesDialog() {
-    /**
-     * Set to true if working on PIC, or false if working on other names (Flight.name2)
-     */
-    override val workingOnName1 = false
+class Name2Dialog: JoozdlogFragment() {
+    private val viewModel: Name2DialogViewModel by viewModels()
 
-    /**
-     * ViewModel to use for this dialog
-     */
-    override val viewModel: Name2DialogViewModel by viewModels()
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        DialogNamesBinding.bind(inflater.inflate(R.layout.dialog_names, container, false)).apply{
+            val namesPickerAdapter = makeNamesPickerAdapterAndAddToList()
+            val selectedNamesAdapter = makeSelectedNamesAdapterAndAddToList()
+
+            launchFlowCollectors(namesPickerAdapter, selectedNamesAdapter)
+            setOnTextChangedListeners()
+            setOnClickListeners()
+        }.root
+
+    private fun DialogNamesBinding.makeNamesPickerAdapterAndAddToList() =
+        makeNamesPickerAdapter().also{
+            namesPickerList.layoutManager = LinearLayoutManager(context)
+            namesPickerList.adapter = it
+        }
+
+    private fun DialogNamesBinding.makeSelectedNamesAdapterAndAddToList() =
+        makeSelectedNamesAdapter().also{
+            pickedNamesList.layoutManager = LinearLayoutManager(context)
+            pickedNamesList.adapter = it
+        }
+
+    private fun makeNamesPickerAdapter() = SelectableStringAdapter{ name ->
+        viewModel.pickNewName(name)
+    }
+
+    private fun makeSelectedNamesAdapter() = SelectableStringAdapter{ name ->
+        viewModel.pickSelectedName(name)
+    }
+
+    @Suppress("unused") // it is here because it is here in all dialogs (for uniformity)
+    private fun DialogNamesBinding.launchFlowCollectors(
+        namesPickerAdapter: SelectableStringAdapter,
+        selectedNamesAdapter: SelectableStringAdapter
+    ){
+        collectPickableNamesFlow(namesPickerAdapter)
+        collectSelectedNamesFlow(selectedNamesAdapter)
+    }
+
+    private fun DialogNamesBinding.setOnClickListeners(){
+        addNameButton.setOnClickListener {
+            viewModel.addSelectedName()
+        }
+        removeNameButton.setOnClickListener {
+            viewModel.removeSelectedName()
+        }
+        addSearchFieldNameButton.setOnClickListener {
+            viewModel.addQueryAsName()
+            namesSearchField.setText("")
+        }
+        saveNamesDialogTextview.setOnClickListener {
+            closeFragment()
+        }
+        cancelNamesDialogTextview.setOnClickListener {
+            viewModel.undo()
+            closeFragment()
+        }
+
+    }
+
+    private fun DialogNamesBinding.setOnTextChangedListeners(){
+        namesSearchField.onTextChanged {
+            viewModel.updateQuery(it)
+        }
+    }
+
+    private fun collectSelectedNamesFlow(selectedNamesAdapter: SelectableStringAdapter) {
+        viewModel.currentNamesListFlow().launchCollectWhileLifecycleStateStarted {
+            selectedNamesAdapter.submitList(it)
+        }
+    }
+
+    private fun collectPickableNamesFlow(namesPickerAdapter: SelectableStringAdapter) {
+        viewModel.pickableNamesListFlow().launchCollectWhileLifecycleStateStarted {
+            namesPickerAdapter.submitList(it)
+        }
+    }
+
+
 }

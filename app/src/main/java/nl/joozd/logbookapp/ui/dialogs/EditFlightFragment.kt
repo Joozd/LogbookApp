@@ -40,6 +40,9 @@ import nl.joozd.logbookapp.ui.utils.toast
 
 import nl.joozd.logbookapp.model.viewmodels.fragments.NewEditFlightFragmentViewModel
 import nl.joozd.logbookapp.ui.adapters.AircraftAutoCompleteAdapter
+import nl.joozd.logbookapp.ui.dialogs.aircraftPicker.AircraftPicker
+import nl.joozd.logbookapp.ui.dialogs.aircraftPicker.BaseAircraftPicker
+import nl.joozd.logbookapp.ui.dialogs.aircraftPicker.SimTypePicker
 import nl.joozd.logbookapp.ui.dialogs.airportPicker.DestPicker
 import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
 import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name1Dialog

@@ -24,11 +24,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.reflect.KProperty
 
 /**
- * cast a Flow item to a MutableStateFlow, for items that you want to expose as flow but want to
- * call as a variable internally.
+ * cast a Flow item to a MutableStateFlow.
+ * For items that you want to expose as an immutable StateFlow
+ * but want to call as a variable internally.
  * Use:
  *  val dataFlow: Flow<SomeType> = MutableStateFlow<SomeType>(makeInitialValue())
- *  var _data: SomeType by CastFlowToMutableFlowShortcut(dataFlow)
+ *  private var data: SomeType by CastFlowToMutableFlowShortcut(dataFlow)
  */
 class CastFlowToMutableFlowShortcut<T>(private val flowToCast: Flow<T>){
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T =

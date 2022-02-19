@@ -17,10 +17,16 @@
  *
  */
 
-package nl.joozd.joozdlogfiletypedetector.interfaces
+package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.SupportedImportTypes
+class JoozdLogV5File(lines: List<String>): CompleteLogbookFile(lines) {
+    companion object {
+        private const val TEXT_TO_SEARCH_FOR =
+            "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature"
 
-abstract class FileTypeDetector {
-    abstract fun getTypeOfFile(): SupportedImportTypes
+        fun buildIfMatches(lines: List<String>): JoozdLogV5File? =
+            if ((lines.firstOrNull() ?: "").startsWith(TEXT_TO_SEARCH_FOR))
+                JoozdLogV5File(lines)
+            else null
+    }
 }

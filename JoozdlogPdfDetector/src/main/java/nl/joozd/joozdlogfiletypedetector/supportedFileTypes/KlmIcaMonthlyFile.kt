@@ -17,10 +17,15 @@
  *
  */
 
-package nl.joozd.joozdlogfiletypedetector.interfaces
+package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.SupportedImportTypes
+class KlmIcaMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
+    companion object{
+        private const val TEXT_TO_SEARCH_FOR = "VOOR VRAGEN OVER VLIEGUREN: FLIGHTCREWSUPPORT@KLM.COM"
 
-abstract class FileTypeDetector {
-    abstract fun getTypeOfFile(): SupportedImportTypes
+        fun buildIfMatches(lines: List<String>): KlmIcaMonthlyFile? =
+            if (lines.any{TEXT_TO_SEARCH_FOR in it})
+                KlmIcaMonthlyFile(lines)
+            else null
+    }
 }

@@ -19,13 +19,4 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-class KlmIcaMonthly(lines: List<String>): CompletedFlightsFile(lines) {
-    companion object{
-        private const val TEXT_TO_SEARCH_FOR = "VOOR VRAGEN OVER VLIEGUREN: FLIGHTCREWSUPPORT@KLM.COM"
-
-        fun buildIfMatches(lines: List<String>): KlmIcaMonthly? =
-            if (lines.any{TEXT_TO_SEARCH_FOR in it})
-                KlmIcaMonthly(lines)
-            else null
-    }
-}
+class UnsupportedPdfFile(rawPdfData: List<String>): UnsupportedFile(rawPdfData)

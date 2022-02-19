@@ -19,4 +19,14 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-class UnsupportedPdf(rawPdfData: List<String>): UnsupportedType(rawPdfData)
+class JoozdLogV4File(lines: List<String>): CompleteLogbookFile(lines) {
+    companion object {
+        private const val TEXT_TO_SEARCH_FOR =
+            "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature"
+
+        fun buildIfMatches(lines: List<String>): JoozdLogV4File? =
+            if ((lines.firstOrNull() ?: "").startsWith(TEXT_TO_SEARCH_FOR))
+                JoozdLogV4File(lines)
+            else null
+    }
+}

@@ -19,7 +19,7 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-class KlmIcaRosterFile(lines: List<String>): PlannedFlights(lines) {
+class KlmIcaRosterFile(lines: List<String>): PlannedFlightsFile(lines) {
     companion object{
         private const val LINE_TO_LOOK_AT = 0
         private const val TEXT_TO_SEARCH_FOR = "CREW ROSTER FROM "

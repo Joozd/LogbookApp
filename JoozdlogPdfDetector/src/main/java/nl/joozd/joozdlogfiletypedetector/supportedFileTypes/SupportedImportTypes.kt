@@ -19,4 +19,4 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-class UnsupportedCsv(csvData: List<String>): UnsupportedType(csvData)
+sealed class SupportedImportTypes(protected val data: List<String>)

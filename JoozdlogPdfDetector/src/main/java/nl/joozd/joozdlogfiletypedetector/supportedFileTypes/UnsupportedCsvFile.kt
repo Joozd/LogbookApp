@@ -17,10 +17,6 @@
  *
  */
 
-package nl.joozd.joozdlogfiletypedetector.interfaces
+package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.SupportedImportTypes
-
-abstract class FileTypeDetector {
-    abstract fun getTypeOfFile(): SupportedImportTypes
-}
+class UnsupportedCsvFile(csvData: List<String>): UnsupportedFile(csvData)

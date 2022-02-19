@@ -46,6 +46,6 @@ class PdfTypeDetector(inputStream: InputStream): FileTypeDetector() {
             ?: KlcBriefingSheetFile.buildIfMatches(lines)
             ?: KlcMonthlyFile.buildIfMatches(lines)
             ?: KlmIcaRosterFile.buildIfMatches(lines)
-            ?: KlmIcaMonthly.buildIfMatches(lines)
-            ?: UnsupportedPdf(lines)
+            ?: KlmIcaMonthlyFile.buildIfMatches(lines)
+            ?: UnsupportedPdfFile(lines)
 }

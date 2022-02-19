@@ -17,29 +17,6 @@
  *
  */
 
-package nl.joozd.joozdlogfiletypedetector
+package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-/**
- * Supported types
- */
-object SupportedTypes {
-    val KLC_ROSTER = PlannedFlights()
-    val KLC_CHECKIN_SHEET = PlannedFlights()
-    val KLM_ICA_ROSTER = PlannedFlights()
-
-    val KLC_MONTHLY = CompletedFlights()
-    val KLM_ICA_MONTHLY = CompletedFlights()
-
-    val MCC_PILOT_LOG_LOGBOOK = CompleteLogbook()
-    val LOGTEN_PRO_LOGBOOK = CompleteLogbook()
-    val JOOZDLOG_CSV_BACKUP = CompleteLogbook()
-
-    val UNSUPPORTED_PDF = Unsupported()
-    val UNSUPPORTED_CSV = Unsupported()
-
-    interface SupportedType
-    class PlannedFlights: SupportedType
-    class CompletedFlights: SupportedType
-    class CompleteLogbook: SupportedType
-    class Unsupported: SupportedType
-}
+class UnsupportedPdf(rawPdfData: List<String>): UnsupportedType(rawPdfData)

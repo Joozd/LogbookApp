@@ -19,10 +19,8 @@
 
 package nl.joozd.joozdlogfiletypedetector.interfaces
 
-import nl.joozd.joozdlogcommon.BasicFlight
 import java.time.Instant
 
-interface CompletedFlightsExtractor {
-    fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight>?
+interface CompletedFlightsExtractor: FlightsExtractor {
     fun getPeriodFromLines(lines: List<String>): ClosedRange<Instant>?
 }

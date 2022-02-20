@@ -19,7 +19,12 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
+import nl.joozd.joozdlogfiletypedetector.interfaces.PlannedFlightsExtractor
+import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.extractors.KlcBriefingSheetExtractor
+
 class KlcBriefingSheetFile(lines: List<String>): PlannedFlightsFile(lines) {
+    override val extractor: PlannedFlightsExtractor = KlcBriefingSheetExtractor()
+
     companion object{
         private const val LINE_TO_LOOK_AT = 0
         private const val TEXT_TO_SEARCH_FOR = "Cockpit Briefing for"

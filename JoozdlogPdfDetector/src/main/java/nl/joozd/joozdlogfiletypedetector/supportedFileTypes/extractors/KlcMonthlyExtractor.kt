@@ -39,6 +39,8 @@ class KlcMonthlyExtractor: CompletedFlightsExtractor {
     }
 
     override fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight>? {
+        // must match lines like:
+        // 17 KL1711 07:59 AMS OPO NXB 10:26 02:27 € 65,26 Stop at OPO for 19:14h.
         val flightRegEx = """(\d{1,2}) ([A-Z]{2}\d{3,4}) (\d\d:\d\d) ([A-Z]{3}) ([A-Z]{3}) ([A-Z]{3}) (\d\d:\d\d) (\d\d:\d\d)""".toRegex()
         val monthStart = getMonthStart(lines) ?: return null
         val matches = lines.mapNotNull { flightRegEx.find(it) }

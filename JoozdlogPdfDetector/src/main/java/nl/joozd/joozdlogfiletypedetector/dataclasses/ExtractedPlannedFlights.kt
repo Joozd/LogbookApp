@@ -17,18 +17,10 @@
  *
  */
 
-package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
+package nl.joozd.joozdlogfiletypedetector.dataclasses
 
-import nl.joozd.joozdlogfiletypedetector.dataclasses.ExtractedCompletedFlights
-import nl.joozd.joozdlogfiletypedetector.interfaces.PlannedFlightsExtractor
+import nl.joozd.joozdlogcommon.BasicFlight
+import java.time.Instant
 
-abstract class PlannedFlightsFile(lines: List<String>): ImportedFile(lines){
-    abstract val extractor: PlannedFlightsExtractor
-
-    fun extractPlannedFlights(): ExtractedCompletedFlights {
-        val period = extractor.getPeriodFromLines(data)
-        val extractedFlights = extractor.extractFlightsFromLines(data)
-
-        return ExtractedCompletedFlights(period, extractedFlights)
-    }
+class ExtractedPlannedFlights(val period: ClosedRange<Instant>?, val flights: Collection<BasicFlight>?) {
 }

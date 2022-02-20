@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
+import android.content.ContentResolver
 import nl.joozd.joozdlogfiletypedetector.interfaces.FileTypeDetector
 import android.content.Intent
 import android.net.Uri
@@ -30,7 +31,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import nl.joozd.joozdlogfiletypedetector.CsvTypeDetector
 import nl.joozd.joozdlogfiletypedetector.PdfTypeDetector
-import nl.joozd.joozdlogfiletypedetector.SupportedTypes
+import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.*
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.importing.ImportedRosterSaver
 import nl.joozd.logbookapp.data.importing.extensions.postProcess
@@ -42,8 +43,6 @@ import nl.joozd.logbookapp.data.importing.interfaces.CompletedFlights
 import nl.joozd.logbookapp.data.importing.interfaces.Roster
 import nl.joozd.logbookapp.data.importing.pdfparser.*
 import nl.joozd.logbookapp.data.importing.results.SaveCompleteFlightsResult
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
@@ -63,6 +62,16 @@ import java.time.Instant
  * - Fixes conflicts when importing Monthlies
  */
 class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
+    private val handler = SingleUseImportIntentHandler()
+
+    fun handleIntent(intent: Intent, contentResolver: ContentResolver){
+        handler.handleIntent(intent, contentResolver)
+
+    }
+
+
+
+
     private val rosterSaver get() = ImportedRosterSaver.make(FlightRepositoryWithUndo.instance)
 
     val statusLiveData: LiveData<Int>
@@ -96,14 +105,13 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                 return@withContext /* END HERE */
             }
 
+            val typeOfFile = typeDetector.getFile()
+
             /*
              * Catch bad data:
              */
-            if (typeDetector.seemsInvalid || typeDetector.typeOfFile is SupportedTypes.Unsupported) {
+            if (typeOfFile is UnsupportedFile) {
                 feedback(PdfParserActivityEvents.UNSUPPORTED_FILE) // TODO handle this in Activity
-                if (typeDetector.seemsInvalid)
-                    Log.w(this::class.simpleName, "Unsupported file 001")
-                else
                     Log.w(this::class.simpleName, "Unsupported file 002")
                 updateStatus(ERROR)
                 return@withContext  /* END HERE */
@@ -113,21 +121,21 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
              * We now have a supported file.
              * What happens next: Depending on if this is a roster or something else, start the respective function
              */
-            when (val type = typeDetector.typeOfFile) {
-                is SupportedTypes.PlannedFlights -> {
+            when (typeOfFile) {
+                is PlannedFlightsFile -> {
                     updateStatus(PARSING_ROSTER)
-                    parseRoster(type, uri)
+                    parseRoster(typeOfFile, uri)
                 }
 
-                is SupportedTypes.CompletedFlights -> {
+                is CompletedFlightsFile -> {
                     updateStatus(PARSING_CHRONO)
-                    parseCompletedFlights(type, uri)
+                    parseCompletedFlights(typeOfFile, uri)
                 }
 
-                is SupportedTypes.CompleteLogbook -> {
+                is CompleteLogbookFile -> {
                     feedback(PdfParserActivityEvents.PARSING_COMPLETE_LOGBOOK)
                     updateStatus(PARSING_CHRONO)
-                    parseCompleteLogbook(type, uri)
+                    parseCompleteLogbook(typeOfFile, uri)
                 }
 
                 else -> {
@@ -144,7 +152,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      * Parse a Roster, and pass it on to Repository for saving
      * Will provide feedback to Activity through [feedback]
      */
-    private suspend fun parseRoster(type: SupportedTypes.PlannedFlights, uri: Uri?) {
+    private suspend fun parseRoster(type: PlannedFlightsFile, uri: Uri?) {
         getParser(type, uri)?.let{ roster ->
             if (roster.isInvalid) {
                 feedback(PdfParserActivityEvents.UNSUPPORTED_FILE)
@@ -183,7 +191,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      * Parse a CompletedFlights file (eg a Monthly Overview), and pass it on to Repository for saving
      * Will provide feedback to Activity through [feedback]
      */
-    private suspend fun parseCompletedFlights(type: SupportedTypes.CompletedFlights, uri: Uri?) {
+    private suspend fun parseCompletedFlights(type: CompletedFlightsFile, uri: Uri?) {
         getParser(type, uri)?.let { completedFlights ->
             if (completedFlights.isInvalid){
                 feedback(PdfParserActivityEvents.UNSUPPORTED_FILE)
@@ -221,7 +229,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      * TODO check if this takes a long time and if so make a progress something
      * TODO ask if this should replace or merge with current data if data is present
      */
-    private suspend fun parseCompleteLogbook(type: SupportedTypes.CompleteLogbook, uri: Uri?) {
+    private suspend fun parseCompleteLogbook(type: CompleteLogbookFile, uri: Uri?) {
         getParser(type, uri)?.let { completeLogbook ->
             //TODO("Handle completelogbook")
             if (!completeLogbook.validImportedLogbook){
@@ -265,7 +273,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
                     null
                 }
             }
-            return if (detector?.seemsValid != true) null else detector
+            detector
         }
         return null
     }
@@ -275,12 +283,12 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      * Rosters keep an opened inputstream so should be closed after using.
      * @return null when bad input data, [Roster] otherwise
      */
-    private suspend fun getParser(type: SupportedTypes.PlannedFlights, uri: Uri?): Roster? =
+    private suspend fun getParser(type: ImportedFile, uri: Uri?): Roster? =
         uri?.getInputStream()?.let{ inputStream ->
             when(type){
-                SupportedTypes.KLC_ROSTER ->  inputStream.use { KlcRoster.ofInputStream(it) }
-                SupportedTypes.KLC_CHECKIN_SHEET -> inputStream.use { KlcCheckinSheet.ofInputStream(it) }
-                SupportedTypes.KLM_ICA_ROSTER -> {
+                is KlcRosterFile -> inputStream.use { KlcRoster.ofInputStream(it) }
+                is KlcBriefingSheetFile -> inputStream.use { KlcCheckinSheet.ofInputStream(it) }
+                is KlmIcaRosterFile -> {
                     feedback(PdfParserActivityEvents.UNSUPPORTED_FILE).putString("Sorry, KLM Roster Not supported atm, use ical calendar")
                     Log.w(this::class.simpleName, "Unsupported file 005")
                     null
@@ -294,11 +302,11 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      * Rosters keep an opened inputstream so should be closed after using.
      * @return null when bad input data, [CompletedFlights] otherwise
      */
-    private fun getParser(type: SupportedTypes.CompletedFlights, uri: Uri?): CompletedFlights? =
+    private fun getParser(type: CompletedFlightsFile, uri: Uri?): CompletedFlights? =
         uri?.getInputStream()?.let{ inputStream ->
             when(type){
-                SupportedTypes.KLC_MONTHLY ->  KlcMonthlyParser(inputStream)
-                SupportedTypes.KLM_ICA_MONTHLY -> KlmMonthlyParser(inputStream)
+                is KlcMonthlyFile ->  KlcMonthlyParser(inputStream)
+                is KlmIcaMonthlyFile -> KlmMonthlyParser(inputStream)
                 else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -3: This should not happen.") }
             }
         }
@@ -308,12 +316,12 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
      * Rosters keep an opened inputstream so should be closed after using.
      * @return null when bad input data, [CompletedFlights] otherwise
      */
-    private suspend fun getParser(type: SupportedTypes.CompleteLogbook, uri: Uri?): ImportedLogbook? =
+    private suspend fun getParser(type: CompleteLogbookFile, uri: Uri?): ImportedLogbook? =
         uri?.getInputStream()?.let{ inputStream ->
             when(type){
-                SupportedTypes.JOOZDLOG_CSV_BACKUP -> inputStream.use { JoozdlogParser.ofInputStream(it)}
-                SupportedTypes.LOGTEN_PRO_LOGBOOK -> inputStream.use { LogTenProParser.ofInputStream(it)}
-                SupportedTypes.MCC_PILOT_LOG_LOGBOOK -> inputStream.use { MccPilotLogCsvParser.ofInputStream(it) }
+                is JoozdLogV4File, is JoozdLogV5File -> inputStream.use { JoozdlogParser.ofInputStream(it)}
+                is LogTenProFile -> inputStream.use { LogTenProParser.ofInputStream(it)}
+                is MccPilotLogFile -> inputStream.use { MccPilotLogCsvParser.ofInputStream(it) }
                 else -> null.also { feedback(PdfParserActivityEvents.ERROR).putString("Error -4: This should not happen.") }
             }
         }
@@ -365,6 +373,8 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     fun runAgain(){
         viewModelScope.launch { run() }
     }
+
+
 
     companion object{
         /**

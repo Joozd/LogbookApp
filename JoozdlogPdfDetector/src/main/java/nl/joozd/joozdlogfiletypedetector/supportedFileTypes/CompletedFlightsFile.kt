@@ -19,4 +19,16 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-abstract class  CompletedFlightsFile(lines: List<String>): SupportedImportTypes(lines)
+import nl.joozd.joozdlogfiletypedetector.dataclasses.ExtractedCompletedFlights
+import nl.joozd.joozdlogfiletypedetector.interfaces.CompletedFlightsExtractor
+
+abstract class CompletedFlightsFile(lines: List<String>): ImportedFile(lines){
+    abstract val extractor: CompletedFlightsExtractor
+
+    fun extractCompletedFlights(): ExtractedCompletedFlights {
+        val period = extractor.getPeriodFromLines(data)
+        val extractedFlights = extractor.extractFlightsFromLines(data)
+
+        return ExtractedCompletedFlights(period, extractedFlights)
+    }
+}

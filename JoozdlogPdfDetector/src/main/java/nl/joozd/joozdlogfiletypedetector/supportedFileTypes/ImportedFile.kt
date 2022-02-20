@@ -17,10 +17,6 @@
  *
  */
 
-package nl.joozd.joozdlogfiletypedetector.interfaces
+package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.ImportedFile
-
-abstract class FileTypeDetector {
-    abstract fun getFile(): ImportedFile
-}
+sealed class ImportedFile(protected val data: List<String>)

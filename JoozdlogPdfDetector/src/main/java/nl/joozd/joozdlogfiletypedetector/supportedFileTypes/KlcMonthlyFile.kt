@@ -19,6 +19,9 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
+import nl.joozd.joozdlogfiletypedetector.interfaces.CompletedFlightsExtractor
+import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.extractors.KlcMonthlyExtractor
+
 class KlcMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
     companion object{
         private const val LINE_TO_LOOK_AT = 0
@@ -29,4 +32,7 @@ class KlcMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
                 KlcMonthlyFile(lines)
             else null
     }
+
+    override val extractor: CompletedFlightsExtractor
+        get() = KlcMonthlyExtractor()
 }

@@ -36,12 +36,12 @@ class PdfTypeDetector(inputStream: InputStream): FileTypeDetector() {
             PdfTextExtractor.getTextFromPage(reader, page, SimpleTextExtractionStrategy()).lines()
         }.flatten()
 
-    override fun getTypeOfFile() = getType(lines())
+    override fun getFile() = getType(lines())
 
     /**
      * Returns the SupportedImportType that matches the data in [reader].
      */
-    private fun getType(lines: List<String>): SupportedImportTypes =
+    private fun getType(lines: List<String>): ImportedFile =
         KlcRosterFile.buildIfMatches(lines)
             ?: KlcBriefingSheetFile.buildIfMatches(lines)
             ?: KlcMonthlyFile.buildIfMatches(lines)

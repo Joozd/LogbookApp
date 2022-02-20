@@ -29,9 +29,9 @@ import java.io.InputStream
 class CsvTypeDetector(private val inputStream: InputStream): FileTypeDetector() {
     private fun lines() = inputStream.reader().readLines()
 
-    override fun getTypeOfFile() = getType(lines())
+    override fun getFile() = getType(lines())
 
-    private fun getType(lines: List<String>): SupportedImportTypes =
+    private fun getType(lines: List<String>): ImportedFile =
         MccPilotLogFile.buildIfMatches(lines)
             ?: LogTenProFile.buildIfMatches(lines)
             ?: JoozdLogV4File.buildIfMatches(lines)

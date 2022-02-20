@@ -19,4 +19,4 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-abstract class CompleteLogbookFile(lines: List<String>): SupportedImportTypes(lines)
+abstract class CompleteLogbookFile(lines: List<String>): ImportedFile(lines)

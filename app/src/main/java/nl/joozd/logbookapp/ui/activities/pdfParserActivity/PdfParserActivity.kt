@@ -45,6 +45,8 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.handleIntent(intent, contentResolver)
+
 
         if (Preferences.aircraftTypesVersion == 0 || Preferences.airportDbVersion == 0) {
             toast("Airport DB not downloaded yet, try again later")
@@ -223,6 +225,16 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
     }
 
 
+
+    private fun showFileNotFoundDialog() {
+        JoozdlogAlertDialog().show(activity) {
+            titleResource = R.string.file_not_found_title
+            messageResource = R.string.file_not_found_message
+            setPositiveButton(android.R.string.ok) {
+                finish()
+            }
+        }
+    }
 
 
 }

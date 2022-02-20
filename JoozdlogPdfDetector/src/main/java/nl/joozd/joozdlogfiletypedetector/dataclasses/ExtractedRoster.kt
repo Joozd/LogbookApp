@@ -17,10 +17,9 @@
  *
  */
 
-package nl.joozd.joozdlogfiletypedetector.interfaces
+package nl.joozd.joozdlogfiletypedetector.dataclasses
 
-import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.ImportedFile
+import nl.joozd.joozdlogcommon.BasicFlight
+import java.time.Instant
 
-abstract class FileTypeDetector {
-    abstract fun getFile(): ImportedFile
-}
+data class ExtractedRoster(val period: ClosedRange<Instant>, val flights: Collection<BasicFlight>)

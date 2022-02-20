@@ -17,6 +17,12 @@
  *
  */
 
-package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
+package nl.joozd.joozdlogfiletypedetector.dataclasses
 
-sealed class SupportedImportTypes(protected val data: List<String>)
+import nl.joozd.joozdlogcommon.BasicFlight
+import java.time.Instant
+
+/**
+ * Values can be null if invalid data was parsed.
+ */
+data class ExtractedCompletedFlights(val period: ClosedRange<Instant>?, val flights: Collection<BasicFlight>?)

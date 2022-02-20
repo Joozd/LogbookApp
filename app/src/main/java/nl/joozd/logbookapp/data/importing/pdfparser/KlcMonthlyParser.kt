@@ -174,8 +174,6 @@ class KlcMonthlyParser(private val inputStream: InputStream): CompletedFlights {
         const val TOTAL_TIME = 8
 
         const val ONE_DAY_IN_SECONDS = 86400L
-
-
     }
 
 }

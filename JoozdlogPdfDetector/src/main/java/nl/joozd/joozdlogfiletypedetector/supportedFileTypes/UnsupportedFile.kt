@@ -19,6 +19,6 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-open class UnsupportedFile(rawData: List<String>): SupportedImportTypes(rawData){
+open class UnsupportedFile(rawData: List<String>): ImportedFile(rawData){
     val rawData get() = data
 }

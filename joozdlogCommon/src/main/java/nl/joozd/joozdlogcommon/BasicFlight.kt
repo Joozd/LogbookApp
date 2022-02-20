@@ -19,15 +19,14 @@
 
 package nl.joozd.joozdlogcommon
 
-import nl.joozd.joozdlogcommon.legacy.basicflight.BasicFlight_version2
 import nl.joozd.serializing.*
 
 data class BasicFlight(
     val flightID: Int,
     val orig: String ,
     val dest: String ,
-    val timeOut: Long,              // timeOut and timeIn are seconds since epoch
-    val timeIn: Long,               // timeOut and timeIn are seconds since epoch
+    val timeOut: Long,                 // timeOut and timeIn are seconds since epoch
+    val timeIn: Long,                  // timeOut and timeIn are seconds since epoch
     val correctedTotalTime: Int,
     val multiPilotTime: Int,
     val nightTime: Int,
@@ -52,12 +51,11 @@ data class BasicFlight(
     val isSim: Boolean,
     val isPF: Boolean,
     val isPlanned: Boolean,
-    val changed: Boolean,
+    val changed: Boolean,              // unknownToServer - can be hard-deleted when cast to flight if this is true
     val autoFill: Boolean,
     val augmentedCrew: Int,
     val DELETEFLAG: Boolean,
-    // val signed: Boolean,
-    val timeStamp: Long = -1, // timeStamp is time of synch with server for this flight
+    val timeStamp: Long = -1,          // timeStamp is time of synch with server for this flight
     val signature: String = ""
 ): JoozdSerializable {
     object VERSION {
@@ -153,6 +151,46 @@ data class BasicFlight(
                 unwrap(wraps[32]),
                 unwrap(wraps[33]),
                 unwrap(wraps[34])
+            )
+        }
+
+        val PROTOTYPE by lazy{
+            BasicFlight(
+                flightID = -1,
+                orig = "",
+                dest = "",
+                timeOut = 0,
+                timeIn = 0,
+                correctedTotalTime = 0,
+                multiPilotTime = 0,
+                nightTime = 0,
+                ifrTime = 0,
+                simTime = 0,
+                aircraft = "",
+                registration = "",
+                name = "",
+                name2 = "",
+                takeOffDay = 0,
+                takeOffNight = 0,
+                landingDay = 0,
+                landingNight = 0,
+                autoLand = 0,
+                flightNumber = "",
+                remarks = "",
+                isPIC = false,
+                isPICUS = false,
+                isCoPilot = false,
+                isDual = false,
+                isInstructor = false,
+                isSim = false,
+                isPF = false,
+                isPlanned = true,
+                changed = true,
+                autoFill = false,
+                augmentedCrew = 0,
+                DELETEFLAG = false,
+                timeStamp = -1,          // timeStamp is time of synch with server for this flight
+                signature = ""
             )
         }
     }

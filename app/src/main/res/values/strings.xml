@@ -165,6 +165,9 @@
     <string name="aircraft_type_not_found">Unknown registration, please select a type</string>
     <string name="airport_not_found_no_night_time">Unknown airport, no night time logged.</string>
 
+    <string name="file_not_found_title">File not found</string>
+    <string name="file_not_found_message">An error occurred while retreiving the file you are trying to import.</string>
+
     <string name="unknown_file_title">Unknown File</string>
     <string name="unknown_file_message">The file youare trying to import into Joozdlog is not supported yet. If you want it to be, please mail it to joozdlog@joozd.nl and if I feel like it I might support it in a future version.</string>
 

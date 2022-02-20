@@ -24,6 +24,8 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.itextpdf:itextg:5.5.10"
+
+    implementation project(":joozdlogCommon")
 }
 
 sourceCompatibility = "7"

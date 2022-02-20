@@ -17,10 +17,13 @@
  *
  */
 
-package nl.joozd.joozdlogfiletypedetector.interfaces
+package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status
 
-import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.ImportedFile
-
-abstract class FileTypeDetector {
-    abstract fun getFile(): ImportedFile
+@Suppress("ClassName")
+sealed class HandlerStatus{
+    object WAITING_FOR_INTENT: HandlerStatus()
+    object READING_URI: HandlerStatus()
+    object FILE_NOT_FOUND: HandlerStatus()
+    object RECEIVED_UNSUPPORTED_FILE: HandlerStatus()
+    object RECEIVED_BAD_INTENT: HandlerStatus()
 }

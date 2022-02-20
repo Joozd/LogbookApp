@@ -19,8 +19,10 @@
 
 package nl.joozd.joozdlogfiletypedetector.interfaces
 
-import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.ImportedFile
+import nl.joozd.joozdlogcommon.BasicFlight
+import java.time.Instant
 
-abstract class FileTypeDetector {
-    abstract fun getFile(): ImportedFile
+interface CompletedFlightsExtractor {
+    fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight>?
+    fun getPeriodFromLines(lines: List<String>): ClosedRange<Instant>?
 }

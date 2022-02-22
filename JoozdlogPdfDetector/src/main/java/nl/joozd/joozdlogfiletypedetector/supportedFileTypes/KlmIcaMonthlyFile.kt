@@ -19,7 +19,12 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
+import nl.joozd.joozdlogfiletypedetector.interfaces.CompletedFlightsExtractor
+
 class KlmIcaMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
+    override val extractor: CompletedFlightsExtractor
+        get() = TODO("Not yet implemented")
+
     companion object{
         private const val TEXT_TO_SEARCH_FOR = "VOOR VRAGEN OVER VLIEGUREN: FLIGHTCREWSUPPORT@KLM.COM"
 

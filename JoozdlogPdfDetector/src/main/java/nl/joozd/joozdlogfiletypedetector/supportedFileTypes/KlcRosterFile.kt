@@ -19,7 +19,12 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
+import nl.joozd.joozdlogfiletypedetector.interfaces.PlannedFlightsExtractor
+
 class KlcRosterFile(lines: List<String>): PlannedFlightsFile(lines) {
+    override val extractor: PlannedFlightsExtractor
+        get() = TODO("Not yet implemented")
+
     companion object{
         private const val LINE_TO_LOOK_AT = 1
         private const val TEXT_TO_SEARCH_FOR = "Individual duty plan for"

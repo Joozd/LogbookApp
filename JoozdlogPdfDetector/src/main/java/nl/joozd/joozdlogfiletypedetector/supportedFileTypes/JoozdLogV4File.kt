@@ -19,7 +19,12 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
+import nl.joozd.joozdlogfiletypedetector.interfaces.CompleteLogbookExtractor
+
 class JoozdLogV4File(lines: List<String>): CompleteLogbookFile(lines) {
+    override val extractor: CompleteLogbookExtractor
+        get() = TODO("Not yet implemented")
+
     companion object {
         private const val TEXT_TO_SEARCH_FOR =
             "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature"
@@ -29,4 +34,6 @@ class JoozdLogV4File(lines: List<String>): CompleteLogbookFile(lines) {
                 JoozdLogV4File(lines)
             else null
     }
+
+
 }

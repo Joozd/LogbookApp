@@ -19,4 +19,14 @@
 
 package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
 
-abstract class CompleteLogbookFile(lines: List<String>): ImportedFile(lines)
+import nl.joozd.joozdlogfiletypedetector.dataclasses.ExtractedCompleteLogbook
+import nl.joozd.joozdlogfiletypedetector.interfaces.CompleteLogbookExtractor
+
+abstract class CompleteLogbookFile(lines: List<String>): ImportedFile(lines){
+    abstract val extractor: CompleteLogbookExtractor
+
+    fun extractFlights() =
+        ExtractedCompleteLogbook(
+            extractor.extractFlightsFromLines(data)
+        )
+}

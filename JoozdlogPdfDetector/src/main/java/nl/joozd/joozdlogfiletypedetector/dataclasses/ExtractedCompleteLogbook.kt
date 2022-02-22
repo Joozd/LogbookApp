@@ -17,22 +17,9 @@
  *
  */
 
-package nl.joozd.joozdlogfiletypedetector.supportedFileTypes
+package nl.joozd.joozdlogfiletypedetector.dataclasses
 
-import nl.joozd.joozdlogfiletypedetector.interfaces.PlannedFlightsExtractor
+import nl.joozd.joozdlogcommon.BasicFlight
 
-class KlmIcaRosterFile(lines: List<String>): PlannedFlightsFile(lines) {
-    override val extractor: PlannedFlightsExtractor
-        get() = TODO("Not yet implemented")
-
-    companion object{
-        private const val LINE_TO_LOOK_AT = 0
-        private const val TEXT_TO_SEARCH_FOR = "CREW ROSTER FROM "
-
-        //OK for now, but I can imagine this will need a bit more specific matching
-        fun buildIfMatches(lines: List<String>): KlmIcaRosterFile? =
-            if (lines[LINE_TO_LOOK_AT].startsWith(TEXT_TO_SEARCH_FOR))
-                KlmIcaRosterFile(lines)
-            else null
-    }
+class ExtractedCompleteLogbook(val flights: Collection<BasicFlight>?) {
 }

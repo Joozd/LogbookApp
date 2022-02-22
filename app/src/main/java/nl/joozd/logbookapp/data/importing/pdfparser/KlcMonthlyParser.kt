@@ -23,7 +23,6 @@ import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
 import java.io.InputStream
-import nl.joozd.joozdlogfiletypedetector.TypeIdentifiers.KLC_MONTHLY
 import nl.joozd.logbookapp.data.importing.interfaces.CompletedFlights
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.*
@@ -37,6 +36,7 @@ import java.time.format.DateTimeFormatter
  * NOTE: Registrations are currently not correct on Montly Overviews (just last 3 letters), it will return them like that.
  * NOTE: ID's are always -1
  */
+@Deprecated("Use KlcMonthlyFile from JoozdlogImport")
 class KlcMonthlyParser(private val inputStream: InputStream): CompletedFlights {
     /*********************************************************************************************
      * Private parts: constructor and variables
@@ -59,7 +59,7 @@ class KlcMonthlyParser(private val inputStream: InputStream): CompletedFlights {
      */
     private val reader = PdfReader(inputStream)
     private val firstPage = PdfTextExtractor.getTextFromPage(reader, 1, SimpleTextExtractionStrategy())
-    private var _dataSeemsValid: Boolean = firstPage.startsWith(KLC_MONTHLY.second)
+    private var _dataSeemsValid: Boolean = false // firstPage.startsWith(KLC_MONTHLY.second)
 
     //Whole text of document, split by line
     private val text: List<String> by lazy{

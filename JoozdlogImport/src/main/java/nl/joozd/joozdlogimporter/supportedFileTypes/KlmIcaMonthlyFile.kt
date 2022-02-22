@@ -17,8 +17,20 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.supportedFileTypes
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+import nl.joozd.joozdlogimporter.interfaces.CompletedFlightsExtractor
+
+class KlmIcaMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
+    override val extractor: CompletedFlightsExtractor
+        get() = TODO("Not yet implemented")
+
+    companion object{
+        private const val TEXT_TO_SEARCH_FOR = "VOOR VRAGEN OVER VLIEGUREN: FLIGHTCREWSUPPORT@KLM.COM"
+
+        fun buildIfMatches(lines: List<String>): KlmIcaMonthlyFile? =
+            if (lines.any{TEXT_TO_SEARCH_FOR in it})
+                KlmIcaMonthlyFile(lines)
+            else null
+    }
+}

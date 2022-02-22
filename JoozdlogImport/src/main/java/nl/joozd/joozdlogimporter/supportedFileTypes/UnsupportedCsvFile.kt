@@ -17,8 +17,6 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.supportedFileTypes
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+class UnsupportedCsvFile(csvData: List<String>): UnsupportedFile(csvData)

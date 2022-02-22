@@ -26,11 +26,11 @@ import android.os.Parcelable
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import nl.joozd.joozdlogfiletypedetector.CsvTypeDetector
-import nl.joozd.joozdlogfiletypedetector.PdfTypeDetector
-import nl.joozd.joozdlogfiletypedetector.dataclasses.ExtractedCompletedFlights
-import nl.joozd.joozdlogfiletypedetector.interfaces.FileTypeDetector
-import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.*
+import nl.joozd.joozdlogimporter.CsvImporter
+import nl.joozd.joozdlogimporter.PdfImporter
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
+import nl.joozd.joozdlogimporter.interfaces.FileImporter
+import nl.joozd.joozdlogimporter.supportedFileTypes.*
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerStatus
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.DispatcherProvider
@@ -96,12 +96,12 @@ class SingleUseImportIntentHandler: CoroutineScope {
     private suspend fun getTypeDetector(
         uri: Uri?,
         contentResolver: ContentResolver
-    ): FileTypeDetector? = withContext(DispatcherProvider.io()){
+    ): FileImporter? = withContext(DispatcherProvider.io()){
         uri?.getInputStream(contentResolver)?.use { inputStream ->
             val mimeType = contentResolver.getType(uri) ?: "NONE"
             val detector = when {
-                mimeType.isPdfMimeType() -> PdfTypeDetector(inputStream)
-                mimeType.isCsvMimeType() -> CsvTypeDetector(inputStream)
+                mimeType.isPdfMimeType() -> PdfImporter(inputStream)
+                mimeType.isCsvMimeType() -> CsvImporter(inputStream)
                 else -> {
                     status = HandlerStatus.RECEIVED_UNSUPPORTED_FILE
                     null

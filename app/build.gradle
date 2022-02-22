@@ -140,7 +140,7 @@ dependencies {
 
     // Own classes
     implementation project(":joozdlogCommon")
-    implementation project(":JoozdlogPdfDetector")
+    implementation project(':JoozdlogImport')
 
     //test libraries
     testImplementation 'junit:junit:4.13.2'

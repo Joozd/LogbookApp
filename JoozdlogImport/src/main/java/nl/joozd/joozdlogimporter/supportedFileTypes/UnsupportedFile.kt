@@ -17,8 +17,8 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.supportedFileTypes
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+open class UnsupportedFile(rawData: List<String>): ImportedFile(rawData){
+    val rawData get() = data
+}

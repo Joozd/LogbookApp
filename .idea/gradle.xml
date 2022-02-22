@@ -10,7 +10,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/JoozdlogPdfDetector" />
+            <option value="$PROJECT_DIR$/JoozdlogImport" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/joozdlogCommon" />
             <option value="$PROJECT_DIR$/klcrosterparser" />

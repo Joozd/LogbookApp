@@ -17,8 +17,10 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.dataclasses
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+import nl.joozd.joozdlogcommon.BasicFlight
+import java.time.Instant
+
+class ExtractedPlannedFlights(val period: ClosedRange<Instant>?, val flights: Collection<BasicFlight>?) {
+}

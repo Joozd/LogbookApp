@@ -20,7 +20,7 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
 import android.content.ContentResolver
-import nl.joozd.joozdlogfiletypedetector.interfaces.FileTypeDetector
+import nl.joozd.joozdlogimporter.interfaces.FileImporter
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
@@ -29,9 +29,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
-import nl.joozd.joozdlogfiletypedetector.CsvTypeDetector
-import nl.joozd.joozdlogfiletypedetector.PdfTypeDetector
-import nl.joozd.joozdlogfiletypedetector.supportedFileTypes.*
+import nl.joozd.joozdlogimporter.CsvImporter
+import nl.joozd.joozdlogimporter.PdfImporter
+import nl.joozd.joozdlogimporter.supportedFileTypes.*
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.importing.ImportedRosterSaver
 import nl.joozd.logbookapp.data.importing.extensions.postProcess
@@ -260,12 +260,12 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Gets a FileTypeDetector which has some metadata about fileType
      */
-    private fun getTypeDetector(uri: Uri?): FileTypeDetector? {
+    private fun getTypeDetector(uri: Uri?): FileImporter? {
         uri?.getInputStream()?.use { inputStream ->
             val mimeType = App.instance.contentResolver.getType(uri) ?: "NONE"
             val detector = when {
-                "application/pdf" in mimeType -> PdfTypeDetector(inputStream)
-                "text/csv" in mimeType || "text/comma-separated-values" in mimeType || "text/plain" in mimeType-> CsvTypeDetector(inputStream)
+                "application/pdf" in mimeType -> PdfImporter(inputStream)
+                "text/csv" in mimeType || "text/comma-separated-values" in mimeType || "text/plain" in mimeType-> CsvImporter(inputStream)
                 else -> {
                     feedback(PdfParserActivityEvents.ERROR).apply{
                         putString("Error 2: ${App.instance.contentResolver.getType(uri)}")

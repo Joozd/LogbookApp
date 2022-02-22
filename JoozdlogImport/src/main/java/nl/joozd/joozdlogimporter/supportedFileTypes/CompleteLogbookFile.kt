@@ -17,8 +17,16 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.supportedFileTypes
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
+import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
+
+abstract class CompleteLogbookFile(lines: List<String>): ImportedFile(lines){
+    abstract val extractor: CompleteLogbookExtractor
+
+    fun extractFlights() =
+        ExtractedCompleteLogbook(
+            extractor.extractFlightsFromLines(data)
+        )
+}

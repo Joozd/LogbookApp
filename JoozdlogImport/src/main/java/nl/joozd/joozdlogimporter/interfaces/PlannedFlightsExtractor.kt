@@ -17,8 +17,10 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.interfaces
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+import java.time.Instant
+
+interface PlannedFlightsExtractor: FlightsExtractor {
+    fun getPeriodFromLines(lines: List<String>): ClosedRange<Instant>?
+}

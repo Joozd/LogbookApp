@@ -17,8 +17,24 @@
  *
  */
 
+package nl.joozd.joozdlogimporter
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+import nl.joozd.joozdlogimporter.interfaces.FileImporter
+import nl.joozd.joozdlogimporter.supportedFileTypes.*
+import java.io.InputStream
+
+/**
+ * Detects type in csv and txt files
+ */
+class CsvImporter(private val inputStream: InputStream): FileImporter() {
+    private fun lines() = inputStream.reader().readLines()
+
+    override fun getFile() = getType(lines())
+
+    private fun getType(lines: List<String>): ImportedFile =
+        MccPilotLogFile.buildIfMatches(lines)
+            ?: LogTenProFile.buildIfMatches(lines)
+            ?: JoozdLogV4File.buildIfMatches(lines)
+            ?: JoozdLogV5File.buildIfMatches(lines)
+            ?: UnsupportedCsvFile(lines)
+}

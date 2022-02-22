@@ -17,8 +17,6 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.interfaces
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+interface CompleteLogbookExtractor: FlightsExtractor

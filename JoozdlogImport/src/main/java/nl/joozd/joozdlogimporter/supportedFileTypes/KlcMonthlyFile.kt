@@ -17,8 +17,22 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.supportedFileTypes
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+import nl.joozd.joozdlogimporter.interfaces.CompletedFlightsExtractor
+import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.KlcMonthlyExtractor
+
+class KlcMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
+    override val extractor: CompletedFlightsExtractor
+        get() = KlcMonthlyExtractor()
+
+    companion object{
+        private const val LINE_TO_LOOK_AT = 0
+        private const val TEXT_TO_SEARCH_FOR = "MONTHLY OVERVIEW"
+
+        fun buildIfMatches(lines: List<String>): KlcMonthlyFile? =
+            if (lines[LINE_TO_LOOK_AT].startsWith(TEXT_TO_SEARCH_FOR))
+                KlcMonthlyFile(lines)
+            else null
+    }
+}

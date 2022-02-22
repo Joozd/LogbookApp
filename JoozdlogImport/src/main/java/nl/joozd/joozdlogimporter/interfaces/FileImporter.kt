@@ -17,8 +17,10 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.interfaces
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+import nl.joozd.joozdlogimporter.supportedFileTypes.ImportedFile
+
+abstract class FileImporter {
+    abstract fun getFile(): ImportedFile
+}

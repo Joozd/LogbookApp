@@ -17,8 +17,10 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.interfaces
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+import nl.joozd.joozdlogcommon.BasicFlight
+
+interface FlightsExtractor {
+    fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight>?
+}

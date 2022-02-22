@@ -17,8 +17,21 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.supportedFileTypes
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+import nl.joozd.joozdlogimporter.interfaces.PlannedFlightsExtractor
+
+class KlcRosterFile(lines: List<String>): PlannedFlightsFile(lines) {
+    override val extractor: PlannedFlightsExtractor
+        get() = TODO("Not yet implemented")
+
+    companion object{
+        private const val LINE_TO_LOOK_AT = 1
+        private const val TEXT_TO_SEARCH_FOR = "Individual duty plan for"
+
+        fun buildIfMatches(lines: List<String>): KlcRosterFile? =
+            if (lines[LINE_TO_LOOK_AT].startsWith(TEXT_TO_SEARCH_FOR))
+                KlcRosterFile(lines)
+            else null
+    }
+}

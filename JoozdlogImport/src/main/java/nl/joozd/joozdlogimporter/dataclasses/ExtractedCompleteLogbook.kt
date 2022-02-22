@@ -17,8 +17,9 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.dataclasses
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+import nl.joozd.joozdlogcommon.BasicFlight
+
+class ExtractedCompleteLogbook(val flights: Collection<BasicFlight>?) {
+}

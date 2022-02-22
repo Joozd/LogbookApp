@@ -17,8 +17,21 @@
  *
  */
 
+package nl.joozd.joozdlogimporter.supportedFileTypes
 
-rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
-include ':joozdlogCommon'
-include ':JoozdlogImport'
+import nl.joozd.joozdlogimporter.interfaces.PlannedFlightsExtractor
+import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.KlcBriefingSheetExtractor
+
+class KlcBriefingSheetFile(lines: List<String>): PlannedFlightsFile(lines) {
+    override val extractor: PlannedFlightsExtractor = KlcBriefingSheetExtractor()
+
+    companion object{
+        private const val LINE_TO_LOOK_AT = 0
+        private const val TEXT_TO_SEARCH_FOR = "Cockpit Briefing for"
+
+        fun buildIfMatches(lines: List<String>): KlcBriefingSheetFile? =
+            if (lines[LINE_TO_LOOK_AT].startsWith(TEXT_TO_SEARCH_FOR))
+                KlcBriefingSheetFile(lines)
+            else null
+    }
+}

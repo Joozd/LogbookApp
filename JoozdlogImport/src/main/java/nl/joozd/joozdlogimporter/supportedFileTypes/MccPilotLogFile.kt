@@ -19,11 +19,20 @@
 
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
+import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
 
 class MccPilotLogFile(lines: List<String>): CompleteLogbookFile(lines) {
     override val extractor: CompleteLogbookExtractor
         get() = TODO("Not yet implemented")
+
+    // MCC PilotLog CSVs can be both ICAO or IATA,
+    // so we look at the first extracted flight's origin and see if is has 4 letters.
+    override val identFormat by lazy {
+        if (extractor.extractFlightsFromLines(data)?.firstOrNull()?.orig?.length == 3)
+            AirportIdentFormat.IATA
+        else AirportIdentFormat.ICAO
+    }
 
     companion object {
         private const val TEXT_TO_SEARCH_FOR =

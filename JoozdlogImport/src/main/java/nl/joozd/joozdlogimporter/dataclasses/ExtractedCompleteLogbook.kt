@@ -20,6 +20,9 @@
 package nl.joozd.joozdlogimporter.dataclasses
 
 import nl.joozd.joozdlogcommon.BasicFlight
+import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 
-class ExtractedCompleteLogbook(val flights: Collection<BasicFlight>?) {
-}
+class ExtractedCompleteLogbook(
+    flights: Collection<BasicFlight>?,
+    identFormat: AirportIdentFormat
+): ExtractedFlights(flights, identFormat)

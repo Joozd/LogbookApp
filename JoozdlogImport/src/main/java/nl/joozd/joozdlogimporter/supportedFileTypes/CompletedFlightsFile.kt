@@ -20,15 +20,21 @@
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
+import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.CompletedFlightsExtractor
 
 abstract class CompletedFlightsFile(lines: List<String>): ImportedFile(lines){
     abstract val extractor: CompletedFlightsExtractor
+    abstract val identFormat: AirportIdentFormat
 
     fun extractCompletedFlights(): ExtractedCompletedFlights {
         val period = extractor.getPeriodFromLines(data)
         val extractedFlights = extractor.extractFlightsFromLines(data)
 
-        return ExtractedCompletedFlights(period, extractedFlights)
+        return ExtractedCompletedFlights(
+            period = period,
+            flights = extractedFlights,
+            identFormat = identFormat
+        )
     }
 }

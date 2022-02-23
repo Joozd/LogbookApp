@@ -17,24 +17,12 @@
  *
  */
 
-package nl.joozd.joozdlogimporter.supportedFileTypes
+package nl.joozd.joozdlogimporter.dataclasses
 
+import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
-import nl.joozd.joozdlogimporter.interfaces.PlannedFlightsExtractor
-import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.KlcBriefingSheetExtractor
 
-class KlcBriefingSheetFile(lines: List<String>): PlannedFlightsFile(lines) {
-    override val extractor: PlannedFlightsExtractor = KlcBriefingSheetExtractor()
-
-    override val identFormat = AirportIdentFormat.IATA
-
-    companion object{
-        private const val LINE_TO_LOOK_AT = 0
-        private const val TEXT_TO_SEARCH_FOR = "Cockpit Briefing for"
-
-        fun buildIfMatches(lines: List<String>): KlcBriefingSheetFile? =
-            if (lines[LINE_TO_LOOK_AT].startsWith(TEXT_TO_SEARCH_FOR))
-                KlcBriefingSheetFile(lines)
-            else null
-    }
-}
+abstract class ExtractedFlights(
+    val flights: Collection<BasicFlight>?,
+    val identFormat: AirportIdentFormat
+    )

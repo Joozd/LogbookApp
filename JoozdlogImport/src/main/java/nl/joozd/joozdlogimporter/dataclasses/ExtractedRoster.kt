@@ -20,6 +20,11 @@
 package nl.joozd.joozdlogimporter.dataclasses
 
 import nl.joozd.joozdlogcommon.BasicFlight
+import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import java.time.Instant
 
-data class ExtractedRoster(val period: ClosedRange<Instant>, val flights: Collection<BasicFlight>)
+class ExtractedRoster(
+    val period: ClosedRange<Instant>?,
+    flights: Collection<BasicFlight>?,
+    identFormat: AirportIdentFormat
+): ExtractedFlights(flights, identFormat)

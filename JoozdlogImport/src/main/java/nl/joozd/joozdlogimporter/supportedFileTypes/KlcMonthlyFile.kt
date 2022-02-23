@@ -19,12 +19,15 @@
 
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
+import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.CompletedFlightsExtractor
 import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.KlcMonthlyExtractor
 
 class KlcMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
     override val extractor: CompletedFlightsExtractor
         get() = KlcMonthlyExtractor()
+
+    override val identFormat = AirportIdentFormat.IATA
 
     companion object{
         private const val LINE_TO_LOOK_AT = 0

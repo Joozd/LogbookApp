@@ -19,11 +19,14 @@
 
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
+import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
 
 class LogTenProFile(lines: List<String>): CompleteLogbookFile(lines) {
     override val extractor: CompleteLogbookExtractor
         get() = TODO("Not yet implemented")
+
+    override val identFormat = AirportIdentFormat.ICAO
 
     companion object {
         private const val TEXT_TO_SEARCH_FOR =

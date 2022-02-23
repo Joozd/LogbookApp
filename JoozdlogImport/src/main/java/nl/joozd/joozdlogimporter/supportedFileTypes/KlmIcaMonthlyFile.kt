@@ -19,11 +19,14 @@
 
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
+import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.CompletedFlightsExtractor
 
 class KlmIcaMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
     override val extractor: CompletedFlightsExtractor
         get() = TODO("Not yet implemented")
+
+    override val identFormat = AirportIdentFormat.IATA
 
     companion object{
         private const val TEXT_TO_SEARCH_FOR = "VOOR VRAGEN OVER VLIEGUREN: FLIGHTCREWSUPPORT@KLM.COM"

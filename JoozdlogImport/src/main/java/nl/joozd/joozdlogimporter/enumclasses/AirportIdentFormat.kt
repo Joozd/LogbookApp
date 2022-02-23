@@ -17,14 +17,9 @@
  *
  */
 
-package nl.joozd.joozdlogimporter.dataclasses
+package nl.joozd.joozdlogimporter.enumclasses
 
-import nl.joozd.joozdlogcommon.BasicFlight
-import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
-import java.time.Instant
-
-class ExtractedPlannedFlights(
-    val period: ClosedRange<Instant>?,
-    flights: Collection<BasicFlight>?,
-    identFormat: AirportIdentFormat
-): ExtractedFlights(flights, identFormat)
+enum class AirportIdentFormat{
+    ICAO,
+    IATA
+}

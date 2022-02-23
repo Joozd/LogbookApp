@@ -20,13 +20,16 @@
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
+import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
 
 abstract class CompleteLogbookFile(lines: List<String>): ImportedFile(lines){
     abstract val extractor: CompleteLogbookExtractor
+    abstract val identFormat: AirportIdentFormat
 
     fun extractFlights() =
         ExtractedCompleteLogbook(
-            extractor.extractFlightsFromLines(data)
+            flights = extractor.extractFlightsFromLines(data),
+            identFormat = identFormat
         )
 }

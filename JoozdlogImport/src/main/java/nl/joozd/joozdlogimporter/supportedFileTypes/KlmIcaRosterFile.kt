@@ -19,11 +19,14 @@
 
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
+import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.PlannedFlightsExtractor
 
 class KlmIcaRosterFile(lines: List<String>): PlannedFlightsFile(lines) {
     override val extractor: PlannedFlightsExtractor
         get() = TODO("Not yet implemented")
+
+    override val identFormat = AirportIdentFormat.IATA
 
     companion object{
         private const val LINE_TO_LOOK_AT = 0

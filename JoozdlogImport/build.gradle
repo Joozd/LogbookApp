@@ -26,6 +26,8 @@ dependencies {
     implementation "com.itextpdf:itextg:5.5.10"
 
     implementation project(":joozdlogCommon")
+
+    testImplementation 'junit:junit:4.13.2'
 }
 
 java {

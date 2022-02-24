@@ -19,21 +19,28 @@
 
 package nl.joozd.logbookapp.data.importing
 
-import nl.joozd.logbookapp.data.importing.pdfparser.ProcessedCompleteFlights
-import nl.joozd.logbookapp.data.importing.pdfparser.ProcessedRoster
-import nl.joozd.logbookapp.data.importing.results.SaveCompleteFlightsResult
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 
-interface ImportedRosterSaver {
-    fun saveRoster(rosterToSave: ProcessedRoster)
-
-    fun saveCompletedFlights(completedFlights: ProcessedCompleteFlights): SaveCompleteFlightsResult
+interface ImportedFlightsSaver {
+    /**
+     * Save a complete logbook (from a backup or import)
+     */
+    suspend fun save(completeLogbook: ExtractedCompleteLogbook)
+    suspend fun save(completedFlights: ExtractedCompletedFlights)
+    suspend fun save(plannedFlights: ExtractedPlannedFlights)
 
     companion object{
+        val instance by lazy { make() }
+
         fun make(
-            repository: FlightRepository = FlightRepositoryWithUndo.instance
-        ): ImportedRosterSaver{
+            flightsRepo: FlightRepository = FlightRepositoryWithUndo.instance,
+            airportsRepo: AirportRepository = AirportRepository.instance
+        ): ImportedFlightsSaver{
             TODO("todo")
         }
     }

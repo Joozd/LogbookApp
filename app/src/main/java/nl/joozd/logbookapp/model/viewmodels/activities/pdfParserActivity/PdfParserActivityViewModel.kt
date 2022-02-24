@@ -33,7 +33,7 @@ import nl.joozd.joozdlogimporter.CsvImporter
 import nl.joozd.joozdlogimporter.PdfImporter
 import nl.joozd.joozdlogimporter.supportedFileTypes.*
 import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.data.importing.ImportedRosterSaver
+import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
 import nl.joozd.logbookapp.data.importing.extensions.postProcess
 import nl.joozd.logbookapp.data.importing.importsParser.JoozdlogParser
 import nl.joozd.logbookapp.data.importing.importsParser.LogTenProParser
@@ -42,7 +42,7 @@ import nl.joozd.logbookapp.data.importing.interfaces.ImportedLogbook
 import nl.joozd.logbookapp.data.importing.interfaces.CompletedFlights
 import nl.joozd.logbookapp.data.importing.interfaces.Roster
 import nl.joozd.logbookapp.data.importing.pdfparser.*
-import nl.joozd.logbookapp.data.importing.results.SaveCompleteFlightsResult
+import nl.joozd.logbookapp.data.importing.results.SaveCompletedFlightsResult
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
@@ -72,7 +72,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
 
 
 
-    private val rosterSaver get() = ImportedRosterSaver.make(FlightRepositoryWithUndo.instance)
+    private val rosterSaver get() = ImportedFlightsSaver.make(FlightRepositoryWithUndo.instance)
 
     val statusLiveData: LiveData<Int>
         get() = _statusLiveData
@@ -80,7 +80,7 @@ class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Holds result of chrono import, null if no chrono was imported before this
      */
-    var chronoImportResult: SaveCompleteFlightsResult? = null
+    var chronoImportResult: SaveCompletedFlightsResult? = null
         private set
 
     private val _statusLiveData = MutableLiveData(STARTING_UP)

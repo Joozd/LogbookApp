@@ -17,21 +17,6 @@
  *
  */
 
-package nl.joozd.joozdlogimporter.supportedFileTypes
+package nl.joozd.logbookapp.data.importing.results
 
-import nl.joozd.joozdlogcommon.BasicFlight
-import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
-import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
-import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
-import kotlin.reflect.typeOf
-
-abstract class CompleteLogbookFile(lines: List<String>): ImportedFile(lines){
-    abstract val extractor: CompleteLogbookExtractor
-    abstract val identFormat: AirportIdentFormat
-
-    fun extractCompletedFlights() = ExtractedCompleteLogbook(
-        flights = extractor.extractFlightsFromLines(data),
-        identFormat = identFormat
-    )
-
-}
+class SaveCompleteLogbookResult(success: Boolean) : SaveFlightsResult

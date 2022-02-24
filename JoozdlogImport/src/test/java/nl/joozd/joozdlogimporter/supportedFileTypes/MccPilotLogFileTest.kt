@@ -31,7 +31,7 @@ class MccPilotLogFileTest {
 
         val t1 = MccPilotLogFile.buildIfMatches(data1)
         assert (t1 is MccPilotLogFile)
-        val e1 = t1!!.extractFlights()
+        val e1 = t1!!.extractCompletedFlights()
 
         assertEquals(1, e1.flights?.size)
         assertEquals(AirportIdentFormat.ICAO, e1.identFormat)
@@ -39,7 +39,7 @@ class MccPilotLogFileTest {
         val t2 = MccPilotLogFile.buildIfMatches(data2)
         assert (t2 is MccPilotLogFile)
 
-        val e2 = t2!!.extractFlights()
+        val e2 = t2!!.extractCompletedFlights()
 
         assertEquals(3, e2.flights?.size)
         assertEquals(AirportIdentFormat.IATA, e2.identFormat)

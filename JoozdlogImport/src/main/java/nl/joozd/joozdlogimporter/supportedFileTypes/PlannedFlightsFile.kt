@@ -19,7 +19,7 @@
 
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
-import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.PlannedFlightsExtractor
 
@@ -31,11 +31,11 @@ abstract class PlannedFlightsFile(lines: List<String>): ImportedFile(lines){
      */
     abstract val identFormat: AirportIdentFormat
 
-    fun extractPlannedFlights(): ExtractedCompletedFlights {
+    fun extractPlannedFlights(): ExtractedPlannedFlights {
         val period = extractor.getPeriodFromLines(data)
         val extractedFlights = extractor.extractFlightsFromLines(data)
 
-        return ExtractedCompletedFlights(
+        return ExtractedPlannedFlights(
             period = period,
             flights = extractedFlights,
             identFormat = identFormat

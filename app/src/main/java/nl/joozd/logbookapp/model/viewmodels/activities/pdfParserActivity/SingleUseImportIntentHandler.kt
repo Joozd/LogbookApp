@@ -28,10 +28,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import nl.joozd.joozdlogimporter.CsvImporter
 import nl.joozd.joozdlogimporter.PdfImporter
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.interfaces.FileImporter
 import nl.joozd.joozdlogimporter.supportedFileTypes.*
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerStatus
+import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.WaitingForUserChoice
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import java.io.FileNotFoundException
@@ -63,7 +67,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
         status = HandlerStatus.READING_URI
         val file = getFileFromIntent(intent, contentResolver) ?: return
         when(file){
-            is CompleteLogbookFile -> parseCompleteLogbook(file)
+            is CompleteLogbookFile -> askIfReplaceOrMerge(file)
             is CompletedFlightsFile -> parseCompletedFlights(file)
             is PlannedFlightsFile -> parsePlannedFlights(file)
             is UnsupportedFile -> {
@@ -73,15 +77,38 @@ class SingleUseImportIntentHandler: CoroutineScope {
         }
     }
 
-    private fun parseCompleteLogbook(file: CompleteLogbookFile){
+    private fun askIfReplaceOrMerge(file: CompleteLogbookFile){
+        val waitingForAction = WaitingForUserChoice.Builder().apply{
+            titleResource = R.string.importing_complete_logbook
+            descriptionResource = R.string.importing_complete_logbook_long
+            choice1Resource = R.string.replace
+            choice2Resource = R.string.merge
+            setAction1{
+                replaceCompleteLogbook(file)
+            }
+            setAction2{
+                mergeCompleteLogbook(file)
+            }
+        }.build()
+    }
+
+    private fun replaceCompleteLogbook(file: CompleteLogbookFile){
+        val extractedFlights: ExtractedCompleteLogbook = file.extractCompletedFlights()
+        TODO("Stub")
+    }
+
+    private fun mergeCompleteLogbook(file: CompleteLogbookFile){
+        val extractedFlights: ExtractedCompleteLogbook = file.extractCompletedFlights()
         TODO("Stub")
     }
 
     private fun parseCompletedFlights(file: CompletedFlightsFile){
         val extractedFlights: ExtractedCompletedFlights = file.extractCompletedFlights()
+        TODO("Stub")
     }
 
     private fun parsePlannedFlights(file: PlannedFlightsFile){
+        val extractedFlights: ExtractedPlannedFlights = file.extractPlannedFlights()
         TODO("Stub")
     }
 

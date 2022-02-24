@@ -17,21 +17,11 @@
  *
  */
 
-package nl.joozd.joozdlogimporter.supportedFileTypes
+package nl.joozd.logbookapp.data.importing.results
 
-import nl.joozd.joozdlogcommon.BasicFlight
-import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
-import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
-import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
-import kotlin.reflect.typeOf
+import nl.joozd.logbookapp.model.dataclasses.Flight
 
-abstract class CompleteLogbookFile(lines: List<String>): ImportedFile(lines){
-    abstract val extractor: CompleteLogbookExtractor
-    abstract val identFormat: AirportIdentFormat
-
-    fun extractCompletedFlights() = ExtractedCompleteLogbook(
-        flights = extractor.extractFlightsFromLines(data),
-        identFormat = identFormat
-    )
-
-}
+/**
+ * [conflicts] is a list of flights in current DB that conflict with imported flights
+ */
+class SaveCompletedFlightsResult(val conflicts: List<Flight>): SaveFlightsResult

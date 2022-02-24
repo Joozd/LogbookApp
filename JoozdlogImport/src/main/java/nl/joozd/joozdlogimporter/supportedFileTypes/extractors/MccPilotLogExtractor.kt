@@ -28,9 +28,8 @@ class MccPilotLogExtractor: CompleteLogbookExtractor {
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     override fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight>? {
-        println("extract flights")
         if (lines.isEmpty()) return null
-        val index = buildIndex(lines).also { println("map: $it")} ?: return null
+        val index = buildIndex(lines) ?: return null
         return lines.drop(1).map{
             makeFlight(it, index) ?: return null
         }
@@ -101,7 +100,6 @@ class MccPilotLogExtractor: CompleteLogbookExtractor {
         index[DEST]?.let{ getOrNull(it) }
 
     private fun List<String>.makeTimeOut(index: Map<String, Int>): Long? {
-        println("${index[TIME_OUT]?.let{ getOrNull(it) }}")
         val s = index[TIME_OUT]?.let{ getOrNull(it) } ?: return null.also { println("error 2")}
         val date = makeDate(index) ?: return null.also { println("error 3")}
         return makeTime(s, date)

@@ -19,4 +19,4 @@
 
 package nl.joozd.logbookapp.data.importing.results
 
-class SaveCompleteFlightsResult(val conflicts: Int, val plannedRemaining: Int)
+class SavePlannedFlightsResult(success: Boolean) : SaveFlightsResult

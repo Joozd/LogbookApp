@@ -77,8 +77,12 @@ class SingleUseImportIntentHandler: CoroutineScope {
         }
     }
 
+    /*
+     * Set status to [WaitingForUserChoice]
+     * which launches either replaceCompleteLogbook or mergeCompleteLogbook
+     */
     private fun askIfReplaceOrMerge(file: CompleteLogbookFile){
-        val waitingForAction = WaitingForUserChoice.Builder().apply{
+        status = WaitingForUserChoice.Builder().apply{
             titleResource = R.string.importing_complete_logbook
             descriptionResource = R.string.importing_complete_logbook_long
             choice1Resource = R.string.replace

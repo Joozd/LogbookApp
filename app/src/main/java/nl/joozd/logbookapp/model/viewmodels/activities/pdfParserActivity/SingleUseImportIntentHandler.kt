@@ -82,28 +82,36 @@ class SingleUseImportIntentHandler: CoroutineScope {
      * which launches either replaceCompleteLogbook or mergeCompleteLogbook
      */
     private fun askIfReplaceOrMerge(file: CompleteLogbookFile){
+        //start extracting flights while waiting for user response
+        val extractedFlightsAsync = async { file.extractCompletedFlights() }
         status = WaitingForUserChoice.Builder().apply{
             titleResource = R.string.importing_complete_logbook
             descriptionResource = R.string.importing_complete_logbook_long
             choice1Resource = R.string.replace
             choice2Resource = R.string.merge
             setAction1{
-                replaceCompleteLogbook(file)
+                replaceCompleteLogbook(extractedFlightsAsync)
             }
             setAction2{
-                mergeCompleteLogbook(file)
+                mergeCompleteLogbook(extractedFlightsAsync)
             }
         }.build()
     }
 
-    private fun replaceCompleteLogbook(file: CompleteLogbookFile){
-        val extractedFlights: ExtractedCompleteLogbook = file.extractCompletedFlights()
-        TODO("Stub")
+    private fun replaceCompleteLogbook(extractedFlightsAsync: Deferred<ExtractedCompleteLogbook>){
+        launch {
+            val extractedFlights = extractedFlightsAsync.await()
+
+            TODO("Stub")
+        }
     }
 
-    private fun mergeCompleteLogbook(file: CompleteLogbookFile){
-        val extractedFlights: ExtractedCompleteLogbook = file.extractCompletedFlights()
-        TODO("Stub")
+    private fun mergeCompleteLogbook(extractedFlightsAsync: Deferred<ExtractedCompleteLogbook>){
+        launch {
+            val extractedFlights = extractedFlightsAsync.await()
+
+            TODO("Stub")
+        }
     }
 
     private fun parseCompletedFlights(file: CompletedFlightsFile){

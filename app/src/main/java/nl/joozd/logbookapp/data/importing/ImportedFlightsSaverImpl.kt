@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.data.importing
 
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
@@ -33,24 +34,26 @@ class ImportedFlightsSaverImpl(
     private val airportRepository: AirportRepository
 ): ImportedFlightsSaver {
     override suspend fun save(completeLogbook: ExtractedCompleteLogbook) {
-        val flights = prepareFlights(completeLogbook)
+        val flights = setAirportsToIcao(completeLogbook)
     }
 
     override suspend fun save(completedFlights: ExtractedCompletedFlights) {
-        TODO("Not yet implemented")
+        val flights = setAirportsToIcao(completedFlights)
     }
 
     override suspend fun save(plannedFlights: ExtractedPlannedFlights) {
-        TODO("Not yet implemented")
+        val flights = setAirportsToIcao(plannedFlights)
     }
 
 
-    private suspend fun prepareFlights(completeLogbook: ExtractedCompleteLogbook): List<Flight>?{
-        val flights = completeLogbook.flights?.map { Flight(it) }
-        return if (completeLogbook.identFormat == AirportIdentFormat.ICAO) flights
-        else flights?.map { it.iataToIcaoAirports(airportRepository.getAirportDataCache()) }
+    private suspend fun setAirportsToIcao(flightsToPrepare: ExtractedFlights): List<Flight>?{
+        val flights = flightsToPrepare.flights?.map { Flight(it) }
+        return if (flightsToPrepare.identFormat == AirportIdentFormat.ICAO) flights
+        else {
+            val adc = airportRepository.getAirportDataCache()
+            flights?.map { it.iataToIcaoAirports(adc) }
+        }
     }
-
 
     private fun Flight.iataToIcaoAirports(adc: AirportDataCache): Flight {
         val o = adc.iataToIcao(orig) ?: orig

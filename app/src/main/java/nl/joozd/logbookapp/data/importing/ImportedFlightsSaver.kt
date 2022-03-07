@@ -41,7 +41,7 @@ interface ImportedFlightsSaver {
             flightsRepo: FlightRepository = FlightRepositoryWithUndo.instance,
             airportsRepo: AirportRepository = AirportRepository.instance
         ): ImportedFlightsSaver{
-            TODO("todo")
+            return ImportedFlightsSaverImpl(flightsRepo, airportsRepo)
         }
     }
 }

@@ -50,5 +50,4 @@ class WaitingForUserChoice(
         fun build(): WaitingForUserChoice =
             WaitingForUserChoice(titleResource!!, descriptionResource!!, choice1Resource!!, choice2Resource!!, action1, action2)
     }
-
 }

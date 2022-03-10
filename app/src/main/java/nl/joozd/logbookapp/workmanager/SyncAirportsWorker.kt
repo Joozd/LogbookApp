@@ -25,90 +25,36 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import nl.joozd.joozdlogcommon.BasicAirport
-import nl.joozd.serializing.SIZE_WRAPPED_INT
-import nl.joozd.serializing.unpackSerialized
-import nl.joozd.serializing.unwrapInt
 import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.data.comm.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.readUntilEOF
-import nl.joozd.logbookapp.utils.DispatcherProvider
-import java.net.URL
 
 class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
-    private val airportsRepository = AirportRepository.instance
-    var progress: Int = 0
-        set(p) {
-            field = p
-            //airportsRepository.setAirportSyncProgress(p)
-        }
-
-
     /**
-     * Try to downlaod airport DB from server. If that fails, try to get it from WWW. If that fails, retry or fail.
+     * Try to download airport DB from server.
      */
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+    override suspend fun doWork(): Result {
         try {
-            val serverDbVersion = Cloud.getAirportDbVersion()
+            val serverDbVersion = withContext(Dispatchers.IO) { Cloud.getAirportDbVersion() }
             Log.d("syncAirportsWorker", "server DB = $serverDbVersion, local DB = ${Preferences.airportDbVersion}")
             when (serverDbVersion) {
-                -1 -> return@withContext (if (getFromWWWIfNeeded()) Result.success() else Result.failure()).also { progress = 100 }                               // -1 is server reported unable
-                -2 -> return@withContext (if (getFromWWWIfNeeded()) Result.success() else Result.retry()).also { progress = 100 }                                 // -2 means connection failure
-                Preferences.airportDbVersion -> return@withContext Result.success().also { progress = 100 }    // DB is up-to-date
+                -1 -> return Result.failure()                              // -1 is server reported unable
+                -2 -> return Result.retry()                                // -2 means connection failure
+                Preferences.airportDbVersion -> return Result.success()    // DB is up-to-date
             }
-            progress = 5
-            Cloud.getAirports { processDownloadProgress(it) }?.map { Airport(it) }?.let {
-                airportsRepository.replaceDbWith(it)
-                progress = 99
-                Preferences.airportDbVersion = serverDbVersion
-                progress = 100
-            } ?: return@withContext Result.retry()                                       // something happened with connection?
-            Result.success()
+            return when (Cloud.downloadAirportsDatabase { processDownloadProgress(it) }){
+                CloudFunctionResults.OK -> Result.success()
+                else -> Result.retry() // connection went bad after checking version; retry
+            }
         }
         catch(exception: Exception) {
             Log.e("SyncAirportsWorker", "exception:\n${exception.stackTraceToString()}")
-            Result.failure()
+            return Result.failure()
         }
-
-    }.also{
-        progress = -1
     }
 
     private fun processDownloadProgress(p: Int){
         Log.d(this::class.simpleName, "processDownloadProgress($p)")
-        progress = 5+p*3/4 // ends at 80
-    }
-
-    /**
-     * Download airport DB over http. Return true if success, false if failed.
-     */
-    private suspend fun getFromWWWIfNeeded(): Boolean{
-        if (Preferences.airportDbVersion == 0){ // only do this if no airport DB loaded yet
-            val inputStream = try{
-                // all work in this class is done on Dispatchers.IO so blocking is OK
-                URL(AIRPORT_DATABASE_URL).openConnection().getInputStream()
-            } catch (e: Exception) {
-                Log.w("SyncAirportsWorker", "Could not get Airport DB from http source")
-                return false
-            }
-            inputStream.use{
-                progress = 5
-                val rawAirports = it.readUntilEOF()
-                val version = unwrapInt(rawAirports.take(SIZE_WRAPPED_INT).toByteArray())
-                val airports = unpackSerialized(rawAirports.drop(SIZE_WRAPPED_INT).toByteArray()).map { bytes -> BasicAirport.deserialize(bytes)}.map{ba -> Airport(ba)}
-                progress = 50
-                airportsRepository.replaceDbWith(airports)
-                Preferences.airportDbVersion = version
-                return true
-            }
-
-        }
-        return false // if airport DB is not null, not grabbing it from www
-    }
-    companion object{
-        const val AIRPORT_DATABASE_URL = "https://joozd.nl/joozdlog/airports"
     }
 }

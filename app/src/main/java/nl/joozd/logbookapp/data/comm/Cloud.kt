@@ -27,7 +27,8 @@ import nl.joozd.comms.Client
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.joozdlogcommon.FeedbackData
 import nl.joozd.joozdlogcommon.ForcedTypeData
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.dataclasses.Airport
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
@@ -229,10 +230,22 @@ object Cloud {
     }
 
     // returns List<BasicAirport>
-    suspend fun getAirports(listener: (Int) -> Unit = {}) = withContext(DispatcherProvider.io()) {
-        Client.getInstance().use {
-            ServerFunctions.getAirports(it, listener)
+    suspend fun downloadAirportsDatabase(listener: (Int) -> Unit = {}): CloudFunctionResults {
+        val serverDbVersion = withContext(DispatcherProvider.io()) { getAirportDbVersion() }
+        when(serverDbVersion){
+            -1 -> return CloudFunctionResults.SERVER_ERROR
+            -2 -> return CloudFunctionResults.CLIENT_ERROR
         }
+        val airports = withContext(DispatcherProvider.io()) {
+            Client.getInstance().use {
+                ServerFunctions.getAirports(it, listener)
+            }
+        }?.map { Airport(it) } ?: return CloudFunctionResults.SERVER_ERROR
+
+        AirportRepository.instance.replaceDbWith(airports)
+        Preferences.airportDbVersion = serverDbVersion
+
+        return CloudFunctionResults.OK
     }
 
     /**********************************************************************************************
@@ -361,7 +374,7 @@ object Cloud {
      * If login failed due to bad login data, set flag
      */
     private suspend fun loginAndHandleIfThatFails(server: Client): Unit?{
-        return when (val result = ServerFunctions.login(server)) {
+        return when (val result = withContext(DispatcherProvider.io()) { ServerFunctions.login(server) }) {
             CloudFunctionResults.OK -> Unit
             CloudFunctionResults.UNKNOWN_USER_OR_PASS, CloudFunctionResults.NOT_LOGGED_IN -> {
                 this.loginDataValid = false

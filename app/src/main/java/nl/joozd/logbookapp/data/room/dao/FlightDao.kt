@@ -38,6 +38,9 @@ interface FlightDao {
     @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 AND flightID IN (:ids)")
     suspend fun getFlightsByID(ids: Collection<Int>): List<FlightData>
 
+    @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 AND timeOut >= :startEpochSecond AND timeOut <= :endEpochSecond")
+    suspend fun getFlightsStartingBetween(startEpochSecond: Long, endEpochSecond: Long): List<FlightData>
+
     @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
     suspend fun getAllFlights(): List<FlightData>
 

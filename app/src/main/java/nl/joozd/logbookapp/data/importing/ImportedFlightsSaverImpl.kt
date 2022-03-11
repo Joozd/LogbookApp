@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.importing
 
+import kotlinx.coroutines.withContext
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedFlights
@@ -28,21 +29,56 @@ import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.utils.DispatcherProvider
 
+
+/**
+ * ImportedFlightsSaver saves imported flights into [FlightRepository]
+ * It accepts both ICAO and IATA formats for airports.
+ */
 class ImportedFlightsSaverImpl(
     private val flightsRepo: FlightRepository,
     private val airportRepository: AirportRepository
 ): ImportedFlightsSaver {
+    /**
+     * Merge a complete logbook into current logbook.
+     * Only checks for exact time, orig and dest matches, otherwise will allow overlapping flights.
+     * Imported flights will be merged onto flights already in logbook
+     * @see mergeFlights
+     */
     override suspend fun save(completeLogbook: ExtractedCompleteLogbook) {
-        val flights = setAirportsToIcao(completeLogbook)
+        val flights = setAirportsToIcao(completeLogbook)?: emptyList()
+        val flightsOnDevice = flightsRepo.getAllFlights()
+        // This makes a list of pairs.
+        // mergeFlights will merge second onto first, overwriting any non-empty data.
+        // This can take some time for large datasets
+        // (eg. checking 10K flights against 10K other flights might be 100M checks)
+        // so I offloaded it to a different coroutine to keep Main thread from filling up.
+        val matchingFlights = withContext(DispatcherProvider.default()){ getMatchingFlightsExactTimes(flightsOnDevice, flights) }
+        val mergedFlights = mergeFlights(matchingFlights)
+        val newFlights = getNonMatchingFlightsExactTimes(flightsOnDevice, flights)
+
+        flightsRepo.save(mergedFlights + newFlights)
     }
 
+    /**
+     * Merge completed flights into logbook.
+     * Will check for same flights (flightnumber, orig and dest) departing on the same
+     *  (UTC) calendar day and update times if such a flight is found.
+     */
     override suspend fun save(completedFlights: ExtractedCompletedFlights) {
         val flights = setAirportsToIcao(completedFlights)
+        TODO("Stub")
     }
 
+    /**
+     * Save planned flights,
+     * Will merge with existing exact matches (times, orig, dest),
+     * Will remove all other planned flights in its period.
+     */
     override suspend fun save(plannedFlights: ExtractedPlannedFlights) {
         val flights = setAirportsToIcao(plannedFlights)
+        TODO("Stub")
     }
 
 
@@ -60,6 +96,4 @@ class ImportedFlightsSaverImpl(
         val d = adc.iataToIcao(dest) ?: dest
         return copy(orig = o, dest = d)
     }
-
-
 }

@@ -25,6 +25,12 @@ import android.content.Context
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.launch
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
@@ -48,6 +54,14 @@ open class JoozdlogActivity: AppCompatActivity() {
     fun closeAndStartMainActivity(){
         startMainActivity(this)
         finish()
+    }
+
+    protected fun <T> Flow<T>.launchCollectWhileLifecycleStateStarted(collector: FlowCollector<T>){
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                collect(collector)
+            }
+        }
     }
 
     fun startMainActivity(context: Context) = with (context) {

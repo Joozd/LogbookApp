@@ -51,6 +51,10 @@ class FlightRepositoryImpl(
     override suspend fun getFlightsByID(ids: Collection<Int>): List<Flight> =
         flightDao.getFlightsByID(ids).map{ it.toFlight() }
 
+    override suspend fun getFlightsStartingInEpochSecondRange(range: ClosedRange<Long>) {
+        flightDao.getFlightsStartingBetween(range.start, range.endInclusive).map{ it.toFlight() }
+    }
+
     override suspend fun getAllFlightsInDB(): List<Flight> =
         flightDao.getAllFlights().map { it.toFlight() }
 

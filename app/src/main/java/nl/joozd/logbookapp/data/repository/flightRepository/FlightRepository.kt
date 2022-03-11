@@ -38,6 +38,11 @@ interface FlightRepository {
     suspend fun getFlightsByID(ids: Collection<Int>): List<Flight>
 
     /**
+     * Get all flights starting in [range]
+     */
+    suspend fun getFlightsStartingInEpochSecondRange(range: ClosedRange<Long>)
+
+    /**
      * Get a Flow of all valid (DELETEFLAG = false) Flights
      */
     fun allFlightsFlow(): Flow<List<Flight>>

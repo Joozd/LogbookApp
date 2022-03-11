@@ -34,6 +34,8 @@ import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.interfaces.FileImporter
 import nl.joozd.joozdlogimporter.supportedFileTypes.*
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
+import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerError
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerStatus
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.WaitingForUserChoice
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
@@ -66,12 +68,13 @@ class SingleUseImportIntentHandler: CoroutineScope {
     private suspend fun getFileAndStartAppropriateParser(intent: Intent, contentResolver: ContentResolver){
         status = HandlerStatus.READING_URI
         val file = getFileFromIntent(intent, contentResolver) ?: return
+
         when(file){
             is CompleteLogbookFile -> askIfReplaceOrMerge(file)
             is CompletedFlightsFile -> parseCompletedFlights(file)
             is PlannedFlightsFile -> parsePlannedFlights(file)
             is UnsupportedFile -> {
-                status = HandlerStatus.RECEIVED_UNSUPPORTED_FILE
+                status = HandlerError(R.string.unknown_file_message)
                 return
             }
         }
@@ -108,9 +111,11 @@ class SingleUseImportIntentHandler: CoroutineScope {
 
     private fun mergeCompleteLogbook(extractedFlightsAsync: Deferred<ExtractedCompleteLogbook>){
         launch {
+            status = HandlerStatus.EXTRACTING_FLIGHTS
             val extractedFlights = extractedFlightsAsync.await()
-
-            TODO("Stub")
+            status = HandlerStatus.SAVING_FLIGHTS
+            ImportedFlightsSaver.instance.save(extractedFlights)
+            status = HandlerStatus.DONE
         }
     }
 
@@ -142,7 +147,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
                 mimeType.isPdfMimeType() -> PdfImporter(inputStream)
                 mimeType.isCsvMimeType() -> CsvImporter(inputStream)
                 else -> {
-                    status = HandlerStatus.RECEIVED_UNSUPPORTED_FILE
+                    status = HandlerError(R.string.unknown_file_message)
                     null
                 }
             }
@@ -155,13 +160,13 @@ class SingleUseImportIntentHandler: CoroutineScope {
      */
     private fun Uri?.getInputStream(contentResolver: ContentResolver): InputStream? =
         if (this == null){
-            status = HandlerStatus.RECEIVED_BAD_INTENT
+            status = HandlerError(R.string.bad_intent_error)
             null
         }
         else try {
             contentResolver.openInputStream(this)
         } catch (e: FileNotFoundException) {
-            status = HandlerStatus.FILE_NOT_FOUND
+            status = HandlerError(R.string.file_not_found_message)
             null
     }
 

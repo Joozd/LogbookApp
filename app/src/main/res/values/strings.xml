@@ -169,7 +169,9 @@
     <string name="file_not_found_message">An error occurred while retreiving the file you are trying to import.</string>
 
     <string name="unknown_file_title">Unknown File</string>
-    <string name="unknown_file_message">The file youare trying to import into Joozdlog is not supported yet. If you want it to be, please mail it to joozdlog@joozd.nl and if I feel like it I might support it in a future version.</string>
+    <string name="unknown_file_message">The file you are trying to import into Joozdlog is not supported yet. If you want it to be, please mail it to joozdlog@joozd.nl and I might support it in a future version.</string>
+    <string name="bad_intent_error">Error importing file: bad_intent_error</string>
+
 
 
     <string name="total_time_too_large">Total time cannot be more than offblocks to on blocks</string>
@@ -320,12 +322,10 @@
 
     <string name="waiting_for_data">Waiting for data…</string>
     <string name="receivedIntent">Receiving data</string>
-    <string name="readingFile">Reading file</string>
-    <string name="reading_roster">getting flights from roster…</string>
-    <string name="reading_chrono">getting flights…</string>
-    <string name="removingOldFlights">Removing old flights</string>
-    <string name="insertNewFlights">Inserting new flights</string>
-    <string name="writingToStorage">Writing data to storage</string>
+    <string name="reading_file">Reading file</string>
+    <string name="extracting_flights">Extracting flights</string>
+    <string name="saving_flights">Saving flights</string>
+
 
     <string name="chrono_conflict_found">Conflict found</string>
     <string name="chrono_conflict_found_long">Your overview was imported, but %1$d conflicting flights were already in your logbook. Please check the period for which you just imported an overview for correct data!</string>
@@ -340,6 +340,9 @@
     <string name="importing_complete_logbook_long">You are importing a complete logbook. Do you want to delete and replace your current logbook, or merge it?</string>
     <string name="replace">Replace</string>
     <string name="merge">Merge</string>
+    <string name="no_airport_db_for_importing">No airport DB was downloaded, and none could be found. Please check if your device is connected to the internet and try again.</string>
+    <string name="downloading_airports">Downloading airports DB…</string>
+
 
 
     <string name="XXXXXXXXXXXXXXX">XXXXXXXXXXXXXXX</string>

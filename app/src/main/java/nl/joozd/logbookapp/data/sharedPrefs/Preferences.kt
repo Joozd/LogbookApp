@@ -195,6 +195,7 @@ object Preferences {
 
     var nextCalendarCheckTime: Long by JoozdLogSharedPrefs(sharedPref, -1)
 
+    // in epochseconds
     var calendarDisabledUntil: Long by JoozdLogSharedPrefs(sharedPref, 0)
 
     /**

@@ -25,7 +25,7 @@ import java.util.*
  * Helper class for names.
  */
 data class Name(val first: String = "", val last: String = "", val middle: String = "") {
-    val checkMyName = (if (middle.isNotEmpty()) "$first $last, $middle" else "$first $last")
+    val formattedAsMyName = (if (middle.isNotEmpty()) "$first $last, $middle" else "$first $last")
         .uppercase(Locale.ROOT)
 
     override fun toString() = listOf(first, middle.lowercase(Locale.ROOT), last).filter { it.isNotBlank() }.joinToString(" ")

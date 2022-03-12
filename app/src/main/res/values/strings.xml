@@ -232,6 +232,7 @@
     <string name="delete_calendar_flight_until_end">Until end of flight</string>
     <string name="you_can_start_calendar_sync_again">You can start calendar synchronizing again by re-enabling it in the Settings menu</string>
     <string name="always_postpone_calendar_sync">Always postpone on manual import</string>
+    <string name="postpone_sync">Postpone sync</string>
 
 
     <!--
@@ -435,6 +436,11 @@
     <string name="loggings_preferences">General Preferences</string>
     <string name="backup_preferences">Backup Preferences</string>
     <string name="backup_prefs_description">You should periodically backup your logbook.</string>
+
+
+    <string name="not_implemented_title">Not Implemented</string>
+    <string name="not_implemented_body">This operation is not implemented yet. Nothing will happen now.</string>
+
 
 
     <string name="fake_hidden_password">••••••••••</string>

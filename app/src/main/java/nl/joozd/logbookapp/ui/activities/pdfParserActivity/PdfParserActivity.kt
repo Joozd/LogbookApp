@@ -66,6 +66,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                 HandlerStatus.EXTRACTING_FLIGHTS -> pdfParserStatusTextView.text = getString(R.string.extracting_flights)
                 HandlerStatus.CLEANING_LOGBOOK -> pdfParserStatusTextView.text = getString(R.string.cleaning_logbook)
                 HandlerStatus.SAVING_FLIGHTS -> pdfParserStatusTextView.text = getString(R.string.saving_flights)
+                HandlerStatus.NOT_IMPLEMENTED -> showNotImplementedDialog()
                 HandlerStatus.DONE -> closeAndStartMainActivity()
                 is HandlerError -> showHandlerError(it)
                 is UserChoice -> showUserChoiceDialog(it)
@@ -92,7 +93,16 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
             setPositiveButton(android.R.string.ok){ _, _ ->
                 finish()
             }
-        }
+        }.create().show()
+
+    private fun showNotImplementedDialog() =
+        AlertDialog.Builder(this).apply{
+            setTitle(R.string.not_implemented_title)
+            setTitle(R.string.not_implemented_body)
+            setPositiveButton(android.R.string.ok){ _, _ ->
+                finish()
+            }
+        }.create().show()
 
     private fun checkAirportDatabaseAvailable(): Boolean =
         Preferences.airportDbVersion > 0

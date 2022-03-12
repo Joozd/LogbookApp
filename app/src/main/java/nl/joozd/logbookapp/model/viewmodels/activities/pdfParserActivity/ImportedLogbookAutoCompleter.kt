@@ -21,10 +21,14 @@ package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedFlights
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
+import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.data.repository.helpers.iataToIcaoAirports
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -41,25 +45,39 @@ class ImportedLogbookAutoCompleter(
     val airportRepository: AirportRepository = AirportRepository.instance
 ) {
     suspend fun autocomplete(importedLogbook: ExtractedCompleteLogbook): SanitizedCompleteLogbook{
-        val aircraftDataCache = aircraftRepository.getAircraftDataCache()
-        val airportDataCache = airportRepository.getAirportDataCache()
-
-        val dirtyFlights = importedLogbook.flightsWithUppercaseRegs() ?: return SanitizedCompleteLogbook(null)
-
-        val rtMap = makeRegistrationToTypesMap(dirtyFlights)
-
-        val cleanedFlights = dirtyFlights.map{
-            println("Cleaning $it")
-            if (it.isSim) it else
-            it.fixAircraftType(rtMap, aircraftDataCache)
-                .autoValues(airportDataCache, aircraftDataCache)
-        }
-        return SanitizedCompleteLogbook(cleanedFlights)
+        val dirtyFlights = importedLogbook.flights?.flightsWithUppercaseRegs() ?: return SanitizedCompleteLogbook(null)
+        return SanitizedCompleteLogbook(sanitizeFlights(dirtyFlights, importedLogbook.identFormat))
     }
 
+    suspend fun autocomplete(plannedFlights: ExtractedPlannedFlights): SanitizedPlannedFlights{
+        val period = plannedFlights.period
+        val dirtyFlights = plannedFlights.flights?.flightsWithUppercaseRegs() ?: return SanitizedPlannedFlights(null, period)
+        return SanitizedPlannedFlights(sanitizeFlights(dirtyFlights, plannedFlights.identFormat), period)
+    }
+
+    private suspend fun sanitizeFlights(flights: Collection<BasicFlight>, identFormat: AirportIdentFormat): List<BasicFlight>{
+        val aircraftDataCache = aircraftRepository.getAircraftDataCache()
+        val airportDataCache = airportRepository.getAirportDataCache()
+        val f = if (identFormat == AirportIdentFormat.ICAO) flights else iataToIcaoAirports(flights, airportDataCache)
+        val rtMap = makeRegistrationToTypesMap(f)
+
+        return f.map{
+            if (it.isSim) it else
+                it.fixAircraftType(rtMap, aircraftDataCache)
+                    .autoValues(airportDataCache, aircraftDataCache)
+        }
+    }
+
+    private fun iataToIcaoAirports(
+        flights: Collection<BasicFlight>,
+        adc: AirportDataCache
+    ): List<BasicFlight> =
+        flights.map { Flight(it).iataToIcaoAirports(adc).toBasicFlight() }
+
+
     //make sure all registrations are uppercase because we want it to be not case-sensitive
-    private fun ExtractedCompleteLogbook.flightsWithUppercaseRegs() =
-        flights?.map { it.copy(registration = it.registration.uppercase()) }
+    private fun Collection<BasicFlight>.flightsWithUppercaseRegs() =
+        map { it.copy(registration = it.registration.uppercase()) }
 
     /*
      * Priority:
@@ -74,14 +92,15 @@ class ImportedLogbookAutoCompleter(
             aircraft.isNotBlank() -> this
             else -> rtMap[registration]?.let { this.copy(aircraft = it) }
                 ?: adc.getAircraftFromRegistration(registration)?.type?.let { this.copy(aircraft = it.shortName) }
-                ?: this.also { printWhyNoTypeFound(rtMap, adc)}
+                ?: this // .also { printWhyNoTypeFound(rtMap, adc)} // FOR DEBUG
         }
 
     private fun BasicFlight.printWhyNoTypeFound(rtMap: Map<String, String>, adc: AircraftDataCache){
         println("reg:   $registration")
         println("type:  $aircraft")
         println("rtMap: ${rtMap[registration]}")
-        println("adc:   ${adc.getAircraftFromRegistration(registration)}\n\n")
+        println("gfr:   ${adc.getAircraftFromRegistration(registration)}")
+        println("adc:   ${adc.getRegistrationToAircraftMap().entries.joinToString("\n")}\n\n")
     }
 
 

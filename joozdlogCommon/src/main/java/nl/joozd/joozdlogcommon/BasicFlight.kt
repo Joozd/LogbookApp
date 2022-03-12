@@ -186,7 +186,7 @@ data class BasicFlight(
                 isPF = false,
                 isPlanned = true,
                 changed = true,
-                autoFill = false,
+                autoFill = true,
                 augmentedCrew = 0,
                 DELETEFLAG = false,
                 timeStamp = -1,          // timeStamp is time of synch with server for this flight

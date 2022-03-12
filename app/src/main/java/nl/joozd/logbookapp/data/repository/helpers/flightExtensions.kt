@@ -166,3 +166,9 @@ private fun increaseFlightnumberByOne(fn: String): String {
 }
 
 fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.uppercase(Locale.ROOT).trim() == other.flightNumber.uppercase(Locale.ROOT).trim()
+
+fun Flight.iataToIcaoAirports(adc: AirportDataCache): Flight {
+    val o = adc.iataToIcao(orig) ?: orig
+    val d = adc.iataToIcao(dest) ?: dest
+    return copy(orig = o, dest = d)
+}

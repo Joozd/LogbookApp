@@ -35,6 +35,7 @@ import nl.joozd.joozdlogimporter.interfaces.FileImporter
 import nl.joozd.joozdlogimporter.supportedFileTypes.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerError
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerStatus
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.UserChoice
@@ -68,9 +69,10 @@ class SingleUseImportIntentHandler: CoroutineScope {
     private suspend fun getFileAndStartAppropriateParser(intent: Intent, contentResolver: ContentResolver){
         status = HandlerStatus.READING_URI
         val file = getFileFromIntent(intent, contentResolver) ?: return
+        println("GOT FILE of type ${file::class.simpleName}")
 
         when(file){
-            is CompleteLogbookFile -> askIfDataShouldBeSanitized(file)
+            is CompleteLogbookFile -> parseCompleteLogbook(file)
             is CompletedFlightsFile -> parseCompletedFlights(file)
             is PlannedFlightsFile -> parsePlannedFlights(file)
             is UnsupportedFile -> {
@@ -80,64 +82,52 @@ class SingleUseImportIntentHandler: CoroutineScope {
         }
     }
 
-    private fun askIfDataShouldBeSanitized(file: CompleteLogbookFile){
-        val extractedLogbookAsync = async { file.extractCompletedFlights() }
-        status = UserChoice.Builder().apply{
-            titleResource = R.string.importing_complete_logbook
-            descriptionResource = R.string.import_complete_logbook_sanitize
-            choice1Resource = R.string.yes
-            choice2Resource = R.string.no
-            setAction1{
-                launch {
-                    status = HandlerStatus.CLEANING_LOGBOOK
-                    val sanitizedLogbook = sanitizeLogbook(extractedLogbookAsync.await())
-                    askIfReplaceOrMerge(sanitizedLogbook)
-                }
-            }
-            setAction2{
-                launch {
-                    askIfReplaceOrMerge(extractedLogbookAsync.await())
-                }
-            }
-        }.build()
-    }
-
-    /*
-     * Set status to [WaitingForUserChoice]
-     * which launches either replaceCompleteLogbook or mergeCompleteLogbook
-     */
-    private fun askIfReplaceOrMerge(extractedLogbook: ExtractedCompleteLogbook){
+    private fun parseCompleteLogbook(file: CompleteLogbookFile){
         //start extracting flights while waiting for user response
-        status = UserChoice.Builder().apply{
-            titleResource = R.string.importing_complete_logbook
-            descriptionResource = R.string.importing_complete_logbook_long
-            choice1Resource = R.string.replace
-            choice2Resource = R.string.merge
-            setAction1{
-                replaceCompleteLogbook(extractedLogbook)
-            }
-            setAction2{
-                mergeCompleteLogbook(extractedLogbook)
-            }
-        }.build()
+        status = HandlerStatus.EXTRACTING_FLIGHTS
+        val extractedLogbookAsync = async { file.extractCompletedFlights() }
+        askIfDataShouldBeSanitized(extractedLogbookAsync)
     }
 
-    private fun replaceCompleteLogbook(extractedFlights: ExtractedCompleteLogbook){
+    private fun parseCompletedFlights(file: CompletedFlightsFile){
+        val extractedFlights: ExtractedCompletedFlights = file.extractCompletedFlights()
+        TODO("Stub")
+    }
+
+    private fun parsePlannedFlights(file: PlannedFlightsFile){
         launch {
-            TODO("Stub")
-            /*
-            This should:
-            -nuke complete logbook
-            -make new login data
-            -send login data link if email set
-            -save extractedFlights
-            -let user know that a new login link has been made
-             */
+            status = HandlerStatus.EXTRACTING_FLIGHTS
+            val extractedFlights: ExtractedPlannedFlights = extractAndAutocomplete(file)
+            if (Preferences.alwaysPostponeCalendarSync) {
+                status = HandlerStatus.SAVING_FLIGHTS
+                saveAndPostponeCalendarSync(extractedFlights)
+                status = HandlerStatus.DONE
+            }
+            else status = buildPostponeCalendarSyncUserChoice(extractedFlights)
         }
+    }
+
+    private suspend fun extractAndAutocomplete(file: PlannedFlightsFile) =
+        ImportedLogbookAutoCompleter().autocomplete(file.extractPlannedFlights())
+
+    private fun askIfDataShouldBeSanitized(extractedLogbookAsync: Deferred<ExtractedCompleteLogbook>){
+        // Will give user a choice to run [sanitizeLogbook] before running [askIfReplaceOrMerge]
+        status = buildAutoValuesCompleteLogbookChoice(extractedLogbookAsync)
     }
 
     private suspend fun sanitizeLogbook(logbook: ExtractedCompleteLogbook): ExtractedCompleteLogbook =
         ImportedLogbookAutoCompleter().autocomplete(logbook)
+
+    private fun askIfReplaceOrMerge(extractedLogbook: ExtractedCompleteLogbook){
+        // Will give user the coice between running  [replaceCompleteLogbook] or [mergeCompleteLogbook]
+        status = buildMergeOrReplaceCompleteLogbookChoice(extractedLogbook)
+    }
+
+    private fun replaceCompleteLogbook(extractedFlights: ExtractedCompleteLogbook){
+        launch {
+            status = HandlerStatus.NOT_IMPLEMENTED
+        }
+    }
 
     private fun mergeCompleteLogbook(extractedFlights: ExtractedCompleteLogbook){
         launch {
@@ -148,14 +138,65 @@ class SingleUseImportIntentHandler: CoroutineScope {
         }
     }
 
-    private fun parseCompletedFlights(file: CompletedFlightsFile){
-        val extractedFlights: ExtractedCompletedFlights = file.extractCompletedFlights()
-        TODO("Stub")
-    }
+    private fun buildMergeOrReplaceCompleteLogbookChoice(extractedLogbook: ExtractedCompleteLogbook) =
+        UserChoice.Builder().apply {
+            titleResource = R.string.importing_complete_logbook
+            descriptionResource = R.string.importing_complete_logbook_long
+            choice1Resource = R.string.replace
+            choice2Resource = R.string.merge
+            setAction1 {
+                replaceCompleteLogbook(extractedLogbook)
+            }
+            setAction2 {
+                mergeCompleteLogbook(extractedLogbook)
+            }
+        }.build()
 
-    private fun parsePlannedFlights(file: PlannedFlightsFile){
-        val extractedFlights: ExtractedPlannedFlights = file.extractPlannedFlights()
-        TODO("Stub")
+    private fun buildAutoValuesCompleteLogbookChoice(extractedLogbookAsync: Deferred<ExtractedCompleteLogbook>) =
+        UserChoice.Builder().apply {
+            titleResource = R.string.importing_complete_logbook
+            descriptionResource = R.string.import_complete_logbook_sanitize
+            choice1Resource = R.string.yes
+            choice2Resource = R.string.no
+            setAction1 {
+                launch {
+                    status = HandlerStatus.CLEANING_LOGBOOK
+                    val sanitizedLogbook = sanitizeLogbook(extractedLogbookAsync.await())
+                    askIfReplaceOrMerge(sanitizedLogbook)
+                }
+            }
+            setAction2 {
+                launch {
+                    askIfReplaceOrMerge(extractedLogbookAsync.await())
+                }
+            }
+        }.build()
+
+    private fun buildPostponeCalendarSyncUserChoice(extractedFlights: ExtractedPlannedFlights) =
+        UserChoice.Builder().apply {
+            titleResource = R.string.calendar_sync_conflict
+            descriptionResource = R.string.calendar_update_active
+            choice1Resource = R.string.postpone_sync
+            choice2Resource = android.R.string.cancel
+            setAction1 {
+                launch {
+                    Preferences.alwaysPostponeCalendarSync = true
+                    status = HandlerStatus.SAVING_FLIGHTS
+                    println("saving")
+                    saveAndPostponeCalendarSync(extractedFlights)
+                    println("Done saving")
+                    status = HandlerStatus.DONE
+                }
+            }
+            setAction2 {
+                status = HandlerStatus.DONE
+            }
+        }.build()
+
+    private suspend fun saveAndPostponeCalendarSync(extractedFlights: ExtractedPlannedFlights) {
+        Preferences.calendarDisabledUntil =
+            extractedFlights.period?.endInclusive ?: return // no period = no sync
+        ImportedFlightsSaver.instance.save(extractedFlights)
     }
 
     private suspend fun getFileFromIntent(intent: Intent, contentResolver: ContentResolver) =

@@ -89,10 +89,10 @@ class FlightRepositoryImpl(
     override suspend fun saveDirectToDB(flights: Collection<Flight>) {
         //If size too big, it will chunk and retry.
         if (flights.size > MAX_SQL_BATCH_SIZE)
-            flights.chunked(MAX_SQL_BATCH_SIZE).forEach { saveDirectToDB(it) }
+            flights.chunked(MAX_SQL_BATCH_SIZE).forEach { withContext(DispatcherProvider.io()) { saveDirectToDB(it) } }
 
         else withContext(DispatcherProvider.io()) {
-            flightDao.save(flights.map { it.toData() })
+            withContext(DispatcherProvider.io()) { flightDao.save(flights.map { it.toData() }) }
         }
     }
 

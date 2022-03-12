@@ -23,7 +23,7 @@ import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import java.time.Instant
 
-class ExtractedPlannedFlights(
+open class ExtractedPlannedFlights(
     val period: ClosedRange<Long>?,
     flights: Collection<BasicFlight>?,
     identFormat: AirportIdentFormat

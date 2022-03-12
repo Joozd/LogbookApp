@@ -28,6 +28,7 @@ import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.helpers.iataToIcaoAirports
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.DispatcherProvider
 
@@ -74,13 +75,23 @@ class ImportedFlightsSaverImpl(
 
     /**
      * Save planned flights,
-     * Will merge with existing exact matches (times, orig, dest),
+     * Will merge with existing exact matches (times, orig, dest) so we don't lose data
      * Will remove all other planned flights in its period.
+     * TODO don't add completed flights that are planned in here, eg. prevent double flights from getting into logbook
+     * TODO this generates two undo actions, needs fixing
      */
     override suspend fun save(plannedFlights: ExtractedPlannedFlights) {
         val flights = getFlightsWithIcaoAirportsInPeriod(plannedFlights) ?: return
-        val flightsOnDevice = flightsRepo.getAllFlights()
-        TODO("Stub")
+        val plannedFlightsOnDevice = getPlannedFlightsOnDevice(plannedFlights.period ?: return)
+
+        val matchingFlights = getMatchingFlightsExactTimes(plannedFlightsOnDevice, flights)
+        val mergedFlights = mergeFlights(matchingFlights)
+
+        val newFlights = getNonMatchingFlightsExactTimes(plannedFlightsOnDevice, flights)
+
+        //Deleting planned flights does not pollute DB as they are not synced to server and thus deleted hard.
+        flightsRepo.delete(plannedFlightsOnDevice)
+        flightsRepo.save(mergedFlights + newFlights)
     }
 
     private suspend fun getFlightsWithIcaoAirportsInPeriod(
@@ -97,6 +108,9 @@ class ImportedFlightsSaverImpl(
             it.timeOut in (plannedFlights.period!!)
         }
 
+    private suspend fun getPlannedFlightsOnDevice(period: ClosedRange<Long>): List<Flight> =
+        flightsRepo.getAllFlights().filter { it.isPlanned }.filter { it.timeOut in (period) }
+
 
     private suspend fun makeFlightsWithIcaoAirports(flightsToPrepare: ExtractedFlights): List<Flight>?{
         val flights = flightsToPrepare.flights?.map { Flight(it) }
@@ -105,11 +119,5 @@ class ImportedFlightsSaverImpl(
             val adc = airportRepository.getAirportDataCache()
             flights?.map { it.iataToIcaoAirports(adc) }
         }
-    }
-
-    private fun Flight.iataToIcaoAirports(adc: AirportDataCache): Flight {
-        val o = adc.iataToIcao(orig) ?: orig
-        val d = adc.iataToIcao(dest) ?: dest
-        return copy(orig = o, dest = d)
     }
 }

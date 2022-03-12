@@ -79,7 +79,7 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
 
     private fun getMyName(lines: List<String>): String {
         val l = lines.first()
-        return l.substring(MY_NAME_START.length..l.indexOf(MY_NAME_END))
+        return l.substring(MY_NAME_START.length..l.indexOf(MY_NAME_END)).trim().uppercase()
     }
 
     private fun addNamesToFlights(flights: List<BasicFlight>, crewLines: List<String>, myName: String): List<BasicFlight>{
@@ -137,14 +137,18 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
         val numbers = line.getNumbers()
         if (numbers.isEmpty()) return
         numbers.indices.forEach { i ->
-            if (i != numbers.indices.last) {
-                val n = numbers[i].toString()
+            val n = numbers[i].toString()
+            val raw = if (i != numbers.indices.last) {
                 val next = numbers[i + 1].toString()
                 //raw is all text between this number and the next
-                val raw = line.substring(line.indexOf(n) + n.length..line.indexOf(next)).trim()
-                if (raw.isNotBlank())
-                    set(numbers[i], rawNameToName(raw, myName).toString())
+                line.substring(line.indexOf(n) + n.length until line.indexOf(next)).trim()
             }
+            else line.drop(line.indexOf(n) + n.length).trim()
+
+            println("RAW: $raw")
+
+            if (raw.isNotBlank())
+                set(numbers[i], rawNameToName(raw, myName).toString())
         }
     }
 
@@ -156,7 +160,7 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
      */
     private fun rawNameToName(rawName: String, myName: String): Name =
         with (Name.ofList(rawName.split(',').map{ it.trim() })){
-            if (checkMyName == myName) Name(MY_NAME) else this
+            if (formattedAsMyName == myName) Name(MY_NAME) else this
         }
 
     // Gets all words that are only numbers, "hallo ab123 456 7" will return [456, 7]

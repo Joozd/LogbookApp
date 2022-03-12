@@ -94,6 +94,7 @@ class ImportedLogbookAutoCompleter(
                 ?: this // .also { printWhyNoTypeFound(rtMap, adc)} // FOR DEBUG
         }
 
+    //For debug
     private fun BasicFlight.printWhyNoTypeFound(rtMap: Map<String, String>, adc: AircraftDataCache){
         println("reg:   $registration")
         println("type:  $aircraft")

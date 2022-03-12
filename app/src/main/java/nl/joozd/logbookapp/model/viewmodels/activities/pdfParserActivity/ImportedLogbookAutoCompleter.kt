@@ -91,18 +91,8 @@ class ImportedLogbookAutoCompleter(
             aircraft.isNotBlank() -> this
             else -> rtMap[registration]?.let { this.copy(aircraft = it) }
                 ?: adc.getAircraftFromRegistration(registration)?.type?.let { this.copy(aircraft = it.shortName) }
-                ?: this // .also { printWhyNoTypeFound(rtMap, adc)} // FOR DEBUG
+                ?: this
         }
-
-    //For debug
-    private fun BasicFlight.printWhyNoTypeFound(rtMap: Map<String, String>, adc: AircraftDataCache){
-        println("reg:   $registration")
-        println("type:  $aircraft")
-        println("rtMap: ${rtMap[registration]}")
-        println("gfr:   ${adc.getAircraftFromRegistration(registration)}")
-        println("adc:   ${adc.getRegistrationToAircraftMap().entries.joinToString("\n")}\n\n")
-    }
-
 
     private fun BasicFlight.autoValues( airportDC: AirportDataCache, aircraftDC: AircraftDataCache): BasicFlight =
         ModelFlight.ofFlightAndDataCaches(Flight(this), airportDC, aircraftDC)

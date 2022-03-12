@@ -26,10 +26,10 @@ import java.io.InputStream
 /**
  * Detects type in csv and txt files
  */
-class CsvImporter(private val inputStream: InputStream): FileImporter() {
-    private fun lines() = inputStream.reader().readLines()
+class CsvImporter(inputStream: InputStream): FileImporter() {
+    private val lines = inputStream.reader().readLines()
 
-    override fun getFile() = getType(lines())
+    override fun getFile() = getType(lines)
 
     private fun getType(lines: List<String>): ImportedFile =
         MccPilotLogFile.buildIfMatches(lines)

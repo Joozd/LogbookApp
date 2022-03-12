@@ -37,7 +37,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerError
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerStatus
-import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.WaitingForUserChoice
+import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.UserChoice
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import java.io.FileNotFoundException
@@ -70,7 +70,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
         val file = getFileFromIntent(intent, contentResolver) ?: return
 
         when(file){
-            is CompleteLogbookFile -> askIfReplaceOrMerge(file)
+            is CompleteLogbookFile -> askIfDataShouldBeSanitized(file)
             is CompletedFlightsFile -> parseCompletedFlights(file)
             is PlannedFlightsFile -> parsePlannedFlights(file)
             is UnsupportedFile -> {
@@ -80,39 +80,68 @@ class SingleUseImportIntentHandler: CoroutineScope {
         }
     }
 
+    private fun askIfDataShouldBeSanitized(file: CompleteLogbookFile){
+        val extractedLogbookAsync = async { file.extractCompletedFlights() }
+        status = UserChoice.Builder().apply{
+            titleResource = R.string.importing_complete_logbook
+            descriptionResource = R.string.import_complete_logbook_sanitize
+            choice1Resource = R.string.yes
+            choice2Resource = R.string.no
+            setAction1{
+                launch {
+                    status = HandlerStatus.CLEANING_LOGBOOK
+                    val sanitizedLogbook = sanitizeLogbook(extractedLogbookAsync.await())
+                    askIfReplaceOrMerge(sanitizedLogbook)
+                }
+            }
+            setAction2{
+                launch {
+                    askIfReplaceOrMerge(extractedLogbookAsync.await())
+                }
+            }
+        }.build()
+    }
+
     /*
      * Set status to [WaitingForUserChoice]
      * which launches either replaceCompleteLogbook or mergeCompleteLogbook
      */
-    private fun askIfReplaceOrMerge(file: CompleteLogbookFile){
+    private fun askIfReplaceOrMerge(extractedLogbook: ExtractedCompleteLogbook){
         //start extracting flights while waiting for user response
-        val extractedFlightsAsync = async { file.extractCompletedFlights() }
-        status = WaitingForUserChoice.Builder().apply{
+        status = UserChoice.Builder().apply{
             titleResource = R.string.importing_complete_logbook
             descriptionResource = R.string.importing_complete_logbook_long
             choice1Resource = R.string.replace
             choice2Resource = R.string.merge
             setAction1{
-                replaceCompleteLogbook(extractedFlightsAsync)
+                replaceCompleteLogbook(extractedLogbook)
             }
             setAction2{
-                mergeCompleteLogbook(extractedFlightsAsync)
+                mergeCompleteLogbook(extractedLogbook)
             }
         }.build()
     }
 
-    private fun replaceCompleteLogbook(extractedFlightsAsync: Deferred<ExtractedCompleteLogbook>){
+    private fun replaceCompleteLogbook(extractedFlights: ExtractedCompleteLogbook){
         launch {
-            val extractedFlights = extractedFlightsAsync.await()
-
             TODO("Stub")
+            /*
+            This should:
+            -nuke complete logbook
+            -make new login data
+            -send login data link if email set
+            -save extractedFlights
+            -let user know that a new login link has been made
+             */
         }
     }
 
-    private fun mergeCompleteLogbook(extractedFlightsAsync: Deferred<ExtractedCompleteLogbook>){
+    private suspend fun sanitizeLogbook(logbook: ExtractedCompleteLogbook): ExtractedCompleteLogbook =
+        ImportedLogbookAutoCompleter().autocomplete(logbook)
+
+    private fun mergeCompleteLogbook(extractedFlights: ExtractedCompleteLogbook){
         launch {
             status = HandlerStatus.EXTRACTING_FLIGHTS
-            val extractedFlights = extractedFlightsAsync.await()
             status = HandlerStatus.SAVING_FLIGHTS
             ImportedFlightsSaver.instance.save(extractedFlights)
             status = HandlerStatus.DONE
@@ -130,8 +159,10 @@ class SingleUseImportIntentHandler: CoroutineScope {
     }
 
     private suspend fun getFileFromIntent(intent: Intent, contentResolver: ContentResolver) =
-        getTypeDetector(intent.getUri(), contentResolver)
-            ?.getFile()
+        withContext(DispatcherProvider.io()) {
+            getTypeDetector(intent.getUri(), contentResolver)
+                ?.getFile()
+        }
 
     private fun Intent.getUri() =
         getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri

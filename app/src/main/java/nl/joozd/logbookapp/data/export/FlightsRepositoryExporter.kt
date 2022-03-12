@@ -87,7 +87,6 @@ class FlightsRepositoryExporter(
                 // timeStamp,
                 Base64.encodeToString(signature.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
             ).joinToString(";") { it.replace(';', '|') }
-
         }
     }
 
@@ -145,12 +144,14 @@ class FlightsRepositoryExporter(
         /**
          *  Read a csv with basicFlights to a list of Flights. Flight ID's will need to be assigned before saving.
          */
+        @Deprecated("Import using CsvImporter in module JoozdlogImport")
         fun csvToFlights(csvBasicFlights: String, mock: Boolean = false) = csvToFlights(csvBasicFlights.lines(), mock)
 
         /**
          *  Read a csv with basicFlights to a list of Flights. Flight ID's will need to be assigned before saving.
          *  @param csvBasicFlights = list of lines each containing a csv encoded basicFlight
          */
+        @Deprecated("Import using CsvImporter in module JoozdlogImport")
         fun csvToFlights(csvBasicFlights: List<String>, mock: Boolean = false): List<Flight> = when (csvBasicFlights.first()){
             FIRST_LINE_V4 -> csvBasicFlights.drop(1).map{Flight(upgrade4to5(csvFlightToBasicFlightv4(it, mock)))}
             FIRST_LINE_V5 -> csvBasicFlights.drop(1).map{Flight(csvFlightToBasicFlightv5(it, mock))}

@@ -21,10 +21,11 @@ package nl.joozd.joozdlogimporter.supportedFileTypes
 
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
+import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.JoozdlogCsvV5Extractor
 
 class JoozdLogV5File(lines: List<String>): CompleteLogbookFile(lines) {
     override val extractor: CompleteLogbookExtractor
-        get() = TODO("Not yet implemented")
+        get() = JoozdlogCsvV5Extractor()
 
     override val identFormat = AirportIdentFormat.ICAO
 

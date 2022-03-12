@@ -22,7 +22,7 @@ package nl.joozd.joozdlogimporter.dataclasses
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 
-class ExtractedCompleteLogbook(
+open class ExtractedCompleteLogbook(
     flights: Collection<BasicFlight>?,
     identFormat: AirportIdentFormat
 ): ExtractedFlights(flights, identFormat)

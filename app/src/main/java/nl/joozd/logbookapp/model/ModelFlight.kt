@@ -173,10 +173,11 @@ data class ModelFlight(
 
     private fun calculateNightTime(): Int {
         if (!orig.checkIfValidCoordinates() || !dest.checkIfValidCoordinates()) return 0
+        val outToInMinutes = getDurationOfFlight().toMinutes().toInt()
+        if (outToInMinutes == 0) return 0
         val totalNightMinutes =
             TwilightCalculator(timeOut).minutesOfNight(orig, dest, timeOut, timeIn)
-        //correct for multicrew
-        return totalNightMinutes * calculateTotalTime() / getDurationOfFlight().toMinutes().toInt()
+        return totalNightMinutes * calculateTotalTime() / outToInMinutes
     }
 
     private fun calculateIfrTime() =

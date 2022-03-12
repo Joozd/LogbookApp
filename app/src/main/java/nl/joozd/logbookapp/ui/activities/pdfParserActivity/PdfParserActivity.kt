@@ -32,7 +32,7 @@ import nl.joozd.logbookapp.databinding.ActivityPdfParserBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerError
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerStatus
-import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.WaitingForUserChoice
+import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.UserChoice
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 
 /**
@@ -64,22 +64,23 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                 HandlerStatus.WAITING_FOR_INTENT -> pdfParserStatusTextView.text = getString(R.string.waiting_for_data)
                 HandlerStatus.READING_URI -> pdfParserStatusTextView.text = getString(R.string.reading_file)
                 HandlerStatus.EXTRACTING_FLIGHTS -> pdfParserStatusTextView.text = getString(R.string.extracting_flights)
+                HandlerStatus.CLEANING_LOGBOOK -> pdfParserStatusTextView.text = getString(R.string.cleaning_logbook)
                 HandlerStatus.SAVING_FLIGHTS -> pdfParserStatusTextView.text = getString(R.string.saving_flights)
                 HandlerStatus.DONE -> closeAndStartMainActivity()
                 is HandlerError -> showHandlerError(it)
-                is WaitingForUserChoice -> showUserChoiceDialog(it)
+                is UserChoice -> showUserChoiceDialog(it)
             }
         }
     }
 
-    private fun showUserChoiceDialog(choice: WaitingForUserChoice) =
+    private fun showUserChoiceDialog(choice: UserChoice) =
         AlertDialog.Builder(this).apply{
             setTitle(choice.titleResource)
             setMessage(choice.descriptionResource)
-            setNegativeButton(choice.choice1Resource){ _, _ ->
+            setPositiveButton(choice.choice1Resource){ _, _ ->
                 choice.action1()
             }
-            setPositiveButton(choice.choice2Resource){ _, _ ->
+            setNegativeButton(choice.choice2Resource){ _, _ ->
                 choice.action2()
             }
         }.create().show()

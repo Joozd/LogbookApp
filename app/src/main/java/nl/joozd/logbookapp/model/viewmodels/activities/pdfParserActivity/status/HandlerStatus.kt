@@ -25,5 +25,6 @@ sealed class HandlerStatus{
     object READING_URI: HandlerStatus()
     object EXTRACTING_FLIGHTS: HandlerStatus()
     object SAVING_FLIGHTS: HandlerStatus()
+    object CLEANING_LOGBOOK: HandlerStatus()
     object DONE: HandlerStatus()
 }

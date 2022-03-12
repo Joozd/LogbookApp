@@ -21,10 +21,7 @@ package nl.joozd.joozdlogimporter.supportedFileTypes.extractors
 
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.interfaces.CompletedFlightsExtractor
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneOffset
+import java.time.*
 import java.time.format.DateTimeFormatter
 
 class KlcMonthlyExtractor: CompletedFlightsExtractor {
@@ -103,7 +100,7 @@ class KlcMonthlyExtractor: CompletedFlightsExtractor {
 
     private fun getMonthStart(lines: List<String>): LocalDate? {
         val period = getPeriodFromLines(lines) ?: return null
-        val startDate = LocalDate.ofInstant(period.start, ZoneOffset.UTC)
+        val startDate = LocalDateTime.ofInstant(period.start, ZoneOffset.UTC).toLocalDate()
         return startDate.withDayOfMonth(1)
     }
 

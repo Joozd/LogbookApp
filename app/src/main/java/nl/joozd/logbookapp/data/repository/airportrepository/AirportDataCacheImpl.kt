@@ -25,9 +25,6 @@ import nl.joozd.logbookapp.data.dataclasses.Airport
  * Keeps a list of Airports and provides access to it.
  */
 class AirportDataCacheImpl(private var airportsList: List<Airport>): AirportDataCache {
-    constructor(cache: AirportDataCache): this(
-        cache.getAirports()
-    )
     private val icaoToIatamap: Map<String, String> by lazy { buildIcaoToIataMap() }
     private val iataToIcaoMap: Map<String, String> by lazy { buildIataToIcaoMap() }
 

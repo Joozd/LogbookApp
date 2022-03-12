@@ -25,14 +25,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
+import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 class AirportRepositoryImpl(
     dataBase: JoozdlogDatabase
 ): AirportRepository, CoroutineScope by dispatchersProviderMainScope()  {
     private val airportDao = dataBase.airportDao()
-    // used for getStaleOrEmptyAirportDataCache
-    private var mostRecentlyLoadedAirportDataCache: AirportDataCache = AirportDataCache.make(emptyList())
+
 
     override fun airportsFlow() = airportDao.airportsFlow()
 
@@ -43,24 +43,28 @@ class AirportRepositoryImpl(
         airportsFlow().map { makeAndStoreAirportDataCache(it) }
 
     override suspend fun getAirportByIcaoIdentOrNull(ident: String): Airport? =
-        airportDao.searchAirportByIdent(ident)
+        withContext(DispatcherProvider.io()) {
+            airportDao.searchAirportByIdent(ident)
+        }
 
     override suspend fun getAirportByIataIdentOrNull(ident: String): Airport? =
-        airportDao.searchAirportByIata(ident)
+        withContext(DispatcherProvider.io()) {
+            airportDao.searchAirportByIata(ident)
+        }
 
     /**
      * Replace current airport database with [newAirports]
      */
-    override suspend fun replaceDbWith(newAirports: Collection<Airport>) {
+    override suspend fun replaceDbWith(newAirports: Collection<Airport>) = withContext(DispatcherProvider.io()) {
         airportDao.clearDb()
         airportDao.save(newAirports)
     }
 
-    private suspend fun getAirports(): List<Airport> = airportDao.requestAllAirports()
+    private suspend fun getAirports(): List<Airport> = withContext(DispatcherProvider.io()) {
+        airportDao.requestAllAirports()
+    }
 
     private fun makeAndStoreAirportDataCache(it: List<Airport>) =
-        AirportDataCache.make(it).also{
-            mostRecentlyLoadedAirportDataCache = it
-        }
+        AirportDataCache.make(it)
 }
 

@@ -19,6 +19,9 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">JoozdLog</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
     <string name="number_of_flights">%1$d flights</string>
     <string name="preference_file_key">nl.joozd.logbookapp.PREFERENCE_FILE_KEY</string>
 
@@ -172,6 +175,10 @@
     <string name="unknown_file_message">The file you are trying to import into Joozdlog is not supported yet. If you want it to be, please mail it to joozdlog@joozd.nl and I might support it in a future version.</string>
     <string name="bad_intent_error">Error importing file: bad_intent_error</string>
 
+    <string name="unknown_link_title">Unknown Link</string>
+    <string name="unknown_link_message">This link is unknown or contains bad data. Please check the link and try again.</string>
+
+
 
 
     <string name="total_time_too_large">Total time cannot be more than offblocks to on blocks</string>
@@ -310,6 +317,7 @@
     <string name="dualTime">Dual time</string>
     <string name="instructorTime">Instructor time</string>
     <string name="balanceForward">Balance Forward</string>
+    <string name="saving_pdf">Saving PDF</string>
 
 
     <!--
@@ -324,6 +332,8 @@
     <string name="receivedIntent">Receiving data</string>
     <string name="reading_file">Reading file</string>
     <string name="extracting_flights">Extracting flights</string>
+    <string name="cleaning_logbook">Cleaning logbook</string>
+
     <string name="saving_flights">Saving flights</string>
 
 
@@ -337,12 +347,14 @@
     <string name="planned_flights_and_conflict_found_long">Your overview was imported, but %1$d conflicting flights and %2$d planned flights are still in your logbook. Please check the period for which you just imported an overview for correct data!</string>
 
     <string name="importing_complete_logbook">Importing complete logbook</string>
-    <string name="importing_complete_logbook_long">You are importing a complete logbook. Do you want to delete and replace your current logbook, or merge it?</string>
+    <string name="importing_complete_logbook_long">Do you want to delete and replace your current logbook, or merge it?</string>
     <string name="replace">Replace</string>
     <string name="merge">Merge</string>
+    <string name="import_complete_logbook_sanitize">You are importing a complete logbook. Do you want to automatically calculate missing values such as night- or multi-pilot times?</string>
+
+
     <string name="no_airport_db_for_importing">No airport DB was downloaded, and none could be found. Please check if your device is connected to the internet and try again.</string>
     <string name="downloading_airports">Downloading airports DB…</string>
-
 
 
     <string name="XXXXXXXXXXXXXXX">XXXXXXXXXXXXXXX</string>
@@ -457,6 +469,7 @@
     <string name="help">Help</string>
     <string name="joozdlog_importer">Joozdlog Importer</string>
     <string name="delete">delete</string>
+    <string name="share">share</string>
 
 
 </resources>

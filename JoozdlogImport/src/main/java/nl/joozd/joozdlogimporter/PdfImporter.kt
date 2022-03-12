@@ -31,12 +31,12 @@ import java.io.InputStream
  */
 class PdfImporter(inputStream: InputStream): FileImporter() {
     private val reader = PdfReader(inputStream)
-    private fun lines() =
+    private val lines =
         (1..reader.numberOfPages).map { page ->
             PdfTextExtractor.getTextFromPage(reader, page, SimpleTextExtractionStrategy()).lines()
         }.flatten()
 
-    override fun getFile() = getType(lines())
+    override fun getFile() = getType(lines)
 
     /**
      * Returns the SupportedImportType that matches the data in [reader].

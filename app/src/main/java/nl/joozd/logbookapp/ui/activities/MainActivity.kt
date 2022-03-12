@@ -170,14 +170,6 @@ class MainActivity : JoozdlogActivity() {
         supportFragmentManager.popBackStack(EDIT_FLIGHT_FRAGMENT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     }
 
-    private fun <T> Flow<T>.launchCollectWhileLifecycleStateStarted(collector: FlowCollector<T>){
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                collect(collector)
-            }
-        }
-    }
-
     private fun ActivityMainNewBinding.showBackupReminderLayoutIf(it: Boolean) {
         backupReminderLayout.visibility = if (it) View.VISIBLE else View.GONE
     }

@@ -19,7 +19,11 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status
 
-class WaitingForUserChoice(
+/**
+ * Used to communicate a user choice to UI.
+ * choice 1 should map to positive, choice 2 to negative
+ */
+class UserChoice(
     val titleResource: Int,
     val descriptionResource: Int,
     val choice1Resource: Int,
@@ -47,7 +51,7 @@ class WaitingForUserChoice(
             action2 = action
         }
 
-        fun build(): WaitingForUserChoice =
-            WaitingForUserChoice(titleResource!!, descriptionResource!!, choice1Resource!!, choice2Resource!!, action1, action2)
+        fun build(): UserChoice =
+            UserChoice(titleResource!!, descriptionResource!!, choice1Resource!!, choice2Resource!!, action1, action2)
     }
 }

@@ -1,23 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~  JoozdLog Pilot's Logbook
-  ~  Copyright (c) 2020-2022 Joost Welle
-  ~
-  ~      This program is free software: you can redistribute it and/or modify
-  ~      it under the terms of the GNU Affero General Public License as
-  ~      published by the Free Software Foundation, either version 3 of the
-  ~      License, or (at your option) any later version.
-  ~
-  ~      This program is distributed in the hope that it will be useful,
-  ~      but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~      GNU Affero General Public License for more details.
-  ~
-  ~      You should have received a copy of the GNU Affero General Public License
-  ~      along with this program.  If not, see https://www.gnu.org/licenses
-  ~
-  -->
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="nl.joozd.logbookapp">
@@ -44,38 +25,65 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.activities.FeedbackActivity"
+        <activity
+            android:name=".ui.activities.LinkHandlerActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=".LinkHandlerActivity"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="joozdlog.joozd.nl"
+                    android:pathPrefix="/inject-key"
+                    android:scheme="https" />
+                <data
+                    android:host="joozdlog.joozd.nl"
+                    android:pathPrefix="/verify-email"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.activities.FeedbackActivity"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ui.activities.ChangePasswordActivity" />
         <activity android:name=".ui.activities.MakePdfActivity" />
-        <activity android:name=".ui.activities.newUserActivity.NewUserActivity"
+        <activity
+            android:name=".ui.activities.newUserActivity.NewUserActivity"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustResize"/>
-        <activity android:name=".ui.activities.SettingsActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.activities.SettingsActivity"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
         </activity>
-        <activity android:name=".ui.activities.totalTimesActivity.TotalTimesActivity"
+        <activity
+            android:name=".ui.activities.totalTimesActivity.TotalTimesActivity"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
         </activity>
-        <activity android:name=".ui.activities.BalanceForwardActivity"
+        <activity
+            android:name=".ui.activities.BalanceForwardActivity"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />
-
         </activity>
         <activity
             android:name=".ui.activities.pdfParserActivity.PdfParserActivity"
             android:excludeFromRecents="true"
-            android:theme="@style/AppTheme"
-            android:exported="true">
+            android:exported="true"
+            android:taskAffinity=".PdfParserActivity"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
@@ -102,29 +110,16 @@
         </activity>
         <activity
             android:name=".ui.activities.MainActivity"
+            android:exported="true"
             android:launchMode="singleTask"
-            android:theme="@style/AppTheme"
-            android:exported="true">
+            android:taskAffinity=".MainActivity"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="joozdlog.joozd.nl"
-                    android:pathPrefix="/inject-key"
-                    android:scheme="https" />
-                <data
-                    android:host="joozdlog.joozd.nl"
-                    android:pathPrefix="/verify-email"
-                    android:scheme="https" />
-            </intent-filter>
         </activity>
 
         <provider

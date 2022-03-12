@@ -17,21 +17,12 @@
  *
  */
 
-package nl.joozd.logbookapp.data.repository.flightRepository
+package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
-import android.util.Log
-import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.joozdlogcommon.BasicFlight
+import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
+import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 
-/**
- * for getting flights only once (avoid triggering livedata on rotation etc).
- * [flight] will stay available for reasone
- */
-class SingleUseFlight(val flight: Flight) {
-    private var unOpened = true
-
-    fun get(): Flight? = if (unOpened) flight.also{
-        Log.d("SingleUseFlight", "opened!")
-        unOpened = false} else null.also{
-        Log.d("SingleUseFlight", "tried to open AGAIN!")
-    }
-}
+class SanitizedCompleteLogbook(
+    flights: Collection<BasicFlight>?
+): ExtractedCompleteLogbook(flights, AirportIdentFormat.ICAO)

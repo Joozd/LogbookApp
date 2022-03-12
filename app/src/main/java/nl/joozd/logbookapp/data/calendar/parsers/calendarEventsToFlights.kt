@@ -34,7 +34,7 @@ private const val ORIG = 2
 private const val DEST = 3
 
 fun Collection<CalendarEvent>.calendarEventsToFlights(
-    period: ClosedRange<Instant>? = null
+    period: ClosedRange<Long>? = null
 ): ExtractedPlannedFlights {
     val flightEvents = this.filter {flightRegExIATA.containsMatchIn(it.description)}
     val flights = flightEventsToBasicFlights(flightEvents, flightRegExIATA)
@@ -59,10 +59,10 @@ private fun flightEventsToBasicFlights(
     }
 }
 
-private fun getPeriodFromFlights(flights: Collection<BasicFlight>): ClosedRange<Instant>?{
+private fun getPeriodFromFlights(flights: Collection<BasicFlight>): ClosedRange<Long>?{
     val start = flights.minOfOrNull { it.timeOut } ?: return null
     val end = flights.maxOfOrNull { it.timeIn } ?: return null
-    return (Instant.ofEpochSecond(start)..Instant.ofEpochSecond(end))
+    return (Instant.ofEpochSecond(start).epochSecond..Instant.ofEpochSecond(end).epochSecond)
 }
 
 private fun MatchResult.flightNumber() = (groups[FLIGHTNUMBER]?.value ?: error ("ERROR 0003 NO FLIGHTNUMBER"))

@@ -24,7 +24,7 @@ import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import java.time.Instant
 
 class ExtractedPlannedFlights(
-    val period: ClosedRange<Instant>?,
+    val period: ClosedRange<Long>?,
     flights: Collection<BasicFlight>?,
     identFormat: AirportIdentFormat
 ): ExtractedFlights(flights, identFormat)

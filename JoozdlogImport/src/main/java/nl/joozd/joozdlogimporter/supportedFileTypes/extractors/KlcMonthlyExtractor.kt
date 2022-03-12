@@ -29,10 +29,10 @@ class KlcMonthlyExtractor: CompletedFlightsExtractor {
      * Look for line
      * Period: From dd-MM-yyyy to dd-MM-yyyy
      */
-    override fun getPeriodFromLines(lines: List<String>): ClosedRange<Instant>? {
+    override fun getPeriodFromLines(lines: List<String>): ClosedRange<Long>? {
         val periodLine = lines.firstOrNull{ it.startsWith(PERIOD_LINE_IDENTIFIER)} ?: return null
         val searchResult = getTwoDateStringsFromLineOrNull(periodLine) ?: return null
-        return makeInstantRangeFromTwoDateStrings(searchResult)
+        return makeEpochSecondRangeFromTwoDateStrings(searchResult)
     }
 
     override fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight>? {
@@ -91,16 +91,16 @@ class KlcMonthlyExtractor: CompletedFlightsExtractor {
             .takeIf { it.size == 2 }
     }
 
-    private fun makeInstantRangeFromTwoDateStrings(ss: List<String>): ClosedRange<Instant>{
+    private fun makeEpochSecondRangeFromTwoDateStrings(ss: List<String>): ClosedRange<Long>{
         val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         return ss.map{ LocalDate.parse(it, dateFormatter)}.let{
-            it.first().instantAtStartOfDay()..it.last().instantAtEndOfDay()
+            it.first().instantAtStartOfDay().epochSecond..it.last().instantAtEndOfDay().epochSecond
         }
     }
 
     private fun getMonthStart(lines: List<String>): LocalDate? {
         val period = getPeriodFromLines(lines) ?: return null
-        val startDate = LocalDateTime.ofInstant(period.start, ZoneOffset.UTC).toLocalDate()
+        val startDate = LocalDateTime.ofEpochSecond(period.start, 0, ZoneOffset.UTC).toLocalDate()
         return startDate.withDayOfMonth(1)
     }
 

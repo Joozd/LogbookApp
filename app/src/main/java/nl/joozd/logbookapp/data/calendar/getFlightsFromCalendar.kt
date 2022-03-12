@@ -43,7 +43,7 @@ private val period
 @RequiresPermission(Manifest.permission.READ_CALENDAR)
 suspend fun Context.getFlightsFromCalendar(): ExtractedPlannedFlights? {
     val foundEvents = activeCalendar()?.let { getEventsInPeriod(it, period) } ?: return null
-    return foundEvents.calendarEventsToFlights(period)
+    return foundEvents.calendarEventsToFlights(period.toEpochSecondRange())
 }
 
 
@@ -67,3 +67,6 @@ private fun buildEventsStartingInPeriodExtractor(calendar: CalendarDescriptor, p
 
 private fun ClosedRange<Instant>.toEpochMilliRange(): ClosedRange<Long> =
     this.start.toEpochMilli()..this.endInclusive.toEpochMilli()
+
+private fun ClosedRange<Instant>.toEpochSecondRange(): ClosedRange<Long> =
+    this.start.epochSecond..this.endInclusive.epochSecond

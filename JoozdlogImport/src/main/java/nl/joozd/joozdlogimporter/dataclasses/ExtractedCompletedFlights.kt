@@ -27,7 +27,7 @@ import java.time.Instant
  * Values can be null if invalid data was parsed.
  */
 class ExtractedCompletedFlights(
-    val period: ClosedRange<Instant>?,
+    val period: ClosedRange<Long>?,
     flights: Collection<BasicFlight>?,
     identFormat: AirportIdentFormat
 ): ExtractedFlights(flights, identFormat)

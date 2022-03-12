@@ -26,11 +26,11 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
-    override fun getPeriodFromLines(lines: List<String>): ClosedRange<Instant>? {
+    override fun getPeriodFromLines(lines: List<String>): ClosedRange<Long>? {
         val flights = getFlightsFromLines(lines) ?: return null
         val start = flights.minOfOrNull { it.timeOut } ?: return null
         val end = flights.maxOfOrNull { it.timeIn } ?: return null
-        return (Instant.ofEpochSecond(start)..Instant.ofEpochSecond(end))
+        return (Instant.ofEpochSecond(start).epochSecond..Instant.ofEpochSecond(end).epochSecond)
     }
 
     override fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight>? {

@@ -19,8 +19,7 @@
 
 package nl.joozd.joozdlogimporter.interfaces
 
-import java.time.Instant
-
 interface CompletedFlightsExtractor: FlightsExtractor {
-    fun getPeriodFromLines(lines: List<String>): ClosedRange<Instant>?
+    //range of epochSeconds
+    fun getPeriodFromLines(lines: List<String>): ClosedRange<Long>?
 }

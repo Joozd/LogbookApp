@@ -47,7 +47,7 @@ class ImportedFlightsSaverImpl(
      * @see mergeFlights
      */
     override suspend fun save(completeLogbook: ExtractedCompleteLogbook) {
-        val flights = setAirportsToIcao(completeLogbook)?: emptyList()
+        val flights = makeFlightsWithIcaoAirports(completeLogbook)?: emptyList()
         val flightsOnDevice = flightsRepo.getAllFlights()
         // This makes a list of pairs.
         // mergeFlights will merge second onto first, overwriting any non-empty data.
@@ -67,7 +67,8 @@ class ImportedFlightsSaverImpl(
      *  (UTC) calendar day and update times if such a flight is found.
      */
     override suspend fun save(completedFlights: ExtractedCompletedFlights) {
-        val flights = setAirportsToIcao(completedFlights)
+        val flights = getFlightsWithIcaoAirportsInPeriod(completedFlights) ?: return
+        val flightsOnDevice = flightsRepo.getAllFlights()
         TODO("Stub")
     }
 
@@ -77,12 +78,27 @@ class ImportedFlightsSaverImpl(
      * Will remove all other planned flights in its period.
      */
     override suspend fun save(plannedFlights: ExtractedPlannedFlights) {
-        val flights = setAirportsToIcao(plannedFlights)
+        val flights = getFlightsWithIcaoAirportsInPeriod(plannedFlights) ?: return
+        val flightsOnDevice = flightsRepo.getAllFlights()
         TODO("Stub")
     }
 
+    private suspend fun getFlightsWithIcaoAirportsInPeriod(
+        completedFlights: ExtractedCompletedFlights
+    ): List<Flight>? =
+        makeFlightsWithIcaoAirports(completedFlights)?.filter {
+            it.timeOut in (completedFlights.period ?: return null)
+        }
 
-    private suspend fun setAirportsToIcao(flightsToPrepare: ExtractedFlights): List<Flight>?{
+    private suspend fun getFlightsWithIcaoAirportsInPeriod(
+        plannedFlights: ExtractedPlannedFlights
+    ): List<Flight>? =
+        makeFlightsWithIcaoAirports(plannedFlights)?.filter {
+            it.timeOut in (plannedFlights.period!!)
+        }
+
+
+    private suspend fun makeFlightsWithIcaoAirports(flightsToPrepare: ExtractedFlights): List<Flight>?{
         val flights = flightsToPrepare.flights?.map { Flight(it) }
         return if (flightsToPrepare.identFormat == AirportIdentFormat.ICAO) flights
         else {

@@ -22,5 +22,5 @@ package nl.joozd.joozdlogimporter.interfaces
 import java.time.Instant
 
 interface PlannedFlightsExtractor: FlightsExtractor {
-    fun getPeriodFromLines(lines: List<String>): ClosedRange<Instant>?
+    fun getPeriodFromLines(lines: List<String>): ClosedRange<Long>?
 }

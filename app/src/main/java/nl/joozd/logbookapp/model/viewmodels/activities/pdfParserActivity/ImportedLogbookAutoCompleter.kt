@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
-import nl.joozd.joozdlogimporter.dataclasses.ExtractedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
@@ -45,13 +44,13 @@ class ImportedLogbookAutoCompleter(
     val airportRepository: AirportRepository = AirportRepository.instance
 ) {
     suspend fun autocomplete(importedLogbook: ExtractedCompleteLogbook): SanitizedCompleteLogbook{
-        val dirtyFlights = importedLogbook.flights?.flightsWithUppercaseRegs() ?: return SanitizedCompleteLogbook(null)
+        val dirtyFlights = importedLogbook.flights?.autoFillableFlightsWithUppercaseRegs() ?: return SanitizedCompleteLogbook(null)
         return SanitizedCompleteLogbook(sanitizeFlights(dirtyFlights, importedLogbook.identFormat))
     }
 
     suspend fun autocomplete(plannedFlights: ExtractedPlannedFlights): SanitizedPlannedFlights{
         val period = plannedFlights.period
-        val dirtyFlights = plannedFlights.flights?.flightsWithUppercaseRegs() ?: return SanitizedPlannedFlights(null, period)
+        val dirtyFlights = plannedFlights.flights?.autoFillableFlightsWithUppercaseRegs() ?: return SanitizedPlannedFlights(null, period)
         return SanitizedPlannedFlights(sanitizeFlights(dirtyFlights, plannedFlights.identFormat), period)
     }
 
@@ -76,8 +75,8 @@ class ImportedLogbookAutoCompleter(
 
 
     //make sure all registrations are uppercase because we want it to be not case-sensitive
-    private fun Collection<BasicFlight>.flightsWithUppercaseRegs() =
-        map { it.copy(registration = it.registration.uppercase()) }
+    private fun Collection<BasicFlight>.autoFillableFlightsWithUppercaseRegs() =
+        map { it.copy(registration = it.registration.uppercase(), autoFill = true) }
 
     /*
      * Priority:

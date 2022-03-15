@@ -23,12 +23,14 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.repository.helpers.revert
@@ -57,7 +59,9 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
 
     val flightEditorFlow = FlightEditor.instanceFlow
 
-    val flightsFlow: Flow<List<ModelFlight>> = makeFlightsFlowCombiner()
+    private val allFlightsFlow = flightRepository.allFlightsFlow()
+    val foundFlightsFlow: Flow<List<ModelFlight>> = makeFlightsFlowCombiner()
+    val amountOfFlightsFlow: Flow<Int> = allFlightsFlow.map { it.size }
 
     val undoRedoStatusChangedFlow = makeUndoRedoStatusChangedFlow()
 
@@ -123,7 +127,7 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
     }
 
     private fun makeFlightsFlowCombiner() = combine(
-        flightRepository.allFlightsFlow(),
+        allFlightsFlow,
         aircraftRepository.aircraftDataCacheFlow(),
         airportRepository.airportDataCacheFlow(),
         searchQueryFlow,

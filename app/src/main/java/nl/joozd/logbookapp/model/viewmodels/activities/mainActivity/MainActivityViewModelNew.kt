@@ -20,7 +20,6 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.mainActivity
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -127,12 +126,11 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         flightRepository.allFlightsFlow(),
         aircraftRepository.aircraftDataCacheFlow(),
         airportRepository.airportDataCacheFlow(),
-
         searchQueryFlow,
         searchTypeFlow
     ){ flights, aircraftData, airportsData, query, searchType ->
         flights.toModelFlights(airportsData, aircraftData)
-            .filterByQuery(query , searchType)
+            .filterByQuery(query, searchType)
     }
 
     /**

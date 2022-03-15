@@ -27,12 +27,13 @@ import java.util.*
 fun List<ModelFlight>?.filterByQuery(query: String, searchType: Int): List<ModelFlight> {
     if (this == null) return emptyList()
     if (query.isBlank()) return this
+    val q = query.uppercase()
     return when (searchType) {
-        MainActivityViewModelNew.SEARCH_ALL -> searchAll(this, query)
-        MainActivityViewModelNew.SEARCH_AIRPORTS -> searchAirport(this, query)
-        MainActivityViewModelNew.SEARCH_AIRCRAFT -> searchAircraft(this, query)
-        MainActivityViewModelNew.SEARCH_NAMES -> searchNames(this, query)
-        MainActivityViewModelNew.SEARCH_FLIGHTNUMBER -> searchFlightnumber(this, query)
+        MainActivityViewModelNew.SEARCH_ALL -> searchAll(this, q)
+        MainActivityViewModelNew.SEARCH_AIRPORTS -> searchAirport(this, q)
+        MainActivityViewModelNew.SEARCH_AIRCRAFT -> searchAircraft(this, q)
+        MainActivityViewModelNew.SEARCH_NAMES -> searchNames(this, q)
+        MainActivityViewModelNew.SEARCH_FLIGHTNUMBER -> searchFlightnumber(this, q)
         else -> this
     }
 }

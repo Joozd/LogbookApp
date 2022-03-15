@@ -20,10 +20,12 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.mainActivity
 
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
@@ -37,6 +39,7 @@ import nl.joozd.logbookapp.model.helpers.filterByQuery
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
+import nl.joozd.logbookapp.utils.DispatcherProvider
 
 //TODO this is still WIP
 class MainActivityViewModelNew: JoozdlogViewModel() {
@@ -142,10 +145,11 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
 
 
 
-    private fun List<Flight>.toModelFlights(
+    private suspend fun List<Flight>.toModelFlights(
         airportsData: AirportDataCache,
         aircraftData: AircraftDataCache
-    ) = this.map { ModelFlight.ofFlightAndDataCaches(it, airportsData, aircraftData) }
+    ) = withContext (DispatcherProvider.default()) {
+        this@toModelFlights.map { ModelFlight.ofFlightAndDataCaches(it, airportsData, aircraftData) } }
 
 
     companion object {

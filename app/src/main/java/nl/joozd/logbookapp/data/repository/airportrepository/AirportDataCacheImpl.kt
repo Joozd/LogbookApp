@@ -27,14 +27,13 @@ import nl.joozd.logbookapp.data.dataclasses.Airport
 class AirportDataCacheImpl(private var airportsList: List<Airport>): AirportDataCache {
     private val icaoToIatamap: Map<String, String> by lazy { buildIcaoToIataMap() }
     private val iataToIcaoMap: Map<String, String> by lazy { buildIataToIcaoMap() }
+    private val icaoToAirportsMap: Map<String, Airport> by lazy { buildIcaoToAirportsMap() }
 
 
     override fun getAirports(): List<Airport> = airportsList
 
     override fun getAirportByIcaoIdentOrNull(icaoIdent: String): Airport? =
-        airportsList.firstOrNull {
-            it.ident.equals(icaoIdent, ignoreCase = true)
-        }
+        icaoToAirportsMap[icaoIdent.uppercase()]
 
     override fun icaoToIata(icaoIdent: String): String? =
         icaoToIatamap[icaoIdent]
@@ -43,10 +42,13 @@ class AirportDataCacheImpl(private var airportsList: List<Airport>): AirportData
         iataToIcaoMap[iataIdent]
 
     private fun buildIcaoToIataMap() =
-        airportsList.map { it.ident to it.iata_code }.toMap()
+        airportsList.map { it.ident.uppercase() to it.iata_code.uppercase() }.toMap()
 
     private fun buildIataToIcaoMap() =
-        airportsList.map { it.iata_code to it.ident }.toMap()
+        airportsList.map { it.iata_code.uppercase() to it.ident.uppercase() }.toMap()
+
+    private fun buildIcaoToAirportsMap() =
+        airportsList.map { it.ident.uppercase() to it }.toMap()
 
 
 }

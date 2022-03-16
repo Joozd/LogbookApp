@@ -43,7 +43,8 @@ class TimestampMaker(private val mock: Boolean = false) {
          * @return offset if success, null if failed.
          */
         suspend fun getAndSaveTimeOffset(): Long? {
-            val serverTime = Cloud.getTime() ?: return null
+            println("getAndSaveTimeOffset STARTED")
+            val serverTime = Cloud.getTime().also{ println("getAndSaveTimeOffset GOT TIME FROM CLOUD: $it")} ?: return null
             val now = Instant.now().epochSecond
             Preferences.serverTimeOffset = serverTime - now
             return Preferences.serverTimeOffset

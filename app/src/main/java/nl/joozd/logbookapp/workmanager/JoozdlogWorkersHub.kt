@@ -49,11 +49,14 @@ object JoozdlogWorkersHub: CoroutineScope {
      * Sync Flights when needed.
      * Needed means: Last sync not inside last INBOUND_SYNC_MINIMUM_INTERVAL minutes.
      * This should be called from MainActivity.onResume() so it is checked when app is opened.
+     * Returns true if a sync is scheduled else false
      */
-    fun syncTimeAndFlightsIfEnoughTimePassed(){
+    fun syncTimeAndFlightsIfEnoughTimePassed(): Boolean{
+        println("syncTimeAndFlightsIfEnoughTimePassed")
         val elapsedSinceLastSync = Instant.now().epochSecond - lastSyncInstantEpochSeconds
-        if (elapsedSinceLastSync < INBOUND_SYNC_MINIMUM_INTERVAL) return
+        if (elapsedSinceLastSync < INBOUND_SYNC_MINIMUM_INTERVAL) return false
         synchronizeTimeAndFlights()
+        return true
     }
 
     /**
@@ -89,7 +92,9 @@ object JoozdlogWorkersHub: CoroutineScope {
      * If another Worker is already trying to do that, that one is replaced
      */
     private fun synchronizeTimeAndFlights(){
+        println("synchronizeTimeAndFlights CP 1")
         if (Preferences.useCloud) {
+            println("synchronizeTimeAndFlights CP 2")
             val task = OneTimeWorkRequestBuilder<SyncFlightsWorker>().apply {
                 setConstraints(makeConstraintsNeedNetwork())
                 addTag(SYNC_FLIGHTS)

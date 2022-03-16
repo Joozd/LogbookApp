@@ -36,7 +36,7 @@ class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
      */
     override suspend fun doWork(): Result {
         try {
-            val serverDbVersion = withContext(Dispatchers.IO) { Cloud.getAirportDbVersion() }
+            val serverDbVersion = withContext(Dispatchers.IO) { Cloud.getServerAirportDbVersion() }
             Log.d("syncAirportsWorker", "server DB = $serverDbVersion, local DB = ${Preferences.airportDbVersion}")
             when (serverDbVersion) {
                 -1 -> return Result.failure()                              // -1 is server reported unable

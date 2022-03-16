@@ -22,7 +22,6 @@ package nl.joozd.logbookapp.data.comm
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.withContext
 import nl.joozd.comms.Client
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.joozdlogcommon.FeedbackData
@@ -58,32 +57,32 @@ object Cloud {
      * Utility functions
      **********************************************************************************************/
 
-    suspend fun getTime(): Long? = withContext(DispatcherProvider.io()) {
+    suspend fun getTime(): Long? =
         Client.getInstance().use { client ->
             ServerFunctions.getTimestamp(client)
         }
-    }
+
 
     /**
      * Creates a new user
      * Calling function should consider storing username and pasword in [Preferences]
      * @return @see [ServerFunctions.createNewAccount]
      */
-    suspend fun createNewUser(name: String, key: ByteArray): CloudFunctionResults = withContext(DispatcherProvider.io()) {
+    suspend fun createNewUser(name: String, key: ByteArray): CloudFunctionResults =
         Client.getInstance().use {
             ServerFunctions.createNewAccount(it, name, key)
         }
-    }
+
 
     /**
      * Creates a new user
      * Calling function should consider storing username and pasword in [Preferences]
      */
-    suspend fun createNewUser(name: String, password: String): CloudFunctionResults = withContext(DispatcherProvider.io()) {
+    suspend fun createNewUser(name: String, password: String): CloudFunctionResults =
         Client.getInstance().use {
             ServerFunctions.createNewAccount(it, name, Encryption.md5Hash(password))
+
         }
-    }
 
     /**
      * Requests a new username from server
@@ -100,19 +99,19 @@ object Cloud {
      * - Generic server errors will be [CloudFunctionResults.SERVER_ERROR] or [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER]
      * - Client errors will be [CloudFunctionResults.CLIENT_ERROR]
      */
-    suspend fun sendNewEmailAddress(): CloudFunctionResults = withContext(DispatcherProvider.io()) {
+    suspend fun sendNewEmailAddress(): CloudFunctionResults =
         Client.getInstance().use { client ->
             ServerFunctions.sendNewEmailData(client, Preferences.emailAddress)
         }
-    }
+
 
 
     /**
      * Confirm email address by sending hash to server
      */
-    suspend fun confirmEmail(confirmationString: String): CloudFunctionResults = withContext(DispatcherProvider.io()) {
-        require (":" in confirmationString) { "A confirmationString must have a \':\' in it"}
-        Client.getInstance().use{ client ->
+    suspend fun confirmEmail(confirmationString: String): CloudFunctionResults {
+        require(":" in confirmationString) { "A confirmationString must have a \':\' in it" }
+        return Client.getInstance().use { client ->
             ServerFunctions.confirmEmail(client, confirmationString)
         }
     }
@@ -121,27 +120,28 @@ object Cloud {
      * Request a login link.
      * @return true if login link is emailed, false if someting else happened.
      */
-    suspend fun requestLoginLinkMail(): CloudFunctionResults = withContext(DispatcherProvider.io()) {
+    suspend fun requestLoginLinkMail(): CloudFunctionResults =
         Client.getInstance().use { client ->
-            ServerFunctions.requestLoginLinkMail(client).also{
-                when(it){
+            ServerFunctions.requestLoginLinkMail(client).also {
+                when (it) {
                     CloudFunctionResults.OK -> {
                         Preferences.emailJobsWaiting.sendLoginLink = false
                     }
                     CloudFunctionResults.EMAIL_DOES_NOT_MATCH -> {
-                        Preferences.emailVerified = false // error dialogs etc will be handled by calling function
+                        Preferences.emailVerified =
+                            false // error dialogs etc will be handled by calling function
                         Preferences.emailJobsWaiting.sendLoginLink = true
                     }
                     else -> Log.w("requestLoginLinkMail()", "unhandled result $it")
                 }
             }
         }
-    }
+
 
     /**
      * Send pending email jobs to server, remove them from pending jobs when successful
      */
-    suspend fun sendPendingEmailJobs(){
+    suspend fun sendPendingEmailJobs() {
         Preferences.emailJobsWaiting.forEach {
             it()
         }
@@ -153,36 +153,31 @@ object Cloud {
      * Calling function should consider storing username and password in [Preferences]
      * For returns see [ServerFunctions.login] and [ServerFunctions.changePassword]
      */
-    suspend fun changePassword(newPassword: String, email: String?): CloudFunctionResults = withContext(DispatcherProvider.io()) {
-        Client.getInstance().use {client ->
-            ServerFunctions.login(client).let{
-                if (!it.isOK()) return@withContext it.also{
-                    Log.w("changePassword","Incorrect login credentials given")
+    suspend fun changePassword(newPassword: String, email: String?): CloudFunctionResults =
+        Client.getInstance().use { client ->
+            ServerFunctions.login(client).let {
+                if (!it.isOK()) return it.also {
+                    Log.w("changePassword", "Incorrect login credentials given")
                 }
             }
             ServerFunctions.changePassword(client, Encryption.md5Hash(newPassword), email ?: "")
         }
-    }
-
-
-
 
     /**
      * Check username / pass
      * ServerFunctions.testLogin returns 1 if success, 2 if failed, negative value if connection failed
      * @return true if correct, false if incorrect, null if unexpected response, server error or no connection
      */
-    suspend fun checkUser(username: String, password: String): CloudFunctionResults =  withContext(DispatcherProvider.io()) {
+    suspend fun checkUser(username: String, password: String): CloudFunctionResults =
         Client.getInstance().use {
             ServerFunctions.testLogin(it, username, password)
         }
-    }
 
-    suspend fun checkUser(): CloudFunctionResults =  withContext(DispatcherProvider.io()) {
+
+    suspend fun checkUser(): CloudFunctionResults =
         Client.getInstance().use {
             ServerFunctions.login(it)
         }
-    }
 
     /**
      * Check username / pass
@@ -193,17 +188,17 @@ object Cloud {
      *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
      *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
      */
-    suspend fun checkUserFromLink(username: String, password: String): CloudFunctionResults =  withContext(DispatcherProvider.io()) {
+    suspend fun checkUserFromLink(username: String, password: String): CloudFunctionResults =
         Client.getInstance().use {
             ServerFunctions.testLoginFromLink(it, username, password)
         }
-    }
 
-    suspend fun requestBackup(): CloudFunctionResults = withContext(DispatcherProvider.io()) {
-        Client.getInstance().use {client ->
+
+    suspend fun requestBackup(): CloudFunctionResults =
+        Client.getInstance().use { client ->
             ServerFunctions.login(client)
             val result = ServerFunctions.requestBackup(client)
-            when (result){
+            when (result) {
                 CloudFunctionResults.OK -> {
                     Preferences.emailJobsWaiting.sendBackupCsv = false
                 }
@@ -215,31 +210,28 @@ object Cloud {
             }
             result
         }
-    }
-
 
 
     /**********************************************************************************************
      * Airport sync functions
      **********************************************************************************************/
 
-    suspend fun getAirportDbVersion(): Int = withContext(DispatcherProvider.io()) {
+    suspend fun getServerAirportDbVersion(): Int =
         Client.getInstance().use { server ->
             ServerFunctions.getAirportDbVersion(server) // no need to handle errors as negative values won't be higher than available ones
         }
-    }
+
 
     // returns List<BasicAirport>
     suspend fun downloadAirportsDatabase(listener: (Int) -> Unit = {}): CloudFunctionResults {
-        val serverDbVersion = withContext(DispatcherProvider.io()) { getAirportDbVersion() }
-        when(serverDbVersion){
+        val serverDbVersion = getServerAirportDbVersion()
+        when (serverDbVersion) {
             -1 -> return CloudFunctionResults.SERVER_ERROR
             -2 -> return CloudFunctionResults.CLIENT_ERROR
         }
-        val airports = withContext(DispatcherProvider.io()) {
-            Client.getInstance().use {
-                ServerFunctions.getAirports(it, listener)
-            }
+        val airports =Client.getInstance().use {
+            ServerFunctions.getAirports(it, listener)
+
         }?.map { Airport(it) } ?: return CloudFunctionResults.SERVER_ERROR
 
         AirportRepository.instance.replaceDbWith(airports)
@@ -261,31 +253,31 @@ object Cloud {
     }
     */
 
-    suspend fun getAircraftTypes(listener: (Int) -> Unit = {}): List<AircraftType>? = withContext(DispatcherProvider.io()) {
-        Client.getInstance().use{
+    suspend fun getAircraftTypes(listener: (Int) -> Unit = {}): List<AircraftType>? =
+        Client.getInstance().use {
             ServerFunctions.getAircraftTypes(it, listener)
         }
-    }
 
-    suspend fun getForcedTypes(listener: (Int) -> Unit = {}): List<ForcedTypeData>? = withContext(DispatcherProvider.io()) {
-        Client.getInstance().use{
+
+    suspend fun getForcedTypes(listener: (Int) -> Unit = {}): List<ForcedTypeData>? =
+        Client.getInstance().use {
             ServerFunctions.getForcedTypes(it, listener)
         }
-    }
 
-    suspend fun getAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? = withContext(DispatcherProvider.io()) {
-        Client.getInstance().use{
-            ServerFunctions.getAircraftTypesVersion(it, listener).also{
+
+    suspend fun getAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? =
+        Client.getInstance().use {
+            ServerFunctions.getAircraftTypesVersion(it, listener).also {
                 Log.d("aircraftTypes", "version: $it")
             }
         }
-    }
 
-    suspend fun getForcedAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? = withContext(DispatcherProvider.io()) {
-        Client.getInstance().use{
+
+    suspend fun getForcedAircraftTypesVersion(listener: (Int) -> Unit = {}): Int? =
+        Client.getInstance().use {
             ServerFunctions.getForcedAircraftTypesVersion(it, listener)
         }
-    }
+
 
 
     /**********************************************************************************************
@@ -297,53 +289,56 @@ object Cloud {
      *         -1 on critical fail (ie wrong credentials),
      *         null on server error (retry later)
      */
-    suspend fun syncAllFlights(flightRepository: FlightRepositoryWithDirectAccess): Long? =
-        withContext(DispatcherProvider.io()) {
-            Client.getInstance().use { server ->
-                with(ServerFunctions) {
-                    val timeStamp: Long =
-                        TimestampMaker.getAndSaveTimeOffset() ?: return@withContext null
-                    loginAndHandleIfThatFails(server) ?: return@withContext -1L
-                    val newFlightsFromServer =
-                        getNewFlightsFromServer(server) ?: return@withContext -1L
-                    var allFlightsInDB = flightRepository.getAllFlightsInDB()
+    suspend fun syncAllFlights(flightRepository: FlightRepositoryWithDirectAccess): Long? {
+        val timeStamp: Long = TimestampMaker.getAndSaveTimeOffset() ?: return null
+        return Client.getInstance().use { server ->
+            with(ServerFunctions) {
+                loginAndHandleIfThatFails(server) ?: return -1L
+                val newFlightsFromServer =
+                    getNewFlightsFromServer(server)
+                        ?: return -1L
+                var allFlightsInDB = flightRepository.getAllFlightsInDB()
 
-
-                    //fix possible flightID conflicts
-                    val highestTakenIDFromServer =
-                        newFlightsFromServer.maxOfOrNull { it.flightID } ?: Int.MIN_VALUE
-                    val flightsUnknownToServer = allFlightsInDB.filter { it.unknownToServer }
-                    if (flightsUnknownToServer.any { it.flightID <= highestTakenIDFromServer }) {
-                        //fixing flights also updates timestamps for them.
-                        fixFlightsUnknownToServerIDs(flightsUnknownToServer, highestTakenIDFromServer)
-                        //update list since we just changed some flights in it.
-                        allFlightsInDB = flightRepository.getAllFlightsInDB()
-                    }
-
-                    // changing all timestamps to now means that editing flights on two devices
-                    // before syncing will stick to most recent sync, not most recent edit)
-                    val flightsToSend =
-                        getFlightsToSendToServerAndSetTimestamp(allFlightsInDB, timeStamp)
-
-                    //send the flights to server, retry on fail as login worked earlier
-                    if (!sendFlights(server, flightsToSend).isOK()) return@withContext null
-                    //add timestamp to this transaction
-                    if (!sendTimeStamp(server, timeStamp).isOK()) return@withContext null
-                    //save changes on server
-                    if (!save(server).isOK()) return@withContext null.also {
-                        Log.d("Cloud","save returned null")
-                    }
-
-                    //mark time of this successful sync
-                    Preferences.lastUpdateTime = timeStamp
-
-                    //Save flights with current timestamps and clear `unknownToServer` flags
-                    flightRepository.save(flightsToSend.map { it.copy(unknownToServer = false) } + newFlightsFromServer)
-
-                    timeStamp
+                //fix possible flightID conflicts
+                val highestTakenIDFromServer =
+                    newFlightsFromServer.maxOfOrNull { it.flightID } ?: Int.MIN_VALUE
+                val flightsUnknownToServer = allFlightsInDB.filter { it.unknownToServer }
+                if (flightsUnknownToServer.any { it.flightID <= highestTakenIDFromServer }) {
+                    //fixing flights also updates timestamps for them.
+                    fixFlightsUnknownToServerIDs(
+                        flightsUnknownToServer,
+                        highestTakenIDFromServer
+                    )
+                    //update list since we just changed some flights in it.
+                    allFlightsInDB = flightRepository.getAllFlightsInDB()
                 }
+
+                // changing all timestamps to now means that editing flights on two devices
+                // before syncing will stick to most recent sync, not most recent edit)
+                val flightsToSend =
+                    getFlightsToSendToServerAndSetTimestamp(allFlightsInDB, timeStamp)
+
+                //send the flights to server, retry on fail as login worked earlier
+                if (!sendFlights(server, flightsToSend).isOK()) return null
+                //add timestamp to this transaction
+                if (!sendTimeStamp(server, timeStamp).isOK()) return null
+                //save changes on server
+                if (!save(server).isOK()) return null.also {
+                    Log.d("Cloud", "save returned null")
+                }
+
+                //mark time of this successful sync
+                Preferences.lastUpdateTime = timeStamp
+
+                //Save flights with current timestamps and clear `unknownToServer` flags
+                flightRepository.save(flightsToSend.map { it.copy(unknownToServer = false) } + newFlightsFromServer)
+
+                timeStamp
             }
         }
+    }
+
+
 
     private fun getFlightsToSendToServerAndSetTimestamp(
         allFlightsInDB: List<Flight>,
@@ -374,7 +369,7 @@ object Cloud {
      * If login failed due to bad login data, set flag
      */
     private suspend fun loginAndHandleIfThatFails(server: Client): Unit?{
-        return when (val result = withContext(DispatcherProvider.io()) { ServerFunctions.login(server) }) {
+        return when (val result = ServerFunctions.login(server)) {
             CloudFunctionResults.OK -> Unit
             CloudFunctionResults.UNKNOWN_USER_OR_PASS, CloudFunctionResults.NOT_LOGGED_IN -> {
                 this.loginDataValid = false
@@ -390,7 +385,7 @@ object Cloud {
     /**
      * Get flights from [server]
      */
-    private fun getNewFlightsFromServer(server: Client): List<Flight>? =
+    private suspend fun getNewFlightsFromServer(server: Client): List<Flight>? =
         try {
             ServerFunctions.requestFlightsSince(server, Preferences.lastUpdateTime)
                 ?.filter{ !it.isPlanned }
@@ -400,10 +395,10 @@ object Cloud {
             null
         }
 
-    suspend fun sendFeedback(feedback: String, contactInfo: String): CloudFunctionResults = withContext(DispatcherProvider.io()) {
+    suspend fun sendFeedback(feedback: String, contactInfo: String): CloudFunctionResults =
         Client.getInstance().use{ client ->
             val feedbackData = FeedbackData(feedback, contactInfo)
             ServerFunctions.sendFeedback(client, feedbackData)
         }
-    }
+
 }

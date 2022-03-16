@@ -2,10 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.8">
-      <module name="JoozdlogPdfDetector" target="1.7" />
-      <module name="klcrosterparser" target="1.7" />
       <module name="LogbookApp.app" target="11" />
-      <module name="LogbookApp.JoozdUtils" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

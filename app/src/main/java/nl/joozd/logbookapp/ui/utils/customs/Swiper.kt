@@ -41,7 +41,7 @@ import kotlin.math.abs
  *  [backgroundLayout] should have a transparent background.
  *  If [backgroundLayout] has a ConstraintView as child, this child wil be taken as swipeable by default
  */
-class Swiper(val backgroundLayout: ConstraintLayout) {
+class Swiper(private val backgroundLayout: ConstraintLayout) {
     /**
      * @param activity: Activity to get LayoutInflater from. If able, provide a root view for LayoutParams
      */

@@ -19,7 +19,7 @@
 
 package nl.joozd.klcrosterparser
 
-import org.threeten.bp.Instant
+import java.time.Instant
 
 /**
  * Holds an Event as published on the roster, eg. a flight, sim session, Check-in, Hotel, etc.

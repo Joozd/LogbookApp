@@ -19,7 +19,11 @@
 
 package nl.joozd.klcrosterparser
 
-import org.threeten.bp.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneOffset
+
 
 data class RosterDay(val date: LocalDate, val events: List<KlcRosterEvent>, val extraInfo: String) {
     val startOfDay = LocalDateTime.of(date, LocalTime.MIDNIGHT).atZone(ZoneOffset.UTC).toInstant()

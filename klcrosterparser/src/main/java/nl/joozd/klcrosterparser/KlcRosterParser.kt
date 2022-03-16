@@ -22,10 +22,10 @@ package nl.joozd.klcrosterparser
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
-import org.threeten.bp.*
-import org.threeten.bp.format.DateTimeFormatter
 import java.io.Closeable
 import java.io.InputStream
+import java.time.*
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
@@ -147,8 +147,15 @@ class KlcRosterParser(private val inputStream: InputStream): Closeable {
             // val dateRangeString = header.slice(header.indexOf(dateRangeStartMarker)+ dateRangeStartMarker.length until header.indexOf(dateRangeEndMarker))
             // val startEnd = dateRangeString.split(" - ")
             val startEnd = dateRangeResult!!.groups[1]!!.value to dateRangeResult.groups[2]!!.value
-            startOfRoster = LocalDate.parse(startEnd.first, DateTimeFormatter.ofPattern("ddMMMyy", Locale.US)).atStartOfDay().atZone(ZoneOffset.UTC).toInstant()
-            endOfRoster = LocalDate.parse(startEnd.second, DateTimeFormatter.ofPattern("ddMMMyy", Locale.US)).plusDays(1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant()
+            startOfRoster = LocalDate.parse(startEnd.first, DateTimeFormatter.ofPattern("ddMMMyy", Locale.US))
+                .atStartOfDay()
+                .atZone(ZoneOffset.UTC)
+                .toInstant()
+            endOfRoster = LocalDate.parse(startEnd.second, DateTimeFormatter.ofPattern("ddMMMyy", Locale.US))
+                .plusDays(1)
+                .atStartOfDay()
+                .atZone(ZoneOffset.UTC)
+                .toInstant()
         }
     }
     val period: ClosedRange<Long>? = if (startOfRoster?.epochSecond == null || endOfRoster?.epochSecond == null) null

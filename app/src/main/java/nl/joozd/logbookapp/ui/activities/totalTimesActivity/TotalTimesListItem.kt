@@ -24,7 +24,6 @@ package nl.joozd.logbookapp.ui.activities.totalTimesActivity
  * @param description: Description (eg. "PH-EZA")
  * @param value: Value to display (eg. "12:34")
  * @param numericValue: Comparable value for sorting (eg. 754)
- * @param originalPosition: Original position in the list (for reverting sort to what is started with)
- * [numericValue] and [originalPosition] are used for sorting in adapter, can be left blank if not used.
+ * [numericValue] is used for sorting in adapter, can be left blank if not used.
  */
-data class TotalTimesListItem(val description: String, val value: String, val numericValue: Comparable<*> = 0, val originalPosition: Int = 0)
+data class TotalTimesListItem(val description: String, val value: String, val numericValue: Int? = null)

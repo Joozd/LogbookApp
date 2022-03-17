@@ -83,6 +83,8 @@ dependencies {
     // Local implementations:
     implementation files("C:\\Users\\joozd\\IdeaProjects\\libs\\joozdserializing-jvm-0.1.jar")
     //implementation files("C:\\Users\\joozd\\IdeaProjects\\libs\\comms\\comms.jar")
+
+    implementation files("C:\\Users\\joozd\\AndroidStudioProjects\\RecyclerViewExpandableListAdapterApplication\\RecyclerViewExpandableListAdapter\\build\\outputs\\aar\\RecyclerViewExpandableListAdapter-release.aar")
     implementation files("C:\\Users\\joozd\\AndroidStudioProjects\\JoozdCalendarApiApplication\\JoozdCalendarApi\\build\\outputs\\aar\\JoozdCalendarApi-release.aar")
     implementation files("C:\\Users\\joozd\\IdeaProjects\\libs\\comms\\comms-jvm.jar")
 

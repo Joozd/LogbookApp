@@ -36,10 +36,10 @@ import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 
 
 class TotalTimesViewModel: JoozdlogActivityViewModel() {
-    private val _allLists = MutableLiveData(List<TotalTimesList?>(NUMBER_OF_LISTS) { null })
+    private val _allLists = MutableLiveData(List<TotalTimesItem?>(NUMBER_OF_LISTS) { null })
 
 
-    val allLists: LiveData<List<TotalTimesList?>> = Transformations.map(_allLists) { it.filterNotNull() }
+    val allLists: LiveData<List<TotalTimesItem>> = Transformations.map(_allLists) { it.filterNotNull() }
 
 
     /**
@@ -53,11 +53,11 @@ class TotalTimesViewModel: JoozdlogActivityViewModel() {
             val allBalancesForward = async { BalanceForwardRepository.instance.getAll() }
 
             // build lists
-            val totalTimes = async(Dispatchers.Default) { TotalTimes(allFlights.await(), allBalancesForward.await()) }
-            val timesPerYear = async(Dispatchers.Default) { TimesPerYear(allFlights.await()) }
-            val timesPerType = async(Dispatchers.Default) { TimesPerType(allFlights.await()) }
-            val timesPerReg = async(Dispatchers.Default) { TimesPerRegistration(allFlights.await())}
-            val visitsPerDest = async(Dispatchers.Default) { AirportsArrived(allFlights.await())}
+            val totalTimes = async { TotalTimes.of(allFlights.await(), allBalancesForward.await()) }
+            val timesPerYear = async { TimesPerYear.of(allFlights.await()) }
+            val timesPerType = async { TimesPerType.of(allFlights.await()) }
+            val timesPerReg = async{ TimesPerRegistration.of(allFlights.await())}
+            val visitsPerDest = async { AirportsArrived.of(allFlights.await())}
 
             //Add totals lists as they become available
             _allLists.value = _allLists.value!!.replaceValueAt(POSITION_TOTALS, totalTimes.await())

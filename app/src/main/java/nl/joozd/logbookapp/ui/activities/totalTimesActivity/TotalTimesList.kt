@@ -54,7 +54,5 @@ interface TotalTimesList {
         const val VALUE_UP = 4L
         const val NAME_DOWN = 8L
         const val NAME_UP = 16L
-
-
     }
 }

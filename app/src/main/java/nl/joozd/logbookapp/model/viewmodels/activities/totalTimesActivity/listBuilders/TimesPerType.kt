@@ -19,42 +19,42 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders
 
+import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
-import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.TotalTimesItem
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortNameDownStrategy
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortNameUpStrategy
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortValueDownStrategy
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortValueUpStrategy
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesListItem
+import nl.joozd.logbookapp.utils.DispatcherProvider
 
-class TimesPerType(flights: List<Flight>): TotalTimesList {
-    /**
-     * Title of the list (eg. "Times per aircraft"
-     */
-    override val title = App.instance.ctx.getString(R.string.times_per_type)
+class TimesPerType(title: String, items: List<TotalTimesListItem>
+): TotalTimesItem(title, items, sortableBy) {
 
-    /**
-     * List of [TotalTimesListItem]
-     * eg. listOf(TotalTimesListItem("PH-EZA","12:34",754), TotalTimesListItem("PH-EZB","12:35",755))
-     */
-    override val values: List<TotalTimesListItem> by lazy { buildList(flights) }
-
-    /**
-     * Bit mask of available sorting types
-     */
-    override val sortableBy = TotalTimesList.NAME_DOWN + TotalTimesList.NAME_UP + TotalTimesList.VALUE_DOWN + TotalTimesList.VALUE_UP
-
-    /**
-     * Set to true if this list should start open in the expandableListView
-     */
-    override val autoOpen = false
-
-    private fun buildList(flights: List<Flight>): List<TotalTimesListItem> {
-        val typesToTimes = flights.filter{!it.isSim}.map { it.aircraftType }.distinct().map { type ->
-            type to flights.filter { it.aircraftType == type }.sumOf { it.duration() }
-        }.toMap()
-        return typesToTimes.keys.sorted().map { type ->
-            val typeLongName: String = /* AircraftRepository.getAircraftTypeByShortName(type)?.name ?: */ type // TODO getAircraftByShortName is suspend, gotta fix that
-            TotalTimesListItem(typeLongName, (typesToTimes[type] ?: -1).minutesToHoursAndMinutesString(), typesToTimes[type] ?: -1, 0)
+    companion object{
+        suspend fun of(flights: List<Flight>) = withContext(DispatcherProvider.default()){
+            val title = App.instance.ctx.getString(R.string.times_per_type)
+            val items = buildList(flights)
+            TimesPerType(title, items)
         }
+
+
+        private suspend fun buildList(flights: List<Flight>): List<TotalTimesListItem> {
+            val adc = AircraftRepository.instance.getAircraftDataCache()
+            val typesToTimes = flights.filter{!it.isSim}.map { it.aircraftType }.distinct().map { type ->
+                type to flights.filter { it.aircraftType == type }.sumOf { it.duration() }
+            }.toMap()
+            return typesToTimes.keys.sorted().map { type ->
+                val typeLongName: String = adc.getAircraftTypeByShortName(type)?.name ?: type
+                TotalTimesListItem(typeLongName, (typesToTimes[type] ?: -1).minutesToHoursAndMinutesString(), typesToTimes[type] ?: -1)
+            }
+        }
+
+        private val sortableBy = listOf(SortValueDownStrategy, SortNameDownStrategy, SortNameUpStrategy, SortValueUpStrategy)
     }
 }

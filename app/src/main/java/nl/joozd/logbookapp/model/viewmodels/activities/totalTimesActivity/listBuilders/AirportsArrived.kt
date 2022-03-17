@@ -19,45 +19,43 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders
 
+import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.TotalTimesItem
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortNameDownStrategy
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortNameUpStrategy
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortValueDownStrategy
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortValueUpStrategy
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesListItem
+import nl.joozd.logbookapp.utils.DispatcherProvider
 
-class AirportsArrived(flights: List<Flight>): TotalTimesList {
-    /**
-     * Title of the list (eg. "Times per aircraft"
-     */
-    override val title = App.instance.ctx.getString(R.string.arrivals_per_airport)
-
-    /**
-     * List of [TotalTimesListItem]
-     * eg. listOf(TotalTimesListItem("PH-EZA","12:34",754), TotalTimesListItem("PH-EZB","12:35",755))
-     */
-    override val values: List<TotalTimesListItem> by lazy { buildList(flights) }
-
-    /**
-     * Bit mask of available sorting types
-     */
-    override val sortableBy = TotalTimesList.NAME_DOWN + TotalTimesList.NAME_UP + TotalTimesList.VALUE_DOWN + TotalTimesList.VALUE_UP
-
-    /**
-     * Set to true if this list should start open in the expandableListView
-     */
-    override val autoOpen = false
-
-    private fun buildList(flights: List<Flight>): List<TotalTimesListItem> {
-        val destsToVisits =
-            flights.filter{!it.isSim}
-                .map { it.dest }
-                .distinct()
-                .map { dest ->
-                    dest to flights.filter { it.dest == dest }.size
-                }
-                .toMap()
-        return destsToVisits.keys.sorted().map { icaoName ->
-            TotalTimesListItem(icaoName, (destsToVisits[icaoName] ?: -1).toString(), destsToVisits[icaoName] ?: -1, 0)
+class AirportsArrived(title: String, items: List<TotalTimesListItem>
+): TotalTimesItem(title,items, sortableBy) {
+    companion object{
+        //This runs suspended as it is nice and heavy work for longer lists.
+        suspend fun of(flights: List<Flight>) = withContext(DispatcherProvider.default()){
+            val title = App.instance.ctx.getString(R.string.arrivals_per_airport)
+            val list = buildList(flights)
+            AirportsArrived(title, list)
         }
+
+        private fun buildList(flights: List<Flight>): List<TotalTimesListItem> {
+            val destsToVisits =
+                flights.filter{!it.isSim}
+                    .map { it.dest }
+                    .distinct()
+                    .map { dest ->
+                        dest to flights.filter { it.dest == dest }.size
+                    }
+                    .toMap()
+            return destsToVisits.keys.sorted().map { icaoName ->
+                TotalTimesListItem(icaoName, (destsToVisits[icaoName] ?: -1).toString(), destsToVisits[icaoName] ?: -1)
+            }
+        }
+
+        private val sortableBy = listOf(SortValueDownStrategy, SortNameDownStrategy, SortNameUpStrategy, SortValueUpStrategy)
     }
 }

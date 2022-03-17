@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.ui.activities.totalTimesActivity
 
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityTotalTimesBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.TotalTimesViewModel
@@ -47,21 +48,17 @@ class TotalTimesActivity : JoozdlogActivity() {
                 title = getString(R.string.totalTimes)
             }
 
-            //TODO maybe ever change this to a RecyclerView implementation. Too tired now to think.
             /**
              * Adding extra Totals lists to this is done in [TotalTimesViewModel.allLists]
              */
-            val totalTimesExpandableListAdapter = TotalTimesExpandableListAdapter(this@TotalTimesActivity)
-            totalTimesExListView.setAdapter(totalTimesExpandableListAdapter)
+            val totalTimesExpandableListAdapter = TotalTimesExpandableListAdapter()
+            totalTimesExListView.adapter = totalTimesExpandableListAdapter
+            totalTimesExListView.layoutManager = LinearLayoutManager(activity)
 
-            viewModel.allLists.observe(activity){ unfiltered ->
-                unfiltered.filterNotNull().also {
-                    println ("lists: ${it.size}")
-                    totalTimesExpandableListAdapter.list = it
-                    it.mapIndexed { i, ttl ->
-                        if (ttl.autoOpen) totalTimesExListView.expandGroup(i)
-                    }
-                }
+            viewModel.allLists.observe(activity){ lists ->
+                println("XXXXXXXXXXXXXX submitting list: $lists")
+                    totalTimesExpandableListAdapter.submitList(lists)
+
             }
             setContentView(root)
         }

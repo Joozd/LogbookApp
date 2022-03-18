@@ -50,7 +50,7 @@ interface FlightDao {
     @Query("SELECT MAX(flightID) FROM FlightData")
     suspend fun highestUsedID(): Int?
 
-    @Query("SELECT * FROM FlightData WHERE isPlanned = 0 AND DELETEFLAG = 0 ORDER BY timeIn LIMIT 1")
+    @Query("SELECT * FROM FlightData WHERE isPlanned = 0 AND DELETEFLAG = 0 ORDER BY timeIn DESC LIMIT 1")
     suspend fun getMostRecentCompleted(): FlightData?
 
     @Query("SELECT MAX(timeStamp) FROM FlightData WHERE isPlanned = 0")

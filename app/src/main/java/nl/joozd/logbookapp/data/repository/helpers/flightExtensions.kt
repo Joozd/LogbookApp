@@ -146,10 +146,15 @@ fun Flight.setNightTime(airportDataCache: AirportDataCache): Flight {
 fun Flight.revert(): Flight {
     val now = ZonedDateTime.now().withSecond(0)
     val nowRoundedDownToFiveMinutes = now.withMinute((now.minute/5) * 5).toEpochSecond()
-    return copy(
-        flightID = Flight.FLIGHT_ID_NOT_INITIALIZED,
+    return Flight(
         orig = dest,
         dest = orig,
+        registration = registration,
+        aircraftType = aircraftType,
+        name = name,
+        name2 = name2,
+        isPIC = isPIC,
+        isSim = isSim,
         flightNumber = increaseFlightnumberByOne(flightNumber),
         timeOut = nowRoundedDownToFiveMinutes,
         timeIn = nowRoundedDownToFiveMinutes + 3600,

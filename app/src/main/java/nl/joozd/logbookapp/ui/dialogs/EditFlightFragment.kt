@@ -103,6 +103,7 @@ class EditFlightFragment: JoozdlogFragment() {
         flightNameField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_name_help) }
         flightName2Field            .setOnLongClickListener { showHelpMessage(R.string.edit_flight_name2_help) }
         flightRemarksField          .setOnLongClickListener { showHelpMessage(R.string.edit_flight_remarks_help) }
+
         simSelector                 .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_help) }
         signSelector                .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sign_help) }
         dualInstructorSelector      .setOnLongClickListener { showHelpMessage(R.string.edit_flight_dual_instructor_help) }
@@ -118,6 +119,8 @@ class EditFlightFragment: JoozdlogFragment() {
         simTakeoffLandingsField     .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_takeoff_landing_help) }
         simNamesField               .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_names_help) }
         simRemarksField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_remarks_help) }
+        simSimSelector              .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_help) }
+        simSignSelector             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sign_help) }
     }
     private fun showHelpMessage(message: Int): Boolean{
         supportFragmentManager.commit {
@@ -135,7 +138,7 @@ class EditFlightFragment: JoozdlogFragment() {
 
     private fun LayoutEditFlightFragmentBinding.setOnClickListeners() {
         setToggleSwitchOnClickListeners()
-        setDialogLaunchingOnClickListeners()
+        setLineSelectorKeysOnClickListeners()
         setClosingOnClickListeners()
     }
 
@@ -144,6 +147,10 @@ class EditFlightFragment: JoozdlogFragment() {
         simSelector.setOnClickListener {
             clearFocus()
             viewModel.toggleSim()
+        }
+
+        signSelector.setOnClickListener {
+            launchSignatureDialog()
         }
 
         dualInstructorSelector.setOnClickListener {
@@ -175,55 +182,46 @@ class EditFlightFragment: JoozdlogFragment() {
             clearFocus()
             viewModel.toggleAutoValues()
         }
+
+        simSimSelector.setOnClickListener {
+            clearFocus()
+            viewModel.toggleSim()
+        }
+
+        simSignSelector.setOnClickListener {
+            launchSignatureDialog()
+        }
+
+
     }
 
-    private fun LayoutEditFlightFragmentBinding.setDialogLaunchingOnClickListeners() {
-        signSelector.setOnClickListener { launchSignatureDialog() }
-
+    private fun LayoutEditFlightFragmentBinding.setLineSelectorKeysOnClickListeners() {
         val dateDialogOnClickListener = makeLaunchDateDialogOnClickListener()
 
         flightDateSelector.setOnClickListener(dateDialogOnClickListener)
 
         // flightDateField has an onClickListener, not an onFocusChanged as it always uses dialog
         flightDateField.setOnClickListener(dateDialogOnClickListener)
-
-        flightFlightNumberSelector.setOnClickListener {
-            toastNotImplementedYet()
-        }
+        flightFlightNumberSelector.setOnClickListener { toastNotImplementedYet() }
 
         //also: this might not work after rotation etc
         flightOrigSelector.setOnClickListener { showOrigPicker() }
-
         flightDestSelector.setOnClickListener { showDestPicker() }
-
         flighttOutSelector.setOnClickListener(makeLaunchTimePickerOnClickListener())
-
         flighttInSelector.setOnClickListener(makeLaunchTimePickerOnClickListener())
-
         flightAcRegSelector.setOnClickListener { launchSimOrAircraftPicker() }
-
         flightTakeoffLandingSelector.setOnClickListener { launchLandingsDialog() }
-
         flightNameSelector.setOnClickListener { launchName1Dialog() }
-
         flightName2Selector.setOnClickListener { launchName2Dialog() }
 
         simDateField.setOnClickListener(dateDialogOnClickListener)
-
         simDateSelectorLeft.setOnClickListener(dateDialogOnClickListener)
-
         simDateSelectorRight.setOnClickListener(dateDialogOnClickListener)
-
         simTimeSelectorLeft.setOnClickListener{ toastNotImplementedYet() }
-
         simTimeSelectorRight.setOnClickListener{ toastNotImplementedYet() }
-
         simAircraftSelectorLeft.setOnClickListener { launchSimOrAircraftPicker() }
-
         simTakeoffLandingSelector.setOnClickListener { launchLandingsDialog() }
-
         simNamesSelectorLeft.setOnClickListener { launchName2Dialog() }
-
         simNamesSelectorRight.setOnClickListener { launchName2Dialog() }
     }
 

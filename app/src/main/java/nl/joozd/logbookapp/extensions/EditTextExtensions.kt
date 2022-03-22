@@ -25,3 +25,9 @@ fun EditText.removeTrailingDigits(){
     setText(text.toString().removeTrailingDigits())
 }
 
+fun EditText.setTextIfNotFocused(newText: CharSequence){
+    if (!hasFocus()){
+        setText(newText)
+    }
+}
+

@@ -391,46 +391,39 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun EditText.handleOrigFocusChanged(hasFocus: Boolean) {
-        separateDataDisplayAndEntry(hasFocus) {
-            viewModel.setOrig(it?.toString())
-        }
+        if (!hasFocus)
+            viewModel.setOrig(text?.toString())
     }
 
     private fun EditText.handleDestFocusChanged(hasFocus: Boolean) {
-        separateDataDisplayAndEntry(hasFocus) {
-            viewModel.setDest(it?.toString())
-        }
+        if (!hasFocus)
+            viewModel.setDest(text?.toString())
     }
 
 
     private fun EditText.handleTimeOutFocusChanged(hasFocus: Boolean) {
-        separateDataDisplayAndEntry(hasFocus) {
-            viewModel.setTimeOut(it?.toString())
-        }
+        if (!hasFocus)
+            viewModel.setTimeOut(text?.toString())
     }
 
     private fun EditText.handleTimeInFocusChanged(hasFocus: Boolean) {
-        separateDataDisplayAndEntry(hasFocus) {
-            viewModel.setTimeIn(it?.toString())
-        }
+        if (!hasFocus)
+            viewModel.setTimeIn(text?.toString())
     }
 
     private fun EditText.handleAircraftFocusChanged(hasFocus: Boolean) {
-        separateDataDisplayAndEntry(hasFocus) {
-            viewModel.setRegAndType(it?.toString())
-        }
+        if (!hasFocus)
+            viewModel.setRegAndType(text?.toString())
     }
 
     private fun EditText.handleTakeoffLandingFocusChanged(hasFocus: Boolean) {
-        separateDataDisplayAndEntry(hasFocus) {
-            viewModel.setTakeoffLandings(it?.toString())
-        }
+        if (!hasFocus)
+            viewModel.setTakeoffLandings(text?.toString())
     }
 
     private fun EditText.handleNameFocusChanged(hasFocus: Boolean) {
-        separateDataDisplayAndEntry(hasFocus) {
-            viewModel.setName(it?.toString())
-        }
+        if (!hasFocus)
+            viewModel.setName(text?.toString())
     }
 
     private fun EditText.handleNamesFieldFocusChanged(hasFocus: Boolean) {
@@ -444,21 +437,18 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun EditText.handleSimTimeFocusChanged(hasFocus: Boolean) {
-        separateDataDisplayAndEntry(hasFocus) {
-            viewModel.setSimTime(it?.toString())
-        }
+        if (!hasFocus)
+            viewModel.setSimTime(text?.toString())
     }
 
     private fun EditText.handleSimAircraftFieldFocusChanged(hasFocus: Boolean) {
-        separateDataDisplayAndEntry(hasFocus) {
-            viewModel.setSimAircraft(it?.toString())
-        }
+        if (!hasFocus)
+            viewModel.setSimAircraft(text?.toString())
     }
 
     private fun EditText.handleSimTakeoffLandingsFieldFocusChanged(hasFocus: Boolean) {
-        separateDataDisplayAndEntry(hasFocus) {
-            viewModel.setTakeoffLandings(it?.toString())
-        }
+        if (!hasFocus)
+            viewModel.setTakeoffLandings(text?.toString())
     }
 
 
@@ -532,11 +522,16 @@ class EditFlightFragment: JoozdlogFragment() {
         }
     }
 
+    /*
+     * We can use setTextIfNotFocused for these fields,
+     * as their contents are not changed from any other field, only from entering data in themselves
+     * (which is done when losing focus so also ok)
+     */
     private fun LayoutEditFlightFragmentBinding.collectOrigFLow(){
         viewModel.origFlow().launchCollectWhileLifecycleStateStarted{
             if (!it.checkIfValidCoordinates()) toastAirportNotFound()
             flightOrigEditText.setAirportFieldToValidOrInvalidLayout(it)
-            flightOrigEditText.setText(getAirportIdent(it))
+            flightOrigEditText.setTextIfNotFocused(getAirportIdent(it))
         }
     }
 
@@ -544,7 +539,7 @@ class EditFlightFragment: JoozdlogFragment() {
         viewModel.destFlow().launchCollectWhileLifecycleStateStarted{
             if (!it.checkIfValidCoordinates()) toastAirportNotFound()
             flightDestEditText.setAirportFieldToValidOrInvalidLayout(it)
-            flightDestEditText.setText(getAirportIdent(it))
+            flightDestEditText.setTextIfNotFocused(getAirportIdent(it))
         }
     }
 
@@ -554,13 +549,13 @@ class EditFlightFragment: JoozdlogFragment() {
 
     private fun LayoutEditFlightFragmentBinding.collectTimeOutFlow(){
         viewModel.timeOutFlow().launchCollectWhileLifecycleStateStarted{
-            flightTimeOutEditText.setText(it.toTimeString())
+            flightTimeOutEditText.setTextIfNotFocused(it.toTimeString())
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectTimeInFlow(){
         viewModel.timeInFlow().launchCollectWhileLifecycleStateStarted{
-            flightTimeInEditText.setText(it.toTimeString())
+            flightTimeInEditText.setTextIfNotFocused(it.toTimeString())
         }
     }
 
@@ -570,7 +565,7 @@ class EditFlightFragment: JoozdlogFragment() {
         viewModel.aircraftFlow().launchCollectWhileLifecycleStateStarted{
             if(it.source == Aircraft.UNKNOWN) launchSimOrAircraftPicker()
             flightAircraftField.setText(it.toString())
-            simAircraftField.setText(it.type?.shortName ?: "")
+            simAircraftField.setTextIfNotFocused(it.type?.shortName ?: "")
         }
     }
 
@@ -578,28 +573,28 @@ class EditFlightFragment: JoozdlogFragment() {
         viewModel.takeoffLandingsFlow().launchCollectWhileLifecycleStateStarted{
             val s = it.toString()
             flightTakeoffLandingField.setText(s)
-            simTakeoffLandingsField.setText(s)
+            simTakeoffLandingsField.setTextIfNotFocused(s)
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectNameFlow(){
         viewModel.nameFlow().launchCollectWhileLifecycleStateStarted{
-            flightNameField.setText(it)
+            flightNameField.setTextIfNotFocused(it)
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectName2Flow(){
         viewModel.name2Flow().launchCollectWhileLifecycleStateStarted{
             val s = it.joinToString(";")
-            flightName2Field.setText(s)
-            simNamesField.setText(s)
+            flightName2Field.setTextIfNotFocused(s)
+            simNamesField.setTextIfNotFocused(s)
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectRemarksFlow(){
         viewModel.remarksFlow().launchCollectWhileLifecycleStateStarted{
-            flightRemarksField.setText(it)
-            simRemarksField.setText(it)
+            flightRemarksField.setTextIfNotFocused(it)
+            simRemarksField.setTextIfNotFocused(it)
         }
     }
 

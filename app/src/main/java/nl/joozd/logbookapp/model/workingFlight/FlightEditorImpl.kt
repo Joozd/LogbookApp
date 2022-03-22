@@ -277,7 +277,7 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
             nightTime = if (isSim) 0 else nightTime,
             multiPilotTime = if (isSim) 0 else multiPilotTime,
             simTime = if (isSim) simTime else 0,
-            augmentedCrew = if (isSim) AugmentedCrew().toInt() else ifrTime
+            augmentedCrew = if (isSim) AugmentedCrew().toInt() else augmentedCrew
         )
 }
 

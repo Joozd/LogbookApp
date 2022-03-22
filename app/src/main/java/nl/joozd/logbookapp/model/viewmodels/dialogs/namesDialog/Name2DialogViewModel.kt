@@ -62,9 +62,9 @@ class Name2DialogViewModel: JoozdlogDialogViewModel() {
     }
 
     fun addSelectedName(){
-        pickedNewName?.let {
+        pickedNewName?.let { name ->
             pickedNewName = null
-            flightEditor.name2 += it
+            flightEditor.name2 = (flightEditor.name2 + name).filter {n -> n.isNotBlank() }
         }
     }
 

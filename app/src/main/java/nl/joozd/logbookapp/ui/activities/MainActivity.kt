@@ -20,19 +20,28 @@
 
 package nl.joozd.logbookapp.ui.activities
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.calendar.getFlightsFromCalendar
+import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModelNew
@@ -96,6 +105,7 @@ class MainActivity : JoozdlogActivity() {
     override fun onResume() {
         super.onResume()
         JoozdlogWorkersHub.syncTimeAndFlightsIfEnoughTimePassed()
+        updateCalendarEventsIfEnabled()
     }
 
     private fun ActivityMainNewBinding.makeFlightsList(){
@@ -313,6 +323,34 @@ class MainActivity : JoozdlogActivity() {
             addToBackStack(null)
         }
     }
+
+
+    private fun updateCalendarEventsIfEnabled(){
+        if (Preferences.useCalendarSync){
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
+                lifecycleScope.launch {
+                    getFlightsFromCalendar()?.let {
+                        ImportedFlightsSaver.instance.save(it)
+                    }
+                }
+            else
+                requestCalendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+        }
+    }
+
+    // Register the permissions callback, which handles the user's response to the
+    // system permissions dialog. Save the return value, an instance of
+    // ActivityResultLauncher. You can use either a val, as shown in this snippet,
+    // or a lateinit var in your onAttach() or onCreate() method.
+    private val requestCalendarPermissionLauncher =
+        registerForActivityResult(RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                updateCalendarEventsIfEnabled()
+            } else {
+                Preferences.useCalendarSync = false
+            }
+        }
 
 
 

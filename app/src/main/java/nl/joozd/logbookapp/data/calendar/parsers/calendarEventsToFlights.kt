@@ -36,7 +36,7 @@ private const val DEST = 3
 fun Collection<CalendarEvent>.calendarEventsToFlights(
     period: ClosedRange<Long>? = null
 ): ExtractedPlannedFlights {
-    val flightEvents = this.filter {flightRegExIATA.containsMatchIn(it.description)}
+    val flightEvents = this.filter {flightRegExIATA.containsMatchIn(it.title)}
     val flights = flightEventsToBasicFlights(flightEvents, flightRegExIATA)
     val p = period ?: getPeriodFromFlights(flights)
     return ExtractedPlannedFlights(p, flights, AirportIdentFormat.IATA)
@@ -46,7 +46,7 @@ private fun flightEventsToBasicFlights(
     flightEvents: List<CalendarEvent>,
     flightRegEx: Regex // this is here in case I want to support ICAO regex as well
 ) = flightEvents.mapNotNull { event ->
-    flightRegEx.find(event.description)?.let { data ->
+    flightRegEx.find(event.title)?.let { data ->
         BasicFlight.PROTOTYPE.copy(
             orig = data.orig(),
             dest = data.dest(),

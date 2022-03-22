@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.data.calendar
 
 import android.Manifest
 import android.content.Context
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.withContext
 import nl.joozd.joozdcalendarapi.CalendarDescriptor

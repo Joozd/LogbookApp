@@ -96,6 +96,7 @@ class ImportedFlightsSaverImpl(
         val plannedFlightsOnDevice = getPlannedFlightsOnDevice(plannedFlights.period ?: return)
 
         val matchingFlights = getMatchingFlightsExactTimes(plannedFlightsOnDevice, flights)
+
         val mergedFlights = mergeFlights(matchingFlights)
 
         val newFlights = getNonMatchingFlightsExactTimes(plannedFlightsOnDevice, flights)

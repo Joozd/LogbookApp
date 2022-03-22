@@ -182,7 +182,7 @@ data class ModelFlight(
 
     private fun calculateIfrTime() =
         if (ifrTime != Flight.FLIGHT_IS_VFR)  calculateTotalTime()
-        else 0
+        else Flight.FLIGHT_IS_VFR
 
     private fun calculateMultiPilotTime() =
         if (aircraft.type?.multiPilot == true) calculateTotalTime()

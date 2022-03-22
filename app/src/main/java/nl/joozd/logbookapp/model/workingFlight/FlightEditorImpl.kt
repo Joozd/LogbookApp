@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
+import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.extensions.atDate
 import nl.joozd.logbookapp.extensions.plusDays
@@ -123,15 +124,13 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
             flight = newFlight.autoValues()
         }
 
+    // Set to Flight.FLIGHT_IS_VFR is not IFR, set to anything >= 0 to make it IFR.
     override var ifrTime: Int
         get() = flight.ifrTime
         set(ifrTime){
-            println("FlightEditor setting IFR time to $ifrTime (it was ${flight.ifrTime})")
             //if IFR time changed to anything other than totalFlightTime or FLIGHT_IS_VFR, this disables autoFill.
             val af = ifrTime == totalFlightTime || ifrTime == Flight.FLIGHT_IS_VFR
-            println("af = $af")
             flight = flight.copy(ifrTime = ifrTime, autoFill = af && autoFill).autoValues()
-            println("Done, flight IFR time is now ${flight.ifrTime}.")
         }
 
     override var nightTime: Int
@@ -245,7 +244,7 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
     }
 
     override suspend fun save() {
-        val f = flight.toFlight().copy(isPlanned = flight.isPlanned())
+        val f = flight.prepareForSaving()
         FlightRepositoryWithUndo.instance.save(f)
     }
 
@@ -263,7 +262,23 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
     // A flight is planned when it is edited to start in the future (or less than 5 minutes before now)
     private fun ModelFlight.isPlanned(): Boolean =
         if (isSim) date() > LocalDate.now()
-        else (timeIn > Instant.now().plusMinutes(-5))
+        else timeIn > Instant.now().plusMinutes(-5)
+
+    /*
+     * Transforms ModelFlight to Flight
+     * and removes values that do not belong in sim/not sim records.
+     */
+    private fun ModelFlight.prepareForSaving(): Flight =
+        toFlight().copy(
+            isPlanned = isPlanned(),
+            orig = if (isSim) "" else orig.ident,
+            dest = if (isSim) "" else dest.ident,
+            ifrTime = if (isSim) 0 else ifrTime,
+            nightTime = if (isSim) 0 else nightTime,
+            multiPilotTime = if (isSim) 0 else multiPilotTime,
+            simTime = if (isSim) simTime else 0,
+            augmentedCrew = if (isSim) AugmentedCrew().toInt() else ifrTime
+        )
 }
 
 

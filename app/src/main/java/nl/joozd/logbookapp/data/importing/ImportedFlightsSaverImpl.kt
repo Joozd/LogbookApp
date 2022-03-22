@@ -25,7 +25,7 @@ import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
+import nl.joozd.logbookapp.data.importing.results.SaveCompletedFlightsResult
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.iataToIcaoAirports
@@ -67,10 +67,21 @@ class ImportedFlightsSaverImpl(
      * Will check for same flights (flightnumber, orig and dest) departing on the same
      *  (UTC) calendar day and update times if such a flight is found.
      */
-    override suspend fun save(completedFlights: ExtractedCompletedFlights) {
-        val flights = getFlightsWithIcaoAirportsInPeriod(completedFlights) ?: return
+    override suspend fun save(completedFlights: ExtractedCompletedFlights): SaveCompletedFlightsResult? {
+        val flights = getFlightsWithIcaoAirportsInPeriod(completedFlights) ?: return null
         val flightsOnDevice = flightsRepo.getAllFlights()
-        TODO("Stub")
+        val relevantFlightsOnDevice = flightsOnDevice.filter { !it.isSim && it.timeOut in completedFlights.period ?: return null }
+        val matchingFlights = getMatchingFlightsSameDay(relevantFlightsOnDevice, flights)
+        val mergedFlights = mergeFlights(matchingFlights)
+        val newFlights = getNonMatchingFlightsSameDay(relevantFlightsOnDevice, flights)
+        val flightsNotInCompletedFlights = getNonMatchingFlightsExactTimes(flights, relevantFlightsOnDevice)
+        flightsRepo.save(mergedFlights + newFlights)
+        return SaveCompletedFlightsResult(
+            flightsInCompletedButNotOnDevice = newFlights.size,
+            flightsOnDeviceButNotInCompleted = flightsNotInCompletedFlights.size,
+            totalFlightsImported = flights.size,
+            flightsUpdated = matchingFlights.filter { it.hasChanges() }.size
+        )
     }
 
     /**

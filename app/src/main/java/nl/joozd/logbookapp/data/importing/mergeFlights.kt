@@ -33,8 +33,8 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
  * - remarks
  * Other things will stay as they were in second flight.
  */
-fun mergeFlights(flights: Collection<Pair<Flight, Flight>>): List<Flight> =
-    flights.map { it.second.mergeOnto(it.first) }
+fun mergeFlights(flights: Collection<MatchingFlights>): List<Flight> =
+    flights.map { it.newFlight.mergeOnto(it.knownFlight) }
 
 /**
  * Merge a flight on device with a new Flight.

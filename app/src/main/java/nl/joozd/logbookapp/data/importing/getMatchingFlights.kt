@@ -22,37 +22,84 @@ package nl.joozd.logbookapp.data.importing
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
 /**
- * Match flights from [flights1] and [flights2].
+ * Match flights from [knownFlights] and [newFlights].
  * Matches will be returned as pairs - flight1 to flight2
  * This matches same times, orig and dest.
  * If multiple flights match, it will only match the first found for every flight in flights1.
  */
 fun getMatchingFlightsExactTimes(
-    flights1: Collection<Flight>,
-    flights2: Collection<Flight>
-): List<Pair<Flight, Flight>> =
-    flights1.mapNotNull { f ->
-        f.findMatchIn(flights2)?.let{
-            f to it
+    knownFlights: Collection<Flight>,
+    newFlights: Collection<Flight>
+): List<MatchingFlights> =
+    knownFlights.mapNotNull { knownFlight ->
+        knownFlight.findExactTimesMatchIn(newFlights)?.let{ newFlight ->
+            MatchingFlights(
+                knownFlight = knownFlight,
+                newFlight = newFlight
+            )
         }
     }
 
 /**
  * returns a list of those [newFlights] that do not match any flights in [flightsToMatchTo]
+ * when matching times, orig and dest.
  */
 fun getNonMatchingFlightsExactTimes(
     flightsToMatchTo: Collection<Flight>,
     newFlights: Collection<Flight>
 ): List<Flight> =
-    newFlights.filter { !it.containsMatchIn(flightsToMatchTo) }
+    newFlights.filter { !it.containsExactTimesMatchIn(flightsToMatchTo) }
 
 
-private fun Flight.containsMatchIn(
+/**
+ * Match flights from [knownFlights] and [newFlights].
+ * Matches will be returned as pairs - flight1 to flight2
+ * This matches same day, flightNumber, orig and dest.
+ * If multiple flights match, it will only match the first found for every flight in flights1.
+ */
+fun getMatchingFlightsSameDay(
+    knownFlights: Collection<Flight>,
+    newFlights: Collection<Flight>
+): List<MatchingFlights> =
+    knownFlights.mapNotNull { knownFlight ->
+        knownFlight.findSameDayMatchIn(newFlights)?.let { newFlight ->
+            MatchingFlights(
+                knownFlight = knownFlight,
+                newFlight = newFlight
+            )
+        }
+    }
+
+/**
+ * returns a list of those [newFlights] that do not match any flights in [flightsToMatchTo]
+ * when matching day, flightNumber, orig and dest.
+ */
+fun getNonMatchingFlightsSameDay(
+    flightsToMatchTo: Collection<Flight>,
+    newFlights: Collection<Flight>
+): List<Flight> =
+    newFlights.filter { !it.containsSameDayMatchIn(flightsToMatchTo) }
+
+
+private fun Flight.containsExactTimesMatchIn(
     flightsToMatchTo: Collection<Flight>,
 ) = flightsToMatchTo.any { it matchesTimeOrigAndDestWith this }
 
-private fun Flight.findMatchIn(flightsToMatchTo: Collection<Flight>) =
+private fun Flight.findExactTimesMatchIn(flightsToMatchTo: Collection<Flight>) =
     flightsToMatchTo.firstOrNull { it matchesTimeOrigAndDestWith this }
+
+private fun Flight.findSameDayMatchIn(flightsToMatchTo: Collection<Flight>) =
+    flightsToMatchTo.firstOrNull { it matchesDateFlightnumberOrigAndDestWith this }
+
+private fun Flight.containsSameDayMatchIn(
+    flightsToMatchTo: Collection<Flight>,
+) = flightsToMatchTo.any { it matchesDateFlightnumberOrigAndDestWith this }
+
+private infix fun Flight.matchesDateFlightnumberOrigAndDestWith(other: Flight): Boolean =
+    this.orig == other.orig
+            && this.dest == other.dest
+            && this.flightNumber == other.flightNumber
+            && this.date() == other.date()
 
 
 private infix fun Flight.matchesTimeOrigAndDestWith(other: Flight): Boolean =

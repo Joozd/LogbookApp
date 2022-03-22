@@ -19,11 +19,9 @@
 
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
-import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
-import kotlin.reflect.typeOf
 
 abstract class CompleteLogbookFile(lines: List<String>): ImportedFile(lines){
     abstract val extractor: CompleteLogbookExtractor

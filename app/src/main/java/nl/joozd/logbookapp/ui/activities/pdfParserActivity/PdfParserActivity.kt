@@ -23,6 +23,7 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
+import androidx.annotation.NonNull
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.Cloud
@@ -30,6 +31,7 @@ import nl.joozd.logbookapp.data.comm.CloudFunctionResults
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityPdfParserBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
+import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.DoneCompletedFlightsWithResult
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerError
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerStatus
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.UserChoice
@@ -50,12 +52,16 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
 
         Log.d("PdfParserActivity", "started")
         ActivityPdfParserBinding.inflate(layoutInflater).apply {
-            if (checkAirportDatabaseAvailable())
-                viewModel.handleIntent(intent, contentResolver)
-            else downloadAirportsThenLaunchIntentHandler()
+            launchIntentHandler()
             collectHandlerStatus()
             setContentView(root)
         }
+    }
+
+    private fun ActivityPdfParserBinding.launchIntentHandler() {
+        if (checkAirportDatabaseAvailable())
+            viewModel.handleIntent(intent, contentResolver)
+        else downloadAirportsThenLaunchIntentHandler()
     }
 
     private fun ActivityPdfParserBinding.collectHandlerStatus() {
@@ -70,6 +76,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                 HandlerStatus.DONE -> closeAndStartMainActivity()
                 is HandlerError -> showHandlerError(it)
                 is UserChoice -> showUserChoiceDialog(it)
+                is DoneCompletedFlightsWithResult -> showCompletedFlightsResult(it)
             }
         }
     }
@@ -83,6 +90,15 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
             }
             setNegativeButton(choice.choice2Resource){ _, _ ->
                 choice.action2()
+            }
+        }.create().show()
+
+    private fun showCompletedFlightsResult(result: DoneCompletedFlightsWithResult) =
+        AlertDialog.Builder(this).apply{
+            setTitle(R.string.imported_complete_flights)
+            setMessage(getString(R.string.imported_complete_flights_results, result.status.totalFlightsImported, result.status.flightsUpdated, result.status.flightsInCompletedButNotOnDevice, result.status.flightsOnDeviceButNotInCompleted))
+            setPositiveButton(android.R.string.ok){ _, _ ->
+                closeAndStartMainActivity()
             }
         }.create().show()
 

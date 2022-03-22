@@ -21,13 +21,13 @@ package nl.joozd.joozdlogimporter
 
 import nl.joozd.joozdlogimporter.interfaces.FileImporter
 import nl.joozd.joozdlogimporter.supportedFileTypes.*
+import java.io.IOException
 import java.io.InputStream
 
 /**
  * Detects type in csv and txt files
  */
-class CsvImporter(inputStream: InputStream): FileImporter() {
-    private val lines = inputStream.reader().readLines()
+class CsvImporter(private val lines: List<String>): FileImporter() {
 
     override fun getFile() = getType(lines)
 
@@ -37,4 +37,10 @@ class CsvImporter(inputStream: InputStream): FileImporter() {
             ?: JoozdLogV4File.buildIfMatches(lines)
             ?: JoozdLogV5File.buildIfMatches(lines)
             ?: UnsupportedCsvFile(lines)
+
+    companion object{
+        @Throws(IOException::class)
+        fun ofInputStream(inputStream: InputStream) =
+            CsvImporter(inputStream.reader().readLines())
+    }
 }

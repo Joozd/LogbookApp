@@ -19,9 +19,9 @@
 
 package nl.joozd.logbookapp.data.importing.results
 
-import nl.joozd.logbookapp.model.dataclasses.Flight
-
-/**
- * [conflicts] is a list of flights in current DB that conflict with imported flights
- */
-class SaveCompletedFlightsResult(val conflicts: List<Flight>): SaveFlightsResult
+class SaveCompletedFlightsResult(
+    val flightsOnDeviceButNotInCompleted: Int,
+    val flightsInCompletedButNotOnDevice: Int,
+    val totalFlightsImported: Int,
+    val flightsUpdated: Int
+): SaveFlightsResult

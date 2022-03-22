@@ -227,7 +227,7 @@
                         android:nextFocusForward="@id/flightAircraftField"
                         android:selectAllOnFocus="true"
                         android:textAlignment="center"
-                        tools:text="12:34" />
+                        tools:text="13:37" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <ImageView

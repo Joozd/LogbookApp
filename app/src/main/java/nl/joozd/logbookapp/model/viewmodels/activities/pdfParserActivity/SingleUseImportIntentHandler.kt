@@ -36,6 +36,7 @@ import nl.joozd.joozdlogimporter.supportedFileTypes.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.DoneCompletedFlightsWithResult
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerError
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerStatus
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.UserChoice
@@ -69,7 +70,6 @@ class SingleUseImportIntentHandler: CoroutineScope {
     private suspend fun getFileAndStartAppropriateParser(intent: Intent, contentResolver: ContentResolver){
         status = HandlerStatus.READING_URI
         val file = getFileFromIntent(intent, contentResolver) ?: return
-        println("GOT FILE of type ${file::class.simpleName}")
 
         when(file){
             is CompleteLogbookFile -> parseCompleteLogbook(file)
@@ -82,29 +82,35 @@ class SingleUseImportIntentHandler: CoroutineScope {
         }
     }
 
-    private fun parseCompleteLogbook(file: CompleteLogbookFile){
-        //start extracting flights while waiting for user response
+    private suspend fun parseCompleteLogbook(file: CompleteLogbookFile) {
         status = HandlerStatus.EXTRACTING_FLIGHTS
-        val extractedLogbookAsync = async { file.extractCompletedFlights() }
+
+        //start extracting flights while waiting for user response
+        val extractedLogbookAsync = withContext (Dispatchers.Default) { async { file.extractCompletedFlights() } }
+
+        //This will continue the process
         askIfDataShouldBeSanitized(extractedLogbookAsync)
     }
 
-    private fun parseCompletedFlights(file: CompletedFlightsFile){
+    private suspend fun parseCompletedFlights(file: CompletedFlightsFile){
+        status = HandlerStatus.EXTRACTING_FLIGHTS
         val extractedFlights: ExtractedCompletedFlights = file.extractCompletedFlights()
-        TODO("Stub")
+        status = HandlerStatus.SAVING_FLIGHTS
+        val result = ImportedFlightsSaver.instance.save(extractedFlights)
+        status = if (result != null) DoneCompletedFlightsWithResult(result)
+            else HandlerError(R.string.error_saving_flights)
+
     }
 
-    private fun parsePlannedFlights(file: PlannedFlightsFile){
-        launch {
-            status = HandlerStatus.EXTRACTING_FLIGHTS
-            val extractedFlights: ExtractedPlannedFlights = extractAndAutocomplete(file)
-            if (Preferences.alwaysPostponeCalendarSync) {
-                status = HandlerStatus.SAVING_FLIGHTS
-                saveAndPostponeCalendarSync(extractedFlights)
-                status = HandlerStatus.DONE
-            }
-            else status = buildPostponeCalendarSyncUserChoice(extractedFlights)
+    private suspend fun parsePlannedFlights(file: PlannedFlightsFile){
+        status = HandlerStatus.EXTRACTING_FLIGHTS
+        val extractedFlights: ExtractedPlannedFlights = extractAndAutocomplete(file)
+        if (Preferences.alwaysPostponeCalendarSync) {
+            status = HandlerStatus.SAVING_FLIGHTS
+            saveAndPostponeCalendarSync(extractedFlights)
+            status = HandlerStatus.DONE
         }
+        else status = buildPostponeCalendarSyncUserChoice(extractedFlights)
     }
 
     private suspend fun extractAndAutocomplete(file: PlannedFlightsFile) =
@@ -182,9 +188,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
                 launch {
                     Preferences.alwaysPostponeCalendarSync = true
                     status = HandlerStatus.SAVING_FLIGHTS
-                    println("saving")
                     saveAndPostponeCalendarSync(extractedFlights)
-                    println("Done saving")
                     status = HandlerStatus.DONE
                 }
             }
@@ -212,19 +216,24 @@ class SingleUseImportIntentHandler: CoroutineScope {
     private suspend fun getTypeDetector(
         uri: Uri?,
         contentResolver: ContentResolver
-    ): FileImporter? = withContext(DispatcherProvider.io()){
+    ): FileImporter? =
         uri?.getInputStream(contentResolver)?.use { inputStream ->
             val mimeType = contentResolver.getType(uri) ?: "NONE"
+
+            @Suppress("BlockingMethodInNonBlockingContext") // unblocked with Dispatchers.IO
             val detector = when {
-                mimeType.isPdfMimeType() -> PdfImporter(inputStream)
-                mimeType.isCsvMimeType() -> CsvImporter(inputStream)
+                mimeType.isPdfMimeType() -> withContext(DispatcherProvider.io()) {
+                    PdfImporter.ofInputStream(inputStream)
+                }
+                mimeType.isCsvMimeType() -> withContext(DispatcherProvider.io()) {
+                    CsvImporter.ofInputStream(inputStream)
+                }
                 else -> {
                     status = HandlerError(R.string.unknown_file_message)
                     null
                 }
             }
             detector
-        }
     }
 
     /**

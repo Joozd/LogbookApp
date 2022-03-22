@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.data.importing
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
+import nl.joozd.logbookapp.data.importing.results.SaveCompletedFlightsResult
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
@@ -31,7 +32,7 @@ interface ImportedFlightsSaver {
      * Save a complete logbook (from a backup or import)
      */
     suspend fun save(completeLogbook: ExtractedCompleteLogbook)
-    suspend fun save(completedFlights: ExtractedCompletedFlights)
+    suspend fun save(completedFlights: ExtractedCompletedFlights): SaveCompletedFlightsResult?
     suspend fun save(plannedFlights: ExtractedPlannedFlights)
 
     companion object{

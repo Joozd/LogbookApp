@@ -24,18 +24,13 @@ import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
 import nl.joozd.joozdlogimporter.supportedFileTypes.*
+import java.io.IOException
 import java.io.InputStream
 
 /**
  * WORK IN PROGRESS
  */
-class PdfImporter(inputStream: InputStream): FileImporter() {
-    private val reader = PdfReader(inputStream)
-    private val lines =
-        (1..reader.numberOfPages).map { page ->
-            PdfTextExtractor.getTextFromPage(reader, page, SimpleTextExtractionStrategy()).lines()
-        }.flatten()
-
+class PdfImporter(private val lines: List<String>): FileImporter() {
     override fun getFile() = getType(lines)
 
     /**
@@ -48,4 +43,17 @@ class PdfImporter(inputStream: InputStream): FileImporter() {
             ?: KlmIcaRosterFile.buildIfMatches(lines)
             ?: KlmIcaMonthlyFile.buildIfMatches(lines)
             ?: UnsupportedPdfFile(lines)
+
+    companion object{
+        @Throws(IOException::class)
+        fun ofInputStream(inputStream: InputStream): PdfImporter {
+            val reader = PdfReader(inputStream)
+            val lines = (1..reader.numberOfPages).map { page ->
+                PdfTextExtractor.getTextFromPage(reader, page, SimpleTextExtractionStrategy()).lines()
+            }.flatten()
+            return PdfImporter(lines)
+        }
+    }
 }
+
+

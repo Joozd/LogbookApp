@@ -41,7 +41,7 @@ abstract class ListItemViewHolder(containerView: View): RecyclerView.ViewHolder(
                 || (checkNames && name.isBlank())
 
     protected fun ModelFlight.namesString(): String{
-        val names = listOf(name) + name2
+        val names = (listOf(name) + name2).filter { it.isNotBlank() }
         return if (names.size <=2) names.joinToString(", ")
         else names.take(2).joinToString(", ") + " + ${names.size - 2}"
     }

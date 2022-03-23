@@ -19,96 +19,51 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
-import android.Manifest
-import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.SharedPreferences
-import androidx.annotation.RequiresPermission
-import androidx.lifecycle.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.data.calendar.CalendarScraper
-import nl.joozd.logbookapp.data.calendar.dataclasses.JoozdCalendar
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import nl.joozd.joozdcalendarapi.CalendarDescriptor
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncTypes
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfBlank
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.CalendarSyncDialogEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
-import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
+import nl.joozd.logbookapp.model.viewmodels.dialogs.status.Status
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
 class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
-    // Private flags
-    private var calendarScrapeWaitingForCalendars: Boolean = false
+    val statusFlow: StateFlow<Status?> = MutableStateFlow(null)
 
-    /**
-     * Temporary values for settings
-     */
-    private var mCalendarSyncType: Int
-        get() = _calendarSyncType.value!!
-        set(it) { _calendarSyncType.value = it.also{
-            println("CalnedarSyncType now $it")
-        } }
+    private var status: Status? by CastFlowToMutableFlowShortcut(statusFlow)
 
-    private var mCalendarSyncIcalAddress: String
-        get() = _calendarSyncIcalAddress.value!!
-        set(it) { _calendarSyncIcalAddress.value = it }
+    val foundCalendarsFlow: StateFlow<List<CalendarDescriptor>?> = MutableStateFlow(null) // null until initialized with [fillCalendarsList]
+    val selectedCalendarFlow: StateFlow<CalendarDescriptor?> = MutableStateFlow(null) // null until initialized with [fillCalendarsList]
+    val calendarSyncTypeFlow: StateFlow<Int> = MutableStateFlow(Preferences.calendarSyncType) // will never be null because initialized here
+    private val calendarSyncIcalAddressFlow: StateFlow<String> = MutableStateFlow(Preferences.calendarSyncIcalAddress) // will never be null because initialized here
 
+    private var foundCalendars: List<CalendarDescriptor>? by CastFlowToMutableFlowShortcut(foundCalendarsFlow)
 
-    private var mSelectedCalendar: JoozdCalendar?
-        get() = _selectedCalendar.value
-        set(it) { _selectedCalendar.value = it }
+    var selectedCalendar: CalendarDescriptor? by CastFlowToMutableFlowShortcut(selectedCalendarFlow)
+        private set
 
-    private val calendarScraper = CalendarScraper(context!!)
+    var calendarSyncType: Int by CastFlowToMutableFlowShortcut(calendarSyncTypeFlow)
+        private set
 
-    private val _foundCalendars = MutableLiveData<List<JoozdCalendar>?>() // null until initialized with [fillCalendarsList]
-    private val _selectedCalendar = MutableLiveData<JoozdCalendar?>() // null until initialized with [fillCalendarsList]
-    private val _calendarSyncType = MutableLiveData(Preferences.calendarSyncType) // will never be null because initialized here
-    private val _calendarSyncIcalAddress = MutableLiveData(Preferences.calendarSyncIcalAddress) // will never be null because initialized here
+    var calendarSyncIcalAddress: String by CastFlowToMutableFlowShortcut(calendarSyncIcalAddressFlow)
+        private set
 
-    private val _okButtonEnabled = MediatorLiveData<Boolean>().apply{
-        addSource(_selectedCalendar){
-            value = checkOkButtonActive()
-        }
-        addSource(_calendarSyncType){
-            value = checkOkButtonActive()
-        }
-        addSource(_calendarSyncIcalAddress){
-            value = checkOkButtonActive()
-        }
-    }
-
-    private val clipboard: ClipboardManager = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-
-    /**
-     * To support other companies etc add extra regexes here and use them in [getLinkFromClipboard]
-     */
-    private val klmIcalRegex = "https://calendar.klm.com/crew/.+".toRegex()
+    val okButtonEnabledFlow = makeOkButtonEnabledFlow()
 
     var foundLink: String? = Preferences.calendarSyncIcalAddress.nullIfBlank()
         private set
 
-
-
-    val foundCalendars = Transformations.map(_foundCalendars) {it?.map{ c -> c.name} ?: emptyList() }
-    val selectedCalendar: LiveData<JoozdCalendar?> get() = _selectedCalendar
-    val calendarSyncType: LiveData<Int> get() = _calendarSyncType
-    val calendarSyncIcalAddress: LiveData<String> get() = _calendarSyncIcalAddress
-    val okButtonEnabled: LiveData<Boolean> get() = _okButtonEnabled
-
-    /**
-     * This can be set to on if a sync shouldn't happen right after clicking OK
-     */
-    var sync: Boolean = true
-
     private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         when (key) {
             Preferences::selectedCalendar.name ->
-                _selectedCalendar.value = _foundCalendars.value?.firstOrNull { c -> c.name == Preferences.selectedCalendar }
+                selectedCalendar = foundCalendars?.firstOrNull { c -> c.displayName == Preferences.selectedCalendar }
 
             Preferences::calendarSyncType.name -> {
-                mCalendarSyncType = Preferences.calendarSyncType
+                calendarSyncType = Preferences.calendarSyncType
             }
 
         }
@@ -118,36 +73,24 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
      * Functions to be ran on (re)creation
      *******************************************/
 
-    /**
-     * Fill calendars list
-     * call [calendarScraperRadioButtonClicked] if that was waiting for calendar list to be filled
-     */
-    @RequiresPermission(Manifest.permission.READ_CALENDAR)
-    fun fillCalendarsList() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) { calendarScraper.getCalendarsList() }.let { _foundCalendars.value = it }
-            _selectedCalendar.value = _foundCalendars.value?.firstOrNull { c -> c.name == Preferences.selectedCalendar} ?: run{
-                //if no calendar matches, make first calendar in list the picked calendar
-                _foundCalendars.value?.firstOrNull()?.let{ firstCalendarInList ->
-                    mSelectedCalendar = firstCalendarInList // this will also set _selectedCalendar through Preferences listener
-                    firstCalendarInList
-                }
-            }
-            if (calendarScrapeWaitingForCalendars){
-                calendarScraperRadioButtonClicked()
-            }
-        }
+    fun fillCalendarsList(calendars: List<CalendarDescriptor>){
+        foundCalendars = calendars
+        selectedCalendar = calendars.firstOrNull { c -> c.displayName == Preferences.selectedCalendar}
+            ?: calendars.firstOrNull()
     }
 
-    /**
-     * This checks clipboard for an iCalendar link, and if found, places it in foundLink and returns true
-     * @return true if an iCal link was found on clipboard, false if not
-     */
-    fun checkClipboardForIcalLink(): Boolean =
-        getLinkFromClipboard().let{
-            it != null && it != mCalendarSyncIcalAddress
+    private fun makeOkButtonEnabledFlow() = combine(
+        selectedCalendarFlow,
+        calendarSyncTypeFlow,
+        calendarSyncIcalAddressFlow
+    ) { cal, syncType, address ->
+        when (syncType) {
+            CalendarSyncTypes.CALENDAR_SYNC_NONE -> false
+            CalendarSyncTypes.CALENDAR_SYNC_ICAL -> address.isNotBlank()
+            CalendarSyncTypes.CALENDAR_SYNC_DEVICE -> cal != null
+            else -> false // It will never be this but compiler doesn't know that
         }
-
+    }
 
     /*******************************************
      * Functions to be ran on a UI action
@@ -156,17 +99,12 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
     /**
      * Calendar Scraper radio button clicked.
      * This should set [Preferences.calendarSyncType] to [CalendarSyncTypes.CALENDAR_SYNC_DEVICE]
-     * which in turn should trigger a watcher that updates a livedata that updates the UI
-     * If no calendars found (ie. no permission (yet)), it sets [calendarScrapeWaitingForCalendars] to true
      */
     fun calendarScraperRadioButtonClicked(){
-        if (_foundCalendars.value != null) {
-            mCalendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_DEVICE
-            calendarScrapeWaitingForCalendars = false
-        }
-        else {
-            mCalendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_NONE
-            calendarScrapeWaitingForCalendars = true
+        calendarSyncType = if (foundCalendars != null) {
+            CalendarSyncTypes.CALENDAR_SYNC_DEVICE
+        } else {
+            CalendarSyncTypes.CALENDAR_SYNC_NONE
         }
 
     }
@@ -174,77 +112,55 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
     /**
      * If a new link is on clipboard, use that
      * If there isn't one but an old one was stored, use that
-     * If there isn't one, feedback [CalendarSyncDialogEvents.NO_ICAL_LINK_FOUND] and set type to NONE
+     * If there isn't one, set status to NO_ICAL_LINK_FOUND and set type to NONE
      */
-    fun icalSubscriptionRadioButtonClicked(){
-        getLinkFromClipboard()?.let { foundLink = it }
+    fun icalSubscriptionRadioButtonClicked(link: String?){
+        link?.let { foundLink = it }
         if (foundLink != null) {
             useFoundLink()
         }
         else {
-            feedback(CalendarSyncDialogEvents.NO_ICAL_LINK_FOUND)
-            mCalendarSyncType=CalendarSyncTypes.CALENDAR_SYNC_NONE
+            status = Status.NO_ICAL_LINK_FOUND
+            calendarSyncType=CalendarSyncTypes.CALENDAR_SYNC_NONE
         }
     }
 
     fun calendarPicked(index: Int){
-        _foundCalendars.value?.get(index)?.let{
-            mSelectedCalendar = it
-        } ?: run { Preferences.calendarSyncType=CalendarSyncTypes.CALENDAR_SYNC_NONE }
+        foundCalendars?.get(index)?.let{
+            selectedCalendar = it
+        } ?: run { calendarSyncType=CalendarSyncTypes.CALENDAR_SYNC_NONE }
     }
 
     /**
      * Set the selected calendar type + its associated data, and, if one actually is selected, set [Preferences.useCalendarSync] to true and sync it
      */
     fun okClicked(){
-        Preferences.calendarSyncType = mCalendarSyncType
-        Preferences.selectedCalendar = mSelectedCalendar?.name ?: ""
-        Preferences.calendarSyncIcalAddress = mCalendarSyncIcalAddress
-        Preferences.useCalendarSync = (mCalendarSyncType != CalendarSyncTypes.CALENDAR_SYNC_NONE).also{
+        Preferences.calendarSyncType = calendarSyncType
+        Preferences.selectedCalendar = selectedCalendar?.displayName ?: ""
+        Preferences.calendarSyncIcalAddress = calendarSyncIcalAddress
+        Preferences.useCalendarSync = (calendarSyncType != CalendarSyncTypes.CALENDAR_SYNC_NONE).also{
             if (it) {
                 Preferences.nextCalendarCheckTime = 0
             }
         }
-        feedback(CalendarSyncDialogEvents.DONE)
+        status = Status.DONE
     }
 
-    private fun checkOkButtonActive(): Boolean = when (mCalendarSyncType){
-        CalendarSyncTypes.CALENDAR_SYNC_NONE -> false
-        CalendarSyncTypes.CALENDAR_SYNC_ICAL -> mCalendarSyncIcalAddress.isNotBlank()
-        CalendarSyncTypes.CALENDAR_SYNC_DEVICE -> mSelectedCalendar != null
-        else -> false // It will never be this but compiler doesn't know that
+    fun resetStatus(){
+        status = null
     }
+
+
 
     /**
      * Use [foundLink] to fill appropriate fields, will feedback an ERROR if null
      */
     private fun useFoundLink() {
         foundLink?.let {
-            println("found link $foundLink")
-            mCalendarSyncIcalAddress = it
-            mCalendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_ICAL
-
-        } ?: feedback(CalendarSyncDialogEvents.ERROR)
+            calendarSyncIcalAddress = it
+            calendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_ICAL
+        } ?: run { status = Status.Error("No link found to use") }
     }
-
-    /**
-     * Grab iCalendar link from cliboard
-     * @return link as String if found, null if not.
-     */
-    private fun getLinkFromClipboard(): String?{
-        with (clipboard){
-            if (!hasPrimaryClip()) return null.also{ println("no primary clip")}
-            println(clipboard.primaryClipDescription?.hasMimeType(MIMETYPE_TEXT_PLAIN))
-            println(clipboard.primaryClip?.getItemAt(0)?.text)
-            return clipboard.primaryClip?.getItemAt(0)?.text?.let {
-                klmIcalRegex.find(it)?.value
-            }
-
-        }
-    }
-
-
-
 
     init {
         Preferences.getSharedPreferences().registerOnSharedPreferenceChangeListener(onSharedPrefsChangedListener)

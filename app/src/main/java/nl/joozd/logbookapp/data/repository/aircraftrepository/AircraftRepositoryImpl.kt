@@ -44,18 +44,12 @@ class AircraftRepositoryImpl(
     private val flightRepository: FlightRepository = FlightRepository.instance
 ): AircraftRepository, CoroutineScope by dispatchersProviderMainScope() {
     private val aircraftTypeDao = dataBase.aircraftTypeDao()
-    //private val registrationDao = dataBase.registrationDao()
     private val preloadedRegistrationsDao = dataBase.preloadedRegistrationsDao()
 
     override fun aircraftTypesFlow() = aircraftTypeDao.aircraftTypesFlow().map {
         it.toAircraftTypes()
     }
 
-    /*
-    private fun aircraftRegistrationsFlow() = registrationDao.allRegistrationsFlow().map {
-        it.toAircraftRegistrationWithTypes()
-    }
-    */
 
     private  fun preloadedRegistrationsFlow() = preloadedRegistrationsDao.registrationsFlow()
 
@@ -76,7 +70,6 @@ class AircraftRepositoryImpl(
             getAircraftTypes(),
             getPreloadedRegistrations(),
             flightRepository.getAllFlights()
-            //getRegistrationWithTypes()
         )
 
     private suspend fun getAircraftTypes() = withContext(Dispatchers.IO) {
@@ -86,11 +79,6 @@ class AircraftRepositoryImpl(
     private suspend fun getPreloadedRegistrations() = withContext(Dispatchers.IO) {
         preloadedRegistrationsDao.requestAllRegistrations()
     }
-
-    /*
-    suspend fun getRegistrationWithTypes() =
-        registrationDao.requestAllRegistrations().map { it.toAircraftRegistrationWithType() }
-     */
 
     override suspend fun getAircraftTypeByShortName(typeShortName: String): AircraftType? =
         aircraftTypeDao.getAircraftTypeFromShortName(typeShortName)?.toAircraftType()
@@ -113,16 +101,6 @@ class AircraftRepositoryImpl(
 
     private fun String.lettersOnly() = filter { it.isLetter() }
 
-
-    /*
-    override suspend fun saveAircraft(aircraft: Aircraft) = withContext(DispatcherProvider.io()) {
-        if (aircraft.type?.name == null) return@withContext // Don't save aircraft without type.
-        val newAcrwt = AircraftRegistrationWithType(aircraft.registration, aircraft.type)
-        println("NEWAIRCRAFT: $newAcrwt")
-        saveAircraftRegistrationWithType(newAcrwt)
-    }
-    */
-
     override suspend fun replaceAllTypesWith(newTypes: List<AircraftType>) =
         withContext(DispatcherProvider.io()+ NonCancellable){
             aircraftTypeDao.clearDb()
@@ -142,12 +120,6 @@ class AircraftRepositoryImpl(
         aircraftTypeDao.save(*typeData.toTypedArray())
     }
 
-    /*
-    private suspend fun saveAircraftRegistrationWithType(arwt: AircraftRegistrationWithType) {
-        registrationDao.save(arwt.toData())
-    }
-    */
-
     private suspend fun savePreloadedRegs(preloaded: List<PreloadedRegistration>) {
         preloadedRegistrationsDao.save(preloaded)
     }
@@ -155,14 +127,12 @@ class AircraftRepositoryImpl(
     private fun makeAircraftMapFlow(): Flow<Map<String, Aircraft>> =
         combine(
             aircraftTypesFlow(),
-            //aircraftRegistrationsFlow(),
             preloadedRegistrationsFlow(),
             flightRepository.allFlightsFlow()
-        ) { aircraftTypes /*, registrationsWithTypes */, preloaded, allFlights ->
+        ) { aircraftTypes, preloaded, allFlights ->
             makeAircraftMap(aircraftTypes,
                 preloaded,
                 allFlights
-                //registrationsWithTypes
             )
         }
 
@@ -174,7 +144,6 @@ class AircraftRepositoryImpl(
         aircraftTypes: List<AircraftType>,
         preloaded: List<PreloadedRegistration>,
         allFlights: List<Flight>
-        //registrationsWithTypes: List<AircraftRegistrationWithType>
     ): HashMap<String, Aircraft> {
         val map = HashMap<String, Aircraft>()
         val aircraftFromFlightsMapAsync = buildAircraftMapFromFlightsAsync(allFlights, aircraftTypes)
@@ -186,11 +155,6 @@ class AircraftRepositoryImpl(
                 map[formatRegistration(it.key)] = it.value
         }
 
-        /*
-        registrationsWithTypes.forEach {
-            map[formatRegistration(it.registration)] = it.toAircraft()
-        }
-        */
         return map
     }
 

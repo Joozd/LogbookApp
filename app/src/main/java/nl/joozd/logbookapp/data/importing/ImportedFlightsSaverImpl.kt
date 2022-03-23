@@ -100,9 +100,10 @@ class ImportedFlightsSaverImpl(
         val mergedFlights = mergeFlights(matchingFlights)
 
         val newFlights = getNonMatchingFlightsExactTimes(plannedFlightsOnDevice, flights)
+        val flightsToDelete = getNonMatchingFlightsExactTimes(flights, plannedFlightsOnDevice)
 
-        //Deleting planned flights does not pollute DB as they are not synced to server and thus deleted hard.
-        flightsRepo.delete(plannedFlightsOnDevice)
+            //Deleting planned flights does not pollute DB as they are not synced to server and thus deleted hard.
+        flightsRepo.delete(flightsToDelete)
         flightsRepo.save(mergedFlights + newFlights)
     }
 

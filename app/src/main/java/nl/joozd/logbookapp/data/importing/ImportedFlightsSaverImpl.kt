@@ -88,7 +88,6 @@ class ImportedFlightsSaverImpl(
      * Save planned flights,
      * Will merge with existing exact matches (times, orig, dest) so we don't lose data
      * Will remove all other planned flights in its period.
-     * TODO don't add completed flights that are planned in here, eg. prevent double flights from getting into logbook
      * TODO this generates two undo actions, needs fixing
      */
     override suspend fun save(plannedFlights: ExtractedPlannedFlights) {

@@ -41,6 +41,7 @@ import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.getFlightsFromCalendar
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModelNew
@@ -347,7 +348,7 @@ class MainActivity : JoozdlogActivity() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
                 lifecycleScope.launch {
                     getFlightsFromCalendar()?.let {
-                        ImportedFlightsSaver.instance.save(it)
+                        ImportedFlightsSaver.make(flightsRepo = FlightRepository.instance).save(it)
                     }
                 }
             else

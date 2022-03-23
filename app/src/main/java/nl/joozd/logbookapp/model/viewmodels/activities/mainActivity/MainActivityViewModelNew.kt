@@ -61,7 +61,7 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
 
     private val allFlightsFlow = flightRepository.allFlightsFlow()
     val foundFlightsFlow: Flow<List<ModelFlight>> = makeFlightsFlowCombiner()
-    val amountOfFlightsFlow: Flow<Int> = allFlightsFlow.map { it.size }
+    val amountOfFlightsFlow: Flow<Int> = allFlightsFlow.map { it.count{ f-> !f.isPlanned } }
 
     val undoRedoStatusChangedFlow = makeUndoRedoStatusChangedFlow()
 

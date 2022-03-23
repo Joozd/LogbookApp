@@ -220,7 +220,7 @@ class FlightRepositoryWithUndoImpl(mockDataBase: JoozdlogDatabase?
 
 
     private fun executeUndoableCommand(command: UndoableCommand){
-        undoStack.push(command).also{ println("pushed $it, size now ${undoStack.size}")}
+        undoStack.push(command)
         redoStack.clear()
         _undoAvailable.value = true
         command()

@@ -145,8 +145,6 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
             }
             else line.drop(line.indexOf(n) + n.length).trim()
 
-            println("RAW: $raw")
-
             if (raw.isNotBlank())
                 set(numbers[i], rawNameToName(raw, myName).toString())
         }

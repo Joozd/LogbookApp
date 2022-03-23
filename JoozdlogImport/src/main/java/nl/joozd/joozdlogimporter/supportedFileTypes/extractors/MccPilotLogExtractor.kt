@@ -21,6 +21,7 @@ package nl.joozd.joozdlogimporter.supportedFileTypes.extractors
 
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
+import java.lang.IllegalArgumentException
 import java.time.*
 import java.time.format.DateTimeFormatter
 
@@ -44,33 +45,43 @@ class MccPilotLogExtractor: CompleteLogbookExtractor {
         try {
             with(line.split(';')) {
                 BasicFlight.PROTOTYPE.copy(
-                    flightNumber = getFlightNumber(index) ?: return null.also{ println("failed at 1")},
-                    orig = getOrig(index) ?: return null.also{ println("failed at 2")},
-                    dest = getDest(index) ?: return null.also{ println("failed at 3")},
-                    timeOut = makeTimeOut(index) ?: return null.also{ println("failed at 4")},
-                    timeIn = makeTimeIn(index) ?: return null.also{ println("failed at 5")},
-                    aircraft = getType(index) ?: return null.also{ println("failed at 6")},
-                    registration = getRegistration(index) ?: return null.also{ println("failed at 7")},
-                    name = getPicName(index) ?: return null.also{ println("failed at 8")},
-                    name2 = getOtherNames(index) ?: return null.also{ println("failed at 9")},
-                    isPIC = isPic(index) ?: return null.also{ println("failed at 10")},
-                    isPICUS = isPicus(index) ?: return null.also{ println("failed at 11")},
-                    isCoPilot = isCopilot(index) ?: return null.also{ println("failed at 12")},
-                    isDual = isDual(index) ?: return null.also{ println("failed at 13")},
-                    isInstructor = isInstructor(index) ?: return null.also{ println("failed at 14")},
-                    ifrTime = ifrTime(index) ?: return null.also{ println("failed at 15")},
-                    nightTime = nightTime(index) ?: return null.also{ println("failed at 16")},
-                    isPF = isPf(index) ?: return null.also{ println("failed at 17")},
-                    isSim = isSim(index) ?: return null.also{ println("failed at 18")},
-                    takeOffDay = takeoffDay(index) ?: return null.also{ println("failed at 19")},
-                    takeOffNight = takeoffNight(index) ?: return null.also{ println("failed at 20")},
-                    landingDay = landingDay(index) ?: return null.also{ println("failed at 21")},
-                    landingNight = landingNight(index) ?: return null.also{ println("failed at 22")},
-                    autoLand = autoLand(index) ?: return null.also{ println("failed at 23")},
-                    remarks = getRemarks(index) ?: return null.also{ println("failed at 24")}
+                    flightNumber = getFlightNumber(index)
+                        ?: throw IllegalArgumentException("failed at 1"),
+                    orig = getOrig(index) ?: throw IllegalArgumentException("failed at 2"),
+                    dest = getDest(index) ?: throw IllegalArgumentException("failed at 3"),
+                    timeOut = makeTimeOut(index) ?: throw IllegalArgumentException("failed at 4"),
+                    timeIn = makeTimeIn(index) ?: throw IllegalArgumentException("failed at 5"),
+                    aircraft = getType(index) ?: throw IllegalArgumentException("failed at 6"),
+                    registration = getRegistration(index)
+                        ?: throw IllegalArgumentException("failed at 7"),
+                    name = getPicName(index) ?: throw IllegalArgumentException("failed at 8"),
+                    name2 = getOtherNames(index) ?: throw IllegalArgumentException("failed at 9"),
+                    isPIC = isPic(index) ?: throw IllegalArgumentException("failed at 10"),
+                    isPICUS = isPicus(index) ?: throw IllegalArgumentException("failed at 11"),
+                    isCoPilot = isCopilot(index) ?: throw IllegalArgumentException("failed at 12"),
+                    isDual = isDual(index) ?: throw IllegalArgumentException("failed at 13"),
+                    isInstructor = isInstructor(index)
+                        ?: throw IllegalArgumentException("failed at 14"),
+                    ifrTime = ifrTime(index) ?: throw IllegalArgumentException("failed at 15"),
+                    nightTime = nightTime(index) ?: throw IllegalArgumentException("failed at 16"),
+                    isPF = isPf(index) ?: throw IllegalArgumentException("failed at 17"),
+                    isSim = isSim(index) ?: throw IllegalArgumentException("failed at 18"),
+                    takeOffDay = takeoffDay(index)
+                        ?: throw IllegalArgumentException("failed at 19"),
+                    takeOffNight = takeoffNight(index)
+                        ?: throw IllegalArgumentException("failed at 20"),
+                    landingDay = landingDay(index)
+                        ?: throw IllegalArgumentException("failed at 21"),
+                    landingNight = landingNight(index)
+                        ?: throw IllegalArgumentException("failed at 22"),
+                    autoLand = autoLand(index) ?: throw IllegalArgumentException("failed at 23"),
+                    remarks = getRemarks(index) ?: throw IllegalArgumentException("failed at 24")
 
                 )
             }
+        }catch (iae: IllegalArgumentException){
+            println("Bad data in $line: ${iae.message}")
+            null
         } catch (e: Exception){
             println("Bad data in $line")
             null

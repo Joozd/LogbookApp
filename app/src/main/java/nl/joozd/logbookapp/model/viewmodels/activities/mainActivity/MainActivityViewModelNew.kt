@@ -80,7 +80,6 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
      * [flightEditorFlow] will emit after a new FlightEditor is made.
      */
     fun showEditFlightDialog(flight: ModelFlight){
-        println("Setting from flight: $flight")
         FlightEditor.setFromFlight(flight)
     }
 

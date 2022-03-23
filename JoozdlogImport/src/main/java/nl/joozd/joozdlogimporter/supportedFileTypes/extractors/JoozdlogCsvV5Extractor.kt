@@ -28,14 +28,12 @@ import java.time.Instant
 class JoozdlogCsvV5Extractor: CompleteLogbookExtractor {
     override fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight> =
         lines.drop(1).map {
-            println ("parsing $it")
             csvFlightToBasicFlightv5(it)
         }
 
     private fun csvFlightToBasicFlightv5(csvFlight: String): BasicFlight =
         csvFlight.split(';')
             .map{ it.replace('|', ';')}.let { v->
-                println("parsing line $v")
                 require(BasicFlight.VERSION.version == 5)
                 BasicFlight.PROTOTYPE.copy(
                     orig = v[1],

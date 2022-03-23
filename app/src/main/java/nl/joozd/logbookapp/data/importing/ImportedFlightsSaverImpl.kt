@@ -107,7 +107,6 @@ class ImportedFlightsSaverImpl(
             //Deleting planned flights does not pollute DB as they are not synced to server and thus deleted hard.
         flightsRepo.delete(flightsToDelete)
         flightsRepo.save(mergedFlights + newFlights)
-        println("DEBUG: Saved ${(mergedFlights + newFlights).size}")
     }
 
     private suspend fun getFlightsWithIcaoAirportsInPeriod(

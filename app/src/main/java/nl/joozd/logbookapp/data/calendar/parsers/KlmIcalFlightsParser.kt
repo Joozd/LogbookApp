@@ -82,13 +82,10 @@ class KlmIcalFlightsParser(icalString: String): AutoRetrievedCalendar {
             KlmIcalFlightsParser(url.readText())
         }
 
-        @Suppress("BlockingMethodInNonBlockingContext")
-        suspend fun ofString(s: String) = withContext(Dispatchers.IO) {
-            println("Creating AAP BANAAN XXX")
-            val url = URL(s)
-            println("Creating AAP BANAAN YYY")
-            ofURL(url).also{
-            println("Created AAP BANAAN XXX")
-        } }
+        suspend fun ofString(s: String): KlmIcalFlightsParser {
+            @Suppress("BlockingMethodInNonBlockingContext")
+            val url = withContext(Dispatchers.IO) { URL(s) }
+            return ofURL(url)
+        }
     }
 }

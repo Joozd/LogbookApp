@@ -89,7 +89,7 @@ class NewUserActivityCalendarPage: JoozdlogFragment() {
      */
     private fun showCalendarDialogNoSync(){
         supportFragmentManager.commit {
-            add(R.id.newUserActivityLayout, CalendarSyncDialog(syncAfter = false))
+            add(R.id.newUserActivityLayout, CalendarSyncDialog())
             addToBackStack(null)
         }
     }

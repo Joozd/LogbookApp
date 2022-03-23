@@ -40,7 +40,9 @@ class FlightsAdapter(
     val itemClick: (ModelFlight) -> Unit
 ): RecyclerViewFastScroller.OnPopupTextUpdate, ListAdapter<ModelFlight, RecyclerView.ViewHolder>(
     FlightDiffCallback()) {
-    /**
+    private val listListeners = ArrayList<ListListener> ()
+
+            /**
      * Text displayed when fastscrolling using RecyclerViewFastScroller
      */
     override fun onChange(position: Int): CharSequence =
@@ -61,12 +63,35 @@ class FlightsAdapter(
         (holder as ListItemViewHolder).bindItem(getItem(position), itemClick, onDelete)
     }
 
+    override fun onCurrentListChanged(
+        previousList: MutableList<ModelFlight>,
+        currentList: MutableList<ModelFlight>
+    ) {
+        super.onCurrentListChanged(previousList, currentList)
+        //copy list so listeners can remove themselves
+        listListeners.toList().forEach { listener ->
+            listener.onListUpdated()
+        }
+    }
+
+    fun addListListener(listListener: ListListener){
+        listListeners.add(listListener)
+    }
+
+    fun removeListListener(listListener: ListListener){
+        listListeners.remove(listListener)
+    }
+
 
     private fun inflateFlightListItemView(parent: ViewGroup) =
         LayoutInflater.from(parent.ctx).inflate(R.layout.item_flight_card, parent, false)
 
     private fun inflateSimListItemView(parent: ViewGroup) =
         LayoutInflater.from(parent.ctx).inflate(R.layout.item_sim, parent, false)
+
+    fun interface ListListener{
+        fun onListUpdated()
+    }
 
     companion object{
         const val VIEW_TYPE_FLIGHT = 1
@@ -75,51 +100,3 @@ class FlightsAdapter(
 
 
 }
-/*
-class FlightsAdapter(
-    var list: List<DisplayFlight> = emptyList()
-): RecyclerViewFastScroller.OnPopupTextUpdate, RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    var onDelete: (Int) -> Unit = {}
-    var itemClick: (Int) -> Unit = {}
-
-    override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
-        super.onViewAttachedToWindow(holder)
-    }
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder.itemViewType){
-            SIM -> (holder as SimViewHolder).bindItem(list[position], itemClick, onDelete)
-            FLIGHT -> (holder as FlightViewHolder).bindItem(list[position], itemClick, onDelete)
-        }
-    }
-
-    override fun getItemCount(): Int = list.size
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return when (viewType){
-            SIM -> SimViewHolder(LayoutInflater.from(parent.ctx).inflate(R.layout.item_sim, parent, false))
-            FLIGHT -> FlightViewHolder(LayoutInflater.from(parent.ctx).inflate(R.layout.item_flight_card, parent, false))
-            else -> error("SelectableStringAdapter error 0001: Type not SIM or FLIGHT")
-        }
-    }
-
-    fun updateList(l: List<DisplayFlight>){
-        list = l
-        notifyDataSetChanged()
-    }
-
-    companion object{
-        const val FLIGHT = 1
-        const val SIM = 2
-    }
-
-    /**
-     * For popup update
-     */
-    override fun onChange(position: Int): CharSequence {
-        return with (list[position]) { monthAndYear}
-    }
-}
-
- */

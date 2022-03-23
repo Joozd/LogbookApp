@@ -24,7 +24,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -95,6 +94,7 @@ class MainActivity : JoozdlogActivity() {
         val binding = (ActivityMainNewBinding.inflate(layoutInflater)).apply {
             setSupportActionBar(mainToolbar)
             makeFlightsList()
+            scrollOnNextUpdate()
             startCollectors()
             initializeSearchFieldViews()
             setOnClickListeners()
@@ -149,9 +149,15 @@ class MainActivity : JoozdlogActivity() {
 
     private fun ActivityMainNewBinding.collectFlightsListFlow(){
         viewModel.foundFlightsFlow.launchCollectWhileLifecycleStateStarted{ flights ->
-            (flightsList.adapter as FlightsAdapter).submitList(flights)
+            putFlightsInFlightsAdapter(flights)
             mainSearchBoxLayout.hint = getString(R.string.search_n_flights, flights.size)
         }
+    }
+
+    private fun ActivityMainNewBinding.putFlightsInFlightsAdapter(
+        flights: List<ModelFlight>
+    ) {
+        (flightsList.adapter as FlightsAdapter).submitList(flights)
     }
 
     //Whenever undo/redo icons state changes, redraw menu
@@ -193,6 +199,9 @@ class MainActivity : JoozdlogActivity() {
         )
 
     private fun ActivityMainNewBinding.closeSearchField() {
+        println("XXXXXXX CLOSE SEARCH FIELD")
+        if (mainSearchField.text?.isNotBlank() == true)
+            scrollOnNextUpdate()
         mainSearchField.setText("")
         mainSearchField.clearFocus()
         mainSearchField.hideKeyboard()
@@ -238,10 +247,18 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    private fun ActivityMainNewBinding.scrollToFirstCompletedFlight(
-        flights: List<ModelFlight>
-    ) {
+
+
+    private fun ActivityMainNewBinding.scrollOnNextUpdate(){
+        val adapter = flightsList.adapter as FlightsAdapter
+        adapter.addListListener(ScrollOnNextUpdateListener(this))
+    }
+
+    private fun ActivityMainNewBinding.scrollToFirstCompletedFlight() {
+        val flights = (flightsList.adapter as FlightsAdapter).currentList
+        println("scroll: currentlist size: ${flights.size}")
         val positionToScrollTo = findIndexOfTopFlightOnScreenAfterScrolling(flights)
+        println("scroll: scroll to: $positionToScrollTo")
         flightsList.scrollToPosition(positionToScrollTo)
 
         // scroll by another 30 dp
@@ -352,10 +369,17 @@ class MainActivity : JoozdlogActivity() {
             }
         }
 
+    private inner class ScrollOnNextUpdateListener(private val binding: ActivityMainNewBinding): FlightsAdapter.ListListener {
+        private val adapter = binding.flightsList.adapter as FlightsAdapter
+        override fun onListUpdated() {
+            adapter.removeListListener(this)
+            binding.scrollToFirstCompletedFlight()
+        }
+    }
 
 
     companion object{
         const val EDIT_FLIGHT_FRAGMENT_TAG = "EDIT_FLIGHT_FRAGMENT_TAG"
-        const val PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED = 3
+        const val PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED = 2
     }
 }

@@ -80,7 +80,7 @@ class ImportedFlightsSaverImpl(
             flightsInCompletedButNotOnDevice = newFlights.size,
             flightsOnDeviceButNotInCompleted = flightsNotInCompletedFlights.size,
             totalFlightsImported = flights.size,
-            flightsUpdated = matchingFlights.filter { it.hasChanges() }.size
+            flightsUpdated = matchingFlights.filter { it.hasChangesforCompletedFlights() }.size
         )
     }
 
@@ -95,8 +95,10 @@ class ImportedFlightsSaverImpl(
         val flights = getFlightsWithIcaoAirportsInPeriod(plannedFlights) ?: return
         val plannedFlightsOnDevice = getPlannedFlightsOnDevice(plannedFlights.period ?: return)
 
-        val matchingFlights = getMatchingFlightsExactTimes(plannedFlightsOnDevice, flights)
-
+        // flights that are an exact match do not get updated or deleted, just stay the way they are.
+        // If anything is changed, flights will be merged.
+        // I guess this saves about 99% of all calendar update saves.
+        val matchingFlights = getMatchingFlightsExactTimes(plannedFlightsOnDevice, flights).filter { !it.isExactMatch() }
         val mergedFlights = mergeFlights(matchingFlights)
 
         val newFlights = getNonMatchingFlightsExactTimes(plannedFlightsOnDevice, flights)
@@ -105,6 +107,7 @@ class ImportedFlightsSaverImpl(
             //Deleting planned flights does not pollute DB as they are not synced to server and thus deleted hard.
         flightsRepo.delete(flightsToDelete)
         flightsRepo.save(mergedFlights + newFlights)
+        println("DEBUG: Saved ${(mergedFlights + newFlights).size}")
     }
 
     private suspend fun getFlightsWithIcaoAirportsInPeriod(

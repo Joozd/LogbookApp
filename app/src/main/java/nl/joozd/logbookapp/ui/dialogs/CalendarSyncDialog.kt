@@ -48,7 +48,7 @@ import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
 import nl.joozd.logbookapp.model.viewmodels.dialogs.CalendarSyncDialogViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
-import nl.joozd.logbookapp.model.viewmodels.status.Status
+import nl.joozd.logbookapp.model.viewmodels.status.CalendarDialogStatus
 
 /*
 When a button is selected, check for permissions and do stuff
@@ -144,9 +144,9 @@ class CalendarSyncDialog: JoozdlogFragment() {
         viewModel.statusFlow.launchCollectWhileLifecycleStateStarted{
             when(it){
                 null -> { }
-                Status.NO_ICAL_LINK_FOUND -> showNoIcalLinkFoundDialog()
-                Status.DONE -> closeFragment()
-                is Status.Error -> {
+                CalendarDialogStatus.NO_ICAL_LINK_FOUND -> showNoIcalLinkFoundDialog()
+                CalendarDialogStatus.DONE -> closeFragment()
+                is CalendarDialogStatus.Error -> {
                     toast(it.error)
                 }
             }

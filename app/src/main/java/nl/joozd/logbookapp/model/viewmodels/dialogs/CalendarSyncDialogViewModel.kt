@@ -28,13 +28,13 @@ import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncTypes
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
-import nl.joozd.logbookapp.model.viewmodels.status.Status
+import nl.joozd.logbookapp.model.viewmodels.status.CalendarDialogStatus
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
 class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
-    val statusFlow: StateFlow<Status?> = MutableStateFlow(null)
+    val statusFlow: StateFlow<CalendarDialogStatus?> = MutableStateFlow(null)
 
-    private var status: Status? by CastFlowToMutableFlowShortcut(statusFlow)
+    private var status: CalendarDialogStatus? by CastFlowToMutableFlowShortcut(statusFlow)
 
     val foundCalendarsFlow: StateFlow<List<CalendarDescriptor>?> = MutableStateFlow(null) // null until initialized with [fillCalendarsList]
     val selectedCalendarFlow: StateFlow<CalendarDescriptor?> = MutableStateFlow(null) // null until initialized with [fillCalendarsList]
@@ -120,7 +120,7 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
             useFoundLink()
         }
         else {
-            status = Status.NO_ICAL_LINK_FOUND
+            status = CalendarDialogStatus.NO_ICAL_LINK_FOUND
             calendarSyncType=CalendarSyncTypes.CALENDAR_SYNC_NONE
         }
     }
@@ -143,7 +143,7 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
                 Preferences.nextCalendarCheckTime = 0
             }
         }
-        status = Status.DONE
+        status = CalendarDialogStatus.DONE
     }
 
     fun resetStatus(){
@@ -159,7 +159,7 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
         foundLink?.let {
             calendarSyncIcalAddress = it
             calendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_ICAL
-        } ?: run { status = Status.Error("No link found to use") }
+        } ?: run { status = CalendarDialogStatus.Error("No link found to use") }
     }
 
     init {

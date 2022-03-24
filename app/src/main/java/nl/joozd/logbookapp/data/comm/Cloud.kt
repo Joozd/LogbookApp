@@ -290,7 +290,8 @@ object Cloud {
      *         null on server error (retry later)
      */
     suspend fun syncAllFlights(flightRepository: FlightRepositoryWithDirectAccess): Long? {
-        val timeStamp: Long = TimestampMaker.getAndSaveTimeOffset() ?: return null
+        TimestampMaker().getAndSaveTimeOffset() ?: return null
+        val timeStamp = TimestampMaker().nowForSycPurposes
         return Client.getInstance().use { server ->
             with(ServerFunctions) {
                 loginAndHandleIfThatFails(server) ?: return -1L

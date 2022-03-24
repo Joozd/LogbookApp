@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import nl.joozd.joozdcalendarapi.CalendarDescriptor
-import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncTypes
+import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
@@ -38,7 +38,7 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
 
     val foundCalendarsFlow: StateFlow<List<CalendarDescriptor>?> = MutableStateFlow(null) // null until initialized with [fillCalendarsList]
     val selectedCalendarFlow: StateFlow<CalendarDescriptor?> = MutableStateFlow(null) // null until initialized with [fillCalendarsList]
-    val calendarSyncTypeFlow: StateFlow<Int> = MutableStateFlow(Preferences.calendarSyncType) // will never be null because initialized here
+    val calendarSyncTypeFlow: StateFlow<CalendarSyncType> = MutableStateFlow(Preferences.calendarSyncType) // will never be null because initialized here
     private val calendarSyncIcalAddressFlow: StateFlow<String> = MutableStateFlow(Preferences.calendarSyncIcalAddress) // will never be null because initialized here
 
     private var foundCalendars: List<CalendarDescriptor>? by CastFlowToMutableFlowShortcut(foundCalendarsFlow)
@@ -46,7 +46,7 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
     var selectedCalendar: CalendarDescriptor? by CastFlowToMutableFlowShortcut(selectedCalendarFlow)
         private set
 
-    var calendarSyncType: Int by CastFlowToMutableFlowShortcut(calendarSyncTypeFlow)
+    var calendarSyncType: CalendarSyncType by CastFlowToMutableFlowShortcut(calendarSyncTypeFlow)
         private set
 
     var calendarSyncIcalAddress: String by CastFlowToMutableFlowShortcut(calendarSyncIcalAddressFlow)
@@ -85,10 +85,9 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
         calendarSyncIcalAddressFlow
     ) { cal, syncType, address ->
         when (syncType) {
-            CalendarSyncTypes.CALENDAR_SYNC_NONE -> false
-            CalendarSyncTypes.CALENDAR_SYNC_ICAL -> address.isNotBlank()
-            CalendarSyncTypes.CALENDAR_SYNC_DEVICE -> cal != null
-            else -> false // It will never be this but compiler doesn't know that
+            CalendarSyncType.CALENDAR_SYNC_NONE -> false
+            CalendarSyncType.CALENDAR_SYNC_ICAL -> address.isNotBlank()
+            CalendarSyncType.CALENDAR_SYNC_DEVICE -> cal != null
         }
     }
 
@@ -98,13 +97,13 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
 
     /**
      * Calendar Scraper radio button clicked.
-     * This should set [Preferences.calendarSyncType] to [CalendarSyncTypes.CALENDAR_SYNC_DEVICE]
+     * This should set [Preferences.calendarSyncType] to [CalendarSyncType.CALENDAR_SYNC_DEVICE]
      */
     fun calendarScraperRadioButtonClicked(){
         calendarSyncType = if (foundCalendars != null) {
-            CalendarSyncTypes.CALENDAR_SYNC_DEVICE
+            CalendarSyncType.CALENDAR_SYNC_DEVICE
         } else {
-            CalendarSyncTypes.CALENDAR_SYNC_NONE
+            CalendarSyncType.CALENDAR_SYNC_NONE
         }
 
     }
@@ -121,14 +120,14 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
         }
         else {
             status = CalendarDialogStatus.NO_ICAL_LINK_FOUND
-            calendarSyncType=CalendarSyncTypes.CALENDAR_SYNC_NONE
+            calendarSyncType=CalendarSyncType.CALENDAR_SYNC_NONE
         }
     }
 
     fun calendarPicked(index: Int){
         foundCalendars?.get(index)?.let{
             selectedCalendar = it
-        } ?: run { calendarSyncType=CalendarSyncTypes.CALENDAR_SYNC_NONE }
+        } ?: run { calendarSyncType=CalendarSyncType.CALENDAR_SYNC_NONE }
     }
 
     /**
@@ -138,7 +137,7 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
         Preferences.calendarSyncType = calendarSyncType
         Preferences.selectedCalendar = selectedCalendar?.displayName ?: ""
         Preferences.calendarSyncIcalAddress = calendarSyncIcalAddress
-        Preferences.useCalendarSync = (calendarSyncType != CalendarSyncTypes.CALENDAR_SYNC_NONE).also{
+        Preferences.useCalendarSync = (calendarSyncType != CalendarSyncType.CALENDAR_SYNC_NONE).also{
             if (it) {
                 Preferences.nextCalendarCheckTime = 0
             }
@@ -158,7 +157,7 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
     private fun useFoundLink() {
         foundLink?.let {
             calendarSyncIcalAddress = it
-            calendarSyncType = CalendarSyncTypes.CALENDAR_SYNC_ICAL
+            calendarSyncType = CalendarSyncType.CALENDAR_SYNC_ICAL
         } ?: run { status = CalendarDialogStatus.Error("No link found to use") }
     }
 

@@ -30,7 +30,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageFinalBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
-import nl.joozd.logbookapp.model.viewmodels.activities.SettingsActivityViewModel
+import nl.joozd.logbookapp.model.viewmodels.activities.settingsActivity.SettingsActivityViewModel
 
 /**
  * Final puntjes op de i
@@ -40,13 +40,9 @@ class NewUserActivityFinalPage: Fragment() {
 
     private val viewModel: NewUserActivityViewModel by activityViewModels()
 
-    //TODO don't use this
-    private val settingsViewmodel: SettingsActivityViewModel by viewModels() // this handles settings changes pretty well :)
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageFinalBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_final, container, false)).apply {
             icaoIataSwitch.isChecked = Preferences.useIataAirports
-            consensusSwitch.isChecked = Preferences.consensusOptIn
 
             /*******************************************************************************************
              * OnClickListeners
@@ -54,9 +50,6 @@ class NewUserActivityFinalPage: Fragment() {
 
             icaoIataSwitch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.setUseIataAirports(isChecked)
-            }
-            consensusSwitch.setOnCheckedChangeListener { _, isChecked ->
-                viewModel.setConsensusOptIn(isChecked)
             }
 
             /*******************************************************************************************

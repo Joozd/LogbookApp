@@ -19,8 +19,13 @@
 
 package nl.joozd.logbookapp.data.sharedPrefs
 
-object CalendarSyncTypes {
-    const val CALENDAR_SYNC_NONE = 0
-    const val CALENDAR_SYNC_DEVICE = 1
-    const val CALENDAR_SYNC_ICAL = 2
+enum class CalendarSyncType(val value: Int) {
+    CALENDAR_SYNC_NONE(0),
+    CALENDAR_SYNC_DEVICE(1),
+    CALENDAR_SYNC_ICAL(2);
+
+    companion object {
+        private val map = values().associateBy(CalendarSyncType::value)
+        fun fromInt(type: Int) = map[type]
+    }
 }

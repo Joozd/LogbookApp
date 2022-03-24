@@ -33,9 +33,11 @@ import java.util.*
 object JoozdlogExport {
     private val context
         get() = App.instance.ctx
-    suspend fun shareCsvExport(fileName: String): Uri = withContext(DispatcherProvider.main()) {
-        val cachePath = File(context.cacheDir, "files").apply{
-            mkdirs()
+    suspend fun shareCsvExport(fileName: String): Uri {
+        val cachePath = withContext(DispatcherProvider.io()) {
+            File(context.cacheDir, "files").apply {
+                mkdirs()
+            }
         }
         val name = if (fileName.uppercase(Locale.ROOT).endsWith(".CSV")) fileName else "$fileName.csv"
         val file = File(cachePath, name)
@@ -45,6 +47,6 @@ object JoozdlogExport {
                 it.write(FlightsRepositoryExporter(FlightRepository.instance).buildCsvString())
             }
         }
-        FileProvider.getUriForFile(context, "nl.joozd.joozdlog.fileprovider", file)
+        return FileProvider.getUriForFile(context, "nl.joozd.joozdlog.fileprovider", file)
     }
 }

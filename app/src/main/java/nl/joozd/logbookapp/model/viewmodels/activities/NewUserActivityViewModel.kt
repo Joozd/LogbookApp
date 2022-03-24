@@ -314,10 +314,6 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         Preferences.useIataAirports = useIata
     }
 
-    fun setConsensusOptIn(optIn: Boolean){
-        Preferences.consensusOptIn = optIn
-    }
-
     /**
      * Save all stuff that needs saving, and set up everything for first use
      */

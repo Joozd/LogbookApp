@@ -172,13 +172,11 @@ object JoozdlogWorkersHub: CoroutineScope {
      * Gets airports from server and overwrites airportsDB if different.
      * If this work already exists, do nothing ( [ExistingWorkPolicy.KEEP] )
      * Runs once per day.
-     * @param onlyUnmetered: If set to true, runs only on Networktype.UNMETERED
      * @param overwrite: If set to true, will replace previously enqueued work (use this when changing onlyUnmetered preference), with a DELAY_FOR_OVERWRITE_MINUTES minute delay.
      *
      */
-    fun periodicGetAirportsFromServer(onlyUnmetered: Boolean = false, overwrite: Boolean = false){
+    fun periodicGetAirportsFromServer(overwrite: Boolean = false){
         val constraints = Constraints.Builder()
-            .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
             .setRequiresBatteryNotLow(true)
             .build()
 
@@ -197,12 +195,10 @@ object JoozdlogWorkersHub: CoroutineScope {
 
     /**
      * Gets aircraft types from server, and sends consensus data to server
-     * @param onlyUnmetered: If set to true, runs only on Networktype.UNMETERED
      * @param overwrite: If set to true, will replace previously enqueued work (use this when changing onlyUnmetered preference)
      */
-    fun periodicSynchronizeAircraftTypes(onlyUnmetered: Boolean = false, overwrite: Boolean = false){
+    fun periodicSynchronizeAircraftTypes(overwrite: Boolean = false){
         val constraints = Constraints.Builder()
-            .setRequiredNetworkType(if (onlyUnmetered) NetworkType.UNMETERED else NetworkType.CONNECTED)
             .setRequiresBatteryNotLow(true)
             .build()
         val task = PeriodicWorkRequestBuilder<SyncAircraftTypesWorker>(Duration.ofDays(1)).apply {
@@ -230,16 +226,6 @@ object JoozdlogWorkersHub: CoroutineScope {
         with (WorkManager.getInstance(App.instance)){
             enqueueUniquePeriodicWork(GET_BACKUP_EMAIL, if (force) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
         }
-    }
-
-
-
-    /**
-     * Reschedule Aircraft and Airport updates
-     */
-    fun rescheduleAircraftAndAirports(onlyUnmetered: Boolean){
-        periodicGetAirportsFromServer(onlyUnmetered, true)
-        periodicSynchronizeAircraftTypes(onlyUnmetered, true)
     }
 
     /**

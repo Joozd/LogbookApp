@@ -28,8 +28,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 26
         targetSdkVersion 31
-        versionCode 93 // my version, increment this every build
-        versionName "JoozdLog 1.1.0.dev.18"
+        versionCode 94 // my version, increment this every build
+        versionName "JoozdLog 1.1.0.dev.19"
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -107,7 +107,6 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     //Kotlin Extensions
-
     implementation 'androidx.activity:activity-ktx:1.4.0'
     implementation "androidx.fragment:fragment-ktx:1.4.1"
     implementation "androidx.room:room-ktx:$room_version"

@@ -44,6 +44,7 @@ import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
+import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModelNew
 import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivity
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesActivity
@@ -52,8 +53,8 @@ import nl.joozd.logbookapp.ui.dialogs.AboutDialog
 import nl.joozd.logbookapp.ui.dialogs.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
-import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.ModelFlight
+import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {

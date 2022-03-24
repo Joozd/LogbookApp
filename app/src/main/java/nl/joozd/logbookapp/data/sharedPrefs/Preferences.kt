@@ -143,8 +143,6 @@ object Preferences {
         get() = _mostRecentBackup
     var mostRecentBackup: Long by JoozdLogSharedPrefs(sharedPref, 0L, _mostRecentBackup)
 
-    var updateLargerFilesOverWifiOnly: Boolean by JoozdLogSharedPrefs(sharedPref, false)
-
     var newUserActivityFinished: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
     var editFlightFragmentWelcomeMessageShouldBeDisplayed: Boolean by JoozdLogSharedPrefs(sharedPref, true)
@@ -192,7 +190,11 @@ object Preferences {
      */
     var useCalendarSync: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
-    var calendarSyncType: Int by JoozdLogSharedPrefs(sharedPref, CalendarSyncTypes.CALENDAR_SYNC_NONE)
+    private var _calendarSyncType: Int by JoozdLogSharedPrefs(sharedPref, CalendarSyncType.CALENDAR_SYNC_NONE.value)
+
+    var calendarSyncType: CalendarSyncType
+        get() = makeCalendarSyncType(_calendarSyncType)
+        set(it) { _calendarSyncType = it.value }
 
     var calendarSyncIcalAddress: String by JoozdLogSharedPrefs(sharedPref, "")
 
@@ -268,6 +270,10 @@ object Preferences {
      * Login link waiting for server to be available
      */
     var loginLinkStringWaiting: String by JoozdLogSharedPrefs(sharedPref, "")
+
+
+    private fun makeCalendarSyncType(type: Int): CalendarSyncType =
+        CalendarSyncType.fromInt(type)?: CalendarSyncType.CALENDAR_SYNC_NONE
 
     /**
      * Hardcoded global const values

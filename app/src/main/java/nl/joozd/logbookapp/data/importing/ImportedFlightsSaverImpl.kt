@@ -29,6 +29,7 @@ import nl.joozd.logbookapp.data.importing.results.SaveCompletedFlightsResult
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.iataToIcaoAirports
+import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.DispatcherProvider
 
@@ -48,7 +49,7 @@ class ImportedFlightsSaverImpl(
      * @see mergeFlights
      */
     override suspend fun save(completeLogbook: ExtractedCompleteLogbook) {
-        val flights = makeFlightsWithIcaoAirports(completeLogbook)?: emptyList()
+        val flights = makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(completeLogbook)?: emptyList()
         val flightsOnDevice = flightsRepo.getAllFlights()
         // This makes a list of pairs.
         // mergeFlights will merge second onto first, overwriting any non-empty data.
@@ -68,7 +69,7 @@ class ImportedFlightsSaverImpl(
      *  (UTC) calendar day and update times if such a flight is found.
      */
     override suspend fun save(completedFlights: ExtractedCompletedFlights): SaveCompletedFlightsResult? {
-        val flights = getFlightsWithIcaoAirportsInPeriod(completedFlights) ?: return null
+        val flights = prepareFlightsForSaving(completedFlights) ?: return null
         val flightsOnDevice = flightsRepo.getAllFlights()
         val relevantFlightsOnDevice = flightsOnDevice.filter { !it.isSim && it.timeOut in completedFlights.period ?: return null }
         val matchingFlights = getMatchingFlightsSameDay(relevantFlightsOnDevice, flights)
@@ -91,7 +92,7 @@ class ImportedFlightsSaverImpl(
      * TODO this generates two undo actions, needs fixing
      */
     override suspend fun save(plannedFlights: ExtractedPlannedFlights) {
-        val flights = getFlightsWithIcaoAirportsInPeriod(plannedFlights) ?: return
+        val flights = prepareFlightsForSaving(plannedFlights) ?: return
         val plannedFlightsOnDevice = getPlannedFlightsOnDevice(plannedFlights.period ?: return)
 
         // flights that are an exact match do not get updated or deleted, just stay the way they are.
@@ -108,17 +109,23 @@ class ImportedFlightsSaverImpl(
         flightsRepo.save(mergedFlights + newFlights)
     }
 
-    private suspend fun getFlightsWithIcaoAirportsInPeriod(
+    /*
+     * Preparing means:
+     * - changing airports to ICAO if needed
+     * - removing names if needed
+     * - only flights in its period
+     */
+    private suspend fun prepareFlightsForSaving(
         completedFlights: ExtractedCompletedFlights
     ): List<Flight>? =
-        makeFlightsWithIcaoAirports(completedFlights)?.filter {
+        makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(completedFlights)?.filter {
             it.timeOut in (completedFlights.period ?: return null)
         }
 
-    private suspend fun getFlightsWithIcaoAirportsInPeriod(
+    private suspend fun prepareFlightsForSaving(
         plannedFlights: ExtractedPlannedFlights
     ): List<Flight>? =
-        makeFlightsWithIcaoAirports(plannedFlights)?.filter {
+        makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(plannedFlights)?.filter {
             it.timeOut in (plannedFlights.period!!)
         }
 
@@ -126,12 +133,16 @@ class ImportedFlightsSaverImpl(
         flightsRepo.getAllFlights().filter { it.isPlanned }.filter { it.timeOut in (period) }
 
 
-    private suspend fun makeFlightsWithIcaoAirports(flightsToPrepare: ExtractedFlights): List<Flight>?{
-        val flights = flightsToPrepare.flights?.map { Flight(it) }
+    private suspend fun makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(flightsToPrepare: ExtractedFlights): List<Flight>?{
+        val flights = flightsToPrepare.flights?.map { Flight(it) }?.removeNamesIfNeeded()
         return if (flightsToPrepare.identFormat == AirportIdentFormat.ICAO) flights
         else {
             val adc = airportRepository.getAirportDataCache()
             flights?.map { it.iataToIcaoAirports(adc) }
         }
     }
+
+    private fun List<Flight>.removeNamesIfNeeded(): List<Flight> =
+        if (Preferences.getNamesFromRosters) this
+        else this.map { it.copy(name = "", name2 = "") }
 }

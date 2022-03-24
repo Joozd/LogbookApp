@@ -30,23 +30,19 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.ui.utils.DarkModeHub
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
-
 class App : Application(){
     companion object {
         var instance: App by DelegatesExt.notNullSingleValue()
     }
-
     val ctx: Context by lazy {applicationContext}
-
-    val applicationScope = CoroutineScope(SupervisorJob())
 
     override fun onCreate() {
         super.onCreate()
         instance = this
 
         //Periodic workers get started as soon as app gets started
-        JoozdlogWorkersHub.periodicGetAirportsFromServer(Preferences.updateLargerFilesOverWifiOnly)
-        JoozdlogWorkersHub.periodicSynchronizeAircraftTypes(Preferences.updateLargerFilesOverWifiOnly)
+        JoozdlogWorkersHub.periodicGetAirportsFromServer()
+        JoozdlogWorkersHub.periodicSynchronizeAircraftTypes()
         JoozdlogWorkersHub.periodicBackupFromServer()
 
         // Set dark mode preference from Preferences

@@ -41,7 +41,7 @@ import kotlinx.coroutines.withContext
 import nl.joozd.joozdcalendarapi.CalendarDescriptor
 import nl.joozd.joozdcalendarapi.getCalendars
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncTypes
+import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
 import nl.joozd.logbookapp.databinding.DialogCalendarSyncBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
@@ -76,7 +76,7 @@ class CalendarSyncDialog: JoozdlogFragment() {
 
     private fun DialogCalendarSyncBinding.setOnClickListeners() {
         calendarScraperRadioButton.isChecked =
-            viewModel.calendarSyncType == CalendarSyncTypes.CALENDAR_SYNC_DEVICE
+            viewModel.calendarSyncType == CalendarSyncType.CALENDAR_SYNC_DEVICE
         calendarScraperRadioButton.setOnClickListener {
             lifecycleScope.launch {
                 fillCalendarsList()
@@ -85,7 +85,7 @@ class CalendarSyncDialog: JoozdlogFragment() {
         }
 
         icalSubscriptionRadioButton.setOnClickListener {
-            icalSubscriptionRadioButton.isChecked = viewModel.calendarSyncType == CalendarSyncTypes.CALENDAR_SYNC_ICAL
+            icalSubscriptionRadioButton.isChecked = viewModel.calendarSyncType == CalendarSyncType.CALENDAR_SYNC_ICAL
             viewModel.icalSubscriptionRadioButtonClicked(getLinkFromClipboard())
         }
 
@@ -136,8 +136,8 @@ class CalendarSyncDialog: JoozdlogFragment() {
         }
 
         viewModel.calendarSyncTypeFlow.launchCollectWhileLifecycleStateStarted{
-            calendarScraperRadioButton.isChecked = it == CalendarSyncTypes.CALENDAR_SYNC_DEVICE
-            icalSubscriptionRadioButton.isChecked = it == CalendarSyncTypes.CALENDAR_SYNC_ICAL
+            calendarScraperRadioButton.isChecked = it == CalendarSyncType.CALENDAR_SYNC_DEVICE
+            icalSubscriptionRadioButton.isChecked = it == CalendarSyncType.CALENDAR_SYNC_ICAL
             makeLayoutForSyncType(it)
         }
 
@@ -154,16 +154,16 @@ class CalendarSyncDialog: JoozdlogFragment() {
     }
 
 
-    private fun DialogCalendarSyncBinding.makeLayoutForSyncType(syncType: Int){
+    private fun DialogCalendarSyncBinding.makeLayoutForSyncType(syncType: CalendarSyncType){
         when(syncType){
-            CalendarSyncTypes.CALENDAR_SYNC_DEVICE -> {
+            CalendarSyncType.CALENDAR_SYNC_DEVICE -> {
                 icalAddressLayout.visibility = View.INVISIBLE
                 calendarPickerSpinnerLayout.visibility = View.VISIBLE
                 lifecycleScope.launch {
                     fillCalendarsList()
                 }
             }
-            CalendarSyncTypes.CALENDAR_SYNC_ICAL -> {
+            CalendarSyncType.CALENDAR_SYNC_ICAL -> {
                 icalAddressLayout.visibility = View.VISIBLE
                 calendarPickerSpinnerLayout.visibility = View.GONE
                 icalAddressEditText.setText(viewModel.foundLink)

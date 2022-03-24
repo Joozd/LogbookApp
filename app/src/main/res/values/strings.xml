@@ -240,8 +240,8 @@
     - Strings for SettingsActivity
     -->
 
-    <string name="useIataAirports">Use IATA airports identifiers</string>
-    <string name="useIcaoAirports">Use ICAO airports identifiers</string>
+    <string name="useIataAirports">Now using IATA airport codes</string>
+    <string name="useIcaoAirports">Now using ICAO airport codes</string>
     <string name="getPlannedflightsFromCalendar">Get planned flights from your device\'s calendar</string>
     <string name="calendarSync">Use Calendar Sync</string>
     <string name="calendar_sync_settings">Calendar Sync</string>
@@ -390,6 +390,7 @@
     <string name="do_you_want_to_enable_this">Do you want to enable this?</string>
     <string name="use_calendar_import">Use Calendar Import</string>
     <string name="calendar_this_device">Calendar on this device</string>
+    <string name="disabled">Disabled</string>
     <string name="ical_link">iCalendar link</string>
 
     <string name="use_cloud_sync">Accept Terms and Use Cloud Sync</string>
@@ -410,8 +411,8 @@
     <string name="consensus_description">JoozdLog Cloud collects (anonymous) Aircraft Registration and type data so you don\'t have to enter aircraft types that somebody else already entered. Typical collected data would be \"4 users said PH-XXX is a Cessna 172\". Switching this off will stop sending and receiving this data.</string>
     <string name="icao_iata_description">Display airports with their IATA identifier ("AMS") if this is switched on, or with their ICAO identifier ("EHAM") if it is off.</string>
 
-    <string name="mark_incomplete_without_pic">Name needs to be set</string>
-    <string name="mark_incomplete_without_pic_description">If no names are set on a completed flight, flight will be marked as incomplete</string>
+    <string name="mark_incomplete_without_pic">PIC name required</string>
+    <string name="mark_incomplete_without_pic_description">If no PIC name is set on a completed flight, flight will be marked as incomplete</string>
     <string name="signed_in_as"><![CDATA[<b>Joozdlog Cloud ID</b><br><small>%1$s</small>&nbsp;]]></string>
     <string name="email_button_text_verified"><![CDATA[<b>Email address</b><br><small>%1$s</small>&nbsp;]]></string>
     <string name="email_button_text_not_verified"><![CDATA[<b>Email address</b><br><small>%1$s (not verified)</small>&nbsp;]]></string>
@@ -426,6 +427,8 @@
 
 
     <string name="backup_now">Backup now</string>
+    <string name="exporting_csv">Exporting CSV file…</string>
+
     <string name="pick_backup_interval">Pick backup interval</string>
     <string name="augmented_crew_time_explanation">In case of an augmented crew (3 or more pilots), Joozdlog calculates the time that can be logged for copilots by subtracting this amount of time for each takeoff and landing, allocating the remaining time evenly over the pilots, then adds this time again for every takeoff/landing performed in the pilot\'s seat.</string>
 

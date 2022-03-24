@@ -43,18 +43,13 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         if (makeNewLoginDataIfNeeded() != CloudFunctionResults.OK)
-            Result.retry().also{
-                Log.d(this@SyncFlightsWorker::class.simpleName, "unwanted result $it")
-            }
+            Result.retry()
         else
-            when (val result = Cloud.syncAllFlights(flightRepository).also{
-                Log.d(this@SyncFlightsWorker::class.simpleName, "doWork() CP 2: $it")
-            }) {
+            when (val result = Cloud.syncAllFlights(flightRepository)) {
                 null -> Result.retry()
                 -1L -> Result.failure()
                 else -> {
                     Preferences.lastUpdateTime = result
-                    Log.d(this@SyncFlightsWorker::class.simpleName, "Synced $result flights")
                     Result.success()
                 }
             }

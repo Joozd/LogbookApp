@@ -166,6 +166,7 @@ object Preferences {
      */
     var useIataAirports: Boolean by JoozdLogSharedPrefs(sharedPref, false)
 
+    /*
     /**
      * Opt-in for Aircraft Type Consensus
      */
@@ -174,6 +175,8 @@ object Preferences {
     val consensusOptInLiveData: LiveData<Boolean>
         get() = _consensusOptIn
     var consensusOptIn: Boolean by JoozdLogSharedPrefs(sharedPref, true, _consensusOptIn)
+
+     */
 
     /**
      * If true, if PIC name is not set, flight will be marked incomplete (red)

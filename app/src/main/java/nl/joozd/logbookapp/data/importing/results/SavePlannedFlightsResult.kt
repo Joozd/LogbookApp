@@ -19,4 +19,4 @@
 
 package nl.joozd.logbookapp.data.importing.results
 
-class SavePlannedFlightsResult(success: Boolean) : SaveFlightsResult
+class SavePlannedFlightsResult(success: Boolean): SaveFlightsResult(success)

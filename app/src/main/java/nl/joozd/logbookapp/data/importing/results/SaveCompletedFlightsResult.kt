@@ -20,8 +20,9 @@
 package nl.joozd.logbookapp.data.importing.results
 
 class SaveCompletedFlightsResult(
-    val flightsOnDeviceButNotInCompleted: Int,
-    val flightsInCompletedButNotOnDevice: Int,
-    val totalFlightsImported: Int,
-    val flightsUpdated: Int
-): SaveFlightsResult
+    success: Boolean,
+    val flightsOnDeviceButNotInCompleted: Int = -1,
+    val flightsInCompletedButNotOnDevice: Int = -1,
+    val totalFlightsImported: Int = -1,
+    val flightsUpdated: Int = -1
+): SaveFlightsResult(success)

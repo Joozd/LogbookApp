@@ -33,9 +33,9 @@ interface ImportedFlightsSaver {
     /**
      * Save a complete logbook (from a backup or import)
      */
-    suspend fun save(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult?
-    suspend fun save(completedFlights: ExtractedCompletedFlights): SaveCompletedFlightsResult?
-    suspend fun save(plannedFlights: ExtractedPlannedFlights): SavePlannedFlightsResult?
+    suspend fun save(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult
+    suspend fun save(completedFlights: ExtractedCompletedFlights): SaveCompletedFlightsResult
+    suspend fun save(plannedFlights: ExtractedPlannedFlights): SavePlannedFlightsResult
 
     companion object{
         val instance by lazy { make() }

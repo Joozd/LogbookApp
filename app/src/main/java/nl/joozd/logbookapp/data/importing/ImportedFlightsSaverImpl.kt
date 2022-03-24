@@ -72,16 +72,17 @@ class ImportedFlightsSaverImpl(
      * Will check for same flights (flightnumber, orig and dest) departing on the same
      *  (UTC) calendar day and update times if such a flight is found.
      */
-    override suspend fun save(completedFlights: ExtractedCompletedFlights): SaveCompletedFlightsResult? {
-        val flights = prepareFlightsForSaving(completedFlights) ?: return null
+    override suspend fun save(completedFlights: ExtractedCompletedFlights): SaveCompletedFlightsResult {
+        val flights = prepareFlightsForSaving(completedFlights) ?: return SaveCompletedFlightsResult(false)
         val flightsOnDevice = flightsRepo.getAllFlights()
-        val relevantFlightsOnDevice = flightsOnDevice.filter { !it.isSim && it.timeOut in completedFlights.period ?: return null }
+        val relevantFlightsOnDevice = flightsOnDevice.filter { !it.isSim && it.timeOut in completedFlights.period ?: return SaveCompletedFlightsResult(false) }
         val matchingFlights = getMatchingFlightsSameDay(relevantFlightsOnDevice, flights)
         val mergedFlights = mergeFlights(matchingFlights)
         val newFlights = getNonMatchingFlightsSameDay(relevantFlightsOnDevice, flights)
         val flightsNotInCompletedFlights = getNonMatchingFlightsExactTimes(flights, relevantFlightsOnDevice)
         flightsRepo.save(mergedFlights + newFlights)
         return SaveCompletedFlightsResult(
+            success = true,
             flightsInCompletedButNotOnDevice = newFlights.size,
             flightsOnDeviceButNotInCompleted = flightsNotInCompletedFlights.size,
             totalFlightsImported = flights.size,

@@ -63,6 +63,7 @@
     <string name="email_for_login">Email address for login link</string>
     <string name="email">Email address</string>
     <string name="not_an_email_address">Not an email address</string>
+    <string name="addresses_do_not_match">Addresses do not match</string>
     <string name="email_repeat">Repeat Email address</string>
     <string name="email_reason">Please enter your email for backup and account recovery purposes.\nYour email address will not be stored outside your phone.</string>
     <string name="autovalue">Auto Values</string>

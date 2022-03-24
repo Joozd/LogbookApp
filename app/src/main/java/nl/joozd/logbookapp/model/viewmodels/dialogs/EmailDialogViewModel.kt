@@ -19,34 +19,56 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import nl.joozd.logbookapp.model.viewmodels.status.EmailDialogStatus
+import nl.joozd.logbookapp.model.viewmodels.status.EmailDialogStatus.EmailDialogStatusError.*
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.util.*
 
 class EmailDialogViewModel: JoozdlogDialogViewModel() {
-    var email1 = Preferences.emailAddress.lowercase(Locale.ROOT)
-        private set
-    var email2 = Preferences.emailAddress.lowercase(Locale.ROOT)
-        private set
-
     //intentionally public
     var onComplete: () -> Unit = {}
 
-    /**
+    val statusFlow: StateFlow<EmailDialogStatus?> = MutableStateFlow(null)
+    private var status by CastFlowToMutableFlowShortcut(statusFlow)
+
+    val email1Flow: StateFlow<String> = MutableStateFlow(Preferences.emailAddress)
+    val email2Flow: StateFlow<String> = MutableStateFlow(Preferences.emailAddress)
+
+    var email1 by CastFlowToMutableFlowShortcut(email1Flow)
+    private set
+    private var email2 by CastFlowToMutableFlowShortcut(email2Flow)
+
+    val canBeAcceptedFlow = combine(email1Flow, email2Flow) { e1, e2 ->
+        println("checking $e1 == $e2 -> ${e1.equals(e2,ignoreCase = true)}")
+        println("matches: ${android.util.Patterns.EMAIL_ADDRESS.matcher(e1).matches()}")
+        android.util.Patterns.EMAIL_ADDRESS.matcher(e1).matches()
+                && e1.equals(e2,ignoreCase = true)
+    }
+
+    /*
      * Text to be shown as "OK" button in email dialog
-     * Will witch to "VERIFY" if clicking it will lead to a verification mail being sent
+     * Will switch to "VERIFY" if clicking it will lead to a verification mail being sent
      * Initially set to OK if email verified or empty, or VERIFY otherwise
      */
-    private val _okButtonText = MutableLiveData(if (Preferences.emailAddress.isBlank() || Preferences.emailVerified) android.R.string.ok else R.string.verify)
-    val okButtonText: LiveData<Int>
-        get() = _okButtonText
+    val okOrVerifyFlow = email1Flow.map {
+        if (it == Preferences.emailAddress && Preferences.emailVerified || it.isEmpty()) android.R.string.ok
+        else R.string.verify
+    }
+
+
+    fun resetStatus(){
+        status = null
+    }
 
     /**
      * When OK clicked:
@@ -56,84 +78,56 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
      * - feeds back DONE to fragment if email changed, OK if nothing happened, so it will close itself
      */
     fun okClicked(){
-        if (email1 != email2) feedback(GeneralEvents.ERROR).putInt(3)
-        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches() && email1.isNotBlank()) feedback(GeneralEvents.ERROR).putInt(4)
+        if (email1 != email2) {
+            status = EmailDialogStatus.Error(EMAILS_DO_NOT_MATCH)
+            return
+        }
+
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()
+        && email1.isNotBlank()) {
+            status = EmailDialogStatus.Error(INVALID_EMAIL_ADDRESS)
+            return
+        }
 
         if (Preferences.emailAddress.lowercase(Locale.ROOT) != email1)
             Preferences.emailVerified = false
 
-        if (!Preferences.emailVerified) {
+        status = if (!Preferences.emailVerified) {
             if (email1 != Preferences.emailAddress.lowercase(Locale.ROOT))
                 Preferences.emailAddress = email1
 
             if (email1.isNotBlank()) {
                 viewModelScope.launch {
+                    // UserManagement takes care of any errors that may arise
                     UserManagement.changeEmailAddress()
-                    // Fire and forget, UserManagement takes care of any errors that arise
                 }
             }
-            feedback(GeneralEvents.DONE)
+            EmailDialogStatus.Done
         }
-        else feedback(GeneralEvents.OK)
+        else EmailDialogStatus.DoneNoChanges
 
 
 
     }
 
-    fun updateEmail(it: String){
-        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(it.trim()).matches())
-                feedback(GeneralEvents.ERROR).putString("Not an email address").putInt(1)
-                email1 = it.lowercase(Locale.ROOT).trim()
+    fun updateEmail1(e: String){
+        email1 = e.trim()
     }
 
-    fun updateEmail2(it: String){
-        when {
-            it.lowercase(Locale.ROOT).trim() != email1 ->
-                feedback(GeneralEvents.ERROR).putString("Does not match").putInt(2)
-            else -> {
-                email2 = it.lowercase(Locale.ROOT).trim()
-
-            }
-        }
+    fun completedEmail1(){
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches())
+            status = EmailDialogStatus.Error(INVALID_EMAIL_ADDRESS_1)
     }
 
-    /**
-     * Checks if current text is the same as email2 and they both are an email address or empty
-     * Will also update text for okButton
-     */
-    fun checkSame1(s: String): Boolean =
-        (s.trim() == email2 && (s.isBlank() || android.util.Patterns.EMAIL_ADDRESS.matcher(email2).matches())).also{
-            updateOKButtonText(s.trim())
-        }
-
-    /**
-     * Checks if current text is the same as email1 and they both are an email address
-     */
-    fun checkSame2(s: String): Boolean =
-        (s.trim() == email1 && (s.isBlank() || android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()))
-
-    /**
-     * True if ok button should be enabled, false if not
-     * Basically just checks if email1 is an email address and email1 and 2 match
-     */
-    fun okButtonShouldBeEnabled(): Boolean = android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches() && email1 == email2
-
-    /**
-     * Checks what text OK button should have (OK or Verify) and sets that
-     * It should say OK if
-     *      - Entered email is same as saved in Preferences OR empty
-     *      - Preferences.emailVerified OR email is empty
-     * It should say VERIFY if
-     *      - entered email is not the same as saved in Preferences
-     *      OR !Preferences.emailVerifies
-     * In other cases it should stay the way it was
-     * @param forceEmail1: Force email1, ued when [email1] isn't updated yet (during typing)
-     */
-    fun updateOKButtonText(forceEmail1: String? = null){
-        val e1 = forceEmail1 ?: email1
-        when{
-            e1.isBlank() || Preferences.emailVerified && e1 == Preferences.emailAddress.lowercase(Locale.ROOT) -> _okButtonText.value = android.R.string.ok
-            e1 != Preferences.emailAddress || !Preferences.emailVerified -> _okButtonText.value = R.string.verify
-        }
+    fun updateEmail2(e: String){
+        email2 = e.trim()
     }
+
+    fun completedEmail2(){
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email2).matches())
+            status = EmailDialogStatus.Error(INVALID_EMAIL_ADDRESS_2)
+        if(!email1.equals(email2, ignoreCase = true))
+            status = EmailDialogStatus.Error(ENTRIES_DO_NOT_MATCH)
+    }
+
 }

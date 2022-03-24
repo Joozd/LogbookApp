@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.data.comm
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 import nl.joozd.comms.Client
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.joozdlogcommon.FeedbackData
@@ -111,8 +112,10 @@ object Cloud {
      */
     suspend fun confirmEmail(confirmationString: String): CloudFunctionResults {
         require(":" in confirmationString) { "A confirmationString must have a \':\' in it" }
-        return Client.getInstance().use { client ->
-            ServerFunctions.confirmEmail(client, confirmationString)
+        return withContext(DispatcherProvider.io()) {
+            Client.getInstance().use { client ->
+                ServerFunctions.confirmEmail(client, confirmationString)
+            }
         }
     }
 

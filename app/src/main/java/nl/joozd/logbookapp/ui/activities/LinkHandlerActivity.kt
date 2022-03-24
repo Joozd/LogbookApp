@@ -30,6 +30,8 @@ import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
+import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.databinding.ActivityLinkHandlerBinding
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
@@ -67,11 +69,14 @@ class LinkHandlerActivity : JoozdlogActivity() {
     }
 
     private fun handleEmailVerificationLink(data: Uri) {
-        println("CheckPoint 1")
         data.lastPathSegment?.replace("-", "/")?.let {
             lifecycleScope.launch {
                 if (UserManagement.confirmEmail(it)) {
+                    showEmailConfirmedSuccessDialog()
                     Cloud.requestLoginLinkMail()
+                }
+                else{
+                    showNoSuccessDialog()
                 }
             }
         }
@@ -107,7 +112,7 @@ class LinkHandlerActivity : JoozdlogActivity() {
         setPositiveButton(android.R.string.ok){ _, _ ->
             closeAndStartMainActivity()
         }
-    }
+    }.create().show()
 
     private fun showNoConnectionDialog() = AlertDialog.Builder(this).apply{
         setTitle(R.string.server_problem)
@@ -115,7 +120,46 @@ class LinkHandlerActivity : JoozdlogActivity() {
         setPositiveButton(android.R.string.ok){ _, _ ->
             closeAndStartMainActivity()
         }
+    }.create().show()
+
+    private fun showEmailConfirmedSuccessDialog() =
+        AlertDialog.Builder(this).apply{
+            setTitle(R.string.email_verified)
+            setMessage(R.string.email_verified)
+            setPositiveButton(android.R.string.ok){ _, _ ->
+                closeAndStartMainActivity()
+            }
+        }.create().show()
+
+    private fun showNoSuccessDialog() {
+        if(ScheduledErrors.currentErrors.isEmpty())
+            showWillBeScheduledDialog()
+        else {
+            val errorMessage = when(ScheduledErrors.currentErrors.first()){
+                Errors.EMAIL_CONFIRMATION_FAILED -> R.string.email_data_rejected
+                Errors.LOGIN_DATA_REJECTED_BY_SERVER -> R.string.wrong_username_password
+                Errors.BAD_EMAIL_SAVED -> R.string.email_address_rejected
+                Errors.SERVER_ERROR -> R.string.server_error
+            }
+                AlertDialog.Builder(this).apply {
+                    setTitle(R.string.error)
+                    setMessage(errorMessage)
+                    setPositiveButton(android.R.string.ok) { _, _ ->
+                        ScheduledErrors.clearError(ScheduledErrors.currentErrors.first())
+                        closeAndStartMainActivity()
+                    }
+                }.create().show()
+        }
     }
+
+    private fun showWillBeScheduledDialog() = AlertDialog.Builder(this).apply{
+        setTitle(R.string.no_internet)
+        setMessage(R.string.email_verification_scheduled)
+        setPositiveButton(android.R.string.ok){ _, _ ->
+            closeAndStartMainActivity()
+        }
+    }.create().show()
+
 
     companion object{
         private const val VERIFY_EMAIL_PATH = "verify-email"

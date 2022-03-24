@@ -29,8 +29,6 @@ object ScheduledErrors {
     val currentErrors: List<Errors>
         get() =  Errors.values().filter { Preferences.errorsToBeShown and it.flag != 0L }
 
-
-
     /**
      * Add an error. Use errors in [Errors]
      * If an error already active, this will do nothing

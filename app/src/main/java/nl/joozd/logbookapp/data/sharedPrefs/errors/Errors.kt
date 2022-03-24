@@ -28,15 +28,15 @@ enum class Errors(val flag: Long) {
     /**
      * User tried to log in to server but server doesn't know this combination of login/pass
      */
-    LOGIN_DATA_REJECTED_BY_SERVER(2),
+    LOGIN_DATA_REJECTED_BY_SERVER(1.shl(1)),
 
     /**
      * Server gave an unexpected response
      */
-    SERVER_ERROR(4),
+    SERVER_ERROR(1.shl(2)),
 
     /**
      * Server complained we tried to feed it a bad email address
      */
-    BAD_EMAIL_SAVED(8)
+    BAD_EMAIL_SAVED(1.shl(3))
 }

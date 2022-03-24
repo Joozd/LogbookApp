@@ -254,9 +254,8 @@ object UserManagement {
      *                              This will be sent to the server to verify
      * @return true if success, false if fail.
      */
-    suspend fun confirmEmail(confirmationString: String): Boolean = withContext (Dispatchers.IO) {
-        //try to confirm email with server
-        return@withContext when (Cloud.confirmEmail(confirmationString)){
+    suspend fun confirmEmail(confirmationString: String): Boolean =
+        when (withContext (Dispatchers.IO) { Cloud.confirmEmail(confirmationString) }){
             CloudFunctionResults.OK -> {
                 Preferences.emailVerified = true
                 Cloud.sendPendingEmailJobs()
@@ -283,7 +282,7 @@ object UserManagement {
                 false
             }
         }
-    }
+
 
     private const val EMAIL_LINK_PLACEHOLDER = "[INSERT_LINK_HERE]"
     private const val EMAIL_SUBJECT = "JoozdLog Login Link"

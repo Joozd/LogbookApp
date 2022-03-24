@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.model.viewmodels.dialogs.status
+package nl.joozd.logbookapp.model.viewmodels.status
 
 sealed class Status{
     object DONE: Status()

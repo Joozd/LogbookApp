@@ -28,7 +28,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncTypes
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
-import nl.joozd.logbookapp.model.viewmodels.dialogs.status.Status
+import nl.joozd.logbookapp.model.viewmodels.status.Status
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
 class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {

@@ -48,7 +48,7 @@ import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
 import nl.joozd.logbookapp.model.viewmodels.dialogs.CalendarSyncDialogViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.toast
-import nl.joozd.logbookapp.model.viewmodels.dialogs.status.Status
+import nl.joozd.logbookapp.model.viewmodels.status.Status
 
 /*
 When a button is selected, check for permissions and do stuff

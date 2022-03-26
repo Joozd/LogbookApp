@@ -21,12 +21,10 @@ package nl.joozd.logbookapp.model.viewmodels.fragments
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -41,7 +39,6 @@ import java.time.LocalDate
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val flightEditor = FlightEditor.instance!! // this Fragment should not have launched if flightEditor is null
-    private val airportRepository = AirportRepository.instance
     private val aircraftRepository = AircraftRepository.instance
     private val flightRepository = FlightRepository.instance
 
@@ -90,18 +87,16 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
 
     fun sortedRegistrationsFlow() =
-        combine(aircraftRepository.aircraftMapFlow(), flightRepository.allFlightsFlow()) {
-                regMap, allFlights ->
-            makeSortedRegistrationsList(allFlights, regMap)
+        aircraftRepository.aircraftMapFlow().map { regMap ->
+            makeSortedRegistrationsList(regMap)
         }
 
     fun namesFlow() = flightRepository.allFlightsFlow().map{
         it.makeNamesList()
     }
 
-    private fun makeSortedRegistrationsList(allFlights: List<Flight>, regMap: Map<String, Aircraft>) =
-        (allFlights.map { it.registration } + regMap.values.map { it.registration })
-            .distinct()
+    private fun makeSortedRegistrationsList(regMap: Map<String, Aircraft>) =
+        regMap.keys.toList()
 
     fun toggleSim(){
         flightEditor.isSim = !flightEditor.isSim

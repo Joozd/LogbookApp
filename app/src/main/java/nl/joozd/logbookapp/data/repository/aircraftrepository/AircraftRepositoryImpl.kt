@@ -144,17 +144,16 @@ class AircraftRepositoryImpl(
         aircraftTypes: List<AircraftType>,
         preloaded: List<PreloadedRegistration>,
         allFlights: List<Flight>
-    ): HashMap<String, Aircraft> {
-        val map = HashMap<String, Aircraft>()
+    ): Map<String, Aircraft> {
+        val map = LinkedHashMap<String, Aircraft>()
         val aircraftFromFlightsMapAsync = buildAircraftMapFromFlightsAsync(allFlights, aircraftTypes)
-        preloaded.forEach {
-            map[formatRegistration(it.registration)] = it.toAircraft(aircraftTypes)
-        }
         aircraftFromFlightsMapAsync.await().forEach{
             if (it.value.type != null || map[it.key] == null)
                 map[formatRegistration(it.key)] = it.value
         }
-
+        preloaded.forEach {
+            map[formatRegistration(it.registration)] = it.toAircraft(aircraftTypes)
+        }
         return map
     }
 

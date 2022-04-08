@@ -27,7 +27,7 @@ import nl.joozd.logbookapp.utils.TimestampMaker
 import java.time.Instant
 
 // Matches KL123(4) ABC( )-( )DEF // int this example characters in parentheses are optional
-private val flightRegExIATA = """([A-Z]{2}\d{3,4})\s([A-Z]{3})\s?-\s?([A-Z]{3})""".toRegex()
+private val flightRegExIATA = """^([A-Z]{2}\d{3,4})\s([A-Z]{3})\s?-\s?([A-Z]{3})""".toRegex()
 
 private const val FLIGHTNUMBER = 1
 private const val ORIG = 2

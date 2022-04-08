@@ -84,8 +84,6 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
 
     private fun addNamesToFlights(flights: List<BasicFlight>, crewLines: List<String>, myName: String): List<BasicFlight>{
         val newFlights = ArrayList<BasicFlight>(flights.size)
-
-        // a map of all found crew as (psn to name)
         val crewPsnToNameMap = makeCrewPsnToNameMap(crewLines, myName)
 
         // List of most recently found crew, to be used until a new crew is found
@@ -104,8 +102,8 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
              * Names are written in reverse order, separated by commas (VRIES, DE, HENK), all caps
              * should become "Xxxxxxx, xxx xxx xxx, Xxxxxx Xxxx Xxxx" (X = uppercase, x = lowercase)
              */
-            // update crewList
 
+            // update currentCrew
             if (line.getNumbers().isNotEmpty()){
                 currentCrew = line.getNumbers().map{psn -> crewPsnToNameMap[psn] ?: "ERROR"}
             }
@@ -120,7 +118,7 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
             val date = getDate(dateString)
 
             flights.firstOrNull{it.hasDate(date) && it.flightNumber == flightNumber}?.let{
-                newFlights.add(it.copy(name = name, name2 = name2, isPIC = name == MY_NAME))
+                newFlights.add(it.copy(name = name, name2 = name2, isPIC = name == SELF))
             }
         }
         return newFlights
@@ -154,11 +152,11 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
     /**
      * Takes a RawName ("JANSEN, JAN", of "VRIES, VAN DE, HENK"
      * and turns it into a Name
-     * If name == myName, makes it [MY_NAME]
+     * If name == myName, makes it [SELF]
      */
     private fun rawNameToName(rawName: String, myName: String): Name =
         with (Name.ofList(rawName.split(',').map{ it.trim() })){
-            if (formattedAsMyName == myName) Name(MY_NAME) else this
+            if (formattedAsMyName == myName) Name(SELF) else this
         }
 
     // Gets all words that are only numbers, "hallo ab123 456 7" will return [456, 7]
@@ -215,7 +213,7 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
         const val MY_NAME_START = "Cockpit Briefing for "
         const val MY_NAME_END = " KLC AUTO BRIEFING"
 
-        const val MY_NAME = "SELF"
+        const val SELF = "SELF"
 
         const val DATE = 0
         const val FLIGHTNUMBER = 1

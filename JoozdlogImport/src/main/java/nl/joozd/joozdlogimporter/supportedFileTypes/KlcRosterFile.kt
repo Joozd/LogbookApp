@@ -21,11 +21,12 @@ package nl.joozd.joozdlogimporter.supportedFileTypes
 
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.PlannedFlightsExtractor
+import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.KlcRosterExtractor
 
 class KlcRosterFile(lines: List<String>): PlannedFlightsFile(lines) {
     override val picIsSet = false
     override val extractor: PlannedFlightsExtractor
-        get() = TODO("Not yet implemented")
+        get() = KlcRosterExtractor()
 
     override val identFormat = AirportIdentFormat.IATA
 

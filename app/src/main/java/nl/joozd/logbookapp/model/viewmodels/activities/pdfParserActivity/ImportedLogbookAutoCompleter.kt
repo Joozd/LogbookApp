@@ -54,7 +54,6 @@ class ImportedLogbookAutoCompleter(
         val period = plannedFlights.period
         val dirtyFlights = plannedFlights.flights?.autoFillableFlightsWithUppercaseRegs() ?: return SanitizedPlannedFlights(null, period)
         val autocompletedFlights = autoCompleteFlights(dirtyFlights, plannedFlights.identFormat)
-        println("AUTOCOMPLETE BEFORE ISPIC")
         val flightsWithPicSet = if (plannedFlights.picIsSet) autocompletedFlights else setPic(autocompletedFlights)
         return SanitizedPlannedFlights(flightsWithPicSet, period)
     }
@@ -74,7 +73,6 @@ class ImportedLogbookAutoCompleter(
 
     private suspend fun setPic(flights: Collection<BasicFlight>): List<BasicFlight> {
         val isPic = IsPicChecker().isPic()
-        println("ISPIC: $isPic")
         return flights.map { it.copy(isPIC = isPic) }
     }
 

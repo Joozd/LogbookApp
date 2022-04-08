@@ -23,9 +23,11 @@ import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 
+/**
+ * Sanitized Planned Flights have all their data sanitized and can be saved as-is.
+ * (saving will take care of flightID and timestamp)
+ */
 class SanitizedPlannedFlights(
     flights: Collection<BasicFlight>?,
-    period: ClosedRange<Long>?
-): ExtractedPlannedFlights(period, flights, AirportIdentFormat.ICAO) {
-
-}
+    period: ClosedRange<Long>?,
+): ExtractedPlannedFlights(period, flights, picIsSet = true, AirportIdentFormat.ICAO)

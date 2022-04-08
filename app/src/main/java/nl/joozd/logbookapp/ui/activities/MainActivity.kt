@@ -41,6 +41,7 @@ import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.getFlightsFromCalendar
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
+import nl.joozd.logbookapp.data.importing.ImportedFlightsSaverImpl
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
@@ -54,6 +55,7 @@ import nl.joozd.logbookapp.ui.dialogs.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import nl.joozd.logbookapp.model.ModelFlight
+import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.ImportedLogbookAutoCompleter
 import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
@@ -349,7 +351,8 @@ class MainActivity : JoozdlogActivity() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
                 lifecycleScope.launch {
                     getFlightsFromCalendar()?.let {
-                        ImportedFlightsSaver.make(flightsRepo = FlightRepository.instance).save(it)
+                        val ff = ImportedLogbookAutoCompleter().autocomplete(it)
+                        ImportedFlightsSaver.make(flightsRepo = FlightRepository.instance).save(ff)
                     }
                 }
             else

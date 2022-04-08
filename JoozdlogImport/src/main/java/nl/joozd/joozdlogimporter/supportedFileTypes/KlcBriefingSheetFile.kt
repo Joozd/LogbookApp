@@ -24,6 +24,7 @@ import nl.joozd.joozdlogimporter.interfaces.PlannedFlightsExtractor
 import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.KlcBriefingSheetExtractor
 
 class KlcBriefingSheetFile(lines: List<String>): PlannedFlightsFile(lines) {
+    override val picIsSet = true
     override val extractor: PlannedFlightsExtractor = KlcBriefingSheetExtractor()
 
     override val identFormat = AirportIdentFormat.IATA

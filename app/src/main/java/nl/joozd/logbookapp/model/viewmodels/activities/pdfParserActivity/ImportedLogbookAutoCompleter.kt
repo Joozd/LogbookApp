@@ -23,6 +23,7 @@ import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
+import nl.joozd.logbookapp.data.functions.IsPicChecker
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
@@ -43,18 +44,22 @@ class ImportedLogbookAutoCompleter(
     val aircraftRepository: AircraftRepository = AircraftRepository.instance,
     val airportRepository: AirportRepository = AirportRepository.instance
 ) {
+
     suspend fun autocomplete(importedLogbook: ExtractedCompleteLogbook): SanitizedCompleteLogbook{
         val dirtyFlights = importedLogbook.flights?.autoFillableFlightsWithUppercaseRegs() ?: return SanitizedCompleteLogbook(null)
-        return SanitizedCompleteLogbook(sanitizeFlights(dirtyFlights, importedLogbook.identFormat))
+        return SanitizedCompleteLogbook(autoCompleteFlights(dirtyFlights, importedLogbook.identFormat))
     }
 
     suspend fun autocomplete(plannedFlights: ExtractedPlannedFlights): SanitizedPlannedFlights{
         val period = plannedFlights.period
         val dirtyFlights = plannedFlights.flights?.autoFillableFlightsWithUppercaseRegs() ?: return SanitizedPlannedFlights(null, period)
-        return SanitizedPlannedFlights(sanitizeFlights(dirtyFlights, plannedFlights.identFormat), period)
+        val autocompletedFlights = autoCompleteFlights(dirtyFlights, plannedFlights.identFormat)
+        println("AUTOCOMPLETE BEFORE ISPIC")
+        val flightsWithPicSet = if (plannedFlights.picIsSet) autocompletedFlights else setPic(autocompletedFlights)
+        return SanitizedPlannedFlights(flightsWithPicSet, period)
     }
 
-    private suspend fun sanitizeFlights(flights: Collection<BasicFlight>, identFormat: AirportIdentFormat): List<BasicFlight>{
+    private suspend fun autoCompleteFlights(flights: Collection<BasicFlight>, identFormat: AirportIdentFormat): List<BasicFlight>{
         val aircraftDataCache = aircraftRepository.getAircraftDataCache()
         val airportDataCache = airportRepository.getAirportDataCache()
         val f = if (identFormat == AirportIdentFormat.ICAO) flights else iataToIcaoAirports(flights, airportDataCache)
@@ -66,6 +71,14 @@ class ImportedLogbookAutoCompleter(
                     .autoValues(airportDataCache, aircraftDataCache)
         }
     }
+
+    private suspend fun setPic(flights: Collection<BasicFlight>): List<BasicFlight> {
+        val isPic = IsPicChecker().isPic()
+        println("ISPIC: $isPic")
+        return flights.map { it.copy(isPIC = isPic) }
+    }
+
+
 
     private fun iataToIcaoAirports(
         flights: Collection<BasicFlight>,

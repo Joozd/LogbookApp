@@ -26,5 +26,6 @@ import java.time.Instant
 open class ExtractedPlannedFlights(
     val period: ClosedRange<Long>?,
     flights: Collection<BasicFlight>?,
+    val picIsSet: Boolean,
     identFormat: AirportIdentFormat
 ): ExtractedFlights(flights, identFormat)

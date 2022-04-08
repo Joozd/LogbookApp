@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.data.calendar
 
 import android.Manifest
 import android.content.Context
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.withContext
 import nl.joozd.joozdcalendarapi.CalendarDescriptor
@@ -29,7 +28,7 @@ import nl.joozd.joozdcalendarapi.CalendarEvent
 import nl.joozd.joozdcalendarapi.EventsExtractor
 import nl.joozd.joozdcalendarapi.getCalendars
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
-import nl.joozd.logbookapp.data.calendar.parsers.calendarEventsToFlights
+import nl.joozd.logbookapp.data.calendar.parsers.calendarEventsToExtractedPlannedFlights
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import java.time.Duration
@@ -44,7 +43,7 @@ private val period
 @RequiresPermission(Manifest.permission.READ_CALENDAR)
 suspend fun Context.getFlightsFromCalendar(): ExtractedPlannedFlights? {
     val foundEvents = activeCalendar()?.let { getEventsInPeriod(it, period) } ?: return null
-    return foundEvents.calendarEventsToFlights(period.toEpochSecondRange())
+    return foundEvents.calendarEventsToExtractedPlannedFlights(period.toEpochSecondRange())
 }
 
 

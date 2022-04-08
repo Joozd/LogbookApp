@@ -26,20 +26,22 @@ import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.logbookapp.utils.TimestampMaker
 import java.time.Instant
 
-// Matches KL123(4) ABC( )-( )DEF - characters in parenthesis are optional
+// Matches KL123(4) ABC( )-( )DEF // int this example characters in parentheses are optional
 private val flightRegExIATA = """([A-Z]{2}\d{3,4})\s([A-Z]{3})\s?-\s?([A-Z]{3})""".toRegex()
 
 private const val FLIGHTNUMBER = 1
 private const val ORIG = 2
 private const val DEST = 3
 
-fun Collection<CalendarEvent>.calendarEventsToFlights(
+private const val PIC_IS_SET = false
+
+fun Collection<CalendarEvent>.calendarEventsToExtractedPlannedFlights(
     period: ClosedRange<Long>? = null
 ): ExtractedPlannedFlights {
     val flightEvents = this.filter {flightRegExIATA.containsMatchIn(it.title)}
     val flights = flightEventsToBasicFlights(flightEvents, flightRegExIATA)
     val p = period ?: getPeriodFromFlights(flights)
-    return ExtractedPlannedFlights(p, flights, AirportIdentFormat.IATA)
+    return ExtractedPlannedFlights(p, flights, PIC_IS_SET, AirportIdentFormat.IATA)
 }
 
 private fun flightEventsToBasicFlights(

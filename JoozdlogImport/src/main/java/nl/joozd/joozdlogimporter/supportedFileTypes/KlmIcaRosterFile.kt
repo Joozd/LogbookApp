@@ -23,6 +23,7 @@ import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.PlannedFlightsExtractor
 
 class KlmIcaRosterFile(lines: List<String>): PlannedFlightsFile(lines) {
+    override val picIsSet = false
     override val extractor: PlannedFlightsExtractor
         get() = TODO("Not yet implemented")
 

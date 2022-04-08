@@ -24,6 +24,11 @@ import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.PlannedFlightsExtractor
 
 abstract class PlannedFlightsFile(lines: List<String>): ImportedFile(lines){
+    /**
+     * true if this file defines if flights are marked as PIC
+     */
+    abstract val picIsSet: Boolean
+
     abstract val extractor: PlannedFlightsExtractor
 
     /**
@@ -38,6 +43,7 @@ abstract class PlannedFlightsFile(lines: List<String>): ImportedFile(lines){
         return ExtractedPlannedFlights(
             period = period,
             flights = extractedFlights,
+            picIsSet = picIsSet,
             identFormat = identFormat
         )
     }

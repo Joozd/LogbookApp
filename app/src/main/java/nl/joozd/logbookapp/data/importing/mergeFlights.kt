@@ -38,13 +38,19 @@ fun mergeFlights(flights: Collection<MatchingFlights>): List<Flight> =
 
 /**
  * Merge a flight on device with a new Flight.
- * non-empty data in [this] will overwrite:
+ * non-empty data (including "0 minutes") in [this] will overwrite:
  * - flightNumber
  * - times
  * - aircraft type
  * - registration
  * - names
  * - remarks
+ * - multiPilotTime,
+ * - ifrTime,
+ * - nightTime,
+ * - isPIC
+ * - isPICUS
+ * - isCoPilot,
  * Other things will stay as they were in [flightOnDevice]
  */
 private fun Flight.mergeOnto(flightOnDevice: Flight): Flight =
@@ -56,6 +62,13 @@ private fun Flight.mergeOnto(flightOnDevice: Flight): Flight =
         registration = registration.nullIfBlank() ?: flightOnDevice.registration,
         name = name.nullIfBlank() ?: flightOnDevice.name,
         name2 = name2.nullIfBlank() ?: flightOnDevice.name2,
-        remarks = remarks.nullIfBlank() ?: flightOnDevice.remarks)
+        remarks = remarks.nullIfBlank() ?: flightOnDevice.remarks,
+        multiPilotTime = multiPilotTime,
+        ifrTime = ifrTime,
+        nightTime = nightTime,
+        isPIC = isPIC,
+        isPICUS = isPICUS,
+        isCoPilot = isCoPilot
+    )
 
 private fun String.nullIfBlank(): String? = takeIf{ it.isNotBlank() }

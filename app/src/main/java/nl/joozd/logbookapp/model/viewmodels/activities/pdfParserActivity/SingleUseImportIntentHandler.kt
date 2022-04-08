@@ -97,7 +97,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
         val extractedFlights: ExtractedCompletedFlights = file.extractCompletedFlights()
         status = HandlerStatus.SAVING_FLIGHTS
         val result = ImportedFlightsSaver.instance.save(extractedFlights)
-        status = if (result != null) DoneCompletedFlightsWithResult(result)
+        status = if (result.success) DoneCompletedFlightsWithResult(result)
             else HandlerError(R.string.error_saving_flights)
 
     }

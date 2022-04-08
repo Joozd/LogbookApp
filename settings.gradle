@@ -19,6 +19,6 @@
 
 
 rootProject.name='LogbookApp'
-include ':app', ':klcrosterparser'
+include ':app'
 include ':joozdlogCommon'
 include ':JoozdlogImport'

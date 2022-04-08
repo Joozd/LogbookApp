@@ -13,7 +13,6 @@
             <option value="$PROJECT_DIR$/JoozdlogImport" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/joozdlogCommon" />
-            <option value="$PROJECT_DIR$/klcrosterparser" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

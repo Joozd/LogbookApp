@@ -39,6 +39,13 @@ class MockFlightDao: FlightDao {
     override suspend fun getFlightsByID(ids: Collection<Int>): List<FlightData> =
         ids.mapNotNull { simulatedDatabase[it] }.filter { !it.DELETEFLAG }
 
+    override suspend fun getFlightsStartingBetween(
+        startEpochSecond: Long,
+        endEpochSecond: Long
+    ): List<FlightData> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getAllFlights(): List<FlightData> =
         simulatedDatabase.values.toList()
 

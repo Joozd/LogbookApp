@@ -56,7 +56,7 @@ class ModelFlightTest: CoroutineTestingClass() {
     fun fillDatabases(){
         runBlocking {
             aircraftRepo.replaceAllTypesWith(AircraftTestData.aircraftTypes)
-            aircraftRepo.saveAircraft(AircraftTestData.arwt1.toAircraft())
+            //aircraftRepo.saveAircraft(AircraftTestData.arwt1.toAircraft())
             airportRepo.replaceDbWith(AirportsTestData.airports)
         }
     }

@@ -19,39 +19,29 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status
 
+import nl.joozd.logbookapp.utils.UserMessage
+
 /**
  * Used to communicate a user choice to UI.
  * choice 1 should map to positive, choice 2 to negative
  */
 class UserChoice(
-    val titleResource: Int,
-    val descriptionResource: Int,
-    val choice1Resource: Int,
-    val choice2Resource: Int,
-    val action1: UserChoiceListener,
-    val action2: UserChoiceListener
-): HandlerStatus() {
-    fun interface UserChoiceListener{
-        operator fun invoke()
-    }
-
-    class Builder{
-        var titleResource: Int? = null
-        var descriptionResource: Int? = null
-        var choice1Resource: Int? = null
-        var choice2Resource: Int? = null
-        private var action1 = UserChoiceListener {  }
-        private var action2 = UserChoiceListener {  }
-
-        fun setAction1(action: UserChoiceListener){
-            action1 = action
-        }
-
-        fun setAction2(action: UserChoiceListener){
-            action2 = action
-        }
-
-        fun build(): UserChoice =
-            UserChoice(titleResource!!, descriptionResource!!, choice1Resource!!, choice2Resource!!, action1, action2)
+    titleResource: Int,
+    descriptionResource: Int,
+    choice1Resource: Int?,
+    choice2Resource: Int?,
+    action1: UserChoiceListener,
+    action2: UserChoiceListener
+): HandlerStatus, UserMessage(titleResource, descriptionResource, choice1Resource, choice2Resource, action1, action2) {
+    class Builder : UserMessage.Builder() {
+        override fun build(): UserChoice =
+            UserChoice(
+                titleResource ?: android.R.string.unknownName,
+                descriptionResource ?: android.R.string.unknownName,
+                choice1Resource,
+                choice2Resource,
+                action1Listener,
+                action2Listener
+            )
     }
 }

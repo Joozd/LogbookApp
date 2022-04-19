@@ -188,6 +188,11 @@ interface FlightEditor {
     var autoFill: Boolean
 
     /**
+     * Get a snapshot for this flight. No guarantees that pending changes have been resolved.
+     */
+    fun snapshot(): ModelFlight
+
+    /**
      * Toggle between Dual, Instructor or neither.
      * if isDual && isInstructor, will togle to isDual.
      */
@@ -201,11 +206,12 @@ interface FlightEditor {
 
     /**
      * Save flight to DB
+     * @return the saved flight
      */
-    suspend fun save()
+    suspend fun save(): Flight
 
     /**
-     * close this editor, should call [FlightEditor.close]
+     * close this editor, should call [FlightEditor.close].
      */
     fun close()
 

@@ -82,16 +82,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
     }
 
     private fun showUserChoiceDialog(choice: UserChoice) =
-        AlertDialog.Builder(this).apply{
-            setTitle(choice.titleResource)
-            setMessage(choice.descriptionResource)
-            setPositiveButton(choice.choice1Resource){ _, _ ->
-                choice.action1()
-            }
-            setNegativeButton(choice.choice2Resource){ _, _ ->
-                choice.action2()
-            }
-        }.create().show()
+        choice.toAlertDialog(this).show()
 
     private fun showCompletedFlightsResult(result: DoneCompletedFlightsWithResult) =
         AlertDialog.Builder(this).apply{

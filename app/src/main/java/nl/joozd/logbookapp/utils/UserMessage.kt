@@ -9,8 +9,13 @@ open class UserMessage(
     private val choice1Resource: Int?,
     private val choice2Resource: Int?,
     private val action1: UserChoiceListener,
-    private val action2: UserChoiceListener
+    private val action2: UserChoiceListener,
+    private val cleanUp: MutableList<() -> Unit> = ArrayList()
 ) {
+    fun addCleanUpAction(action: () -> Unit){
+        cleanUp.add(action)
+    }
+
     fun interface UserChoiceListener{
         operator fun invoke()
     }
@@ -59,11 +64,17 @@ open class UserMessage(
             choice1Resource?.let{
                 setPositiveButton(it){ _, _ ->
                     action1()
+                    cleanUp.forEach {
+                        it()
+                    }
                 }
             }
             choice2Resource?.let{
                 setNegativeButton(it){ _, _ ->
                     action2()
+                    cleanUp.forEach {
+                        it()
+                    }
                 }
             }
         }.create()

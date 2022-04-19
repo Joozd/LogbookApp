@@ -26,11 +26,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.calendar.CalendarControl
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.repository.helpers.revert
@@ -41,6 +42,7 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.DispatcherProvider
+import nl.joozd.logbookapp.utils.UserMessage
 
 //TODO this is still WIP
 class MainActivityViewModelNew: JoozdlogViewModel() {
@@ -71,7 +73,9 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
 
     fun deleteFlight(flight: ModelFlight){
         viewModelScope.launch{
-            flightRepository.delete(flight.toFlight())
+            val f = flight.toFlight()
+            flightRepository.delete(f)
+            CalendarControl.handleManualDelete(f)
         }
     }
 
@@ -143,8 +147,6 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         combine(flightRepository.undoAvailableFlow, flightRepository.redoAvailableFlow){
             u, r -> Pair(u,r)
         }
-
-
 
     private suspend fun List<Flight>.toModelFlights(
         airportsData: AirportDataCache,

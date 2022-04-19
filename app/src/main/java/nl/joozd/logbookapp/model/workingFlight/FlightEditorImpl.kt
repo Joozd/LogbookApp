@@ -229,6 +229,8 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
             flight = flight.copy (autoFill = isAutoValues).autoValues()
         }
 
+    override fun snapshot(): ModelFlight = flight.copy()
+
     override fun toggleDualInstructorNeither() {
         val becomesDual = isDual == isInstructor // either both true or both false will make becomesDual true
         val becomesInstructor = isDual && !isInstructor //
@@ -243,9 +245,10 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
         flight = flight.copy(isPICUS = becomesPICUS, isPIC = becomesPIC).autoValues()
     }
 
-    override suspend fun save() {
+    override suspend fun save(): Flight {
         val f = flight.prepareForSaving()
         FlightRepositoryWithUndo.instance.save(f)
+        return f
     }
 
     override fun close() {

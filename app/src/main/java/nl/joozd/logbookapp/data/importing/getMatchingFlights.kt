@@ -95,15 +95,22 @@ private fun Flight.containsSameDayMatchIn(
     flightsToMatchTo: Collection<Flight>,
 ) = flightsToMatchTo.any { it matchesDateFlightnumberOrigAndDestWith this }
 
-private infix fun Flight.matchesDateFlightnumberOrigAndDestWith(other: Flight): Boolean =
-    this.orig.trim() == other.orig.trim()
-            && this.dest.trim() == other.dest.trim()
-            && this.flightNumber.trim() == other.flightNumber.trim()
-            && this.date() == other.date()
-
-
-private infix fun Flight.matchesTimeOrigAndDestWith(other: Flight): Boolean =
+infix fun Flight.matchesDateFlightnumberOrigAndDestWith(other: Flight): Boolean =
     this.orig == other.orig
+    && this.dest == other.dest
+    && this.flightNumber == other.flightNumber
+    && this.date() == other.date()
+
+
+infix fun Flight.matchesTimeOrigAndDestWith(other: Flight): Boolean =
+    this.orig == other.orig
+    && this.dest == other.dest
+    && this.timeOut == other.timeOut
+    && this.timeIn == other.timeIn
+
+infix fun Flight.matchesFlightnumberTimeOrigAndDestWith(other: Flight): Boolean =
+    this.flightNumber == other.flightNumber
+    && this.orig == other.orig
     && this.dest == other.dest
     && this.timeOut == other.timeOut
     && this.timeIn == other.timeIn

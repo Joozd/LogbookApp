@@ -21,6 +21,7 @@
 package nl.joozd.logbookapp.ui.activities
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -41,8 +42,6 @@ import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.getFlightsFromCalendar
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
-import nl.joozd.logbookapp.data.importing.ImportedFlightsSaverImpl
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
@@ -57,6 +56,7 @@ import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.ImportedLogbookAutoCompleter
 import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
+import nl.joozd.logbookapp.ui.messageCenter.MessageCenter
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {
@@ -131,6 +131,7 @@ class MainActivity : JoozdlogActivity() {
         collectFlightsListFlow()
         collectUndoRedoChangedFlow()
         collectAmountOfFlightsFlow()
+        collectCalendarControlFlow()
     }
 
     private fun collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded(){
@@ -177,6 +178,12 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
+    private fun collectCalendarControlFlow(){
+        MessageCenter.messageFlow.launchCollectWhileLifecycleStateStarted{
+            it?.toAlertDialog(this)?.show()
+        }
+    }
+
     private fun ActivityMainNewBinding.initializeSearchFieldViews(){
         initializeSearchTypeSpinner()
         addOnTextChangedListenerToMainSearchField()
@@ -198,7 +205,7 @@ class MainActivity : JoozdlogActivity() {
 
     private fun makeFlightsListAdapter() =
         FlightsAdapter(
-            onDelete = { flight -> viewModel.deleteFlight(flight) },
+            onDelete = { flight -> attemptToDelete(flight) },
             itemClick = { flight -> viewModel.showEditFlightDialog(flight) }
         )
 
@@ -283,6 +290,11 @@ class MainActivity : JoozdlogActivity() {
         return iWithMinValue - PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED
     }
 
+    private fun attemptToDelete(flight: ModelFlight){
+        if (flight.isPlanned)
+            viewModel.deleteFlight(flight)
+        else (showDeletingCompletedFlightDialog(flight))
+    }
 
 
     private fun View.showKeyboard(){
@@ -345,6 +357,19 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
+    private fun showDeletingCompletedFlightDialog(flight: ModelFlight){
+        AlertDialog.Builder(this).apply{
+            setTitle(R.string.delete)
+            setMessage(R.string.delete_completed_flight)
+            setPositiveButton(android.R.string.ok){ _, _ ->
+                viewModel.deleteFlight(flight)
+            }
+            setNegativeButton(android.R.string.cancel){ _, _ ->
+                // intentionally left blank
+            }
+        }.create().show()
+    }
+
 
     private fun updateCalendarEventsIfEnabled(){
         if (Preferences.useCalendarSync){
@@ -352,7 +377,7 @@ class MainActivity : JoozdlogActivity() {
                 lifecycleScope.launch {
                     getFlightsFromCalendar()?.let {
                         val ff = ImportedLogbookAutoCompleter().autocomplete(it)
-                        ImportedFlightsSaver.make(flightsRepo = FlightRepository.instance).save(ff)
+                        ImportedFlightsSaver.instance.save(ff)
                     }
                 }
             else

@@ -28,6 +28,8 @@ import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.helpers.findBestHitForRegistration
 import nl.joozd.logbookapp.extensions.plusDays
+import nl.joozd.logbookapp.model.ModelFlight
+import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.helpers.hoursAndMinutesStringToInt
 import java.time.*
 import kotlin.coroutines.CoroutineContext
@@ -90,11 +92,12 @@ class FlightEditorDataParser(
         editor.aircraft = Aircraft(type = t)
     }
 
-    suspend fun saveAndClose(){
+    suspend fun saveAndClose(): Flight {
         val runningJobs = job.children.toList()
         runningJobs.joinAll()
-        editor.save()
+        val f = editor.save()
         editor.close()
+        return f
     }
 
     fun close(){

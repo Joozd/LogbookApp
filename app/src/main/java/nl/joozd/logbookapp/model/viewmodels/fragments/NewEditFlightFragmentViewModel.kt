@@ -23,6 +23,7 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.data.calendar.CalendarControl
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
@@ -39,6 +40,7 @@ import java.time.LocalDate
 
 class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
     private val flightEditor = FlightEditor.instance!! // this Fragment should not have launched if flightEditor is null
+    private val uneditedFlight = flightEditor.snapshot()
     private val aircraftRepository = AircraftRepository.instance
     private val flightRepository = FlightRepository.instance
 
@@ -207,7 +209,12 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     fun saveAndClose(){
         viewModelScope.launch {
-            flightEditorDataParser.saveAndClose()
+            val f = flightEditorDataParser.saveAndClose()
+
+            with(CalendarControl){
+                if (!checkIfCalendarSyncOK(flightEditor.snapshot(), uneditedFlight))
+                    handleManualFlightSave(f)
+            }
         }
     }
 

@@ -39,7 +39,7 @@ interface ImportedFlightsSaver {
     suspend fun save(plannedFlights: ExtractedPlannedFlights): SavePlannedFlightsResult
 
     companion object{
-        val instance by lazy { make() }
+        val instance get() = make()
 
         fun make(
             flightsRepo: FlightRepository = FlightRepositoryWithUndo.instance,

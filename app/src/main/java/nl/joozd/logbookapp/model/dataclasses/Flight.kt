@@ -172,6 +172,9 @@ data class Flight(
         if (it >= 0 ) it else it+86400
     }
 
+    infix fun isExactMatchOf(other: Flight): Boolean =
+        this.copy (flightID = 0, timeStamp = 0) == other.copy(flightID = 0, timeStamp = 0)
+
     companion object{
         const val FLIGHT_ID_NOT_INITIALIZED = -1
         const val FLIGHT_IS_VFR = -1

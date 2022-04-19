@@ -125,7 +125,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
         ImportedLogbookAutoCompleter().autocomplete(logbook)
 
     private fun askIfReplaceOrMerge(extractedLogbook: ExtractedCompleteLogbook){
-        // Will give user the coice between running  [replaceCompleteLogbook] or [mergeCompleteLogbook]
+        // Will give user the choice between running  [replaceCompleteLogbook] or [mergeCompleteLogbook]
         status = buildMergeOrReplaceCompleteLogbookChoice(extractedLogbook)
     }
 

@@ -10,9 +10,11 @@ data class MatchingFlights(val knownFlight: Flight, val newFlight: Flight){
                 || knownFlight.registration != newFlight.registration
                 || knownFlight.aircraftType != newFlight.aircraftType
 
+
+
     /**
      * Check if these two flights are exactly the same, apart from ID and timestamp.
      */
     fun isExactMatch(): Boolean =
-        knownFlight.copy (flightID = 0, timeStamp = 0) == newFlight.copy(flightID = 0, timeStamp = 0)
+        knownFlight isExactMatchOf newFlight
 }

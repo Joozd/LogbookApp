@@ -19,6 +19,8 @@
 
 package nl.joozd.logbookapp.data.importing
 
+import nl.joozd.logbookapp.extensions.nullIfBlank
+import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
 
@@ -57,18 +59,60 @@ private fun Flight.mergeOnto(flightOnDevice: Flight): Flight =
     flightOnDevice.copy(
         timeOut = timeOut,
         timeIn = timeIn,
-        flightNumber = flightNumber.nullIfBlank() ?: flightOnDevice.aircraftType,
+        flightNumber = flightNumber.nullIfBlank() ?: flightOnDevice.flightNumber,
         aircraftType = aircraftType.nullIfBlank() ?: flightOnDevice.aircraftType,
         registration = registration.nullIfBlank() ?: flightOnDevice.registration,
         name = name.nullIfBlank() ?: flightOnDevice.name,
         name2 = name2.nullIfBlank() ?: flightOnDevice.name2,
         remarks = remarks.nullIfBlank() ?: flightOnDevice.remarks,
-        multiPilotTime = multiPilotTime,
-        ifrTime = ifrTime,
-        nightTime = nightTime,
-        isPIC = isPIC,
-        isPICUS = isPICUS,
-        isCoPilot = isCoPilot
+        multiPilotTime = chooseMultiPilotTime(this, flightOnDevice),
+        ifrTime = chooseIfrTime(this, flightOnDevice),
+        nightTime = chooseNightTime(this, flightOnDevice),
+        isPIC = decideIsPic(this, flightOnDevice),
+        isPICUS = decideIsPicus(this, flightOnDevice),
+        isCoPilot = decideIfCopilot(this, flightOnDevice)
     )
 
-private fun String.nullIfBlank(): String? = takeIf{ it.isNotBlank() }
+/* Try to be smart about getting the wanted data:
+ * - if autofill, set it to new data if not zero, or old data if new data is zero.
+ * - if not autofill, set duration if it is either 0 or whole flight to the same ratio.
+ * -- If not 0 or whole flight, keep manually entered value.
+ */
+private fun chooseMultiPilotTime(newData: Flight, oldData: Flight): Int =
+    if (oldData.autoFill)
+        newData.multiPilotTime.nullIfZero() ?: oldData.multiPilotTime
+    else when (oldData.multiPilotTime){
+        0 -> 0
+        oldData.duration() -> newData.duration()
+        else -> oldData.multiPilotTime
+    }
+
+private fun chooseIfrTime(newData: Flight, oldData: Flight): Int =
+    if (oldData.autoFill)
+        newData.ifrTime.nullIfZero() ?: oldData.ifrTime
+    else when (oldData.ifrTime){
+        0 -> 0
+        oldData.duration() -> newData.duration()
+        else -> oldData.ifrTime
+    }
+
+private fun chooseNightTime(newData: Flight, oldData: Flight): Int =
+    if (oldData.autoFill)
+        newData.ifrTime.nullIfZero() ?: oldData.nightTime
+    else when (oldData.nightTime){
+        0 -> 0
+        oldData.duration() -> newData.duration()
+        else -> oldData.nightTime
+    }
+
+
+private fun decideIsPic(newData: Flight, oldData: Flight): Boolean =
+    newData.isPIC || oldData.isPIC
+
+private fun decideIsPicus(newData: Flight, oldData: Flight): Boolean =
+    newData.isPICUS || oldData.isPICUS
+
+private fun decideIfCopilot(newData: Flight, oldData: Flight): Boolean =
+    if (chooseMultiPilotTime(newData, oldData) == 0) false
+    else !decideIsPic(newData, oldData)
+

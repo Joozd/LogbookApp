@@ -28,10 +28,12 @@ import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.logbookapp.data.importing.results.SaveCompleteLogbookResult
 import nl.joozd.logbookapp.data.importing.results.SaveCompletedFlightsResult
 import nl.joozd.logbookapp.data.importing.results.SavePlannedFlightsResult
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.iataToIcaoAirports
 import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.DispatcherProvider
 
@@ -42,7 +44,8 @@ import nl.joozd.logbookapp.utils.DispatcherProvider
  */
 class ImportedFlightsSaverImpl(
     private val flightsRepo: FlightRepository,
-    private val airportRepository: AirportRepository
+    private val airportRepository: AirportRepository,
+    private val aircraftRepository: AircraftRepository
 ): ImportedFlightsSaver {
     /**
      * Merge a complete logbook into current logbook.
@@ -77,16 +80,17 @@ class ImportedFlightsSaverImpl(
         val flightsOnDevice = flightsRepo.getAllFlights()
         val relevantFlightsOnDevice = flightsOnDevice.filter { !it.isSim && it.timeOut in completedFlights.period ?: return SaveCompletedFlightsResult(false) }
         val matchingFlights = getMatchingFlightsSameDay(relevantFlightsOnDevice, flights)
-        val mergedFlights = mergeFlights(matchingFlights)
+        val mergedFlights = mergeFlights(matchingFlights).autocomplete(airportRepository, aircraftRepository)
         val newFlights = getNonMatchingFlightsSameDay(relevantFlightsOnDevice, flights)
-        val flightsNotInCompletedFlights = getNonMatchingFlightsExactTimes(flights, relevantFlightsOnDevice)
+        val flightsNotInCompletedFlights = getNonMatchingFlightsSameDay(flights, relevantFlightsOnDevice)
         flightsRepo.save(mergedFlights + newFlights)
+
         return SaveCompletedFlightsResult(
             success = true,
             flightsInCompletedButNotOnDevice = newFlights.size,
             flightsOnDeviceButNotInCompleted = flightsNotInCompletedFlights.size,
             totalFlightsImported = flights.size,
-            flightsUpdated = matchingFlights.filter { it.hasChangesforCompletedFlights() }.size
+            flightsUpdated = mergedFlights.count { f -> flightsOnDevice.none { it.isExactMatchOf(f)} }
         )
     }
 

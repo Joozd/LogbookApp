@@ -19,5 +19,5 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status
 
-class HandlerError(val errorMessageResource: Int): HandlerStatus() {
+class HandlerError(val errorMessageResource: Int): HandlerStatus {
 }

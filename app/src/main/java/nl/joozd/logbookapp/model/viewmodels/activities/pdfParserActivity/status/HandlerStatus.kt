@@ -20,12 +20,12 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status
 
 @Suppress("ClassName")
-sealed class HandlerStatus{
-    object WAITING_FOR_INTENT: HandlerStatus()
-    object READING_URI: HandlerStatus()
-    object EXTRACTING_FLIGHTS: HandlerStatus()
-    object SAVING_FLIGHTS: HandlerStatus()
-    object CLEANING_LOGBOOK: HandlerStatus()
-    object DONE: HandlerStatus()
-    object NOT_IMPLEMENTED: HandlerStatus()
+sealed interface HandlerStatus{
+    object WAITING_FOR_INTENT: HandlerStatus
+    object READING_URI: HandlerStatus
+    object EXTRACTING_FLIGHTS: HandlerStatus
+    object SAVING_FLIGHTS: HandlerStatus
+    object CLEANING_LOGBOOK: HandlerStatus
+    object DONE: HandlerStatus
+    object NOT_IMPLEMENTED: HandlerStatus
 }

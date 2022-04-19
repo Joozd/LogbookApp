@@ -24,9 +24,9 @@ import java.util.*
 infix fun String.inIgnoreCase(other: String): Boolean =
     this.uppercase(Locale.ROOT) in other.uppercase(Locale.ROOT)
 
-fun String.nullIfEmpty() = if (this.isEmpty()) null else this
+fun String.nullIfEmpty() = this.ifEmpty { null }
 
-fun String.nullIfBlank() = if (this.isBlank()) null else this
+fun String.nullIfBlank() = this.ifBlank { null }
 
 fun String.removeTrailingDigits(): String {
     if (isEmpty()) return this

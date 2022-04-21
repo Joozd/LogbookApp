@@ -32,7 +32,7 @@ import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.iataToIcaoAirports
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.DispatcherProvider
 
@@ -153,6 +153,6 @@ class ImportedFlightsSaverImpl(
     }
 
     private fun List<Flight>.removeNamesIfNeeded(): List<Flight> =
-        if (Preferences.getNamesFromRosters) this
+        if (Prefs.getNamesFromRosters) this
         else this.map { it.copy(name = "", name2 = "") }
 }

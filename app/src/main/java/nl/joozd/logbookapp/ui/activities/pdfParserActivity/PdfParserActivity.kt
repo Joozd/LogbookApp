@@ -23,12 +23,11 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
-import androidx.annotation.NonNull
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivityPdfParserBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.DoneCompletedFlightsWithResult
@@ -112,7 +111,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
         }.create().show()
 
     private fun checkAirportDatabaseAvailable(): Boolean =
-        Preferences.airportDbVersion > 0
+        Prefs.airportDbVersion > 0
 
     private fun ActivityPdfParserBinding.downloadAirportsThenLaunchIntentHandler(){
         launch{

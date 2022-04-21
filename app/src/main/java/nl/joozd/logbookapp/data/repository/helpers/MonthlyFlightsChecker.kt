@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.data.repository.helpers
 
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import kotlin.math.absoluteValue
 
@@ -106,7 +106,7 @@ class MonthlyFlightsChecker(private val allFlights: List<Flight>, private val mo
         && timeOut == f.timeOut
         && timeIn == f.timeIn
         && flightNumber == f.flightNumber
-        && if (Preferences.updateAircraftWithoutAsking) true else {
+        && if (Prefs.updateAircraftWithoutAsking) true else {
             registration == f.registration
             && aircraftType == f.aircraftType
         }
@@ -117,7 +117,7 @@ class MonthlyFlightsChecker(private val allFlights: List<Flight>, private val mo
         && (timeOut-f.timeOut).absoluteValue <= tolerance * 60
         && timeIn-f.timeIn.absoluteValue <= tolerance * 60
         && flightNumber == f.flightNumber
-        && if (Preferences.updateAircraftWithoutAsking) true else {
+        && if (Prefs.updateAircraftWithoutAsking) true else {
             registration == f.registration
             && aircraftType == f.aircraftType
         }

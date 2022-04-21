@@ -21,9 +21,8 @@ package nl.joozd.logbookapp.ui.adapters.flightsadapter
 
 import android.view.View
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ItemFlightCardBinding
-import nl.joozd.logbookapp.extensions.toLocalTimeString
 import nl.joozd.logbookapp.extensions.toMonthYear
 import nl.joozd.logbookapp.extensions.toTimeString
 import nl.joozd.logbookapp.model.ModelFlight
@@ -72,7 +71,7 @@ class FlightViewHolder(containerView: View) : ListItemViewHolder(containerView) 
     }
 
     private fun Airport.displayString(): String =
-        if (Preferences.useIataAirports)
+        if (Prefs.useIataAirports)
             iata_code.takeIf{ it.isNotBlank() } ?: ident
         else ident
 }

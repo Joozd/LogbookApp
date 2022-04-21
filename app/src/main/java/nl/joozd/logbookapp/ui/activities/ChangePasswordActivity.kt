@@ -26,7 +26,7 @@ import androidx.activity.viewModels
 import androidx.fragment.app.commit
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivityChangePasswordBinding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
 import nl.joozd.logbookapp.extensions.nullIfBlank
@@ -63,7 +63,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
 
 
             // do some visual things (colors, texts etc)
-            emailWillBeSentToTextView.text = Preferences.emailAddress.nullIfBlank()?.let {
+            emailWillBeSentToTextView.text = Prefs.emailAddress.nullIfBlank()?.let {
                 getStringWithMakeup(R.string.mail_will_be_sent_to, it)
             } ?: getString(R.string.no_email_text)
 
@@ -73,7 +73,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
              ***************************************************************************************/
 
             submitButton.setOnClickListener {
-                if (Preferences.emailAddress.isBlank()) {
+                if (Prefs.emailAddress.isBlank()) {
                     noEmailDialog { viewModel.submitClicked() }
                 } else
                 viewModel.submitClicked()
@@ -215,7 +215,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
         titleResource = R.string.login_error
         messageResource = R.string.login_error_message
         setPositiveButton(R.string.create_account){
-            Preferences.username = null // setting this to null will cause a new account to be created on the next sync
+            Prefs.username = null // setting this to null will cause a new account to be created on the next sync
         }
         setNegativeButton(android.R.string.cancel){
             finish()

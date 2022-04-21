@@ -28,7 +28,7 @@ import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
@@ -43,7 +43,7 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
                 null -> Result.retry()
                 -1L -> Result.failure()
                 else -> {
-                    Preferences.lastUpdateTime = result
+                    Prefs.lastUpdateTime = result
                     Result.success()
                 }
             }
@@ -54,6 +54,6 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
      * @return [CloudFunctionResults.OK] if not needed or success, something else if failure
      */
     private suspend fun makeNewLoginDataIfNeeded(): CloudFunctionResults =
-        if (Preferences.username == null) UserManagement.newLoginDataNeeded()
+        if (Prefs.username == null) UserManagement.newLoginDataNeeded()
         else CloudFunctionResults.OK
 }

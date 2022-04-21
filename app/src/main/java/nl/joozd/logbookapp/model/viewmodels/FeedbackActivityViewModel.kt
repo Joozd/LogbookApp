@@ -25,7 +25,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
@@ -33,7 +33,7 @@ class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Text entered in feedback text field
      */
-    private var _feedbackText = Preferences.feedbackWaiting
+    private var _feedbackText = Prefs.feedbackWaiting
     // + exposed getter
     val feedbackText
         get() = _feedbackText
@@ -41,7 +41,7 @@ class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Text entered in contact field
      */
-    private var _contactInfo = Preferences.emailAddress
+    private var _contactInfo = Prefs.emailAddress
     // + exposed getter
     val contactInfo
         get() = _contactInfo
@@ -59,10 +59,10 @@ class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
     fun updateContactText(it: String){ _contactInfo = it }
 
     /**
-     * When "submit" is clicked, save [_feedbackText] to [Preferences] and start a worker with [_contactInfo]
+     * When "submit" is clicked, save [_feedbackText] to [Prefs] and start a worker with [_contactInfo]
      */
     fun submitClicked(){
-        Preferences.feedbackWaiting = _feedbackText
+        Prefs.feedbackWaiting = _feedbackText
         JoozdlogWorkersHub.sendFeedback(_contactInfo)
         feedback(GeneralEvents.DONE)
     }

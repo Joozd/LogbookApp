@@ -25,7 +25,7 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 
@@ -33,14 +33,14 @@ class ConfirmEmailWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         when{
-            Preferences.emailConfirmationStringWaiting.isBlank() -> Result.failure()
+            Prefs.emailConfirmationStringWaiting.isBlank() -> Result.failure()
 
             /*
              In case of client error (ie. internet failed before this is done), function will try to schedule work again
              which will fail because policy should be KEEP. However, as it does not add an unacceptible error to ScheduledErrors,
              this when will default to Result.retry()
             */
-            UserManagement.confirmEmail(Preferences.emailConfirmationStringWaiting) ->
+            UserManagement.confirmEmail(Prefs.emailConfirmationStringWaiting) ->
                 Result.success()
 
             // These would have been filled by UserManagement.confirmEmail

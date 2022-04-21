@@ -24,7 +24,7 @@ import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
@@ -59,12 +59,12 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      */
 
     //Use Cloud, used on PAGE_CLOUD
-    private val _useCloudCheckboxStatus = MutableLiveData(Preferences.useCloud)
+    private val _useCloudCheckboxStatus = MutableLiveData(Prefs.useCloud)
 
     //Use IATA airports instead of ICAO, used on PAGE_FINAL
-    private val _useIataAirports = MutableLiveData(Preferences.useIataAirports)
+    private val _useIataAirports = MutableLiveData(Prefs.useIataAirports)
 
-    private val _getFlightsFromCalendar = MutableLiveData(Preferences.useCalendarSync)
+    private val _getFlightsFromCalendar = MutableLiveData(Prefs.useCalendarSync)
 
 
 
@@ -79,19 +79,18 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         }
 
     /**
-     * Listen to changes in [Preferences]
+     * Listen to changes in [Prefs]
      */
+    //TODO make this work again, this does nothing atm (but I need to work on newuseractivity anyway so i will fix it then)
     private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         // Log.d("AirportRepository", "key = $key")
         when(key) {
-            Preferences::useCloud.name -> _useCloudCheckboxStatus.value = Preferences.useCloud
-            Preferences::useIataAirports.name -> _useIataAirports.value = Preferences.useIataAirports
-            Preferences::useCalendarSync.name -> _getFlightsFromCalendar.value = Preferences.useCalendarSync
+            Prefs::useCloud.name -> _useCloudCheckboxStatus.value = Prefs.useCloud
+            Prefs::useIataAirports.name -> _useIataAirports.value = Prefs.useIataAirports
+            Prefs::useCalendarSync.name -> _getFlightsFromCalendar.value = Prefs.useCalendarSync
         }
     }
-    init{
-        Preferences.getSharedPreferences().registerOnSharedPreferenceChangeListener (onSharedPrefsChangedListener)
-    }
+
 
     /*******************************************************************************************
      * Public parts
@@ -178,7 +177,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     }
 
     fun done(){
-        Preferences.newUserActivityFinished = true
+        Prefs.newUserActivityFinished = true
         syncFlights()
         feedback(NewUserActivityEvents.FINISHED)
     }
@@ -203,13 +202,13 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
 
     /**
      * When useCloudCheckbox is clicked:
-     * if terms are already accepted, toggle [Preferences.useCloud]
+     * if terms are already accepted, toggle [Prefs.useCloud]
      * Else, [NewUserActivityEvents.SHOW_TERMS_DIALOG] is sent to NewUserActivityCloudPage
-     *  This will show a CloudSyncTermsDialog, which will set [Preferences.useCloud] to true
+     *  This will show a CloudSyncTermsDialog, which will set [Prefs.useCloud] to true
      */
     fun useCloudCheckboxClicked(){
-        if (Preferences.acceptedCloudSyncTerms)
-            Preferences.useCloud = !Preferences.useCloud
+        if (Prefs.acceptedCloudSyncTerms)
+            Prefs.useCloud = !Prefs.useCloud
         else feedback(NewUserActivityEvents.SHOW_TERMS_DIALOG, PAGE_CLOUD)
     }
 
@@ -217,11 +216,11 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * [PAGE_EMAIL] functions / variables
      *******************************************************************************************/
 
-    var email1 = Preferences.emailAddress.also{
+    var email1 = Prefs.emailAddress.also{
         if (it.isNotEmpty()) continueButtonEnabledList[PAGE_EMAIL] = true // if email already set, user can click 'continue' instead of skip.
     }
         private set
-    var email2 = Preferences.emailAddress
+    var email2 = Prefs.emailAddress
         private set
 
     /**
@@ -283,8 +282,8 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * If Cloud is used, email address is confirmed with server, if not it is stored for later usage
      */
     private fun emailPageContinueClicked() {
-        Preferences.emailAddress = email1
-        if (Preferences.useCloud)
+        Prefs.emailAddress = email1
+        if (Prefs.useCloud)
             viewModelScope.launch{
                 UserManagement.changeEmailAddress()
             }
@@ -295,14 +294,14 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      *******************************************************************************************/
 
     /**
-     * If [Preferences.useCalendarSync] is true, (switch is on) set it to off
+     * If [Prefs.useCalendarSync] is true, (switch is on) set it to off
      * else, show dialog (which will switch it on on success)
      */
     fun setGetFlightsFromCalendarClicked() {
-        if (!Preferences.useCalendarSync) // if it is switched on from being off
+        if (!Prefs.useCalendarSync) // if it is switched on from being off
             feedback(SettingsActivityEvents.CALENDAR_DIALOG_NEEDED, PAGE_CALENDAR)
         else
-            Preferences.useCalendarSync = false
+            Prefs.useCalendarSync = false
     }
 
 
@@ -311,26 +310,17 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      *******************************************************************************************/
 
     fun setUseIataAirports(useIata: Boolean) {
-        Preferences.useIataAirports = useIata
+        Prefs.useIataAirports = useIata
     }
 
     /**
      * Save all stuff that needs saving, and set up everything for first use
      */
     private fun finalPageDoneClicked(){
-        Preferences.lastUpdateTime=0                                    // force update upon loading MainActivity if cloud is in use
-        Preferences.newUserActivityFinished = true
+        Prefs.lastUpdateTime=0                                    // force update upon loading MainActivity if cloud is in use
+        Prefs.newUserActivityFinished = true
     }
 
-
-    /*******************************************************************************************
-     * misc functions
-     *******************************************************************************************/
-
-    override fun onCleared() {
-        super.onCleared()
-        Preferences.getSharedPreferences().unregisterOnSharedPreferenceChangeListener (onSharedPrefsChangedListener)
-    }
 
     /*******************************************************************************************
      * Instance states

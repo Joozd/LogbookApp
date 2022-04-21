@@ -1,7 +1,7 @@
 package nl.joozd.logbookapp.ui.activities.settingsActivity
 
 import android.widget.NumberPicker
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.dialogs.NumberPickerDialog
 
@@ -18,7 +18,7 @@ class AugmentedNumberPicker: NumberPickerDialog() {
      * Override this to actually do something with the picked number
      */
     override fun onNumberPicked(pickedNumber: Int) {
-        Preferences.standardTakeoffLandingTimes = unFormat(pickedNumber)
+        Prefs.standardTakeoffLandingTimes = unFormat(pickedNumber)
     }
 
     override val formatter = NumberPicker.Formatter{

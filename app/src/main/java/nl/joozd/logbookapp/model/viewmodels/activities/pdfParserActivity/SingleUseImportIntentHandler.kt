@@ -35,7 +35,7 @@ import nl.joozd.joozdlogimporter.interfaces.FileImporter
 import nl.joozd.joozdlogimporter.supportedFileTypes.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.DoneCompletedFlightsWithResult
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerError
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerStatus
@@ -105,7 +105,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
     private suspend fun parsePlannedFlights(file: PlannedFlightsFile){
         status = HandlerStatus.EXTRACTING_FLIGHTS
         val extractedFlights: ExtractedPlannedFlights = extractAndAutocomplete(file)
-        if (Preferences.alwaysPostponeCalendarSync) {
+        if (Prefs.alwaysPostponeCalendarSync) {
             status = HandlerStatus.SAVING_FLIGHTS
             saveAndPostponeCalendarSync(extractedFlights)
             status = HandlerStatus.DONE
@@ -186,7 +186,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
             choice2Resource = android.R.string.cancel
             setAction1 {
                 launch {
-                    Preferences.alwaysPostponeCalendarSync = true
+                    Prefs.alwaysPostponeCalendarSync = true
                     status = HandlerStatus.SAVING_FLIGHTS
                     saveAndPostponeCalendarSync(extractedFlights)
                     status = HandlerStatus.DONE
@@ -198,7 +198,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
         }.build()
 
     private suspend fun saveAndPostponeCalendarSync(extractedFlights: ExtractedPlannedFlights) {
-        Preferences.calendarDisabledUntil =
+        Prefs.calendarDisabledUntil =
             extractedFlights.period?.endInclusive ?: return // no period = no sync
         ImportedFlightsSaver.instance.save(extractedFlights)
     }

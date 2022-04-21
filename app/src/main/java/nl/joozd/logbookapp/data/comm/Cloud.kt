@@ -32,7 +32,7 @@ import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.data.utils.Encryption
 import nl.joozd.logbookapp.exceptions.NotAuthorizedException
@@ -66,7 +66,7 @@ object Cloud {
 
     /**
      * Creates a new user
-     * Calling function should consider storing username and pasword in [Preferences]
+     * Calling function should consider storing username and pasword in [Prefs]
      * @return @see [ServerFunctions.createNewAccount]
      */
     suspend fun createNewUser(name: String, key: ByteArray): CloudFunctionResults =
@@ -77,7 +77,7 @@ object Cloud {
 
     /**
      * Creates a new user
-     * Calling function should consider storing username and pasword in [Preferences]
+     * Calling function should consider storing username and pasword in [Prefs]
      */
     suspend fun createNewUser(name: String, password: String): CloudFunctionResults =
         Client.getInstance().use {
@@ -102,7 +102,7 @@ object Cloud {
      */
     suspend fun sendNewEmailAddress(): CloudFunctionResults =
         Client.getInstance().use { client ->
-            ServerFunctions.sendNewEmailData(client, Preferences.emailAddress)
+            ServerFunctions.sendNewEmailData(client, Prefs.emailAddress)
         }
 
 
@@ -128,12 +128,12 @@ object Cloud {
             ServerFunctions.requestLoginLinkMail(client).also {
                 when (it) {
                     CloudFunctionResults.OK -> {
-                        Preferences.emailJobsWaiting.sendLoginLink = false
+                        Prefs.emailJobsWaiting.sendLoginLink = false
                     }
                     CloudFunctionResults.EMAIL_DOES_NOT_MATCH -> {
-                        Preferences.emailVerified =
+                        Prefs.emailVerified =
                             false // error dialogs etc will be handled by calling function
-                        Preferences.emailJobsWaiting.sendLoginLink = true
+                        Prefs.emailJobsWaiting.sendLoginLink = true
                     }
                     else -> Log.w("requestLoginLinkMail()", "unhandled result $it")
                 }
@@ -145,7 +145,7 @@ object Cloud {
      * Send pending email jobs to server, remove them from pending jobs when successful
      */
     suspend fun sendPendingEmailJobs() {
-        Preferences.emailJobsWaiting.forEach {
+        Prefs.emailJobsWaiting.forEach {
             it()
         }
     }
@@ -153,7 +153,7 @@ object Cloud {
 
     /**
      * Changes a user's password
-     * Calling function should consider storing username and password in [Preferences]
+     * Calling function should consider storing username and password in [Prefs]
      * For returns see [ServerFunctions.login] and [ServerFunctions.changePassword]
      */
     suspend fun changePassword(newPassword: String, email: String?): CloudFunctionResults =
@@ -203,11 +203,11 @@ object Cloud {
             val result = ServerFunctions.requestBackup(client)
             when (result) {
                 CloudFunctionResults.OK -> {
-                    Preferences.emailJobsWaiting.sendBackupCsv = false
+                    Prefs.emailJobsWaiting.sendBackupCsv = false
                 }
                 CloudFunctionResults.EMAIL_DOES_NOT_MATCH -> {
-                    Preferences.emailVerified = false
-                    Preferences.emailJobsWaiting.sendBackupCsv = true
+                    Prefs.emailVerified = false
+                    Prefs.emailJobsWaiting.sendBackupCsv = true
                 }
                 else -> Log.w("requestBackup()", "unhandled result $result")
             }
@@ -238,7 +238,7 @@ object Cloud {
         }?.map { Airport(it) } ?: return CloudFunctionResults.SERVER_ERROR
 
         AirportRepository.instance.replaceDbWith(airports)
-        Preferences.airportDbVersion = serverDbVersion
+        Prefs.airportDbVersion = serverDbVersion
 
         return CloudFunctionResults.OK
     }
@@ -332,7 +332,7 @@ object Cloud {
                 }
 
                 //mark time of this successful sync
-                Preferences.lastUpdateTime = timeStamp
+                Prefs.lastUpdateTime = timeStamp
 
                 //Save flights with current timestamps and clear `unknownToServer` flags
                 flightRepository.save(flightsToSend.map { it.copy(unknownToServer = false) } + newFlightsFromServer)
@@ -348,7 +348,7 @@ object Cloud {
         allFlightsInDB: List<Flight>,
         timeStamp: Long
     ) = allFlightsInDB.filter {
-        (it.timeStamp > Preferences.lastUpdateTime || it.unknownToServer)
+        (it.timeStamp > Prefs.lastUpdateTime || it.unknownToServer)
     }
         .filter { !it.isPlanned || !it.unknownToServer } // don't send planned flights unless server knows about them somehow
         .map { it.copy(timeStamp = timeStamp, unknownToServer = false) }
@@ -391,7 +391,7 @@ object Cloud {
      */
     private suspend fun getNewFlightsFromServer(server: Client): List<Flight>? =
         try {
-            ServerFunctions.requestFlightsSince(server, Preferences.lastUpdateTime)
+            ServerFunctions.requestFlightsSince(server, Prefs.lastUpdateTime)
                 ?.filter{ !it.isPlanned }
         } catch (e: NotAuthorizedException) {
             // should have been checked earlier but might as well check it here as well

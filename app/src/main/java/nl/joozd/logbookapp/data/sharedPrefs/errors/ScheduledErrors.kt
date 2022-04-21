@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.data.sharedPrefs.errors
 
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 /**
  * Errors that need showing at some time but are not really time sensitive
@@ -27,7 +27,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Preferences
  */
 object ScheduledErrors {
     val currentErrors: List<Errors>
-        get() =  Errors.values().filter { Preferences.errorsToBeShown and it.flag != 0L }
+        get() =  Errors.values().filter { Prefs.errorsToBeShown and it.flag != 0L }
 
     /**
      * Add an error. Use errors in [Errors]
@@ -35,7 +35,7 @@ object ScheduledErrors {
      * @param error: Error to make active
      */
     fun addError(error: Errors){
-        Preferences.errorsToBeShown = Preferences.errorsToBeShown or error.flag
+        Prefs.errorsToBeShown = Prefs.errorsToBeShown or error.flag
     }
 
     /**
@@ -44,7 +44,7 @@ object ScheduledErrors {
      * @param error: Error to make clear
      */
     fun clearError(error: Errors){
-        Preferences.errorsToBeShown = Preferences.errorsToBeShown.mask(error.flag)
+        Prefs.errorsToBeShown = Prefs.errorsToBeShown.mask(error.flag)
     }
 
     /**

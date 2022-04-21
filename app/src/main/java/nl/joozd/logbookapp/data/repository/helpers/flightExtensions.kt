@@ -20,8 +20,7 @@
 package nl.joozd.logbookapp.data.repository.helpers
 
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.atEndOfDay
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.nullIfZero
@@ -46,7 +45,7 @@ fun Flight.isSamedPlannedFlightAs(f: Flight) =
 /**
  * Checks if two flights are the same physical flight (ie the same orig to same dest at the same time with the same flightnumber)
  */
-fun Flight.isSameFlightAs(f: Flight, withMargins: Boolean = false) = (Preferences.maxChronoAdjustment * 60L).let { margin ->
+fun Flight.isSameFlightAs(f: Flight, withMargins: Boolean = false) = (Prefs.maxChronoAdjustment * 60L).let { margin ->
        orig == f.orig
             && dest == f.dest
             && if (withMargins) timeOut in (f.timeOut - margin..f.timeOut + margin) else timeOut == f.timeOut
@@ -91,7 +90,7 @@ fun Flight.isSameFlightWithSameInfo(other: Flight) = isSameFlightAs(other) &&
             && timeOut in (f.timeOut-margin .. f.timeOut+margin)
             && timeIn in (f.timeIn-margin .. f.timeIn+margin)
 
-    fun Flight.isSameCompletedFlight(f: Flight) = isSameCompletedFlight(f, Preferences.maxChronoAdjustment * 60L)
+    fun Flight.isSameCompletedFlight(f: Flight) = isSameCompletedFlight(f, Prefs.maxChronoAdjustment * 60L)
 
 
 /**

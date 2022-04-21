@@ -19,54 +19,60 @@
 
 package nl.joozd.logbookapp.data.sharedPrefs
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
-import androidx.lifecycle.MutableLiveData
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.*
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KProperty
 
 /**
  * Use a var as a SharedPreference.
- * @param sharedPrefs: SharedPreferences to use
+ * @param dataStore: SharedPreferences to use
  * @param defaultValue: Default value to return. Needs to be used to set type of variable to set
- * @param liveData: LiveData to update with this. NOTE: Won't start emitting until data has been changed.
  */
-class JoozdLogSharedPrefs<T>(private val sharedPrefs: SharedPreferences, private val defaultValue: T, private val liveData: MutableLiveData<T>? = null){
-
-
+class JoozdLogSharedPrefs<T : Any>(private val dataStore: DataStore<Preferences>, private val defaultValue: T){
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
         return getPreference(property.name, defaultValue)
     }
 
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         setPreference(property.name, value)
-        liveData?.postValue(value)
     }
 
     private fun getPreference(key: String, defaultValue: T): T {
-        with(sharedPrefs) {
-            @Suppress("UNCHECKED_CAST")
-            return when (defaultValue) {
-                is Boolean -> getBoolean(key, defaultValue)
-                is Int -> getInt(key, defaultValue)
-                is Long -> getLong(key, defaultValue)
-                is Float -> getFloat(key, defaultValue)
-                is String -> getString(key, defaultValue)
-                else -> throw IllegalArgumentException()
-            } as T
-        }
+        @Suppress("UNCHECKED_CAST")
+        val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
+        return readBlocking(prefsKey, defaultValue)
     }
 
     private fun setPreference(key: String, value: T) {
-        sharedPrefs.edit {
-            when (value) {
-                is Boolean -> putBoolean(key, value)
-                is Int -> putInt(key, value)
-                is Long -> putLong(key, value)
-                is Float -> putFloat(key, value)
-                is String -> putString(key, value)
-                else -> throw IllegalArgumentException()
+        @Suppress("UNCHECKED_CAST")
+        val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
+        MainScope().launch {
+            dataStore.edit { p ->
+                p[prefsKey] = value
             }
         }
     }
+
+
+    private fun generatePreferencesKey(key: String, defaultValue: T) =
+        when(defaultValue){
+            is Boolean -> booleanPreferencesKey(key)
+            is Int -> intPreferencesKey(key)
+            is Long -> longPreferencesKey(key)
+            is Float -> floatPreferencesKey(key)
+            is String -> stringPreferencesKey(key)
+            else -> throw IllegalArgumentException()
+    }
+
+    private fun readBlocking(key: Preferences.Key<T>, defaultValue: T): T =
+        runBlocking {
+            @Suppress("UNCHECKED_CAST")
+            (dataStore.data.first()[key] ?: defaultValue)
+        }
+
 }
 

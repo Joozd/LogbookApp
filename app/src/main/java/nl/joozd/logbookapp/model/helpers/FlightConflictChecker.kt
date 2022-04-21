@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.model.helpers
 
 import nl.joozd.logbookapp.data.repository.helpers.isSamedPlannedFlightAs
 import nl.joozd.logbookapp.data.repository.helpers.prepareForSave
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import java.time.Instant
 
@@ -37,12 +37,12 @@ object FlightConflictChecker {
      */
     fun checkConflictingWithCalendarSync(originalFlight: Flight?, changedFlight: Flight): Long {
         return when {
-            !Preferences.useCalendarSync -> 0L                                                                           // not using calendar sync
-            Preferences.calendarDisabledUntil >= maxOf(originalFlight?.timeIn ?: 0, changedFlight.timeIn) -> 0L              // not using calendar sync for flight being edited
+            !Prefs.useCalendarSync -> 0L                                                                           // not using calendar sync
+            Prefs.calendarDisabledUntil >= maxOf(originalFlight?.timeIn ?: 0, changedFlight.timeIn) -> 0L              // not using calendar sync for flight being edited
             !changedFlight.prepareForSave().isPlanned -> 0L                                                                     // not planned, no problem
             originalFlight?.isSamedPlannedFlightAs(changedFlight.prepareForSave()) == true -> 0L                                // editing a planned flight in a way that doesn't break sync
             maxOf (originalFlight?.timeOut ?: 0, changedFlight.timeOut) <
-                    maxOf(Preferences.calendarDisabledUntil,Instant.now().epochSecond) -> 0L                                    // editing a flight that starts before calendar sync cutoff
+                    maxOf(Prefs.calendarDisabledUntil,Instant.now().epochSecond) -> 0L                                    // editing a flight that starts before calendar sync cutoff
             originalFlight == null && changedFlight.timeOut > Instant.now().epochSecond -> changedFlight.timeIn + 1L            // If editing a new flight that starts in the future, 1 second after end of that flight
             else -> maxOf(originalFlight?.timeIn ?: 0, changedFlight.timeIn) + 1L                                            // In other cases, 1 second after latest timeIn of planned flight and workingFlight
         }

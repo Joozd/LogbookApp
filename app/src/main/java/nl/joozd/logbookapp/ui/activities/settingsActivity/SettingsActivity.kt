@@ -33,7 +33,7 @@ import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivitySettingsBinding
 import nl.joozd.logbookapp.errors.errorDialog
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
@@ -85,7 +85,7 @@ class SettingsActivity : JoozdlogActivity() {
         viewModel.statusFlow.launchCollectWhileLifecycleStateStarted{
             when(it){
                 null -> { }
-                SettingsActivityStatus.SignedOut -> setLoggedInInfo(Preferences.username)
+                SettingsActivityStatus.SignedOut -> setLoggedInInfo(Prefs.username)
                 SettingsActivityStatus.LoginLinkCopied -> toast(R.string.login_link_created)
                 SettingsActivityStatus.AskIfNewAccountNeeded -> showNewAccountDialog()
                 SettingsActivityStatus.CalendarDialogNeeded -> showCalendarDialog()
@@ -203,12 +203,12 @@ class SettingsActivity : JoozdlogActivity() {
     private fun ActivitySettingsBinding.setItemOnClickedListeners() {
         settingsUseIataSelector.setOnClickListener{
             viewModel.toggleUseIataAirports()
-            setSettingsUseIataSelector(Preferences.useIataAirports)
+            setSettingsUseIataSelector(Prefs.useIataAirports)
         }
 
         settingsPicNameRequiredSwitch.setOnClickListener {
             viewModel.toggleRequirePicName()
-            settingsPicNameRequiredSwitch.isChecked = Preferences.picNameNeedsToBeSet
+            settingsPicNameRequiredSwitch.isChecked = Prefs.picNameNeedsToBeSet
         }
 
         settingsGetFlightsFromCalendarSelector.setOnClickListener {
@@ -224,7 +224,7 @@ class SettingsActivity : JoozdlogActivity() {
 
         autoPostponeCalendarSyncSelector.setOnClickListener {
             viewModel.toggleAutoPostponeCalendarSync()
-            autoPostponeCalendarSyncSelector.isChecked = Preferences.alwaysPostponeCalendarSync
+            autoPostponeCalendarSyncSelector.isChecked = Prefs.alwaysPostponeCalendarSync
         }
 
         dontPostponeTextView.setOnClickListener {
@@ -253,7 +253,7 @@ class SettingsActivity : JoozdlogActivity() {
 
         addNamesFromRosterSwitch.setOnClickListener {
             viewModel.toggleAddNamesFromRoster()
-            addNamesFromRosterSwitch.isChecked = Preferences.getNamesFromRosters
+            addNamesFromRosterSwitch.isChecked = Prefs.getNamesFromRosters
         }
 
         augmentedCrewButton.setOnClickListener { showAugmentedTimesNumberPicker() }
@@ -262,7 +262,7 @@ class SettingsActivity : JoozdlogActivity() {
 
         backupFromCloudSwitch.setOnClickListener {
             toggleBackupFromCloudWithDialogIfNeeded()
-            backupFromCloudSwitch.isChecked = Preferences.backupFromCloud
+            backupFromCloudSwitch.isChecked = Prefs.backupFromCloud
         }
 
         backupNowButton.setBackupNowButtonToActive()
@@ -313,7 +313,7 @@ class SettingsActivity : JoozdlogActivity() {
 
     /**
      * This dialog will ask viewModel to make a new account.
-     * If [Preferences.acceptedCloudSyncTerms] it will enable [Preferences.useCloud]
+     * If [Prefs.acceptedCloudSyncTerms] it will enable [Prefs.useCloud]
      * if not, it will open a dialog that will allow user to accept terms and if so, sets those both to true.
      */
     private fun showNewAccountDialog(){
@@ -323,7 +323,7 @@ class SettingsActivity : JoozdlogActivity() {
             setNegativeButton(android.R.string.cancel)
             setPositiveButton(android.R.string.ok){
                 UserManagement.newUser()
-                if (Preferences.acceptedCloudSyncTerms)
+                if (Prefs.acceptedCloudSyncTerms)
                     viewModel.forceUseCloud()
                 else supportFragmentManager.commit {
                     add(R.id.settingsActivityLayout, CloudSyncTermsDialog(sync = true)) // secondary constructor used, works on recreate
@@ -335,7 +335,7 @@ class SettingsActivity : JoozdlogActivity() {
 
     /**
      * This dialog will ask all info for calendar sync (ical + address, scraper + calendar)
-     * If [Preferences.useCalendarSync] is false it will set it to true on OK
+     * If [Prefs.useCalendarSync] is false it will set it to true on OK
      * if not, it will open a dialog that will allow user to accept terms and if so, sets those both to true.
      */
     private fun showCalendarDialog(){
@@ -391,7 +391,7 @@ class SettingsActivity : JoozdlogActivity() {
         emailAddressButton.visibility=isVisible
         lastSynchedTimeTextView.visibility=isVisible
         changePasswordButton.visibility=isVisible
-        val showLoginLinkButton = if (Preferences.username == null) View.GONE else isVisible
+        val showLoginLinkButton = if (Prefs.username == null) View.GONE else isVisible
         loginLinkButton.visibility = showLoginLinkButton
         loginLinkExplanationImageView.visibility = showLoginLinkButton
         backupFromCloudSwitch.visibility = isVisible
@@ -443,7 +443,7 @@ class SettingsActivity : JoozdlogActivity() {
             title= App.instance.getString(R.string.timeForTakeoffLanding)
             wrapSelectorWheel = false
             maxValue = AugmentedNumberPicker.EIGHT_HOURS
-            setValue(Preferences.standardTakeoffLandingTimes)
+            setValue(Prefs.standardTakeoffLandingTimes)
         }.show(supportFragmentManager, null)
     }
 
@@ -452,15 +452,15 @@ class SettingsActivity : JoozdlogActivity() {
             title = App.instance.getString(R.string.pick_backup_interval)
             wrapSelectorWheel = false
             maxValue = 365
-            selectedValue = Preferences.backupInterval
+            selectedValue = Prefs.backupInterval
         }.show(supportFragmentManager, null)
     }
 
     private fun toggleBackupFromCloudWithDialogIfNeeded(){
         when{
-            Preferences.backupFromCloud -> Preferences.backupFromCloud = false
-            !viewModel.emailGoodAndVerified -> showEmailDialog { Preferences.backupFromCloud = true }
-            else -> Preferences.backupFromCloud = true
+            Prefs.backupFromCloud -> Prefs.backupFromCloud = false
+            !viewModel.emailGoodAndVerified -> showEmailDialog { Prefs.backupFromCloud = true }
+            else -> Prefs.backupFromCloud = true
         }
     }
 

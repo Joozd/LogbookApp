@@ -25,17 +25,15 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.extensions.notNullFlow
 import nl.joozd.logbookapp.extensions.toDateStringForFiles
 import nl.joozd.logbookapp.extensions.toDateStringLocalized
 import nl.joozd.logbookapp.extensions.toTimeStringLocalized
@@ -54,95 +52,39 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     val statusFlow: StateFlow<SettingsActivityStatus?> = MutableStateFlow(null)
     private var status by CastFlowToMutableFlowShortcut(statusFlow)
 
-    val useIataFlow: StateFlow<Boolean> = MutableStateFlow(Preferences.useIataAirports)
-    private var useIata by CastFlowToMutableFlowShortcut(useIataFlow)
+    val useIataFlow get() = Prefs.useIataAirportsFlow.notNullFlow()
+    val picNameRequiredFlow get() = Prefs.picNameNeedsToBeSetFlow.notNullFlow()
+    val standardTakeoffLandingTimesFlow get() = Prefs.standardTakeoffLandingTimesFlow.notNullFlow()
 
-    val picNameRequiredFlow: StateFlow<Boolean> = MutableStateFlow(Preferences.picNameNeedsToBeSet)
-    private var picNameRequired by CastFlowToMutableFlowShortcut(picNameRequiredFlow)
+    val backupIntervalFlow = Prefs.backupIntervalFlow.notNullFlow()
+    val backupFromCloudFlow = Prefs.backupFromCloudFlow.notNullFlow()
 
-    val standardTakeoffLandingTimesFlow: StateFlow<Int> = MutableStateFlow(Preferences.standardTakeoffLandingTimes)
-    private var standardTakeoffLandingTimes: Int by CastFlowToMutableFlowShortcut(standardTakeoffLandingTimesFlow)
-
-    val backupIntervalFlow: StateFlow<Int> = MutableStateFlow(Preferences.backupInterval)
-    private var backupInterval: Int by CastFlowToMutableFlowShortcut(backupIntervalFlow)
-
-    val backupFromCloudFlow: StateFlow<Boolean> = MutableStateFlow(Preferences.backupFromCloud)
-    private var backupFromCloud by CastFlowToMutableFlowShortcut(backupFromCloudFlow)
-
-    val useCalendarSyncFlow: StateFlow<Boolean> = MutableStateFlow(Preferences.useCalendarSync)
-    private var useCalendarSync by CastFlowToMutableFlowShortcut(useCalendarSyncFlow)
-
-    val calendarSyncTypeFlow: StateFlow<CalendarSyncType> = MutableStateFlow(Preferences.calendarSyncType)
-    private var calendarSyncType: CalendarSyncType by CastFlowToMutableFlowShortcut(calendarSyncTypeFlow)
-
-    val alwaysPostponeCalendarSyncFlow: StateFlow<Boolean> = MutableStateFlow(Preferences.alwaysPostponeCalendarSync)
-    private var alwaysPostponeCalendarSync by CastFlowToMutableFlowShortcut(alwaysPostponeCalendarSyncFlow)
-
-    private val calendarDisabledUntilFlow: StateFlow<Long> = MutableStateFlow(Preferences.calendarDisabledUntil)
-    private var calendarDisabledUntil: Long by CastFlowToMutableFlowShortcut(calendarDisabledUntilFlow)
+    val useCalendarSyncFlow = Prefs.useCalendarSyncFlow.notNullFlow()
+    val calendarSyncTypeFlow = Prefs.calendarSyncTypeFlow.notNullFlow()
+    val alwaysPostponeCalendarSyncFlow = Prefs.alwaysPostponeCalendarSyncFlow.notNullFlow()
+    private val calendarDisabledUntilFlow = Prefs.calendarDisabledUntilFlow.notNullFlow()
 
     val calendarDisabledFlow = calendarDisabledUntilFlow.map { calendarIsDisabledNow(it) }
     val calendarDisabled: Boolean
-        get() = calendarIsDisabledNow(calendarDisabledUntil)
+        get() = calendarIsDisabledNow(Prefs.calendarDisabledUntil)
 
-    val useCloudFlow: StateFlow<Boolean> = MutableStateFlow(Preferences.useCloud)
-    private var useCloud by CastFlowToMutableFlowShortcut(useCloudFlow)
+    val useCloudFlow = Prefs.useCloudFlow.notNullFlow()
 
-    val lastUpdateTimeFlow: StateFlow<Long> = MutableStateFlow(Preferences.lastUpdateTime)
-    private var lastUpdateTime: Long by CastFlowToMutableFlowShortcut(lastUpdateTimeFlow)
+    val lastUpdateTimeFlow = Prefs.lastUpdateTimeFlow.notNullFlow()
 
-    val usernameFlow: StateFlow<String?> = MutableStateFlow(Preferences.username)
-    private var username by CastFlowToMutableFlowShortcut(usernameFlow)
+    val usernameFlow = Prefs.usernameFlow.notNullFlow()
 
-    private val emailAddressFlow: StateFlow<String> = MutableStateFlow(Preferences.emailAddress)
-    private var emailAddress by CastFlowToMutableFlowShortcut(emailAddressFlow)
+    private val emailAddressFlow = Prefs.emailAddressFlow.notNullFlow()
 
-    private val emailVerifiedFlow: StateFlow<Boolean> = MutableStateFlow(Preferences.emailVerified)
-    private var emailVerified by CastFlowToMutableFlowShortcut(emailVerifiedFlow)
+    private val emailVerifiedFlow = Prefs.emailVerifiedFlow.notNullFlow()
     val emailDataFlow = buildEmailDataFlow()
 
-    val getNamesFromRostersFlow: StateFlow<Boolean> = MutableStateFlow(Preferences.getNamesFromRosters)
-    private var getNamesFromRosters by CastFlowToMutableFlowShortcut(getNamesFromRostersFlow)
+    val getNamesFromRostersFlow = Prefs.getNamesFromRostersFlow.notNullFlow()
 
-
-    /*********************************************************************************************
-     * Private parts
-     *********************************************************************************************/
-
-    private val onSharedPrefsChangedListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        when (key) {
-            Preferences::useIataAirports.name -> useIata = Preferences.useIataAirports
-            Preferences::useCalendarSync.name -> useCalendarSync = Preferences.useCalendarSync
-            Preferences::alwaysPostponeCalendarSync.name -> alwaysPostponeCalendarSync = Preferences.alwaysPostponeCalendarSync
-            Preferences::useCloud.name -> useCloud = Preferences.useCloud
-            Preferences::username.name -> username = Preferences.username
-            Preferences::calendarDisabledUntil.name -> calendarDisabledUntil = Preferences.calendarDisabledUntil
-            Preferences::getNamesFromRosters.name -> getNamesFromRosters = Preferences.getNamesFromRosters
-            Preferences::lastUpdateTime.name -> lastUpdateTime = Preferences.lastUpdateTime
-            Preferences::backupInterval.name -> backupInterval = Preferences.backupInterval
-            Preferences::backupFromCloud.name -> backupFromCloud = Preferences.backupFromCloud
-            Preferences::calendarSyncType.name -> calendarSyncType = Preferences.calendarSyncType
-            Preferences::picNameNeedsToBeSet.name -> picNameRequired = Preferences.picNameNeedsToBeSet
-            Preferences::standardTakeoffLandingTimes.name -> standardTakeoffLandingTimes = Preferences.standardTakeoffLandingTimes
-            Preferences::emailAddress.name -> emailAddress = Preferences.emailAddress
-            Preferences::emailVerified.name -> emailVerified = Preferences.emailVerified
-        }
-    }.also{
-        Preferences.getSharedPreferences().registerOnSharedPreferenceChangeListener (it)
-    }
-
-    override fun onCleared() {
-        Preferences.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(onSharedPrefsChangedListener)
-    }
-
-
-    /*********************************************************************************************
-     * Observables
-     *********************************************************************************************/
 
     val calendarDisabledUntilString: String
         get(){
-            val time = LocalDateTime.ofInstant(Instant.ofEpochSecond(Preferences.calendarDisabledUntil), ZoneOffset.UTC)
+            val time = LocalDateTime.ofInstant(Instant.ofEpochSecond(Prefs.calendarDisabledUntil), ZoneOffset.UTC)
             return "${time.toDateStringLocalized()} ${time.toTimeStringLocalized()} Z"
         }
 
@@ -153,7 +95,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
 
     val emailGoodAndVerified
-        get() = Preferences.emailAddress.isNotBlank() && Preferences.emailVerified
+        get() = Prefs.emailAddress.isNotBlank() && Prefs.emailVerified
 
 
     /*********************************************************************************************
@@ -176,37 +118,37 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     }
 
     fun toggleUseIataAirports() {
-        Preferences.useIataAirports = !Preferences.useIataAirports
+        Prefs.useIataAirports = !Prefs.useIataAirports
     }
 
     fun toggleRequirePicName(){
-        Preferences.picNameNeedsToBeSet = !Preferences.picNameNeedsToBeSet
+        Prefs.picNameNeedsToBeSet = !Prefs.picNameNeedsToBeSet
     }
 
     /**
-     * If [Preferences.useCalendarSync] is true, (switch is on) set it to off
+     * If [Prefs.useCalendarSync] is true, (switch is on) set it to off
      * else, if a type of sync is selected, switch it to on; if it isn't show dialog (which will switch it on on success)
      */
     fun setGetFlightsFromCalendarClicked() {
-        if (!Preferences.useCalendarSync) { // if it is switched on from being off
-            Preferences.calendarDisabledUntil = 0
+        if (!Prefs.useCalendarSync) { // if it is switched on from being off
+            Prefs.calendarDisabledUntil = 0
 
             // If no calendar sync type chosen, show dialog, else just set it to on
-            if (Preferences.calendarSyncType == CalendarSyncType.CALENDAR_SYNC_NONE)
+            if (Prefs.calendarSyncType == CalendarSyncType.CALENDAR_SYNC_NONE)
                 status = SettingsActivityStatus.CalendarDialogNeeded
             else
-                Preferences.useCalendarSync = true
+                Prefs.useCalendarSync = true
         }
         else
-            Preferences.useCalendarSync = false
+            Prefs.useCalendarSync = false
     }
 
     fun toggleAutoPostponeCalendarSync(){
-        Preferences.alwaysPostponeCalendarSync = !Preferences.alwaysPostponeCalendarSync
+        Prefs.alwaysPostponeCalendarSync = !Prefs.alwaysPostponeCalendarSync
     }
 
     fun toggleAddNamesFromRoster(){
-        Preferences.getNamesFromRosters = !Preferences.getNamesFromRosters
+        Prefs.getNamesFromRosters = !Prefs.getNamesFromRosters
     }
 
     /*
@@ -219,26 +161,26 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     fun useCloudSyncToggled(){
         when{
             //toggle off if on
-            Preferences.useCloud -> Preferences.useCloud = false
+            Prefs.useCloud -> Prefs.useCloud = false
 
             //toggle on if toggled off but user was logged in before
             //this will force a full resync. Device data will overwrite server data with same FlightID
             UserManagement.signedIn -> {
-                Preferences.lastUpdateTime = 0
-                Preferences.useCloud = true
+                Prefs.lastUpdateTime = 0
+                Prefs.useCloud = true
                 JoozdlogWorkersHub.syncTimeAndFlightsIfEnoughTimePassed()
             }
 
             // Activity will take care of showing &Cs if needed
             else -> {
-                Preferences.lastUpdateTime = 0
+                Prefs.lastUpdateTime = 0
                 status = SettingsActivityStatus.AskIfNewAccountNeeded
             }
         }
     }
 
     fun forceUseCloud(){
-        Preferences.useCloud = true
+        Prefs.useCloud = true
     }
 
     fun copyLoginLinkToClipboard(){
@@ -255,11 +197,11 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     }
 
     fun dontPostponeCalendarSync(){
-        Preferences.calendarDisabledUntil = 0
+        Prefs.calendarDisabledUntil = 0
     }
 
     private fun calendarIsDisabledNow(disabledUntil: Long) =
-        Preferences.useCalendarSync && disabledUntil > Instant.now().epochSecond
+        Prefs.useCalendarSync && disabledUntil > Instant.now().epochSecond
 
     private fun buildEmailDataFlow() =
         combine(emailAddressFlow, emailVerifiedFlow){ address, verified ->

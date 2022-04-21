@@ -23,15 +23,15 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 class SubmitFeedbackWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
-        if (Preferences.feedbackWaiting.isBlank()) return Result.success()
+        if (Prefs.feedbackWaiting.isBlank()) return Result.success()
         val contactInfo = inputData.getString(CONTACT_INFO_TAG) ?: ""
-        return if (Cloud.sendFeedback(Preferences.feedbackWaiting, contactInfo).isOK()) {
-            Preferences.feedbackWaiting = ""
+        return if (Cloud.sendFeedback(Prefs.feedbackWaiting, contactInfo).isOK()) {
+            Prefs.feedbackWaiting = ""
             Result.success()
         } else Result.retry()
     }

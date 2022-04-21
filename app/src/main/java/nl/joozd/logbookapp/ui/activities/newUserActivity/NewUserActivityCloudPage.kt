@@ -27,7 +27,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.CloudSyncTermsDialog
@@ -46,7 +46,7 @@ class NewUserActivityCloudPage: JoozdlogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageCloudBinding.bind(inflater.inflate(R.layout.activity_new_user_page_cloud, container, false)).apply {
-            useCloudCheckbox.isChecked = Preferences.useCloud
+            useCloudCheckbox.isChecked = Prefs.useCloud
 
             /*******************************************************************************************
              * OnClickedListeners
@@ -54,7 +54,7 @@ class NewUserActivityCloudPage: JoozdlogFragment() {
 
             useCloudCheckbox.setOnClickListener {
                 viewModel.useCloudCheckboxClicked()
-                useCloudCheckbox.isChecked = Preferences.useCloud
+                useCloudCheckbox.isChecked = Prefs.useCloud
             }
 
             /*******************************************************************************************

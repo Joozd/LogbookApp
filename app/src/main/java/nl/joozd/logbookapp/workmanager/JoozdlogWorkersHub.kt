@@ -24,7 +24,7 @@ import androidx.work.*
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import java.time.Duration
 import java.time.Instant
@@ -72,7 +72,7 @@ object JoozdlogWorkersHub: CoroutineScope {
     }
 
     /**
-     * Synchronizes time with server, stores offset in SharedPrefs through [Preferences]
+     * Synchronizes time with server, stores offset in SharedPrefs through [Prefs]
      * If another Worker is already trying to do that, that one is canceled
      */
     fun synchronizeTime(){
@@ -93,7 +93,7 @@ object JoozdlogWorkersHub: CoroutineScope {
      */
     private fun synchronizeTimeAndFlights(){
         println("synchronizeTimeAndFlights CP 1")
-        if (Preferences.useCloud) {
+        if (Prefs.useCloud) {
             println("synchronizeTimeAndFlights CP 2")
             val task = OneTimeWorkRequestBuilder<SyncFlightsWorker>().apply {
                 setConstraints(makeConstraintsNeedNetwork())
@@ -154,7 +154,7 @@ object JoozdlogWorkersHub: CoroutineScope {
 
     /**
      * Send feedback to server.
-     * [SubmitFeedbackWorker] will also reset [Preferences.feedbackWaiting] to an empty String
+     * [SubmitFeedbackWorker] will also reset [Prefs.feedbackWaiting] to an empty String
      */
     fun sendFeedback(contactInfo: String){
         val task = OneTimeWorkRequestBuilder<SubmitFeedbackWorker>()

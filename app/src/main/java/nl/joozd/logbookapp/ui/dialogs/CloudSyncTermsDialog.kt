@@ -25,8 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.DialogCloudSyncTermsBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.model.viewmodels.dialogs.CloudSyncTermsDialogViewModel
@@ -35,7 +34,7 @@ import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 /**
  * This dialog will show terms and conditions for Cloud.
- * If OK clicked, it will set [Preferences.useCloud] and [Preferences.acceptedCloudSyncTerms] to true
+ * If OK clicked, it will set [Prefs.useCloud] and [Prefs.acceptedCloudSyncTerms] to true
  */
 class CloudSyncTermsDialog(): JoozdlogFragment() {
     constructor(sync: Boolean): this() {
@@ -66,8 +65,8 @@ class CloudSyncTermsDialog(): JoozdlogFragment() {
 
             iAcceptTextView.apply {
                 setOnClickListener {
-                    Preferences.acceptedCloudSyncTerms = true
-                    Preferences.useCloud = true
+                    Prefs.acceptedCloudSyncTerms = true
+                    Prefs.useCloud = true
                     if (syncOnClose) JoozdlogWorkersHub.syncTimeAndFlightsIfEnoughTimePassed()
                     closeFragment()
                 }

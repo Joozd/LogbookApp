@@ -29,7 +29,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
 import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.databinding.ActivityLinkHandlerBinding
@@ -90,7 +90,7 @@ class LinkHandlerActivity : JoozdlogActivity() {
                 val result = UserManagement.loginFromLink(makeLoginPassPair(lpString))
                 println("CheckPoint 3: result: $result")
                 if (result in CloudFunctionResults.connectionErrors) {
-                    Preferences.loginLinkStringWaiting = lpString
+                    Prefs.loginLinkStringWaiting = lpString
                     JoozdlogWorkersHub.scheduleLoginAttempt()
                     showNoConnectionDialog()
                 } else {

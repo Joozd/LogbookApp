@@ -20,37 +20,8 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
 import android.content.ContentResolver
-import nl.joozd.joozdlogimporter.interfaces.FileImporter
 import android.content.Intent
-import android.net.Uri
-import android.os.Parcelable
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.*
-import nl.joozd.joozdlogimporter.CsvImporter
-import nl.joozd.joozdlogimporter.PdfImporter
-import nl.joozd.joozdlogimporter.supportedFileTypes.*
-import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
-import nl.joozd.logbookapp.data.importing.extensions.postProcess
-import nl.joozd.logbookapp.data.importing.importsParser.JoozdlogParser
-import nl.joozd.logbookapp.data.importing.importsParser.LogTenProParser
-import nl.joozd.logbookapp.data.importing.importsParser.MccPilotLogCsvParser
-import nl.joozd.logbookapp.data.importing.interfaces.ImportedLogbook
-import nl.joozd.logbookapp.data.importing.interfaces.CompletedFlights
-import nl.joozd.logbookapp.data.importing.interfaces.Roster
-import nl.joozd.logbookapp.data.importing.pdfparser.*
-import nl.joozd.logbookapp.data.importing.results.SaveCompletedFlightsResult
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.PdfParserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.extensions.*
-import nl.joozd.logbookapp.utils.DispatcherProvider
-import java.io.FileNotFoundException
-import java.io.InputStream
-import java.time.Instant
 
 class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
     private val handler = SingleUseImportIntentHandler()

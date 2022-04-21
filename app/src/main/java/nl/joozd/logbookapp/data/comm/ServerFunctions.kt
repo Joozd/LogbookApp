@@ -25,7 +25,7 @@ import nl.joozd.comms.Client
 import nl.joozd.comms.isOK
 import nl.joozd.joozdlogcommon.*
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.serializing.*
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
@@ -61,7 +61,7 @@ object ServerFunctions {
      *  [CloudFunctionResults.NO_LOGIN_DATA] if no login data saved
      *  [CloudFunctionResults.DATA_ERROR] if bad data was received
      *  [CloudFunctionResults.UNKNOWN_USER_OR_PASS] if login data rejected by server
-     *  [CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS] if [Preferences.emailAddress] is blank or server doesn't like the email address]
+     *  [CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS] if [Prefs.emailAddress] is blank or server doesn't like the email address]
      *  [CloudFunctionResults.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
      *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
      *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
@@ -69,10 +69,10 @@ object ServerFunctions {
      */
     suspend fun requestBackup(client: Client): CloudFunctionResults {
         val payload = LoginDataWithEmail(
-            Preferences.username ?: return CloudFunctionResults.NO_LOGIN_DATA,
-            Preferences.key ?: return CloudFunctionResults.NO_LOGIN_DATA,
+            Prefs.username ?: return CloudFunctionResults.NO_LOGIN_DATA,
+            Prefs.key ?: return CloudFunctionResults.NO_LOGIN_DATA,
             BasicFlight.VERSION.version,
-            Preferences.emailAddress.nullIfBlank() ?: return CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS
+            Prefs.emailAddress.nullIfBlank() ?: return CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS
         ).serialize()
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_BACKUP_MAIL, payload).let{
             if (!it.isOK())
@@ -157,7 +157,7 @@ object ServerFunctions {
      * Logs a user in. User will remain logged in until connection with [client] is lost.
      * @return [CloudFunctionResults]:
      *  [CloudFunctionResults.OK] if logged in OK
-     *  [CloudFunctionResults.NO_LOGIN_DATA] if no login data stored in [Preferences]
+     *  [CloudFunctionResults.NO_LOGIN_DATA] if no login data stored in [Prefs]
      *  [CloudFunctionResults.UNKNOWN_USER_OR_PASS] if server rejected login data. In this case, an error to be shown to user will be scheduled through [ScheduledErrors.addError]
      *  [CloudFunctionResults.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
      *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
@@ -166,8 +166,8 @@ object ServerFunctions {
     suspend fun login(client: Client): CloudFunctionResults {
         //payLoad is LoginData.serialize()
         val payLoad = LoginData(
-            Preferences.username ?: return CloudFunctionResults.NO_LOGIN_DATA,
-            Preferences.key ?: return CloudFunctionResults.NO_LOGIN_DATA,
+            Prefs.username ?: return CloudFunctionResults.NO_LOGIN_DATA,
+            Prefs.key ?: return CloudFunctionResults.NO_LOGIN_DATA,
             BasicFlight.VERSION.version)
             .serialize()
 
@@ -317,10 +317,10 @@ object ServerFunctions {
      * Request an email with a login link from the server
      */
     suspend fun requestLoginLinkMail(client: Client): CloudFunctionResults {
-        val n = Preferences.username
-        val k = Preferences.key
+        val n = Prefs.username
+        val k = Prefs.key
         if (n == null || k == null) return CloudFunctionResults.NO_LOGIN_DATA
-        val payload = LoginDataWithEmail(n, k, BasicFlight.VERSION.version, Preferences.emailAddress).serialize()
+        val payload = LoginDataWithEmail(n, k, BasicFlight.VERSION.version, Prefs.emailAddress).serialize()
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_LOGIN_LINK_MAIL, payload)
         return when (client.readFromServer()?.toString(Charsets.UTF_8)) { // <--- TODO Somehow this doesn't return problem might be on server
             null -> CloudFunctionResults.CLIENT_ERROR
@@ -459,8 +459,8 @@ object ServerFunctions {
     }
 
     private fun generateLoginDataWithEmail(username: String? = null, key: ByteArray? = null, email: String? = null): LoginDataWithEmail? {
-        return LoginDataWithEmail(username ?: Preferences.username ?: return null,
-                           key ?: Preferences.key ?: return null,
-                           BasicFlight.VERSION.version, email ?: Preferences.emailAddress)
+        return LoginDataWithEmail(username ?: Prefs.username ?: return null,
+                           key ?: Prefs.key ?: return null,
+                           BasicFlight.VERSION.version, email ?: Prefs.emailAddress)
     }
 }

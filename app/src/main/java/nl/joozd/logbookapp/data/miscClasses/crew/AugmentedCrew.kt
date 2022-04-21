@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.data.miscClasses.crew
 
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.getBit
 import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.extensions.setBit
@@ -72,7 +72,7 @@ data class AugmentedCrew(val size: Int = 2,
      */
     fun getLogTime(totalTime: Int, pic: Boolean): Int{
         if (pic || size <=2) return totalTime
-        val t = times.nullIfZero() ?: Preferences.standardTakeoffLandingTimes
+        val t = times.nullIfZero() ?: Prefs.standardTakeoffLandingTimes
         val divideableTime = (totalTime - 2*t).toFloat()
         val timePerShare = divideableTime / size
         val minutesInSeat = (timePerShare*2).toInt()
@@ -114,7 +114,7 @@ data class AugmentedCrew(val size: Int = 2,
         const val MAX_CREW_SIZE = 15
 
         val COCO: AugmentedCrew
-            get() = AugmentedCrew(3, takeoff = false, landing = false, times = Preferences.standardTakeoffLandingTimes)
+            get() = AugmentedCrew(3, takeoff = false, landing = false, times = Prefs.standardTakeoffLandingTimes)
 
         fun of(value: Int) = if (value == 0) AugmentedCrew() else AugmentedCrew(
             size = 15.and(value),

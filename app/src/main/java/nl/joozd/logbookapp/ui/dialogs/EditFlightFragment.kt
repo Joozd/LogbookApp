@@ -32,7 +32,7 @@ import com.google.android.material.textfield.TextInputEditText
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.LayoutEditFlightFragmentBinding
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
@@ -69,7 +69,7 @@ class EditFlightFragment: JoozdlogFragment() {
             setOnFocusChangedListeners()
             startFlowCollectors()
             catchAndIgnoreClicksOnEmptyPartOfDialog()
-            if (Preferences.editFlightFragmentWelcomeMessageShouldBeDisplayed)
+            if (Prefs.editFlightFragmentWelcomeMessageShouldBeDisplayed)
                 showWelcomeMessage()
 
 
@@ -693,7 +693,7 @@ class EditFlightFragment: JoozdlogFragment() {
         titleResource = R.string.edit_flight_welcome_title
         messageResource = R.string.edit_flight_welcome_message
         setPositiveButton(android.R.string.ok){
-            Preferences.editFlightFragmentWelcomeMessageShouldBeDisplayed = false
+            Prefs.editFlightFragmentWelcomeMessageShouldBeDisplayed = false
         }
     }
 
@@ -702,7 +702,7 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun getAirportIdent(airport: Airport) =
-        if (Preferences.useIataAirports && airport.iata_code.isNotBlank()) airport.iata_code
+        if (Prefs.useIataAirports && airport.iata_code.isNotBlank()) airport.iata_code
         else airport.ident
 
     private fun TextInputEditText.setAirportFieldToValidOrInvalidLayout(airport: Airport) {

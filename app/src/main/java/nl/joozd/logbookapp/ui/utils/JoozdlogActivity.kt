@@ -57,6 +57,7 @@ open class JoozdlogActivity: AppCompatActivity() {
     }
 
     protected fun <T> Flow<T>.launchCollectWhileLifecycleStateStarted(collector: FlowCollector<T>){
+        println("DEBUG: Collecting ${this::class.simpleName}")
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 collect(collector)

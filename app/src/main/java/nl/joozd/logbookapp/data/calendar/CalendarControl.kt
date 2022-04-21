@@ -2,7 +2,7 @@ package nl.joozd.logbookapp.data.calendar
 
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.importing.matchesFlightnumberTimeOrigAndDestWith
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.ui.messageCenter.MessageCenter
@@ -37,8 +37,8 @@ object CalendarControl {
 
     private fun Flight.causesConflictWithCalendar(): Boolean =
         isPlanned
-                && Preferences.useCalendarSync
-                && timeIn > Preferences.calendarDisabledUntil
+                && Prefs.useCalendarSync
+                && timeIn > Prefs.calendarDisabledUntil
                 && timeIn > Instant.now().epochSecond
 
 
@@ -58,7 +58,7 @@ object CalendarControl {
             titleResource = R.string.calendar_sync_conflict
             descriptionResource = msg
             setPositiveButton(android.R.string.ok){
-                Preferences.calendarDisabledUntil = time + 1
+                Prefs.calendarDisabledUntil = time + 1
             }
             setNegativeButton(R.string.ignore){ /* intentionally left blank */ }
         }.build()

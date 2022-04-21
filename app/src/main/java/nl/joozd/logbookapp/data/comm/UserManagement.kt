@@ -25,7 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.extensions.nullIfBlank
@@ -34,10 +34,10 @@ import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 
 object UserManagement {
     val signedIn: Boolean
-        get() = Preferences.username != null && Errors.LOGIN_DATA_REJECTED_BY_SERVER !in ScheduledErrors.currentErrors
+        get() = Prefs.username != null && Errors.LOGIN_DATA_REJECTED_BY_SERVER !in ScheduledErrors.currentErrors
 
     val username
-        get() = Preferences.username
+        get() = Prefs.username
 
     /**
      * Will create a new user next time flights are synchronized.
@@ -45,23 +45,23 @@ object UserManagement {
      * Actual new user creation is triggered by [nl.joozd.logbookapp.workmanager.SyncFlightsWorker]
      */
     fun newUser(){
-        Preferences.username = null
+        Prefs.username = null
     }
 
     /**
      * Create a new user on server
      * This will definitely invalidate current login data
      *
-     * If user successfully created, it will set email if one is entered in [Preferences.emailAddress]
+     * If user successfully created, it will set email if one is entered in [Prefs.emailAddress]
      *
      * @return @see [Cloud.createNewUser]
      */
     private suspend fun createNewUser(username: String, password: String): CloudFunctionResults = withContext (Dispatchers.IO){
-        Preferences.username = username
-        Preferences.password = password
-        val email = Preferences.emailAddress.nullIfBlank()
-        return@withContext Cloud.createNewUser(username, Preferences.key!!).also {
-            Log.d("CreateNewUser()", "Created new user with key ${Preferences.key?.toList()}")
+        Prefs.username = username
+        Prefs.password = password
+        val email = Prefs.emailAddress.nullIfBlank()
+        return@withContext Cloud.createNewUser(username, Prefs.key!!).also {
+            Log.d("CreateNewUser()", "Created new user with key ${Prefs.key?.toList()}")
             if (it == CloudFunctionResults.OK) {
                 //if email set, send it to server
                 email?.let {
@@ -69,14 +69,14 @@ object UserManagement {
                     //TODO handle replies from server: OK / NOT_A_VALID_EMAIL_ADDRESS / SERVER_ERROR / UNKNOWN_USER_OR_PASS / NO_LOGIN_DATA
                     Log.d("CreateNewUser()", "Added email: $email")
                 }
-                Preferences.lastUpdateTime = -1
-                Preferences.useCloud = true
+                Prefs.lastUpdateTime = -1
+                Prefs.useCloud = true
                 Log.d("CreateNewUser()", "created username: $username, password: $password, email: $email")
-                Log.d("CreateNewUser()", "check: ${Preferences.username}, password: ${Preferences.password}")
+                Log.d("CreateNewUser()", "check: ${Prefs.username}, password: ${Prefs.password}")
             } else {
                 Log.d("CreateNewUser()", "Cloud.createNewUser returned $it")
-                Preferences.username = Preferences.USERNAME_NOT_SET
-                Preferences.password = null
+                Prefs.username = Prefs.USERNAME_NOT_SET
+                Prefs.password = null
             }
         }
     }
@@ -97,8 +97,8 @@ object UserManagement {
         Log.d("UserManagement", "password: $password")
         return@withContext createNewUser(newUsername, password).let{
             if (it == CloudFunctionResults.USER_ALREADY_EXISTS) newLoginDataNeeded() else {
-                Preferences.emailVerified = false
-                if (Preferences.emailAddress.isNotBlank())
+                Prefs.emailVerified = false
+                if (Prefs.emailAddress.isNotBlank())
                     //We can wait for this, it is already a background process and there is no hurry
                     changeEmailAddress()
                 it
@@ -114,18 +114,18 @@ object UserManagement {
      */
     suspend fun changePassword(newPassword: String): CloudFunctionResults = withContext (Dispatchers.IO){
         // Check if username/pass set
-        Preferences.username ?: return@withContext CloudFunctionResults.NO_LOGIN_DATA
-        Preferences.password ?: return@withContext CloudFunctionResults.NO_LOGIN_DATA
+        Prefs.username ?: return@withContext CloudFunctionResults.NO_LOGIN_DATA
+        Prefs.password ?: return@withContext CloudFunctionResults.NO_LOGIN_DATA
 
         Cloud.checkUser().let {
             if (!it.isOK())
                 return@withContext it
         }
-        Preferences.newPassword = newPassword
-        return@withContext Cloud.changePassword(newPassword, email = Preferences.emailAddress.nullIfBlank()).also{
+        Prefs.newPassword = newPassword
+        return@withContext Cloud.changePassword(newPassword, email = Prefs.emailAddress.nullIfBlank()).also{
             if (it.isOK()) {
-                Preferences.password = newPassword
-                Preferences.newPassword = ""
+                Prefs.password = newPassword
+                Prefs.newPassword = ""
                 CloudFunctionResults.OK
             }
         }
@@ -137,8 +137,8 @@ object UserManagement {
      * @return true if sent to server, false if failed due to bad data, or no connection.
      * If no connection it will schedule sending to server when internet gets available
      */
-    suspend fun changeEmailAddress(newEmailAddress: String = Preferences.emailAddress): Boolean = withContext (Dispatchers.IO){
-        Preferences.emailAddress = newEmailAddress
+    suspend fun changeEmailAddress(newEmailAddress: String = Prefs.emailAddress): Boolean = withContext (Dispatchers.IO){
+        Prefs.emailAddress = newEmailAddress
         //don't do anything if no data entered and return false
         return@withContext if (newEmailAddress.isBlank()) false
         else when (Cloud.sendNewEmailAddress()) {
@@ -174,9 +174,9 @@ object UserManagement {
      * Try to fix a login if app crashed during password change (detected by Preferences.newPassword not being empty)
      */
     suspend fun tryToFixLogin(): Boolean? = withContext (Dispatchers.IO) {
-        Preferences.newPassword.nullIfBlank()?.let {
-            Preferences.password?.let { pw ->
-                when (Cloud.checkUser(Preferences.username ?: return@withContext false, pw)) {
+        Prefs.newPassword.nullIfBlank()?.let {
+            Prefs.password?.let { pw ->
+                when (Cloud.checkUser(Prefs.username ?: return@withContext false, pw)) {
                     CloudFunctionResults.OK -> {
                         Log.w("tryToFixLogin", "Login was already correct")
                         return@withContext true
@@ -187,16 +187,16 @@ object UserManagement {
             }
             //If we get here, either Preferences.password == null or it is incorrect for login, and newPassword is not blank
 
-            when (Cloud.checkUser(Preferences.username ?: return@withContext false, Preferences.newPassword)) {
+            when (Cloud.checkUser(Prefs.username ?: return@withContext false, Prefs.newPassword)) {
                 CloudFunctionResults.OK -> { // yay this fixed it
-                    Preferences.password = Preferences.newPassword
-                    Preferences.newPassword = ""
+                    Prefs.password = Prefs.newPassword
+                    Prefs.newPassword = ""
                     true
                 }
                 in CloudFunctionResults.connectionErrors -> null // Server didn't respond well. Don't do anything.
                 CloudFunctionResults.UNKNOWN_USER_OR_PASS -> { // Didn't fix it, just wrong login credentials (which is wierd as newPassword wasn't empty)
-                    Preferences.newPassword = ""
-                    Preferences.username = null  //this will start the creation of a new account on the next sync
+                    Prefs.newPassword = ""
+                    Prefs.username = null  //this will start the creation of a new account on the next sync
                     false
                 }
                 else -> null // something else went wrong. Doing nothing for now, maybe force a new creation here as well?
@@ -216,23 +216,23 @@ object UserManagement {
     suspend fun loginFromLink(loginPassPair: Pair<String, String>): CloudFunctionResults = withContext (Dispatchers.IO) {
         return@withContext Cloud.checkUserFromLink(loginPassPair.first, loginPassPair.second).also {
             if (it.isOK()) {
-                Preferences.username = loginPassPair.first
-                Preferences.forcePassword(loginPassPair.second)
-                Preferences.lastUpdateTime = -1
-                Preferences.useCloud = true
+                Prefs.username = loginPassPair.first
+                Prefs.forcePassword(loginPassPair.second)
+                Prefs.lastUpdateTime = -1
+                Prefs.useCloud = true
             }
         }
     }
 
     fun signOut() {
-        Preferences.username = null
-        Preferences.password = null
-        Preferences.lastUpdateTime = -1
-        Preferences.useCloud = false
+        Prefs.username = null
+        Prefs.password = null
+        Prefs.lastUpdateTime = -1
+        Prefs.useCloud = false
     }
 
-    fun generateLoginLink(): String? = Preferences.username?.let {
-        "https://joozdlog.joozd.nl/inject-key/$it:${Preferences.password?.replace('/', '-')}"
+    fun generateLoginLink(): String? = Prefs.username?.let {
+        "https://joozdlog.joozd.nl/inject-key/$it:${Prefs.password?.replace('/', '-')}"
     }
 
     fun generateLoginLinkIntent(): Intent? = generateLoginLink()?.let { link ->
@@ -257,7 +257,7 @@ object UserManagement {
     suspend fun confirmEmail(confirmationString: String): Boolean =
         when (withContext (Dispatchers.IO) { Cloud.confirmEmail(confirmationString) }){
             CloudFunctionResults.OK -> {
-                Preferences.emailVerified = true
+                Prefs.emailVerified = true
                 Cloud.sendPendingEmailJobs()
                 true
             }

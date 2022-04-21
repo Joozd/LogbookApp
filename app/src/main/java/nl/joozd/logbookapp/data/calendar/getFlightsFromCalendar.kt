@@ -29,16 +29,16 @@ import nl.joozd.joozdcalendarapi.EventsExtractor
 import nl.joozd.joozdcalendarapi.getCalendars
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.logbookapp.data.calendar.parsers.calendarEventsToExtractedPlannedFlights
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import java.time.Duration
 import java.time.Instant
 
 private val startCutoff
-    get() = maxOf(Instant.now(), Instant.ofEpochSecond(Preferences.calendarDisabledUntil))
+    get() = maxOf(Instant.now(), Instant.ofEpochSecond(Prefs.calendarDisabledUntil))
 
 private val period
-    get() = (startCutoff..Instant.now().plus(Duration.ofDays(Preferences.calendarSyncAmountOfDays)))
+    get() = (startCutoff..Instant.now().plus(Duration.ofDays(Prefs.calendarSyncAmountOfDays)))
 
 @RequiresPermission(Manifest.permission.READ_CALENDAR)
 suspend fun Context.getFlightsFromCalendar(): ExtractedPlannedFlights? {
@@ -49,7 +49,7 @@ suspend fun Context.getFlightsFromCalendar(): ExtractedPlannedFlights? {
 
 @RequiresPermission(Manifest.permission.READ_CALENDAR)
 private suspend fun Context.activeCalendar(): CalendarDescriptor? = withContext(DispatcherProvider.io()) {
-    getCalendars().firstOrNull { it.displayName == Preferences.selectedCalendar }
+    getCalendars().firstOrNull { it.displayName == Prefs.selectedCalendar }
 }
 
 private suspend fun Context.getEventsInPeriod(calendar: CalendarDescriptor, period: ClosedRange<Instant>): List<CalendarEvent>{

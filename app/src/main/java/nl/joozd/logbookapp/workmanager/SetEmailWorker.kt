@@ -25,7 +25,7 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 
@@ -36,7 +36,7 @@ class SetEmailWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         when{
-            Preferences.emailAddress.isBlank() -> Result.failure()
+            Prefs.emailAddress.isBlank() -> Result.failure()
 
             /*
              In case of client error (ie. internet failed before this is done), function will try to schedule work again

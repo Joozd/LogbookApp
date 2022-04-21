@@ -46,7 +46,7 @@ class EmailJobsWaiting(var maskedValues: Int ): Iterable<suspend () -> Unit> {
         }
 
     private fun saveToPrefs(){
-        Preferences._emailJobsWaiting = maskedValues
+        Prefs.emailJobsWaitingInt = maskedValues
     }
 
     /**

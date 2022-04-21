@@ -27,7 +27,7 @@ import kotlinx.coroutines.*
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 /**
  * Sync aircraftTypes with server
@@ -51,26 +51,26 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
         Log.d(this::class.simpleName, "serverVersions $serverTypesVersion / $serverForcedVersion")
 
 
-        if (serverTypesVersion != Preferences.aircraftTypesVersion) {
+        if (serverTypesVersion != Prefs.aircraftTypesVersion) {
             Cloud.getAircraftTypes()?.let {
                 Log.d(this::class.simpleName, "Downlaoded ${it.size} types")
                 saveTypes = launch {
                     aircraftRepository.replaceAllTypesWith(it)
-                    Preferences.aircraftTypesVersion = serverTypesVersion
+                    Prefs.aircraftTypesVersion = serverTypesVersion
                 }
 
             } ?: return@withContext Result.retry()
         }
 
 
-        if (serverForcedVersion != Preferences.aircraftForcedVersion) {
+        if (serverForcedVersion != Prefs.aircraftForcedVersion) {
             Cloud.getForcedTypes()?.let {
                 Log.d(this::class.simpleName, "Downlaoded ${it.size} forcedTypes")
                 saveForced = launch {
                     aircraftRepository.replaceAllPreloadedWith(it.map {
                         PreloadedRegistration(registration = it.registration, type = it.type)
                     })
-                    Preferences.aircraftForcedVersion = serverForcedVersion
+                    Prefs.aircraftForcedVersion = serverForcedVersion
                 }
             } ?: return@withContext Result.retry()
         }

@@ -22,11 +22,6 @@ package nl.joozd.logbookapp
 import nl.joozd.logbookapp.utils.DelegatesExt
 import android.app.Application
 import android.content.Context
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.ui.utils.DarkModeHub
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 

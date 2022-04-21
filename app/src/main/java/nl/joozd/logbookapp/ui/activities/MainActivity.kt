@@ -21,6 +21,7 @@
 package nl.joozd.logbookapp.ui.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -42,7 +43,7 @@ import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.getFlightsFromCalendar
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModelNew
@@ -132,6 +133,7 @@ class MainActivity : JoozdlogActivity() {
         collectUndoRedoChangedFlow()
         collectAmountOfFlightsFlow()
         collectCalendarControlFlow()
+        collectIcaoIataSwappedFlow()
     }
 
     private fun collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded(){
@@ -181,6 +183,13 @@ class MainActivity : JoozdlogActivity() {
     private fun collectCalendarControlFlow(){
         MessageCenter.messageFlow.launchCollectWhileLifecycleStateStarted{
             it?.toAlertDialog(this)?.show()
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged") // in this case, entire dataset will be changed.
+    private fun ActivityMainNewBinding.collectIcaoIataSwappedFlow(){
+        Prefs.useIataAirportsFlow.launchCollectWhileLifecycleStateStarted{
+            flightsList.adapter?.notifyDataSetChanged()
         }
     }
 
@@ -346,7 +355,7 @@ class MainActivity : JoozdlogActivity() {
 
 
     private fun startNewUserActivityIfNewInstall() {
-        if (!Preferences.newUserActivityFinished)
+        if (!Prefs.newUserActivityFinished)
             startActivity(Intent(this, NewUserActivity::class.java))
     }
 
@@ -372,7 +381,7 @@ class MainActivity : JoozdlogActivity() {
 
 
     private fun updateCalendarEventsIfEnabled(){
-        if (Preferences.useCalendarSync){
+        if (Prefs.useCalendarSync){
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
                 lifecycleScope.launch {
                     getFlightsFromCalendar()?.let {
@@ -395,7 +404,7 @@ class MainActivity : JoozdlogActivity() {
             if (isGranted) {
                 updateCalendarEventsIfEnabled()
             } else {
-                Preferences.useCalendarSync = false
+                Prefs.useCalendarSync = false
             }
         }
 

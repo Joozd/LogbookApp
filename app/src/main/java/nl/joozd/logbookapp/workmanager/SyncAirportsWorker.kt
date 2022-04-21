@@ -27,7 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
@@ -37,11 +37,11 @@ class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
     override suspend fun doWork(): Result {
         try {
             val serverDbVersion = withContext(Dispatchers.IO) { Cloud.getServerAirportDbVersion() }
-            Log.d("syncAirportsWorker", "server DB = $serverDbVersion, local DB = ${Preferences.airportDbVersion}")
+            Log.d("syncAirportsWorker", "server DB = $serverDbVersion, local DB = ${Prefs.airportDbVersion}")
             when (serverDbVersion) {
                 -1 -> return Result.failure()                              // -1 is server reported unable
                 -2 -> return Result.retry()                                // -2 means connection failure
-                Preferences.airportDbVersion -> return Result.success()    // DB is up-to-date
+                Prefs.airportDbVersion -> return Result.success()    // DB is up-to-date
             }
             return when (Cloud.downloadAirportsDatabase { processDownloadProgress(it) }){
                 CloudFunctionResults.OK -> Result.success()

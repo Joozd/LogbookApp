@@ -27,7 +27,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.extensions.minus
 import java.time.Duration
@@ -48,11 +48,11 @@ class RequestBackupIfScheduled(appContext: Context, workerParams: WorkerParamete
      * dependent work will not execute if you return [Result.failure]
      */
     override suspend fun doWork(): Result = withContext(Dispatchers.IO + NonCancellable) {
-        if (!Preferences.backupFromCloud || !backupNeeded()) Result.success() // If backup not needed, this (checking if it is needed) is all we do.
+        if (!Prefs.backupFromCloud || !backupNeeded()) Result.success() // If backup not needed, this (checking if it is needed) is all we do.
         else {
             when (Cloud.requestBackup()) {
                 CloudFunctionResults.OK -> Result.success().also{
-                    Preferences.mostRecentBackup = Instant.now().epochSecond
+                    Prefs.mostRecentBackup = Instant.now().epochSecond
                 }
                 CloudFunctionResults.CLIENT_ERROR -> Result.retry()
                 else -> Result.failure()
@@ -61,8 +61,8 @@ class RequestBackupIfScheduled(appContext: Context, workerParams: WorkerParamete
     }
 
     private fun backupNeeded(): Boolean {
-        if (Preferences.backupInterval == 0) return false
-        val mostRecentBackup = Instant.ofEpochSecond(Preferences.mostRecentBackup).atStartOfDay(OffsetDateTime.now().offset)
-        return Instant.now() - mostRecentBackup > Duration.ofDays(Preferences.backupInterval.toLong())
+        if (Prefs.backupInterval == 0) return false
+        val mostRecentBackup = Instant.ofEpochSecond(Prefs.mostRecentBackup).atStartOfDay(OffsetDateTime.now().offset)
+        return Instant.now() - mostRecentBackup > Duration.ofDays(Prefs.backupInterval.toLong())
     }
 }

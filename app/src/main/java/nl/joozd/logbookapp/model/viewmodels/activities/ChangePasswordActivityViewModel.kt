@@ -33,30 +33,28 @@ import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.utils.generatePassword
 
+//TODO remove livedata, move flow collection to activity
 class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
 
     /***********************************************************************************************
      * Private parts
      ***********************************************************************************************/
 
-    private val _emailAddress = MutableLiveData(Preferences.emailAddress)
+    private val _emailAddress = MutableLiveData(Prefs.emailAddress)
 
-    private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        when (key) {
-            Preferences::emailAddress.name ->
-                _emailAddress.value = Preferences.emailAddress
+    //TODO collect flows in activity, not here
+    init{
+        viewModelScope.launch {
+            Prefs.emailAddressFlow.collect{
+                _emailAddress.value = it
+            }
         }
     }
-    init{
-        Preferences.getSharedPreferences().registerOnSharedPreferenceChangeListener (onSharedPrefsChangedListener)
-    }
-
-
 
     /***********************************************************************************************
      * Public parts
@@ -92,10 +90,10 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
                     when (UserManagement.changePassword(password)){
                         CloudFunctionResults.OK -> {
                             sendPasswordLinksToClipboard(UserManagement.generateLoginLink())
-                            if (Preferences.emailVerified)
+                            if (Prefs.emailVerified)
                                 Cloud.requestLoginLinkMail()
                             else {
-                                Preferences.emailJobsWaiting.sendLoginLink = true
+                                Prefs.emailJobsWaiting.sendLoginLink = true
                             }
                             feedback(ChangePasswordEvents.FINISHED)
                         }

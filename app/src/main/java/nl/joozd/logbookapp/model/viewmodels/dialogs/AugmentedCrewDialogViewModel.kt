@@ -19,19 +19,10 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
-import android.text.Editable
-import android.util.Log
-import androidx.core.text.isDigitsOnly
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.map
 import kotlinx.coroutines.flow.map
 import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
-import nl.joozd.logbookapp.extensions.nullIfZero
-import nl.joozd.logbookapp.extensions.toInt
 import nl.joozd.logbookapp.model.helpers.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
-import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 
 class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
     private val undoCrew = flightEditor.augmentedCrew

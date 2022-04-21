@@ -117,6 +117,9 @@ dependencies {
 
     kapt "androidx.room:room-compiler:$room_version"
 
+    //Jetpack Datastore Preferences
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
     //RecyclerView Fasstscroller
     implementation 'com.quiph.ui:recyclerviewfastscroller:0.1.3'
 

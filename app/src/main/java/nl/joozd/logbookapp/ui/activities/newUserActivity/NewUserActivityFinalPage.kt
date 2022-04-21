@@ -25,12 +25,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageFinalBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
-import nl.joozd.logbookapp.model.viewmodels.activities.settingsActivity.SettingsActivityViewModel
 
 /**
  * Final puntjes op de i
@@ -42,7 +40,7 @@ class NewUserActivityFinalPage: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageFinalBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_final, container, false)).apply {
-            icaoIataSwitch.isChecked = Preferences.useIataAirports
+            icaoIataSwitch.isChecked = Prefs.useIataAirports
 
             /*******************************************************************************************
              * OnClickListeners

@@ -27,7 +27,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageCalendarBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.CalendarSyncDialog
@@ -51,13 +51,13 @@ class NewUserActivityCalendarPage: JoozdlogFragment() {
 
             /**
              * When useCalendarImportSwitch is clicked, viewModel will open UseCalendarDialog if switching to on,
-             * or switch [Preferences.useCalendarSync] when switching to off.
-             * This will intitially also set switch state to [Preferences.useCalendarSync],
+             * or switch [Prefs.useCalendarSync] when switching to off.
+             * This will intitially also set switch state to [Prefs.useCalendarSync],
              *      which will update later when that gets updated through viewModel.getFlightsFromCalendar.observe
              */
             useCalendarImportSwitch.setOnClickListener {
                 viewModel.setGetFlightsFromCalendarClicked()
-                useCalendarImportSwitch.isChecked = Preferences.useCalendarSync
+                useCalendarImportSwitch.isChecked = Prefs.useCalendarSync
             }
 
 
@@ -84,7 +84,7 @@ class NewUserActivityCalendarPage: JoozdlogFragment() {
 
     /**
      * This dialog will ask all info for calendar sync (ical + address, scraper + calendar)
-     * If [Preferences.useCalendarSync] is false it will set it to true on OK
+     * If [Prefs.useCalendarSync] is false it will set it to true on OK
      * if not, it will open a dialog that will allow user to accept terms and if so, sets those both to true.
      */
     private fun showCalendarDialogNoSync(){

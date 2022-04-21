@@ -24,10 +24,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
 import nl.joozd.logbookapp.utils.TimestampMaker
-import java.time.Instant
 
 
 /**

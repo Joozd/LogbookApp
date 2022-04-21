@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.EmailDialogStatus
 import nl.joozd.logbookapp.model.viewmodels.status.EmailDialogStatus.EmailDialogStatusError.*
@@ -41,8 +41,8 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
     val statusFlow: StateFlow<EmailDialogStatus?> = MutableStateFlow(null)
     private var status by CastFlowToMutableFlowShortcut(statusFlow)
 
-    val email1Flow: StateFlow<String> = MutableStateFlow(Preferences.emailAddress)
-    val email2Flow: StateFlow<String> = MutableStateFlow(Preferences.emailAddress)
+    val email1Flow: StateFlow<String> = MutableStateFlow(Prefs.emailAddress)
+    val email2Flow: StateFlow<String> = MutableStateFlow(Prefs.emailAddress)
 
     var email1 by CastFlowToMutableFlowShortcut(email1Flow)
     private set
@@ -61,7 +61,7 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
      * Initially set to OK if email verified or empty, or VERIFY otherwise
      */
     val okOrVerifyFlow = email1Flow.map {
-        if (it == Preferences.emailAddress && Preferences.emailVerified || it.isEmpty()) android.R.string.ok
+        if (it == Prefs.emailAddress && Prefs.emailVerified || it.isEmpty()) android.R.string.ok
         else R.string.verify
     }
 
@@ -89,12 +89,12 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
             return
         }
 
-        if (Preferences.emailAddress.lowercase(Locale.ROOT) != email1)
-            Preferences.emailVerified = false
+        if (Prefs.emailAddress.lowercase(Locale.ROOT) != email1)
+            Prefs.emailVerified = false
 
-        status = if (!Preferences.emailVerified) {
-            if (email1 != Preferences.emailAddress.lowercase(Locale.ROOT))
-                Preferences.emailAddress = email1
+        status = if (!Prefs.emailVerified) {
+            if (email1 != Prefs.emailAddress.lowercase(Locale.ROOT))
+                Prefs.emailAddress = email1
 
             if (email1.isNotBlank()) {
                 viewModelScope.launch {

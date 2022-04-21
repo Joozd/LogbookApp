@@ -26,7 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.comm.UserManagement
 import nl.joozd.logbookapp.data.comm.CloudFunctionResults
-import nl.joozd.logbookapp.data.sharedPrefs.Preferences
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 
@@ -36,8 +36,8 @@ import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 class CloudLoginWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        if (':' !in Preferences.loginLinkStringWaiting) return@withContext Result.failure() // bad login string
-        val loginPass = Preferences.loginLinkStringWaiting.replace('-', '/').split(":").let { lp ->
+        if (':' !in Prefs.loginLinkStringWaiting) return@withContext Result.failure() // bad login string
+        val loginPass = Prefs.loginLinkStringWaiting.replace('-', '/').split(":").let { lp ->
             lp.first() to lp.last()
         }
         when (UserManagement.loginFromLink(loginPass)) {

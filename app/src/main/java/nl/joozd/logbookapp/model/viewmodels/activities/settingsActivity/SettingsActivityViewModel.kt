@@ -72,7 +72,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val lastUpdateTimeFlow = Prefs.lastUpdateTimeFlow.notNullFlow()
 
-    val usernameFlow = Prefs.usernameFlow.notNullFlow()
+    val usernameFlow = Prefs.usernameFlow
 
     private val emailAddressFlow = Prefs.emailAddressFlow.notNullFlow()
 

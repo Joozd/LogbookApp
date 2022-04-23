@@ -21,8 +21,8 @@ package nl.joozd.logbookapp.data.sharedPrefs
 
 import android.content.Context
 import android.util.Base64
-import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.MainScope
@@ -44,9 +44,13 @@ object Prefs {
     }
 
     private val Context.dataStore by preferencesDataStore(
-        name = USER_PREFERENCES_FILE_KEY
+        name = USER_PREFERENCES_FILE_KEY,
+        produceMigrations = { context ->
+            // Since we're migrating from SharedPreferences, add a migration based on the
+            // SharedPreferences name
+            listOf(SharedPreferencesMigration(context, USER_PREFERENCES_FILE_KEY))
+        }
     )
-
 
     /**
      * username is the users' username.
@@ -272,33 +276,28 @@ object Prefs {
     var loginLinkStringWaiting: String by JoozdLogSharedPrefs(dataStore, "")
 
 
-    private fun usernameIfSet(name: String) = name.takeIf { usernameResource == USERNAME_NOT_SET }
+    private fun usernameIfSet(name: String) = name.takeIf { usernameResource != USERNAME_NOT_SET }
 
     private fun makeCalendarSyncType(type: Int): CalendarSyncType =
         CalendarSyncType.fromInt(type) ?: CalendarSyncType.CALENDAR_SYNC_NONE
 
     private fun getBooleanFlowForItem(itemName: String, defaultValue: Boolean? = null): Flow<Boolean?> = dataStore.data.map { p ->
-        println("Get boolean flow for item $itemName")
         p[booleanPreferencesKey(itemName)] ?: defaultValue
     }
 
     private fun getIntFlowForItem(itemName: String, defaultValue: Int? = null): Flow<Int?> = dataStore.data.map { p ->
-        println("Get Int flow for item $itemName")
         p[intPreferencesKey(itemName)] ?: defaultValue
     }
 
     private fun getLongFlowForItem(itemName: String, defaultValue: Long? = null): Flow<Long?> = dataStore.data.map { p ->
-        println("Get Long flow for item $itemName")
         p[longPreferencesKey(itemName)] ?: defaultValue
     }
 
     private fun getFloatFlowForItem(itemName: String, defaultValue: Float? = null): Flow<Float?> = dataStore.data.map { p ->
-        println("Get Float flow for item $itemName")
         p[floatPreferencesKey(itemName)] ?: defaultValue
     }
 
     private fun getStringFlowForItem(itemName: String, defaultValue: String? = null): Flow<String?> = dataStore.data.map { p ->
-        println("Get String flow for item $itemName")
         p[stringPreferencesKey(itemName)] ?: defaultValue
     }
 

@@ -19,24 +19,19 @@
 
 package nl.joozd.logbookapp.core
 
-import android.util.Log
 import androidx.work.*
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.workmanager.*
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Central point for all things worker.
  */
-object JoozdlogWorkersHub: CoroutineScope {
-    override val coroutineContext: CoroutineContext
-        get() = DispatcherProvider.default() + SupervisorJob()
+object JoozdlogWorkersHub: CoroutineScope by MainScope() {
     /**
      * Constants for influencing behaviour
      */
@@ -52,7 +47,6 @@ object JoozdlogWorkersHub: CoroutineScope {
      * Returns true if a sync is scheduled else false
      */
     fun syncTimeAndFlightsIfEnoughTimePassed(): Boolean{
-        println("syncTimeAndFlightsIfEnoughTimePassed")
         val elapsedSinceLastSync = Instant.now().epochSecond - lastSyncInstantEpochSeconds
         if (elapsedSinceLastSync < INBOUND_SYNC_MINIMUM_INTERVAL) return false
         synchronizeTimeAndFlights()
@@ -92,9 +86,7 @@ object JoozdlogWorkersHub: CoroutineScope {
      * If another Worker is already trying to do that, that one is replaced
      */
     private fun synchronizeTimeAndFlights(){
-        println("synchronizeTimeAndFlights CP 1")
         if (Prefs.useCloud) {
-            println("synchronizeTimeAndFlights CP 2")
             val task = OneTimeWorkRequestBuilder<SyncFlightsWorker>().apply {
                 setConstraints(makeConstraintsNeedNetwork())
                 addTag(SYNC_FLIGHTS)
@@ -111,7 +103,6 @@ object JoozdlogWorkersHub: CoroutineScope {
      * If another worker is already doing this, that one will be kept and this will be ignored.
      */
     fun scheduleEmailConfirmation(){
-        Log.d("scheduleEmailConf...", "Scheduling an email confirmation")
         val task = OneTimeWorkRequestBuilder<ConfirmEmailWorker>().apply{
             setConstraints(makeConstraintsNeedNetwork())
             addTag(CONFIRM_EMAIL)
@@ -126,7 +117,6 @@ object JoozdlogWorkersHub: CoroutineScope {
      * If another worker is already doing this, that one will be kept and this will be ignored.
      */
     fun scheduleSetEmail(){
-        Log.d("scheduleEmailConf...", "Scheduling an email confirmation")
         val task = OneTimeWorkRequestBuilder<SetEmailWorker>().apply{
             setConstraints(makeConstraintsNeedNetwork())
             addTag(CONFIRM_EMAIL)
@@ -142,7 +132,6 @@ object JoozdlogWorkersHub: CoroutineScope {
      * If another worker is already doing this, that one will be kept and this will be ignored.
      */
     fun scheduleLoginAttempt(){
-        Log.d("scheduleLoginAttempt", "Scheduling a login attempt")
         val task = OneTimeWorkRequestBuilder<CloudLoginWorker>().apply{
             setConstraints(makeConstraintsNeedNetwork())
             addTag(LOGIN_TO_CLOUD)
@@ -217,7 +206,6 @@ object JoozdlogWorkersHub: CoroutineScope {
      * Schedule a check whether server should send a backup email
      */
     fun periodicBackupFromServer(force: Boolean = false){
-        Log.d("periodBackupFrmServer()", "added task to check for backup")
         val constraints = makeConstraintsNeedNetwork()
         val task = PeriodicWorkRequestBuilder<RequestBackupIfScheduled>(Duration.ofDays(1)).apply {
             setConstraints(constraints)

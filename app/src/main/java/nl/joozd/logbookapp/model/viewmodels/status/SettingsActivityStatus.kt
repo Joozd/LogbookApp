@@ -7,9 +7,6 @@ sealed class SettingsActivityStatus{
     object LoginLinkCopied: SettingsActivityStatus()
     object AskIfNewAccountNeeded: SettingsActivityStatus()
     object CalendarDialogNeeded: SettingsActivityStatus()
-    object BuildingCsv: SettingsActivityStatus()
 
     class Error(val errorResource: Int): SettingsActivityStatus()
-
-    class SharedUri(val uri: Uri): SettingsActivityStatus()
 }

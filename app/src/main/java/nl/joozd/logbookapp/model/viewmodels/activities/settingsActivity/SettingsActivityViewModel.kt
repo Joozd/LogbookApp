@@ -22,28 +22,22 @@ package nl.joozd.logbookapp.model.viewmodels.activities.settingsActivity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.comm.UserManagement
-import nl.joozd.logbookapp.data.export.JoozdlogExport
+import nl.joozd.logbookapp.core.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.notNullFlow
-import nl.joozd.logbookapp.extensions.toDateStringForFiles
 import nl.joozd.logbookapp.extensions.toDateStringLocalized
 import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.ui.utils.DarkModeHub
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
+import nl.joozd.logbookapp.core.JoozdlogWorkersHub
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -104,13 +98,6 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     fun resetStatus(){
         status = null
-    }
-
-    fun backUpNow() = viewModelScope.launch {
-        val dateString = LocalDate.now().toDateStringForFiles()
-        status = SettingsActivityStatus.BuildingCsv
-        val uri = JoozdlogExport.shareCsvExport("joozdlog_backup_$dateString")
-        status = SettingsActivityStatus.SharedUri(uri)
     }
 
     fun darkmodePicked(darkMode: Int){

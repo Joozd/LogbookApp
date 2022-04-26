@@ -29,17 +29,20 @@ import android.widget.Button
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.commit
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.core.BackupCenter
+import nl.joozd.logbookapp.core.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivitySettingsBinding
 import nl.joozd.logbookapp.errors.errorDialog
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
+import nl.joozd.logbookapp.extensions.makeCsvSharingIntent
 import nl.joozd.logbookapp.extensions.toDateStringLocalized
 import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.viewmodels.activities.settingsActivity.SettingsActivityViewModel
+import nl.joozd.logbookapp.model.viewmodels.status.BackupCenterStatus
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.ui.activities.ChangePasswordActivity
 import nl.joozd.logbookapp.ui.dialogs.*
@@ -89,11 +92,18 @@ class SettingsActivity : JoozdlogActivity() {
                 SettingsActivityStatus.LoginLinkCopied -> toast(R.string.login_link_created)
                 SettingsActivityStatus.AskIfNewAccountNeeded -> showNewAccountDialog()
                 SettingsActivityStatus.CalendarDialogNeeded -> showCalendarDialog()
-                SettingsActivityStatus.BuildingCsv -> backupNowButton.setBackupNowButtonToBuildingCsv()
+
                 is SettingsActivityStatus.Error -> errorDialog(getString(it.errorResource))
-                is SettingsActivityStatus.SharedUri -> shareCsvAndActivateBackupNowButton(it)
+
             }
             if (it != null) viewModel.resetStatus()
+        }
+        BackupCenter.statusFlow.launchCollectWhileLifecycleStateStarted{
+            when(it){
+                null -> { }
+                BackupCenterStatus.BuildingCsv -> backupNowButton.setBackupNowButtonToBuildingCsv()
+                is BackupCenterStatus.SharedUri -> shareCsvAndActivateBackupNowButton(it.uri)
+            }
         }
     }
 
@@ -346,15 +356,16 @@ class SettingsActivity : JoozdlogActivity() {
     }
 
     private fun ActivitySettingsBinding.shareCsvAndActivateBackupNowButton(
-        it: SettingsActivityStatus.SharedUri
+        it: Uri
     ) {
-        makeCsvSharingIntent(it.uri)
+        makeCsvSharingIntent(it)
         backupNowButton.setBackupNowButtonToActive()
+        viewModel.resetStatus()
     }
 
 
     private fun Button.setBackupNowButtonToActive() {
-        setOnClickListener { viewModel.backUpNow() }
+        setOnClickListener { BackupCenter.backUpNow() }
         setText(R.string.backup_now)
     }
 
@@ -475,25 +486,9 @@ class SettingsActivity : JoozdlogActivity() {
         }
     }
 
-    private fun makeCsvSharingIntent(uri: Uri) {
-        startActivity(Intent.createChooser(Intent().apply {
-            action = Intent.ACTION_SEND
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            setDataAndType(uri, CSV_MIME_TYPE)
-            putExtra(Intent.EXTRA_STREAM, uri)
-        }, "Gooi maar ergens heen aub"))
-    }
-
     private fun makeTimeString(instant: Long): String =
         if (instant < 0) "Never"
         else  LocalDateTime.ofInstant(Instant.ofEpochSecond(instant), ZoneOffset.UTC).let{
             "${it.toDateStringLocalized()} ${it.toTimeStringLocalized()}Z"
         }
-
-
-
-
-    companion object{
-        private const val CSV_MIME_TYPE = "text/csv"
-    }
 }

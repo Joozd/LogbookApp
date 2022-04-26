@@ -27,17 +27,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.data.repository.*
-import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 
-open class JoozdlogViewModel(): ViewModel(){
+open class JoozdlogViewModel: ViewModel(){
     private val _feedbackEvent = MutableLiveData<FeedbackEvent>()
     val feedbackEvent: LiveData<FeedbackEvent>
         get() = _feedbackEvent
@@ -56,16 +51,10 @@ open class JoozdlogViewModel(): ViewModel(){
      * The [FeedbackEvent] that is being returned can be edited (ie. extraData can be filled)
      * with an [apply] statement. This is faster than the filling of the livedata so it works.
      */
-    protected fun feedback(event: FeedbackEvents.Event): FeedbackEvent =
+    protected fun feedback(event: FeedbackEvents.Event, feedbackEvent: MutableLiveData<FeedbackEvent> = _feedbackEvent): FeedbackEvent =
         FeedbackEvent(event).also{
             Log.d("Feedback", "event: $event, feedbackEvent: $feedbackEvent")
             viewModelScope.launch(Dispatchers.Main) {_feedbackEvent.value = it }
-        }
-
-    protected fun feedback(event: FeedbackEvents.Event, feedbackEvent: MutableLiveData<FeedbackEvent>): FeedbackEvent =
-        FeedbackEvent(event).also{
-            Log.d("Feedback2", "event: $event, feedbackEvent: $feedbackEvent")
-            viewModelScope.launch(Dispatchers.Main) { feedbackEvent.value = it }
         }
 
     protected fun getString(resID: Int) = context.getString(resID)

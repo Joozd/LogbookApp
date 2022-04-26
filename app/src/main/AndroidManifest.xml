@@ -16,7 +16,7 @@
     </queries>
 
     <application
-        android:name=".App"
+        android:name=".core.App"
         android:allowBackup="true"
         android:fullBackupOnly="true"
         android:icon="@mipmap/ic_launcher"

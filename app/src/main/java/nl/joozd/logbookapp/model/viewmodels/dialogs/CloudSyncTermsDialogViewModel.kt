@@ -25,7 +25,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 

@@ -23,14 +23,14 @@ import android.content.SharedPreferences
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.comm.UserManagement
+import nl.joozd.logbookapp.core.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
+import nl.joozd.logbookapp.core.JoozdlogWorkersHub
 import java.util.*
 
 class NewUserActivityViewModel: JoozdlogActivityViewModel() {

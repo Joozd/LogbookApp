@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.utils
 
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 
 fun checkPermission(permission: String) =
     ActivityCompat.checkSelfPermission(App.instance.ctx, permission) == PackageManager.PERMISSION_GRANTED

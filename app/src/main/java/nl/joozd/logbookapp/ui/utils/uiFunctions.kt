@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.ui.utils
 
 import android.content.Context
 import android.widget.Toast
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 fun toast(message: Int) = App.instance.ctx.toast(message)
 fun toast(message: String) = App.instance.ctx.toast(message)
 

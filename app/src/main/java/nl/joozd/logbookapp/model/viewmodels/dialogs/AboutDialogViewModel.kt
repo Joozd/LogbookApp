@@ -25,7 +25,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.BuildConfig
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
@@ -33,7 +33,8 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 class AboutDialogViewModel: JoozdlogDialogViewModel() {
     private val _text = MutableLiveData<String>().apply{
         viewModelScope.launch{
-            value = withContext(Dispatchers.IO) {App.instance.resources.openRawResource(R.raw.about_joozdlog)
+            value = withContext(Dispatchers.IO) {
+                App.instance.resources.openRawResource(R.raw.about_joozdlog)
                 .reader()
                 .readText()
                 .replace(VERSION_STRING, BuildConfig.VERSION_NAME)

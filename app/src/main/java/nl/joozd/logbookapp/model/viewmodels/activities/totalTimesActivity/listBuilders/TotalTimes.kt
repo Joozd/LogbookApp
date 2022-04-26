@@ -22,7 +22,7 @@ package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listB
 import android.util.Log
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString

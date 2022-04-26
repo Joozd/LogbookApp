@@ -17,15 +17,15 @@
  *
  */
 
-package nl.joozd.logbookapp.workmanager
+package nl.joozd.logbookapp.core
 
 import android.util.Log
 import androidx.work.*
 import kotlinx.coroutines.*
-import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.utils.DispatcherProvider
+import nl.joozd.logbookapp.workmanager.*
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit

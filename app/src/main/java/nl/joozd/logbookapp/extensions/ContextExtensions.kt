@@ -20,9 +20,12 @@
 package nl.joozd.logbookapp.extensions
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.core.text.HtmlCompat
+import nl.joozd.logbookapp.core.Constants
 
 fun Context.getColorFromAttr(
     @AttrRes attrColor: Int,
@@ -35,3 +38,12 @@ fun Context.getColorFromAttr(
 
 fun Context.getStringWithMakeup(res: Int, vararg args: Any?) =
     HtmlCompat.fromHtml(getString(res, *args), HtmlCompat.FROM_HTML_MODE_COMPACT)
+
+fun Context.makeCsvSharingIntent(uri: Uri) {
+    startActivity(Intent.createChooser(Intent().apply {
+        action = Intent.ACTION_SEND
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        setDataAndType(uri, Constants.CSV_MIME_TYPE)
+        putExtra(Intent.EXTRA_STREAM, uri)
+    }, "Gooi maar ergens heen aub"))
+}

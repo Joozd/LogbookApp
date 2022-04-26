@@ -20,7 +20,7 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders
 
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.TotalTimesItem
@@ -28,7 +28,6 @@ import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortin
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortNameUpStrategy
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortValueDownStrategy
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortValueUpStrategy
-import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesListItem
 import nl.joozd.logbookapp.utils.DispatcherProvider
 

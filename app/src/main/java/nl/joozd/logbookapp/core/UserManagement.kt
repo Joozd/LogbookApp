@@ -17,20 +17,21 @@
  *
  */
 
-package nl.joozd.logbookapp.data.comm
+package nl.joozd.logbookapp.core
 
 import android.content.Intent
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
 import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.utils.generatePassword
-import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
+import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.comm.CloudFunctionResults
+import nl.joozd.logbookapp.data.comm.InternetStatus
 
 object UserManagement {
     val signedIn: Boolean
@@ -91,7 +92,8 @@ object UserManagement {
      */
     suspend fun newLoginDataNeeded(): CloudFunctionResults = withContext (Dispatchers.IO){
         if (InternetStatus.internetAvailable == false) return@withContext CloudFunctionResults.NO_INTERNET
-        val newUsername = Cloud.requestUsername() ?: return@withContext CloudFunctionResults.CLIENT_ERROR
+        val newUsername = Cloud.requestUsername()
+            ?: return@withContext CloudFunctionResults.CLIENT_ERROR
         val password = generatePassword(16)
         Log.d("UserManagement", "username: $newUsername")
         Log.d("UserManagement", "password: $password")
@@ -122,7 +124,10 @@ object UserManagement {
                 return@withContext it
         }
         Prefs.newPassword = newPassword
-        return@withContext Cloud.changePassword(newPassword, email = Prefs.emailAddress.nullIfBlank()).also{
+        return@withContext Cloud.changePassword(
+            newPassword,
+            email = Prefs.emailAddress.nullIfBlank()
+        ).also{
             if (it.isOK()) {
                 Prefs.password = newPassword
                 Prefs.newPassword = ""
@@ -237,7 +242,8 @@ object UserManagement {
 
     fun generateLoginLinkIntent(): Intent? = generateLoginLink()?.let { link ->
         Intent(Intent.ACTION_SEND).apply {
-            val text = App.instance.resources.openRawResource(R.raw.joozdlog_login_link_email).reader().readText().replace(EMAIL_LINK_PLACEHOLDER, link)
+            val text = App.instance.resources.openRawResource(R.raw.joozdlog_login_link_email).reader().readText().replace(
+                EMAIL_LINK_PLACEHOLDER, link)
 
             type = "text/plain"
             putExtra(Intent.EXTRA_SUBJECT, EMAIL_SUBJECT)

@@ -19,9 +19,6 @@
 
 package nl.joozd.logbookapp.model.viewmodels
 
-import android.content.Context
-import nl.joozd.logbookapp.App
-import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 
 abstract class JoozdlogDialogViewModel: JoozdlogViewModel() {

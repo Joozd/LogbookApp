@@ -21,9 +21,8 @@ package nl.joozd.logbookapp.data.export
 
 import android.net.Uri
 import androidx.core.content.FileProvider
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import java.io.File

@@ -36,7 +36,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope

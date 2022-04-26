@@ -43,7 +43,7 @@ import nl.joozd.logbookapp.extensions.noColon
 import nl.joozd.logbookapp.extensions.toMonthYear
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.getDateStringFromEpochSeconds
 import nl.joozd.logbookapp.model.helpers.FlightDataPresentationFunctions.minutesToHoursAndMinutesString
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 
 @Deprecated ("Use new [FlightsAdapter]")
 class FlightsAdapterOld(var allFlights: List<Flight>, private val deleteListener: (Flight) -> Unit, private val itemClick: (Flight) -> Unit) : RecyclerView.Adapter<FlightsAdapterOld.ViewHolder>(),

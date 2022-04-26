@@ -20,9 +20,8 @@
 package nl.joozd.logbookapp.data.repository
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
-import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
+import nl.joozd.logbookapp.core.JoozdlogWorkersHub
 
 /**
  * For doing I/O things that are not related to flights, airports, aircraft or balances forward

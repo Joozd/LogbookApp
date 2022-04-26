@@ -130,7 +130,7 @@
     <string name="never">Never</string>
     <string name="always">Always</string>
     <string name="warning">Warning</string>
-    <string name="dismiss">Dismiss</string>
+    <string name="ignore_for_one_day">Ignore for 1 day</string>
     <string name="verify">Verify</string>
 
     <string name="tbd">TBD</string>
@@ -180,8 +180,6 @@
     <string name="unknown_link_message">This link is unknown or contains bad data. Please check the link and try again.</string>
 
 
-
-
     <string name="total_time_too_large">Total time cannot be more than offblocks to on blocks</string>
     <string name="invalid_total_time">Could not parse total time</string>
 
@@ -196,7 +194,6 @@
     <string name="mail_to_myself">Send it to myself</string>
     <string name="send_using">Pick an app:</string>
     <string name="email_verification_scheduled">The verification of your email address is scheduled to happen when your device has an internet connection. \nOnce it succeeds, you will receive an email with your login link.</string>
-
 
 
     <string name="login_error_message">Cannot log in to server.</string>
@@ -452,9 +449,9 @@
     <string name="not_implemented_body">This operation is not implemented yet. Nothing will happen now.</string>
 
 
-
     <string name="fake_hidden_password">••••••••••</string>
-    <string name="backup_message_main_activity">You have not backed up your logbook for %1$s days.</string>
+    <string name="you_have_never_backed_up">No backup of logbook has been remembered.</string>
+    <string name="you_have_not_backed_up_n_days">You have not backed up your logbook for %1$d days.</string>
     <string name="cloud_backup_explanation">Send a periodic email to yourself from the cloud. Your email address is not saved on the server, so backups will be initiated from this device (and stop if you uninstall or kill the app, they should run with the app in the background).</string>
     <string name="new_user_email_reason">Please enter your email address here. It is only used to help you keep access to your data.\nYour email address will not be saved outside your device.</string>
     <string name="feedback_explanation">You can give any feedback you have to Joozdlog here. I would especially be happy to read things that nag you when using the app, feature requests or compliments.</string>
@@ -486,6 +483,8 @@
     <string name="joozdlog_importer">Joozdlog Importer</string>
     <string name="delete">delete</string>
     <string name="share">share</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>

@@ -1,7 +1,7 @@
 package nl.joozd.logbookapp.ui.activities.settingsActivity
 
 import android.widget.NumberPicker
-import nl.joozd.logbookapp.App
+import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.getStringWithMakeup

@@ -19,46 +19,27 @@
 
 package nl.joozd.logbookapp.data.sharedPrefs
 
-import android.content.Context
 import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.datastore.preferences.SharedPreferencesMigration
-import androidx.datastore.preferences.core.*
-import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.App
 import nl.joozd.logbookapp.data.utils.Encryption
 
 
-object Prefs {
-    private const val USER_PREFERENCES_FILE_KEY = "nl.joozd.logbookapp.PREFERENCE_FILE_KEY"
+object Prefs: JoozdLogPreferences() {
+    override val preferencesFileKey = "nl.joozd.logbookapp.PREFERENCE_FILE_KEY"
+    override val needsMigration = true
+
     const val USERNAME_NOT_SET = "USERNAME_NOT_SET"
     private const val NO_CALENDAR_SELECTED = ""
     private const val PASSWORD_SHAREDPREF_KEY = "passwordSharedPrefKey"
-
-    private val dataStore by lazy {
-        App.instance.ctx.dataStore
-    }
-
-    private val Context.dataStore by preferencesDataStore(
-        name = USER_PREFERENCES_FILE_KEY,
-        produceMigrations = { context ->
-            // Since we're migrating from SharedPreferences, add a migration based on the
-            // SharedPreferences name
-            listOf(SharedPreferencesMigration(context, USER_PREFERENCES_FILE_KEY))
-        }
-    )
 
     /**
      * username is the users' username.
      * cannot delegate as that doesn't support null
      */
-
-
-    private var usernameResource: String by JoozdLogSharedPrefs(dataStore, USERNAME_NOT_SET)
+    private var usernameResource: String by JoozdLogSharedPreference(dataStore, USERNAME_NOT_SET)
     var username: String?
         get() = usernameIfSet(usernameResource)
         set(it) {
@@ -105,53 +86,53 @@ object Prefs {
                 Base64.decode(it, Base64.DEFAULT)
             }
 
-    var emailAddress: String by JoozdLogSharedPrefs(dataStore, "")
+    var emailAddress: String by JoozdLogSharedPreference(dataStore, "")
     val emailAddressFlow get() = getStringFlowForItem(this::emailAddress.name, "")
 
     /**
      * [emailVerified] is true if email verification code was deemed correct by server
      * set this to false if server gives an INCORRECT_EMAIL_ADDRESS error
      */
-    var emailVerified: Boolean by JoozdLogSharedPrefs(dataStore, false)
+    var emailVerified: Boolean by JoozdLogSharedPreference(dataStore, false)
     val emailVerifiedFlow get() = getBooleanFlowForItem(this::emailVerified.name, false)
 
     /**
      * a list of jobs waiting for email confirmation
      * Parse this into an [EmailJobsWaiting] object
      */
-    var emailJobsWaitingInt: Int by JoozdLogSharedPrefs(dataStore, 0)
+    var emailJobsWaitingInt: Int by JoozdLogSharedPreference(dataStore, 0)
 
     val emailJobsWaiting: EmailJobsWaiting = EmailJobsWaiting(emailJobsWaitingInt)
 
     //Placeholder for new password when changing pass. If app gets killed during password change, this will remain set.
-    var newPassword: String by JoozdLogSharedPrefs(dataStore, "")
+    var newPassword: String by JoozdLogSharedPreference(dataStore, "")
 
-    var lastUpdateTime: Long by JoozdLogSharedPrefs(dataStore, -1)
+    var lastUpdateTime: Long by JoozdLogSharedPreference(dataStore, -1)
     val lastUpdateTimeFlow get() = getLongFlowForItem(this::lastUpdateTime.name, -1)
 
-    var serverTimeOffset: Long by JoozdLogSharedPrefs(dataStore, 0)
+    var serverTimeOffset: Long by JoozdLogSharedPreference(dataStore, 0)
 
-    var airportDbVersion: Int by JoozdLogSharedPrefs(dataStore, 0)
+    var airportDbVersion: Int by JoozdLogSharedPreference(dataStore, 0)
 
-    var aircraftTypesVersion: Int by JoozdLogSharedPrefs(dataStore, 0)
+    var aircraftTypesVersion: Int by JoozdLogSharedPreference(dataStore, 0)
 
-    var aircraftForcedVersion: Int by JoozdLogSharedPrefs(dataStore, 0)
+    var aircraftForcedVersion: Int by JoozdLogSharedPreference(dataStore, 0)
 
     /**
      * Amount of days that need to have passed for a notice to be shown
      */
-    var backupInterval: Int by JoozdLogSharedPrefs(dataStore, 0)
+    var backupInterval: Int by JoozdLogSharedPreference(dataStore, 0)
     val backupIntervalFlow get() = getIntFlowForItem(this::backupInterval.name, 0)
 
-    var backupFromCloud: Boolean by JoozdLogSharedPrefs(dataStore, false)
+    var backupFromCloud: Boolean by JoozdLogSharedPreference(dataStore, false)
     val backupFromCloudFlow get() = getBooleanFlowForItem(this::backupFromCloud.name, false)
 
     //Instant epochSeconds of most recent backup
-    var mostRecentBackup: Long by JoozdLogSharedPrefs(dataStore, 0L)
+    var mostRecentBackup: Long by JoozdLogSharedPreference(dataStore, 0L)
 
-    var newUserActivityFinished: Boolean by JoozdLogSharedPrefs(dataStore, false)
+    var newUserActivityFinished: Boolean by JoozdLogSharedPreference(dataStore, false)
 
-    var editFlightFragmentWelcomeMessageShouldBeDisplayed: Boolean by JoozdLogSharedPrefs(
+    var editFlightFragmentWelcomeMessageShouldBeDisplayed: Boolean by JoozdLogSharedPreference(
         dataStore,
         true
     )
@@ -159,34 +140,34 @@ object Prefs {
     /**
      * Errors to be shown, bit flags. @see scheduleErrorNotification
      */
-    var errorsToBeShown: Long by JoozdLogSharedPrefs(dataStore, 0L)
+    var errorsToBeShown: Long by JoozdLogSharedPreference(dataStore, 0L)
 
 
     /***********************
      *   UI preferences:   *
      **********************/
 
-    var darkMode: Int by JoozdLogSharedPrefs(dataStore, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+    var darkMode: Int by JoozdLogSharedPreference(dataStore, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
     /**
      * Use ICAO or Iata? True = IATA, false ICAO
      */
-    var useIataAirports: Boolean by JoozdLogSharedPrefs(dataStore, false)
+    var useIataAirports: Boolean by JoozdLogSharedPreference(dataStore, false)
     val useIataAirportsFlow get() = getBooleanFlowForItem(this::useIataAirports.name, false)
 
     /**
      * If true, if PIC name is not set, flight will be marked incomplete (red)
      */
-    var picNameNeedsToBeSet: Boolean by JoozdLogSharedPrefs(dataStore, true)
+    var picNameNeedsToBeSet: Boolean by JoozdLogSharedPreference(dataStore, true)
     val picNameNeedsToBeSetFlow get() = getBooleanFlowForItem(this::picNameNeedsToBeSet.name, true)
 
     /**
      * Get planned flights from calendar?
      */
-    var useCalendarSync: Boolean by JoozdLogSharedPrefs(dataStore, false)
+    var useCalendarSync: Boolean by JoozdLogSharedPreference(dataStore, false)
     val useCalendarSyncFlow get() = getBooleanFlowForItem(this::useCalendarSync.name, false)
 
-    private var _calendarSyncType: Int by JoozdLogSharedPrefs(
+    private var _calendarSyncType: Int by JoozdLogSharedPreference(
         dataStore,
         CalendarSyncType.CALENDAR_SYNC_NONE.value
     )
@@ -199,41 +180,41 @@ object Prefs {
         }
     val calendarSyncTypeFlow = _calendarSyncTypeFlow.map { makeCalendarSyncType(it!!)}
 
-    var calendarSyncIcalAddress: String by JoozdLogSharedPrefs(dataStore, "")
+    var calendarSyncIcalAddress: String by JoozdLogSharedPreference(dataStore, "")
     val calendarSyncIcalAddressFlow get() = getStringFlowForItem(this::calendarSyncIcalAddress.name, "")
 
-    var nextCalendarCheckTime: Long by JoozdLogSharedPrefs(dataStore, -1)
+    var nextCalendarCheckTime: Long by JoozdLogSharedPreference(dataStore, -1)
 
     // in epochSeconds
-    var calendarDisabledUntil: Long by JoozdLogSharedPrefs(dataStore, 0)
+    var calendarDisabledUntil: Long by JoozdLogSharedPreference(dataStore, 0)
     val calendarDisabledUntilFlow get() = getLongFlowForItem(this::calendarDisabledUntil.name, 0)
 
     /**
      * CalendarSync days into the future:
      */
-    var calendarSyncAmountOfDays: Long by JoozdLogSharedPrefs(dataStore, 30L)
+    var calendarSyncAmountOfDays: Long by JoozdLogSharedPreference(dataStore, 30L)
 
     /**
      * Postpone calendar sync without asking
      */
-    var alwaysPostponeCalendarSync: Boolean by JoozdLogSharedPrefs(dataStore, false)
+    var alwaysPostponeCalendarSync: Boolean by JoozdLogSharedPreference(dataStore, false)
     val alwaysPostponeCalendarSyncFlow get() = getBooleanFlowForItem(this::alwaysPostponeCalendarSync.name, false)
 
 
     /**
      * Accept aircraft change from Monthly Overview without confirmation?
      */
-    var updateAircraftWithoutAsking: Boolean by JoozdLogSharedPrefs(dataStore, true)
+    var updateAircraftWithoutAsking: Boolean by JoozdLogSharedPreference(dataStore, true)
 
     /**
      * Max time difference before montly/actual becomes a conflict (in minutes)
      */
-    var maxChronoAdjustment: Int by JoozdLogSharedPrefs(dataStore, 180)
+    var maxChronoAdjustment: Int by JoozdLogSharedPreference(dataStore, 180)
 
     /**
      * Add names from rosters?
      */
-    var getNamesFromRosters: Boolean by JoozdLogSharedPrefs(dataStore, defaultValue = true)
+    var getNamesFromRosters: Boolean by JoozdLogSharedPreference(dataStore, defaultValue = true)
     val getNamesFromRostersFlow get() = getBooleanFlowForItem(this::getNamesFromRosters.name, true)
 
     /*************************
@@ -241,21 +222,21 @@ object Prefs {
      *************************/
 
     //time to allocate to pilot if flying heavy crew and did takeoff or landing
-    var standardTakeoffLandingTimes: Int by JoozdLogSharedPrefs(dataStore, 30)
+    var standardTakeoffLandingTimes: Int by JoozdLogSharedPreference(dataStore, 30)
     val standardTakeoffLandingTimesFlow get() = getIntFlowForItem(this::standardTakeoffLandingTimes.name, 30)
 
     //Calendar on device that is used to import flights
-    var selectedCalendar: String by JoozdLogSharedPrefs(dataStore, NO_CALENDAR_SELECTED)
+    var selectedCalendar: String by JoozdLogSharedPreference(dataStore, NO_CALENDAR_SELECTED)
     val selectedCalendarFlow get() = getStringFlowForItem(this::selectedCalendar.name, NO_CALENDAR_SELECTED)
 
     // true if user wants new flights to be marked as IFR. Not sure if I want to use this.
     // var normallyFliesIFR: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
     // true if user wants to use cloud -
-    var useCloud: Boolean by JoozdLogSharedPrefs(dataStore, false)
+    var useCloud: Boolean by JoozdLogSharedPreference(dataStore, false)
     val useCloudFlow get() = getBooleanFlowForItem(this::useCloud.name, false)
 
-    var acceptedCloudSyncTerms: Boolean by JoozdLogSharedPrefs(dataStore, false)
+    var acceptedCloudSyncTerms: Boolean by JoozdLogSharedPreference(dataStore, false)
 
     /**
      * Small things being saved:
@@ -263,45 +244,23 @@ object Prefs {
 
     // If feedback could not be sent to server, save it for the next time
     // TODO handle this with a worker
-    var feedbackWaiting: String by JoozdLogSharedPrefs(dataStore, "")
+    var feedbackWaiting: String by JoozdLogSharedPreference(dataStore, "")
 
     /**
      * Email confirmation string waiting for a network connection. Handled by [nl.joozd.logbookapp.workmanager.ConfirmEmailWorker]
      */
-    var emailConfirmationStringWaiting: String by JoozdLogSharedPrefs(dataStore, "")
+    var emailConfirmationStringWaiting: String by JoozdLogSharedPreference(dataStore, "")
 
     /**
      * Login link waiting for server to be available
      */
-    var loginLinkStringWaiting: String by JoozdLogSharedPrefs(dataStore, "")
+    var loginLinkStringWaiting: String by JoozdLogSharedPreference(dataStore, "")
 
 
     private fun usernameIfSet(name: String) = name.takeIf { usernameResource != USERNAME_NOT_SET }
 
     private fun makeCalendarSyncType(type: Int): CalendarSyncType =
         CalendarSyncType.fromInt(type) ?: CalendarSyncType.CALENDAR_SYNC_NONE
-
-    private fun getBooleanFlowForItem(itemName: String, defaultValue: Boolean? = null): Flow<Boolean?> = dataStore.data.map { p ->
-        p[booleanPreferencesKey(itemName)] ?: defaultValue
-    }
-
-    private fun getIntFlowForItem(itemName: String, defaultValue: Int? = null): Flow<Int?> = dataStore.data.map { p ->
-        p[intPreferencesKey(itemName)] ?: defaultValue
-    }
-
-    private fun getLongFlowForItem(itemName: String, defaultValue: Long? = null): Flow<Long?> = dataStore.data.map { p ->
-        p[longPreferencesKey(itemName)] ?: defaultValue
-    }
-
-    private fun getFloatFlowForItem(itemName: String, defaultValue: Float? = null): Flow<Float?> = dataStore.data.map { p ->
-        p[floatPreferencesKey(itemName)] ?: defaultValue
-    }
-
-    private fun getStringFlowForItem(itemName: String, defaultValue: String? = null): Flow<String?> = dataStore.data.map { p ->
-        p[stringPreferencesKey(itemName)] ?: defaultValue
-    }
-
-
 }
 
 

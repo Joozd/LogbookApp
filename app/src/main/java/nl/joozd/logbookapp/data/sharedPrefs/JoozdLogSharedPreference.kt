@@ -27,53 +27,5 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KProperty
 
-/**
- * Use a var as a SharedPreference.
- * @param dataStore: SharedPreferences to use
- * @param defaultValue: Default value to return. Needs to be used to set type of variable to set
- * @Note reading this value is a blocking IO operation.
- */
-class JoozdLogSharedPreference<T : Any>(private val dataStore: DataStore<Preferences>, private val defaultValue: T){
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return getPreference(property.name, defaultValue)
-    }
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        setPreference(property.name, value)
-    }
-
-    private fun getPreference(key: String, defaultValue: T): T {
-        @Suppress("UNCHECKED_CAST")
-        val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
-        return readBlocking(prefsKey, defaultValue)
-    }
-
-    private fun setPreference(key: String, value: T) {
-        @Suppress("UNCHECKED_CAST")
-        val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
-        MainScope().launch {
-            dataStore.edit { p ->
-                p[prefsKey] = value
-            }
-        }
-    }
-
-
-    private fun generatePreferencesKey(key: String, defaultValue: T) =
-        when(defaultValue){
-            is Boolean -> booleanPreferencesKey(key)
-            is Int -> intPreferencesKey(key)
-            is Long -> longPreferencesKey(key)
-            is Float -> floatPreferencesKey(key)
-            is String -> stringPreferencesKey(key)
-            else -> throw IllegalArgumentException()
-    }
-
-    private fun readBlocking(key: Preferences.Key<T>, defaultValue: T): T =
-        runBlocking {
-            @Suppress("UNCHECKED_CAST")
-            (dataStore.data.first()[key] ?: defaultValue)
-        }
-
-}
 

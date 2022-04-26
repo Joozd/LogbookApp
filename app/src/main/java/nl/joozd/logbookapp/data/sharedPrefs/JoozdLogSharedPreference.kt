@@ -31,8 +31,9 @@ import kotlin.reflect.KProperty
  * Use a var as a SharedPreference.
  * @param dataStore: SharedPreferences to use
  * @param defaultValue: Default value to return. Needs to be used to set type of variable to set
+ * @Note reading this value is a blocking IO operation.
  */
-class JoozdLogSharedPrefs<T : Any>(private val dataStore: DataStore<Preferences>, private val defaultValue: T){
+class JoozdLogSharedPreference<T : Any>(private val dataStore: DataStore<Preferences>, private val defaultValue: T){
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
         return getPreference(property.name, defaultValue)
     }

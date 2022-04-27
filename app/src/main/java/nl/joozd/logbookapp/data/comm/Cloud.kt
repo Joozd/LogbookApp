@@ -213,7 +213,7 @@ object Cloud {
                 CloudFunctionResults.OK -> {
                     Prefs.emailJobsWaiting.sendBackupCsv = false
                     BackupPrefs.mostRecentBackup = Instant.now().epochSecond
-                    BackupPrefs.backupIgnoredExtraDays = 0
+                    BackupPrefs.backupIgnoredUntil = 0
                 }
                 CloudFunctionResults.EMAIL_DOES_NOT_MATCH -> {
                     Prefs.emailVerified = false

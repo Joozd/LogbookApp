@@ -5,18 +5,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.Constants
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.BackupCenter
+import nl.joozd.logbookapp.core.Constants.ONE_DAY_IN_SECONDS
 import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
 import nl.joozd.logbookapp.databinding.FragmentBackupNotificationBinding
+import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.extensions.makeCsvSharingIntent
 import nl.joozd.logbookapp.model.viewmodels.status.BackupCenterStatus
 import nl.joozd.logbookapp.ui.utils.MessageBarFragment
 import java.time.Instant
+import java.time.ZoneOffset
 
 /**
  * A small fragment that gives user a choice to backup now or ignore 1 day.
@@ -41,8 +43,8 @@ class BackupNotificationFragment: MessageBarFragment() {
     }
 
     private fun FragmentBackupNotificationBinding.setOnClickListeners(){
-        setIgnoreListener()
-        setBackupNowListener()
+        setIgnoreOnClickListener()
+        setBackupNowOnClickListener()
     }
 
     private fun FragmentBackupNotificationBinding.launchBackupMessageFlow(){
@@ -51,20 +53,18 @@ class BackupNotificationFragment: MessageBarFragment() {
             backupMessage.text = if (BackupPrefs.mostRecentBackup == 0L)
                 getString(R.string.you_have_never_backed_up)
             else
-                getString(R.string.you_have_not_backed_up_n_days, elapsedTime / Constants.ONE_DAY_IN_SECONDS)
+                getString(R.string.you_have_not_backed_up_n_days, elapsedTime / ONE_DAY_IN_SECONDS)
         }
     }
 
-    private fun FragmentBackupNotificationBinding.setIgnoreListener(){
+    private fun FragmentBackupNotificationBinding.setIgnoreOnClickListener(){
         ignoreButton.setOnClickListener {
-            lifecycleScope.launch {
-                BackupPrefs.backupIgnoredExtraDays ++
-                onCompleted()
-            }
+            BackupPrefs.backupIgnoredUntil = Instant.now().atStartOfDay(ZoneOffset.UTC).epochSecond + ONE_DAY_IN_SECONDS
+            onCompleted()
         }
     }
 
-    private fun FragmentBackupNotificationBinding.setBackupNowListener(){
+    private fun FragmentBackupNotificationBinding.setBackupNowOnClickListener(){
         backupButton.setOnClickListener {
             BackupCenter.putBackupUriInStatus()
         }

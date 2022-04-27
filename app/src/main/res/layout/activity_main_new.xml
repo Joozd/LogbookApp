@@ -101,20 +101,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/searchField">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/backup_reminder_layout"
-
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:layout_editor_absoluteX="4dp"
-            tools:visibility="visible">
-
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
         <com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
             android:id="@+id/fastscroller"
             android:layout_width="match_parent"
@@ -125,7 +111,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/backup_reminder_layout"
+            app:layout_constraintTop_toTopOf="parent"
             app:popupDrawable="@drawable/scrollbar_popup_drawable_light">
 
             <androidx.recyclerview.widget.RecyclerView
@@ -149,6 +135,16 @@
             </androidx.recyclerview.widget.RecyclerView>
 
         </com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller>
+
+        <FrameLayout
+            android:id="@+id/message_bar_target"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

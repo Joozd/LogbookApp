@@ -33,7 +33,7 @@ object BackupCenter: CoroutineScope by MainScope() {
         status = BackupCenterStatus.BuildingCsv
         val uri = JoozdlogExport.shareCsvExport("joozdlog_backup_$dateString")
         status = BackupCenterStatus.SharedUri(uri)
-        BackupPrefs.backupIgnoredExtraDays = 0
+        BackupPrefs.backupIgnoredUntil = 0
         BackupPrefs.mostRecentBackup = Instant.now().epochSecond
     }
 
@@ -60,10 +60,11 @@ object BackupCenter: CoroutineScope by MainScope() {
             }
         }
 
-    private fun scheduleBackupNotification(atTime: Long){
+    private fun scheduleBackupNotification(delay: Long){
+        MessageCenter.pullMessageBarFragmentByTag(BACKUP_NOTIFICATION_TAG)
         val task = OneTimeWorkRequestBuilder<ScheduleBackupNotificationWorker>()
             .addTag(BACKUP_NOTIFICATION_TAG)
-            .setInitialDelay(Duration.between(Instant.now(), Instant.ofEpochSecond(atTime)))
+            .setInitialDelay(Duration.ofSeconds(delay))
             .build()
 
         WorkManager.getInstance(App.instance)

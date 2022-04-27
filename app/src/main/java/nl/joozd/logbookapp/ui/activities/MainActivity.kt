@@ -58,6 +58,8 @@ import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.ImportedLogbookAutoCompleter
 import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
 import nl.joozd.logbookapp.core.MessageCenter
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.extensions.removeByTagAnimated
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {
@@ -109,6 +111,8 @@ class MainActivity : JoozdlogActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        //TODO this should go to `core`
         JoozdlogWorkersHub.syncTimeAndFlightsIfEnoughTimePassed()
         updateCalendarEventsIfEnabled()
     }
@@ -132,13 +136,14 @@ class MainActivity : JoozdlogActivity() {
         collectFlightsListFlow()
         collectUndoRedoChangedFlow()
         collectAmountOfFlightsFlow()
-        collectCalendarControlFlow()
         collectIcaoIataSwappedFlow()
+
+        collectMessageCenterMessages()
+        collectMessageCenterFragments()
     }
 
     private fun collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded(){
         viewModel.flightEditorFlow.launchCollectWhileLifecycleStateStarted{
-            println("Collected flightEditorFlow $it")
             killWorkingFlightEditingFragments()
             if (it != null)
                 launchEditFlightFragment()
@@ -180,16 +185,29 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    private fun collectCalendarControlFlow(){
+    @SuppressLint("NotifyDataSetChanged") // in this case, entire dataset will be changed.
+    private fun ActivityMainNewBinding.collectIcaoIataSwappedFlow(){
+        Prefs.useIataAirportsFlow.launchCollectWhileLifecycleStateStarted{
+            flightsList.adapter?.notifyDataSetChanged()
+        }
+    }
+
+    private fun collectMessageCenterMessages(){
         MessageCenter.messageFlow.launchCollectWhileLifecycleStateStarted{
             it?.toAlertDialog(this)?.show()
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged") // in this case, entire dataset will be changed.
-    private fun ActivityMainNewBinding.collectIcaoIataSwappedFlow(){
-        Prefs.useIataAirportsFlow.launchCollectWhileLifecycleStateStarted{
-            flightsList.adapter?.notifyDataSetChanged()
+    private fun collectMessageCenterFragments(){
+        MessageCenter.messageBarFragmentFlow.launchCollectWhileLifecycleStateStarted{
+            if (it != null) {
+                supportFragmentManager.commit {
+                    setCustomAnimations(R.anim.slide_in_from_top, 0)
+                    add(R.id.message_bar_target, it, MESSAGE_BAR_FRAGMENT_TAG)
+                }
+            } else {
+                supportFragmentManager.removeByTagAnimated(MESSAGE_BAR_FRAGMENT_TAG, R.anim.slide_out_to_top)
+            }
         }
     }
 
@@ -208,10 +226,6 @@ class MainActivity : JoozdlogActivity() {
         supportFragmentManager.popBackStack(EDIT_FLIGHT_FRAGMENT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     }
 
-    private fun ActivityMainNewBinding.showBackupReminderLayoutIf(it: Boolean) {
-        backupReminderLayout.visibility = if (it) View.VISIBLE else View.GONE
-    }
-
     private fun makeFlightsListAdapter() =
         FlightsAdapter(
             onDelete = { flight -> attemptToDelete(flight) },
@@ -219,7 +233,6 @@ class MainActivity : JoozdlogActivity() {
         )
 
     private fun ActivityMainNewBinding.closeSearchField() {
-        println("XXXXXXX CLOSE SEARCH FIELD")
         if (mainSearchField.text?.isNotBlank() == true)
             scrollOnNextUpdate()
         mainSearchField.setText("")
@@ -276,9 +289,7 @@ class MainActivity : JoozdlogActivity() {
 
     private fun ActivityMainNewBinding.scrollToFirstCompletedFlight() {
         val flights = (flightsList.adapter as FlightsAdapter).currentList
-        println("scroll: currentlist size: ${flights.size}")
         val positionToScrollTo = findIndexOfTopFlightOnScreenAfterScrolling(flights)
-        println("scroll: scroll to: $positionToScrollTo")
         flightsList.scrollToPosition(positionToScrollTo)
 
         // scroll by another 30 dp
@@ -318,7 +329,6 @@ class MainActivity : JoozdlogActivity() {
 
     private fun launchEditFlightFragment() {
         val eff = EditFlightFragment()
-        println("Launching EFF $eff")
         supportFragmentManager.commit {
             add(R.id.mainActivityLayout, eff, EDIT_FLIGHT_FRAGMENT_TAG)
             addToBackStack(EDIT_FLIGHT_FRAGMENT_TAG)
@@ -353,7 +363,6 @@ class MainActivity : JoozdlogActivity() {
         startActivity(Intent(this, SettingsActivity::class.java))
     }
 
-
     private fun startNewUserActivityIfNewInstall() {
         if (!Prefs.newUserActivityFinished)
             startActivity(Intent(this, NewUserActivity::class.java))
@@ -386,7 +395,7 @@ class MainActivity : JoozdlogActivity() {
                 lifecycleScope.launch {
                     getFlightsFromCalendar()?.let {
                         val ff = ImportedLogbookAutoCompleter().autocomplete(it)
-                        ImportedFlightsSaver.instance.save(ff)
+                        ImportedFlightsSaver.make(FlightRepository.instance).save(ff)
                     }
                 }
             else
@@ -419,6 +428,8 @@ class MainActivity : JoozdlogActivity() {
 
     companion object{
         const val EDIT_FLIGHT_FRAGMENT_TAG = "EDIT_FLIGHT_FRAGMENT_TAG"
+        const val MESSAGE_BAR_FRAGMENT_TAG = "MESSAGE_BAR_FRAGMENT_TAG"
+
         const val PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED = 2
     }
 }

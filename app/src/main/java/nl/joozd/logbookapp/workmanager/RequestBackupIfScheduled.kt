@@ -50,7 +50,7 @@ class RequestBackupIfScheduled(appContext: Context, workerParams: WorkerParamete
     override suspend fun doWork(): Result = withContext(Dispatchers.IO + NonCancellable) {
         if (!Prefs.backupFromCloud || !backupNeeded()) Result.success() // If backup not needed, this (checking if it is needed) is all we do.
         else {
-            when (Cloud.requestBackup()) {
+            when (Cloud.requestBackupEmail()) {
                 CloudFunctionResults.OK -> Result.success().also{
                     Prefs.mostRecentBackup = Instant.now().epochSecond
                 }

@@ -53,7 +53,7 @@ class EmailJobsWaiting(var maskedValues: Int ): Iterable<suspend () -> Unit> {
      * Values for use in Iterator
      */
     private val runSendLoginLink = suspend { Cloud.requestLoginLinkMail(); Unit }
-    private val runSendBackupCsv = suspend { Cloud.requestBackup(); Unit }
+    private val runSendBackupCsv = suspend { Cloud.requestBackupEmail(); Unit }
     private val resetIterator = suspend { iteratorAlreadyRunning = false }
 
     private val jobMarkers = listOf(sendLoginLink, sendBackupCsv, true) // last true is the job that sets [iteratorAlreadyRunning] to false

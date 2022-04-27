@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.ui.messageCenter
+package nl.joozd.logbookapp.core
 
 
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,8 +26,10 @@ object MessageCenter {
     }
 
     fun pushMessageBarFragment(fragment: MessageBarFragment){
-        fragment.setOnCompleted { nextFragment() }
-        addFragmentToQueue(fragment)
+        if (notYetInQueue(fragment)) {
+            fragment.setOnCompleted { nextFragment() }
+            addFragmentToQueue(fragment)
+        }
     }
 
     private fun addMessageToQueue(msg: UserMessage){
@@ -55,4 +57,9 @@ object MessageCenter {
     private fun nextFragment(){
         currentMessageBarFragment = messageBarFragmentQueue.poll()
     }
+
+    private fun notYetInQueue(fragment: MessageBarFragment) =
+        fragment.messageTag == null ||
+                (fragment.messageTag !in messageBarFragmentQueue.map { it.tag }
+                        && fragment.messageTag != currentMessageBarFragment?.messageTag)
 }

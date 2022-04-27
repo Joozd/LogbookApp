@@ -30,6 +30,7 @@ import nl.joozd.joozdlogcommon.ForcedTypeData
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
+import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
 import nl.joozd.logbookapp.model.dataclasses.Flight
 
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
@@ -39,6 +40,7 @@ import nl.joozd.logbookapp.exceptions.NotAuthorizedException
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.TimestampMaker
+import java.time.Instant
 
 /**
  * Cloud will take care of all things happening in the cloud.
@@ -197,13 +199,21 @@ object Cloud {
         }
 
 
-    suspend fun requestBackup(): CloudFunctionResults =
-        Client.getInstance().use { client ->
+    /**
+     * This will send a mail with all flights currently in cloud.
+     * Flights will be synced first just to be sure things are correct.
+     */
+    suspend fun requestBackupEmail(): CloudFunctionResults {
+        syncAllFlights()
+        return Client.getInstance().use { client ->
             ServerFunctions.login(client)
+
             val result = ServerFunctions.requestBackup(client)
             when (result) {
                 CloudFunctionResults.OK -> {
                     Prefs.emailJobsWaiting.sendBackupCsv = false
+                    BackupPrefs.mostRecentBackup = Instant.now().epochSecond
+                    BackupPrefs.backupIgnoredExtraDays = 0
                 }
                 CloudFunctionResults.EMAIL_DOES_NOT_MATCH -> {
                     Prefs.emailVerified = false
@@ -213,6 +223,7 @@ object Cloud {
             }
             result
         }
+    }
 
 
     /**********************************************************************************************
@@ -292,7 +303,7 @@ object Cloud {
      *         -1 on critical fail (ie wrong credentials),
      *         null on server error (retry later)
      */
-    suspend fun syncAllFlights(flightRepository: FlightRepositoryWithDirectAccess): Long? {
+    suspend fun syncAllFlights(flightRepository: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance): Long? {
         TimestampMaker().getAndSaveTimeOffset() ?: return null
         val timeStamp = TimestampMaker().nowForSycPurposes
         return Client.getInstance().use { server ->

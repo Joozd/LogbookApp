@@ -57,7 +57,7 @@ import nl.joozd.logbookapp.core.JoozdlogWorkersHub
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.ImportedLogbookAutoCompleter
 import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
-import nl.joozd.logbookapp.ui.messageCenter.MessageCenter
+import nl.joozd.logbookapp.core.MessageCenter
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {

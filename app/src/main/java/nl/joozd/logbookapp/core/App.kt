@@ -40,7 +40,7 @@ class App : Application(){
         JoozdlogWorkersHub.periodicBackupFromServer()
 
         //Set long-running tasks for notifications
-        BackupCenter.scheduleBackupNotification()
+        BackupCenter.makeOrScheduleBackupNotification()
 
         // Set dark mode preference from Preferences
         DarkModeHub.setDarkMode()

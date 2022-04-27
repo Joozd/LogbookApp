@@ -365,7 +365,7 @@ class SettingsActivity : JoozdlogActivity() {
 
 
     private fun Button.setBackupNowButtonToActive() {
-        setOnClickListener { BackupCenter.backUpNow() }
+        setOnClickListener { BackupCenter.putBackupUriInStatus() }
         setText(R.string.backup_now)
     }
 

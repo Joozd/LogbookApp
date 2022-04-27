@@ -14,7 +14,6 @@ import nl.joozd.logbookapp.core.BackupCenter
 import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
 import nl.joozd.logbookapp.databinding.FragmentBackupNotificationBinding
 import nl.joozd.logbookapp.extensions.makeCsvSharingIntent
-import nl.joozd.logbookapp.model.viewmodels.fragments.BackupNotificationFragmentViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.BackupCenterStatus
 import nl.joozd.logbookapp.ui.utils.MessageBarFragment
 import java.time.Instant
@@ -25,7 +24,8 @@ import java.time.Instant
  * Ignore should remove the fragment, to be re-displayed the next calendar day.
  */
 class BackupNotificationFragment: MessageBarFragment() {
-    private val viewModel: BackupNotificationFragmentViewModel by viewModels()
+    override val messageTag = "BackupNotificationFragment"
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,8 +44,6 @@ class BackupNotificationFragment: MessageBarFragment() {
         setIgnoreListener()
         setBackupNowListener()
     }
-
-
 
     private fun FragmentBackupNotificationBinding.launchBackupMessageFlow(){
         BackupPrefs.mostRecentBackupFlow.launchCollectWhileLifecycleStateStarted { t ->
@@ -68,7 +66,7 @@ class BackupNotificationFragment: MessageBarFragment() {
 
     private fun FragmentBackupNotificationBinding.setBackupNowListener(){
         backupButton.setOnClickListener {
-            BackupCenter.backUpNow()
+            BackupCenter.putBackupUriInStatus()
         }
     }
 
@@ -96,7 +94,7 @@ class BackupNotificationFragment: MessageBarFragment() {
     }
 
     private fun TextView.setBackupButtonToActive() {
-        setOnClickListener { BackupCenter.backUpNow() }
+        setOnClickListener { BackupCenter.putBackupUriInStatus() }
         setText(R.string.backup_now)
         BackupCenter.reset()
     }

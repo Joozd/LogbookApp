@@ -76,13 +76,10 @@ object BackupCenter: CoroutineScope by MainScope() {
         combine(BackupPrefs.nextBackupNeededFlow, Prefs.backupFromCloudFlow) {
             backupNeededAt, backupFromCloud ->
                 val backupOverdueBy = Instant.now().epochSecond - backupNeededAt
-                println("DEBUG: Backup overdue by $backupOverdueBy seconds")
                 when {
                     backupNotificationNeeded(backupFromCloud, backupOverdueBy) -> BackupAction.NOTIFY
                     backupEmailNeeded(backupOverdueBy, backupFromCloud) -> BackupAction.EMAIL
                     else -> BackupAction.SCHEDULE(backupOverdueBy * -1)
-                }.also{
-                    println("backupActionFlow emitted $it")
                 }
         }
 

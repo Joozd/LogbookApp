@@ -20,6 +20,4 @@ object BackupPrefs: JoozdLogPreferences() {
     { interval, mostRecent, backupIgnoredUntil ->
         maxOf(mostRecent + interval * ONE_DAY_IN_SECONDS, backupIgnoredUntil)
     }
-
-
 }

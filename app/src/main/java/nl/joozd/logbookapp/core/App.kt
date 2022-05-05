@@ -22,7 +22,6 @@ package nl.joozd.logbookapp.core
 import nl.joozd.logbookapp.utils.DelegatesExt
 import android.app.Application
 import android.content.Context
-import nl.joozd.logbookapp.ui.utils.DarkModeHub
 
 class App : Application(){
     companion object {
@@ -34,15 +33,11 @@ class App : Application(){
         super.onCreate()
         instance = this
 
-        //Periodic workers get started as soon as app gets started
+        //Periodic workers get started as soon as app gets started.
         JoozdlogWorkersHub.periodicGetAirportsFromServer()
         JoozdlogWorkersHub.periodicSynchronizeAircraftTypes()
-        JoozdlogWorkersHub.periodicBackupFromServer()
-
-        //Set long-running tasks for notifications
-        BackupCenter.makeOrScheduleBackupNotification()
 
         // Set dark mode preference from Preferences
-        DarkModeHub.setDarkMode()
+        DarkModeCenter.setDarkMode()
     }
 }

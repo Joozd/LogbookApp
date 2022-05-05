@@ -24,9 +24,9 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.comm.OldCloud
 import nl.joozd.logbookapp.core.UserManagement
-import nl.joozd.logbookapp.data.comm.CloudFunctionResults
+import nl.joozd.logbookapp.data.comm.ServerFunctionResult
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
@@ -36,10 +36,10 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
     private val flightRepository = FlightRepositoryWithDirectAccess.instance
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        if (makeNewLoginDataIfNeeded() != CloudFunctionResults.OK)
+        if (makeNewLoginDataIfNeeded() != ServerFunctionResult.OK)
             Result.retry()
         else
-            when (val result = Cloud.syncAllFlights(flightRepository)) {
+            when (val result = OldCloud.syncAllFlights(flightRepository)) {
                 null -> Result.retry()
                 -1L -> Result.failure()
                 else -> {
@@ -51,9 +51,9 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
 
     /**
      * Make new login data if needed
-     * @return [CloudFunctionResults.OK] if not needed or success, something else if failure
+     * @return [ServerFunctionResult.OK] if not needed or success, something else if failure
      */
-    private suspend fun makeNewLoginDataIfNeeded(): CloudFunctionResults =
+    private suspend fun makeNewLoginDataIfNeeded(): ServerFunctionResult =
         if (Prefs.username == null) UserManagement.newLoginDataNeeded()
-        else CloudFunctionResults.OK
+        else ServerFunctionResult.OK
 }

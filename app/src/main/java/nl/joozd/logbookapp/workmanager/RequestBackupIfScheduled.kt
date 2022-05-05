@@ -25,8 +25,8 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.comm.CloudFunctionResults
+import nl.joozd.logbookapp.data.comm.OldCloud
+import nl.joozd.logbookapp.data.comm.ServerFunctionResult
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.extensions.minus
@@ -50,11 +50,11 @@ class RequestBackupIfScheduled(appContext: Context, workerParams: WorkerParamete
     override suspend fun doWork(): Result = withContext(Dispatchers.IO + NonCancellable) {
         if (!Prefs.backupFromCloud || !backupNeeded()) Result.success() // If backup not needed, this (checking if it is needed) is all we do.
         else {
-            when (Cloud.requestBackupEmail()) {
-                CloudFunctionResults.OK -> Result.success().also{
+            when (OldCloud.requestBackupEmail()) {
+                ServerFunctionResult.OK -> Result.success().also{
                     Prefs.mostRecentBackup = Instant.now().epochSecond
                 }
-                CloudFunctionResults.CLIENT_ERROR -> Result.retry()
+                ServerFunctionResult.CLIENT_ERROR -> Result.retry()
                 else -> Result.failure()
             }
         }

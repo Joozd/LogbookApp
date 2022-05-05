@@ -71,13 +71,11 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      */
     fun synchronizeTime(){
         val task = OneTimeWorkRequestBuilder<SyncTimeWorker>()
-            .setConstraints(makeConstraintsNeedNetwork())
+            .needNetwork()
             .addTag(SYNC_TIME)
             .build()
 
-        with (WorkManager.getInstance(App.instance)){
-            enqueueUniqueWork(SYNC_TIME, ExistingWorkPolicy.KEEP, task)
-        }
+        enqueue(SYNC_TIME, ExistingWorkPolicy.KEEP, task)
     }
 
 
@@ -87,14 +85,12 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      */
     private fun synchronizeTimeAndFlights(){
         if (Prefs.useCloud) {
-            val task = OneTimeWorkRequestBuilder<SyncFlightsWorker>().apply {
-                setConstraints(makeConstraintsNeedNetwork())
-                addTag(SYNC_FLIGHTS)
-            }.build()
+            val task = OneTimeWorkRequestBuilder<SyncFlightsWorker>()
+                .needNetwork()
+                .addTag(SYNC_FLIGHTS)
+                .build()
 
-            with(WorkManager.getInstance(App.instance)) {
-                enqueueUniqueWork(SYNC_FLIGHTS, ExistingWorkPolicy.REPLACE, task)
-            }
+            enqueue(SYNC_FLIGHTS, ExistingWorkPolicy.REPLACE, task)
         }
     }
 
@@ -103,13 +99,12 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      * If another worker is already doing this, that one will be kept and this will be ignored.
      */
     fun scheduleEmailConfirmation(){
-        val task = OneTimeWorkRequestBuilder<ConfirmEmailWorker>().apply{
-            setConstraints(makeConstraintsNeedNetwork())
-            addTag(CONFIRM_EMAIL)
-        }.build()
-        with(WorkManager.getInstance(App.instance)) {
-            enqueueUniqueWork(CONFIRM_EMAIL, ExistingWorkPolicy.KEEP, task)
-        }
+        val task = OneTimeWorkRequestBuilder<ConfirmEmailWorker>()
+            .needNetwork()
+            .addTag(CONFIRM_EMAIL)
+            .build()
+
+        enqueue(CONFIRM_EMAIL, ExistingWorkPolicy.KEEP, task)
     }
 
     /**
@@ -117,14 +112,35 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      * If another worker is already doing this, that one will be kept and this will be ignored.
      */
     fun scheduleSetEmail(){
-        val task = OneTimeWorkRequestBuilder<SetEmailWorker>().apply{
-            setConstraints(makeConstraintsNeedNetwork())
-            addTag(CONFIRM_EMAIL)
-        }.build()
-        with(WorkManager.getInstance(App.instance)) {
-            enqueueUniqueWork(CONFIRM_EMAIL, ExistingWorkPolicy.KEEP, task)
-        }
+        val task = OneTimeWorkRequestBuilder<SetEmailWorker>()
+            .needNetwork()
+            .addTag(CONFIRM_EMAIL)
+            .build()
+        enqueue(CONFIRM_EMAIL, ExistingWorkPolicy.KEEP, task)
     }
+
+    /**
+     * Schedule an email backup
+     */
+    fun scheduleBackupEmail(){
+        val task = OneTimeWorkRequestBuilder<SendBackupEmailWorker>()
+            .needNetwork()
+            .addTag(GET_BACKUP_EMAIL)
+            .build()
+        enqueue(GET_BACKUP_EMAIL, ExistingWorkPolicy.KEEP, task)
+    }
+
+    /**
+     * Schedule an email backup
+     */
+    fun scheduleLoginLinkEmail(){
+        val task = OneTimeWorkRequestBuilder<SendBackupEmailWorker>()
+            .needNetwork()
+            .addTag(GET_BACKUP_EMAIL)
+            .build()
+        enqueue(GET_BACKUP_EMAIL, ExistingWorkPolicy.KEEP, task)
+    }
+
 
 
     /**
@@ -132,13 +148,11 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      * If another worker is already doing this, that one will be kept and this will be ignored.
      */
     fun scheduleLoginAttempt(){
-        val task = OneTimeWorkRequestBuilder<CloudLoginWorker>().apply{
-            setConstraints(makeConstraintsNeedNetwork())
-            addTag(LOGIN_TO_CLOUD)
-        }.build()
-        with(WorkManager.getInstance(App.instance)) {
-            enqueueUniqueWork(LOGIN_TO_CLOUD, ExistingWorkPolicy.KEEP, task)
-        }
+        val task = OneTimeWorkRequestBuilder<CloudLoginWorker>()
+            .needNetwork()
+            .addTag(LOGIN_TO_CLOUD)
+            .build()
+        enqueue(LOGIN_TO_CLOUD, ExistingWorkPolicy.KEEP, task)
     }
 
     /**
@@ -147,14 +161,12 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      */
     fun sendFeedback(contactInfo: String){
         val task = OneTimeWorkRequestBuilder<SubmitFeedbackWorker>()
-            .setConstraints(makeConstraintsNeedNetwork())
+            .needNetwork()
             .setInputData(makeDataWithString(SubmitFeedbackWorker.CONTACT_INFO_TAG, contactInfo))
             .addTag(SUBMIT_FEEDBACK)
             .build()
 
-        with(WorkManager.getInstance(App.instance)) {
-            enqueueUniqueWork(SUBMIT_FEEDBACK, ExistingWorkPolicy.REPLACE, task)
-        }
+        enqueue(SUBMIT_FEEDBACK, ExistingWorkPolicy.REPLACE, task)
     }
 
     /**
@@ -176,9 +188,7 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
                 setInitialDelay(DELAY_FOR_OVERWRITE_MINUTES, TimeUnit.MINUTES)
         }.build()
 
-        with (WorkManager.getInstance(App.instance)){
-            enqueueUniquePeriodicWork(GET_AIRPORTS, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
-        }
+        enqueue(GET_AIRPORTS, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
     }
 
 
@@ -197,23 +207,7 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
                 setInitialDelay(DELAY_FOR_OVERWRITE_MINUTES, TimeUnit.MINUTES)
         }.build()
 
-        with (WorkManager.getInstance(App.instance)){
-            enqueueUniquePeriodicWork(SYNC_AIRCRAFT_TYPES, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
-        }
-    }
-
-    /**
-     * Schedule a check whether server should send a backup email
-     */
-    fun periodicBackupFromServer(force: Boolean = false){
-        val constraints = makeConstraintsNeedNetwork()
-        val task = PeriodicWorkRequestBuilder<RequestBackupIfScheduled>(Duration.ofDays(1)).apply {
-            setConstraints(constraints)
-            addTag(GET_BACKUP_EMAIL)
-        }.build()
-        with (WorkManager.getInstance(App.instance)){
-            enqueueUniquePeriodicWork(GET_BACKUP_EMAIL, if (force) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
-        }
+        enqueue(SYNC_AIRCRAFT_TYPES, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
     }
 
     /**
@@ -223,11 +217,37 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
         .setRequiredNetworkType(NetworkType.CONNECTED)
         .build()
 
+    private fun OneTimeWorkRequest.Builder.needNetwork(): OneTimeWorkRequest.Builder{
+        setConstraints(makeConstraintsNeedNetwork())
+        return this
+    }
+
+    private fun PeriodicWorkRequest.Builder.needNetwork(): PeriodicWorkRequest.Builder{
+        setConstraints(makeConstraintsNeedNetwork())
+        return this
+    }
+
     /**
      * Make an input data object with a single string
      */
     private fun makeDataWithString(tag: String, value: String) =
         Data.Builder().putString(tag, value).build()
+
+    private fun enqueue(uniqueWorkName: String,
+                        existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
+                        periodicWork: PeriodicWorkRequest
+    ) = with (WorkManager.getInstance(App.instance)){
+        enqueueUniquePeriodicWork(uniqueWorkName, existingPeriodicWorkPolicy, periodicWork)
+    }
+
+    private fun enqueue(uniqueWorkName: String,
+                        existingWorkPolicy: ExistingWorkPolicy,
+                        work: OneTimeWorkRequest
+    ) = with(WorkManager.getInstance(App.instance)) {
+        enqueueUniqueWork(uniqueWorkName, existingWorkPolicy, work)
+    }
+
+
 
     /**
      * Constants for use as tags

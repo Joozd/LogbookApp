@@ -93,7 +93,7 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
         supportFragmentManager.commit{ attach(fragment) }
     }
 
-    protected fun <T> Flow<T>.launchCollectWhileLifecycleStateStarted(collector: FlowCollector<T>){
+    fun <T> Flow<T>.launchCollectWhileLifecycleStateStarted(collector: FlowCollector<T>){
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 collect(collector)

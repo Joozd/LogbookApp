@@ -371,6 +371,13 @@
         <item name="android:elevation">4dp</item>
     </style>
 
+    <style name="NotificationBox" parent="DataBox">
+        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:background">@drawable/rounded_corners_secondarybackground</item>
+        <item name="android:elevation">8dp</item>
+    </style>
+
     <style name="Card" parent="AppTheme">
         <item name="android:layout_marginStart">8dp</item>
         <item name="android:layout_marginTop">4dp</item>

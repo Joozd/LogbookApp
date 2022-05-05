@@ -20,17 +20,17 @@
 package nl.joozd.logbookapp.extensions
 
 import nl.joozd.comms.CommsResult
-import nl.joozd.logbookapp.data.comm.CloudFunctionResults
+import nl.joozd.logbookapp.data.comm.ServerFunctionResult
 
-fun CommsResult.toCloudFunctionResults(): CloudFunctionResults = when(this){
-    CommsResult.OK -> CloudFunctionResults.OK
-    CommsResult.DATA_ERROR -> CloudFunctionResults.DATA_ERROR
-    CommsResult.CLIENT_NOT_ALIVE -> CloudFunctionResults.CLIENT_NOT_ALIVE
-    CommsResult.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
-    CommsResult.CLIENT_ERROR -> CloudFunctionResults.CLIENT_ERROR
-    CommsResult.SOCKET_IS_NULL -> CloudFunctionResults.SOCKET_IS_NULL
-    CommsResult.UNKNOWN_HOST -> CloudFunctionResults.UNKNOWN_HOST
-    CommsResult.IO_ERROR -> CloudFunctionResults.IO_ERROR
-    CommsResult.CONNECTION_REFUSED -> CloudFunctionResults.CONNECTION_REFUSED
-    CommsResult.SOCKET_ERROR -> CloudFunctionResults.SOCKET_ERROR
+fun CommsResult.toCloudFunctionResults(): ServerFunctionResult = when(this){
+    CommsResult.OK -> ServerFunctionResult.OK
+    CommsResult.DATA_ERROR -> ServerFunctionResult.DATA_ERROR
+    CommsResult.CLIENT_NOT_ALIVE -> ServerFunctionResult.CLIENT_NOT_ALIVE
+    CommsResult.SERVER_ERROR -> ServerFunctionResult.SERVER_ERROR
+    CommsResult.CLIENT_ERROR -> ServerFunctionResult.CLIENT_ERROR
+    CommsResult.SOCKET_IS_NULL -> ServerFunctionResult.SOCKET_IS_NULL
+    CommsResult.UNKNOWN_HOST -> ServerFunctionResult.UNKNOWN_HOST
+    CommsResult.IO_ERROR -> ServerFunctionResult.IO_ERROR
+    CommsResult.CONNECTION_REFUSED -> ServerFunctionResult.CONNECTION_REFUSED
+    CommsResult.SOCKET_ERROR -> ServerFunctionResult.SOCKET_ERROR
 }

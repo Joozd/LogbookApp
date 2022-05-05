@@ -17,12 +17,12 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.utils
+package nl.joozd.logbookapp.core
 
 import androidx.appcompat.app.AppCompatDelegate
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
-object DarkModeHub {
+object DarkModeCenter {
     fun setDarkMode(darkMode: Int){
         Prefs.darkMode = if (darkMode in SUPPORTED_MODES) darkMode else AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         AppCompatDelegate.setDefaultNightMode(Prefs.darkMode)

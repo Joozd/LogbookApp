@@ -22,6 +22,8 @@ package nl.joozd.logbookapp.ui.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Bundle
+import android.os.PersistableBundle
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -31,13 +33,19 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.core.background.startBackgroundTasks
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
-
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+        super.onCreate(savedInstanceState, persistentState)
+        startBackgroundTasks(this)
+
     }
 
     protected val activity: JoozdlogActivity

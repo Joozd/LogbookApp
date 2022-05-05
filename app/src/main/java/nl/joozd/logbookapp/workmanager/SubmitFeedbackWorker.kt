@@ -22,7 +22,7 @@ package nl.joozd.logbookapp.workmanager
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.comm.OldCloud
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 class SubmitFeedbackWorker(appContext: Context, workerParams: WorkerParameters)
@@ -30,7 +30,7 @@ class SubmitFeedbackWorker(appContext: Context, workerParams: WorkerParameters)
     override suspend fun doWork(): Result {
         if (Prefs.feedbackWaiting.isBlank()) return Result.success()
         val contactInfo = inputData.getString(CONTACT_INFO_TAG) ?: ""
-        return if (Cloud.sendFeedback(Prefs.feedbackWaiting, contactInfo).isOK()) {
+        return if (OldCloud.sendFeedback(Prefs.feedbackWaiting, contactInfo).isOK()) {
             Prefs.feedbackWaiting = ""
             Result.success()
         } else Result.retry()

@@ -29,9 +29,11 @@ import android.widget.Button
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.commit
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.BackupCenter
+import nl.joozd.logbookapp.core.background.BackupCenter
 import nl.joozd.logbookapp.core.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
@@ -42,7 +44,6 @@ import nl.joozd.logbookapp.extensions.makeCsvSharingIntent
 import nl.joozd.logbookapp.extensions.toDateStringLocalized
 import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.viewmodels.activities.settingsActivity.SettingsActivityViewModel
-import nl.joozd.logbookapp.model.viewmodels.status.BackupCenterStatus
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.ui.activities.ChangePasswordActivity
 import nl.joozd.logbookapp.ui.dialogs.*
@@ -97,13 +98,6 @@ class SettingsActivity : JoozdlogActivity() {
 
             }
             if (it != null) viewModel.resetStatus()
-        }
-        BackupCenter.statusFlow.launchCollectWhileLifecycleStateStarted{
-            when(it){
-                null -> { }
-                BackupCenterStatus.BuildingCsv -> backupNowButton.setBackupNowButtonToBuildingCsv()
-                is BackupCenterStatus.SharedUri -> shareCsvAndActivateBackupNowButton(it.uri)
-            }
         }
     }
 
@@ -331,12 +325,17 @@ class SettingsActivity : JoozdlogActivity() {
             titleResource = R.string.cloud_sync_title
             messageResource = R.string.make_new_account_question
             setNegativeButton(android.R.string.cancel)
-            setPositiveButton(android.R.string.ok){
-                UserManagement.newUser()
+            setPositiveButton(android.R.string.ok) {
+                lifecycleScope.launch {
+                    UserManagement.createNewUser()
+                }
                 if (Prefs.acceptedCloudSyncTerms)
                     viewModel.forceUseCloud()
                 else supportFragmentManager.commit {
-                    add(R.id.settingsActivityLayout, CloudSyncTermsDialog(sync = true)) // secondary constructor used, works on recreate
+                    add(
+                        R.id.settingsActivityLayout,
+                        CloudSyncTermsDialog(sync = true)
+                    ) // secondary constructor used, works on recreate
                     addToBackStack(null)
                 }
             }
@@ -355,18 +354,23 @@ class SettingsActivity : JoozdlogActivity() {
         }
     }
 
-    private fun ActivitySettingsBinding.shareCsvAndActivateBackupNowButton(
+    private fun Button.shareCsvAndActivateBackupNowButton(
         it: Uri
     ) {
         makeCsvSharingIntent(it)
-        backupNowButton.setBackupNowButtonToActive()
+        setBackupNowButtonToActive()
         viewModel.resetStatus()
     }
 
 
     private fun Button.setBackupNowButtonToActive() {
-        setOnClickListener { BackupCenter.putBackupUriInStatus() }
-        setText(R.string.backup_now)
+        setOnClickListener {
+            setBackupNowButtonToBuildingCsv()
+            lifecycleScope.launch {
+                shareCsvAndActivateBackupNowButton(BackupCenter.makeBackupUri())
+            }
+            setText(R.string.backup_now)
+        }
     }
 
     private fun Button.setBackupNowButtonToBuildingCsv() {

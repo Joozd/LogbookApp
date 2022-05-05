@@ -19,10 +19,9 @@
 
 package nl.joozd.logbookapp.data.comm
 
-enum class CloudFunctionResults {
+enum class ServerFunctionResult {
     /**
      * Return codes for Joozdlog Cloud functions.
-     * All values are randomly chosen and do not need to be in order. Might as well be an enum class.
      */
     OK,
     NOT_A_VALID_EMAIL_ADDRESS,

@@ -9,9 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/DataBox"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
+        style="@style/NotificationBox"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,30 +17,31 @@
         tools:context=".ui.fragments.BackupNotificationFragment">
 
         <TextView
-            android:id="@+id/backup_message"
+            android:id="@+id/generic_notification_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAlignment="center"
             android:textColor="?android:attr/textColorSecondary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="BACKUP_MESSAGE_HERE" />
+            tools:text="Message goes here. If it is a very long message, it might span multiple lines!" />
 
         <TextView
-            android:id="@+id/backup_button"
+            android:id="@+id/positive_button"
             style="@style/DialogButtonText"
-            android:text="@string/backup_now"
+            tools:text="Positive Button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/backup_message" />
+            app:layout_constraintTop_toBottomOf="@id/generic_notification_message" />
 
         <TextView
-            android:id="@+id/ignore_button"
+            android:id="@+id/negative_button"
             style="@style/DialogButtonText"
-            android:text="@string/ignore_for_one_day"
+            tools:text="Negative Button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/backup_message" />
+            app:layout_constraintTop_toBottomOf="@id/generic_notification_message" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

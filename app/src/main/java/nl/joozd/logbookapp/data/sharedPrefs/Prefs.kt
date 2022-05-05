@@ -21,7 +21,9 @@ package nl.joozd.logbookapp.data.sharedPrefs
 
 import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.utils.Encryption
@@ -35,20 +37,27 @@ object Prefs: JoozdLogPreferences() {
     private const val NO_CALENDAR_SELECTED = ""
     private const val PASSWORD_SHAREDPREF_KEY = "passwordSharedPrefKey"
 
+
+    /*
+    private const val XXXXXXXXXX = "XXXXXXXXXX"
+     */
+
     /**
      * username is the users' username.
      * cannot delegate as that doesn't support null
      */
-    private var usernameResource: String by JoozdLogSharedPreference(USERNAME_NOT_SET)
+    private const val USERNAME_RESOURCE = "USERNAME_RESOURCE"
+    private var usernameResource: String by JoozdLogSharedPreferenceNotNull(USERNAME_RESOURCE, USERNAME_NOT_SET)
     var username: String?
         get() = usernameIfSet(usernameResource)
         set(it) {
             usernameResource = it ?: USERNAME_NOT_SET
         }
-    private val usernameResourceFlow by PrefsFlow(usernameResource, USERNAME_NOT_SET)// get() = getStringFlowForItem(this::usernameResource.name, USERNAME_NOT_SET)
+    private val usernameResourceFlow by PrefsFlow(USERNAME_RESOURCE, USERNAME_NOT_SET)
     val usernameFlow = usernameResourceFlow.map {
         usernameIfSet(it)
     }
+    suspend fun username() = usernameFlow.first()
 
     /**
      * password is the users password, hashed to 128 bits
@@ -62,18 +71,18 @@ object Prefs: JoozdLogPreferences() {
             MainScope().launch {
                 val encodedPassword = hashAndEncodeToBase64(v)
                 dataStore.putString(PASSWORD_SHAREDPREF_KEY, encodedPassword)
-
                 }
             }
+    private val passwordFlow = dataStore.data.map { p ->
+        p[stringPreferencesKey(PASSWORD_SHAREDPREF_KEY)]}
 
     private fun hashAndEncodeToBase64(v: String?): String? =
         v?.let {
             Base64.encodeToString(Encryption.md5Hash(it), Base64.DEFAULT)
         }
 
-
     //Base64 encoded password
-    fun forcePassword(encodedPassword: String) {
+    fun setEncodedPassword(encodedPassword: String) {
         dataStore.putString(PASSWORD_SHAREDPREF_KEY, encodedPassword)
     }
 
@@ -85,154 +94,162 @@ object Prefs: JoozdLogPreferences() {
             password?.let {
                 Base64.decode(it, Base64.DEFAULT)
             }
-
-    var emailAddress: String by JoozdLogSharedPreference("")
-    val emailAddressFlow by PrefsFlow(emailAddress, "")
-
-    /**
-     * [emailVerified] is true if email verification code was deemed correct by server
-     * set this to false if server gives an INCORRECT_EMAIL_ADDRESS error
-     */
-    var emailVerified: Boolean by JoozdLogSharedPreference(false)
-    val emailVerifiedFlow by PrefsFlow(emailVerified, false)
-
-    /**
-     * a list of jobs waiting for email confirmation
-     * Parse this into an [EmailJobsWaiting] object
-     */
-    var emailJobsWaitingInt: Int by JoozdLogSharedPreference(0)
-
-    val emailJobsWaiting: EmailJobsWaiting = EmailJobsWaiting(emailJobsWaitingInt)
+    val keyFlow = passwordFlow.map { p -> p?.let {Base64.decode(it, Base64.DEFAULT) }}
+    suspend fun key() = keyFlow.first()
 
     //Placeholder for new password when changing pass. If app gets killed during password change, this will remain set.
-    var newPassword: String by JoozdLogSharedPreference("")
+    private const val NEW_PASSWORD = "NEW_PASSWORD"
+    var newPassword: String by JoozdLogSharedPreferenceNotNull(NEW_PASSWORD, "")
 
-    var lastUpdateTime: Long by JoozdLogSharedPreference(-1)
-    val lastUpdateTimeFlow by PrefsFlow(lastUpdateTime-1)
+    private const val LAST_UPDATE_TIME = "LAST_UPDATE_TIME"
+    var lastUpdateTime: Long by JoozdLogSharedPreferenceNotNull(LAST_UPDATE_TIME,-1)
+    val lastUpdateTimeFlow by PrefsFlow(LAST_UPDATE_TIME,-1)
 
-    var serverTimeOffset: Long by JoozdLogSharedPreference(0)
+    private const val SERVER_TIME_OFFSET = "SERVER_TIME_OFFSET"
+    var serverTimeOffset: Long by JoozdLogSharedPreferenceNotNull(SERVER_TIME_OFFSET,0)
 
-    var airportDbVersion: Int by JoozdLogSharedPreference(0)
+    private const val AIRPORT_DB_VERSION = "AIRPORT_DB_VERSION"
+    var airportDbVersion: Int by JoozdLogSharedPreferenceNotNull(AIRPORT_DB_VERSION,0)
 
-    var aircraftTypesVersion: Int by JoozdLogSharedPreference(0)
+    private const val AIRCRAFT_TYPES_VERSION = "AIRCRAFT_TYPES_VERSION"
+    var aircraftTypesVersion: Int by JoozdLogSharedPreferenceNotNull(AIRCRAFT_TYPES_VERSION,0)
 
-    var aircraftForcedVersion: Int by JoozdLogSharedPreference(0)
+    private const val AIRCRAFT_FORCED_TYPES_VERSION = "AIRCRAFT_FORCED_TYPES_VERSION"
+    var aircraftForcedVersion: Int by JoozdLogSharedPreferenceNotNull(AIRCRAFT_FORCED_TYPES_VERSION,0)
 
     /**
      * Amount of days that need to have passed for a notice to be shown
      */
-    var backupInterval: Int by JoozdLogSharedPreference(0)
-    val backupIntervalFlow by PrefsFlow(backupInterval, 0)
+    private const val BACKUP_INTERVAL = "BACKUP_INTERVAL"
+    var backupInterval: Int by JoozdLogSharedPreferenceNotNull(BACKUP_INTERVAL,0)
+    val backupIntervalFlow by PrefsFlow(BACKUP_INTERVAL, 0)
 
-    var backupFromCloud: Boolean by JoozdLogSharedPreference(false)
-    val backupFromCloudFlow by PrefsFlow(backupFromCloud, false)
+    private const val BACKUP_FROM_CLOUD = "BACKUP_FROM_CLOUD"
+    var backupFromCloud: Boolean by JoozdLogSharedPreferenceNotNull(BACKUP_FROM_CLOUD,false)
+    val backupFromCloudFlow by PrefsFlow(BACKUP_FROM_CLOUD, false)
+    fun postBackupFromCloud(value: Boolean) = post(BACKUP_FROM_CLOUD, value)
 
     //Instant epochSeconds of most recent backup
-    var mostRecentBackup: Long by JoozdLogSharedPreference(0L)
+    private const val MOST_RECENT_BACKUP = "MOST_RECENT_BACKUP"
+    var mostRecentBackup: Long by JoozdLogSharedPreferenceNotNull(MOST_RECENT_BACKUP,0L)
 
-    var newUserActivityFinished: Boolean by JoozdLogSharedPreference(false)
+    private const val NEW_USER_ACT_FINISHED = "NEW_USER_ACT_FINISHED"
+    var newUserActivityFinished: Boolean by JoozdLogSharedPreferenceNotNull(NEW_USER_ACT_FINISHED,false)
 
-    var editFlightFragmentWelcomeMessageShouldBeDisplayed: Boolean by JoozdLogSharedPreference(true)
-
-    /**
-     * Errors to be shown, bit flags. @see scheduleErrorNotification
-     */
-    var errorsToBeShown: Long by JoozdLogSharedPreference(0L)
-
+    private const val EFF_FIRST_USE = "EFF_FIRST_USE"
+    var editFlightFragmentWelcomeMessageShouldBeDisplayed: Boolean by JoozdLogSharedPreferenceNotNull(EFF_FIRST_USE,true)
 
     /***********************
      *   UI preferences:   *
      **********************/
 
-    var darkMode: Int by JoozdLogSharedPreference(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+    private const val DARK_MODE = "DARK_MODE"
+    var darkMode: Int by JoozdLogSharedPreferenceNotNull(DARK_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+    val darkModeFlow by PrefsFlow(DARK_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
     /**
      * Use ICAO or Iata? True = IATA, false ICAO
      */
-    var useIataAirports: Boolean by JoozdLogSharedPreference(false)
-    val useIataAirportsFlow by PrefsFlow(useIataAirports, false)
+    private const val USE_IATA = "USE_IATA"
+    var useIataAirports: Boolean by JoozdLogSharedPreferenceNotNull(USE_IATA, false)
+    val useIataAirportsFlow by PrefsFlow(USE_IATA, false)
 
     /**
      * If true, if PIC name is not set, flight will be marked incomplete (red)
      */
-    var picNameNeedsToBeSet: Boolean by JoozdLogSharedPreference(true)
-    val picNameNeedsToBeSetFlow by PrefsFlow(picNameNeedsToBeSet, true)
+    private const val PIC_NAME_NEEDED = "PIC_NAME_NEEDED"
+    var picNameNeedsToBeSet: Boolean by JoozdLogSharedPreferenceNotNull(PIC_NAME_NEEDED,true)
+    val picNameNeedsToBeSetFlow by PrefsFlow(PIC_NAME_NEEDED, true)
 
     /**
      * Get planned flights from calendar?
      */
-    var useCalendarSync: Boolean by JoozdLogSharedPreference(false)
-    val useCalendarSyncFlow by PrefsFlow(useCalendarSync, false)
+    private const val USE_CAL_SYNC = "USE_CAL_SYNC"
+    var useCalendarSync: Boolean by JoozdLogSharedPreferenceNotNull(USE_CAL_SYNC, false)
+    val useCalendarSyncFlow by PrefsFlow(USE_CAL_SYNC, false)
 
-    private var _calendarSyncType: Int by JoozdLogSharedPreference(
+    private const val _CALENDAR_SYNC_TYPE = "_CALENDAR_SYNC_TYPE"
+    private var calendarSyncTypeValue: Int by JoozdLogSharedPreferenceNotNull(_CALENDAR_SYNC_TYPE,
         CalendarSyncType.CALENDAR_SYNC_NONE.value
     )
-    val _calendarSyncTypeFlow  by PrefsFlow(_calendarSyncType, CalendarSyncType.CALENDAR_SYNC_NONE.value)//  get() = getIntFlowForItem(this::_calendarSyncType.name, CalendarSyncType.CALENDAR_SYNC_NONE.value)
+    val calendarSyncTypeValueFlow  by PrefsFlow(_CALENDAR_SYNC_TYPE, CalendarSyncType.CALENDAR_SYNC_NONE.value)//  get() = getIntFlowForItem(this::_calendarSyncType.name, CalendarSyncType.CALENDAR_SYNC_NONE.value)
 
     var calendarSyncType: CalendarSyncType
-        get() = makeCalendarSyncType(_calendarSyncType)
+        get() = makeCalendarSyncType(calendarSyncTypeValue)
         set(it) {
-            _calendarSyncType = it.value
+            calendarSyncTypeValue = it.value
         }
-    val calendarSyncTypeFlow = _calendarSyncTypeFlow.map { makeCalendarSyncType(it)}
+    val calendarSyncTypeFlow = calendarSyncTypeValueFlow.map { makeCalendarSyncType(it)}
 
-    var calendarSyncIcalAddress: String by JoozdLogSharedPreference("")
-    val calendarSyncIcalAddressFlow by PrefsFlow(calendarSyncIcalAddress, "")
+    private const val CAL_SYNC_ICAL_ADDR = "CAL_SYNC_ICAL_ADDR"
+    var calendarSyncIcalAddress: String by JoozdLogSharedPreferenceNotNull(CAL_SYNC_ICAL_ADDR,"")
+    val calendarSyncIcalAddressFlow by PrefsFlow(CAL_SYNC_ICAL_ADDR, "")
 
-    var nextCalendarCheckTime: Long by JoozdLogSharedPreference(-1)
+    private const val NEXT_CAL_CHECK_TIME = "NEXT_CAL_CHECK_TIME"
+    var nextCalendarCheckTime: Long by JoozdLogSharedPreferenceNotNull(NEXT_CAL_CHECK_TIME,-1)
 
     // in epochSeconds
-    var calendarDisabledUntil: Long by JoozdLogSharedPreference(0)
-    val calendarDisabledUntilFlow by PrefsFlow(calendarDisabledUntil, 0)
+    private const val CAL_DISABLED_UNTIL = "CAL_DISABLED_UNTIL"
+    var calendarDisabledUntil: Long by JoozdLogSharedPreferenceNotNull(CAL_DISABLED_UNTIL,0L)
+    val calendarDisabledUntilFlow by PrefsFlow(CAL_DISABLED_UNTIL, 0L)
 
     /**
      * CalendarSync days into the future:
      */
-    var calendarSyncAmountOfDays: Long by JoozdLogSharedPreference(30L)
+    private const val CAL_SYNC_DAYS = "CAL_SYNC_DAYS"
+    var calendarSyncAmountOfDays: Long by JoozdLogSharedPreferenceNotNull(CAL_SYNC_DAYS,30L)
 
     /**
      * Postpone calendar sync without asking
      */
-    var alwaysPostponeCalendarSync: Boolean by JoozdLogSharedPreference(false)
-    val alwaysPostponeCalendarSyncFlow by PrefsFlow(alwaysPostponeCalendarSync, false)
+    private const val CAL_ALWAYS_POSTPONE = "CAL_ALWAYS_POSTPONE"
+    var alwaysPostponeCalendarSync: Boolean by JoozdLogSharedPreferenceNotNull(CAL_ALWAYS_POSTPONE,false)
+    val alwaysPostponeCalendarSyncFlow by PrefsFlow(CAL_ALWAYS_POSTPONE, false)
 
 
     /**
      * Accept aircraft change from Monthly Overview without confirmation?
      */
-    var updateAircraftWithoutAsking: Boolean by JoozdLogSharedPreference(true)
+    private const val UPDATE_AIRCRAFT_WITHOUT_ASKING = "UPDATE_AIRCRAFT_WITHOUT_ASKING"
+    var updateAircraftWithoutAsking: Boolean by JoozdLogSharedPreferenceNotNull(UPDATE_AIRCRAFT_WITHOUT_ASKING,true)
 
     /**
      * Max time difference before montly/actual becomes a conflict (in minutes)
      */
-    var maxChronoAdjustment: Int by JoozdLogSharedPreference(180)
+    private const val MAX_CHRONO_DIFF = "MAX_CHRONO_DIFF"
+    var maxChronoAdjustment: Int by JoozdLogSharedPreferenceNotNull(MAX_CHRONO_DIFF,180)
 
     /**
      * Add names from rosters?
      */
-    var getNamesFromRosters: Boolean by JoozdLogSharedPreference(defaultValue = true)
-    val getNamesFromRostersFlow by PrefsFlow(getNamesFromRosters, true)
+    private const val GET_NAMES_FROM_ROSTERS = "GET_NAMES_FROM_ROSTERS"
+    var getNamesFromRosters: Boolean by JoozdLogSharedPreferenceNotNull(GET_NAMES_FROM_ROSTERS, defaultValue = true)
+    val getNamesFromRostersFlow by PrefsFlow(GET_NAMES_FROM_ROSTERS, true)
 
     /*************************
      * Other settings
      *************************/
 
     //time to allocate to pilot if flying heavy crew and did takeoff or landing
-    var standardTakeoffLandingTimes: Int by JoozdLogSharedPreference(30)
-    val standardTakeoffLandingTimesFlow by PrefsFlow(standardTakeoffLandingTimes, 30)
+    private const val STANDARD_TAKEOFF_LANDING_TIMES = "STANDARD_TAKEOFF_LANDING_TIMES"
+    var standardTakeoffLandingTimes: Int by JoozdLogSharedPreferenceNotNull(STANDARD_TAKEOFF_LANDING_TIMES,30)
+    val standardTakeoffLandingTimesFlow by PrefsFlow(STANDARD_TAKEOFF_LANDING_TIMES, 30)
 
     //Calendar on device that is used to import flights
-    var selectedCalendar: String by JoozdLogSharedPreference(NO_CALENDAR_SELECTED)
-    val selectedCalendarFlow by PrefsFlow(selectedCalendar, NO_CALENDAR_SELECTED)
+    private const val SELECTED_CALENDAR = "SELECTED_CALENDAR"
+    var selectedCalendar: String by JoozdLogSharedPreferenceNotNull(SELECTED_CALENDAR, NO_CALENDAR_SELECTED)
+    val selectedCalendarFlow by PrefsFlow(SELECTED_CALENDAR, NO_CALENDAR_SELECTED)
 
     // true if user wants new flights to be marked as IFR. Not sure if I want to use this.
     // var normallyFliesIFR: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
     // true if user wants to use cloud -
-    var useCloud: Boolean by JoozdLogSharedPreference(false)
-    val useCloudFlow by PrefsFlow(useCloud, false)
+    private const val USE_CLOUD = "USE_CLOUD"
+    var useCloud: Boolean by JoozdLogSharedPreferenceNotNull(USE_CLOUD,false)
+    val useCloudFlow by PrefsFlow(USE_CLOUD, false)
 
-    var acceptedCloudSyncTerms: Boolean by JoozdLogSharedPreference(false)
+    private const val ACCEPTED_CLOUD_TERMS = "ACCEPTED_CLOUD_TERMS"
+    var acceptedCloudSyncTerms: Boolean by JoozdLogSharedPreferenceNotNull(ACCEPTED_CLOUD_TERMS, false)
 
     /**
      * Small things being saved:
@@ -240,17 +257,17 @@ object Prefs: JoozdLogPreferences() {
 
     // If feedback could not be sent to server, save it for the next time
     // TODO handle this with a worker
-    var feedbackWaiting: String by JoozdLogSharedPreference("")
+    private const val FEEDBACK_WAITING = "FEEDBACK_WAITING"
+    var feedbackWaiting: String by JoozdLogSharedPreferenceNotNull(FEEDBACK_WAITING, "")
 
-    /**
-     * Email confirmation string waiting for a network connection. Handled by [nl.joozd.logbookapp.workmanager.ConfirmEmailWorker]
-     */
-    var emailConfirmationStringWaiting: String by JoozdLogSharedPreference("")
 
     /**
      * Login link waiting for server to be available
      */
-    var loginLinkStringWaiting: String by JoozdLogSharedPreference("")
+    private const val LOGIN_LINK_STRING_WAITING = "LOGIN_LINK_STRING_WAITING"
+    var loginLinkStringWaiting: String by JoozdLogSharedPreferenceNotNull(LOGIN_LINK_STRING_WAITING, "")
+    val loginLinkStringWaitingFlow by PrefsFlow(LOGIN_LINK_STRING_WAITING, "")
+    fun pushLoginLinkStringWaiting(value: String) = post(LOGIN_LINK_STRING_WAITING, value)
 
 
     private fun usernameIfSet(name: String) = name.takeIf { usernameResource != USERNAME_NOT_SET }

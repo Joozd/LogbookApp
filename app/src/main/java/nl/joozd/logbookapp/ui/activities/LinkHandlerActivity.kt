@@ -26,12 +26,11 @@ import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.comm.CloudFunctionResults
+import nl.joozd.logbookapp.data.comm.OldCloud
+import nl.joozd.logbookapp.data.comm.ServerFunctionResult
 import nl.joozd.logbookapp.core.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
-import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.databinding.ActivityLinkHandlerBinding
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.core.JoozdlogWorkersHub
@@ -73,7 +72,7 @@ class LinkHandlerActivity : JoozdlogActivity() {
             lifecycleScope.launch {
                 if (UserManagement.confirmEmail(it)) {
                     showEmailConfirmedSuccessDialog()
-                    Cloud.requestLoginLinkMail()
+                    OldCloud.requestLoginLinkMail()
                 }
                 else{
                     showNoSuccessDialog()
@@ -87,9 +86,9 @@ class LinkHandlerActivity : JoozdlogActivity() {
             println("CheckPoint 2: $lpString")
             //TODO needs sanity check
             lifecycleScope.launch {
-                val result = UserManagement.loginFromLink(makeLoginPassPair(lpString))
+                val result = UserManagement.loginFromLink(lpString)
                 println("CheckPoint 3: result: $result")
-                if (result in CloudFunctionResults.connectionErrors) {
+                if (result in ServerFunctionResult.connectionErrors) {
                     Prefs.loginLinkStringWaiting = lpString
                     JoozdlogWorkersHub.scheduleLoginAttempt()
                     showNoConnectionDialog()
@@ -99,12 +98,6 @@ class LinkHandlerActivity : JoozdlogActivity() {
             }
         }
     }
-
-    private fun makeLoginPassPair(loginPassString: String): Pair<String, String> =
-        loginPassString.replace('-', '/').split(":").let { lp ->
-            lp.first() to lp.last()
-        }
-
 
     private fun showUnknownLinkMessage() = AlertDialog.Builder(this).apply{
         setTitle(R.string.unknown_link_title)

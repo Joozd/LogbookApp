@@ -34,9 +34,10 @@ import nl.joozd.logbookapp.extensions.toDateStringLocalized
 import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
-import nl.joozd.logbookapp.ui.utils.DarkModeHub
+import nl.joozd.logbookapp.core.DarkModeCenter
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.core.JoozdlogWorkersHub
+import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -68,9 +69,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val usernameFlow = Prefs.usernameFlow
 
-    private val emailAddressFlow = Prefs.emailAddressFlow.notNullFlow()
+    private val emailAddressFlow = EmailPrefs.emailAddressFlow.notNullFlow()
 
-    private val emailVerifiedFlow = Prefs.emailVerifiedFlow.notNullFlow()
+    private val emailVerifiedFlow = EmailPrefs.emailVerifiedFlow.notNullFlow()
     val emailDataFlow = buildEmailDataFlow()
 
     val getNamesFromRostersFlow = Prefs.getNamesFromRostersFlow.notNullFlow()
@@ -89,7 +90,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
 
     val emailGoodAndVerified
-        get() = Prefs.emailAddress.isNotBlank() && Prefs.emailVerified
+        get() = EmailPrefs.emailAddress.isNotBlank() && EmailPrefs.emailVerified
 
 
     /*********************************************************************************************
@@ -101,7 +102,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     }
 
     fun darkmodePicked(darkMode: Int){
-        DarkModeHub.setDarkMode(darkMode)
+        DarkModeCenter.setDarkMode(darkMode)
     }
 
     fun toggleUseIataAirports() {

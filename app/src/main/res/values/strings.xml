@@ -62,6 +62,9 @@
     <string name="email_for_login">Email address for login link</string>
     <string name="email">Email address</string>
     <string name="not_an_email_address">Not an email address</string>
+    <string name="server_not_an_email_address_please_enter_again">The server did not like the entered email address. Please enter it again in Settings.</string>
+    <string name="enter_email">Enter email</string>
+
     <string name="addresses_do_not_match">Addresses do not match</string>
     <string name="email_repeat">Repeat Email address</string>
     <string name="email_reason">Please enter your email for backup and account recovery purposes.\nYour email address will not be stored outside your phone.</string>
@@ -183,6 +186,8 @@
     <string name="total_time_too_large">Total time cannot be more than offblocks to on blocks</string>
     <string name="invalid_total_time">Could not parse total time</string>
 
+    <string name="new_user_error_0001">Error creating new user: error 0001. This error is not expected to occur. Please inform Joozd though the "feedback" menu.</string>
+
     <string name="no_internet">Cannot connect to server</string>
     <string name="need_internet">You need an internet connection for this.</string>
     <string name="server_problem">Cannot connect to server</string>
@@ -193,7 +198,7 @@
     <string name="changed_password_message">Your password has changed. Please send your login link to yourself to make sure it is saved.</string>
     <string name="mail_to_myself">Send it to myself</string>
     <string name="send_using">Pick an app:</string>
-    <string name="email_verification_scheduled">The verification of your email address is scheduled to happen when your device has an internet connection. \nOnce it succeeds, you will receive an email with your login link.</string>
+    <string name="email_verification_scheduled">The verification of your email address is scheduled to happen when your device has an internet connection.\nOnce it succeeds, you will receive an email with your login link.</string>
 
 
     <string name="login_error_message">Cannot log in to server.</string>
@@ -210,7 +215,8 @@
     <string name="does_not_match">Does not match</string>
     <string name="wrong_username_password">The server has rejected your login data. Please create a new cloud account or find your working login link.</string>
     <string name="email_data_rejected">The server has rejected your email confirmation data. Please check you clicked the correct confirmation link.</string>
-    <string name="email_address_rejected">The server has rejected your email address. Please re-enter your email address in Settings</string>
+    <string name="email_address_rejected">The server has rejected your email address. Do you want to re-confirm, or delete it?</string>
+
 
     <string name="pass_requirements">Password requirements</string>
     <string name="password_requirements">At least 6 characters, two of which are not the same.</string>
@@ -481,6 +487,7 @@
     <string name="print_hint">When printing logbook, make sure you make the printer fit it to printable area as the PDF does not have margins.</string>
     <string name="help">Help</string>
     <string name="joozdlog_importer">Joozdlog Importer</string>
+    <string name="confirm">confirm</string>
     <string name="delete">delete</string>
     <string name="share">share</string>
     <!-- TODO: Remove or change this placeholder text -->

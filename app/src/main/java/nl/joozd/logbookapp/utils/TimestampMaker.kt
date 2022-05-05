@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.utils
 
-import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.comm.OldCloud
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import java.time.Instant
 
@@ -34,7 +34,7 @@ class TimestampMaker(private val mock: Boolean = false) {
                 else maxOf(Instant.now().epochSecond + Prefs.serverTimeOffset, Prefs.lastUpdateTime+1)
 
     suspend fun getAndSaveTimeOffset(): Long? {
-        val serverTime = Cloud.getTime() ?: return null
+        val serverTime = OldCloud.getTime() ?: return null
         val now = Instant.now().epochSecond
         Prefs.serverTimeOffset = serverTime - now
         return Prefs.serverTimeOffset

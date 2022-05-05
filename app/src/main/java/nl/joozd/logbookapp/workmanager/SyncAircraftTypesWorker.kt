@@ -24,7 +24,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.*
-import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.comm.OldCloud
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
@@ -46,13 +46,13 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
         Log.d(this::class.simpleName,"Started doWork()")
         val aircraftRepository = AircraftRepository.instance
 
-        val serverTypesVersion = Cloud.getAircraftTypesVersion() ?: return@withContext Result.retry()
-        val serverForcedVersion = Cloud.getForcedAircraftTypesVersion() ?: return@withContext Result.retry()
+        val serverTypesVersion = OldCloud.getAircraftTypesVersion() ?: return@withContext Result.retry()
+        val serverForcedVersion = OldCloud.getForcedAircraftTypesVersion() ?: return@withContext Result.retry()
         Log.d(this::class.simpleName, "serverVersions $serverTypesVersion / $serverForcedVersion")
 
 
         if (serverTypesVersion != Prefs.aircraftTypesVersion) {
-            Cloud.getAircraftTypes()?.let {
+            OldCloud.getAircraftTypes()?.let {
                 Log.d(this::class.simpleName, "Downlaoded ${it.size} types")
                 saveTypes = launch {
                     aircraftRepository.replaceAllTypesWith(it)
@@ -64,7 +64,7 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
 
 
         if (serverForcedVersion != Prefs.aircraftForcedVersion) {
-            Cloud.getForcedTypes()?.let {
+            OldCloud.getForcedTypes()?.let {
                 Log.d(this::class.simpleName, "Downlaoded ${it.size} forcedTypes")
                 saveForced = launch {
                     aircraftRepository.replaceAllPreloadedWith(it.map {

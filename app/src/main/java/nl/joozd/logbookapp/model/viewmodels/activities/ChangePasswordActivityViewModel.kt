@@ -28,10 +28,10 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.data.comm.OldCloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
 import nl.joozd.logbookapp.core.UserManagement
-import nl.joozd.logbookapp.data.comm.CloudFunctionResults
+import nl.joozd.logbookapp.data.comm.ServerFunctionResult
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
@@ -87,18 +87,18 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
                 feedback(ChangePasswordEvents.WAITING_FOR_SERVER)
                 viewModelScope.launch {
                     when (UserManagement.changePassword(password)){
-                        CloudFunctionResults.OK -> {
+                        ServerFunctionResult.OK -> {
                             sendPasswordLinksToClipboard(UserManagement.generateLoginLink())
                             if (Prefs.emailVerified)
-                                Cloud.requestLoginLinkMail()
+                                OldCloud.requestLoginLinkMail()
                             else {
                                 Prefs.emailJobsWaiting.sendLoginLink = true
                             }
                             feedback(ChangePasswordEvents.FINISHED)
                         }
-                        CloudFunctionResults.NO_LOGIN_DATA -> feedback(ChangePasswordEvents.NOT_LOGGED_IN)
-                        CloudFunctionResults.UNKNOWN_USER_OR_PASS -> feedback(ChangePasswordEvents.LOGIN_INCORRECT)
-                        CloudFunctionResults.CLIENT_ERROR -> feedback(ChangePasswordEvents.SERVER_NOT_RESPONDING)
+                        ServerFunctionResult.NO_LOGIN_DATA -> feedback(ChangePasswordEvents.NOT_LOGGED_IN)
+                        ServerFunctionResult.UNKNOWN_USER_OR_PASS -> feedback(ChangePasswordEvents.LOGIN_INCORRECT)
+                        ServerFunctionResult.CLIENT_ERROR -> feedback(ChangePasswordEvents.SERVER_NOT_RESPONDING)
                         else -> feedback(ChangePasswordEvents.NOT_IMPLEMENTED)
                     }
                 }

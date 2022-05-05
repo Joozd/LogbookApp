@@ -200,7 +200,7 @@ class MainActivity : JoozdlogActivity() {
 
     private fun collectMessageCenterFragments(){
         MessageCenter.messageBarFragmentFlow.launchCollectWhileLifecycleStateStarted{
-            if (it != null) {
+            if (it != null && supportFragmentManager.findFragmentById(it.id) == null) {
                 supportFragmentManager.commit {
                     setCustomAnimations(R.anim.slide_in_from_top, 0)
                     add(R.id.message_bar_target, it, MESSAGE_BAR_FRAGMENT_TAG)

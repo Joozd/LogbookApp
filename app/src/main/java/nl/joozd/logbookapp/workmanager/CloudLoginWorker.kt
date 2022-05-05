@@ -25,10 +25,9 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.core.UserManagement
-import nl.joozd.logbookapp.data.comm.CloudFunctionResults
+import nl.joozd.logbookapp.data.comm.ServerFunctionResult
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
-import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 
 /**
  * This is used to login from a login link if connection failure when doing it right away
@@ -41,8 +40,8 @@ class CloudLoginWorker(appContext: Context, workerParams: WorkerParameters)
             lp.first() to lp.last()
         }
         when (UserManagement.loginFromLink(loginPass)) {
-            CloudFunctionResults.OK -> Result.success()
-            CloudFunctionResults.UNKNOWN_USER_OR_PASS -> {
+            ServerFunctionResult.OK -> Result.success()
+            ServerFunctionResult.UNKNOWN_USER_OR_PASS -> {
                 ScheduledErrors.addError(Errors.LOGIN_DATA_REJECTED_BY_SERVER)
                 Result.failure()
             } // bad login data in link

@@ -27,7 +27,6 @@ import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.core.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
-import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 
 class ConfirmEmailWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {

@@ -27,9 +27,10 @@ import nl.joozd.joozdlogcommon.*
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
+import nl.joozd.logbookapp.core.UserManagement
+import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.serializing.*
 import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
-import nl.joozd.logbookapp.data.sharedPrefs.errors.ScheduledErrors
 import nl.joozd.logbookapp.exceptions.NotAuthorizedException
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.extensions.toCloudFunctionResults
@@ -38,6 +39,7 @@ import java.security.MessageDigest
 // NOTE: ALL THESE FUNCTIONS MUST BE CALLED FROM SUSPENDED FUNCTION DUE TO BLOCKING CALLS
 // If properly used in a Client().use{} block that should always be the case as Client() has
 // blocking code in its constructor.
+@Deprecated("Use Cloud")
 object ServerFunctions {
     private const val TAG = "ServerFunctions"
     /**
@@ -56,35 +58,36 @@ object ServerFunctions {
 
     /**
      * Request Server to send a backup mail
-     * @return [CloudFunctionResults]:
-     *  [CloudFunctionResults.OK] if all OK
-     *  [CloudFunctionResults.NO_LOGIN_DATA] if no login data saved
-     *  [CloudFunctionResults.DATA_ERROR] if bad data was received
-     *  [CloudFunctionResults.UNKNOWN_USER_OR_PASS] if login data rejected by server
-     *  [CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS] if [Prefs.emailAddress] is blank or server doesn't like the email address]
-     *  [CloudFunctionResults.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
-     *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
-     *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
+     * @return [ServerFunctionResult]:
+     *  [ServerFunctionResult.OK] if all OK
+     *  [ServerFunctionResult.NO_LOGIN_DATA] if no login data saved
+     *  [ServerFunctionResult.DATA_ERROR] if bad data was received
+     *  [ServerFunctionResult.UNKNOWN_USER_OR_PASS] if login data rejected by server
+     *  [ServerFunctionResult.NOT_A_VALID_EMAIL_ADDRESS] if [Prefs.emailAddress] is blank or server doesn't like the email address]
+     *  [ServerFunctionResult.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
+     *  [ServerFunctionResult.CLIENT_NOT_ALIVE] if Client died
+     *  [ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
      *  or, it can return any of the errors [Client.sendRequest] can return
      */
-    suspend fun requestBackup(client: Client): CloudFunctionResults {
+    suspend fun requestBackup(client: Client): CloudFunctionResult {
+        if(checkIfLoginDataSet()) return CloudFunctionResult.SERVER_REFUSED
         val payload = LoginDataWithEmail(
-            Prefs.username ?: return CloudFunctionResults.NO_LOGIN_DATA,
-            Prefs.key ?: return CloudFunctionResults.NO_LOGIN_DATA,
+            Prefs.username!!,
+            Prefs.key!!,
             BasicFlight.VERSION.version,
-            Prefs.emailAddress.nullIfBlank() ?: return CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS
+            EmailPrefs.emailAddress.nullIfBlank() ?: return ServerFunctionResult.NOT_A_VALID_EMAIL_ADDRESS
         ).serialize()
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_BACKUP_MAIL, payload).let{
             if (!it.isOK())
                 return it.toCloudFunctionResults()
         }
-        return when (val r = client.readFromServer()?.toString(Charsets.UTF_8)) {
-            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-            JoozdlogCommsKeywords.BAD_DATA_RECEIVED -> CloudFunctionResults.DATA_ERROR
-            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
-            JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> CloudFunctionResults.EMAIL_DOES_NOT_MATCH
-            null -> if (client.alive) CloudFunctionResults.CLIENT_ERROR else CloudFunctionResults.CLIENT_NOT_ALIVE
-            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER.also{
+        return when (val r = readServerResponse(client)) {
+            JoozdlogCommsKeywords.OK -> ServerFunctionResult.OK
+            JoozdlogCommsKeywords.BAD_DATA_RECEIVED -> ServerFunctionResult.DATA_ERROR
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> ServerFunctionResult.UNKNOWN_USER_OR_PASS
+            JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> ServerFunctionResult.EMAIL_DOES_NOT_MATCH
+            null -> if (client.alive) ServerFunctionResult.CLIENT_ERROR else ServerFunctionResult.CLIENT_NOT_ALIVE
+            else -> ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER.also{
                 Log.w("requestBackup()", "Received unknown reply from server: $r")
             }
         }
@@ -155,33 +158,33 @@ object ServerFunctions {
 
     /**
      * Logs a user in. User will remain logged in until connection with [client] is lost.
-     * @return [CloudFunctionResults]:
-     *  [CloudFunctionResults.OK] if logged in OK
-     *  [CloudFunctionResults.NO_LOGIN_DATA] if no login data stored in [Prefs]
-     *  [CloudFunctionResults.UNKNOWN_USER_OR_PASS] if server rejected login data. In this case, an error to be shown to user will be scheduled through [ScheduledErrors.addError]
-     *  [CloudFunctionResults.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
-     *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
-     *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
+     * @return [ServerFunctionResult]:
+     *  [ServerFunctionResult.OK] if logged in OK
+     *  [ServerFunctionResult.NO_LOGIN_DATA] if no login data stored in [Prefs]
+     *  [ServerFunctionResult.UNKNOWN_USER_OR_PASS] if server rejected login data. In this case, an error to be shown to user will be scheduled through [ScheduledErrors.addError]
+     *  [ServerFunctionResult.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
+     *  [ServerFunctionResult.CLIENT_NOT_ALIVE] if Client died
+     *  [ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
      */
-    suspend fun login(client: Client): CloudFunctionResults {
+    suspend fun login(client: Client): ServerFunctionResult {
         //payLoad is LoginData.serialize()
         val payLoad = LoginData(
-            Prefs.username ?: return CloudFunctionResults.NO_LOGIN_DATA,
-            Prefs.key ?: return CloudFunctionResults.NO_LOGIN_DATA,
+            Prefs.username ?: return ServerFunctionResult.NO_LOGIN_DATA,
+            Prefs.key ?: return ServerFunctionResult.NO_LOGIN_DATA,
             BasicFlight.VERSION.version)
             .serialize()
 
         client.sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
-        return when (client.readFromServer()?.toString(Charsets.UTF_8)){
-            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS.also{
+        return when (readServerResponse(client)){
+            JoozdlogCommsKeywords.OK -> ServerFunctionResult.OK
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> ServerFunctionResult.UNKNOWN_USER_OR_PASS.also{
                 ScheduledErrors.addError(Errors.LOGIN_DATA_REJECTED_BY_SERVER)
             }
             null -> {
-                if (client.alive) CloudFunctionResults.CLIENT_ERROR
-                else CloudFunctionResults.CLIENT_NOT_ALIVE
+                if (client.alive) ServerFunctionResult.CLIENT_ERROR
+                else ServerFunctionResult.CLIENT_NOT_ALIVE
             }
-            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER.also{
+            else -> ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER.also{
                 Log.w("login()", "Got unexpected reply from server: $it")
             }
         }
@@ -193,27 +196,27 @@ object ServerFunctions {
      * @param client: [Client] to use for comms
      * @param username: username to check
      * @param password: password to check. Password must not already be hashed.
-     * @return a [CloudFunctionResults] value
-     *  [CloudFunctionResults.OK] if logged in OK
-     *  [CloudFunctionResults.UNKNOWN_USER_OR_PASS] if server rejected login data. In this case, an error to be shown to user will be scheduled through [ScheduledErrors.addError]
-     *  [CloudFunctionResults.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
-     *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
-     *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
+     * @return a [ServerFunctionResult] value
+     *  [ServerFunctionResult.OK] if logged in OK
+     *  [ServerFunctionResult.UNKNOWN_USER_OR_PASS] if server rejected login data. In this case, an error to be shown to user will be scheduled through [ScheduledErrors.addError]
+     *  [ServerFunctionResult.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
+     *  [ServerFunctionResult.CLIENT_NOT_ALIVE] if Client died
+     *  [ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
      */
-    suspend fun testLogin(client: Client, username: String, password: String): CloudFunctionResults {
+    suspend fun testLogin(client: Client, username: String, password: String): ServerFunctionResult {
         val payload = LoginData(username, makeKey(password),BasicFlight.VERSION.version).serialize()
         val requestResult = client.sendRequest(JoozdlogCommsKeywords.LOGIN, payload)
         if (!requestResult.isOK()) return requestResult.toCloudFunctionResults()
-        return when (val x = client.readFromServer()?.toString(Charsets.UTF_8)){
-            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
+        return when (val x = readServerResponse(client)){
+            JoozdlogCommsKeywords.OK -> ServerFunctionResult.OK
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> ServerFunctionResult.UNKNOWN_USER_OR_PASS
             null -> {
-                if (client.alive) CloudFunctionResults.CLIENT_ERROR
-                else CloudFunctionResults.CLIENT_NOT_ALIVE
+                if (client.alive) ServerFunctionResult.CLIENT_ERROR
+                else ServerFunctionResult.CLIENT_NOT_ALIVE
             }
             else -> {
                 Log.w("testLogin", "Server responded unexpected \"$x\"")
-                CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
+                ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER
             } // for debugging, server responded something unexpected
         }
     }
@@ -223,27 +226,27 @@ object ServerFunctions {
      * @param client: [Client] to use for comms
      * @param username: username to check
      * @param password: password to check. This expects an already hashed password.
-     * @return a [CloudFunctionResults] value
-     *  [CloudFunctionResults.OK] if logged in OK
-     *  [CloudFunctionResults.UNKNOWN_USER_OR_PASS] if server rejected login data. In this case, an error to be shown to user will be scheduled through [ScheduledErrors.addError]
-     *  [CloudFunctionResults.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
-     *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if Client died
-     *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
+     * @return a [ServerFunctionResult] value
+     *  [ServerFunctionResult.OK] if logged in OK
+     *  [ServerFunctionResult.UNKNOWN_USER_OR_PASS] if server rejected login data. In this case, an error to be shown to user will be scheduled through [ScheduledErrors.addError]
+     *  [ServerFunctionResult.CLIENT_ERROR] if Client got an error (eg. died while receiving data)
+     *  [ServerFunctionResult.CLIENT_NOT_ALIVE] if Client died
+     *  [ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER] if server sent an unknown reply
      */
-    suspend fun testLoginFromLink(client: Client, username: String, password: String): CloudFunctionResults {
+    suspend fun testLoginFromLink(client: Client, username: String, password: String): ServerFunctionResult {
         val payload = LoginData(username, Base64.decode(password, Base64.DEFAULT) ,BasicFlight.VERSION.version).serialize()
         val requestResult = client.sendRequest(JoozdlogCommsKeywords.LOGIN, payload)
         if (!requestResult.isOK()) return requestResult.toCloudFunctionResults()
-        return when (val x = client.readFromServer()?.toString(Charsets.UTF_8)){
-            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
+        return when (val x = readServerResponse(client)){
+            JoozdlogCommsKeywords.OK -> ServerFunctionResult.OK
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> ServerFunctionResult.UNKNOWN_USER_OR_PASS
             null -> {
-                if (client.alive) CloudFunctionResults.SERVER_ERROR
-                else CloudFunctionResults.CLIENT_ERROR
+                if (client.alive) ServerFunctionResult.SERVER_ERROR
+                else ServerFunctionResult.CLIENT_ERROR
             }
             else -> {
                 Log.w("testLogin", "Server responded unexpected \"$x\"")
-                CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
+                ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER
             } // for debugging, server responded something unexpected
         }
     }
@@ -254,7 +257,7 @@ object ServerFunctions {
      */
     suspend fun requestUsername(client: Client): String?{
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_NEW_USERNAME)
-        return client.readFromServer()?.toString(Charsets.UTF_8)
+        return readServerResponse(client)
     }
 
     /**
@@ -262,72 +265,49 @@ object ServerFunctions {
      * @param name: Username
      * @param key: Key
      */
-    suspend fun createNewAccount(client: Client, name: String, key: ByteArray): CloudFunctionResults {
+    suspend fun createNewAccount(client: Client, name: String, key: ByteArray): CloudFunctionResult {
         val payLoad = LoginData(name, key, BasicFlight.VERSION.version).serialize()
         client.sendRequest(JoozdlogCommsKeywords.NEW_ACCOUNT, payLoad)
         val result = client.readFromServer()
         Log.d(TAG, "Result was ${result?.toString(Charsets.UTF_8)}")
-        return when (result?.toString(Charsets.UTF_8)){
-            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-            JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS
-            JoozdlogCommsKeywords.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
-            null -> CloudFunctionResults.CLIENT_ERROR
-            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
-        }
+        return handleServerResult(readServerResponse(client))
     }
 
-    /**
-     * Send new email address to server
-     * Server will send a confirmation mail if it worked.
-     */
-    suspend fun sendNewEmailData(client: Client, emailToSend: String): CloudFunctionResults =
-        generateLoginDataWithEmail(email = emailToSend)?.let{loginData ->
-            client.sendRequest(JoozdlogCommsKeywords.SET_EMAIL, loginData.serialize()).let{
-                if (!it.isOK()) return it.toCloudFunctionResults()
-            }
-            when(client.readFromServer()?.toString(Charsets.UTF_8)) {
-                JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-                JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
-                JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> CloudFunctionResults.NOT_A_VALID_EMAIL_ADDRESS
-                JoozdlogCommsKeywords.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
-                null -> CloudFunctionResults.CLIENT_ERROR
-                else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
-            }
-        } ?: CloudFunctionResults.NO_LOGIN_DATA
+
 
 
     /**
      * send an email confirmation string to server
      */
-    suspend fun confirmEmail(client: Client, confirmationString: String): CloudFunctionResults {
+    suspend fun confirmEmail(client: Client, confirmationString: String): ServerFunctionResult {
         val payload = wrap(confirmationString)
         client.sendRequest(JoozdlogCommsKeywords.CONFIRM_EMAIL, payload).let {
             if (!it.isOK()) return it.toCloudFunctionResults()
         }
-        return when(client.readFromServer()?.toString(Charsets.UTF_8)){
-            null -> CloudFunctionResults.CLIENT_ERROR
-            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
-            JoozdlogCommsKeywords.EMAIL_NOT_KNOWN_OR_VERIFIED -> CloudFunctionResults.EMAIL_DOES_NOT_MATCH
-            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
+        return when(readServerResponse(client)){
+            null -> ServerFunctionResult.CLIENT_ERROR
+            JoozdlogCommsKeywords.OK -> ServerFunctionResult.OK
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> ServerFunctionResult.UNKNOWN_USER_OR_PASS
+            JoozdlogCommsKeywords.EMAIL_NOT_KNOWN_OR_VERIFIED -> ServerFunctionResult.EMAIL_DOES_NOT_MATCH
+            else -> ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER
         }
     }
 
     /**
      * Request an email with a login link from the server
      */
-    suspend fun requestLoginLinkMail(client: Client): CloudFunctionResults {
+    suspend fun requestLoginLinkMail(client: Client): ServerFunctionResult {
         val n = Prefs.username
         val k = Prefs.key
-        if (n == null || k == null) return CloudFunctionResults.NO_LOGIN_DATA
-        val payload = LoginDataWithEmail(n, k, BasicFlight.VERSION.version, Prefs.emailAddress).serialize()
+        if (n == null || k == null) return ServerFunctionResult.NO_LOGIN_DATA
+        val payload = LoginDataWithEmail(n, k, BasicFlight.VERSION.version, EmailPrefs.emailAddress).serialize()
         client.sendRequest(JoozdlogCommsKeywords.REQUEST_LOGIN_LINK_MAIL, payload)
-        return when (client.readFromServer()?.toString(Charsets.UTF_8)) { // <--- TODO Somehow this doesn't return problem might be on server
-            null -> CloudFunctionResults.CLIENT_ERROR
-            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> CloudFunctionResults.UNKNOWN_USER_OR_PASS
-            JoozdlogCommsKeywords.EMAIL_NOT_KNOWN_OR_VERIFIED -> CloudFunctionResults.EMAIL_DOES_NOT_MATCH
-            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER
+        return when (readServerResponse(client)) { // <--- TODO Somehow this doesn't return problem might be on server
+            null -> ServerFunctionResult.CLIENT_ERROR
+            JoozdlogCommsKeywords.OK -> ServerFunctionResult.OK
+            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> ServerFunctionResult.UNKNOWN_USER_OR_PASS
+            JoozdlogCommsKeywords.EMAIL_NOT_KNOWN_OR_VERIFIED -> ServerFunctionResult.EMAIL_DOES_NOT_MATCH
+            else -> ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER
         }
     }
 
@@ -337,29 +317,29 @@ object ServerFunctions {
      * @param client: The [Client] to use
      * @param newPassword: The new password to set. (this only works when logged in so no need for old pass)
      * @param email: Email to send new login link to.
-     * @return [CloudFunctionResults]:
-     *  [CloudFunctionResults.OK] if OK
-     *  [CloudFunctionResults.NOT_LOGGED_IN] if not logged in before doing this
-     *  [CloudFunctionResults.SERVER_ERROR] if server reported having an error
-     *  [CloudFunctionResults.CLIENT_ERROR] if client died during this
-     *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if client died before this
-     *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server gave an unexpected reply
+     * @return [ServerFunctionResult]:
+     *  [ServerFunctionResult.OK] if OK
+     *  [ServerFunctionResult.NOT_LOGGED_IN] if not logged in before doing this
+     *  [ServerFunctionResult.SERVER_ERROR] if server reported having an error
+     *  [ServerFunctionResult.CLIENT_ERROR] if client died during this
+     *  [ServerFunctionResult.CLIENT_NOT_ALIVE] if client died before this
+     *  [ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER] if server gave an unexpected reply
      */
-    suspend fun changePassword(client: Client, newPassword: ByteArray, email: String): CloudFunctionResults {
+    suspend fun changePassword(client: Client, newPassword: ByteArray, email: String): ServerFunctionResult {
         val payload = LoginDataWithEmail("", newPassword, 0, email).serialize() // username and basicFlightVersion are unused in this function
         client.sendRequest(JoozdlogCommsKeywords.UPDATE_PASSWORD, payload).let{
             if (!it.isOK()) return it.toCloudFunctionResults()
         }
         client.readFromServer().let {
             return when(val result = it?.toString(Charsets.UTF_8)){
-                JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-                JoozdlogCommsKeywords.NOT_LOGGED_IN -> CloudFunctionResults.NOT_LOGGED_IN
-                JoozdlogCommsKeywords.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
+                JoozdlogCommsKeywords.OK -> ServerFunctionResult.OK
+                JoozdlogCommsKeywords.NOT_LOGGED_IN -> ServerFunctionResult.NOT_LOGGED_IN
+                JoozdlogCommsKeywords.SERVER_ERROR -> ServerFunctionResult.SERVER_ERROR
                 null -> {
-                    if (client.alive) CloudFunctionResults.CLIENT_ERROR
-                    else CloudFunctionResults.CLIENT_NOT_ALIVE
+                    if (client.alive) ServerFunctionResult.CLIENT_ERROR
+                    else ServerFunctionResult.CLIENT_NOT_ALIVE
                 }
-                else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER.also{
+                else -> ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER.also{
                     Log.w(this::class.simpleName, "Unexpected reply from server: $result")
                 } // generic server error
             }
@@ -390,27 +370,27 @@ object ServerFunctions {
      * Send flights to server
      * @param client: an initialized Client to send/receive data
      * @param flightsToSend: A list of Flights to send to server
-     * @return [CloudFunctionResults]:
-     *  [CloudFunctionResults.OK] if OK
-     *  [CloudFunctionResults.NOT_LOGGED_IN] if not logged in before doing this
-     *  [CloudFunctionResults.SERVER_ERROR] if server reported having an error
-     *  [CloudFunctionResults.CLIENT_ERROR] if client died during this
-     *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if client died before this
-     *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server gave an unexpected reply
+     * @return [ServerFunctionResult]:
+     *  [ServerFunctionResult.OK] if OK
+     *  [ServerFunctionResult.NOT_LOGGED_IN] if not logged in before doing this
+     *  [ServerFunctionResult.SERVER_ERROR] if server reported having an error
+     *  [ServerFunctionResult.CLIENT_ERROR] if client died during this
+     *  [ServerFunctionResult.CLIENT_NOT_ALIVE] if client died before this
+     *  [ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER] if server gave an unexpected reply
      */
-    suspend fun sendFlights(client: Client, flightsToSend: List<Flight>): CloudFunctionResults {
+    suspend fun sendFlights(client: Client, flightsToSend: List<Flight>): ServerFunctionResult {
         client.sendRequest(
             JoozdlogCommsKeywords.SENDING_FLIGHTS,
             packSerialized(flightsToSend.map {it.toBasicFlight().serialize() }))
-        return when (val result = client.readFromServer()?.toString(Charsets.UTF_8)){
-            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-            JoozdlogCommsKeywords.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
-            JoozdlogCommsKeywords.NOT_LOGGED_IN -> CloudFunctionResults.NOT_LOGGED_IN
+        return when (val result = readServerResponse(client)){
+            JoozdlogCommsKeywords.OK -> ServerFunctionResult.OK
+            JoozdlogCommsKeywords.SERVER_ERROR -> ServerFunctionResult.SERVER_ERROR
+            JoozdlogCommsKeywords.NOT_LOGGED_IN -> ServerFunctionResult.NOT_LOGGED_IN
             null -> {
-                if (client.alive) CloudFunctionResults.CLIENT_ERROR
-                else CloudFunctionResults.CLIENT_NOT_ALIVE
+                if (client.alive) ServerFunctionResult.CLIENT_ERROR
+                else ServerFunctionResult.CLIENT_NOT_ALIVE
             }
-            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER.also{
+            else -> ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER.also{
                 Log.w(this::class.simpleName, "Unexpected reply from server: $result")
             } // generic server error
         }
@@ -419,35 +399,38 @@ object ServerFunctions {
     /**
      * Send a timestamp to server
      */
-    suspend fun sendTimeStamp(client: Client, timeStamp: Long): CloudFunctionResults =
+    suspend fun sendTimeStamp(client: Client, timeStamp: Long): ServerFunctionResult =
         client.sendRequest(JoozdlogCommsKeywords.ADD_TIMESTAMP, wrap(timeStamp)).toCloudFunctionResults()
 
     /**
      * Send feedback to server
-     * @return [CloudFunctionResults]:
-     *  [CloudFunctionResults.OK] if OK
-     *  [CloudFunctionResults.SERVER_ERROR] if server reported having an error
-     *  [CloudFunctionResults.CLIENT_ERROR] if client died during this
-     *  [CloudFunctionResults.CLIENT_NOT_ALIVE] if client died before this
-     *  [CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER] if server gave an unexpected reply
+     * @return [ServerFunctionResult]:
+     *  [ServerFunctionResult.OK] if OK
+     *  [ServerFunctionResult.SERVER_ERROR] if server reported having an error
+     *  [ServerFunctionResult.CLIENT_ERROR] if client died during this
+     *  [ServerFunctionResult.CLIENT_NOT_ALIVE] if client died before this
+     *  [ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER] if server gave an unexpected reply
      */
-    suspend fun sendFeedback(client: Client, feedbackData: FeedbackData): CloudFunctionResults {
+    suspend fun sendFeedback(client: Client, feedbackData: FeedbackData): ServerFunctionResult {
         Log.d(this::class.simpleName, "SendFeedback $client / $feedbackData")
         client.sendRequest(JoozdlogCommsKeywords.SENDING_FEEDBACK, feedbackData.serialize())
-        return when (val result = client.readFromServer()?.toString(Charsets.UTF_8)){
-            JoozdlogCommsKeywords.OK -> CloudFunctionResults.OK
-            JoozdlogCommsKeywords.SERVER_ERROR -> CloudFunctionResults.SERVER_ERROR
+        return when (val result = readServerResponse(client)){
+            JoozdlogCommsKeywords.OK -> ServerFunctionResult.OK
+            JoozdlogCommsKeywords.SERVER_ERROR -> ServerFunctionResult.SERVER_ERROR
             null -> {
-                if (client.alive) CloudFunctionResults.CLIENT_ERROR
-                else CloudFunctionResults.CLIENT_NOT_ALIVE
+                if (client.alive) ServerFunctionResult.CLIENT_ERROR
+                else ServerFunctionResult.CLIENT_NOT_ALIVE
             }
-            else -> CloudFunctionResults.UNKNOWN_REPLY_FROM_SERVER.also{
+            else -> ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER.also{
                 Log.w(this::class.simpleName, "Unexpected reply from server: $result")
             } // generic server error
         }
     }
 
-    suspend fun save(client: Client): CloudFunctionResults =
+    private suspend fun readServerResponse(client: Client) =
+        client.readFromServer()?.toString(Charsets.UTF_8)
+
+    suspend fun save(client: Client): ServerFunctionResult =
         client.sendRequest(JoozdlogCommsKeywords.SAVE_CHANGES).toCloudFunctionResults()
 
     /**
@@ -458,9 +441,6 @@ object ServerFunctions {
         digest()
     }
 
-    private fun generateLoginDataWithEmail(username: String? = null, key: ByteArray? = null, email: String? = null): LoginDataWithEmail? {
-        return LoginDataWithEmail(username ?: Prefs.username ?: return null,
-                           key ?: Prefs.key ?: return null,
-                           BasicFlight.VERSION.version, email ?: Prefs.emailAddress)
-    }
+
+
 }

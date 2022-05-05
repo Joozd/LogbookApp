@@ -1,7 +1,11 @@
 package nl.joozd.logbookapp.ui.utils
 
 import android.content.Context
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.view.View
 import androidx.fragment.app.viewModels
+import nl.joozd.logbookapp.R
 
 /**
  * When message in in this fragment has been completed (i.e. bar can be closed), call [onCompleted]
@@ -25,5 +29,10 @@ abstract class MessageBarFragment: JoozdlogFragment() {
         super.onAttach(context)
         onCompleted?.let { messageBarFragmentViewModel.onCompleted = it }
     }
+
+    protected fun inflateGenericLayout(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): View = inflater.inflate(R.layout.fragment_generic_notification, container, false)
 
 }

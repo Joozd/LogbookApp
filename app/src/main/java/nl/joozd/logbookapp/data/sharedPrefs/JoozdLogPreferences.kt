@@ -31,42 +31,51 @@ abstract class JoozdLogPreferences {
         else DataStoreProviderNoMigration(context,preferencesFileKey).dataStore
     }
 
+    protected fun <T: Any> post(key: String, newValue: T){
+        @Suppress("UNCHECKED_CAST")
+        val prefsKey = generatePreferencesKey(key, newValue) as Preferences.Key<T>
+        MainScope().launch{ // doing this on MainScope is OK as Datastore will give it Dispatchers.IO
+            dataStore.edit { p ->
+                p[prefsKey] = newValue
+            }
+        }
+    }
+
     protected fun getBooleanFlowForItem(itemName: String, defaultValue: Boolean? = null): Flow<Boolean?> = dataStore.data.map { p ->
         println("Getting value for $itemName: ${p[booleanPreferencesKey(itemName)]}")
         p[booleanPreferencesKey(itemName)] ?: defaultValue
     }
 
-    protected fun getIntFlowForItem(itemName: String, defaultValue: Int? = null): Flow<Int?> = dataStore.data.map { p ->
-        p[intPreferencesKey(itemName)] ?: defaultValue
-    }
 
-    protected fun getLongFlowForItem(itemName: String, defaultValue: Long? = null): Flow<Long?> = dataStore.data.map { p ->
-        p[longPreferencesKey(itemName)] ?: defaultValue
-    }
-
-    protected fun getFloatFlowForItem(itemName: String, defaultValue: Float? = null): Flow<Float?> = dataStore.data.map { p ->
-        p[floatPreferencesKey(itemName)] ?: defaultValue
-    }
-
-    protected fun getStringFlowForItem(itemName: String, defaultValue: String? = null): Flow<String?> = dataStore.data.map { p ->
-        p[stringPreferencesKey(itemName)] ?: defaultValue
-    }
 
     //[preference] is just in here for type checking, the actual linking is through the properties name!
-    protected inner class PrefsFlow<T: Any>(private val preference: T, private val defaultValue: T? = null) {
+    protected inner class PrefsFlow<T: Any>(private val name: String, private val defaultValue: T) {
         operator fun getValue(thisRef: JoozdLogPreferences, property: KProperty<*>): Flow<T> {
-            val name = property.name.dropLast(4)
-            println("getting flow for $name}")
-
             @Suppress("UNCHECKED_CAST")
-            return when (preference) {
+            return when (defaultValue) {
                 is Boolean -> getBooleanFlowForItem(name,defaultValue as Boolean?) as Flow<T>
                 is Int -> getIntFlowForItem(name, defaultValue as Int?) as Flow<T>
                 is Long -> getLongFlowForItem(name, defaultValue as Long?) as Flow<T>
                 is Float -> getFloatFlowForItem(name, defaultValue as Float?) as Flow<T>
                 is String -> getStringFlowForItem(name, defaultValue as String?) as Flow<T>
-                else -> throw IllegalArgumentException("prefsFlow Only accepts Boolean/Int/Long/Float/String, got ${preference::class.simpleName}")
+                else -> throw IllegalArgumentException("prefsFlow Only accepts Boolean/Int/Long/Float/String, got ${defaultValue::class.simpleName}")
             }
+        }
+
+        private fun getIntFlowForItem(itemName: String, defaultValue: Int? = null): Flow<Int?> = dataStore.data.map { p ->
+            p[intPreferencesKey(itemName)] ?: defaultValue
+        }
+
+        private fun getLongFlowForItem(itemName: String, defaultValue: Long? = null): Flow<Long?> = dataStore.data.map { p ->
+            p[longPreferencesKey(itemName)] ?: defaultValue
+        }
+
+        private fun getFloatFlowForItem(itemName: String, defaultValue: Float? = null): Flow<Float?> = dataStore.data.map { p ->
+            p[floatPreferencesKey(itemName)] ?: defaultValue
+        }
+
+        private fun getStringFlowForItem(itemName: String, defaultValue: String? = null): Flow<String?> = dataStore.data.map { p ->
+            p[stringPreferencesKey(itemName)] ?: defaultValue
         }
     }
 
@@ -75,47 +84,37 @@ abstract class JoozdLogPreferences {
      * @param defaultValue: Default value to return. Needs to be used to set type of variable to set
      * @Note reading this value is a blocking IO operation.
      */
-    protected inner class JoozdLogSharedPreference<T : Any>(private val defaultValue: T){
+    protected inner class JoozdLogSharedPreferenceNotNull<T : Any>(private val key: String, private val defaultValue: T){
         operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
-            return getPreference(property.name, defaultValue)
+            return getPreference(defaultValue)
         }
 
         operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-            setPreference(property.name, value)
+            setPreference(value)
         }
 
-        private fun getPreference(key: String, defaultValue: T): T {
+        private fun getPreference(defaultValue: T): T {
             @Suppress("UNCHECKED_CAST")
             val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
             return readBlocking(prefsKey, defaultValue)
         }
 
-        private fun setPreference(key: String, value: T) {
+        private fun setPreference(value: T) {
             @Suppress("UNCHECKED_CAST")
             val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
-            MainScope().launch { // doing this on MainScope is OK as Datastore will give it Dispatchers.IO
+            writeBlocking(prefsKey, value)
+        }
+
+        private fun readBlocking(key: Preferences.Key<T>, defaultValue: T): T =
+            runBlocking {
+                (dataStore.data.first()[key] ?: defaultValue)
+            }
+
+        private fun writeBlocking(prefsKey: Preferences.Key<T>, value: T) =
+            runBlocking {
                 dataStore.edit { p ->
                     p[prefsKey] = value
                 }
             }
-        }
-
-
-        private fun generatePreferencesKey(key: String, defaultValue: T) =
-            when(defaultValue){
-                is Boolean -> booleanPreferencesKey(key)
-                is Int -> intPreferencesKey(key)
-                is Long -> longPreferencesKey(key)
-                is Float -> floatPreferencesKey(key)
-                is String -> stringPreferencesKey(key)
-                else -> throw IllegalArgumentException()
-            }
-
-        private fun readBlocking(key: Preferences.Key<T>, defaultValue: T): T =
-            runBlocking {
-                @Suppress("UNCHECKED_CAST")
-                (dataStore.data.first()[key] ?: defaultValue)
-            }
-
     }
 }

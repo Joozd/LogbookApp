@@ -28,22 +28,26 @@ open class UserMessage(
         var action1Listener = UserChoiceListener {  }
         var action2Listener = UserChoiceListener {  }
 
-        fun setAction1(action: UserChoiceListener){
+        fun setAction1(action: UserChoiceListener): Builder{
             action1Listener = action
+            return this
         }
 
-        fun setAction2(action: UserChoiceListener){
+        fun setAction2(action: UserChoiceListener): Builder{
             action2Listener = action
+            return this
         }
 
-        fun setPositiveButton(resource: Int, action: UserChoiceListener){
+        fun setPositiveButton(resource: Int, action: UserChoiceListener): Builder{
             choice1Resource = resource
             action1Listener = action
+            return this
         }
 
-        fun setNegativeButton(resource: Int, action: UserChoiceListener){
+        fun setNegativeButton(resource: Int, action: UserChoiceListener): Builder{
             choice2Resource = resource
             action2Listener = action
+            return this
         }
 
         open fun build(): UserMessage =

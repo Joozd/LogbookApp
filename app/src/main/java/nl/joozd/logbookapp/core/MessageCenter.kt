@@ -1,12 +1,18 @@
 package nl.joozd.logbookapp.core
 
-
-import androidx.lifecycle.lifecycleScope
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.databinding.FragmentGenericNotificationBinding
+import nl.joozd.logbookapp.ui.fragments.makeGenericMessageBarFragment
 import nl.joozd.logbookapp.ui.utils.MessageBarFragment
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.UserMessage
@@ -48,6 +54,15 @@ object MessageCenter {
         }
     }
 
+    fun pushGenericError(messageResource: Int){
+        val message = UserMessage.Builder().apply{
+            titleResource = R.string.error
+            descriptionResource = messageResource
+            setPositiveButton(android.R.string.ok){ }
+        }.build()
+        pushMessage(message)
+    }
+
     private fun addMessageToQueue(msg: UserMessage){
         messageQueue.add(msg)
 
@@ -77,8 +92,44 @@ object MessageCenter {
 
     // Will put null if no next fragment present
     private suspend fun nextFragmentWithDelay(){
-        delay(1000) // time for short fade out
+        delay(600) // time for short fade out
         nextFragment()
+    }
+
+    class MessageFragmentBuilder {
+        var tag: String? = null
+
+        var message: String? = null
+        var messageResource: Int? = null
+        var messageFlow: Flow<String>? = null
+        var messageResourceFlow: Flow<Int>? = null
+
+        val hasPositiveButton get() = positiveText != null && positiveTextResource != null && positiveTextFlow!= null && positiveTextResource != null
+        var positiveText: String? = null
+        var positiveTextResource: Int? = null
+        var positiveTextFlow: Flow<String>? = null
+        var positiveTextResourceFlow: Flow<Int>? = null
+        var positiveAction: Executable = Executable{ }
+        fun positiveAction(action: Executable){ positiveAction = action}
+
+        val hasNegativeButton get() = negativeText != null && negativeTextResource != null && negativeTextFlow!= null && negativeTextResourceFlow != null
+        var negativeText: String? = null
+        var negativeTextResource: Int? = null
+        var negativeTextFlow: Flow<String>? = null
+        var negativeTextResourceFlow: Flow<Int>? = null
+        var negativeAction: Executable = Executable {  }
+        fun negativeAction(action: Executable){ negativeAction = action}
+
+        fun build(): MessageBarFragment = makeGenericMessageBarFragment(this)
+
+        fun buildAndPush(){
+            pushMessageBarFragment(build())
+        }
+
+
+        fun interface Executable{
+            operator fun invoke()
+        }
     }
 
     private fun notYetInQueue(fragment: MessageBarFragment) =

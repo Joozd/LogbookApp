@@ -1,9 +1,6 @@
 package nl.joozd.logbookapp.core
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -11,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.databinding.FragmentGenericNotificationBinding
 import nl.joozd.logbookapp.ui.fragments.makeGenericMessageBarFragment
 import nl.joozd.logbookapp.ui.utils.MessageBarFragment
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
@@ -111,6 +107,14 @@ object MessageCenter {
         var positiveTextResourceFlow: Flow<Int>? = null
         var positiveAction: Executable = Executable{ }
         fun positiveAction(action: Executable){ positiveAction = action}
+        fun setPositiveButton(text: Int, action: Executable){
+            positiveTextResource = text
+            positiveAction = action
+        }
+        fun setPositiveButton(text: String, action: Executable){
+            positiveText = text
+            positiveAction = action
+        }
 
         val hasNegativeButton get() = negativeText != null && negativeTextResource != null && negativeTextFlow!= null && negativeTextResourceFlow != null
         var negativeText: String? = null
@@ -119,11 +123,24 @@ object MessageCenter {
         var negativeTextResourceFlow: Flow<Int>? = null
         var negativeAction: Executable = Executable {  }
         fun negativeAction(action: Executable){ negativeAction = action}
+        fun setNegativeButton(text: Int, action: Executable){
+            negativeTextResource = text
+            negativeAction = action
+        }
+        fun setNegativeButton(text: String, action: Executable){
+            negativeText = text
+            negativeAction = action
+        }
 
         fun build(): MessageBarFragment = makeGenericMessageBarFragment(this)
 
         fun buildAndPush(){
             pushMessageBarFragment(build())
+        }
+
+        fun commit(block: MessageFragmentBuilder.() -> Unit){
+            block()
+            buildAndPush()
         }
 
 

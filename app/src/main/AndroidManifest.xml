@@ -26,28 +26,6 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".ui.activities.LinkHandlerActivity"
-            android:exported="true"
-            android:excludeFromRecents="true"
-            android:taskAffinity=".LinkHandlerActivity"
-            android:theme="@style/AppTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="joozdlog.joozd.nl"
-                    android:pathPrefix="/inject-key"
-                    android:scheme="https" />
-                <data
-                    android:host="joozdlog.joozd.nl"
-                    android:pathPrefix="/verify-email"
-                    android:scheme="https" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".ui.activities.FeedbackActivity"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize" />
@@ -118,6 +96,21 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="joozdlog.joozd.nl"
+                    android:pathPrefix="/inject-key"
+                    android:scheme="https" />
+                <data
+                    android:host="joozdlog.joozd.nl"
+                    android:pathPrefix="/verify-email"
+                    android:scheme="https" />
             </intent-filter>
 
         </activity>

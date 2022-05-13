@@ -21,13 +21,13 @@ package nl.joozd.logbookapp.data.repository
 
 import kotlinx.coroutines.CoroutineScope
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
-import nl.joozd.logbookapp.core.JoozdlogWorkersHub
+import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
 
 /**
  * For doing I/O things that are not related to flights, airports, aircraft or balances forward
  */
 object GeneralRepository: CoroutineScope by dispatchersProviderMainScope() {
     fun synchTimeWithServer(){
-        JoozdlogWorkersHub.synchronizeTime()
+        JoozdlogWorkersHubOld.synchronizeTime()
     }
 }

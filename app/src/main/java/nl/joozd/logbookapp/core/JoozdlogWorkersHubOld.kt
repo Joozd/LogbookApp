@@ -31,7 +31,8 @@ import java.util.concurrent.TimeUnit
 /**
  * Central point for all things worker.
  */
-object JoozdlogWorkersHub: CoroutineScope by MainScope() {
+@Deprecated("Use typed worker hubs")
+object JoozdlogWorkersHubOld: JoozdlogWorkersHub(), CoroutineScope by MainScope() {
     /**
      * Constants for influencing behaviour
      */
@@ -71,11 +72,11 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      */
     fun synchronizeTime(){
         val task = OneTimeWorkRequestBuilder<SyncTimeWorker>()
-            .needNetwork()
+            .needsNetwork()
             .addTag(SYNC_TIME)
             .build()
 
-        enqueue(SYNC_TIME, ExistingWorkPolicy.KEEP, task)
+        enqueue(task, SYNC_TIME, ExistingWorkPolicy.KEEP)
     }
 
 
@@ -86,11 +87,11 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
     private fun synchronizeTimeAndFlights(){
         if (Prefs.useCloud) {
             val task = OneTimeWorkRequestBuilder<SyncFlightsWorker>()
-                .needNetwork()
+                .needsNetwork()
                 .addTag(SYNC_FLIGHTS)
                 .build()
 
-            enqueue(SYNC_FLIGHTS, ExistingWorkPolicy.REPLACE, task)
+            enqueue(task, SYNC_FLIGHTS, ExistingWorkPolicy.REPLACE)
         }
     }
 
@@ -100,11 +101,11 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      */
     fun scheduleEmailConfirmation(){
         val task = OneTimeWorkRequestBuilder<ConfirmEmailWorker>()
-            .needNetwork()
+            .needsNetwork()
             .addTag(CONFIRM_EMAIL)
             .build()
 
-        enqueue(CONFIRM_EMAIL, ExistingWorkPolicy.KEEP, task)
+        enqueue(task, CONFIRM_EMAIL, ExistingWorkPolicy.KEEP)
     }
 
     /**
@@ -113,10 +114,10 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      */
     fun scheduleSetEmail(){
         val task = OneTimeWorkRequestBuilder<SetEmailWorker>()
-            .needNetwork()
+            .needsNetwork()
             .addTag(CONFIRM_EMAIL)
             .build()
-        enqueue(CONFIRM_EMAIL, ExistingWorkPolicy.KEEP, task)
+        enqueue(task, CONFIRM_EMAIL, ExistingWorkPolicy.KEEP)
     }
 
     /**
@@ -124,21 +125,21 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      */
     fun scheduleBackupEmail(){
         val task = OneTimeWorkRequestBuilder<SendBackupEmailWorker>()
-            .needNetwork()
+            .needsNetwork()
             .addTag(GET_BACKUP_EMAIL)
             .build()
-        enqueue(GET_BACKUP_EMAIL, ExistingWorkPolicy.KEEP, task)
+        enqueue(task, GET_BACKUP_EMAIL, ExistingWorkPolicy.KEEP)
     }
 
     /**
      * Schedule an email backup
      */
     fun scheduleLoginLinkEmail(){
-        val task = OneTimeWorkRequestBuilder<SendBackupEmailWorker>()
-            .needNetwork()
+        val task = OneTimeWorkRequestBuilder<SendLoginLinkEmailWorker>()
+            .needsNetwork()
             .addTag(GET_BACKUP_EMAIL)
             .build()
-        enqueue(GET_BACKUP_EMAIL, ExistingWorkPolicy.KEEP, task)
+        enqueue(task, GET_BACKUP_EMAIL, ExistingWorkPolicy.REPLACE)
     }
 
 
@@ -149,10 +150,10 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      */
     fun scheduleLoginAttempt(){
         val task = OneTimeWorkRequestBuilder<CloudLoginWorker>()
-            .needNetwork()
+            .needsNetwork()
             .addTag(LOGIN_TO_CLOUD)
             .build()
-        enqueue(LOGIN_TO_CLOUD, ExistingWorkPolicy.KEEP, task)
+        enqueue(task, LOGIN_TO_CLOUD, ExistingWorkPolicy.KEEP)
     }
 
     /**
@@ -161,12 +162,12 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
      */
     fun sendFeedback(contactInfo: String){
         val task = OneTimeWorkRequestBuilder<SubmitFeedbackWorker>()
-            .needNetwork()
+            .needsNetwork()
             .setInputData(makeDataWithString(SubmitFeedbackWorker.CONTACT_INFO_TAG, contactInfo))
             .addTag(SUBMIT_FEEDBACK)
             .build()
 
-        enqueue(SUBMIT_FEEDBACK, ExistingWorkPolicy.REPLACE, task)
+        enqueue(task, SUBMIT_FEEDBACK, ExistingWorkPolicy.REPLACE)
     }
 
     /**
@@ -188,7 +189,7 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
                 setInitialDelay(DELAY_FOR_OVERWRITE_MINUTES, TimeUnit.MINUTES)
         }.build()
 
-        enqueue(GET_AIRPORTS, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
+        enqueue(task, GET_AIRPORTS, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP)
     }
 
 
@@ -207,45 +208,9 @@ object JoozdlogWorkersHub: CoroutineScope by MainScope() {
                 setInitialDelay(DELAY_FOR_OVERWRITE_MINUTES, TimeUnit.MINUTES)
         }.build()
 
-        enqueue(SYNC_AIRCRAFT_TYPES, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP, task)
+        enqueue(task, SYNC_AIRCRAFT_TYPES, if (overwrite) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP)
     }
 
-    /**
-     * Build Constraints with requiredNetworkType = NetworkType.CONNECTED
-     */
-    private fun makeConstraintsNeedNetwork() = Constraints.Builder()
-        .setRequiredNetworkType(NetworkType.CONNECTED)
-        .build()
-
-    private fun OneTimeWorkRequest.Builder.needNetwork(): OneTimeWorkRequest.Builder{
-        setConstraints(makeConstraintsNeedNetwork())
-        return this
-    }
-
-    private fun PeriodicWorkRequest.Builder.needNetwork(): PeriodicWorkRequest.Builder{
-        setConstraints(makeConstraintsNeedNetwork())
-        return this
-    }
-
-    /**
-     * Make an input data object with a single string
-     */
-    private fun makeDataWithString(tag: String, value: String) =
-        Data.Builder().putString(tag, value).build()
-
-    private fun enqueue(uniqueWorkName: String,
-                        existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
-                        periodicWork: PeriodicWorkRequest
-    ) = with (WorkManager.getInstance(App.instance)){
-        enqueueUniquePeriodicWork(uniqueWorkName, existingPeriodicWorkPolicy, periodicWork)
-    }
-
-    private fun enqueue(uniqueWorkName: String,
-                        existingWorkPolicy: ExistingWorkPolicy,
-                        work: OneTimeWorkRequest
-    ) = with(WorkManager.getInstance(App.instance)) {
-        enqueueUniqueWork(uniqueWorkName, existingWorkPolicy, work)
-    }
 
 
 

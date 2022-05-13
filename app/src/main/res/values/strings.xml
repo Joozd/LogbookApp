@@ -198,7 +198,7 @@
     <string name="changed_password_message">Your password has changed. Please send your login link to yourself to make sure it is saved.</string>
     <string name="mail_to_myself">Send it to myself</string>
     <string name="send_using">Pick an app:</string>
-    <string name="email_verification_scheduled">The verification of your email address is scheduled to happen when your device has an internet connection.\nOnce it succeeds, you will receive an email with your login link.</string>
+    <string name="email_verification_scheduled">Cannot connect to server right now. The verification of your email address will happen when we can reach the server.\nOnce it succeeds, you will receive an email with your login link.</string>
 
 
     <string name="login_error_message">Cannot log in to server.</string>
@@ -215,7 +215,7 @@
     <string name="does_not_match">Does not match</string>
     <string name="wrong_username_password">The server has rejected your login data. Please create a new cloud account or find your working login link.</string>
     <string name="email_data_rejected">The server has rejected your email confirmation data. Please check you clicked the correct confirmation link.</string>
-    <string name="email_address_rejected">The server has rejected your email address. Do you want to re-confirm, or delete it?</string>
+    <string name="email_address_rejected">The server has rejected your email address. You might have clicked an old confirmation message. Do you want to request a new confirmation mail, or delete your current email settings?</string>
 
 
     <string name="pass_requirements">Password requirements</string>
@@ -472,8 +472,9 @@
     <string name="email_deleted">Email deleted</string>
     <string name="email_deleted_long">Your email address has been deleted from this device.</string>
     <string name="email_verified">Email address verified!</string>
-    <string name="email_verification_requested_short">Verification Mail</string>
+    <string name="verification_mail">Verification Mail</string>
     <string name="email_verification_requested_long">A verification email will be requested from the Joozdlog Server. Please verify the mail on this device!</string>
+    <string name="email_verification_invalid_data">The email verification data received is not valid.</string>
     <string name="logged_in">Logged in to cloud!</string>
     <string name="login_delayed">No server, will try again</string>
 

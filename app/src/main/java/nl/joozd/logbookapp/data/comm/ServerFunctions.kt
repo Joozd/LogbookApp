@@ -42,6 +42,7 @@ import java.security.MessageDigest
 @Deprecated("Use Cloud")
 object ServerFunctions {
     private const val TAG = "ServerFunctions"
+    /*
     /**
      * sends a REQUEST TIMESTAMP to server
      * Expects server to reply with a single Long (8 Bytes)
@@ -93,19 +94,7 @@ object ServerFunctions {
         }
     }
 
-    /**
-     * returns version of Airport Database
-     * @param client: Client to use
-     * @return version of database on server, or negative value if error:
-     * -1 = server error
-     * -2 = connection error
-     */
-    suspend fun getAirportDbVersion(client: Client): Int{
-        client.sendRequest(JoozdlogCommsKeywords.REQUEST_AIRPORT_DB_VERSION)
-        return client.readFromServer()?.let {
-            unwrapInt(it)
-        } ?: -2
-    }
+
 
     /**
      * Downloads list of airports from server
@@ -293,23 +282,7 @@ object ServerFunctions {
         }
     }
 
-    /**
-     * Request an email with a login link from the server
-     */
-    suspend fun requestLoginLinkMail(client: Client): ServerFunctionResult {
-        val n = Prefs.username
-        val k = Prefs.key
-        if (n == null || k == null) return ServerFunctionResult.NO_LOGIN_DATA
-        val payload = LoginDataWithEmail(n, k, BasicFlight.VERSION.version, EmailPrefs.emailAddress).serialize()
-        client.sendRequest(JoozdlogCommsKeywords.REQUEST_LOGIN_LINK_MAIL, payload)
-        return when (readServerResponse(client)) { // <--- TODO Somehow this doesn't return problem might be on server
-            null -> ServerFunctionResult.CLIENT_ERROR
-            JoozdlogCommsKeywords.OK -> ServerFunctionResult.OK
-            JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> ServerFunctionResult.UNKNOWN_USER_OR_PASS
-            JoozdlogCommsKeywords.EMAIL_NOT_KNOWN_OR_VERIFIED -> ServerFunctionResult.EMAIL_DOES_NOT_MATCH
-            else -> ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER
-        }
-    }
+
 
 
     /**
@@ -442,5 +415,7 @@ object ServerFunctions {
     }
 
 
+
+     */
 
 }

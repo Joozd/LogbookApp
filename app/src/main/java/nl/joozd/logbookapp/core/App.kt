@@ -34,8 +34,8 @@ class App : Application(){
         instance = this
 
         //Periodic workers get started as soon as app gets started.
-        JoozdlogWorkersHub.periodicGetAirportsFromServer()
-        JoozdlogWorkersHub.periodicSynchronizeAircraftTypes()
+        JoozdlogWorkersHubOld.periodicGetAirportsFromServer()
+        JoozdlogWorkersHubOld.periodicSynchronizeAircraftTypes()
 
         // Set dark mode preference from Preferences
         DarkModeCenter.setDarkMode()

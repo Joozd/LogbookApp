@@ -14,7 +14,7 @@ object EmailPrefs: JoozdLogPreferences() {
     var emailAddress by JoozdLogSharedPreferenceNotNull(EMAIL_ADDRESS,"")
     val emailAddressFlow by PrefsFlow(EMAIL_ADDRESS, "")
     suspend fun emailAddress() = emailAddressFlow.first()
-    fun postEmailAdress(value: String) = post(EMAIL_ADDRESS, value)
+    fun postEmailAddress(value: String) = post(EMAIL_ADDRESS, value)
 
     /**
      * Email confirmation string waiting for a network connection. Handled by [nl.joozd.logbookapp.workmanager.ConfirmEmailWorker]
@@ -22,6 +22,8 @@ object EmailPrefs: JoozdLogPreferences() {
     private const val EMAIL_CONF_STRING_WAITING = "EMAIL_CONF_STRING_WAITING"
     var emailConfirmationStringWaiting by JoozdLogSharedPreferenceNotNull(EMAIL_CONF_STRING_WAITING,"")
     val emailConfirmationStringWaitingFlow by PrefsFlow(EMAIL_CONF_STRING_WAITING, "")
+    fun postEmailConfirmationStringWaiting(value: String) = post(EMAIL_CONF_STRING_WAITING, value)
+
 
     /**
      * [emailVerified] is true if email verification code was deemed correct by server

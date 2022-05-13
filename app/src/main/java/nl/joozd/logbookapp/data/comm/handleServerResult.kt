@@ -32,12 +32,16 @@ private suspend fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
     return CloudFunctionResult.SERVER_REFUSED
 }
 
-private suspend fun handleBadEmailAddress(): CloudFunctionResult {
+/*
+ * This one should have been caught by checking for valid email when user enters email address.
+ */
+private fun handleBadEmailAddress(): CloudFunctionResult {
+    UserManagement.invalidateEmail()
     val message = UserMessage.Builder().apply{
         titleResource = R.string.not_an_email_address
         descriptionResource = R.string.server_not_an_email_address_please_enter_again
         setPositiveButton(R.string.enter_email){
-            UserManagement.invalidateEmail()
+
         }
     }.build()
     MessageCenter.pushMessage(message)

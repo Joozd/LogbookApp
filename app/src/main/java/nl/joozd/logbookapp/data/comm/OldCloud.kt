@@ -19,31 +19,6 @@
 
 package nl.joozd.logbookapp.data.comm
 
-import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.withContext
-import nl.joozd.comms.Client
-import nl.joozd.joozdlogcommon.AircraftType
-import nl.joozd.joozdlogcommon.FeedbackData
-import nl.joozd.joozdlogcommon.ForcedTypeData
-import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
-import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
-import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
-import nl.joozd.logbookapp.model.dataclasses.Flight
-
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.data.utils.Encryption
-import nl.joozd.logbookapp.exceptions.NotAuthorizedException
-import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import nl.joozd.logbookapp.utils.DispatcherProvider
-import nl.joozd.logbookapp.utils.TimestampMaker
-import java.time.Instant
-
 /**
  * Cloud will take care of all things happening in the cloud.
  * It consists of a number of functions, that will communicate with
@@ -53,6 +28,7 @@ import java.time.Instant
 @Deprecated("use Cloud")
 object OldCloud {
     const val name = "JoozdLogCloud object"
+    /*
 
     //This will emit [false] if server tells us login data are not valid
     val loginDataValidFlow: Flow<Boolean> = MutableStateFlow(true)
@@ -82,51 +58,6 @@ object OldCloud {
         }
 
 
-
-    /**
-     * Creates a new user
-     * Calling function should consider storing username and pasword in [Prefs]
-     */
-    suspend fun createNewUser(name: String, password: String): ServerFunctionResult =
-        Client.getInstance().use {
-            ServerFunctions.createNewAccount(it, name, Encryption.md5Hash(password))
-
-        }
-
-    /**
-     * Requests a new username from server
-     */
-    suspend fun requestUsername(): String? =
-        Client.getInstance().use { ServerFunctions.requestUsername(it) }
-
-    /**
-     * Send new email address to server.
-     * Function will return [ServerFunctionResult.NO_LOGIN_DATA] if no login data present.
-     * Server will:
-     * - check if user is logged in, otherwise [ServerFunctionResult.UNKNOWN_USER_OR_PASS]
-     * - Save a hash of that email and send a confirmation mail. If that fails due bad email address we get [ServerFunctionResult.NOT_A_VALID_EMAIL_ADDRESS]
-     * - Generic server errors will be [ServerFunctionResult.SERVER_ERROR] or [ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER]
-     * - Client errors will be [ServerFunctionResult.CLIENT_ERROR]
-     */
-    suspend fun sendNewEmailAddress() = withContext (Dispatchers.IO) {
-        Client.getInstance().use { client ->
-            ServerFunctions.sendNewEmailData(client, EmailPrefs.emailAddress)
-        }
-    }
-
-
-
-    /**
-     * Confirm email address by sending hash to server
-     */
-    suspend fun confirmEmail(confirmationString: String): ServerFunctionResult {
-        require(":" in confirmationString) { "A confirmationString must have a \':\' in it" }
-        return withContext(DispatcherProvider.io()) {
-            Client.getInstance().use { client ->
-                ServerFunctions.confirmEmail(client, confirmationString)
-            }
-        }
-    }
 
     /**
      * Request a login link.
@@ -194,41 +125,14 @@ object OldCloud {
         }
 
 
-    /**
-     * This will send a mail with all flights currently in cloud.
-     * Flights will be synced first just to be sure things are correct.
-     */
-    suspend fun requestBackupEmail(): ServerFunctionResult {
-        syncAllFlights()
-        return Client.getInstance().use { client ->
-            ServerFunctions.login(client)
 
-            val result = ServerFunctions.requestBackup(client)
-            when (result) {
-                ServerFunctionResult.OK -> {
-                    TaskFlags.sendBackupEmail = false
-                    BackupPrefs.mostRecentBackup = Instant.now().epochSecond
-                    BackupPrefs.backupIgnoredUntil = 0
-                }
-                ServerFunctionResult.EMAIL_DOES_NOT_MATCH -> {
-                    EmailPrefs.emailVerified = false
-                    TaskFlags.sendBackupEmail = true
-                }
-                else -> Log.w("requestBackup()", "unhandled result $result")
-            }
-            result
-        }
-    }
 
 
     /**********************************************************************************************
      * Airport sync functions
      **********************************************************************************************/
 
-    suspend fun getServerAirportDbVersion(): Int =
-        Client.getInstance().use { server ->
-            ServerFunctions.getAirportDbVersion(server) // no need to handle errors as negative values won't be higher than available ones
-        }
+
 
 
     // returns List<BasicAirport>
@@ -411,4 +315,6 @@ object OldCloud {
             ServerFunctions.sendFeedback(client, feedbackData)
         }
 
+
+     */
 }

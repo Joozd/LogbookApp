@@ -36,7 +36,7 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.core.DarkModeCenter
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import nl.joozd.logbookapp.core.JoozdlogWorkersHub
+import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import java.time.Instant
 import java.time.LocalDateTime
@@ -156,7 +156,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
             UserManagement.signedIn -> {
                 Prefs.lastUpdateTime = 0
                 Prefs.useCloud = true
-                JoozdlogWorkersHub.syncTimeAndFlightsIfEnoughTimePassed()
+                JoozdlogWorkersHubOld.syncTimeAndFlightsIfEnoughTimePassed()
             }
 
             // Activity will take care of showing &Cs if needed

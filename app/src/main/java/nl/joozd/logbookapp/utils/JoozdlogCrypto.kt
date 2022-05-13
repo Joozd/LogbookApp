@@ -44,3 +44,13 @@ fun generatePassword(length: Int): String{
 
     return keyBytes.toByteArray().toString(Charsets.UTF_8)
 }
+
+/**
+ * Generates a 16 byte (128 bit) key
+ */
+fun generateKey(): ByteArray{
+    val random = SecureRandom()
+    val ba = ByteArray(16)
+    random.nextBytes(ba)
+    return ba
+}

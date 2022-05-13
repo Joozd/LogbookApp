@@ -20,195 +20,134 @@
 package nl.joozd.logbookapp.core
 
 import android.content.Intent
-import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.*
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
-import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.utils.generatePassword
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.utils.UserMessage
 
-object UserManagement {
+/*
+ * UserManagement does NOT take care of setting TaskFlags that need to be (re-)set, other than any other function can.
+ *  (can ask for something to be done, cannot mark a task as incomplete or finished)
+ * Flags are the business of TaskManager and workers. This only provides functions.
+ * It also might send messages to MessageCentre in case user needs to be made aware of something, or needs to make a decision.
+ */
+//TODO move all functions that get called as the result of a TaskFlag being set to Workers.
+// Functions here are to be replaced by just setting TaskFlag. Currently this work would be done in two places, which violates DRY, or leads to opaque back-and-forth-ing.
+class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
     /**
-     * To be called from TaskDispatcher
+     * Schedule the creation of a new user account.
      */
-    suspend fun createNewUser(){
-        if(requestAndSaveLoginData()){
-            /*
-             * requestAndSaveLoginData just made username and key so they cannot be null
-             */
-            createNewUserOnServer(Prefs.username()!!, Prefs.key()!!)
-            TaskFlags.createNewUser = false
-        }
-
-        /*
-         * this will probably end up with a call to this function again.
-         * However, Cloud should have taken care of the reasons for failure.
-         */
-        else TaskFlags.createNewUser = true
+    fun createNewUser(){
+        taskFlags.postCreateNewUser(true)
     }
+
+    fun requestEmailVerificationMail(){
+        taskFlags.postRequestVerificationEmail(true)
+    }
+
 
     /*
-     * This will invalidate current login data.
-     * - Asks a username from server
-     * - generates a password
-     * - saves them to Prefs.
-     * @return true if new data received and saved, false if connection or server error.
+    Functions to be called from Workers
      */
-    private suspend fun requestAndSaveLoginData(): Boolean{
-        Prefs.username = Prefs.USERNAME_NOT_SET
-        Prefs.password = null
-        EmailPrefs.emailVerified = false
 
-        Cloud().requestUsername()?.let{ n ->
-            Prefs.username = n
-            Prefs.password = generatePassword(16)
-            return true
-        }
-        return false
-    }
-
-    /*
-     * Create a new user on server
-     * Does NOT check or save anything with Prefs.
-     *
-     * If user successfully created, it will send email if one is entered in [EmailPrefs.emailAddress]
-     *
-     * If not successful, will set [TaskFlags.createNewUser] to true. Reason for failure will be handled by Cloud.
+    /**
+     * Create a new user on server. Will verify email as well if one is set.
+     * @return true if user created now, false it not due to any reason. (connection or server refused)
      */
-    private suspend fun createNewUserOnServer(username: String, key: ByteArray) {
-        require(username.isNotBlank() && key.isNotEmpty()) { "Username($username) cannot be blank and key ($key) cannot be empty" }
+    //TODO if this can only be used in a Worker, it belongs in that worker.
 
-        if (Cloud().createNewUser(username, key)) {
-            //if email set, send it to server
-            EmailPrefs.emailAddress().takeIf { it.isNotBlank() }?.let {
-                Cloud().sendNewEmailAddress(username, key, it)
-            }
-            Prefs.lastUpdateTime = -1
-            Prefs.useCloud = true
-        }
-        else TaskFlags.createNewUser = true
-    }
 
     /**
      * Change email address. It will confirm with server at the first possible time. Server will send a confirmation mail if needed.
      * If newEmailAddress is null, it will re-confirm stored address with server.
-     * If no connection it will schedule sending to server when internet gets available
+     * If no connection it will schedule sending to server when internet gets available.
      */
-    suspend fun changeEmailAddress(newEmailAddress: String) {
-        EmailPrefs.emailAddress = newEmailAddress
-        verifyEmailPrefsAddressWithServer()
+    fun changeEmailAddress(newEmailAddress: String?) {
+        newEmailAddress?.let { EmailPrefs.emailAddress = it }
+        requestEmailVerificationMail()
     }
 
-    private suspend fun verifyEmailPrefsAddressWithServer(){
-        EmailPrefs.emailAddress().takeIf{ it.isNotBlank() }?.let{ address ->
-            val loginDataSet = checkIfLoginDataSet()
-            if (loginDataSet)
-                Cloud().sendNewEmailAddress(Prefs.username()!!, Prefs.key()!!, address)
-            else TaskFlags.pushUpdateEmailWithServer(true) // this reschedules it, checkIfLoginDataSet() will have taken care of no login data problem
-        }
-    }
+
+
 
     /**
      * check username/password with server and store them if OK.
-     * If not OK, Cloud will handle any problems.
      */
-    suspend fun loginFromLink(loginLinkString: String) {
+    suspend fun loginFromLink(loginLinkString: String): Boolean {
         val lpPair = makeLoginPassPair(loginLinkString)
-        when(Cloud().checkLoginDataWithServer(lpPair.first, lpPair.second)){
-            true -> {
+        return when(cloud.checkLoginDataWithServer(lpPair.first, lpPair.second)){
+            CloudFunctionResult.OK -> {
                 storeNewLoginData(lpPair)
+                TaskFlags.postUseLoginLink(false)
+                true
             }
-            false -> showBadLoginLinkMessage()
-            null -> {
+            CloudFunctionResult.SERVER_REFUSED -> {
+                showBadLoginLinkMessage()
+                TaskFlags.postUseLoginLink(false) // The data in login link was bad. It will be bad next time we try it too, so no use in rescheduling.
+                false
+            }
+            CloudFunctionResult.CONNECTION_ERROR -> {
                 showLoginLinkPostponedMessage()
                 storeNewLoginData(lpPair)
+                TaskFlags.postUseLoginLink(true)
+                false
             }
         }
     }
 
-    private suspend fun storeNewLoginData(lpPair: Pair<String, String>) {
+
+    /*
+     * Schedule email verification with server
+     */
+    suspend fun verifyEmailAddressWithServerIfSet() {
+        if (EmailPrefs.emailAddress().isNotBlank())
+            TaskFlags.postRequestVerificationEmail(true)
+    }
+
+    //login data from login link has base64 encoded key
+    private fun storeNewLoginData(lpPair: Pair<String, String>) {
         Prefs.username = lpPair.first
-        Prefs.setEncodedPassword(lpPair.second)
+        Prefs.postKeyString(lpPair.second)
         Prefs.lastUpdateTime = -1
         Prefs.useCloud = true
-        verifyEmailPrefsAddressWithServer()
+        requestEmailVerificationMail()
     }
 
     /**
      * Change password. First checks if login credentials correct,
      * Then, saves new password, and changes that on server.
-     * If anything goes wrong between saving new pass and setting it on server, user should be able to log in with previous loginlink.
+     * If anything goes wrong between saving new pass and setting it on server,
+     * user's account will be locked and they will probably get a notification
+     * about making a new cloud account on next sync.
      */
-    suspend fun changePassword(newPassword: String): ServerFunctionResult = withContext (Dispatchers.IO){
-        // Check if username/pass set
-        Prefs.username ?: return@withContext ServerFunctionResult.NO_LOGIN_DATA
-        Prefs.password ?: return@withContext ServerFunctionResult.NO_LOGIN_DATA
-
-        OldCloud.checkUser().let {
-            if (!it.isOK())
-                return@withContext it
+    suspend fun changePassword(): Boolean =
+        if (checkIfLoginDataSet()) {
+            val newPassword = generatePassword(16)
+            val result = if (cloud.changePassword(newPassword) == CloudFunctionResult.OK) {
+                Prefs.keyString = newPassword
+                true
+            } else false
+            TaskFlags.postChangePassword(!result)
+            result // return
         }
-        Prefs.newPassword = newPassword
-        return@withContext OldCloud.changePassword(
-            newPassword,
-            email = EmailPrefs.emailAddress.nullIfBlank()
-        ).also{
-            if (it.isOK()) {
-                Prefs.password = newPassword
-                Prefs.newPassword = ""
-                ServerFunctionResult.OK
-            }
+        else {
+            TaskFlags.postChangePassword(true) // will change password as soon as login data are actually set.
+            false
         }
-    }
-
-    /**
-     * Try to fix a login if app crashed during password change (detected by Preferences.newPassword not being empty)
-     */
-    suspend fun tryToFixLogin(): Boolean? = withContext (Dispatchers.IO) {
-        Prefs.newPassword.nullIfBlank()?.let {
-            Prefs.password?.let { pw ->
-                when (OldCloud.checkUser(Prefs.username ?: return@withContext false, pw)) {
-                    ServerFunctionResult.OK -> {
-                        Log.w("tryToFixLogin", "Login was already correct")
-                        return@withContext true
-                    }
-                    in ServerFunctionResult.connectionErrors -> return@withContext null // other problem, don't do anything
-                    else -> Unit
-                }
-            }
-            //If we get here, either Preferences.password == null or it is incorrect for login, and newPassword is not blank
-
-            when (OldCloud.checkUser(Prefs.username ?: return@withContext false, Prefs.newPassword)) {
-                ServerFunctionResult.OK -> { // yay this fixed it
-                    Prefs.password = Prefs.newPassword
-                    Prefs.newPassword = ""
-                    true
-                }
-                in ServerFunctionResult.connectionErrors -> null // Server didn't respond well. Don't do anything.
-                ServerFunctionResult.UNKNOWN_USER_OR_PASS -> { // Didn't fix it, just wrong login credentials (which is wierd as newPassword wasn't empty)
-                    Prefs.newPassword = ""
-                    Prefs.username = null  //this will start the creation of a new account on the next sync
-                    false
-                }
-                else -> null // something else went wrong. Doing nothing for now, maybe force a new creation here as well?
-            }
-        } ?: false.also { Log.w("tryToFixLogin", "Don't run this when Preferences.newPassword is blank") }
-    }
 
     fun signOut() {
         Prefs.username = null
-        Prefs.password = null
+        Prefs.keyString = null
         Prefs.lastUpdateTime = -1
         Prefs.useCloud = false
     }
 
     fun generateLoginLink(): String? = Prefs.username?.let {
-        "https://joozdlog.joozd.nl/inject-key/$it:${Prefs.password?.replace('/', '-')}"
+        "https://joozdlog.joozd.nl/inject-key/$it:${Prefs.keyString?.replace('/', '-')}"
     }
 
     fun generateLoginLinkIntent(): Intent? = generateLoginLink()?.let { link ->
@@ -224,49 +163,41 @@ object UserManagement {
 
     /**
      * Confirm email confirmation string with server, or schedule that to happen as soon as server is online
-     * In case of failure, it will set failure flags in [ScheduledErrors]
-     * If the failure is that the server could not be reached, it will not set any errors but start a worker through [JoozdlogWorkersHub] which will recall this
-     *      function when a network connection is available
      * @param confirmationString    the confirmation string as should have been received in confirmation email
-     *                              This will be sent to the server to verify
+     *                              This will be sent to the server to verify.
+     * @param fromActivity: If true, this will send a message to MessageCenter in case of postponement of confirmation, so user will get feedback of the result of clicking his "confirm email" link.
      * @return true if success, false if fail.
      */
-    suspend fun confirmEmail(confirmationString: String): Boolean =
-        when (withContext (Dispatchers.IO) { OldCloud.confirmEmail(confirmationString) }){
-            ServerFunctionResult.OK -> {
-                EmailPrefs.emailVerified = true // TaskDispatcher will monitor this and take care of the rest
-                true
+    suspend fun confirmEmail(confirmationString: String, fromActivity: Boolean = true) {
+        if (":" !in confirmationString) {
+            showBadEmailConfirmationStringMessage()
+            return
+        }
+        when(cloud.confirmEmail(confirmationString)){
+            CloudFunctionResult.OK -> {
+                TaskFlags.postVerifyEmailCode(false)
+                EmailPrefs.postEmailConfirmationStringWaiting("")
+                showEmailConfirmedMessage()
             }
-            ServerFunctionResult.CLIENT_ERROR -> {
-                TaskFlags.verifyEmail = true
-                EmailPrefs.emailConfirmationStringWaiting = confirmationString
-                false
+            CloudFunctionResult.SERVER_REFUSED -> {
+                // This doesn't remove flag, as doing that will prevent the message from being shown on next activity creation.
+                showEmailConfirmationRejectedMessage()
             }
-            ServerFunctionResult.UNKNOWN_USER_OR_PASS -> {
-                ScheduledErrors.addError(Errors.LOGIN_DATA_REJECTED_BY_SERVER)
-                false
-            }
-            ServerFunctionResult.EMAIL_DOES_NOT_MATCH -> {
-                ScheduledErrors.addError(Errors.EMAIL_CONFIRMATION_FAILED)
-                false
-            }
-            ServerFunctionResult.UNKNOWN_REPLY_FROM_SERVER -> {
-                ScheduledErrors.addError(Errors.SERVER_ERROR)
-                false
-            }
-            else -> {
-                Log.w("confirmEmail", "Received unhandled response")
-                false
+            CloudFunctionResult.CONNECTION_ERROR -> if (fromActivity){
+                EmailPrefs.postEmailConfirmationStringWaiting(confirmationString)
+                TaskFlags.postVerifyEmailCode(true)
+                showEmailConfirmationPostponedMessage()
             }
         }
+    }
+
+
 
     private fun showBadLoginLinkMessage(){
         val message = UserMessage.Builder().apply{
             titleResource = R.string.login_error
             descriptionResource = R.string.wrong_username_password
-            setPositiveButton(android.R.string.ok){
-
-            }
+            setPositiveButton(android.R.string.ok){ }
         }.build()
         MessageCenter.pushMessage(message)
     }
@@ -275,28 +206,65 @@ object UserManagement {
         val message = UserMessage.Builder().apply{
             titleResource = R.string.login_link
             descriptionResource = R.string.no_internet_login
-            setPositiveButton(android.R.string.ok){
-
-            }
+            setPositiveButton(android.R.string.ok){ }
         }.build()
         MessageCenter.pushMessage(message)
     }
 
-    private suspend fun signedIn(): Boolean =
-        Prefs.username() != null && Prefs.key() != null
+    private fun showBadEmailConfirmationStringMessage(){
+        val message = UserMessage.Builder().apply{
+            titleResource = R.string.verification_mail
+            descriptionResource = R.string.email_verification_invalid_data
+            setPositiveButton(android.R.string.ok){ }
+        }.build()
+        MessageCenter.pushMessage(message)
+    }
 
-    private fun handleBadEmailAddressSent(){
+    private fun showEmailConfirmedMessage(){
+        val message = UserMessage.Builder().apply{
+            titleResource = R.string.verification_mail
+            descriptionResource = R.string.email_verified
+            setPositiveButton(android.R.string.ok){ }
+        }.build()
+        MessageCenter.pushMessage(message)
+    }
 
+    private fun showEmailConfirmationRejectedMessage(){
+        MessageCenter.MessageFragmentBuilder().commit{
+            messageResource = R.string.email_address_rejected
+            setPositiveButton(R.string.verify){
+                cancelEmailCodeVerification()
+                MainScope().launch { verifyEmailAddressWithServerIfSet() }
+            }
+            setNegativeButton(R.string.delete){
+                cancelEmailCodeVerification()
+                invalidateEmail()
+            }
+        }
+    }
+
+    private fun showEmailConfirmationPostponedMessage(){
+        val message = UserMessage.Builder().apply{
+            titleResource = R.string.verification_mail
+            descriptionResource = R.string.email_verification_scheduled
+            setPositiveButton(android.R.string.ok){ }
+        }.build()
+        MessageCenter.pushMessage(message)
+    }
+
+    private fun cancelEmailCodeVerification() {
+        TaskFlags.postVerifyEmailCode(false)
+        EmailPrefs.postEmailConfirmationStringWaiting("")
     }
 
     fun invalidateEmail(){
-        EmailPrefs.postEmailAdress("")
+        EmailPrefs.postEmailAddress("")
         EmailPrefs.postEmailVerified(false)
         Prefs.postBackupFromCloud(false)
     }
 
-    private suspend fun checkIfLoginDataSet(): Boolean =
-        signedIn().also {
+    suspend fun checkIfLoginDataSet(): Boolean =
+        (Prefs.username() != null && Prefs.key() != null).also {
             if (!it)
                 notifyNoUserDataSet()
         }

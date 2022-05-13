@@ -29,7 +29,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 31
         versionCode 103 // my version, increment this every build
-        versionName "JoozdLog 1.1.0.dev.28"
+        versionName "JoozdLog 1.1.1.dev.28"
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

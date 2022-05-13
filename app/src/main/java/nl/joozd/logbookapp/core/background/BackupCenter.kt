@@ -43,12 +43,12 @@ class BackupCenter(private val activity: JoozdlogActivity) {
                         is BackupAction.NOTIFY -> {
                             if (backupAction.emailNeeded) {
                                 //try to send a backup email, give it a second to see if it works, else retry.
-                                OldCloud.requestBackupEmail()
-                                delay(1000)
-                                makeOrScheduleBackupNotification()
+                                TaskFlags.postSendBackupEmail(true)
+                                delay(5000)
+                                makeOrScheduleBackupNotification() // call this recursively, if TaskFlags.sendBackupEmail == true, this will go to [else] statement below this line.
                             } else MessageCenter.pushMessageBarFragment(BackupNotificationFragment())
                         }
-                        BackupAction.EMAIL -> OldCloud.requestBackupEmail()
+                        BackupAction.EMAIL -> TaskFlags.postSendBackupEmail(true)
                         is BackupAction.SCHEDULE -> scheduleBackupNotification(backupAction.delay)
                     }
                 }

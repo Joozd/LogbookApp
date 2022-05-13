@@ -80,13 +80,13 @@ class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {
      * If fail or no internet, feedback to Activity
      */
     fun submitClicked(){
-        val password = generatePassword(16)
+
         when {
             InternetStatus.internetAvailable != true -> feedback(ChangePasswordEvents.NO_INTERNET)
             else -> { // passwords match, are good enough, username not empty and internet looks OK
                 feedback(ChangePasswordEvents.WAITING_FOR_SERVER)
                 viewModelScope.launch {
-                    when (UserManagement.changePassword(password)){
+                    when (UserManagement.changePassword()){
                         ServerFunctionResult.OK -> {
                             sendPasswordLinksToClipboard(UserManagement.generateLoginLink())
                             if (Prefs.emailVerified)

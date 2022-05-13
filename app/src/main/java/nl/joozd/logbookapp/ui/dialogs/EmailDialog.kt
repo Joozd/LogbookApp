@@ -169,7 +169,7 @@ class EmailDialog(): JoozdlogFragment() {
     private fun showResultDialog() {
         if (viewModel.email1.isNotBlank())
             AlertDialog.Builder(requireActivity()).apply {
-                setTitle(R.string.email_verification_requested_short)
+                setTitle(R.string.verification_mail)
                 setMessage(R.string.email_verification_requested_long)
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     closeFragment()

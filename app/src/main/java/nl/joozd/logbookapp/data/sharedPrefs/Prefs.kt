@@ -22,11 +22,10 @@ package nl.joozd.logbookapp.data.sharedPrefs
 import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.preferences.core.stringPreferencesKey
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.data.utils.Encryption
+import nl.joozd.logbookapp.ui.utils.base64Decode
+import nl.joozd.logbookapp.ui.utils.base64Encode
 
 
 object Prefs: JoozdLogPreferences() {
@@ -58,43 +57,26 @@ object Prefs: JoozdLogPreferences() {
         usernameIfSet(it)
     }
     suspend fun username() = usernameFlow.first()
+    fun postUsername(name: String?) = post(USERNAME_RESOURCE, name ?: USERNAME_NOT_SET)
 
     /**
-     * password is the users password, hashed to 128 bits
-     * NOTE: saved as an md5 hash, cannot retrieve password!
-     * @get will return a base64 encoded 128 bit hash, use _key_ for reading the key as bytes
-     * @set will save a (base64 encoded) 128 bit MD5 hash to sharedPrefs. This hash will be used to encrypt on server
+     * password is the users password, as a Base64 encoded Bytearray (encoded to String)
+     * can only be set from a base64 encoded key
      */
-    var password: String?
+    var keyString: String?
         get() = dataStore.getString(PASSWORD_SHAREDPREF_KEY, null)
-        set(v) {
-            MainScope().launch {
-                val encodedPassword = hashAndEncodeToBase64(v)
-                dataStore.putString(PASSWORD_SHAREDPREF_KEY, encodedPassword)
-                }
-            }
-    private val passwordFlow = dataStore.data.map { p ->
+        set(p) { dataStore.putString(PASSWORD_SHAREDPREF_KEY, p) }
+    private val keyStringFlow = dataStore.data.map { p ->
         p[stringPreferencesKey(PASSWORD_SHAREDPREF_KEY)]}
+    fun postKeyString(ks: String) = post(PASSWORD_SHAREDPREF_KEY, ks)
 
-    private fun hashAndEncodeToBase64(v: String?): String? =
-        v?.let {
-            Base64.encodeToString(Encryption.md5Hash(it), Base64.DEFAULT)
-        }
+    //ByteArray version that will actually be used as key. Actually stored as base64 encoded string in keyString.
+    var key: ByteArray?
+        get() = keyString?.let { base64Decode(it) }
+        set(key){ keyString = key?.let { base64Encode(it) } }
+    fun postKey(key: ByteArray) = postKeyString(base64Encode(key))
 
-    //Base64 encoded password
-    fun setEncodedPassword(encodedPassword: String) {
-        dataStore.putString(PASSWORD_SHAREDPREF_KEY, encodedPassword)
-    }
-
-    /**
-     * will return bytearray from hashed password
-     */
-    val key: ByteArray?
-        get() =
-            password?.let {
-                Base64.decode(it, Base64.DEFAULT)
-            }
-    val keyFlow = passwordFlow.map { p -> p?.let {Base64.decode(it, Base64.DEFAULT) }}
+    val keyFlow = keyStringFlow.map { p -> p?.let { base64Decode(p) }}
     suspend fun key() = keyFlow.first()
 
     //Placeholder for new password when changing pass. If app gets killed during password change, this will remain set.
@@ -104,6 +86,7 @@ object Prefs: JoozdLogPreferences() {
     private const val LAST_UPDATE_TIME = "LAST_UPDATE_TIME"
     var lastUpdateTime: Long by JoozdLogSharedPreferenceNotNull(LAST_UPDATE_TIME,-1)
     val lastUpdateTimeFlow by PrefsFlow(LAST_UPDATE_TIME,-1)
+    fun postLastUpdateTime(value: Long) = post(LAST_UPDATE_TIME, value)
 
     private const val SERVER_TIME_OFFSET = "SERVER_TIME_OFFSET"
     var serverTimeOffset: Long by JoozdLogSharedPreferenceNotNull(SERVER_TIME_OFFSET,0)
@@ -247,9 +230,11 @@ object Prefs: JoozdLogPreferences() {
     private const val USE_CLOUD = "USE_CLOUD"
     var useCloud: Boolean by JoozdLogSharedPreferenceNotNull(USE_CLOUD,false)
     val useCloudFlow by PrefsFlow(USE_CLOUD, false)
+    fun postUseCloud(value: Boolean) = post(USE_CLOUD, value)
 
     private const val ACCEPTED_CLOUD_TERMS = "ACCEPTED_CLOUD_TERMS"
     var acceptedCloudSyncTerms: Boolean by JoozdLogSharedPreferenceNotNull(ACCEPTED_CLOUD_TERMS, false)
+    val acceptedCloudSyncTermsFlow by PrefsFlow(ACCEPTED_CLOUD_TERMS, false)
 
     /**
      * Small things being saved:

@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
-import nl.joozd.logbookapp.core.JoozdlogWorkersHub
+import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
 
 class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
     /**
@@ -63,7 +63,7 @@ class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
      */
     fun submitClicked(){
         Prefs.feedbackWaiting = _feedbackText
-        JoozdlogWorkersHub.sendFeedback(_contactInfo)
+        JoozdlogWorkersHubOld.sendFeedback(_contactInfo)
         feedback(GeneralEvents.DONE)
     }
 

@@ -6,9 +6,9 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
+import nl.joozd.logbookapp.comm.confirmEmail
+import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.core.usermanagement.checkConfirmationString
-import nl.joozd.logbookapp.core.usermanagement.confirmEmail
-import nl.joozd.logbookapp.data.comm.Cloud
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.utils.DispatcherProvider
 

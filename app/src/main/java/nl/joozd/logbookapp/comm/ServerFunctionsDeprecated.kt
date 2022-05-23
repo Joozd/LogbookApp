@@ -17,13 +17,13 @@
  *
  */
 
-package nl.joozd.logbookapp.data.comm
+package nl.joozd.logbookapp.comm
 
 // NOTE: ALL THESE FUNCTIONS MUST BE CALLED FROM SUSPENDED FUNCTION DUE TO BLOCKING CALLS
 // If properly used in a Client().use{} block that should always be the case as Client() has
 // blocking code in its constructor.
 @Deprecated("Use Cloud")
-object ServerFunctions {
+object ServerFunctionsDeprecated {
     private const val TAG = "ServerFunctions"
     /*
     /**

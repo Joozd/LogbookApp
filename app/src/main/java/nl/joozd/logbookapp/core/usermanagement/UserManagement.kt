@@ -27,7 +27,7 @@ import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.core.Constants
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.data.comm.*
+import nl.joozd.logbookapp.comm.*
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.utils.generatePassword
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs

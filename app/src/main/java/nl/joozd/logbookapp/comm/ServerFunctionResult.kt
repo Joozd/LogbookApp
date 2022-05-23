@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.data.comm
+package nl.joozd.logbookapp.comm
 
 enum class ServerFunctionResult {
     /**

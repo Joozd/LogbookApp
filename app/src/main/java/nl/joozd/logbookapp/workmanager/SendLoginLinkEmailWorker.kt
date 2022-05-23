@@ -6,8 +6,8 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.data.comm.Cloud
-import nl.joozd.logbookapp.data.comm.CloudFunctionResult
+import nl.joozd.logbookapp.comm.Cloud
+import nl.joozd.logbookapp.comm.CloudFunctionResult
 
 class SendLoginLinkEmailWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {

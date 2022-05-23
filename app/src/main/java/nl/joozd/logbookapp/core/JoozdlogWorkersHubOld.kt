@@ -123,17 +123,6 @@ object JoozdlogWorkersHubOld: JoozdlogWorkersHub(), CoroutineScope by MainScope(
     /**
      * Schedule an email backup
      */
-    fun scheduleBackupEmail(){
-        val task = OneTimeWorkRequestBuilder<SendBackupEmailWorker>()
-            .needsNetwork()
-            .addTag(GET_BACKUP_EMAIL)
-            .build()
-        enqueue(task, GET_BACKUP_EMAIL, ExistingWorkPolicy.KEEP)
-    }
-
-    /**
-     * Schedule an email backup
-     */
     fun scheduleLoginLinkEmail(){
         val task = OneTimeWorkRequestBuilder<SendLoginLinkEmailWorker>()
             .needsNetwork()

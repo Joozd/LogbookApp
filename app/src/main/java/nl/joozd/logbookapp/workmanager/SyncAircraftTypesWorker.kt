@@ -24,7 +24,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.*
-import nl.joozd.logbookapp.data.comm.OldCloud
+import nl.joozd.logbookapp.comm.OldCloud
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs

@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.data.comm
+package nl.joozd.logbookapp.comm
 
 import android.content.Context
 import android.net.ConnectivityManager

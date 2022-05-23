@@ -25,8 +25,8 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.data.comm.OldCloud
-import nl.joozd.logbookapp.data.comm.ServerFunctionResult
+import nl.joozd.logbookapp.comm.OldCloud
+import nl.joozd.logbookapp.comm.ServerFunctionResult
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)

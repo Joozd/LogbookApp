@@ -28,10 +28,10 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.comm.OldCloud
-import nl.joozd.logbookapp.data.comm.InternetStatus
+import nl.joozd.logbookapp.comm.OldCloud
+import nl.joozd.logbookapp.comm.InternetStatus
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
-import nl.joozd.logbookapp.data.comm.ServerFunctionResult
+import nl.joozd.logbookapp.comm.ServerFunctionResult
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel

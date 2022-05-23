@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.utils
 
-import nl.joozd.logbookapp.data.comm.OldCloud
+import nl.joozd.logbookapp.comm.OldCloud
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import java.time.Instant
 

@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.data.comm
+package nl.joozd.logbookapp.comm
 
 import android.util.Base64
 import nl.joozd.comms.Client

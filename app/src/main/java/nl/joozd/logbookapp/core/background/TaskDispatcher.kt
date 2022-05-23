@@ -26,8 +26,11 @@ class TaskDispatcher(private val activity: JoozdlogActivity) {
                 emailUpdateWanted()
                 emailConfirmationWanted() // Worker takes care of checking for bad email confirmation string to prevent infinite loop.
 
-                //TODO below this line needs reworking
+
+                //TODO WIP
                 backupEmailWanted()
+
+                //TODO below this line needs reworking
                 loginLinkWanted()
             }
         }
@@ -55,6 +58,12 @@ class TaskDispatcher(private val activity: JoozdlogActivity) {
         }
     }
 
+    private suspend fun backupEmailWanted() {
+        backupEmailWantedFlow.collect {
+            if (it)
+                UserManagementWorkersHub().scheduleBackupEmail()
+        }
+    }
 
 
     private suspend fun loginLinkWanted() {
@@ -64,12 +73,7 @@ class TaskDispatcher(private val activity: JoozdlogActivity) {
         }
     }
 
-    private suspend fun backupEmailWanted() {
-        backupEmailWantedFlow.collect {
-            if (it)
-                JoozdlogWorkersHubOld.scheduleBackupEmail()
-        }
-    }
+
 
 
     private val validEmailFlow = combine (EmailPrefs.emailAddressFlow, EmailPrefs.emailVerifiedFlow){

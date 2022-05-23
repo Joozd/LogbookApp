@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.utils.DispatcherProvider
-import nl.joozd.logbookapp.core.usermanagement.generateNewUserAndCreateOnServer
+import nl.joozd.logbookapp.comm.generateNewUserAndCreateOnServer
 
 /*
  * This gets called from TaskDispatcher when [TaskDispatcher.newUserWantedFlow] == true,

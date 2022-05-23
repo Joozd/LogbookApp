@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.data.comm
+package nl.joozd.logbookapp.comm
 
 enum class CloudFunctionResult {
     OK,                 // wanted task completed successfully

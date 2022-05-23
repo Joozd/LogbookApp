@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.data.comm
+package nl.joozd.logbookapp.comm
 
 /**
  * Cloud will take care of all things happening in the cloud.

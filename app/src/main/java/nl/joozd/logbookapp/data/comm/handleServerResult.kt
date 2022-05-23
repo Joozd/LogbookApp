@@ -3,8 +3,8 @@ package nl.joozd.logbookapp.data.comm
 import android.util.Log
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.MessageCenter
-import nl.joozd.logbookapp.core.UserManagement
+import nl.joozd.logbookapp.core.messages.MessageCenter
+import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.utils.UserMessage
 
 suspend fun handleServerResult(serverResult: String?): CloudFunctionResult =

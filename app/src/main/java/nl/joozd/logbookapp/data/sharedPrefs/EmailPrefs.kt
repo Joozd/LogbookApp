@@ -23,6 +23,7 @@ object EmailPrefs: JoozdLogPreferences() {
     var emailConfirmationStringWaiting by JoozdLogSharedPreferenceNotNull(EMAIL_CONF_STRING_WAITING,"")
     val emailConfirmationStringWaitingFlow by PrefsFlow(EMAIL_CONF_STRING_WAITING, "")
     fun postEmailConfirmationStringWaiting(value: String) = post(EMAIL_CONF_STRING_WAITING, value)
+    suspend fun emailConfirmationStringWaiting() = emailConfirmationStringWaitingFlow.first()
 
 
     /**

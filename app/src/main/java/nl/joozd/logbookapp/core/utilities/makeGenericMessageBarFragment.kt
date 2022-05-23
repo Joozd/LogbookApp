@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import nl.joozd.logbookapp.core.MessageCenter
+import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.databinding.FragmentGenericNotificationBinding
 import nl.joozd.logbookapp.ui.utils.MessageBarFragment
 

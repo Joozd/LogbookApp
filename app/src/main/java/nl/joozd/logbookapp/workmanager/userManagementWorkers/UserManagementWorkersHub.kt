@@ -7,12 +7,17 @@ class UserManagementWorkersHub: JoozdlogWorkersHub() {
         enqueueOneTimeWorker<CreateNewUserWorker>(Tags.CREATE_NEW_USER, needNetwork = true)
     }
 
-    fun scheduleRequestEmailVerificationMail() {
-        enqueueOneTimeWorker<RequestEmailVerificationMailWorker>(Tags.REQUEST_EMAIL_VERIFICATION_MAIL, needNetwork = true)
+    fun scheduleUpdateEmail(){
+        enqueueOneTimeWorker<UpdateEmailWorker>(Tags.UPDATE_EMAIL, needNetwork = true)
+    }
+
+    fun scheduleConfirmEmail(){
+        enqueueOneTimeWorker<ConfirmEmailWorker>(Tags.CONFIRM_EMAIL_CODE, needNetwork = true)
     }
 
     object Tags{
         const val CREATE_NEW_USER = "CREATE_NEW_USER"
-        const val REQUEST_EMAIL_VERIFICATION_MAIL = "REQUEST_EMAIL_VERIFICATION_MAIL"
+        const val UPDATE_EMAIL = "UPDATE_EMAIL"
+        const val CONFIRM_EMAIL_CODE = "CONFIRM_EMAIL_CODE"
     }
 }

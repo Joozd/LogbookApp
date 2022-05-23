@@ -23,7 +23,7 @@ import android.content.SharedPreferences
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.UserManagement
+import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents

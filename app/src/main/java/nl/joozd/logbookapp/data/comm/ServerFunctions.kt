@@ -19,23 +19,6 @@
 
 package nl.joozd.logbookapp.data.comm
 
-import android.util.Base64
-import android.util.Log
-import nl.joozd.comms.Client
-import nl.joozd.comms.isOK
-import nl.joozd.joozdlogcommon.*
-import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
-import nl.joozd.logbookapp.core.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
-import nl.joozd.serializing.*
-import nl.joozd.logbookapp.data.sharedPrefs.errors.Errors
-import nl.joozd.logbookapp.exceptions.NotAuthorizedException
-import nl.joozd.logbookapp.extensions.nullIfBlank
-import nl.joozd.logbookapp.extensions.toCloudFunctionResults
-import java.security.MessageDigest
-
 // NOTE: ALL THESE FUNCTIONS MUST BE CALLED FROM SUSPENDED FUNCTION DUE TO BLOCKING CALLS
 // If properly used in a Client().use{} block that should always be the case as Client() has
 // blocking code in its constructor.

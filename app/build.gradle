@@ -75,7 +75,8 @@ android {
     testOptions {
             unitTests.returnDefaultValues = true
         }
-    }
+    namespace 'nl.joozd.logbookapp'
+}
 
 
 

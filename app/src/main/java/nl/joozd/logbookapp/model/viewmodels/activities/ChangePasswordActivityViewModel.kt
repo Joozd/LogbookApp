@@ -30,12 +30,11 @@ import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.comm.OldCloud
 import nl.joozd.logbookapp.data.comm.InternetStatus
-import nl.joozd.logbookapp.core.UserManagement
+import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.comm.ServerFunctionResult
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.utils.generatePassword
 
 //TODO remove livedata, move flow collection to activity
 class ChangePasswordActivityViewModel: JoozdlogActivityViewModel() {

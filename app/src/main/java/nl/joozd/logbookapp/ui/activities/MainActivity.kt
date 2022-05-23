@@ -58,8 +58,8 @@ import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.ImportedLogbookAutoCompleter
 import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
-import nl.joozd.logbookapp.core.MessageCenter
-import nl.joozd.logbookapp.core.UserManagement
+import nl.joozd.logbookapp.core.messages.MessageCenter
+import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.extensions.removeByTagAnimated
 

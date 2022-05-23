@@ -17,12 +17,16 @@
  *
  */
 
-package nl.joozd.logbookapp.core
+package nl.joozd.logbookapp.core.usermanagement
 
 import android.content.Intent
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.core.App
+import nl.joozd.logbookapp.core.Constants
+import nl.joozd.logbookapp.core.messages.MessageCenter
+import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.comm.*
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.utils.generatePassword
@@ -42,24 +46,13 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
      * Schedule the creation of a new user account.
      */
     fun createNewUser(){
-        taskFlags.postCreateNewUser(true)
+        TaskFlags.postCreateNewUser(true)
     }
 
+    //requesting a verification email is done by just re-submitting current email address.
     fun requestEmailVerificationMail(){
-        taskFlags.postRequestVerificationEmail(true)
+        TaskFlags.postUpdateEmailWithServer(true)
     }
-
-
-    /*
-    Functions to be called from Workers
-     */
-
-    /**
-     * Create a new user on server. Will verify email as well if one is set.
-     * @return true if user created now, false it not due to any reason. (connection or server refused)
-     */
-    //TODO if this can only be used in a Worker, it belongs in that worker.
-
 
     /**
      * Change email address. It will confirm with server at the first possible time. Server will send a confirmation mail if needed.
@@ -68,52 +61,6 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
      */
     fun changeEmailAddress(newEmailAddress: String?) {
         newEmailAddress?.let { EmailPrefs.emailAddress = it }
-        requestEmailVerificationMail()
-    }
-
-
-
-
-    /**
-     * check username/password with server and store them if OK.
-     */
-    suspend fun loginFromLink(loginLinkString: String): Boolean {
-        val lpPair = makeLoginPassPair(loginLinkString)
-        return when(cloud.checkLoginDataWithServer(lpPair.first, lpPair.second)){
-            CloudFunctionResult.OK -> {
-                storeNewLoginData(lpPair)
-                TaskFlags.postUseLoginLink(false)
-                true
-            }
-            CloudFunctionResult.SERVER_REFUSED -> {
-                showBadLoginLinkMessage()
-                TaskFlags.postUseLoginLink(false) // The data in login link was bad. It will be bad next time we try it too, so no use in rescheduling.
-                false
-            }
-            CloudFunctionResult.CONNECTION_ERROR -> {
-                showLoginLinkPostponedMessage()
-                storeNewLoginData(lpPair)
-                TaskFlags.postUseLoginLink(true)
-                false
-            }
-        }
-    }
-
-
-    /*
-     * Schedule email verification with server
-     */
-    suspend fun verifyEmailAddressWithServerIfSet() {
-        if (EmailPrefs.emailAddress().isNotBlank())
-            TaskFlags.postRequestVerificationEmail(true)
-    }
-
-    //login data from login link has base64 encoded key
-    private fun storeNewLoginData(lpPair: Pair<String, String>) {
-        Prefs.username = lpPair.first
-        Prefs.postKeyString(lpPair.second)
-        Prefs.lastUpdateTime = -1
-        Prefs.useCloud = true
         requestEmailVerificationMail()
     }
 
@@ -146,8 +93,8 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         Prefs.useCloud = false
     }
 
-    fun generateLoginLink(): String? = Prefs.username?.let {
-        "https://joozdlog.joozd.nl/inject-key/$it:${Prefs.keyString?.replace('/', '-')}"
+    fun generateLoginLink(): String? = Prefs.username?.let { username ->
+        "${Constants.JOOZDLOG_LOGIN_LINK_PREFIX}$username:${Prefs.keyString?.replace('/', '-')}"
     }
 
     fun generateLoginLinkIntent(): Intent? = generateLoginLink()?.let { link ->
@@ -280,8 +227,11 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         TODO("Notify user no login data is set")
     }
 
-    private const val EMAIL_LINK_PLACEHOLDER = "[INSERT_LINK_HERE]"
-    private const val EMAIL_SUBJECT = "JoozdLog Login Link"
+    companion object {
+        private const val EMAIL_LINK_PLACEHOLDER = "[INSERT_LINK_HERE]"
+        private const val EMAIL_SUBJECT = "JoozdLog Login Link"
+
+    }
 }
 
 

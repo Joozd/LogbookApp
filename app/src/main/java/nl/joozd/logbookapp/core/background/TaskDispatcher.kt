@@ -22,9 +22,9 @@ class TaskDispatcher(private val activity: JoozdlogActivity) {
             activity.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 //these functions collect their respective Flow and handle that flow's output.
                 //TODO this one is the way I want it. Do the rest the same way.
-                //TODO also: take care of handling unwanted situations like bad login data, unaccepted t&c's, etc.
                 newUserWanted()
-                verificationEmailWanted()
+                emailUpdateWanted()
+                emailConfirmationWanted() // Worker takes care of checking for bad email confirmation string to prevent infinite loop.
 
                 //TODO below this line needs reworking
                 backupEmailWanted()
@@ -34,18 +34,28 @@ class TaskDispatcher(private val activity: JoozdlogActivity) {
     }
 
     private suspend fun newUserWanted() {
-        newUserWantedFlow.collect{
+        newUserWantedFlow().collect{
             if(it)
                 UserManagementWorkersHub().scheduleCreateNewUser()
         }
     }
 
-    private suspend fun verificationEmailWanted() {
-        verificationMailWantedFlow.collect{
-            if(it)
-                UserManagementWorkersHub().scheduleRequestEmailVerificationMail()
+    private suspend fun emailUpdateWanted(){
+        emailUpdateWantedFlow().collect{
+            if(it){
+                UserManagementWorkersHub().scheduleUpdateEmail()
+            }
         }
     }
+
+    private suspend fun emailConfirmationWanted() {
+        emailConfirmationWantedFlow().collect{
+            if(it)
+                UserManagementWorkersHub().scheduleConfirmEmail()
+        }
+    }
+
+
 
     private suspend fun loginLinkWanted() {
         loginLinkWantedFlow.collect {
@@ -70,15 +80,16 @@ class TaskDispatcher(private val activity: JoozdlogActivity) {
         use, accepted -> use && accepted
     }
 
+    private fun emailConfirmationWantedFlow() = combine(TaskFlags.verifyEmailCodeFlow, Prefs.useCloudFlow, EmailPrefs.emailConfirmationStringWaitingFlow){
+        wanted, enabled, value -> wanted && enabled && value.isNotBlank()
+    }
 
-
-    private val newUserWantedFlow = combine(TaskFlags.createNewUserFlow, useCloudFlow) {
+    private fun newUserWantedFlow() = combine(TaskFlags.createNewUserFlow, useCloudFlow) {
             needed, enabled -> needed && enabled
     }
 
-    private val verificationMailWantedFlow = combine(useCloudFlow, EmailPrefs.emailAddressFlow, TaskFlags.requestVerificationEmailFlow){
-        enabled, address, wanted -> enabled && address.isNotBlank() && wanted
-
+    private fun emailUpdateWantedFlow() = combine(TaskFlags.updateEmailWithServerFlow, Prefs.useCloudFlow, EmailPrefs.emailAddressFlow){
+        wanted, enabled, address -> wanted && enabled && address.isNotBlank()
     }
 
     private val loginLinkWantedFlow = combine(validEmailFlow, TaskFlags.sendLoginLinkFlow){

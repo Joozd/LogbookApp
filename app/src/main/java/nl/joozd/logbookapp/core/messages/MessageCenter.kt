@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.core
+package nl.joozd.logbookapp.core.messages
 
 
 import kotlinx.coroutines.MainScope
@@ -30,6 +30,12 @@ object MessageCenter {
     fun pushMessage(message: UserMessage){
         message.addCleanUpAction { nextMessage() }
         addMessageToQueue(message)
+    }
+
+    fun commitMessage(message: UserMessage.Builder.() -> Unit){
+        val builder = UserMessage.Builder()
+        builder.message()
+        pushMessage(builder.build())
     }
 
     fun pushMessageBarFragment(fragment: MessageBarFragment){

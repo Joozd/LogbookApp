@@ -22,11 +22,12 @@ object TaskFlags: JoozdLogPreferences() {
     var sendBackupEmail by JoozdLogSharedPreferenceNotNull(SEND_BACKUP_EMAIL,false)
     val sendBackupEmailFlow by PrefsFlow(SEND_BACKUP_EMAIL, false)
     fun postSendBackupEmail(value: Boolean) = post(SEND_BACKUP_EMAIL, value)
-
+/*
     private const val REQUEST_EMAIL_ADDRESS_VERIFICATION_MAIL = "REQUEST_EMAIL_ADDRESS_VERIFICATION_MAIL"
     var requestVerificationEmail by JoozdLogSharedPreferenceNotNull(REQUEST_EMAIL_ADDRESS_VERIFICATION_MAIL, false)
     val requestVerificationEmailFlow by PrefsFlow(REQUEST_EMAIL_ADDRESS_VERIFICATION_MAIL, false)
     fun postRequestVerificationEmail(value: Boolean) = post(REQUEST_EMAIL_ADDRESS_VERIFICATION_MAIL, value)
+ */
 
     private const val VERIFY_EMAIL_CODE = "VERIFY_EMAIL_CODE"
     var verifyEmailCode by JoozdLogSharedPreferenceNotNull(VERIFY_EMAIL_CODE, false)

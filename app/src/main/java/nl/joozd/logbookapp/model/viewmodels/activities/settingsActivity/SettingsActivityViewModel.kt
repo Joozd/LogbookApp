@@ -26,7 +26,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import kotlinx.coroutines.flow.*
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.UserManagement
+import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.notNullFlow

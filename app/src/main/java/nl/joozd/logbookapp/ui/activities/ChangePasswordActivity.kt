@@ -25,7 +25,7 @@ import android.util.Log
 import androidx.activity.viewModels
 import androidx.fragment.app.commit
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.UserManagement
+import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivityChangePasswordBinding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup

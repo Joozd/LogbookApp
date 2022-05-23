@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities
 
-import nl.joozd.logbookapp.core.UserManagement
+import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.LoginActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 

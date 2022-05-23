@@ -7,7 +7,6 @@ import nl.joozd.joozdlogcommon.LoginData
 import nl.joozd.joozdlogcommon.LoginDataWithEmail
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.core.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.serializing.unwrapInt

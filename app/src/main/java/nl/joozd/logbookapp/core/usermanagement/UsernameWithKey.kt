@@ -2,16 +2,16 @@ package nl.joozd.logbookapp.core.usermanagement
 
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
-class LoginData(val username: String, val key: ByteArray){
+class UsernameWithKey(val username: String, val key: ByteArray){
     companion object{
-        fun fromPrefs(): LoginData?{
+        fun fromPrefs(): UsernameWithKey?{
             val n = Prefs.username
             val k = Prefs.key
             if (n == null || k == null) {
                 TODO("Handle no login data present")
                 return null
             }
-            return LoginData(n, k)
+            return UsernameWithKey(n, k)
         }
     }
 }

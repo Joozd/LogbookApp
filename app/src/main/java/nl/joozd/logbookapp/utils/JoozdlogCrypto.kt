@@ -19,38 +19,15 @@
 
 package nl.joozd.logbookapp.utils
 
+import nl.joozd.joozdlogcommon.Protocol
 import java.security.SecureRandom
-
-/**
- * Collection of crypto functions
- */
-fun generatePassword(length: Int): String{
-    // lowest readable UTF-8 encoded character (space)
-    val lowestReadable = 0x20.toByte()
-    // highest readable UTF-8 encoded character (tilde)
-    val highestReadable = 0x7e.toByte()
-    val utf8Chars = (lowestReadable..highestReadable)
-
-    val keyBytes = emptyList<Byte>().toMutableList()
-
-    do{
-        ByteArray(1).also {
-            SecureRandom().nextBytes(it)
-            if (it.first() in utf8Chars) {
-                keyBytes.add(it.first())
-            }
-        }
-    } while (keyBytes.size < length)
-
-    return keyBytes.toByteArray().toString(Charsets.UTF_8)
-}
 
 /**
  * Generates a 16 byte (128 bit) key
  */
 fun generateKey(): ByteArray{
     val random = SecureRandom()
-    val ba = ByteArray(16)
+    val ba = ByteArray(Protocol.KEY_SIZE)
     random.nextBytes(ba)
     return ba
 }

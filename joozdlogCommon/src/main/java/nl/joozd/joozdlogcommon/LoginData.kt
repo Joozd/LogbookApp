@@ -23,7 +23,7 @@ import nl.joozd.serializing.*
 
 /**
  * @param userName: Username (a string, example: "joozd" or "Bsdligfh3456"
- * @param password: decryption key. ByteArray, expected to be 16 bytes
+ * @param password: decryption key. ByteArray, expected to be [Protocol.KEY_SIZE] bytes
  * @param basicFlightVersion: Version number of [BasicFlight] to use
  */
 

@@ -5,9 +5,8 @@ import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
-import nl.joozd.logbookapp.utils.UserMessage
 
-suspend fun handleServerResult(serverResult: String?): CloudFunctionResult =
+fun handleServerResult(serverResult: String?): CloudFunctionResult =
     when(serverResult){
         JoozdlogCommsKeywords.OK  -> CloudFunctionResult.OK
 
@@ -27,8 +26,14 @@ suspend fun handleServerResult(serverResult: String?): CloudFunctionResult =
         }
     }
 
-private suspend fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
-    TODO("Set email to unverified, let MessageCenter display message about this with possible user action")
+private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
+    MessageCenter.commitMessage {
+        titleResource = R.string.email
+        descriptionResource = R.string.server_reported_email_not_verified_new_mail_will_be_sent
+        setPositiveButton(android.R.string.ok){
+            UserManagement().requestEmailVerificationMail()
+        }
+    }
     return CloudFunctionResult.SERVER_REFUSED
 }
 
@@ -36,29 +41,34 @@ private suspend fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
  * This one should have been caught by checking for valid email when user enters email address.
  */
 private fun handleBadEmailAddress(): CloudFunctionResult {
-    UserManagement.invalidateEmail()
-    val message = UserMessage.Builder().apply{
-        titleResource = R.string.not_an_email_address
+    UserManagement().invalidateEmail()
+    MessageCenter.commitMessage {
+        titleResource = R.string.email
         descriptionResource = R.string.server_not_an_email_address_please_enter_again
-        setPositiveButton(R.string.enter_email){
-
-        }
-    }.build()
-    MessageCenter.pushMessage(message)
+        setPositiveButton(android.R.string.ok){ }
+    }
     return CloudFunctionResult.SERVER_REFUSED
 }
 
-private suspend fun handleBadLoginData(): CloudFunctionResult {
-    TODO("Log out, ask user to generate new login data or click login link")
+private fun handleBadLoginData(): CloudFunctionResult {
+    UserManagement().logOut()
+    MessageCenter.commitMessage {
+        titleResource = R.string.login_error
+        descriptionResource = R.string.no_login_data_cloud_disabled
+        setPositiveButton(android.R.string.ok){ }
+    }
     return CloudFunctionResult.SERVER_REFUSED
 }
 
-private suspend fun handleNotLoggedInSituation(): CloudFunctionResult {
-    TODO("Show message saying not logged in situation, this is an error message, should not happen.")
+private fun handleNotLoggedInSituation(): CloudFunctionResult {
+    MessageCenter.commitMessage {
+        titleResource = R.string.login_error
+        descriptionResource = R.string.not_signed_in
+        setPositiveButton(android.R.string.ok){ }
+    }
     return CloudFunctionResult.SERVER_REFUSED
 }
-
-private suspend fun handleUserAlreadyExists(): CloudFunctionResult {
-    UserManagement.createNewUser()
+// this only happens when creating a new user, in extremely rare cases. The calling function will try again on a SERVER_REFUSED.
+private fun handleUserAlreadyExists(): CloudFunctionResult {
     return CloudFunctionResult.SERVER_REFUSED
 }

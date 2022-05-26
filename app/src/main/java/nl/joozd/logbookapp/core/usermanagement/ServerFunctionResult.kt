@@ -2,7 +2,10 @@ package nl.joozd.logbookapp.core.usermanagement
 
 import androidx.work.ListenableWorker.Result
 
-enum class UserManagementFunctionResult {
+/**
+ * Invoking this will return true on [SUCCESS], or false on any other condition.
+ */
+enum class ServerFunctionResult {
     SUCCESS,
     FAILURE,
     RETRY;
@@ -12,4 +15,6 @@ enum class UserManagementFunctionResult {
         FAILURE -> Result.failure()
         RETRY -> Result.retry()
     }
+
+    operator fun invoke(): Boolean = this == SUCCESS
 }

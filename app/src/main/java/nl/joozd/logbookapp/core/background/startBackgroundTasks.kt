@@ -5,7 +5,8 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 /**
  * Start all background tasks
  */
-fun startBackgroundTasks(activity: JoozdlogActivity) {
-    TaskDispatcher(activity).start()
-    BackupCenter(activity).makeOrScheduleBackupNotification()
+fun JoozdlogActivity.startBackgroundTasks() {
+    TaskDispatcher().start(this)
+    PersistentMessagesDispatcher().start(this)
+    BackupCenter().makeOrScheduleBackupNotification(this)
 }

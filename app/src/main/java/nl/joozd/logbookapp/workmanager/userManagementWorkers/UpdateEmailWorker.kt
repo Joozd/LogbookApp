@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.core.usermanagement.updateEmailAddressOnServer
-import nl.joozd.logbookapp.data.comm.Cloud
+import nl.joozd.logbookapp.comm.updateEmailAddressOnServer
+import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.utils.DispatcherProvider
 
 /*

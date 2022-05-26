@@ -62,7 +62,8 @@
     <string name="email_for_login">Email address for login link</string>
     <string name="email">Email address</string>
     <string name="not_an_email_address">Not an email address</string>
-    <string name="server_not_an_email_address_please_enter_again">The server did not like the entered email address. Please enter it again in Settings.</string>
+    <string name="server_not_an_email_address_please_enter_again">The server did not like the entered email address for a scheduled action that requires one. Please enter it again in Settings.</string>
+    <string name="server_reported_email_not_verified_new_mail_will_be_sent">The server reported that your entered email address is not verified.\nA new verification mail will be sent to the email address entered in Settings.\n\nPlease open the verification link in this app.</string>
     <string name="enter_email">Enter email</string>
 
     <string name="addresses_do_not_match">Addresses do not match</string>
@@ -198,10 +199,12 @@
     <string name="changed_password_message">Your password has changed. Please send your login link to yourself to make sure it is saved.</string>
     <string name="mail_to_myself">Send it to myself</string>
     <string name="send_using">Pick an app:</string>
-    <string name="email_verification_scheduled">Cannot connect to server right now. The verification of your email address will happen when we can reach the server.\nOnce it succeeds, you will receive an email with your login link.</string>
+    <string name="email_verification_scheduled_title">Verifying email</string>
+    <string name="email_verification_scheduled_message">Your email verification has been scheduled. If you are connected to the internet this should happen pretty fast, otherwise it will be the next time your device connects to the internet.\nPLEASE NOTE: The server only remembers one email address verification per account. Using the same verification on multiple devices means you will get multiple emails as all emails start from your own device (the server doesn't remember your email address, only a code to verify it).</string>
 
 
-    <string name="login_error_message">Cannot log in to server.</string>
+    <string name="login_data_rejected_cloud_disabled">The server rejected your login data. Cloud functions have been disabled. Use a valid login link or create a new Cloud account in Settings to enable it again.</string>
+    <string name="no_login_data_cloud_disabled">No login data was found when trying to perform a scheduled Cloud function. Cloud functions have been disabled. Use a valid login link or create a new Cloud account in Settings to enable it again.</string>
     <string name="waiting_for_server">Waiting for server</string>
     <string name="created_account">Created account %1$s.</string>
     <string name="create_login_link_hint">A login link has been placed on your clipboard. Paste it into an email or text message to send it to yourself!\nYou can also create a login link from the settings menu. I strongly suggest you do as it\'s your only way in if you lose your phone!</string>
@@ -226,7 +229,7 @@
     <string name="username_already_taken">This username is already taken. If this is you, use your login link if you have it, or create a new account.</string>
     <string name="change_email">Change email</string>
     <string name="no_email">No email</string>
-    <string name="no_email_text">No working email address was entered. I recommend you enter your email so a login link can be sent. Your email will not be stored outside your phone and will not be used for anything else.</string>
+    <string name="no_email_text">No working email address was entered, bot a request for something needing an email address was scheduled. Please enter your email address in Settings.</string>
     <string name="i_dont_care">I don\'t care</string>
     <string name="user_exists_password_correct">This username exists, and you have entered the correct password for it. If this is not you, please pick another username and a more secure password.</string>
     <string name="what_to_do_forgot_password">If your login is still working on this device, you can change it to something you catually can remember via the settings screen, or you can generate a login link.</string>
@@ -474,7 +477,8 @@
     <string name="email_verified">Email address verified!</string>
     <string name="verification_mail">Verification Mail</string>
     <string name="email_verification_requested_long">A verification email will be requested from the Joozdlog Server. Please verify the mail on this device!</string>
-    <string name="email_verification_invalid_data">The email verification data received is not valid.</string>
+    <string name="email_verification_invalid_data">The email verification data received is not valid. Do you want to request new email verification data?</string>
+    <string name="email_verification_code_not_saved_bug">An email verification was scheduled but no code was saved. Please report this through the Feedback option in the menu and tell me what you did, so I can fix this bug.</string>
     <string name="logged_in">Logged in.</string>
     <string name="login_delayed">No server, will try again</string>
 

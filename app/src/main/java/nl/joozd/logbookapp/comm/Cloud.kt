@@ -1,14 +1,18 @@
 package nl.joozd.logbookapp.comm
 
 import android.util.Base64
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import nl.joozd.comms.Client
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogcommon.LoginData
 import nl.joozd.joozdlogcommon.LoginDataWithEmail
+import nl.joozd.joozdlogcommon.Protocol
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.ui.utils.md5Hash
 import nl.joozd.serializing.unwrapInt
 import nl.joozd.serializing.wrap
 
@@ -73,13 +77,15 @@ class Cloud(private val server: String = SERVER_URL, private val port: Int = SER
 
     /**
      * Change password. Will return true if success, false if failed due to no connection or server refused.
-     * Server refusal will be handled by [handleResponse], so calling function might set TaskFlag on any failure.
+     * Server refusal will be handled by [handleResponse].
+     *
      */
-    suspend fun changePassword(newPassword: String): CloudFunctionResult =
+    suspend fun changeLoginKey(username: String, currentKey: ByteArray, newKey: ByteArray): CloudFunctionResult =
         withClient {
-            val r = login()
+            require(newKey.size == Protocol.KEY_SIZE) // maybe handle this a bit more gracefully? Should not happen anyway.
+            val r = login(username, currentKey)
             if(r != CloudFunctionResult.OK) return r
-            return changePasswordOnServer(Encryption.md5Hash(newPassword), EmailPrefs.emailAddress())
+            return changePasswordOnServer(newKey, EmailPrefs.emailAddress())
         }
 
     /**
@@ -91,15 +97,17 @@ class Cloud(private val server: String = SERVER_URL, private val port: Int = SER
     /**
      * Request an email with a login link from the server
      */
-    suspend fun requestLoginLinkMail(): CloudFunctionResult =
-        resultForRequest(JoozdlogCommsKeywords.REQUEST_LOGIN_LINK_MAIL, makeLoginDataWithEmailPayload())
+    //TODO pass login detaiuls. CLoud does not need to know where to find those.
+    suspend fun requestLoginLinkMail(username: String, key: ByteArray, emailAddress: String): CloudFunctionResult =
+        resultForRequest(JoozdlogCommsKeywords.REQUEST_LOGIN_LINK_MAIL, makeLoginDataWithEmailPayload(username, key, emailAddress))
 
     /**
      * This will send a mail with all flights currently in cloud.
      * Flights should be synced first just to be sure things are correct.
      */
-    suspend fun requestBackupEmail(): CloudFunctionResult =
-        resultForRequest(JoozdlogCommsKeywords.REQUEST_BACKUP_MAIL, makeLoginDataWithEmailPayload())
+    suspend fun requestBackupEmail(username: String, key: ByteArray, emailAddress: String): CloudFunctionResult =
+        resultForRequest(JoozdlogCommsKeywords.REQUEST_BACKUP_MAIL, makeLoginDataWithEmailPayload(username, key, emailAddress))
+
 
 
     /*
@@ -133,12 +141,12 @@ class Cloud(private val server: String = SERVER_URL, private val port: Int = SER
 
     //Doesn't handle bad login data, but server will refuse empty usernames etc.
     //However, it is better to check this (e.g. with with UserManagement.checkIfLoginDataSet()) before making bad data.
-    private suspend fun makeLoginDataWithEmailPayload(): ByteArray =
+    private fun makeLoginDataWithEmailPayload(username: String, key: ByteArray, emailAddress: String): ByteArray =
         LoginDataWithEmail(
-            Prefs.username() ?: "NO_USERNAME",
-            Prefs.key() ?:  ByteArray(16) { 0.toByte()},
+            username,
+            key,
             basicFlightVersion,
-            EmailPrefs.emailAddress
+            emailAddress
         ).serialize()
 
 
@@ -156,10 +164,12 @@ class Cloud(private val server: String = SERVER_URL, private val port: Int = SER
             BasicFlight.VERSION.version, email ?: EmailPrefs.emailAddress)
     }
 
-    private suspend inline fun <T> withClient(block: Client.() -> T): T =
+    // all client usage should use this function so locking is properly taken care of.
+    private suspend inline fun <T> withClient(block: Client.() -> T): T = clientMutex.withLock {
         client().use {
             block(it)
         }
+    }
 
     private suspend fun resultForRequest(request: String, extraData: ByteArray? ): CloudFunctionResult = withClient {
         sendRequest(request, extraData)
@@ -168,11 +178,10 @@ class Cloud(private val server: String = SERVER_URL, private val port: Int = SER
 
     /*
      * Log in to server until Client is closed again
-     * If username and password are set it will make something up which will not work.
      */
-    private suspend fun Client.login(): CloudFunctionResult {
+    private suspend fun Client.login(username: String, key: ByteArray): CloudFunctionResult {
         //payLoad is LoginData.serialize()
-        val payLoad = LoginData(Prefs.username()!!, Prefs.key()!!, BasicFlight.VERSION.version)
+        val payLoad = LoginData(username, key , BasicFlight.VERSION.version)
             .serialize()
 
         sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
@@ -193,6 +202,8 @@ class Cloud(private val server: String = SERVER_URL, private val port: Int = SER
     companion object {
         private const val SERVER_URL = "joozd.nl"
         private const val SERVER_PORT = 1337
+
+        private val clientMutex = Mutex() // Only one client connection at a time. More can cause problems when changing password or stuff like that.
 
     }
 

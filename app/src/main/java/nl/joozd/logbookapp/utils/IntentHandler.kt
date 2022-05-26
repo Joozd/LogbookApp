@@ -11,6 +11,22 @@ import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 class IntentHandler(private val intent: Intent) {
     private val uri: Uri? = intent.data
 
+    /**
+     * Returns true if IntentHandler could handle this, of false if not
+     */
+    suspend fun handle(): Boolean = when(IntentType.ofUri(uri)){
+        IntentType.INVALID -> false
+        IntentType.LOGIN_LINK -> {
+            handleLoginLink()
+            true
+        }
+        IntentType.EMAIL_VERIFICATION_LINK -> {
+            handleEmailCodeConfirmation()
+            true
+        }
+
+    }
+
     // Handling a login link means just saving the stored data.
     // Any problems with the data (i.e. bad login/pass combo) will arise when anything is done with it
     // so any problems will be known to user when he needs to know.
@@ -21,7 +37,17 @@ class IntentHandler(private val intent: Intent) {
         }
     }
 
+    suspend fun handleEmailCodeConfirmation(){
+        getEmailConfirmationCodeFromIntent()?.let{
+            showEmailConfirmationSheduledMessage()
+            UserManagement().confirmEmail(it)
+        }
+    }
+
     private fun getLoginLinkFromIntent() =
+        uri?.lastPathSegment
+
+    private fun getEmailConfirmationCodeFromIntent() =
         uri?.lastPathSegment
 
     private fun makeLoginPassPair(loginPassString: String): Pair<String, String> =
@@ -29,11 +55,10 @@ class IntentHandler(private val intent: Intent) {
             lp.first() to lp.last()
         }
 
+
     private suspend fun storeNewLoginData(lpPair: Pair<String, String>)= withContext(DispatcherProvider.io()) {
-        Prefs.username = lpPair.first
-        Prefs.keyString = lpPair.second
-        Prefs.lastUpdateTime = -1
-        Prefs.useCloud = true
+        UserManagement().storeNewLoginData(lpPair.first, lpPair.second)
+        Prefs.postUseCloud(true)
         UserManagement().requestEmailVerificationMail()
     }
 
@@ -43,5 +68,33 @@ class IntentHandler(private val intent: Intent) {
             descriptionResource = R.string.no_internet_login
             setPositiveButton(android.R.string.ok){ }
         }
+    }
+
+    private fun showEmailConfirmationSheduledMessage(){
+        MessageCenter.commitMessage {
+            titleResource = R.string.email_verification_scheduled_title
+            descriptionResource = R.string.email_verification_scheduled_message
+            setPositiveButton(android.R.string.ok){ }
+        }
+    }
+
+    private enum class IntentType {
+        LOGIN_LINK,
+        EMAIL_VERIFICATION_LINK,
+        INVALID;
+
+        companion object {
+            fun ofUri(uri: Uri?): IntentType = when (uri?.pathSegments?.firstOrNull()) {
+                INTENT_LOGIN_LINK_PATH -> LOGIN_LINK
+                INTENT_VERIFY_EMAIL_PATH -> EMAIL_VERIFICATION_LINK
+                else -> INVALID
+            }
+        }
+    }
+
+
+    companion object{
+        private const val INTENT_VERIFY_EMAIL_PATH = "verify-email"
+        private const val INTENT_LOGIN_LINK_PATH ="inject-key"
     }
 }

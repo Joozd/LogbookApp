@@ -20,24 +20,28 @@
 package nl.joozd.logbookapp.core.usermanagement
 
 import android.content.Intent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.core.Constants
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.comm.*
+import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.utils.generatePassword
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
+import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.UserMessage
+import nl.joozd.logbookapp.utils.generateKey
 
 /*
  * UserManagement does NOT take care of setting TaskFlags that need to be (re-)set, other than any other function can.
  *  (can ask for something to be done, cannot mark a task as incomplete or finished)
- * Flags are the business of TaskManager and workers. This only provides functions.
- * It also might send messages to MessageCentre in case user needs to be made aware of something, or needs to make a decision.
+ * Flags are the business of TaskManager and workers. This only provides entries for the rest of the program to set something in motion.
+ * It is allowed send messages to MessageCentre in case user needs to be made aware of something, or needs to make a decision for a real-time function.
  */
 //TODO move all functions that get called as the result of a TaskFlag being set to Workers.
 // Functions here are to be replaced by just setting TaskFlag. Currently this work would be done in two places, which violates DRY, or leads to opaque back-and-forth-ing.
@@ -46,47 +50,61 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
      * Schedule the creation of a new user account.
      */
     fun createNewUser(){
-        TaskFlags.postCreateNewUser(true)
+        taskFlags.postCreateNewUser(true)
+    }
+
+    //blocking IO in DispatcherProvider.io()
+    suspend fun storeNewLoginData(username: String, key: ByteArray) = withContext(DispatcherProvider.io()){
+        Prefs.username = username
+        Prefs.key = key
+        Prefs.lastUpdateTime = -1
+    }
+
+    //blocking IO in DispatcherProvider.io()
+    suspend fun storeNewLoginData(username: String, keyString: String) = withContext(DispatcherProvider.io()){
+        Prefs.username = username
+        Prefs.keyString = keyString
+        Prefs.lastUpdateTime = -1
     }
 
     //requesting a verification email is done by just re-submitting current email address.
     fun requestEmailVerificationMail(){
-        TaskFlags.postUpdateEmailWithServer(true)
+        taskFlags.postUpdateEmailWithServer(true)
+    }
+
+    fun requestLoginLink(){
+        taskFlags.postSendLoginLink(true)
     }
 
     /**
      * Change email address. It will confirm with server at the first possible time. Server will send a confirmation mail if needed.
      * If newEmailAddress is null, it will re-confirm stored address with server.
      * If no connection it will schedule sending to server when internet gets available.
+     * @param newEmailAddress - the email address to store. This is NOT checked to see if it is a valid email address.
      */
-    fun changeEmailAddress(newEmailAddress: String?) {
-        newEmailAddress?.let { EmailPrefs.emailAddress = it }
+    fun changeEmailAddress(newEmailAddress: String) {
+        EmailPrefs.emailAddress = newEmailAddress
         requestEmailVerificationMail()
     }
 
     /**
      * Change password. First checks if login credentials correct,
-     * Then, saves new password, and changes that on server.
-     * If anything goes wrong between saving new pass and setting it on server,
-     * user's account will be locked and they will probably get a notification
-     * about making a new cloud account on next sync.
+     * This function is executed right away, as a scheduled password change might lead to unwanted and/or unforeseen consequences.
+     * @return true if password changed; new password will be stored.
+     * @return false if password not changed due to server refusal (eg bad login data, which is handled by cloud) or no connection.
+     * Calling function gets to handle message to user about success or failure. Consider coercing user to save new login link in that message.
      */
-    suspend fun changePassword(): Boolean =
-        if (checkIfLoginDataSet()) {
-            val newPassword = generatePassword(16)
-            val result = if (cloud.changePassword(newPassword) == CloudFunctionResult.OK) {
-                Prefs.keyString = newPassword
-                true
-            } else false
-            TaskFlags.postChangePassword(!result)
-            result // return
-        }
-        else {
-            TaskFlags.postChangePassword(true) // will change password as soon as login data are actually set.
-            false
-        }
+    suspend fun changeLoginKey(cloud: Cloud = Cloud()): Boolean =
+        UsernameWithKey.fromPrefs()?.let{ lp ->
+            val newKey = generateKey()
+            val result = cloud.changeLoginKey(lp.username, lp.key, newKey)
+            if (result == CloudFunctionResult.OK)
+                withContext(DispatcherProvider.io()) { Prefs.key = newKey }
+            return result == CloudFunctionResult.OK
+        } ?: false
 
-    fun signOut() {
+
+    fun logOut() {
         Prefs.username = null
         Prefs.keyString = null
         Prefs.lastUpdateTime = -1
@@ -110,94 +128,18 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
 
     /**
      * Confirm email confirmation string with server, or schedule that to happen as soon as server is online
-     * @param confirmationString    the confirmation string as should have been received in confirmation email
+     * @param confirmationString    the confirmation string as should have been received in confirmation email.
      *                              This will be sent to the server to verify.
-     * @param fromActivity: If true, this will send a message to MessageCenter in case of postponement of confirmation, so user will get feedback of the result of clicking his "confirm email" link.
-     * @return true if success, false if fail.
      */
-    suspend fun confirmEmail(confirmationString: String, fromActivity: Boolean = true) {
-        if (":" !in confirmationString) {
-            showBadEmailConfirmationStringMessage()
-            return
-        }
-        when(cloud.confirmEmail(confirmationString)){
-            CloudFunctionResult.OK -> {
-                TaskFlags.postVerifyEmailCode(false)
-                EmailPrefs.postEmailConfirmationStringWaiting("")
-                showEmailConfirmedMessage()
+    suspend fun confirmEmail(confirmationString: String) {
+        if (checkConfirmationString(confirmationString))
+            withContext(DispatcherProvider.io()){
+                EmailPrefs.emailConfirmationStringWaiting = confirmationString
+                TaskFlags.verifyEmailCode = true
             }
-            CloudFunctionResult.SERVER_REFUSED -> {
-                // This doesn't remove flag, as doing that will prevent the message from being shown on next activity creation.
-                showEmailConfirmationRejectedMessage()
-            }
-            CloudFunctionResult.CONNECTION_ERROR -> if (fromActivity){
-                EmailPrefs.postEmailConfirmationStringWaiting(confirmationString)
-                TaskFlags.postVerifyEmailCode(true)
-                showEmailConfirmationPostponedMessage()
-            }
-        }
+        else MessagesWaiting.postBadVerificationCodeClicked(true)
     }
 
-
-
-    private fun showBadLoginLinkMessage(){
-        val message = UserMessage.Builder().apply{
-            titleResource = R.string.login_error
-            descriptionResource = R.string.wrong_username_password
-            setPositiveButton(android.R.string.ok){ }
-        }.build()
-        MessageCenter.pushMessage(message)
-    }
-
-    private fun showLoginLinkPostponedMessage(){
-        val message = UserMessage.Builder().apply{
-            titleResource = R.string.login_link
-            descriptionResource = R.string.no_internet_login
-            setPositiveButton(android.R.string.ok){ }
-        }.build()
-        MessageCenter.pushMessage(message)
-    }
-
-    private fun showBadEmailConfirmationStringMessage(){
-        val message = UserMessage.Builder().apply{
-            titleResource = R.string.verification_mail
-            descriptionResource = R.string.email_verification_invalid_data
-            setPositiveButton(android.R.string.ok){ }
-        }.build()
-        MessageCenter.pushMessage(message)
-    }
-
-    private fun showEmailConfirmedMessage(){
-        val message = UserMessage.Builder().apply{
-            titleResource = R.string.verification_mail
-            descriptionResource = R.string.email_verified
-            setPositiveButton(android.R.string.ok){ }
-        }.build()
-        MessageCenter.pushMessage(message)
-    }
-
-    private fun showEmailConfirmationRejectedMessage(){
-        MessageCenter.MessageFragmentBuilder().commit{
-            messageResource = R.string.email_address_rejected
-            setPositiveButton(R.string.verify){
-                cancelEmailCodeVerification()
-                MainScope().launch { verifyEmailAddressWithServerIfSet() }
-            }
-            setNegativeButton(R.string.delete){
-                cancelEmailCodeVerification()
-                invalidateEmail()
-            }
-        }
-    }
-
-    private fun showEmailConfirmationPostponedMessage(){
-        val message = UserMessage.Builder().apply{
-            titleResource = R.string.verification_mail
-            descriptionResource = R.string.email_verification_scheduled
-            setPositiveButton(android.R.string.ok){ }
-        }.build()
-        MessageCenter.pushMessage(message)
-    }
 
     private fun cancelEmailCodeVerification() {
         TaskFlags.postVerifyEmailCode(false)

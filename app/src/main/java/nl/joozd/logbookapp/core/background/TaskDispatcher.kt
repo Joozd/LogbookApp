@@ -5,71 +5,61 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
-import nl.joozd.logbookapp.workmanager.userManagementWorkers.UserManagementWorkersHub
+import nl.joozd.logbookapp.workmanager.userManagementWorkers.ServerFunctionsWorkersHub
 
 /**
  * Run all tasks set in [TaskFlags].
  * All tasks will go straight to Worker as none is very time-sensitive.
  */
-class TaskDispatcher(private val activity: JoozdlogActivity) {
-    fun start() {
-        activity.lifecycleScope.launch {
-            activity.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                //these functions collect their respective Flow and handle that flow's output.
-                //TODO this one is the way I want it. Do the rest the same way.
-                newUserWanted()
-                emailUpdateWanted()
-                emailConfirmationWanted() // Worker takes care of checking for bad email confirmation string to prevent infinite loop.
+class TaskDispatcher: BackgroundTasksDispatcher() {
+    override suspend fun startCollectors() {
+        //these functions collect their respective Flow and handle that flow's output.
+        handleNewUserWanted()
+        handleEmailUpdateWanted()
+        handleEmailConfirmationWanted()
+        handleBackupEmailWanted()
+        handleLoginLinkWanted()
+    }
 
-
-                //TODO WIP
-                backupEmailWanted()
-
-                //TODO below this line needs reworking
-                loginLinkWanted()
-            }
+    private suspend fun handleNewUserWanted() {
+        newUserWantedFlow().doIfTrueCollected {
+                ServerFunctionsWorkersHub().scheduleCreateNewUser()
         }
     }
 
-    private suspend fun newUserWanted() {
-        newUserWantedFlow().collect{
-            if(it)
-                UserManagementWorkersHub().scheduleCreateNewUser()
-        }
-    }
-
-    private suspend fun emailUpdateWanted(){
-        emailUpdateWantedFlow().collect{
-            if(it){
-                UserManagementWorkersHub().scheduleUpdateEmail()
-            }
-        }
-    }
-
-    private suspend fun emailConfirmationWanted() {
-        emailConfirmationWantedFlow().collect{
-            if(it)
-                UserManagementWorkersHub().scheduleConfirmEmail()
-        }
-    }
-
-    private suspend fun backupEmailWanted() {
-        backupEmailWantedFlow.collect {
-            if (it)
-                UserManagementWorkersHub().scheduleBackupEmail()
+    private suspend fun handleEmailUpdateWanted() {
+        emailUpdateWantedFlow().doIfTrueCollected {
+            ServerFunctionsWorkersHub().scheduleUpdateEmail()
         }
     }
 
 
-    private suspend fun loginLinkWanted() {
-        loginLinkWantedFlow.collect {
-            if (it)
-                JoozdlogWorkersHubOld.scheduleLoginLinkEmail()
+
+    private suspend fun handleEmailConfirmationWanted() {
+        emailConfirmationWantedFlow().doIfTrueCollected {
+            ServerFunctionsWorkersHub().scheduleConfirmEmail() // Worker takes care of checking for bad email confirmation string to prevent infinite loop.
+        }
+    }
+
+    private suspend fun handleBackupEmailWanted() {
+        backupEmailWantedFlow().doIfTrueCollected {
+            ServerFunctionsWorkersHub().scheduleBackupEmail()
+        }
+    }
+
+    // HERE STOOD PASSWORD CHANGE But I think I don't want to schedule that,
+    // as it might lead to a user ending up without a login link in case the server rejects email address.
+    // Password change can only be done straight through UserManagement().
+
+
+
+    private suspend fun handleLoginLinkWanted() {
+        loginLinkWantedFlow().doIfTrueCollected {
+            ServerFunctionsWorkersHub().scheduleLoginLinkEmail()
         }
     }
 
@@ -77,32 +67,30 @@ class TaskDispatcher(private val activity: JoozdlogActivity) {
 
 
     private val validEmailFlow = combine (EmailPrefs.emailAddressFlow, EmailPrefs.emailVerifiedFlow){
-        a, v -> a.isNotBlank() && v
+        address, verified -> address.isNotBlank() && verified
     }
 
     private val useCloudFlow = combine(Prefs.useCloudFlow, Prefs.acceptedCloudSyncTermsFlow){
-        use, accepted -> use && accepted
+        useCloud, acceptedTerms -> useCloud && acceptedTerms
     }
 
-    private fun emailConfirmationWantedFlow() = combine(TaskFlags.verifyEmailCodeFlow, Prefs.useCloudFlow, EmailPrefs.emailConfirmationStringWaitingFlow){
+    private fun emailConfirmationWantedFlow() = combine(TaskFlags.verifyEmailCodeFlow, useCloudFlow, EmailPrefs.emailConfirmationStringWaitingFlow){
         wanted, enabled, value -> wanted && enabled && value.isNotBlank()
     }
 
     private fun newUserWantedFlow() = combine(TaskFlags.createNewUserFlow, useCloudFlow) {
-            needed, enabled -> needed && enabled
+        needed, enabled -> needed && enabled
     }
 
-    private fun emailUpdateWantedFlow() = combine(TaskFlags.updateEmailWithServerFlow, Prefs.useCloudFlow, EmailPrefs.emailAddressFlow){
+    private fun emailUpdateWantedFlow() = combine(TaskFlags.updateEmailWithServerFlow, useCloudFlow, EmailPrefs.emailAddressFlow){
         wanted, enabled, address -> wanted && enabled && address.isNotBlank()
     }
 
-    private val loginLinkWantedFlow = combine(validEmailFlow, TaskFlags.sendLoginLinkFlow){
-        valid, wanted -> valid && wanted
+    private fun loginLinkWantedFlow() = combine(TaskFlags.sendLoginLinkFlow, useCloudFlow, validEmailFlow ){
+        wanted, enabled, valid -> wanted && enabled && valid
     }
 
-    private val backupEmailWantedFlow = combine(validEmailFlow, TaskFlags.sendBackupEmailFlow){
-        valid, wanted -> valid && wanted
+    private fun backupEmailWantedFlow() = combine(TaskFlags.sendBackupEmailFlow, useCloudFlow, validEmailFlow){
+        wanted, enabled, valid -> wanted && enabled && valid
     }
-
-
 }

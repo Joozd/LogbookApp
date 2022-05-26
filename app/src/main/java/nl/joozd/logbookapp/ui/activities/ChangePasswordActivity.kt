@@ -213,7 +213,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
 
     private fun showIncorrectLoginError() = JoozdlogAlertDialog().show(activity){
         titleResource = R.string.login_error
-        messageResource = R.string.login_error_message
+        messageResource = R.string.login_data_rejected_cloud_disabled
         setPositiveButton(R.string.create_account){
             Prefs.username = null // setting this to null will cause a new account to be created on the next sync
         }

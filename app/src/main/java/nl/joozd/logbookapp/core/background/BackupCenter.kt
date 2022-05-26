@@ -29,12 +29,12 @@ import java.time.LocalDate
 /**
  * Takes care of all things backup that need to be done in background.
  */
-class BackupCenter(private val activity: JoozdlogActivity) {
+class BackupCenter {
     /**
      * This will trigger again when relevant preferences are updated
      * @see backupActionFlow for which preferences are monitored.
      */
-    fun makeOrScheduleBackupNotification() {
+    fun makeOrScheduleBackupNotification(activity: JoozdlogActivity) {
         activity.lifecycleScope.launch {
             activity.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 backupActionFlow.collect { backupAction ->
@@ -44,7 +44,7 @@ class BackupCenter(private val activity: JoozdlogActivity) {
                                 //try to send a backup email, give it a second to see if it works, else retry.
                                 TaskFlags.postSendBackupEmail(true)
                                 delay(5000)
-                                makeOrScheduleBackupNotification() // call this recursively, if TaskFlags.sendBackupEmail == true, this will go to [else] statement below this line.
+                                makeOrScheduleBackupNotification(activity) // call this recursively, if TaskFlags.sendBackupEmail == true, this will go to [else] statement below this line.
                             } else MessageCenter.pushMessageBarFragment(BackupNotificationFragment())
                         }
                         BackupAction.EMAIL -> TaskFlags.postSendBackupEmail(true)

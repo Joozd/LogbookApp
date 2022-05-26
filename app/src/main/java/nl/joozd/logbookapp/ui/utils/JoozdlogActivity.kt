@@ -44,7 +44,7 @@ open class JoozdlogActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onCreate(savedInstanceState, persistentState)
-        startBackgroundTasks(this)
+        startBackgroundTasks()
 
     }
 

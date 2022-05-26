@@ -6,11 +6,11 @@ import nl.joozd.logbookapp.ui.utils.base64Decode
  * Checks if confirmation string can be read by server.
  * Sending a bad confirmation string to server will result in BAD_DATA_RECEIVED which is handled the same as a connection error and will lead to an infinite loop.
  */
-fun checkConfirmationString(confirmationString: String) = LoginData.fromPrefs()?.let{
+fun checkConfirmationString(confirmationString: String) = UsernameWithKey.fromPrefs()?.let{
     checkConfirmationString(confirmationString, it)
 } ?: false
 
-private fun checkConfirmationString(confirmationString: String, loginData: LoginData): Boolean =
+private fun checkConfirmationString(confirmationString: String, loginData: UsernameWithKey): Boolean =
     ':' in confirmationString
             && confirmationString.split(':').let {
         it.first() == loginData.username

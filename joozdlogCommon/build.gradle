@@ -17,6 +17,7 @@
  *
  */
 
+
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
 
@@ -24,8 +25,10 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api files("C:\\Users\\joozd\\IdeaProjects\\libs\\joozdserializing-jvm-0.1.jar")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    //implementation "androidx.room:room-runtime:$room_version"
-    //annotationProcessor 'androidx.room:room-compiler:2.3.0'
+
+    implementation 'org.json:json:20180813'
+
+    testImplementation 'junit:junit:4.13.2'
 }
 
 java {

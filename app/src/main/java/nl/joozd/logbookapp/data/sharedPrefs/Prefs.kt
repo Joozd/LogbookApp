@@ -85,11 +85,12 @@ object Prefs: JoozdLogPreferences() {
 
     private const val LAST_UPDATE_TIME = "LAST_UPDATE_TIME"
     var lastUpdateTime: Long by JoozdLogSharedPreferenceNotNull(LAST_UPDATE_TIME,-1)
-    val lastUpdateTimeFlow by PrefsFlow(LAST_UPDATE_TIME,-1)
+    val lastUpdateTimeFlow by PrefsFlow(LAST_UPDATE_TIME,-1L)
     fun postLastUpdateTime(value: Long) = post(LAST_UPDATE_TIME, value)
 
     private const val SERVER_TIME_OFFSET = "SERVER_TIME_OFFSET"
     var serverTimeOffset: Long by JoozdLogSharedPreferenceNotNull(SERVER_TIME_OFFSET,0)
+    fun postServerTimeOffset(value: Long) = post(SERVER_TIME_OFFSET, value)
 
     private const val AIRPORT_DB_VERSION = "AIRPORT_DB_VERSION"
     var airportDbVersion: Int by JoozdLogSharedPreferenceNotNull(AIRPORT_DB_VERSION,0)

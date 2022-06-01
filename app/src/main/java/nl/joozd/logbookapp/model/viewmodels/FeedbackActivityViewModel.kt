@@ -28,6 +28,7 @@ import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
 import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
+import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 
 class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
     /**
@@ -41,7 +42,7 @@ class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Text entered in contact field
      */
-    private var _contactInfo = Prefs.emailAddress
+    private var _contactInfo = EmailPrefs.emailAddress
     // + exposed getter
     val contactInfo
         get() = _contactInfo

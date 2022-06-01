@@ -45,7 +45,7 @@ class LoginActivityViewModel: JoozdlogActivityViewModel(){
      *******************************************************************************************/
 
     fun signOut(){
-        UserManagement.signOut()
+        UserManagement().logOut()
         feedback(LoginActivityEvents.FINISHED)
     }
 }

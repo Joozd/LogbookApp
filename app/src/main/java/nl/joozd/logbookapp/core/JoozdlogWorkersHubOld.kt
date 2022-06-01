@@ -61,7 +61,7 @@ object JoozdlogWorkersHubOld: JoozdlogWorkersHub(), CoroutineScope by MainScope(
      */
     fun syncTimeAndFlightsIfFlightsUpdated(){
         launch {
-            if (lastSyncInstantEpochSeconds < FlightRepositoryWithSpecializedFunctions.instance.getMostRecentTimestampOfACompletedFlight() ?: Long.MIN_VALUE)
+            if (lastSyncInstantEpochSeconds < (FlightRepositoryWithSpecializedFunctions.instance.getMostRecentTimestampOfACompletedFlight() ?: Long.MIN_VALUE))
                 synchronizeTimeAndFlights()
         }
     }
@@ -131,19 +131,6 @@ object JoozdlogWorkersHubOld: JoozdlogWorkersHub(), CoroutineScope by MainScope(
         enqueue(task, GET_BACKUP_EMAIL, ExistingWorkPolicy.REPLACE)
     }
 
-
-
-    /**
-     * Schedule server login attempt
-     * If another worker is already doing this, that one will be kept and this will be ignored.
-     */
-    fun scheduleLoginAttempt(){
-        val task = OneTimeWorkRequestBuilder<CloudLoginWorker>()
-            .needsNetwork()
-            .addTag(LOGIN_TO_CLOUD)
-            .build()
-        enqueue(task, LOGIN_TO_CLOUD, ExistingWorkPolicy.KEEP)
-    }
 
     /**
      * Send feedback to server.

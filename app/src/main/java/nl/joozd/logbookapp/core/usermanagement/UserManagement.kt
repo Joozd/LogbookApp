@@ -19,22 +19,16 @@
 
 package nl.joozd.logbookapp.core.usermanagement
 
-import android.content.Intent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.core.Constants
-import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.comm.*
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.utils.DispatcherProvider
-import nl.joozd.logbookapp.utils.UserMessage
 import nl.joozd.logbookapp.utils.generateKey
 
 /*
@@ -115,16 +109,12 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         "${Constants.JOOZDLOG_LOGIN_LINK_PREFIX}$username:${Prefs.keyString?.replace('/', '-')}"
     }
 
-    fun generateLoginLinkIntent(): Intent? = generateLoginLink()?.let { link ->
-        Intent(Intent.ACTION_SEND).apply {
-            val text = App.instance.resources.openRawResource(R.raw.joozdlog_login_link_email).reader().readText().replace(
-                EMAIL_LINK_PLACEHOLDER, link)
-
-            type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, EMAIL_SUBJECT)
-            putExtra(Intent.EXTRA_TEXT, text)
+    fun generateLoginLinkMessage(): String? = generateLoginLink()?.let { link ->
+         App.instance.resources.openRawResource(R.raw.joozdlog_login_link_email)
+             .reader()
+             .readText()
+             .replace(EMAIL_LINK_PLACEHOLDER, link)
         }
-    }
 
     /**
      * Confirm email confirmation string with server, or schedule that to happen as soon as server is online
@@ -171,8 +161,6 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
 
     companion object {
         private const val EMAIL_LINK_PLACEHOLDER = "[INSERT_LINK_HERE]"
-        private const val EMAIL_SUBJECT = "JoozdLog Login Link"
-
     }
 }
 

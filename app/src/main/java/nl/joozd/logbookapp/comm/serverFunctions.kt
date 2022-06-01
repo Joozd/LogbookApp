@@ -3,7 +3,6 @@ package nl.joozd.logbookapp.comm
 //These functions know where Preferences such as login data or email addresses can be found.
 
 import android.util.Log
-import androidx.work.ListenableWorker
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
@@ -15,7 +14,6 @@ import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.generateKey
-import nl.joozd.logbookapp.workmanager.userManagementWorkers.ServerFunctionsWorkersHub
 
 /**
  * This will invalidate current login data.
@@ -139,11 +137,10 @@ private suspend fun sendEmailAddressToServer(loginData: UsernameWithKey, emailAd
     cloud.sendNewEmailAddress(loginData.username, loginData.key, emailAddress).correspondingServerFunctionResult()
 
 private suspend fun createNewUserOnServer(loginData: UsernameWithKey, cloud: Cloud): ServerFunctionResult =
-    when(cloud.createNewUser(loginData.username, loginData.key)){
-        CloudFunctionResult.OK -> ServerFunctionResult.SUCCESS
-        CloudFunctionResult.CONNECTION_ERROR -> ServerFunctionResult.RETRY
-        CloudFunctionResult.SERVER_REFUSED -> ServerFunctionResult.FAILURE // this only happens when server returns USER_ALREADY_EXISTS; in this case just rerun function with new username/key
-    }
+    cloud.createNewUser(loginData.username, loginData.key).correspondingServerFunctionResult()
+    // FAILURE only happens in very rare case when a retry if
+
+
 
 // If there is no email address stored, this will handle it (eg. prompt user to enter email address so requested calling function can be performed)
 private suspend fun getEmailAddressFromPrefs(): String? =

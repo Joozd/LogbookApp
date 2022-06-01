@@ -200,7 +200,7 @@
     <string name="mail_to_myself">Send it to myself</string>
     <string name="send_using">Pick an app:</string>
     <string name="email_verification_scheduled_title">Verifying email</string>
-    <string name="email_verification_scheduled_message">Your email verification has been scheduled. If you are connected to the internet this should happen pretty fast, otherwise it will be the next time your device connects to the internet.\nPLEASE NOTE: The server only remembers one email address verification per account. Using the same verification on multiple devices means you will get multiple emails as all emails start from your own device (the server doesn't remember your email address, only a code to verify it).</string>
+    <string name="email_verification_scheduled_message">Your email verification has been scheduled. If you are connected to the internet this should happen pretty fast, otherwise it will be the next time your device connects to the internet.\nPLEASE NOTE: The server only remembers one email address verification per account. Using the same verification on multiple devices means you will get multiple emails as all emails start from your own device (the server doesn\'t remember your email address, only a code to verify it).</string>
 
 
     <string name="login_data_rejected_cloud_disabled">The server rejected your login data. Cloud functions have been disabled. Use a valid login link or create a new Cloud account in Settings to enable it again.</string>

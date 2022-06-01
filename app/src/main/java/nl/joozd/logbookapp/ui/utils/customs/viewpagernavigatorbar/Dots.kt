@@ -41,7 +41,7 @@ class Dots(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRe
     //secondary constructors:
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0):  this(context, attrs, defStyleAttr, 0, 0,null)
     constructor(context: Context, attrs: AttributeSet?):                         this(context, attrs, 0, 0, 0, null)
-    constructor(context: Context, amountOfDots: Int = 0, activeDot: Int? = 0):   this(context, null, 0, 0, amountOfDots)
+    constructor(context: Context, amountOfDots: Int = 0):                        this(context, null, 0, 0, amountOfDots)
     constructor(context: Context):                                               this(context, null, 0, 0)
 
     private var initialized = true
@@ -133,13 +133,13 @@ class Dots(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRe
 
     init{
         context.obtainStyledAttributes(attrs, R.styleable.Dots, defStyleAttr, defStyleRes).apply{
-            //inactive dot size = default (converted to px here) or from attrs (converted to Px by getDimsnsionPixelSize)
+            //inactive dot size = default (converted to px here) or from attrs (converted to Px by getDimensionPixelSize)
             inactiveDotSize = getDimensionPixelSize(R.styleable.Dots_dotsInactiveDiameter, inactiveDotSize)
 
-            //active dot size = default (converted to px here) or from attrs (converted to Px by getDimsnsionPixelSize)
+            //active dot size = default (converted to px here) or from attrs (converted to Px by getDimensionPixelSize)
             activeDotSize = getDimensionPixelSize(R.styleable.Dots_dotsActiveDiameter, activeDotSize)
 
-            //spacing = default (converted to px here) or from attrs (converted to Px by getDimsnsionPixelSize)
+            //spacing = default (converted to px here) or from attrs (converted to Px by getDimensionPixelSize)
             spacing = getDimensionPixelSize(R.styleable.Dots_dotsSpacing, spacing)
             activeColor = getColor(R.styleable.Dots_dotsActiveColor, activeColor)
             inactiveColor = getColor(R.styleable.Dots_dotsActiveColor, inactiveColor)
@@ -154,7 +154,7 @@ class Dots(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRe
     }
 
     /**
-     * Make a dot active, and all preivous active dot inactive
+     * Make a dot active, and all previous active dot inactive
      */
     fun activateDot(dotIndex: Int){
         activeDot?.let { if (it != dotIndex) deactivateDot(it) }
@@ -219,7 +219,7 @@ class Dots(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRe
      */
     private fun updateView(){
         val totalWidth = if (amountOfDots == 0) 0 else (amountOfDots-1) * spacing + maxDotSize
-        println("TOTALWIDTH: $totalWidth, amountOFDots: $amountOfDots, spacing: $spacing, maxDotSize: $maxDotSize")
+        println("totalWidth: $totalWidth, amountOFDots: $amountOfDots, spacing: $spacing, maxDotSize: $maxDotSize")
         removeAllViews()
         layoutParams = LayoutParams(totalWidth, maxDotSize)
         ConstraintSet().apply{

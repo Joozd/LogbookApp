@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.ui.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
 import androidx.appcompat.app.ActionBar
@@ -33,7 +34,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.core.background.startBackgroundTasks
+import nl.joozd.logbookapp.core.usermanagement.UserManagement
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
@@ -75,6 +79,15 @@ open class JoozdlogActivity: AppCompatActivity() {
 
     fun startMainActivity(context: Context) = with (context) {
         startActivity(packageManager.getLaunchIntentForPackage(packageName))
+    }
+
+    fun sendMessageToOtherApp(message: String, subject: String? = null){
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            subject?.let { putExtra(Intent.EXTRA_SUBJECT, it) }
+            putExtra(Intent.EXTRA_TEXT, message)
+        }
+        startActivity(Intent.createChooser(intent, null))
     }
 
     /**

@@ -142,11 +142,22 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         Prefs.postBackupFromCloud(false)
     }
 
+    /**
+     * Use this for functions that need to be logged in.
+     * If you just want to know, and not have any consequences from not being logged in, use [isLoggedIn]
+     * @return true if logged in, false if not.
+     * False will also cause messages to user to be generated.
+     */
     suspend fun checkIfLoginDataSet(): Boolean =
-        (Prefs.username() != null && Prefs.key() != null).also {
+        isLoggedIn().also {
             if (!it)
                 notifyNoUserDataSet()
         }
+
+    /**
+     * True if logged in, false if not. For purposes that need to be logged in or else handle that, use [checkIfLoginDataSet]
+     */
+    suspend fun isLoggedIn() = Prefs.username() != null && Prefs.key() != null
 
     private fun makeLoginPassPair(loginPassString: String): Pair<String, String> =
         loginPassString.replace('-', '/').split(":").let { lp ->

@@ -252,7 +252,9 @@ class SettingsActivity : JoozdlogActivity() {
         }
 
         loginLinkButton.setOnClickListener {
-            startActivity(UserManagement.generateLoginLinkIntent())
+            UserManagement().generateLoginLinkMessage()?.let{
+                sendMessageToOtherApp(it, getString(R.string.login_link_title))
+            } ?: toast(R.string.not_signed_in)
         }
 
         addNamesFromRosterSwitch.setOnClickListener {
@@ -327,7 +329,7 @@ class SettingsActivity : JoozdlogActivity() {
             setNegativeButton(android.R.string.cancel)
             setPositiveButton(android.R.string.ok) {
                 lifecycleScope.launch {
-                    UserManagement.createNewUser()
+                    UserManagement().createNewUser()
                 }
                 if (Prefs.acceptedCloudSyncTerms)
                     viewModel.forceUseCloud()

@@ -246,15 +246,6 @@ object Prefs: JoozdLogPreferences() {
     var feedbackWaiting: String by JoozdLogSharedPreferenceNotNull(FEEDBACK_WAITING, "")
 
 
-    /**
-     * Login link waiting for server to be available
-     */
-    private const val LOGIN_LINK_STRING_WAITING = "LOGIN_LINK_STRING_WAITING"
-    var loginLinkStringWaiting: String by JoozdLogSharedPreferenceNotNull(LOGIN_LINK_STRING_WAITING, "")
-    val loginLinkStringWaitingFlow by PrefsFlow(LOGIN_LINK_STRING_WAITING, "")
-    fun pushLoginLinkStringWaiting(value: String) = post(LOGIN_LINK_STRING_WAITING, value)
-
-
     private fun usernameIfSet(name: String) = name.takeIf { usernameResource != USERNAME_NOT_SET }
 
     private fun makeCalendarSyncType(type: Int): CalendarSyncType =

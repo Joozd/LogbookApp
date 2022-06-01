@@ -41,8 +41,6 @@ class HTTPServerTest {
         println("cleaned up test")
     }
 
-
-
     companion object{
         private const val TEMP_DIR_URL = "file:///c|/temp/"
         private const val TEMP_DIR = "c:\\temp\\"

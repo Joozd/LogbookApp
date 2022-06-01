@@ -54,14 +54,13 @@ import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.dialogs.AboutDialog
 import nl.joozd.logbookapp.ui.dialogs.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
-import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.ImportedLogbookAutoCompleter
 import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
 import nl.joozd.logbookapp.core.messages.MessageCenter
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.extensions.removeByTagAnimated
+import nl.joozd.logbookapp.utils.IntentHandler
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
 class MainActivity : JoozdlogActivity() {
@@ -116,42 +115,15 @@ class MainActivity : JoozdlogActivity() {
         super.onResume()
 
         //TODO this should go to `core`
-        JoozdlogWorkersHubOld.syncTimeAndFlightsIfEnoughTimePassed()
+        // JoozdlogWorkersHubOld.syncTimeAndFlightsIfEnoughTimePassed()
         updateCalendarEventsIfEnabled()
     }
 
     private fun handleIntent() {
-        //if action != ACTION_VIEW we don't want it.
-        if (intent?.action != Intent.ACTION_VIEW) return
-
-        // If no data in intent we can't use it.
-        val data: Uri = intent?.data ?: return
-
-        when(data.pathSegments?.firstOrNull()){
-            INTENT_LOGIN_LINK_PATH -> handleLoginLink(data)
-            INTENT_VERIFY_EMAIL_PATH -> handleEmailVerificationLink(data)
-            else -> showUnknownLinkMessage()
+        lifecycleScope.launch {
+            IntentHandler(intent).handle()
         }
     }
-
-    private fun handleLoginLink(data: Uri) {
-        data.lastPathSegment?.let { lpString ->
-            lifecycleScope.launch {
-                UserManagement.loginFromLink(lpString)
-            }
-        }
-    }
-
-    private fun handleEmailVerificationLink(data: Uri) {
-        fixEmailConfirmationStringBase64Data(data)?.let {
-            lifecycleScope.launch {
-                UserManagement.confirmEmail(it)
-            }
-        }
-    }
-
-    // Base64 uses slashes, but they mess with Intent link detection so they are replaced with dashes. This is where that is reverted.
-    private fun fixEmailConfirmationStringBase64Data(data: Uri) = data.lastPathSegment?.replace("-", "/")
 
     private fun ActivityMainNewBinding.makeFlightsList(){
         val adapter = makeFlightsListAdapter()
@@ -430,17 +402,17 @@ class MainActivity : JoozdlogActivity() {
         setPositiveButton(android.R.string.ok){ _, _ -> }
     }.create().show()
 
+    // @SuppressLint("MissingPermission") // BECAUSE IT IS NOT MISSING PERMISSION
     private fun updateCalendarEventsIfEnabled(){
         if (Prefs.useCalendarSync){
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
-                lifecycleScope.launch {
+            lifecycleScope.launch {
+                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
                     getFlightsFromCalendar()?.let {
                         val ff = ImportedLogbookAutoCompleter().autocomplete(it)
                         ImportedFlightsSaver.make(FlightRepository.instance).save(ff)
                     }
-                }
-            else
-                requestCalendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+                else requestCalendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+            }
         }
     }
 
@@ -472,8 +444,5 @@ class MainActivity : JoozdlogActivity() {
         const val MESSAGE_BAR_FRAGMENT_TAG = "MESSAGE_BAR_FRAGMENT_TAG"
 
         const val PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED = 2
-
-        private const val INTENT_VERIFY_EMAIL_PATH = "verify-email"
-        private const val INTENT_LOGIN_LINK_PATH ="inject-key"
     }
 }

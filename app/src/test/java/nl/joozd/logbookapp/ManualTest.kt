@@ -26,7 +26,7 @@ import java.net.URL
 class ManualTest {
     @Test
     fun manualTest() {
-        val url = URL("file://c:/temp/ical.txt")
+        val url = URL("file:///c|/temp/ical.txt")
         println(url.readText())
 
     }

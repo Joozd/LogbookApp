@@ -195,8 +195,10 @@
     <string name="server_problem_message">The server cannot be reached. It may be down, or your internet may have problems. Please try again later.</string>
     <string name="server_error">The server returned bad data. Please try again later and consider sending a bug report through the "feedback" menu, describing what you were trying to do.</string>
     <string name="login_error">Login Error</string>
-    <string name="changed_password">Changed password</string>
-    <string name="changed_password_message">Your password has changed. Please send your login link to yourself to make sure it is saved.</string>
+    <string name="changed_login_link">Changed login link</string>
+    <string name="changed_login_link_message">Your login link has changed. Please send your login link to yourself to make sure it is saved.</string>
+    <string name="key_recently_changed">Your password was just changed.</string>
+    <string name="key_recently_changed_message">Your password was just changed. Do you really mean to change it again?</string>
     <string name="mail_to_myself">Send it to myself</string>
     <string name="send_using">Pick an app:</string>
     <string name="email_verification_scheduled_title">Verifying email</string>
@@ -229,8 +231,11 @@
     <string name="username_already_taken">This username is already taken. If this is you, use your login link if you have it, or create a new account.</string>
     <string name="change_email">Change email</string>
     <string name="no_email">No email</string>
-    <string name="no_email_text">No working email address was entered, bot a request for something needing an email address was scheduled. Please enter your email address in Settings.</string>
+    <string name="no_email_text">No working email address was entered, but a request for something needing an email address was scheduled. Please enter your email address in Settings.</string>
+    <string name="no_email_entered_no_email_will_be_sent">No working email address was entered, so no login link will be emailed to you.</string>
+
     <string name="i_dont_care">I don\'t care</string>
+    <string name="i_understand">I understand</string>
     <string name="user_exists_password_correct">This username exists, and you have entered the correct password for it. If this is not you, please pick another username and a more secure password.</string>
     <string name="what_to_do_forgot_password">If your login is still working on this device, you can change it to something you catually can remember via the settings screen, or you can generate a login link.</string>
     <string name="use_this">Use this</string>
@@ -377,7 +382,6 @@
     <string name="signIn">Sign in</string>
     <string name="signOut">Sign out</string>
     <string name="youCannotResetPassword">Don\'t forget to save your new login link!</string>
-    <string name="use_old_link_if_failed_maybe">If something goes wrong and the new login link doesn\'t work (like when app gets killed halfway), you should be able to log in with the old link. So make sure you have that saved before continuing.</string>
     <string name="make_new_account">Make a new account</string>
     <string name="make_new_account_question">You do not have valid login data. Do you want to create a new account?\nIf you have a valid login link, click \"NO\" and use your login link to log in.</string>
     <string name="skipThisStep">Skip this step</string>
@@ -445,9 +449,11 @@
     <string name="change_password">Change Login Link</string>
     <string name="create_login_link">Copy login link</string>
     <string name="login_link_created">Login link copied to clipboard!</string>
-    <string name="login_link">Joozdlog Login Link</string>
+    <string name="login_link_title">Joozdlog Login Link</string>
     <string name="create_login_link_explanation">This will create a login link that you can paste in your favorite app (email, sms, notepad, anywhere). If you click that link, it will try to log you in with the username/password currently set on this device.</string>
     <string name="change_password_explanation">You can use this screen to change your password when you think your login link might have been compromised. A new login link will be created for you to save in your favorite app.</string>
+    <string name="change_pass_error_1">ChangePass error 1: No login stored while changing login link. This should not happen. Sorry. Best make a new cloud account and pretend this never happened.</string>
+
     <string name="new_password">New Password</string>
     <string name="loggings_preferences">General Preferences</string>
     <string name="backup_preferences">Backup Preferences</string>

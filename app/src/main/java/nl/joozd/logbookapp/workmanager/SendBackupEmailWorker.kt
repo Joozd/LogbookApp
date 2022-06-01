@@ -6,8 +6,6 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.comm.Cloud
-import nl.joozd.logbookapp.comm.OldCloud
-import nl.joozd.logbookapp.comm.ServerFunctionResult.*
 import nl.joozd.logbookapp.comm.requestBackupMail
 
 class SendBackupEmailWorker(appContext: Context, workerParams: WorkerParameters, private val cloud: Cloud = Cloud())

@@ -96,31 +96,6 @@ object JoozdlogWorkersHubOld: JoozdlogWorkersHub(), CoroutineScope by MainScope(
     }
 
 
-
-    /**
-     * Schedule an email confirmation
-     * If another worker is already doing this, that one will be kept and this will be ignored.
-     */
-    fun scheduleSetEmail(){
-        val task = OneTimeWorkRequestBuilder<SetEmailWorker>()
-            .needsNetwork()
-            .addTag(CONFIRM_EMAIL)
-            .build()
-        enqueue(task, CONFIRM_EMAIL, ExistingWorkPolicy.KEEP)
-    }
-
-    /**
-     * Schedule an email backup
-     */
-    fun scheduleLoginLinkEmail(){
-        val task = OneTimeWorkRequestBuilder<SendLoginLinkEmailWorker>()
-            .needsNetwork()
-            .addTag(GET_BACKUP_EMAIL)
-            .build()
-        enqueue(task, GET_BACKUP_EMAIL, ExistingWorkPolicy.REPLACE)
-    }
-
-
     /**
      * Send feedback to server.
      * [SubmitFeedbackWorker] will also reset [Prefs.feedbackWaiting] to an empty String

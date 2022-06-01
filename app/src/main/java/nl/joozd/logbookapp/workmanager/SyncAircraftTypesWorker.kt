@@ -37,7 +37,7 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
     : CoroutineWorker(appContext, workerParams) {
 
 
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO + NonCancellable) {
+    override suspend fun doWork(): Result = Result.failure() /* withContext(Dispatchers.IO + NonCancellable) {
         var saveForced: Job? = null
         var saveTypes: Job? = null
         // var sendConsensus: Job? = null // this one is called straight away
@@ -81,4 +81,5 @@ class SyncAircraftTypesWorker(appContext: Context, workerParams: WorkerParameter
 
         return@withContext Result.success()
     }
+    */
 }

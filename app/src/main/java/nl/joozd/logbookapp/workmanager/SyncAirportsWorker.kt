@@ -34,7 +34,7 @@ class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
     /**
      * Try to download airport DB from server.
      */
-    override suspend fun doWork(): Result {
+    override suspend fun doWork(): Result = Result.failure() /* {
         try {
             val serverDbVersion = withContext(Dispatchers.IO) { OldCloud.getServerAirportDbVersion() }
             Log.d("syncAirportsWorker", "server DB = $serverDbVersion, local DB = ${Prefs.airportDbVersion}")
@@ -57,4 +57,5 @@ class SyncAirportsWorker(appContext: Context, workerParams: WorkerParameters)
     private fun processDownloadProgress(p: Int){
         Log.d(this::class.simpleName, "processDownloadProgress($p)")
     }
+    */
 }

@@ -35,7 +35,7 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
 
     private val flightRepository = FlightRepositoryWithDirectAccess.instance
 
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+    override suspend fun doWork(): Result = Result.failure() /*withContext(Dispatchers.IO) {
         if (makeNewLoginDataIfNeeded() != ServerFunctionResult.OK)
             Result.retry()
         else
@@ -49,6 +49,7 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
             }
     }
 
+
     /**
      * Make new login data if needed
      * @return [ServerFunctionResult.OK] if not needed or success, something else if failure
@@ -56,4 +57,8 @@ class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
     private suspend fun makeNewLoginDataIfNeeded(): ServerFunctionResult =
         if (Prefs.username == null) UserManagement.newLoginDataNeeded()
         else ServerFunctionResult.OK
+*/
+
 }
+
+

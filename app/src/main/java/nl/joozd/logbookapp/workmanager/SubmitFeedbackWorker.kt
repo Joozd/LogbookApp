@@ -27,7 +27,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 class SubmitFeedbackWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
-    override suspend fun doWork(): Result {
+    override suspend fun doWork(): Result = Result.failure() /* {
         if (Prefs.feedbackWaiting.isBlank()) return Result.success()
         val contactInfo = inputData.getString(CONTACT_INFO_TAG) ?: ""
         return if (OldCloud.sendFeedback(Prefs.feedbackWaiting, contactInfo).isOK()) {
@@ -35,6 +35,7 @@ class SubmitFeedbackWorker(appContext: Context, workerParams: WorkerParameters)
             Result.success()
         } else Result.retry()
     }
+    */
 
     companion object{
         const val CONTACT_INFO_TAG = "CONTACT_INFO_TAG"

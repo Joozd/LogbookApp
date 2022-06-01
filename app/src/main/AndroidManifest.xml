@@ -9,10 +9,10 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.SEND" />
-
             <data android:mimeType="text/plain" />
         </intent>
     </queries>
+
 
     <application
         android:name=".core.App"

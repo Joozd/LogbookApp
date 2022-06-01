@@ -12,7 +12,7 @@ import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.ui.utils.md5Hash
+import nl.joozd.serializing.longFromBytes
 import nl.joozd.serializing.unwrapInt
 import nl.joozd.serializing.wrap
 
@@ -24,7 +24,7 @@ import nl.joozd.serializing.wrap
  *  - a [CloudFunctionResult] for server commands like "request confirmation email"
  *  - the requested data, or null if failed for any reason.
  */
-class Cloud(private val server: String = SERVER_URL, private val port: Int = SERVER_PORT) {
+class Cloud(private val server: String = Protocol.SERVER_URL, private val port: Int = Protocol.SERVER_PORT) {
     private val basicFlightVersion get() = BasicFlight.VERSION.version
     /**
      * @return true if data accepted, false if username and/or key are rejected by server.
@@ -108,7 +108,18 @@ class Cloud(private val server: String = SERVER_URL, private val port: Int = SER
     suspend fun requestBackupEmail(username: String, key: ByteArray, emailAddress: String): CloudFunctionResult =
         resultForRequest(JoozdlogCommsKeywords.REQUEST_BACKUP_MAIL, makeLoginDataWithEmailPayload(username, key, emailAddress))
 
-
+    /**
+     * sends a REQUEST TIMESTAMP to server
+     * Expects server to reply with a single Long (8 Bytes)
+     * @return the Timestamp from server as a Long (epochSeconds) or -1 if error
+     */
+    suspend fun getTime(): Long? =
+        withClient {
+            sendRequest(JoozdlogCommsKeywords.REQUEST_TIMESTAMP)
+            readFromServer()?.let {
+                longFromBytes(it)
+            }
+        }
 
     /*
       TODO: Make a sync protocol taht works better than this one:
@@ -125,20 +136,6 @@ class Cloud(private val server: String = SERVER_URL, private val port: Int = SER
      */
 
 
-
-
-
-
-
-
-    suspend fun getServerAirportDbVersion(): Int = withClient{
-        sendRequest(JoozdlogCommsKeywords.REQUEST_AIRPORT_DB_VERSION)
-        return readFromServer()?.let {
-            unwrapInt(it)
-        } ?: -2
-    }
-
-
     //Doesn't handle bad login data, but server will refuse empty usernames etc.
     //However, it is better to check this (e.g. with with UserManagement.checkIfLoginDataSet()) before making bad data.
     private fun makeLoginDataWithEmailPayload(username: String, key: ByteArray, emailAddress: String): ByteArray =
@@ -148,9 +145,6 @@ class Cloud(private val server: String = SERVER_URL, private val port: Int = SER
             basicFlightVersion,
             emailAddress
         ).serialize()
-
-
-
 
 
     private suspend fun client() = Client.getInstance(server, port)
@@ -194,17 +188,11 @@ class Cloud(private val server: String = SERVER_URL, private val port: Int = SER
         return handleResponse()
     }
 
-
-
     private suspend fun Client.handleResponse() = handleServerResult(readServerResponse())
 
 
     companion object {
-        private const val SERVER_URL = "joozd.nl"
-        private const val SERVER_PORT = 1337
-
         private val clientMutex = Mutex() // Only one client connection at a time. More can cause problems when changing password or stuff like that.
-
     }
 
 

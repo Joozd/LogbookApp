@@ -95,18 +95,7 @@ object JoozdlogWorkersHubOld: JoozdlogWorkersHub(), CoroutineScope by MainScope(
         }
     }
 
-    /**
-     * Schedule an email confirmation
-     * If another worker is already doing this, that one will be kept and this will be ignored.
-     */
-    fun scheduleEmailConfirmation(){
-        val task = OneTimeWorkRequestBuilder<ConfirmEmailWorker>()
-            .needsNetwork()
-            .addTag(CONFIRM_EMAIL)
-            .build()
 
-        enqueue(task, CONFIRM_EMAIL, ExistingWorkPolicy.KEEP)
-    }
 
     /**
      * Schedule an email confirmation

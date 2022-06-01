@@ -46,5 +46,7 @@ data class DataFilesMetaData(
         private const val AIRCRAFT_FORCED_TYPES_LOCATION = "aircraftForcedTypesLocation"
         private const val AIRPORTS_VERSION = "airportsVersion"
         private const val AIRPORTS_LOCATION = "airportsLocation"
+
+        fun blank() = DataFilesMetaData(0, "", 0, "",0, "")
     }
 }

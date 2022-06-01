@@ -45,5 +45,9 @@ object TaskFlags: JoozdLogPreferences() {
     val changePasswordFlow by PrefsFlow(CHANGE_PASSWORD, false)
     fun postChangePassword(value: Boolean) = post(CHANGE_PASSWORD, value)
 
+    private const val SYNC_DATA_FILES = "SYNC_DATA_FILES"
+    var syncDataFiles by JoozdLogSharedPreferenceNotNull(SYNC_DATA_FILES,false)
+    val syncDataFilesFlow by PrefsFlow(SYNC_DATA_FILES, false)
+    fun postSyncDataFiles(value: Boolean) = post(SYNC_DATA_FILES, value)
 
 }

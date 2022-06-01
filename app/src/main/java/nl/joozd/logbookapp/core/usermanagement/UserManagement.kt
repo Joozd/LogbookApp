@@ -130,7 +130,6 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         else MessagesWaiting.postBadVerificationCodeClicked(true)
     }
 
-
     private fun cancelEmailCodeVerification() {
         TaskFlags.postVerifyEmailCode(false)
         EmailPrefs.postEmailConfirmationStringWaiting("")
@@ -163,8 +162,6 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         loginPassString.replace('-', '/').split(":").let { lp ->
             lp.first() to lp.last()
         }
-
-
 
     private fun notifyNoUserDataSet(){
         TODO("Notify user no login data is set")

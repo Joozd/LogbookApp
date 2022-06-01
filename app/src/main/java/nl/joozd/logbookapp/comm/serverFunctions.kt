@@ -112,8 +112,11 @@ suspend fun requestLoginLinkEmail(cloud: Cloud = Cloud()): ServerFunctionResult 
         }
     } ?: ServerFunctionResult.FAILURE
 
-
-
+/**
+ * Get time from server, or not.
+ */
+suspend fun getTimeFromServer(cloud: Cloud = Cloud()): Long? =
+    cloud.getTime()
 
 
 

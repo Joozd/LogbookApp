@@ -19,22 +19,14 @@
 
 package nl.joozd.logbookapp.ui.activities
 
-import android.content.Intent
+import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.viewModels
-import androidx.fragment.app.commit
+import android.view.View
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivityChangePasswordBinding
-import nl.joozd.logbookapp.extensions.getStringWithMakeup
-import nl.joozd.logbookapp.extensions.nullIfBlank
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.ChangePasswordEvents
-import nl.joozd.logbookapp.model.viewmodels.activities.ChangePasswordActivityViewModel
-import nl.joozd.logbookapp.ui.dialogs.EmailDialog
-import nl.joozd.logbookapp.ui.dialogs.WaitingForSomethingDialog
-import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.longToast
 import nl.joozd.logbookapp.ui.utils.toast
@@ -45,8 +37,6 @@ import nl.joozd.logbookapp.ui.utils.toast
  * This way you can use this to change password in case of forgotten pass (ie. if you have a recovery link)
  */
 class ChangePasswordActivity : JoozdlogActivity() {
-    private val viewModel: ChangePasswordActivityViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.AppTheme)
@@ -57,216 +47,79 @@ class ChangePasswordActivity : JoozdlogActivity() {
                 title = getString(R.string.change_password)
             }
 
-
-            //launch login activity if not signed in
-            signInIfNeeded()
-
-
-            // do some visual things (colors, texts etc)
-            emailWillBeSentToTextView.text = Prefs.emailAddress.nullIfBlank()?.let {
-                getStringWithMakeup(R.string.mail_will_be_sent_to, it)
-            } ?: getString(R.string.no_email_text)
-
-
-            /****************************************************************************************
-             * Buttons, onFocusChangeds, etc
-             ***************************************************************************************/
-
-            submitButton.setOnClickListener {
-                if (Prefs.emailAddress.isBlank()) {
-                    noEmailDialog { viewModel.submitClicked() }
-                } else
-                viewModel.submitClicked()
-            }
-
-            changeEmailButton.setOnClickListener {
-                showEmailDialog()
-            }
+            resetSubmitButton()
 
             /****************************************************************************************
              * Observers
              ***************************************************************************************/
 
-            //Only change password when online
-            viewModel.online.observe(activity){
-                checkInternet(it)
-            }
-
-            viewModel.emailAddress.observe(activity){ email ->
-                emailWillBeSentToTextView.text = email?.nullIfBlank()?.let {
-                    getStringWithMakeup(R.string.mail_will_be_sent_to, it)
-                } ?: getString(R.string.no_email_text)
-            }
-
-            viewModel.feedbackEvent.observe(activity){
-                when (it.getEvent()){
-                    ChangePasswordEvents.LOGIN_LINK_COPIED -> showCopiedDialog()
-                    ChangePasswordEvents.FINISHED -> {
-                        closeWaitingDialog()
-                    }
-
-                    ChangePasswordEvents.WAITING_FOR_SERVER -> showWaitingForServerLayout()
-
-                    ChangePasswordEvents.NO_INTERNET -> showNoInternetError()
-                    ChangePasswordEvents.NOT_LOGGED_IN, ChangePasswordEvents.LOGIN_INCORRECT -> {
-                        Log.d("Debug 3", "plekje 3")
-                        closeWaitingDialog()
-                        showIncorrectLoginError()
-                    }
-                    ChangePasswordEvents.SERVER_NOT_RESPONDING -> {
-                        closeWaitingDialog()
-                        showServerDownError()
-                    }
-
-
-
-                    else -> longToast("Unhandled event: ${it.type}")
-                }
-            }
-
-
-
-
             setContentView(root)
         }
     }
 
-
-    /***********************************************************************************************
-     * Private functions with output to UI (start dialogs, etc)
-     ***********************************************************************************************/
-
-    /**
-     * Check if internet available, if not show dialog that closes activity
-     */
-    private fun checkInternet(internetAvailable: Boolean){
-        if (!internetAvailable){
-            JoozdlogAlertDialog().show(this, tag = NO_INTERNET_DIALOG_TAG){
-                titleResource = R.string.no_internet
-                messageResource = R.string.need_internet
-                setPositiveButton(android.R.string.ok){
-                    finish()
-                }
-            }
-        }
-        else{
-            (supportFragmentManager.findFragmentByTag(NO_INTERNET_DIALOG_TAG) as JoozdlogAlertDialog?)?.dismiss()
-        }
-    }
-
-    /**
-     * Check if signed in, if not, show dialog that redirects to login, or closes activity
-     */
-    private fun signInIfNeeded(){
-        if (!UserManagement.signedIn){
-            JoozdlogAlertDialog().show(this){
-                titleResource = R.string.you_are_not_signed_in
-                messageResource = R.string.you_need_to_be_signed_in
-                setPositiveButton(R.string.signIn){
-                    toast("YEAH SORRY THIS DOESNT WORK ATM")
-                    TODO("Make this work")
-                }
-                setNegativeButton(android.R.string.cancel){
-                    finish()
-                }
+    private fun ActivityChangePasswordBinding.resetSubmitButton() {
+        submitButtonLoadingSpinner.visibility = View.GONE
+        with(submitButton){
+            setText(R.string.change_password)
+            isEnabled = true
+            setOnClickListener {
+                changePasswordAndUpdateButton()
             }
         }
     }
 
-    /**
-     * Show "waiting for server" dialog.
-     * TODO make this cancelable
-     */
-    private fun showWaitingForServerLayout(){
-        supportFragmentManager.commit {
-            add(R.id.changePasswordBackgroundLayout, WaitingForSomethingDialog().apply{
-                setDescription(R.string.waiting_for_server)
-            }, WAITING_DIALOG_TAG)
+    private fun ActivityChangePasswordBinding.makeSubmitButtonShowLoading(){
+        submitButtonLoadingSpinner.visibility = View.VISIBLE
+        with(submitButton) {
+            text = ""
+            isEnabled = false
         }
     }
 
-    private fun closeWaitingDialog(){
-        supportFragmentManager.findFragmentByTag(WAITING_DIALOG_TAG).let{
-            (it as WaitingForSomethingDialog).done()
-        }
-    }
-
-
-    /**
-     * This should not happen as another dialog is already looking at that
-     */
-    private fun showNoInternetError() = JoozdlogAlertDialog().show(activity){
-        titleResource = R.string.no_internet
-        messageResource = R.string.need_internet
-        setPositiveButton(android.R.string.cancel){
-            // do nothing
-        }
-    }
-
-    private fun showServerDownError() = JoozdlogAlertDialog().show(activity){
-        titleResource = R.string.server_problem
-        messageResource = R.string.server_problem_message
-        setPositiveButton(android.R.string.cancel){
-            // do nothing
-        }
-    }
-
-    private fun showIncorrectLoginError() = JoozdlogAlertDialog().show(activity){
-        titleResource = R.string.login_error
-        messageResource = R.string.login_data_rejected_cloud_disabled
-        setPositiveButton(R.string.create_account){
-            Prefs.username = null // setting this to null will cause a new account to be created on the next sync
-        }
-        setNegativeButton(android.R.string.cancel){
-            finish()
-        }
-    }
-
-    private fun showCopiedDialog() = JoozdlogAlertDialog().show(activity){
-        titleResource = R.string.changed_password
-        messageResource = R.string.changed_password_message
-        setPositiveButton(android.R.string.ok) { finish() }
-        setNegativeButton(R.string.mail_to_myself){
-            sendLoginEmail()
-            finish()
-
-        }
-    }
-
-    /**
-     * Shows a dialog complaining no email was entered. Positive button will execute function provided as [f].
-     * Negative button will close the dialog.
-     */
-    private fun noEmailDialog(f: () -> Unit) =
-        JoozdlogAlertDialog().show(activity) {
-            titleResource = R.string.no_email
-            messageResource = R.string.no_email_text
-            setPositiveButton(R.string.i_dont_care){
-                f()
+    private fun ActivityChangePasswordBinding.makeSubmitButtonRecentlyChanged(){
+        submitButtonLoadingSpinner.visibility = View.GONE
+        with(submitButton) {
+            setText(R.string.change_password)
+            isEnabled = true
+            setOnClickListener {
+                showRecentlyChangedDialog()
             }
-            setNegativeButton(android.R.string.cancel)
         }
+    }
 
-
-    private fun sendLoginEmail(){
-        UserManagement.generateLoginLinkIntent()?.let {
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(Intent.createChooser(it, getString(R.string.send_using)))
+    private fun ActivityChangePasswordBinding.changePasswordAndUpdateButton() {
+        makeSubmitButtonShowLoading()
+        lifecycleScope.launch {
+            if (UserManagement().changeLoginKey()) {
+                showLoginLinkChangedDialog()
+                makeSubmitButtonRecentlyChanged()
             }
-        } ?: toast("ChangePass error 1: No login stored")
-    }
-
-    private fun showEmailDialog(extra: () -> Unit = {}) {
-        supportFragmentManager.commit {
-            add(R.id.changePasswordBackgroundLayout, EmailDialog(extra), null)
-            addToBackStack(null)
+            else resetSubmitButton()
         }
     }
 
 
-    companion object{
 
-        const val NO_INTERNET_DIALOG_TAG = "NO_INTERNET_DIALOG_TAG"
-        const val WAITING_DIALOG_TAG = "WAITING_DIALOG_TAG"
+    private fun ActivityChangePasswordBinding.showRecentlyChangedDialog() {
+        AlertDialog.Builder(activity).apply {
+            setTitle(R.string.key_recently_changed)
+            setMessage(R.string.key_recently_changed_message)
+            setPositiveButton(android.R.string.ok) { _, _ ->
+                changePasswordAndUpdateButton()
+            }
+            setNegativeButton(android.R.string.cancel) { _, _ -> }
+        }.create().show()
+    }
+
+    private fun showLoginLinkChangedDialog(){
+        AlertDialog.Builder(activity).apply{
+            setTitle(R.string.changed_login_link)
+            setMessage(R.string.changed_login_link_message)
+            setPositiveButton(android.R.string.ok){ _, _ ->
+                UserManagement().generateLoginLinkMessage()?.let {
+                    sendMessageToOtherApp(it, getString(R.string.login_link_title))
+                } ?: longToast(R.string.change_pass_error_1)
+            }
+        }
     }
 }

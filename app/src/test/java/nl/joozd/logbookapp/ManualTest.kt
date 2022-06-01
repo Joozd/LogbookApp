@@ -19,29 +19,15 @@
 
 package nl.joozd.logbookapp
 
-import com.itextpdf.text.pdf.PdfReader
-import com.itextpdf.text.pdf.parser.PdfTextExtractor
-import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
+
 import org.junit.Test
-import org.junit.Assert.assertEquals
-import java.io.File
-import java.lang.StringBuilder
+import java.net.URL
 
 class ManualTest {
     @Test
     fun manualTest() {
-        val file = File("C:\\temp\\joozdlog\\klc_idp.pdf")
-        val reader = PdfReader(file.inputStream())
-        var completeStringBuilder = StringBuilder()
-        repeat(reader.numberOfPages) { pageNumber ->
-            val pageText = PdfTextExtractor.getTextFromPage(
-                reader,
-                pageNumber + 1,
-                SimpleTextExtractionStrategy()
-            ).trim()
-            completeStringBuilder.append(pageText)
-        }
-        println(completeStringBuilder)
+        val url = URL("file://c:/temp/ical.txt")
+        println(url.readText())
 
     }
 

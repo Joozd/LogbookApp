@@ -25,8 +25,6 @@ import android.util.Log
 import androidx.activity.viewModels
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.comm.OldCloud
-import nl.joozd.logbookapp.comm.ServerFunctionResult
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivityPdfParserBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
@@ -128,13 +126,14 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    private suspend fun downloadAirportDatabase(): Boolean{
+    private fun downloadAirportDatabase(): Boolean = false /*{
         val result = OldCloud.downloadAirportsDatabase{
             if (it%10 == 0)
                 Log.d(this::class.simpleName, "Downloading airports DB - $it%")
         }
         return result == ServerFunctionResult.OK
     }
+    */
 
 
 }

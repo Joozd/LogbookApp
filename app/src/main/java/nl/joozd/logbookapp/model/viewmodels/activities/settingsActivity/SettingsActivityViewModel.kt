@@ -23,7 +23,9 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
@@ -36,7 +38,6 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.core.DarkModeCenter
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import java.time.Instant
 import java.time.LocalDateTime
@@ -147,23 +148,13 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     */
 
     fun useCloudSyncToggled(){
-        when{
-            //toggle off if on
-            Prefs.useCloud -> Prefs.useCloud = false
-
-            //toggle on if toggled off but user was logged in before
-            //this will force a full resync. Device data will overwrite server data with same FlightID
-            UserManagement.signedIn -> {
-                Prefs.lastUpdateTime = 0
-                Prefs.useCloud = true
-                JoozdlogWorkersHubOld.syncTimeAndFlightsIfEnoughTimePassed()
+        Prefs.postUseCloud(!Prefs.useCloud)
+        viewModelScope.launch {
+            with(UserManagement()) {
+                if (!isLoggedIn())
+                    createNewUser()
             }
-
-            // Activity will take care of showing &Cs if needed
-            else -> {
-                Prefs.lastUpdateTime = 0
-                status = SettingsActivityStatus.AskIfNewAccountNeeded
-            }
+            Prefs.lastUpdateTime = 0 // returning to MainActivity will trigger a Sync request if Cloud is enabled
         }
     }
 
@@ -172,11 +163,11 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     }
 
     fun copyLoginLinkToClipboard(){
-        UserManagement.generateLoginLink()?.let { loginLink ->
+        UserManagement().generateLoginLink()?.let { loginLink ->
             status =
             with (App.instance) {
                 (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
-                    ClipData.newPlainText(getString(R.string.login_link), loginLink)
+                    ClipData.newPlainText(getString(R.string.login_link_title), loginLink)
                 )
                 SettingsActivityStatus.LoginLinkCopied
             }

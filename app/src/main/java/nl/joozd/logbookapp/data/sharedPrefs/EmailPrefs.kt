@@ -17,7 +17,7 @@ object EmailPrefs: JoozdLogPreferences() {
     fun postEmailAddress(value: String) = post(EMAIL_ADDRESS, value)
 
     /**
-     * Email confirmation string waiting for a network connection. Handled by [nl.joozd.logbookapp.workmanager.ConfirmEmailWorker]
+     * Email confirmation string waiting for a network connection.
      */
     private const val EMAIL_CONF_STRING_WAITING = "EMAIL_CONF_STRING_WAITING"
     var emailConfirmationStringWaiting by JoozdLogSharedPreferenceNotNull(EMAIL_CONF_STRING_WAITING,"")

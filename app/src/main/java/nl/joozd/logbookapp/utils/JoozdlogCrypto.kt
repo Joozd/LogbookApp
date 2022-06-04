@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.utils
 
-import nl.joozd.joozdlogcommon.Protocol
+import nl.joozd.joozdlogcommon.comms.Protocol
 import java.security.SecureRandom
 
 /**

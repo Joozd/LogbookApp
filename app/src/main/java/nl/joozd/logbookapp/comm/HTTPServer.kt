@@ -10,7 +10,7 @@ import java.net.URL
 
 // HTTP requests cannot be rejected only fail due to connection problems, so they will either return requested data or null.
 // For testing I can just inject a local url (e.g. file:///c|/temp/)
-class HTTPServer(private val urlPrefix: String = Protocol.DATAFILES_URL_PREFIX){
+class HTTPServer(private val protocol: Protocol = Protocol){
     suspend fun getDataFilesMetaData(): DataFilesMetaData? =
         readMetaDataJsonFileToString()?.let { DataFilesMetaData.fromJSON(it) }
 
@@ -20,7 +20,7 @@ class HTTPServer(private val urlPrefix: String = Protocol.DATAFILES_URL_PREFIX){
         try {
             withContext(DispatcherProvider.io()) {
                 @Suppress("BlockingMethodInNonBlockingContext")
-                URL(urlPrefix + Protocol.DATAFILES_METADATA_FILENAME).readText()
+                URL(protocol.DATAFILES_URL_PREFIX + protocol.DATAFILES_METADATA_FILENAME).readText()
             }
         } catch (ioe: IOException){
             Log.w("readMetaDataJsonString", "IO error when trying to read url")

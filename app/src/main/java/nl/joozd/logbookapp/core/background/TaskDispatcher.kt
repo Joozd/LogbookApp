@@ -51,17 +51,18 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
         }
     }
 
-    // HERE STOOD PASSWORD CHANGE But I think I don't want to schedule that,
-    // as it might lead to a user ending up without a login link in case the server rejects email address.
-    // Password change can only be done straight through UserManagement().
-
-
-
     private suspend fun handleLoginLinkWanted() {
         loginLinkWantedFlow().doIfTrueCollected {
             ServerFunctionsWorkersHub().scheduleLoginLinkEmail()
         }
     }
+
+    private suspend fun handleSyncDataFiles() {
+        TaskFlags.syncDataFilesFlow.doIfTrueCollected {
+            ServerFunctionsWorkersHub().scheduleSyncDataFiles()
+        }
+    }
+
 
 
 

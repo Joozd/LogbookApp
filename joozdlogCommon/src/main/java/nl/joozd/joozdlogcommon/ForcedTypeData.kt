@@ -24,7 +24,7 @@ import nl.joozd.serializing.*
 /**
  * This class matches aircraft registrations to types
  * @param registration: Primary key, aircraft registration (can be any string, but usually something like "PH-EZE"
- * @param type: AircraftTypeData.name<String> to match with AircraftType
+ * @param type: [AircraftType.shortName]<String> to match with AircraftType
  */
 data class ForcedTypeData(val registration: String, val type: String): JoozdSerializable {
     override fun serialize(): ByteArray {

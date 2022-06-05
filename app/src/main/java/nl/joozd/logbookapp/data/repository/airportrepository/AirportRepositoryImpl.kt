@@ -55,7 +55,7 @@ class AirportRepositoryImpl(
     /**
      * Replace current airport database with [newAirports]
      */
-    override suspend fun replaceDbWith(newAirports: Collection<Airport>) = withContext(DispatcherProvider.io()) {
+    override suspend fun updateAirports(newAirports: Collection<Airport>) = withContext(DispatcherProvider.io()) {
         airportDao.clearDb()
         airportDao.save(newAirports)
     }

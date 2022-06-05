@@ -19,13 +19,49 @@
 
 package nl.joozd.logbookapp.data.sharedPrefs
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
-import kotlinx.coroutines.MainScope
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KProperty
+
+/**
+ * Use a var as a SharedPreference.
+ * @param defaultValue: Default value to return. Needs to be used to set type of variable to set
+ * @Note reading this value is a blocking IO operation.
+ */
+class JoozdLogSharedPreference<T : Any>(private val joozdlogSharedPreferences: JoozdLogPreferences, key: String, private val defaultValue: T){
+    @Suppress("UNCHECKED_CAST")
+    private val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
+
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        return getPreference(defaultValue)
+    }
+
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+        setPreference(value)
+    }
+
+    private fun getPreference(defaultValue: T): T {
+        return readBlocking(prefsKey, defaultValue)
+    }
+
+    private fun setPreference(value: T) {
+        writeBlocking(prefsKey, value)
+    }
+
+    private fun readBlocking(key: Preferences.Key<T>, defaultValue: T): T =
+        runBlocking {
+            (joozdlogSharedPreferences.dataStore.data.first()[key] ?: defaultValue)
+        }
+
+    private fun writeBlocking(prefsKey: Preferences.Key<T>, value: T) =
+        runBlocking {
+            joozdlogSharedPreferences.dataStore.edit { p ->
+                p[prefsKey] = value
+            }
+        }
+}
 
 
 

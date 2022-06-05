@@ -85,7 +85,7 @@ class AircraftRepositoryTests {
                 assertEquals(0, awaitItem().size) // map starts empty
 
                 //test replaceAllPreloaded
-                repo.updatePreloadedRegistrations(AircraftTestData.preloadedList)
+                repo.updateForcedTypes(AircraftTestData.preloadedList)
                 expectedSize += AircraftTestData.preloadedList.size
                 assertEquals(expectedSize, expectMostRecentItem().size)
 

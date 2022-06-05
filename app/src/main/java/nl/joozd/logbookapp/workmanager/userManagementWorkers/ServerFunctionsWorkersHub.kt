@@ -3,6 +3,7 @@ package nl.joozd.logbookapp.workmanager.userManagementWorkers
 import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
 import nl.joozd.logbookapp.workmanager.SendBackupEmailWorker
 import nl.joozd.logbookapp.workmanager.SendLoginLinkEmailWorker
+import nl.joozd.logbookapp.workmanager.SyncDataFilesWorker
 
 // This is a class and not an object so I can inject stuff for testing when I think about that sort of thing
 class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
@@ -24,6 +25,10 @@ class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
 
     fun scheduleLoginLinkEmail(){
         enqueueOneTimeWorker<SendLoginLinkEmailWorker>(Tags.REQUEST_LOGIN_LINK_MAIL, needNetwork = true)
+    }
+
+    fun scheduleSyncDataFiles(){
+        enqueueOneTimeWorker<SyncDataFilesWorker>(Tags.REQUEST_LOGIN_LINK_MAIL, needNetwork = true)
     }
 
     object Tags{

@@ -56,8 +56,8 @@ class AirportRepositoryTests {
                 //mock db starts empty
                 assertEquals(expectedSize, awaitItem().size)
 
-                //test replaceDbWith()
-                repo.replaceDbWith(AirportsTestData.airports)
+                //test updateAirports()
+                repo.updateAirports(AirportsTestData.airports)
                 expectedSize += AirportsTestData.airports.size
 
                 assertEquals(expectedSize, expectMostRecentItem().size)

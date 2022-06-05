@@ -147,7 +147,7 @@ object OldCloud {
 
         }?.map { Airport(it) } ?: return ServerFunctionResult.SERVER_ERROR
 
-        AirportRepository.instance.replaceDbWith(airports)
+        AirportRepository.instance.updateAirports(airports)
         Prefs.airportDbVersion = serverDbVersion
 
         return ServerFunctionResult.OK

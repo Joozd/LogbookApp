@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.data.room.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import nl.joozd.joozdlogcommon.ForcedTypeData
 
 @Entity
 data class PreloadedRegistration(
@@ -28,6 +29,7 @@ data class PreloadedRegistration(
     var type: String = UNKNOWN
 )
 {
+    constructor(forcedType: ForcedTypeData): this(forcedType.registration, forcedType.type)
     companion object {
         const val UNKNOWN = "UNKNOWN_TYPE"
     }

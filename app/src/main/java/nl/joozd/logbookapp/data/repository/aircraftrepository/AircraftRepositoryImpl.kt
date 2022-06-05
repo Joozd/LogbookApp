@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import nl.joozd.joozdlogcommon.AircraftType
+import nl.joozd.joozdlogcommon.ForcedTypeData
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
@@ -108,10 +109,10 @@ class AircraftRepositoryImpl(
         }
 
 
-    override suspend fun updatePreloadedRegistrations(newPreloaded: List<PreloadedRegistration>) =
+    override suspend fun updateForcedTypes(newForcedTypes: List<ForcedTypeData>) =
         withContext(DispatcherProvider.io()+ NonCancellable){
             preloadedRegistrationsDao.clearDb()
-            savePreloadedRegs(newPreloaded)
+            savePreloadedRegs(newForcedTypes.map { PreloadedRegistration(it) })
         }
 
 

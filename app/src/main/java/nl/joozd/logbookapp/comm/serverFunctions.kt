@@ -10,6 +10,10 @@ import nl.joozd.logbookapp.core.usermanagement.UsernameWithKey
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.core.usermanagement.ServerFunctionResult
 import nl.joozd.logbookapp.core.usermanagement.checkConfirmationString
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
+import nl.joozd.logbookapp.data.sharedPrefs.DataVersions
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.utils.DispatcherProvider
@@ -118,6 +122,31 @@ suspend fun requestLoginLinkEmail(cloud: Cloud = Cloud()): ServerFunctionResult 
 suspend fun getTimeFromServer(cloud: Cloud = Cloud()): Long? =
     cloud.getTime()
 
+/**
+ * Update data files if needed
+ * Only returns SUCCESS or RETRY
+ */
+suspend fun updateDataFiles(server: HTTPServer,
+                            aircraftRepository: AircraftRepository = AircraftRepository.instance,
+                            airportRepository: AirportRepository = AirportRepository.instance
+): ServerFunctionResult{
+    val metaData = server.getDataFilesMetaData() ?: return ServerFunctionResult.RETRY
+    if(metaData.aircraftTypesVersion > DataVersions.aircraftTypesVersion()){
+        aircraftRepository.updateAircraftTypes(server.getAircraftTypes(metaData) ?: return ServerFunctionResult.RETRY)
+        DataVersions.aircraftTypesVersion(metaData.aircraftTypesVersion)
+    }
+    if(metaData.aircraftForcedTypesVersion > DataVersions.aircraftForcedTypesVersion()){
+        aircraftRepository.updateForcedTypes(server.getForcedTypes(metaData) ?: return ServerFunctionResult.RETRY)
+        DataVersions.aircraftTypesVersion(metaData.aircraftTypesVersion)
+    }
+
+    if(metaData.airportsVersion > DataVersions.airportsVersion()){
+        airportRepository.updateAirports(server.getAirports(metaData) ?: return ServerFunctionResult.RETRY)
+        DataVersions.airportsVersion(metaData.airportsVersion)
+    }
+
+    return ServerFunctionResult.SUCCESS
+}
 
 
 private suspend fun sendEmailConfirmationCode(confirmationString: String, cloud: Cloud): ServerFunctionResult {

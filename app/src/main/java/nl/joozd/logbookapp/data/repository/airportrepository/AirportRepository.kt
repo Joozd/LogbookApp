@@ -46,7 +46,7 @@ interface AirportRepository {
     /**
      * Replace current airport database with [newAirports]
      */
-    suspend fun replaceDbWith(newAirports: Collection<Airport>)
+    suspend fun updateAirports(newAirports: Collection<Airport>)
 
     companion object {
         val instance: AirportRepository by lazy {

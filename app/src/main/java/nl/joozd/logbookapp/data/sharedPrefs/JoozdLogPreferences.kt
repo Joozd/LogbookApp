@@ -24,8 +24,8 @@ abstract class JoozdLogPreferences {
 
     protected val context: Context get () = App.instance
 
-    //Initialized in a helper class because initializing it in this class would use uninitialized FILE_KEY.
-    protected val dataStore by lazy {
+    //Initialized lazy because initializing it immediately would use uninitialized FILE_KEY.
+    val dataStore by lazy {
         if (needsMigration)
             DataStoreProviderWithMigration(context, preferencesFileKey).dataStore
         else DataStoreProviderNoMigration(context,preferencesFileKey).dataStore
@@ -84,37 +84,13 @@ abstract class JoozdLogPreferences {
      * @param defaultValue: Default value to return. Needs to be used to set type of variable to set
      * @Note reading this value is a blocking IO operation.
      */
-    protected inner class JoozdLogSharedPreferenceNotNull<T : Any>(private val key: String, private val defaultValue: T){
-        operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
-            return getPreference(defaultValue)
-        }
+    protected inner class JoozdLogSharedPreferenceNotNull<T : Any>(key: String, private val defaultValue: T){
+        private var _delegate: T by JoozdLogSharedPreference(this@JoozdLogPreferences, key, defaultValue)
+
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): T = _delegate
 
         operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-            setPreference(value)
+            _delegate = value
         }
-
-        private fun getPreference(defaultValue: T): T {
-            @Suppress("UNCHECKED_CAST")
-            val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
-            return readBlocking(prefsKey, defaultValue)
-        }
-
-        private fun setPreference(value: T) {
-            @Suppress("UNCHECKED_CAST")
-            val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
-            writeBlocking(prefsKey, value)
-        }
-
-        private fun readBlocking(key: Preferences.Key<T>, defaultValue: T): T =
-            runBlocking {
-                (dataStore.data.first()[key] ?: defaultValue)
-            }
-
-        private fun writeBlocking(prefsKey: Preferences.Key<T>, value: T) =
-            runBlocking {
-                dataStore.edit { p ->
-                    p[prefsKey] = value
-                }
-            }
     }
 }

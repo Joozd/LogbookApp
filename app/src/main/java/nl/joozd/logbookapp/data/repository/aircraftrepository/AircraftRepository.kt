@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.data.repository.aircraftrepository
 
 import kotlinx.coroutines.flow.Flow
 import nl.joozd.joozdlogcommon.AircraftType
+import nl.joozd.joozdlogcommon.ForcedTypeData
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
@@ -68,9 +69,9 @@ interface AircraftRepository {
     suspend fun updateAircraftTypes(newTypes: List<AircraftType>)
 
     /**
-     * Replace entire Preloaded Registrations DB with [newPreloaded]
+     * Replace entire Preloaded Registrations DB with [newForcedTypes]
      */
-    suspend fun updatePreloadedRegistrations(newPreloaded: List<PreloadedRegistration>)
+    suspend fun updateForcedTypes(newForcedTypes: List<ForcedTypeData>)
 
     /**
      * Get an aircraft from its registration

@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.data
 
 import nl.joozd.joozdlogcommon.AircraftType
+import nl.joozd.joozdlogcommon.ForcedTypeData
 import nl.joozd.logbookapp.data.dataclasses.AircraftRegistrationWithType
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 
@@ -37,7 +38,7 @@ object AircraftTestData {
     val updatedArwt1 = AircraftRegistrationWithType("PH-EZE", aircraftType2)
     val regsWithTypes = listOf(arwt1, arwt2)
 
-    val preloaded1 = PreloadedRegistration("PH-EZA", aircraftType1.name)
-    val preloaded2 = PreloadedRegistration("PH-EZB", aircraftType2.name)
+    val preloaded1 = ForcedTypeData("PH-EZA", aircraftType1.shortName)
+    val preloaded2 = ForcedTypeData("PH-EZB", aircraftType2.shortName)
     val preloadedList = listOf(preloaded1, preloaded2)
 }

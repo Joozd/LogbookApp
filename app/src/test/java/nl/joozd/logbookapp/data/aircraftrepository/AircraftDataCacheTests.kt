@@ -29,7 +29,6 @@ import nl.joozd.logbookapp.data.FlightsTestData
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.room.MockDatabase
-import nl.joozd.logbookapp.data.room.model.toAircraft
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -50,8 +49,8 @@ class AircraftDataCacheTests {
         )
 
         runBlocking {
-            repo.replaceAllTypesWith(AircraftTestData.aircraftTypes)
-            repo.replaceAllPreloadedWith(AircraftTestData.preloadedList)
+            repo.updateAircraftTypes(AircraftTestData.aircraftTypes)
+            repo.updateForcedTypes(AircraftTestData.preloadedList)
             mockFlightRepo.save(FlightsTestData.flightsWithAircraft)
         }
     }

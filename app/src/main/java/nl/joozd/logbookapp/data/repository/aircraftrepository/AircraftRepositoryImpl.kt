@@ -101,14 +101,14 @@ class AircraftRepositoryImpl(
 
     private fun String.lettersOnly() = filter { it.isLetter() }
 
-    override suspend fun replaceAllTypesWith(newTypes: List<AircraftType>) =
+    override suspend fun updateAircraftTypes(newTypes: List<AircraftType>) =
         withContext(DispatcherProvider.io()+ NonCancellable){
             aircraftTypeDao.clearDb()
             saveAircraftTypes(newTypes)
         }
 
 
-    override suspend fun replaceAllPreloadedWith(newPreloaded: List<PreloadedRegistration>) =
+    override suspend fun updatePreloadedRegistrations(newPreloaded: List<PreloadedRegistration>) =
         withContext(DispatcherProvider.io()+ NonCancellable){
             preloadedRegistrationsDao.clearDb()
             savePreloadedRegs(newPreloaded)

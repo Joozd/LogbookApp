@@ -65,12 +65,12 @@ interface AircraftRepository {
     /**
      * Replace entire Types DB with [newTypes]
      */
-    suspend fun replaceAllTypesWith(newTypes: List<AircraftType>)
+    suspend fun updateAircraftTypes(newTypes: List<AircraftType>)
 
     /**
      * Replace entire Preloaded Registrations DB with [newPreloaded]
      */
-    suspend fun replaceAllPreloadedWith(newPreloaded: List<PreloadedRegistration>)
+    suspend fun updatePreloadedRegistrations(newPreloaded: List<PreloadedRegistration>)
 
     /**
      * Get an aircraft from its registration

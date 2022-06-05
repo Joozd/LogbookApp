@@ -27,11 +27,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.joozd.logbookapp.data.AircraftTestData
 import nl.joozd.logbookapp.data.FlightsTestData
-import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.room.MockDatabase
-import nl.joozd.logbookapp.data.room.model.toAircraft
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import org.junit.After
 
@@ -72,11 +70,11 @@ class AircraftRepositoryTests {
             repo.aircraftTypesFlow().test {
                 //should start empty
                 assertEquals(0, awaitItem().size)
-                repo.replaceAllTypesWith(AircraftTestData.aircraftTypes)
+                repo.updateAircraftTypes(AircraftTestData.aircraftTypes)
                 assertEquals(2, awaitItem().size)
-                repo.replaceAllTypesWith(emptyList())
+                repo.updateAircraftTypes(emptyList())
                 assertEquals(0, awaitItem().size)
-                repo.replaceAllTypesWith(AircraftTestData.aircraftTypes)
+                repo.updateAircraftTypes(AircraftTestData.aircraftTypes)
                 assertEquals(2, awaitItem().size)
 
                 cancelAndConsumeRemainingEvents()
@@ -87,7 +85,7 @@ class AircraftRepositoryTests {
                 assertEquals(0, awaitItem().size) // map starts empty
 
                 //test replaceAllPreloaded
-                repo.replaceAllPreloadedWith(AircraftTestData.preloadedList)
+                repo.updatePreloadedRegistrations(AircraftTestData.preloadedList)
                 expectedSize += AircraftTestData.preloadedList.size
                 assertEquals(expectedSize, expectMostRecentItem().size)
 

@@ -12,7 +12,6 @@ import nl.joozd.logbookapp.core.usermanagement.ServerFunctionResult
 import nl.joozd.logbookapp.core.usermanagement.checkConfirmationString
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 import nl.joozd.logbookapp.data.sharedPrefs.DataVersions
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs

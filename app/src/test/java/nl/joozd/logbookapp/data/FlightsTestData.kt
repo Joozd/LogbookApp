@@ -41,7 +41,4 @@ object FlightsTestData {
     val flightsWithAircraft = listOf(flightWithAircraft, flightWithUnknownAircraft)
 
     val injectableFlights = listOf(mostRecentCompletedFlight, mostRecentTimestampFlight, deletedFlight, unknownToServerFlight, plannedFlight)
-
-    fun parseFlightsFile(): List<Flight> = FlightsRepositoryExporter.csvToFlights(File("C:\\temp\\joozdlog\\flights.csv").readText(), mock = true)
-    fun flightsFileLines(): List<String> = File("C:\\temp\\joozdlog\\flights.csv").readLines()
 }

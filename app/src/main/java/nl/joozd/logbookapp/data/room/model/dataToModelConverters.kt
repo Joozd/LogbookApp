@@ -83,7 +83,7 @@ fun List<AircraftTypeData>.toAircraftTypes(): List<AircraftType> =
 
 fun PreloadedRegistration.toAircraft(types: List<AircraftType>?) = Aircraft(
     registration,
-    types?.firstOrNull{ it.name == type},
+    types?.firstOrNull{ it.shortName == type},
     Aircraft.PRELOADED
 )
 

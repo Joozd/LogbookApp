@@ -2,7 +2,7 @@ package nl.joozd.logbookapp.comms
 
 import kotlinx.coroutines.runBlocking
 import nl.joozd.joozdlogcommon.DataFilesMetaData
-import nl.joozd.joozdlogcommon.Protocol
+import nl.joozd.joozdlogcommon.comms.Protocol
 import nl.joozd.logbookapp.comm.HTTPServer
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -11,38 +11,42 @@ import org.junit.Test
 import java.io.File
 
 class HTTPServerTest {
-    private val testServer = HTTPServer(TEMP_DIR_URL)
+    private val testServer = HTTPServer(MOCK_SERVER_ADDRESS)
 
-    private val testData = DataFilesMetaData(
-        1,
-        "acTypesLocation",
-        2,
-        "acForcedLocation",
-        3,
-        "airportsLocation"
-    )
-
-    @Before
-    fun setup(){
-        println("setting up test")
-        File(TEMP_DIR + Protocol.DATAFILES_METADATA_FILENAME).writeText(testData.toString())
-    }
+    private val testData = DataFilesMetaData.fromJSON("""{
+    "aircraftTypesVersion": 5,
+    "aircraftTypesLocation": "aircrafttypes_5",
+    
+    "aircraftForcedTypesVersion": 4,
+    "aircraftForcedTypesLocation": "forcedtypes_4",
+    
+    "airportsVersion": 1,
+    "airportsLocation": "airports_1"
+}""") // this is copypasted from C:\joozdlog\test\joozdlog\datafiles_metadata.json
 
     @Test
     fun testHTTPServer() = runBlocking {
         println("starting test")
-        assertEquals(testData, testServer.getDataFilesMetaData())
-        println("test complete")
+        val serverMetaData = testServer.getDataFilesMetaData()!!
+        assertEquals(testData, serverMetaData)
+        println("Metadata test OK")
+
+        val aircraftTypes = testServer.getAircraftTypes(serverMetaData)!!
+        assert(aircraftTypes.isNotEmpty()) // if not null and not empty, I think it's safe to assume that this works.
+        println("Aircraft types test OK, got ${aircraftTypes.size} items")
+
+        val aircraftForcedTypes = testServer.getForcedTypes(serverMetaData)!!
+        assert(aircraftForcedTypes.isNotEmpty()) // if not null and not empty, I think it's safe to assume that this works.
+        println("Aircraft Forced Types test OK, got ${aircraftForcedTypes.size} items")
+
+        val airports = testServer.getAirports(serverMetaData)!!
+        assert(airports.isNotEmpty()) // if not null and not empty, I think it's safe to assume that this works.
+        println("airports test OK, got ${airports.size} items")
     }
 
-    @After
-    fun cleanUp(){
-        File(TEMP_DIR + Protocol.DATAFILES_METADATA_FILENAME).delete()
-        println("cleaned up test")
-    }
+
 
     companion object{
-        private const val TEMP_DIR_URL = "file:///c|/temp/"
-        private const val TEMP_DIR = "c:\\temp\\"
+        private const val MOCK_SERVER_ADDRESS = "file:///c|/joozdlog/test/"
     }
 }

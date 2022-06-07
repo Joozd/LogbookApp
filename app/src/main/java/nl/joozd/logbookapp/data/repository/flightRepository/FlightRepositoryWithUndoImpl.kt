@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.data.repository.flightRepository
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -35,7 +36,7 @@ import java.util.*
 
 class FlightRepositoryWithUndoImpl(
     mockDataBase: JoozdlogDatabase?
-): FlightRepositoryWithUndo, CoroutineScope by dispatchersProviderMainScope() {
+): FlightRepositoryWithUndo {
     private constructor(): this (null)
 
     private val repositoryWithDirectAccess =
@@ -193,13 +194,13 @@ class FlightRepositoryWithUndoImpl(
     }
 
     private fun generateSaveFlightsAction(flightsToSave: Collection<Flight>): () -> Unit = {
-        launch {
+        MainScope().launch {
             repositoryWithDirectAccess.save(flightsToSave)
         }
     }
 
     private fun generateDeleteFlightsAction(flightsToSave: Collection<Flight>): () -> Unit = {
-        launch {
+        MainScope().launch {
             repositoryWithDirectAccess.delete(flightsToSave)
         }
     }
@@ -212,7 +213,7 @@ class FlightRepositoryWithUndoImpl(
         newFlights: Collection<Flight>,
         overwrittenFlights: Collection<Flight>
     ): () -> Unit = {
-        launch {
+        MainScope().launch {
             repositoryWithDirectAccess.deleteHard(newFlights)
             repositoryWithDirectAccess.saveDirectToDB(overwrittenFlights) // bypasses new timestamp / ID generation
         }

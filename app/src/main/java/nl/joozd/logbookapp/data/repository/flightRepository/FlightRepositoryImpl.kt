@@ -34,14 +34,14 @@ import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 
-open class FlightRepositoryImpl(
+class FlightRepositoryImpl(
     injectedDatabase: JoozdlogDatabase?
 ) : FlightRepositoryWithDirectAccess, FlightRepositoryWithSpecializedFunctions, CoroutineScope by dispatchersProviderMainScope() {
     private constructor(): this (null)
 
     private val database = injectedDatabase ?: JoozdlogDatabase.getInstance() // this way we can detect if a DB is injected
     private val flightDao = database.flightDao()
-    protected val idGenerator = IDGenerator()
+    private val idGenerator = IDGenerator()
 
     override suspend fun getFlightByID(flightID: Int): Flight? =
         flightDao.getFlightById(flightID)?.toFlight()
@@ -158,7 +158,7 @@ open class FlightRepositoryImpl(
         }
     }
 
-    protected suspend fun Collection<Flight>.updateIDsIfNeeded(): List<Flight> {
+    private suspend fun Collection<Flight>.updateIDsIfNeeded(): List<Flight> {
         //make sure generated fLightIDs are incremented far enough
         forceLowestFreeIdToBeHigherThanHighestIdIn(this)
 
@@ -183,7 +183,7 @@ open class FlightRepositoryImpl(
     /**
      * Generate unique IDs.
      */
-    protected inner class IDGenerator{
+    private inner class IDGenerator{
         private var mostRecentHighestID: Int = Flight.FLIGHT_ID_NOT_INITIALIZED
 
         private val mutex = Mutex()

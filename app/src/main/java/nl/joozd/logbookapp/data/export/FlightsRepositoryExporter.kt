@@ -21,13 +21,11 @@ package nl.joozd.logbookapp.data.export
 
 import android.util.Base64
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogcommon.BasicFlight_version4
 import nl.joozd.joozdlogcommon.legacy.basicflight.BasicFlightVersionFunctions.upgrade4to5
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
@@ -197,7 +195,7 @@ class FlightsRepositoryExporter(
                 autoFill = v[28] == true.toString(),
                 augmentedCrew = v[29].toInt(),
                 DELETEFLAG = false,
-                timeStamp = TimestampMaker(mock).nowForSycPurposes,
+                timeStamp = TimestampMaker().nowForSycPurposes,
                 signature = if (mock) "" else Base64.decode(v[30], Base64.NO_WRAP).toString(Charsets.UTF_8)
             )
         }
@@ -238,7 +236,7 @@ class FlightsRepositoryExporter(
                 autoFill = v[29] == true.toString(),
                 augmentedCrew = v[30].toInt(),
                 DELETEFLAG = false,
-                timeStamp = TimestampMaker(mock).nowForSycPurposes,
+                timeStamp = TimestampMaker().nowForSycPurposes,
                 signature = if (mock) "" else Base64.decode(v[31], Base64.NO_WRAP).toString(Charsets.UTF_8)
             )
         }

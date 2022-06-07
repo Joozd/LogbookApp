@@ -23,15 +23,15 @@ import nl.joozd.logbookapp.comm.getTimeFromServer
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import java.time.Instant
 
-class TimestampMaker(private val mock: Boolean = false) {
+class TimestampMaker() {
     /**
      * Now, in seconds from Epoch, for sync purposes
      * - corrected for differences with server time
      * - always 1 second later than the last sync
      */
-    val nowForSycPurposes: Long
-        get() = if (mock) Instant.now().epochSecond
-                else maxOf(Instant.now().epochSecond + Prefs.serverTimeOffset, Prefs.lastUpdateTime+1)
+    val nowForSycPurposes get() = now + Prefs.serverTimeOffset
+
+    val now get() = Instant.now().epochSecond
 
     suspend fun getAndSaveTimeOffset() {
         getTimeFromServer()?.let { serverTime ->

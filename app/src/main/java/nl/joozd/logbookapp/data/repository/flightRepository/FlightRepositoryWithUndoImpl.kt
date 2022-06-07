@@ -33,7 +33,8 @@ import nl.joozd.logbookapp.utils.UndoableCommand
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 import java.util.*
 
-class FlightRepositoryWithUndoImpl(mockDataBase: JoozdlogDatabase?
+class FlightRepositoryWithUndoImpl(
+    mockDataBase: JoozdlogDatabase?
 ): FlightRepositoryWithUndo, CoroutineScope by dispatchersProviderMainScope() {
     private constructor(): this (null)
 

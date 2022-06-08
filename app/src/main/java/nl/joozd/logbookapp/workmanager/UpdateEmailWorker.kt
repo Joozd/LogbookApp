@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.workmanager.userManagementWorkers
+package nl.joozd.logbookapp.workmanager
 
 import android.content.Context
 import androidx.work.CoroutineWorker

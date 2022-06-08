@@ -14,7 +14,7 @@ class SyncDataFilesWorker(appContext: Context, workerParams: WorkerParameters, p
     : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         updateDataFiles(server).also {
-            if(it())
+            if(it.isOK())
                 DataVersions.mostRecentSyncEpochSecond(TimestampMaker().now)
         }.toListenableWorkerResult()
 

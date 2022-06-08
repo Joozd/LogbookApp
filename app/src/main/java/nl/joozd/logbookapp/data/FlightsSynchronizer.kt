@@ -13,7 +13,9 @@ import nl.joozd.logbookapp.comm.ServerFunctionResult
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.utils.TimestampMaker
 
 /**
  * This has full access to both a [Client] (i.e. direct access to server) and [FlightRepositoryWithDirectAccess]
@@ -57,6 +59,8 @@ class FlightsSynchronizer(
 
         downloadNewOrNewerFlightsFromServer(repoIDsWithTimeStamps, serverIDsWithTimestamps)
         sendNewOrNewerFlightsToServer(repoIDsWithTimeStamps, serverIDsWithTimestamps)
+
+        ServerPrefs.mostRecentFlightsSyncEpochSecond(TimestampMaker().now)
 
         CloudFunctionResult.OK
     }

@@ -16,5 +16,5 @@ enum class ServerFunctionResult {
         RETRY -> Result.retry()
     }
 
-    operator fun invoke(): Boolean = this == SUCCESS
+    fun isOK(): Boolean = this == SUCCESS
 }

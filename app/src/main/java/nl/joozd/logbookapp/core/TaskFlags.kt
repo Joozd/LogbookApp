@@ -1,7 +1,10 @@
 package nl.joozd.logbookapp.core
 
 import nl.joozd.logbookapp.data.sharedPrefs.JoozdLogPreferences
+import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
 
+
+// TODO change all of these to JoozdlogSharedPreferenceDelegate for cleaner code.
 /**
  * Every task represents something that needs to be done.
  * TaskDispatcher will observe these and dispatch those tasks to whomever is supposed to handle them.
@@ -51,8 +54,5 @@ object TaskFlags: JoozdLogPreferences() {
     fun postSyncDataFiles(value: Boolean) = post(SYNC_DATA_FILES, value)
 
     private const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
-    var syncFlights by JoozdLogSharedPreferenceNotNull(SYNC_FLIGHTS,false)
-    val syncFlightsFlow by PrefsFlow(SYNC_FLIGHTS, false)
-    fun postSyncFlights(value: Boolean) = post(SYNC_FLIGHTS, value)
-
+    val syncFlights by JoozdlogSharedPreferenceDelegate(SYNC_FLIGHTS, false)
 }

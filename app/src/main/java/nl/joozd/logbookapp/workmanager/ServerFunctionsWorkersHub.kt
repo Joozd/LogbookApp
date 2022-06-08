@@ -1,9 +1,4 @@
-package nl.joozd.logbookapp.workmanager.userManagementWorkers
-
-import nl.joozd.logbookapp.workmanager.JoozdlogWorkersHub
-import nl.joozd.logbookapp.workmanager.SendBackupEmailWorker
-import nl.joozd.logbookapp.workmanager.SendLoginLinkEmailWorker
-import nl.joozd.logbookapp.workmanager.SyncDataFilesWorker
+package nl.joozd.logbookapp.workmanager
 
 // This is a class and not an object so I can inject stuff for testing when I think about that sort of thing
 class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
@@ -31,11 +26,16 @@ class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
         enqueueOneTimeWorker<SyncDataFilesWorker>(Tags.REQUEST_LOGIN_LINK_MAIL, needNetwork = true)
     }
 
+    fun scheduleSyncFlights(){
+        enqueueOneTimeWorker<SyncFlightsWorker>(Tags.SYNC_FLIGHTS, needNetwork = true)
+    }
+
     object Tags{
         const val CREATE_NEW_USER = "CREATE_NEW_USER"
         const val UPDATE_EMAIL = "UPDATE_EMAIL"
         const val CONFIRM_EMAIL_CODE = "CONFIRM_EMAIL_CODE"
         const val GET_BACKUP_EMAIL = "GET_BACKUP_EMAIL"
         const val REQUEST_LOGIN_LINK_MAIL = "REQUEST_LOGIN_LINK_MAIL"
+        const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
     }
 }

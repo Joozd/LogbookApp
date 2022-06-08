@@ -12,6 +12,9 @@ import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
 object TaskFlags: JoozdLogPreferences() {
     override val preferencesFileKey = "nl.joozd.logbookapp.TASK_FLAGS_FILE_KEY"
 
+    private const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
+    private const val SYNC_DATA_FILES = "SYNC_DATA_FILES"
+
     private const val SEND_BACKUP_EMAIL = "SEND_BACKUP_EMAIL"
     var sendBackupEmail by JoozdLogSharedPreferenceNotNull(SEND_BACKUP_EMAIL,false)
     val sendBackupEmailFlow by PrefsFlow(SEND_BACKUP_EMAIL, false)
@@ -43,16 +46,7 @@ object TaskFlags: JoozdLogPreferences() {
     val createNewUserFlow by PrefsFlow(CREATE_NEW_USER, false)
     fun postCreateNewUser(value: Boolean) = post(CREATE_NEW_USER, value)
 
-    private const val CHANGE_PASSWORD = "CHANGE_PASSWORD"
-    var changePassword by JoozdLogSharedPreferenceNotNull(CHANGE_PASSWORD,false)
-    val changePasswordFlow by PrefsFlow(CHANGE_PASSWORD, false)
-    fun postChangePassword(value: Boolean) = post(CHANGE_PASSWORD, value)
 
-    private const val SYNC_DATA_FILES = "SYNC_DATA_FILES"
-    var syncDataFiles by JoozdLogSharedPreferenceNotNull(SYNC_DATA_FILES,false)
-    val syncDataFilesFlow by PrefsFlow(SYNC_DATA_FILES, false)
-    fun postSyncDataFiles(value: Boolean) = post(SYNC_DATA_FILES, value)
-
-    private const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
+    val syncDataFiles by JoozdlogSharedPreferenceDelegate(SYNC_DATA_FILES,false)
     val syncFlights by JoozdlogSharedPreferenceDelegate(SYNC_FLIGHTS, false)
 }

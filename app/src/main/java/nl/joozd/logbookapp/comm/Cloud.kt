@@ -1,18 +1,17 @@
 package nl.joozd.logbookapp.comm
 
-import android.util.Base64
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.joozd.comms.Client
-import nl.joozd.joozdlogcommon.BasicFlight
-import nl.joozd.joozdlogcommon.LoginData
-import nl.joozd.joozdlogcommon.LoginDataWithEmail
+import nl.joozd.joozdlogcommon.*
 import nl.joozd.joozdlogcommon.comms.Protocol
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.serializing.longFromBytes
+import nl.joozd.serializing.packSerializable
+import nl.joozd.serializing.unpackSerialized
 import nl.joozd.serializing.wrap
 
 /**
@@ -51,27 +50,6 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
     suspend fun sendNewEmailAddress(username: String, key: ByteArray, emailToSend: String): CloudFunctionResult {
         val data = LoginDataWithEmail(username, key, basicFlightVersion, emailToSend).serialize()
         return resultForRequest (JoozdlogCommsKeywords.SET_EMAIL, data)
-    }
-
-    /**
-     * check username and password with server
-     * @param username: username to check
-     * @param password: password to check. This expects an already hashed password.
-     * @return
-     *  - CloudFunctionResult.OK if server accepted,
-     *  - CloudFunctionResult.SERVER_REFUSED if server rejected,
-     *  - CloudFunctionResult.CONNECTION_ERROR if no connection made or client or server error.
-     *  This does nothing to handle bad login data, as it is only made to check if login data is OK or not.
-     */
-    suspend fun checkLoginDataWithServer(username: String, password: String): CloudFunctionResult {
-        val payload = LoginData(username, Base64.decode(password, Base64.DEFAULT), basicFlightVersion).serialize()
-        return withClient {
-            sendRequest(JoozdlogCommsKeywords.LOGIN, payload)
-            readServerResponse()?.let {
-                if (it == JoozdlogCommsKeywords.OK) CloudFunctionResult.OK
-                else CloudFunctionResult.SERVER_REFUSED
-            } ?: CloudFunctionResult.CONNECTION_ERROR
-        }
     }
 
     /**
@@ -120,19 +98,58 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
             }
         }
 
+    //This is meant for operations which require some back-and-forth transfers with server.
+    // At the time of this writing only flights syncing uses it.
+    suspend fun doInOneClientSession(block: suspend Client.() -> CloudFunctionResult): CloudFunctionResult =
+        withClient{
+            block()
+        }
+
     /*
-      TODO: Make a sync protocol taht works better than this one:
-       - NOTE this must be done in a separate Sync class/module/whatever. Not here. Here is only for communication.
-       - Roll all timestamps into a hash, make class Class(amountOfFlights: Int, combinedTimes, Long): JoozdLogSerializable in JoozdLogCommon.
-       - Compare this hash with the server's timestamp hash (requesy hash from server)
-       - If not the same, request a list of all FlightID's with timestamps from server
-       - Request all flights with a higher timestamp from server
-       - Send a list with all flights with a more recent local timestamp + all IDs which are not yet on server
-       -
-       - Keep session alive and pass Client around, or login with every step? Last would be much more server load.
-       -
-       - Change server storage to keep a hash-only reference for speed improvement? This can be done later as well.
+     * Log in to server until Client is closed again
      */
+    suspend fun Client.login(username: String, key: ByteArray): CloudFunctionResult {
+        //payLoad is LoginData.serialize()
+        val payLoad = LoginData(username, key, BasicFlight.VERSION.version)
+            .serialize()
+
+        sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
+        return handleResponse()!!
+    }
+
+    suspend fun Client.putFlightsListChecksumInResult(result: Result<FlightsListChecksum>): CloudFunctionResult {
+        sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS_LIST_CHECKSUM)
+        readFromServer().let{ response ->
+            handleServerResult(response)?.let { return it }
+            result.value = FlightsListChecksum.deserialize(response!!)  //if response was null, handleServerResult would have caught it
+        }
+        return CloudFunctionResult.OK
+    }
+
+    suspend fun Client.putIDWithTimestampsListInResult(result: Result<List<IDWithTimeStamp>>): CloudFunctionResult {
+        sendRequest(JoozdlogCommsKeywords.REQUEST_ID_WITH_TIMESTAMPS_LIST)
+        readFromServer().let{ response ->
+            handleServerResult(response)?.let { return it }
+            result.value = unpackSerialized(response!!).map { IDWithTimeStamp.deserialize (it) } //if response was null, handleServerResult would have caught it
+        }
+        return CloudFunctionResult.OK
+    }
+
+    suspend fun Client.putFlightsFromServerInResult(flightIDsToDownload: List<Int>, result: Result<List<BasicFlight>>): CloudFunctionResult{
+        val extraData = wrap(flightIDsToDownload) // NOTE TO SELF on server use unwrapList(data)
+        sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS, extraData)
+        readFromServer().let{ response ->
+            handleServerResult(response)?.let { return it }
+            result.value = unpackSerialized(response!!).map { BasicFlight.deserialize (it) } //if response was null, handleServerResult would have caught it
+        }
+        return CloudFunctionResult.OK
+    }
+
+    suspend fun Client.sendFlights(flights: List<BasicFlight>): CloudFunctionResult{
+        val extraData = packSerializable(flights)
+        sendRequest(JoozdlogCommsKeywords.SENDING_FLIGHTS, extraData)
+        return handleResponse()!!
+    }
 
 
     //Doesn't handle bad login data, but server will refuse empty usernames etc.
@@ -166,28 +183,20 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
 
     private suspend fun resultForRequest(request: String, extraData: ByteArray? ): CloudFunctionResult = withClient {
         sendRequest(request, extraData)
-        handleResponse()
-    }
-
-    /*
-     * Log in to server until Client is closed again
-     */
-    private suspend fun Client.login(username: String, key: ByteArray): CloudFunctionResult {
-        //payLoad is LoginData.serialize()
-        val payLoad = LoginData(username, key , BasicFlight.VERSION.version)
-            .serialize()
-
-        sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
-        return handleResponse()
+        handleResponse()!!
     }
 
     private suspend fun Client.changePasswordOnServer(newPassword: ByteArray, email: String): CloudFunctionResult {
         val payload = LoginDataWithEmail("", newPassword, 0, email).serialize() // username and basicFlightVersion are unused in this function
         sendRequest(JoozdlogCommsKeywords.UPDATE_PASSWORD, payload)
-        return handleResponse()
+        return handleResponse()!!
     }
 
     private suspend fun Client.handleResponse() = handleServerResult(readServerResponse())
+
+    // Pass this to functions giving a result to get returned data.
+    // The return of the function will only be a CloudFunctionResult, so if you want anything else you can drop it in here.
+    data class Result<T>(var value: T? = null)
 
 
     companion object {

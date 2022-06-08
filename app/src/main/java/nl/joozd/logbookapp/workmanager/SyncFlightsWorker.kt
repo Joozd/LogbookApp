@@ -22,43 +22,29 @@ package nl.joozd.logbookapp.workmanager
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.comm.OldCloud
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
-import nl.joozd.logbookapp.comm.ServerFunctionResult
+import nl.joozd.logbookapp.comm.Cloud
+import nl.joozd.logbookapp.comm.syncFlights
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.utils.DispatcherProvider
 
-class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters)
+/*
+ * This gets called from TaskDispatcher when [TaskDispatcher.syncNeededFlow] == true,
+ *  which is triggered primarily by [TaskFlags.createNewUser]
+ * return:
+ *  - Success() if successful, should set it's flag to false
+ *  - Retry() if connection error from cloud function, should not touch its flag
+ *  - Failure() if server refused to perform task, should not touch its flag
+ *      (server refusal handling should have set another flag which will prevent this worker from being called until it is fixed)
+ */
+class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters,
+                        private val repository: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance,
+                        private val cloud: Cloud = Cloud())
     : CoroutineWorker(appContext, workerParams) {
 
-    private val flightRepository = FlightRepositoryWithDirectAccess.instance
-
-    override suspend fun doWork(): Result = Result.failure() /*withContext(Dispatchers.IO) {
-        if (makeNewLoginDataIfNeeded() != ServerFunctionResult.OK)
-            Result.retry()
-        else
-            when (val result = OldCloud.syncAllFlights(flightRepository)) {
-                null -> Result.retry()
-                -1L -> Result.failure()
-                else -> {
-                    Prefs.lastUpdateTime = result
-                    Result.success()
-                }
-            }
+    override suspend fun doWork(): Result = withContext(DispatcherProvider.io()) {
+        return@withContext syncFlights(cloud, repository).toListenableWorkerResult()
     }
-
-
-    /**
-     * Make new login data if needed
-     * @return [ServerFunctionResult.OK] if not needed or success, something else if failure
-     */
-    private suspend fun makeNewLoginDataIfNeeded(): ServerFunctionResult =
-        if (Prefs.username == null) UserManagement.newLoginDataNeeded()
-        else ServerFunctionResult.OK
-*/
-
 }
 
 

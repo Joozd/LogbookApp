@@ -37,5 +37,5 @@ object ServerPrefs: JoozdLogPreferences() {
     val emailVerifiedFlow by PrefsFlow(EMAIL_VERIFIED, false)
     fun postEmailVerified(value: Boolean) = post(EMAIL_VERIFIED, value)
 
-    val mostRecentSyncEpochSecond by JoozdlogSharedPreferenceDelegate(MOST_RECENT_SYNC_EPOCH_SECOND, -1L)
+    val mostRecentFlightsSyncEpochSecond by JoozdlogSharedPreferenceDelegate(MOST_RECENT_SYNC_EPOCH_SECOND, -1L)
 }

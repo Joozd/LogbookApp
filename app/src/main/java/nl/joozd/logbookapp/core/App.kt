@@ -33,10 +33,6 @@ class App : Application(){
         super.onCreate()
         instance = this
 
-        //Periodic workers get started as soon as app gets started.
-        JoozdlogWorkersHubOld.periodicGetAirportsFromServer()
-        JoozdlogWorkersHubOld.periodicSynchronizeAircraftTypes()
-
         // Set dark mode preference from Preferences
         DarkModeCenter.setDarkMode()
     }

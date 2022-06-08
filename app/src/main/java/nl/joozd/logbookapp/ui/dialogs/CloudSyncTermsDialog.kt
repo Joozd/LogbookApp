@@ -30,7 +30,7 @@ import nl.joozd.logbookapp.databinding.DialogCloudSyncTermsBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.model.viewmodels.dialogs.CloudSyncTermsDialogViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
-import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
+import nl.joozd.logbookapp.core.TaskFlags
 
 /**
  * This dialog will show terms and conditions for Cloud.
@@ -50,7 +50,7 @@ class CloudSyncTermsDialog(): JoozdlogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogCloudSyncTermsBinding.bind(inflater.inflate(R.layout.dialog_cloud_sync_terms, container, false)).apply {
-            syncOnClose = savedInstanceState?.getBoolean(SYNC_ON_OK) ?: false
+            if (syncOnClose) TaskFlags.syncFlights(true)
             cloudSyncTermsDialogBackground.setOnClickListener { } // catch clicks so they don't fall through
 
             // termsTextView.movementMethod = ScrollingMovementMethod()
@@ -65,9 +65,8 @@ class CloudSyncTermsDialog(): JoozdlogFragment() {
 
             iAcceptTextView.apply {
                 setOnClickListener {
-                    Prefs.acceptedCloudSyncTerms = true
-                    Prefs.useCloud = true
-                    if (syncOnClose) JoozdlogWorkersHubOld.syncTimeAndFlightsIfEnoughTimePassed()
+                    Prefs.acceptedCloudSyncTerms(true)
+                    Prefs.useCloud(true)
                     closeFragment()
                 }
                 val clickable = viewModel.waitedLongEnough.value ?: false

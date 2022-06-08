@@ -46,7 +46,7 @@ class NewUserActivityCloudPage: JoozdlogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageCloudBinding.bind(inflater.inflate(R.layout.activity_new_user_page_cloud, container, false)).apply {
-            useCloudCheckbox.isChecked = Prefs.useCloud
+            useCloudCheckbox.isChecked = Prefs.useCloud.valueBlocking
 
             /*******************************************************************************************
              * OnClickedListeners
@@ -54,7 +54,7 @@ class NewUserActivityCloudPage: JoozdlogFragment() {
 
             useCloudCheckbox.setOnClickListener {
                 viewModel.useCloudCheckboxClicked()
-                useCloudCheckbox.isChecked = Prefs.useCloud
+                useCloudCheckbox.isChecked = Prefs.useCloud.valueBlocking
             }
 
             /*******************************************************************************************

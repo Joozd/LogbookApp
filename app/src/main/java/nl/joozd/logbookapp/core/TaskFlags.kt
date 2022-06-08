@@ -12,6 +12,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
 object TaskFlags: JoozdLogPreferences() {
     override val preferencesFileKey = "nl.joozd.logbookapp.TASK_FLAGS_FILE_KEY"
 
+    private const val CREATE_NEW_USER = "CREATE_NEW_USER"
     private const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
     private const val SYNC_DATA_FILES = "SYNC_DATA_FILES"
     private const val FEEDBACK_WAITING = "FEEDBACK_WAITING"
@@ -31,22 +32,14 @@ object TaskFlags: JoozdLogPreferences() {
     val updateEmailWithServerFlow by PrefsFlow(UPDATE_EMAIL, false)
     fun postUpdateEmailWithServer(value: Boolean) = post(UPDATE_EMAIL, value)
 
-    private const val REQUEST_LOGIN_LINK_MAIL = "REQUEST_LOGIN_LINK_MAIL"
-    var requestLoginLinkMail by JoozdLogSharedPreferenceNotNull(REQUEST_LOGIN_LINK_MAIL,false)
-    val requestLoginLinkMailFlow by PrefsFlow(REQUEST_LOGIN_LINK_MAIL, false)
-    fun postRequestLoginLinkMail(value: Boolean) = post(REQUEST_LOGIN_LINK_MAIL, value)
-
     private const val SEND_LOGIN_LINK = "SEND_LOGIN_LINK"
     var sendLoginLink by JoozdLogSharedPreferenceNotNull(SEND_LOGIN_LINK,false)
     val sendLoginLinkFlow by PrefsFlow(SEND_LOGIN_LINK, false)
     fun postSendLoginLink(value: Boolean) = post(UPDATE_EMAIL, value)
 
     //create a new user both local and on server
-    private const val CREATE_NEW_USER = "CREATE_NEW_USER"
-    var createNewUser by JoozdLogSharedPreferenceNotNull(CREATE_NEW_USER,false)
-    val createNewUserFlow by PrefsFlow(CREATE_NEW_USER, false)
-    fun postCreateNewUser(value: Boolean) = post(CREATE_NEW_USER, value)
 
+    val createNewUser by JoozdlogSharedPreferenceDelegate(CREATE_NEW_USER,false)
     val feedbackWaiting by JoozdlogSharedPreferenceDelegate(FEEDBACK_WAITING, false)
     val syncDataFiles by JoozdlogSharedPreferenceDelegate(SYNC_DATA_FILES,false)
     val syncFlights by JoozdlogSharedPreferenceDelegate(SYNC_FLIGHTS, false)

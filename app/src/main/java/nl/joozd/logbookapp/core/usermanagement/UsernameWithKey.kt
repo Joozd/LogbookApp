@@ -8,8 +8,8 @@ class UsernameWithKey(val username: String, val key: ByteArray){
             val n = Prefs.username
             val k = Prefs.key
             if (n == null || k == null) {
-                TODO("Handle no login data present")
                 return null
+                // TODO Handle no login data present
             }
             return UsernameWithKey(n, k)
         }

@@ -169,7 +169,7 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
         }
         viewModelScope.launch(Dispatchers.IO) {
             feedback(MakePdfActivityEvents.WRITING)
-            context?.contentResolver?.openOutputStream(uri)?.use {
+            context.contentResolver?.openOutputStream(uri)?.use {
                 pdfLogbook?.writeTo(it)
             }
             _uriWithLogbook = uri

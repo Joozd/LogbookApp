@@ -32,10 +32,14 @@ object Prefs: JoozdLogPreferences() {
     override val preferencesFileKey = "nl.joozd.logbookapp.PREFERENCE_FILE_KEY"
     override val needsMigration = true
 
-    const val USERNAME_NOT_SET = "USERNAME_NOT_SET"
+
+    private const val USERNAME_NOT_SET = "USERNAME_NOT_SET"
     private const val NO_CALENDAR_SELECTED = ""
     private const val PASSWORD_SHAREDPREF_KEY = "passwordSharedPrefKey"
 
+
+    private const val USE_CLOUD = "USE_CLOUD"
+    private const val ACCEPTED_CLOUD_TERMS = "ACCEPTED_CLOUD_TERMS"
     private const val FEEDBACK_WAITING = "FEEDBACK_WAITING"
     private const val FEEDBACK_CONTACT_INFO_WAITING = "FEEDBACK_CONTACT_INFO_WAITING"
 
@@ -227,18 +231,9 @@ object Prefs: JoozdLogPreferences() {
     var selectedCalendar: String by JoozdLogSharedPreferenceNotNull(SELECTED_CALENDAR, NO_CALENDAR_SELECTED)
     val selectedCalendarFlow by PrefsFlow(SELECTED_CALENDAR, NO_CALENDAR_SELECTED)
 
-    // true if user wants new flights to be marked as IFR. Not sure if I want to use this.
-    // var normallyFliesIFR: Boolean by JoozdLogSharedPrefs(sharedPref, true)
 
-    // true if user wants to use cloud -
-    private const val USE_CLOUD = "USE_CLOUD"
-    var useCloud: Boolean by JoozdLogSharedPreferenceNotNull(USE_CLOUD,false)
-    val useCloudFlow by PrefsFlow(USE_CLOUD, false)
-    fun postUseCloud(value: Boolean) = post(USE_CLOUD, value)
-
-    private const val ACCEPTED_CLOUD_TERMS = "ACCEPTED_CLOUD_TERMS"
-    var acceptedCloudSyncTerms: Boolean by JoozdLogSharedPreferenceNotNull(ACCEPTED_CLOUD_TERMS, false)
-    val acceptedCloudSyncTermsFlow by PrefsFlow(ACCEPTED_CLOUD_TERMS, false)
+    val useCloud by JoozdlogSharedPreferenceDelegate(USE_CLOUD,false)
+    val acceptedCloudSyncTerms by JoozdlogSharedPreferenceDelegate(ACCEPTED_CLOUD_TERMS, false)
 
     /**
      * Small things being saved:

@@ -44,7 +44,7 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
      * Schedule the creation of a new user account.
      */
     fun createNewUser(){
-        taskFlags.postCreateNewUser(true)
+        taskFlags.createNewUser(true)
     }
 
     //blocking IO in DispatcherProvider.io()
@@ -99,10 +99,11 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
 
 
     fun logOut() {
+        Prefs.useCloud(false)
         Prefs.username = null
         Prefs.keyString = null
         Prefs.lastUpdateTime = -1
-        Prefs.useCloud = false
+
     }
 
     fun generateLoginLink(): String? = Prefs.username?.let { username ->

@@ -58,7 +58,8 @@ class IntentHandler(intent: Intent) {
 
     private suspend fun storeNewLoginData(lpPair: Pair<String, String>)= withContext(DispatcherProvider.io()) {
         UserManagement().storeNewLoginData(lpPair.first, lpPair.second)
-        Prefs.postUseCloud(true)
+        Prefs.useCloud(true)
+        Prefs.acceptedCloudSyncTerms(true) // I guess they must have accepted it sometime in the past or they wouldn't have login data
         UserManagement().requestEmailVerificationMail()
     }
 

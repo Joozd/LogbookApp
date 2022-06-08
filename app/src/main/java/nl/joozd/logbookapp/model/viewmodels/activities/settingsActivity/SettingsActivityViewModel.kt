@@ -64,7 +64,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     val calendarDisabled: Boolean
         get() = calendarIsDisabledNow(Prefs.calendarDisabledUntil)
 
-    val useCloudFlow = Prefs.useCloudFlow.notNullFlow()
+    val useCloudFlow = Prefs.useCloud.flow
 
     val lastUpdateTimeFlow = Prefs.lastUpdateTimeFlow.notNullFlow()
 
@@ -148,7 +148,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     */
 
     fun useCloudSyncToggled(){
-        Prefs.postUseCloud(!Prefs.useCloud)
+        Prefs.useCloud(!Prefs.useCloud.valueBlocking)
         viewModelScope.launch {
             with(UserManagement()) {
                 if (!isLoggedIn())
@@ -159,7 +159,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     }
 
     fun forceUseCloud(){
-        Prefs.useCloud = true
+        Prefs.useCloud(true)
     }
 
     fun copyLoginLinkToClipboard(){

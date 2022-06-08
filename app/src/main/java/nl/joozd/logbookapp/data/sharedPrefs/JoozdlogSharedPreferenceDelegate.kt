@@ -41,7 +41,7 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private
 
 
         suspend operator fun invoke() = value()
-        suspend operator fun invoke(newValue: T) = setValue(newValue)
+        operator fun invoke(newValue: T) = MainScope().launch { setValue(newValue) }
 
         private fun readBlocking(): T =
             runBlocking {

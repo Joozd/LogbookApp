@@ -30,7 +30,6 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
-import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import java.util.*
 
@@ -60,7 +59,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      */
 
     //Use Cloud, used on PAGE_CLOUD
-    private val _useCloudCheckboxStatus = MutableLiveData(Prefs.useCloud)
+    private val _useCloudCheckboxStatus = MutableLiveData(Prefs.useCloud.valueBlocking)
 
     //Use IATA airports instead of ICAO, used on PAGE_FINAL
     private val _useIataAirports = MutableLiveData(Prefs.useIataAirports)
@@ -82,11 +81,12 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     /**
      * Listen to changes in [Prefs]
      */
-    //TODO make this work again, this does nothing atm (but I need to work on newuseractivity anyway so i will fix it then)
+    //TODO this does not longer work this way
     private val onSharedPrefsChangedListener =  SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         // Log.d("AirportRepository", "key = $key")
         when(key) {
-            Prefs::useCloud.name -> _useCloudCheckboxStatus.value = Prefs.useCloud
+
+            Prefs::useCloud.name -> _useCloudCheckboxStatus.value = Prefs.useCloud.valueBlocking
             Prefs::useIataAirports.name -> _useIataAirports.value = Prefs.useIataAirports
             Prefs::useCalendarSync.name -> _getFlightsFromCalendar.value = Prefs.useCalendarSync
         }
@@ -179,12 +179,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
 
     fun done(){
         Prefs.newUserActivityFinished = true
-        syncFlights()
         feedback(NewUserActivityEvents.FINISHED)
-    }
-
-    private fun syncFlights(){
-        JoozdlogWorkersHubOld.syncTimeAndFlightsIfFlightsUpdated()
     }
 
     /**
@@ -208,8 +203,8 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      *  This will show a CloudSyncTermsDialog, which will set [Prefs.useCloud] to true
      */
     fun useCloudCheckboxClicked(){
-        if (Prefs.acceptedCloudSyncTerms)
-            Prefs.useCloud = !Prefs.useCloud
+        if (Prefs.acceptedCloudSyncTerms.valueBlocking)
+            Prefs.useCloud.valueBlocking = !Prefs.useCloud.valueBlocking
         else feedback(NewUserActivityEvents.SHOW_TERMS_DIALOG, PAGE_CLOUD)
     }
 

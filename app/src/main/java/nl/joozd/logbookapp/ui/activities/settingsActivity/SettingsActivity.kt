@@ -331,7 +331,7 @@ class SettingsActivity : JoozdlogActivity() {
                 lifecycleScope.launch {
                     UserManagement().createNewUser()
                 }
-                if (Prefs.acceptedCloudSyncTerms)
+                if (Prefs.acceptedCloudSyncTerms.valueBlocking)
                     viewModel.forceUseCloud()
                 else supportFragmentManager.commit {
                     add(

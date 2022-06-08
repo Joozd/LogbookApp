@@ -81,7 +81,7 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
         address, verified -> address.isNotBlank() && verified
     }
 
-    private val useCloudFlow = combine(Prefs.useCloudFlow, Prefs.acceptedCloudSyncTermsFlow){
+    private val useCloudFlow = combine(Prefs.useCloud.flow, Prefs.acceptedCloudSyncTerms.flow){
         useCloud, acceptedTerms -> useCloud && acceptedTerms
     }
 
@@ -89,7 +89,7 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
         wanted, enabled, value -> wanted && enabled && value.isNotBlank()
     }
 
-    private fun newUserWantedFlow() = combine(TaskFlags.createNewUserFlow, useCloudFlow) {
+    private fun newUserWantedFlow() = combine(TaskFlags.createNewUser.flow, useCloudFlow) {
         needed, enabled -> needed && enabled
     }
 

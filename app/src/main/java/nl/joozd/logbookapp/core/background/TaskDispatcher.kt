@@ -18,6 +18,8 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
         handleEmailConfirmationWanted()
         handleBackupEmailWanted()
         handleLoginLinkWanted()
+        handleSyncDataFiles()
+        handleSyncFlights()
     }
 
     private suspend fun handleNewUserWanted() {

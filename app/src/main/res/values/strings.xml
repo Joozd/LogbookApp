@@ -430,7 +430,7 @@
     <string name="signed_in_as"><![CDATA[<b>Joozdlog Cloud ID</b><br><small>%1$s</small>&nbsp;]]></string>
     <string name="email_button_text_verified"><![CDATA[<b>Email address</b><br><small>%1$s</small>&nbsp;]]></string>
     <string name="email_button_text_not_verified"><![CDATA[<b>Email address</b><br><small>%1$s (not verified)</small>&nbsp;]]></string>
-    <string name="not_signed_in">Not signed in</string>
+    <string name="not_signed_in_bug_please_tell_joozd">Server replied you are not signed in during an operation that requires you to sign in. This most probably means you encountered a bug. Please tell Joozd what you were trying to do via the Feedback menu.</string>
     <string name="standard_augmented_time"><![CDATA[<b>Augmented Crew takeoff/landing time</b><br><small>%1$s minutes</small>&nbsp;]]></string>
     <string name="backup_interval_time"><![CDATA[<b>Remind me to make a backup every</b><br><small>%1$s</small>&nbsp;]]></string>
     <string name="backup_from_cloud">Send backup emails from cloud</string>

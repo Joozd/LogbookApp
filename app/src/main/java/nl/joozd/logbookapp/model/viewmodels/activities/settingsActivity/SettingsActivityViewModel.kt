@@ -172,7 +172,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
                 SettingsActivityStatus.LoginLinkCopied
             }
 
-        } ?: SettingsActivityStatus.Error(R.string.not_signed_in)
+        } ?: SettingsActivityStatus.Error(R.string.not_signed_in_bug_please_tell_joozd)
     }
 
     fun dontPostponeCalendarSync(){

@@ -254,7 +254,7 @@ class SettingsActivity : JoozdlogActivity() {
         loginLinkButton.setOnClickListener {
             UserManagement().generateLoginLinkMessage()?.let{
                 sendMessageToOtherApp(it, getString(R.string.login_link_title))
-            } ?: toast(R.string.not_signed_in)
+            } ?: toast(R.string.not_signed_in_bug_please_tell_joozd)
         }
 
         addNamesFromRosterSwitch.setOnClickListener {

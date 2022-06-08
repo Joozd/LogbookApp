@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.combine
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.workmanager.userManagementWorkers.ServerFunctionsWorkersHub
+import nl.joozd.logbookapp.workmanager.ServerFunctionsWorkersHub
 
 /**
  * Run all tasks set in [TaskFlags].
@@ -53,8 +53,14 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
     }
 
     private suspend fun handleSyncDataFiles() {
-        TaskFlags.syncDataFilesFlow.doIfTrueCollected {
+        TaskFlags.syncDataFiles.flow.doIfTrueCollected {
             ServerFunctionsWorkersHub().scheduleSyncDataFiles()
+        }
+    }
+
+    private suspend fun handleSyncFlights(){
+        syncNeededFlow().doIfTrueCollected {
+            ServerFunctionsWorkersHub().scheduleSyncFlights()
         }
     }
 
@@ -90,5 +96,7 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
         wanted, enabled, valid -> wanted && enabled && valid
     }
 
-
+    private fun syncNeededFlow() = combine(TaskFlags.syncFlights.flow, useCloudFlow){ needed, enabled ->
+        needed && enabled
+    }
 }

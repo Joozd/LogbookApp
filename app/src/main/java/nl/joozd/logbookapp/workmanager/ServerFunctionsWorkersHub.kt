@@ -22,8 +22,12 @@ class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
         enqueueOneTimeWorker<SendLoginLinkEmailWorker>(Tags.REQUEST_LOGIN_LINK_MAIL, needNetwork = true)
     }
 
+    fun scheduleSubmitFeedback(){
+        enqueueOneTimeWorker<SubmitFeedbackWorker>(Tags.SUBMIT_FEEDBACK, needNetwork = true)
+    }
+
     fun scheduleSyncDataFiles(){
-        enqueueOneTimeWorker<SyncDataFilesWorker>(Tags.REQUEST_LOGIN_LINK_MAIL, needNetwork = true)
+        enqueueOneTimeWorker<SyncDataFilesWorker>(Tags.SYNC_DATA_FILES, needNetwork = true)
     }
 
     fun scheduleSyncFlights(){
@@ -36,6 +40,8 @@ class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
         const val CONFIRM_EMAIL_CODE = "CONFIRM_EMAIL_CODE"
         const val GET_BACKUP_EMAIL = "GET_BACKUP_EMAIL"
         const val REQUEST_LOGIN_LINK_MAIL = "REQUEST_LOGIN_LINK_MAIL"
+        const val SUBMIT_FEEDBACK = "SUBMIT_FEEDBACK"
+        const val SYNC_DATA_FILES = "SYNC_DATA_FILES"
         const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
     }
 }

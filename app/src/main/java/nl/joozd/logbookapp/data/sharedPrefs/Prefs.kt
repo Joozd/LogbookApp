@@ -36,6 +36,9 @@ object Prefs: JoozdLogPreferences() {
     private const val NO_CALENDAR_SELECTED = ""
     private const val PASSWORD_SHAREDPREF_KEY = "passwordSharedPrefKey"
 
+    private const val FEEDBACK_WAITING = "FEEDBACK_WAITING"
+    private const val FEEDBACK_CONTACT_INFO_WAITING = "FEEDBACK_CONTACT_INFO_WAITING"
+
 
     /*
     private const val XXXXXXXXXX = "XXXXXXXXXX"
@@ -241,10 +244,8 @@ object Prefs: JoozdLogPreferences() {
      * Small things being saved:
      */
 
-    // If feedback could not be sent to server, save it for the next time
-    // TODO handle this with a worker
-    private const val FEEDBACK_WAITING = "FEEDBACK_WAITING"
-    var feedbackWaiting: String by JoozdLogSharedPreferenceNotNull(FEEDBACK_WAITING, "")
+    val feedbackWaiting by JoozdlogSharedPreferenceDelegate(FEEDBACK_WAITING, "")
+    val feedbackContactInfoWaiting by JoozdlogSharedPreferenceDelegate(FEEDBACK_CONTACT_INFO_WAITING, "")
 
 
     private fun usernameIfSet(name: String) = name.takeIf { usernameResource != USERNAME_NOT_SET }

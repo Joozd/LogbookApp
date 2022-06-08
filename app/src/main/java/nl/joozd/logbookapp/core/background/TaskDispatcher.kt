@@ -18,6 +18,7 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
         handleEmailConfirmationWanted()
         handleBackupEmailWanted()
         handleLoginLinkWanted()
+        handleFeedbackWaiting()
         handleSyncDataFiles()
         handleSyncFlights()
     }
@@ -51,6 +52,12 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
     private suspend fun handleLoginLinkWanted() {
         loginLinkWantedFlow().doIfTrueCollected {
             ServerFunctionsWorkersHub().scheduleLoginLinkEmail()
+        }
+    }
+
+    private suspend fun handleFeedbackWaiting() {
+        TaskFlags.feedbackWaiting.flow.doIfTrueCollected {
+            ServerFunctionsWorkersHub().scheduleSubmitFeedback()
         }
     }
 

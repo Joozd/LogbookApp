@@ -98,6 +98,11 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
             }
         }
 
+    suspend fun sendFeedback(feedbackData: FeedbackData): CloudFunctionResult = withClient {
+        sendRequest(JoozdlogCommsKeywords.SENDING_FEEDBACK, feedbackData.serialize())
+        handleResponse()!!
+    }
+
     //This is meant for operations which require some back-and-forth transfers with server.
     // At the time of this writing only flights syncing uses it.
     suspend fun doInOneClientSession(block: suspend Client.() -> CloudFunctionResult): CloudFunctionResult =

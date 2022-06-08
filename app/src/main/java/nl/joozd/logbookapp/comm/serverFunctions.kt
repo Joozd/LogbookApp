@@ -4,6 +4,7 @@ package nl.joozd.logbookapp.comm
 
 import android.util.Log
 import kotlinx.coroutines.withContext
+import nl.joozd.joozdlogcommon.FeedbackData
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.core.usermanagement.UsernameWithKey
@@ -16,6 +17,7 @@ import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWith
 import nl.joozd.logbookapp.data.sharedPrefs.DataVersions
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.generateKey
 
@@ -154,6 +156,12 @@ suspend fun syncFlights(server: Cloud = Cloud(), repository: FlightRepositoryWit
         if (it.isOK()) TaskFlags.syncFlights(false)
     }
 
+suspend fun sendFeedback(cloud: Cloud = Cloud()): ServerFunctionResult =
+    (Prefs.feedbackWaiting().nullIfBlank()?.let{ feedback ->
+        cloud.sendFeedback(FeedbackData(feedback, Prefs.feedbackContactInfoWaiting()))
+            .correspondingServerFunctionResult()
+    }  ?: ServerFunctionResult.SUCCESS)
+        .also{ if (it.isOK()) TaskFlags.feedbackWaiting(false) }
 
 
 private suspend fun sendEmailConfirmationCode(confirmationString: String, cloud: Cloud): ServerFunctionResult {

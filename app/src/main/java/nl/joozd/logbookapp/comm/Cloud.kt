@@ -147,7 +147,7 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
 
     suspend fun Client.sendFlights(flights: List<BasicFlight>): CloudFunctionResult{
         val extraData = packSerializable(flights)
-        sendRequest(JoozdlogCommsKeywords.SENDING_FLIGHTS, extraData)
+        sendRequest(JoozdlogCommsKeywords.SENDING_NEWER_FLIGHTS, extraData)
         return handleResponse()!!
     }
 

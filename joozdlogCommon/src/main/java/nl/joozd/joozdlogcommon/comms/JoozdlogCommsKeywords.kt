@@ -54,16 +54,21 @@ object JoozdlogCommsKeywords {
     const val LOGIN = "LOGIN"
     const val REQUEST_NEW_USERNAME = "REQUEST_NEW_USERNAME"
     const val NEW_ACCOUNT = "NEW_ACCOUNT"
-    const val UPDATE_PASSWORD = "UPDATE_PASSWORD" // should be done after being logged in as it will encrypt all flights with new password
+    const val UPDATE_PASSWORD = "UPDATE_PASSWORD" // should be done after being logged in as it will recrypt all flights with new password
     const val USER_ALREADY_EXISTS = "EXISTING_USER"
     const val UNKNOWN_USER_OR_PASS = "UNKNOWN_USER_PASS_COMBO"
     const val NOT_LOGGED_IN = "NOT_LOGGED_IN"
 
-    //flights syncing keywords
+    //flights keywords
     const val REQUEST_FLIGHTS_LIST_CHECKSUM = "REQUEST_FLIGHTS_LIST_CHECKSUM"
     const val REQUEST_ID_WITH_TIMESTAMPS_LIST = "REQUEST_ID_WITH_TIMESTAMPS_LIST" // Client can expect a packed List<serialized IDWithTimeStamp>
     const val REQUEST_FLIGHTS = "REQUEST_FLIGHTS" // expects in extraData a list of Ints, representing a list of FlightIDs to send. Client can expect a list of all found flights; nonexistent IDs will be ignored.
-    const val SENDING_FLIGHTS = "SENDING_FLIGHTS" // server will expect a packed List<serialized BasicFlight> as extraData
+    const val SENDING_NEWER_FLIGHTS = "SENDING_NEWER_FLIGHTS" // server will expect a packed List<serialized BasicFlight> as extraData
+
+    //deprecated, but here for backwards compatibility
+    const val SENDING_FLIGHTS = "SENDING_FLIGHTS"
+    const val REQUEST_FLIGHTS_SINCE_TIMESTAMP = "REQUEST_FLIGHTS_SINCE_TIMESTAMP" // can be used with timestamp -1 for all flights
+
 
     //aircraft keywords
     const val SENDING_AIRCRAFT_CONSENSUS = "SENDING_AIRCRAFT_CONSENSUS" // adds a packSerialized list of <AircraftConsensus>

@@ -10,8 +10,11 @@ import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.comm.CloudFunctionResult
 import nl.joozd.logbookapp.comm.requestLoginLinkEmail
 
-class SendLoginLinkEmailWorker(appContext: Context, workerParams: WorkerParameters, private val cloud: Cloud = Cloud())
-    : CoroutineWorker(appContext, workerParams) {
+class SendLoginLinkEmailWorker(
+    appContext: Context,
+    workerParams: WorkerParameters,
+    private val cloud: Cloud = Cloud()
+) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         requestLoginLinkEmail(cloud).toListenableWorkerResult()
     }

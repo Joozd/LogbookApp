@@ -1,12 +1,14 @@
 package nl.joozd.logbookapp.comm
 
-import android.util.Log
+
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 
-fun handleServerResult(serverResult: String?): CloudFunctionResult =
+fun handleServerResult(serverResult: ByteArray?) = handleServerResult(serverResult?.toString())
+
+fun handleServerResult(serverResult: String?): CloudFunctionResult? =
     when(serverResult){
         JoozdlogCommsKeywords.OK  -> CloudFunctionResult.OK
 
@@ -20,10 +22,10 @@ fun handleServerResult(serverResult: String?): CloudFunctionResult =
         JoozdlogCommsKeywords.NOT_LOGGED_IN -> handleNotLoggedInSituation()
         JoozdlogCommsKeywords.USER_ALREADY_EXISTS -> handleUserAlreadyExists()
 
-        else -> {
-            Log.e("HandleServerResult", "cannot handle response from server: $serverResult")
-            CloudFunctionResult.CONNECTION_ERROR
-        }
+        // null means something else was sent by server; probably data that we want to receive.
+        // This way, we can check a serverResult for one of the above responses.
+        // example: val x = readFromServer(); handleServerResult(x)?.let { return it }; doSomethingWith(x)
+        else -> null
     }
 
 private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
@@ -63,7 +65,7 @@ private fun handleBadLoginData(): CloudFunctionResult {
 private fun handleNotLoggedInSituation(): CloudFunctionResult {
     MessageCenter.commitMessage {
         titleResource = R.string.login_error
-        descriptionResource = R.string.not_signed_in
+        descriptionResource = R.string.not_signed_in_bug_please_tell_joozd
         setPositiveButton(android.R.string.ok){ }
     }
     return CloudFunctionResult.SERVER_REFUSED

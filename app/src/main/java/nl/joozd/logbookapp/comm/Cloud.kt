@@ -7,7 +7,7 @@ import nl.joozd.joozdlogcommon.*
 import nl.joozd.joozdlogcommon.comms.Protocol
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.serializing.longFromBytes
 import nl.joozd.serializing.packSerializable
@@ -62,7 +62,7 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
             require(newKey.size == Protocol.KEY_SIZE) // maybe handle this a bit more gracefully? Should not happen anyway.
             val r = login(username, currentKey)
             if(r != CloudFunctionResult.OK) return r
-            return changePasswordOnServer(newKey, EmailPrefs.emailAddress())
+            return changePasswordOnServer(newKey, ServerPrefs.emailAddress())
         }
 
     /**
@@ -171,7 +171,7 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
     private fun generateLoginDataWithEmail(username: String? = null, key: ByteArray? = null, email: String? = null): LoginDataWithEmail? {
         return LoginDataWithEmail(username ?: Prefs.username ?: return null,
             key ?: Prefs.key ?: return null,
-            BasicFlight.VERSION.version, email ?: EmailPrefs.emailAddress)
+            BasicFlight.VERSION.version, email ?: ServerPrefs.emailAddress)
     }
 
     // all client usage should use this function so locking is properly taken care of.

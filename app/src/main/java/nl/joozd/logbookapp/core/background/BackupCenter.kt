@@ -17,7 +17,8 @@ import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
-import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.extensions.toDateStringForFiles
 import nl.joozd.logbookapp.ui.fragments.BackupNotificationFragment
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
@@ -68,7 +69,7 @@ class BackupCenter {
     }
 
     private val backupActionFlow: Flow<BackupAction> =
-        combine(BackupPrefs.nextBackupNeededFlow, TaskFlags.sendBackupEmailFlow, EmailPrefs.backupEmailEnabledFlow) {
+        combine(BackupPrefs.nextBackupNeededFlow, TaskFlags.sendBackupEmailFlow, backupEmailEnabledFlow()) {
             backupNeededAt, emailBackupAlreadyScheduled, emailBackupEnabled ->
                 val backupOverdueBy = Instant.now().epochSecond - backupNeededAt
                 when {
@@ -79,6 +80,11 @@ class BackupCenter {
                     else -> BackupAction.SCHEDULE(backupOverdueBy * -1)
                 }
         }
+
+    private fun backupEmailEnabledFlow() = combine(ServerPrefs.emailAddressFlow, ServerPrefs.emailVerifiedFlow, Prefs.backupFromCloudFlow){
+            address, verified, enabled ->
+        address.isNotBlank() && verified && enabled
+    }
 
     private fun backupEmailNeeded(backupOverdueBy: Long, alreadyScheduled: Boolean,  backupFromCloudEnabled: Boolean) =
         backupOverdueBy > 0                             // backup is overdue

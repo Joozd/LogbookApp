@@ -10,14 +10,14 @@ import nl.joozd.logbookapp.comm.confirmEmail
 import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.comm.ServerFunctionResult
 import nl.joozd.logbookapp.core.usermanagement.checkConfirmationString
-import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.utils.DispatcherProvider
 
 
 class ConfirmEmailWorker(appContext: Context, workerParams: WorkerParameters, private val cloud: Cloud = Cloud())
     : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result = withContext(DispatcherProvider.io()) {
-        EmailPrefs.emailConfirmationStringWaiting().takeIf{ checkConfirmationString(it) }?.let{ email ->
+        ServerPrefs.emailConfirmationStringWaiting().takeIf{ checkConfirmationString(it) }?.let{ email ->
             return@withContext confirmEmail(email, cloud).also{
                 if (it == ServerFunctionResult.SUCCESS)
                     MessagesWaiting.postEmailConfirmed(true)

@@ -27,7 +27,7 @@ import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.comm.*
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.generateKey
 
@@ -77,7 +77,7 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
      * @param newEmailAddress - the email address to store. This is NOT checked to see if it is a valid email address.
      */
     fun changeEmailAddress(newEmailAddress: String) {
-        EmailPrefs.emailAddress = newEmailAddress
+        ServerPrefs.emailAddress = newEmailAddress
         requestEmailVerificationMail()
     }
 
@@ -124,7 +124,7 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
     suspend fun confirmEmail(confirmationString: String) {
         if (checkConfirmationString(confirmationString))
             withContext(DispatcherProvider.io()){
-                EmailPrefs.emailConfirmationStringWaiting = confirmationString
+                ServerPrefs.emailConfirmationStringWaiting = confirmationString
                 TaskFlags.verifyEmailCode = true
             }
         else MessagesWaiting.postBadVerificationCodeClicked(true)
@@ -132,12 +132,12 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
 
     private fun cancelEmailCodeVerification() {
         TaskFlags.postVerifyEmailCode(false)
-        EmailPrefs.postEmailConfirmationStringWaiting("")
+        ServerPrefs.postEmailConfirmationStringWaiting("")
     }
 
     fun invalidateEmail(){
-        EmailPrefs.postEmailAddress("")
-        EmailPrefs.postEmailVerified(false)
+        ServerPrefs.postEmailAddress("")
+        ServerPrefs.postEmailVerified(false)
         Prefs.postBackupFromCloud(false)
     }
 

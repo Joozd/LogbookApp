@@ -38,7 +38,7 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.core.DarkModeCenter
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -70,9 +70,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val usernameFlow = Prefs.usernameFlow
 
-    private val emailAddressFlow = EmailPrefs.emailAddressFlow.notNullFlow()
+    private val emailAddressFlow = ServerPrefs.emailAddressFlow.notNullFlow()
 
-    private val emailVerifiedFlow = EmailPrefs.emailVerifiedFlow.notNullFlow()
+    private val emailVerifiedFlow = ServerPrefs.emailVerifiedFlow.notNullFlow()
     val emailDataFlow = buildEmailDataFlow()
 
     val getNamesFromRostersFlow = Prefs.getNamesFromRostersFlow.notNullFlow()
@@ -91,7 +91,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
 
     val emailGoodAndVerified
-        get() = EmailPrefs.emailAddress.isNotBlank() && EmailPrefs.emailVerified
+        get() = ServerPrefs.emailAddress.isNotBlank() && ServerPrefs.emailVerified
 
 
     /*********************************************************************************************

@@ -3,12 +3,14 @@ package nl.joozd.logbookapp.data.sharedPrefs
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 
-object EmailPrefs: JoozdLogPreferences() {
-    override val preferencesFileKey = "nl.joozd.logbookapp.EMAIL_PREFS_KEY"
+object ServerPrefs: JoozdLogPreferences() {
+    override val preferencesFileKey = "nl.joozd.logbookapp.SERVER_PREFS_KEY"
 
     /*
     private const val XXXXXXXXXX = "XXXXXXXXXX"
      */
+
+    private const val MOST_RECENT_SYNC_EPOCH_SECOND = "MOST_RECENT_SYNC_EPOCH_SECOND"
 
     private const val EMAIL_ADDRESS = "EMAIL_ADDRESS"
     var emailAddress by JoozdLogSharedPreferenceNotNull(EMAIL_ADDRESS,"")
@@ -35,9 +37,5 @@ object EmailPrefs: JoozdLogPreferences() {
     val emailVerifiedFlow by PrefsFlow(EMAIL_VERIFIED, false)
     fun postEmailVerified(value: Boolean) = post(EMAIL_VERIFIED, value)
 
-    val backupEmailEnabledFlow = combine(emailAddressFlow, emailVerifiedFlow, Prefs.backupFromCloudFlow){
-        addr, verified, enabled ->
-        addr.isNotBlank() && verified && enabled
-    }
-
+    val mostRecentSyncEpochSecond by JoozdlogSharedPreferenceDelegate(MOST_RECENT_SYNC_EPOCH_SECOND, -1L)
 }

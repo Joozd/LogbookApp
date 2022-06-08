@@ -1,14 +1,9 @@
 package nl.joozd.logbookapp.core.background
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.workmanager.userManagementWorkers.ServerFunctionsWorkersHub
 
 /**
@@ -67,7 +62,7 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
 
 
 
-    private val validEmailFlow = combine (EmailPrefs.emailAddressFlow, EmailPrefs.emailVerifiedFlow){
+    private val validEmailFlow = combine (ServerPrefs.emailAddressFlow, ServerPrefs.emailVerifiedFlow){
         address, verified -> address.isNotBlank() && verified
     }
 
@@ -75,7 +70,7 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
         useCloud, acceptedTerms -> useCloud && acceptedTerms
     }
 
-    private fun emailConfirmationWantedFlow() = combine(TaskFlags.verifyEmailCodeFlow, useCloudFlow, EmailPrefs.emailConfirmationStringWaitingFlow){
+    private fun emailConfirmationWantedFlow() = combine(TaskFlags.verifyEmailCodeFlow, useCloudFlow, ServerPrefs.emailConfirmationStringWaitingFlow){
         wanted, enabled, value -> wanted && enabled && value.isNotBlank()
     }
 
@@ -83,7 +78,7 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
         needed, enabled -> needed && enabled
     }
 
-    private fun emailUpdateWantedFlow() = combine(TaskFlags.updateEmailWithServerFlow, useCloudFlow, EmailPrefs.emailAddressFlow){
+    private fun emailUpdateWantedFlow() = combine(TaskFlags.updateEmailWithServerFlow, useCloudFlow, ServerPrefs.emailAddressFlow){
         wanted, enabled, address -> wanted && enabled && address.isNotBlank()
     }
 
@@ -94,4 +89,6 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
     private fun backupEmailWantedFlow() = combine(TaskFlags.sendBackupEmailFlow, useCloudFlow, validEmailFlow){
         wanted, enabled, valid -> wanted && enabled && valid
     }
+
+
 }

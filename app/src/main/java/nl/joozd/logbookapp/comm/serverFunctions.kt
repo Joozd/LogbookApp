@@ -14,7 +14,7 @@ import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.sharedPrefs.DataVersions
-import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.generateKey
@@ -59,7 +59,7 @@ suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud()): ServerFunctionRe
         getEmailAddressFromPrefs()?.let{ emailAddress ->
             sendEmailAddressToServer(loginData, emailAddress, cloud).also{
                 if (it.isOK()) {
-                    EmailPrefs.postEmailVerified(false)
+                    ServerPrefs.postEmailVerified(false)
                     TaskFlags.postUpdateEmailWithServer(false)
                 }
             }
@@ -76,8 +76,8 @@ suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud()): ServerFunctionRe
 suspend fun confirmEmail(confirmationString: String, cloud: Cloud = Cloud()): ServerFunctionResult =
     sendEmailConfirmationCode(confirmationString, cloud).also{
         if (it == ServerFunctionResult.SUCCESS) withContext (DispatcherProvider.io()) {
-            EmailPrefs.emailVerified = true // blocking is OK in this context
-            EmailPrefs.emailConfirmationStringWaiting = "" // blocking is OK in this context
+            ServerPrefs.emailVerified = true // blocking is OK in this context
+            ServerPrefs.emailConfirmationStringWaiting = "" // blocking is OK in this context
             TaskFlags.verifyEmailCode = false // blocking is OK in this context
         }
     }
@@ -168,7 +168,7 @@ private suspend fun sendEmailConfirmationCode(confirmationString: String, cloud:
 
 private suspend fun resetEmailCodeVerificationFlag() = withContext(DispatcherProvider.io()){
     TaskFlags.verifyEmailCode = false // blocking is OK in this context
-    EmailPrefs.emailConfirmationStringWaiting = "" // // blocking is OK in this context
+    ServerPrefs.emailConfirmationStringWaiting = "" // // blocking is OK in this context
 }
 
 private suspend fun sendEmailAddressToServer(loginData: UsernameWithKey, emailAddress: String, cloud: Cloud): ServerFunctionResult =
@@ -183,19 +183,19 @@ private suspend fun createNewUserOnServer(loginData: UsernameWithKey, cloud: Clo
 
 // If there is no email address stored, this will handle it (eg. prompt user to enter email address so requested calling function can be performed)
 private suspend fun getEmailAddressFromPrefs(): String? =
-    EmailPrefs.emailAddress().ifBlank {
+    ServerPrefs.emailAddress().ifBlank {
         // Fallback handling of no email address entered when one is needed.
         // Any functions being called should only be triggered when an emal address is entered.
         // Therefore, this should only happen after user triggered an action in a way unforeseen at the time of this writing
         Log.e("getEmailAddressFromPrefs", "getEmailAddressFromPrefs() was called but an EmailPrefs.emailAddress is blank. User is notified to fix this.")
         MessagesWaiting.postNoEmailEntered(true) // this will trigger display of "no email entered" message to user.
-        EmailPrefs.emailVerified = false
+        ServerPrefs.emailVerified = false
 
         null
     }
 
 private fun resetEmailData() {
-    EmailPrefs.postEmailVerified(false)
+    ServerPrefs.postEmailVerified(false)
     UserManagement().requestEmailVerificationMail()
 }
 

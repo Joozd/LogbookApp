@@ -31,7 +31,7 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityE
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
-import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import java.util.*
 
 class NewUserActivityViewModel: JoozdlogActivityViewModel() {
@@ -217,11 +217,11 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      * [PAGE_EMAIL] functions / variables
      *******************************************************************************************/
 
-    var email1 = EmailPrefs.emailAddress.also{
+    var email1 = ServerPrefs.emailAddress.also{
         if (it.isNotEmpty()) continueButtonEnabledList[PAGE_EMAIL] = true // if email already set, user can click 'continue' instead of skip.
     }
         private set
-    var email2 = EmailPrefs.emailAddress
+    var email2 = ServerPrefs.emailAddress
         private set
 
     /**

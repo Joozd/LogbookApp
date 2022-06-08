@@ -8,7 +8,7 @@ import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
-class IntentHandler(private val intent: Intent) {
+class IntentHandler(intent: Intent) {
     private val uri: Uri? = intent.data
 
     /**
@@ -30,14 +30,14 @@ class IntentHandler(private val intent: Intent) {
     // Handling a login link means just saving the stored data.
     // Any problems with the data (i.e. bad login/pass combo) will arise when anything is done with it
     // so any problems will be known to user when he needs to know.
-    suspend fun handleLoginLink() {
+    private suspend fun handleLoginLink() {
         getLoginLinkFromIntent()?.let {
             showLoginDataSavedMessage()
             storeNewLoginData(makeLoginPassPair(it))
         }
     }
 
-    suspend fun handleEmailCodeConfirmation(){
+    private suspend fun handleEmailCodeConfirmation(){
         getEmailConfirmationCodeFromIntent()?.let{
             showEmailConfirmationSheduledMessage()
             UserManagement().confirmEmail(it)

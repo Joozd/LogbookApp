@@ -8,10 +8,11 @@ import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.core.usermanagement.UsernameWithKey
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
-import nl.joozd.logbookapp.core.usermanagement.ServerFunctionResult
 import nl.joozd.logbookapp.core.usermanagement.checkConfirmationString
+import nl.joozd.logbookapp.data.FlightsSynchronizer
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.sharedPrefs.DataVersions
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
@@ -32,7 +33,7 @@ suspend fun generateNewUserAndCreateOnServer(cloud: Cloud = Cloud()): ServerFunc
         when (createNewUserOnServer(loginData, cloud)) {
                 ServerFunctionResult.SUCCESS -> {
                     saveLoginDataAsNewUser(loginData)
-                    TaskFlags.postCreateNewUser(false) // blocking is OK in this context
+                    TaskFlags.postCreateNewUser(false)
                     ServerFunctionResult.SUCCESS
                 }
                 ServerFunctionResult.RETRY -> ServerFunctionResult.RETRY
@@ -57,7 +58,7 @@ suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud()): ServerFunctionRe
     UsernameWithKey.fromPrefs()?.let { loginData ->
         getEmailAddressFromPrefs()?.let{ emailAddress ->
             sendEmailAddressToServer(loginData, emailAddress, cloud).also{
-                if (it()) {
+                if (it.isOK()) {
                     EmailPrefs.postEmailVerified(false)
                     TaskFlags.postUpdateEmailWithServer(false)
                 }
@@ -92,7 +93,7 @@ suspend fun requestBackupMail(cloud: Cloud = Cloud()): ServerFunctionResult =
     UsernameWithKey.fromPrefs()?.let { uk ->
         getEmailAddressFromPrefs()?.let { email ->
             cloud.requestBackupEmail(uk.username, uk.key, email).correspondingServerFunctionResult().also{
-                if(it())
+                if(it.isOK())
                     TaskFlags.postSendBackupEmail(false)
             }
         }
@@ -109,7 +110,7 @@ suspend fun requestLoginLinkEmail(cloud: Cloud = Cloud()): ServerFunctionResult 
     UsernameWithKey.fromPrefs()?.let { uk ->
         getEmailAddressFromPrefs()?.let { email ->
             cloud.requestLoginLinkMail(uk.username, uk.key, email).correspondingServerFunctionResult().also{
-                if(it())
+                if(it.isOK())
                     TaskFlags.postSendLoginLink(false)
             }
         }
@@ -128,7 +129,7 @@ suspend fun getTimeFromServer(cloud: Cloud = Cloud()): Long? =
 suspend fun updateDataFiles(server: HTTPServer,
                             aircraftRepository: AircraftRepository = AircraftRepository.instance,
                             airportRepository: AirportRepository = AirportRepository.instance
-): ServerFunctionResult{
+): ServerFunctionResult {
     val metaData = server.getDataFilesMetaData() ?: return ServerFunctionResult.RETRY
     if(metaData.aircraftTypesVersion > DataVersions.aircraftTypesVersion()){
         aircraftRepository.updateAircraftTypes(server.getAircraftTypes(metaData) ?: return ServerFunctionResult.RETRY)
@@ -147,13 +148,20 @@ suspend fun updateDataFiles(server: HTTPServer,
     return ServerFunctionResult.SUCCESS
 }
 
+suspend fun syncFlights(server: Cloud = Cloud(), repository: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance): ServerFunctionResult =
+    //This has its own class as it would make too big a function.
+    FlightsSynchronizer(server, repository).synchronizeIfNotSynced().also{
+        if (it.isOK()) TaskFlags.syncFlights(false)
+    }
+
+
 
 private suspend fun sendEmailConfirmationCode(confirmationString: String, cloud: Cloud): ServerFunctionResult {
     // If bad data is sent to server (server cannot discern between malformed data in transport or malformed data because bad data was sent)
     // we will get into an endless loop, se we check if data is parsable by server here.
     require(checkConfirmationString(confirmationString)) { "Bad confirmation string $confirmationString received, this should have been checked by calling function" }
     return cloud.confirmEmail(confirmationString).correspondingServerFunctionResult().also {
-        if (it())
+        if (it.isOK())
             resetEmailCodeVerificationFlag()
     }
 }
@@ -196,11 +204,5 @@ private fun storeLoginData(username: String, key: ByteArray) {
     Prefs.username = username
     Prefs.key = key
     Prefs.postLastUpdateTime(-1)
-}
-
-private fun CloudFunctionResult.correspondingServerFunctionResult(): ServerFunctionResult = when(this){
-    CloudFunctionResult.OK -> ServerFunctionResult.SUCCESS
-    CloudFunctionResult.CONNECTION_ERROR -> ServerFunctionResult.RETRY
-    CloudFunctionResult.SERVER_REFUSED -> ServerFunctionResult.FAILURE
 }
 

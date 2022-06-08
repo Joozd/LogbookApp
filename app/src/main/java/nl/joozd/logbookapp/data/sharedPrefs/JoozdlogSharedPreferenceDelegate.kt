@@ -23,11 +23,11 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private
             get() = readBlocking()
             set(value) = writeBlocking(value)
 
-        fun flow(): Flow<T> = dataStore.data.map { p ->
+        val flow: Flow<T> get() = dataStore.data.map { p ->
             p[prefsKey] ?: defaultValue
         }
 
-        suspend fun value(): T = flow().first()
+        suspend fun value(): T = flow.first()
 
         fun postValue(value: T) = MainScope().launch {
             setValue(value)

@@ -23,8 +23,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.commit
+import androidx.lifecycle.asLiveData
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivityFeedbackBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
@@ -46,104 +49,81 @@ class FeedbackActivity : JoozdlogActivity() {
                 title = getString(R.string.feedback)
             }
 
-            //reset EditTexts to anything already entered there on recreate
-            feedbackEditText.setText(viewModel.feedbackText)
-            contactEditText.setText(viewModel.contactInfo)
-
-
-            //update typed text in viewModel during typing
-            feedbackEditText.onTextChanged {
-                viewModel.updateFeedbackText(it)
-            }
-
-            contactEditText.onTextChanged {
-                viewModel.updateContactText(it)
-            }
-
-            // load joozdlog_todo_list.txt in LiveData in viewModel and show it in a [TextDisplayDialog]
-            knownIssuesButton.setOnClickListener {
-                viewModel.loadKnownIssuesLiveData(R.raw.joozdlog_todo_list)
-                supportFragmentManager.commit {
-                    add(R.id.layoutBelowToolbar, TextDisplayDialog(R.string.joozdlog_todo_title, viewModel.knownIssuesLiveData), null)
-                    addToBackStack(null)
-                }
-            }
-
-            youCanAlsoSendAnEmailTextview.setOnClickListener {
-                Intent(Intent.ACTION_SENDTO).apply{
-                    type = "*/*"
-                    data = Uri.parse("mailto:")
-                    putExtra(Intent.EXTRA_EMAIL, arrayOf("joozdlog@joozd.nl"))
-                    putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback))
-                }.let{
-                    if (it.resolveActivity(packageManager) != null){
-                        startActivity(it)
-                    } else toast ("No email app found")
-                }
-            }
-
-            submitButton.setOnClickListener {
-                if (viewModel.feedbackText.isNotBlank())
-                    confirmSubmitFeedback()
-                else emptyFeedbackDialog()
-            }
-
-
-            viewModel.feedbackEvent.observe(activity){
-                when (it.getEvent()){
-                    GeneralEvents.DONE -> finish()
-                    GeneralEvents.ERROR -> {
-                        when (it.getInt()){
-                            FeedbackActivityViewModel.NO_INTERNET -> noInternetDialog()
-                            FeedbackActivityViewModel.CONNECTION_ERROR -> noServerdialog()
-                            FeedbackActivityViewModel.EMPTY_FEEDBACK -> emptyFeedbackDialog()
-                            else -> toast("UNHANDLED ERROR aub")
-                        }
-                    }
-                }
-            }
+            collectFlows()
+            setOnTextChangedListeners()
+            setOnClickListeners()
 
             setContentView(root)
         }
     }
 
-    /**
-     * Show dialog about not having an internet connection
-     */
-    private fun noInternetDialog() = JoozdlogAlertDialog().show(activity){
-        titleResource = R.string.no_internet
-        messageResource = R.string.need_internet
-        setPositiveButton(android.R.string.ok) { finish() }
+    private fun ActivityFeedbackBinding.setOnClickListeners() {
+        knownIssuesButton.setOnClickListener {
+            viewModel.loadKnownIssuesLiveData(R.raw.joozdlog_todo_list)
+            supportFragmentManager.commit {
+                add(R.id.layoutBelowToolbar, TextDisplayDialog(R.string.joozdlog_todo_title, viewModel.knownIssuesFlow.asLiveData()), null)
+                addToBackStack(null)
+            }
+        }
+
+        youCanAlsoSendAnEmailTextview.setOnClickListener {
+            launchSendEmailIntent()
+        }
+
+        submitButton.setOnClickListener {
+            confirmSubmitFeedback(feedbackEditText.text.toString())
+        }
     }
 
-    /**
-     * Show dialog about server connection problems
-     */
-    private fun noServerdialog() = JoozdlogAlertDialog().show(activity){
-        titleResource = R.string.no_internet
-        messageResource = R.string.server_problem_message
-        setPositiveButton(android.R.string.ok) { finish() }
+    private fun launchSendEmailIntent() {
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            setDataAndType(Uri.parse("mailto:"), "*/*")
+            putExtra(Intent.EXTRA_EMAIL, arrayOf("joozdlog@joozd.nl"))
+            putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback))
+        }
+        intent.resolveActivity(packageManager)?.let{
+            startActivity(intent)
+        }?: toast("No email app found")
+
     }
 
-    /**
-     * Show dialog about feedback not allowed to be empty
-     */
-    private fun emptyFeedbackDialog() = JoozdlogAlertDialog().show(activity){
-        titleResource = R.string.empty_feedback
-        messageResource = R.string.empty_feedback_message
-        setPositiveButton(android.R.string.ok)
+    private fun ActivityFeedbackBinding.collectFlows() {
+        Prefs.feedbackWaiting.flow.launchCollectWhileLifecycleStateStarted { feedbackEditText.setText(it) }
+        Prefs.feedbackContactInfoWaiting.flow.launchCollectWhileLifecycleStateStarted { contactEditText.setText(it) }
+
+        viewModel.finishedFlow.launchCollectWhileLifecycleStateStarted{
+            if (it)
+                showFeedbackWillBeSubmittedDialog()
+        }
+    }
+
+    private fun ActivityFeedbackBinding.setOnTextChangedListeners() {
+        feedbackEditText.onTextChanged {
+            submitButton.isEnabled = it.isNotBlank()
+            viewModel.enteredFeedback = it
+        }
+
+        contactEditText.onTextChanged {
+            viewModel.enteredContactInfo = it
+        }
+    }
+
+    private fun showFeedbackWillBeSubmittedDialog() = AlertDialog.Builder(this).apply{
+        setTitle(R.string.submit)
+        setMessage(R.string.your_feedback_will_be_submitted)
+        setPositiveButton(android.R.string.ok){ _, _ -> finish() }
     }
 
     /**
      * Show dialog asking if this is indeed the feedback they want to submit
      */
-    private fun confirmSubmitFeedback() = JoozdlogAlertDialog().show(activity){
-        titleResource = R.string.submit_feedback_qmk
-        message = viewModel.feedbackText
-        setPositiveButton(android.R.string.ok){
+    private fun confirmSubmitFeedback(feedback: String) = AlertDialog.Builder(this).apply{
+        setTitle(R.string.submit_feedback_qmk)
+        setMessage(feedback)
+        setPositiveButton(android.R.string.ok){ _, _ ->
             viewModel.submitClicked()
         }
-        setNegativeButton(android.R.string.cancel)
-    }
+        setNegativeButton(android.R.string.cancel) { _, _ -> }
+    }.create().show()
 
 }

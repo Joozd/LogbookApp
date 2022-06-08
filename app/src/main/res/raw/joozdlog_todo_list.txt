@@ -2,29 +2,7 @@
 JOOZDLOG TODO LIST (in no particular order)
 ******************
 
-Improve email texts
-
-"back" when editing flight now minimzes app, fix that
-
-Custom aircraft + upload to server
-
-Don't add flights from roster if they are already in logbook as completed flights
-
-Names dialog needs improving
-
-Make dialog for name, address etc when exporting PDF logbook
-
-Currencies, limits, max times, etcetera
-
-Totals with nice graphs, stats etc.
-
-Entering a flightnumber - make a copy of the last flight with that number?
-
-sim time start the same as last sim time instead of 0
-
-Notification when doing background work (ie. up/download to server)
-
-Date Picker Dialog needs some work
+Brand new release with no known issues! (I do expect some to arise though)
 
 
 

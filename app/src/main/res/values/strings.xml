@@ -474,6 +474,8 @@
     <string name="here">here</string>
     <string name="feedback">Feedback</string>
     <string name="contact_info_text">Optional contact info (phone/email/etc)</string>
+    <string name="submitting_feedback">Submitting Feedback</string>
+    <string name="your_feedback_will_be_submitted">Your feedback will be submitted. Thank you for helping me make this app even better!</string>
     <string name="contact_info_explanation">All feedback will be read, and I will do my best to answer but I might be too busy/lazy.</string>
     <string name="privacy">Privacy</string>
     <string name="privacy_text">All text entered in this screen will end up in an email to me and may be stored in my inbox until I delete it manually. It will not be saved anywehere else, and nothing will be used for any other purpose than processing/answering your feedback.</string>

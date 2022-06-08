@@ -19,58 +19,38 @@
 
 package nl.joozd.logbookapp.model.viewmodels
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
-import nl.joozd.logbookapp.core.JoozdlogWorkersHubOld
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
+import nl.joozd.logbookapp.core.TaskFlags
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
+import nl.joozd.logbookapp.utils.DispatcherProvider
 
 class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
-    /**
-     * Text entered in feedback text field
-     */
-    private var _feedbackText = Prefs.feedbackWaiting
-    // + exposed getter
-    val feedbackText
-        get() = _feedbackText
+    var enteredFeedback: String? = null
+    var enteredContactInfo: String? = null
 
-    /**
-     * Text entered in contact field
-     */
-    private var _contactInfo = ServerPrefs.emailAddress
-    // + exposed getter
-    val contactInfo
-        get() = _contactInfo
+    val finishedFlow: Flow<Boolean> = MutableStateFlow(false)
+    private var finished by CastFlowToMutableFlowShortcut(finishedFlow)
 
-    private val _knownIssuesLiveData = MutableLiveData("")
-    val knownIssuesLiveData: LiveData<String>
-        get() = _knownIssuesLiveData
-    fun loadKnownIssuesLiveData(source: Int) = viewModelScope.launch(Dispatchers.IO) {
-        _knownIssuesLiveData.postValue(App.instance.resources.openRawResource(source).use{
-            it.reader().readText()
-        })
+    val knownIssuesFlow: Flow<String> = MutableStateFlow("")
+    private var knownIssues by CastFlowToMutableFlowShortcut(knownIssuesFlow)
+
+
+    fun loadKnownIssuesLiveData(source: Int) = viewModelScope.launch {
+        knownIssues = App.instance.resources.openRawResource(source).use{
+            withContext(DispatcherProvider.io()) { it.reader().readText() }
+        }
     }
 
-    fun updateFeedbackText(it: String){ _feedbackText = it }
-    fun updateContactText(it: String){ _contactInfo = it }
-
-    /**
-     * When "submit" is clicked, save [_feedbackText] to [Prefs] and start a worker with [_contactInfo]
-     */
-    fun submitClicked(){
-        Prefs.feedbackWaiting = _feedbackText
-        JoozdlogWorkersHubOld.sendFeedback(_contactInfo)
-        feedback(GeneralEvents.DONE)
-    }
-
-    companion object{
-        const val EMPTY_FEEDBACK = 1
-        const val NO_INTERNET = 2
-        const val CONNECTION_ERROR = 3
+    fun submitClicked() = viewModelScope.launch{
+        enteredFeedback?.let { Prefs.feedbackWaiting(it) }
+        enteredContactInfo?.let { Prefs.feedbackContactInfoWaiting(it) }
+        TaskFlags.feedbackWaiting(true)
+        finished = true
     }
 }

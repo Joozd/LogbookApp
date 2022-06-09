@@ -17,6 +17,7 @@ import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWith
 import nl.joozd.logbookapp.data.sharedPrefs.DataVersions
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.generateKey
@@ -62,7 +63,7 @@ suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud()): ServerFunctionRe
             sendEmailAddressToServer(loginData, emailAddress, cloud).also{
                 if (it.isOK()) {
                     ServerPrefs.postEmailVerified(false)
-                    TaskFlags.postUpdateEmailWithServer(false)
+                    TaskFlags.updateEmailWithServer(false)
                 }
             }
         }
@@ -78,9 +79,8 @@ suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud()): ServerFunctionRe
 suspend fun confirmEmail(confirmationString: String, cloud: Cloud = Cloud()): ServerFunctionResult =
     sendEmailConfirmationCode(confirmationString, cloud).also{
         if (it == ServerFunctionResult.SUCCESS) withContext (DispatcherProvider.io()) {
+            resetEmailCodeVerificationFlag()
             ServerPrefs.emailVerified = true // blocking is OK in this context
-            ServerPrefs.emailConfirmationStringWaiting = "" // blocking is OK in this context
-            TaskFlags.verifyEmailCode = false // blocking is OK in this context
         }
     }
 
@@ -96,7 +96,7 @@ suspend fun requestBackupMail(cloud: Cloud = Cloud()): ServerFunctionResult =
         getEmailAddressFromPrefs()?.let { email ->
             cloud.requestBackupEmail(uk.username, uk.key, email).correspondingServerFunctionResult().also{
                 if(it.isOK())
-                    TaskFlags.postSendBackupEmail(false)
+                    TaskFlags.sendBackupEmail(false)
             }
         }
     } ?: ServerFunctionResult.FAILURE
@@ -113,7 +113,7 @@ suspend fun requestLoginLinkEmail(cloud: Cloud = Cloud()): ServerFunctionResult 
         getEmailAddressFromPrefs()?.let { email ->
             cloud.requestLoginLinkMail(uk.username, uk.key, email).correspondingServerFunctionResult().also{
                 if(it.isOK())
-                    TaskFlags.postSendLoginLink(false)
+                    TaskFlags.sendLoginLink(false)
             }
         }
     } ?: ServerFunctionResult.FAILURE
@@ -157,8 +157,8 @@ suspend fun syncFlights(server: Cloud = Cloud(), repository: FlightRepositoryWit
     }
 
 suspend fun sendFeedback(cloud: Cloud = Cloud()): ServerFunctionResult =
-    (Prefs.feedbackWaiting().nullIfBlank()?.let{ feedback ->
-        cloud.sendFeedback(FeedbackData(feedback, Prefs.feedbackContactInfoWaiting()))
+    (TaskPayloads.feedbackWaiting().nullIfBlank()?.let{ feedback ->
+        cloud.sendFeedback(FeedbackData(feedback, TaskPayloads.feedbackContactInfoWaiting()))
             .correspondingServerFunctionResult()
     }  ?: ServerFunctionResult.SUCCESS)
         .also{ if (it.isOK()) TaskFlags.feedbackWaiting(false) }
@@ -174,9 +174,9 @@ private suspend fun sendEmailConfirmationCode(confirmationString: String, cloud:
     }
 }
 
-private suspend fun resetEmailCodeVerificationFlag() = withContext(DispatcherProvider.io()){
-    TaskFlags.verifyEmailCode = false // blocking is OK in this context
-    ServerPrefs.emailConfirmationStringWaiting = "" // // blocking is OK in this context
+private fun resetEmailCodeVerificationFlag() {
+    TaskFlags.verifyEmailCode(false)
+    TaskPayloads.emailConfirmationStringWaiting("")
 }
 
 private suspend fun sendEmailAddressToServer(loginData: UsernameWithKey, emailAddress: String, cloud: Cloud): ServerFunctionResult =

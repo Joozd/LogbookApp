@@ -40,8 +40,6 @@ object Prefs: JoozdLogPreferences() {
 
     private const val USE_CLOUD = "USE_CLOUD"
     private const val ACCEPTED_CLOUD_TERMS = "ACCEPTED_CLOUD_TERMS"
-    private const val FEEDBACK_WAITING = "FEEDBACK_WAITING"
-    private const val FEEDBACK_CONTACT_INFO_WAITING = "FEEDBACK_CONTACT_INFO_WAITING"
 
 
     /*
@@ -239,8 +237,7 @@ object Prefs: JoozdLogPreferences() {
      * Small things being saved:
      */
 
-    val feedbackWaiting by JoozdlogSharedPreferenceDelegate(FEEDBACK_WAITING, "")
-    val feedbackContactInfoWaiting by JoozdlogSharedPreferenceDelegate(FEEDBACK_CONTACT_INFO_WAITING, "")
+
 
 
     private fun usernameIfSet(name: String) = name.takeIf { usernameResource != USERNAME_NOT_SET }

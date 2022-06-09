@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.combine
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.workmanager.ServerFunctionsWorkersHub
 
 /**
@@ -85,7 +86,7 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
         useCloud, acceptedTerms -> useCloud && acceptedTerms
     }
 
-    private fun emailConfirmationWantedFlow() = combine(TaskFlags.verifyEmailCodeFlow, useCloudFlow, ServerPrefs.emailConfirmationStringWaitingFlow){
+    private fun emailConfirmationWantedFlow() = combine(TaskFlags.verifyEmailCode.flow, useCloudFlow, TaskPayloads.emailConfirmationStringWaiting.flow){
         wanted, enabled, value -> wanted && enabled && value.isNotBlank()
     }
 
@@ -93,15 +94,15 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
         needed, enabled -> needed && enabled
     }
 
-    private fun emailUpdateWantedFlow() = combine(TaskFlags.updateEmailWithServerFlow, useCloudFlow, ServerPrefs.emailAddressFlow){
+    private fun emailUpdateWantedFlow() = combine(TaskFlags.updateEmailWithServer.flow, useCloudFlow, ServerPrefs.emailAddressFlow){
         wanted, enabled, address -> wanted && enabled && address.isNotBlank()
     }
 
-    private fun loginLinkWantedFlow() = combine(TaskFlags.sendLoginLinkFlow, useCloudFlow, validEmailFlow ){
+    private fun loginLinkWantedFlow() = combine(TaskFlags.sendLoginLink.flow, useCloudFlow, validEmailFlow ){
         wanted, enabled, valid -> wanted && enabled && valid
     }
 
-    private fun backupEmailWantedFlow() = combine(TaskFlags.sendBackupEmailFlow, useCloudFlow, validEmailFlow){
+    private fun backupEmailWantedFlow() = combine(TaskFlags.sendBackupEmail.flow, useCloudFlow, validEmailFlow){
         wanted, enabled, valid -> wanted && enabled && valid
     }
 

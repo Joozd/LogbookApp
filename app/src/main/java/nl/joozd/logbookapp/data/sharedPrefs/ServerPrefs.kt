@@ -18,16 +18,6 @@ object ServerPrefs: JoozdLogPreferences() {
     fun postEmailAddress(value: String) = post(EMAIL_ADDRESS, value)
 
     /**
-     * Email confirmation string waiting for a network connection.
-     */
-    private const val EMAIL_CONF_STRING_WAITING = "EMAIL_CONF_STRING_WAITING"
-    var emailConfirmationStringWaiting by JoozdLogSharedPreferenceNotNull(EMAIL_CONF_STRING_WAITING,"")
-    val emailConfirmationStringWaitingFlow by PrefsFlow(EMAIL_CONF_STRING_WAITING, "")
-    fun postEmailConfirmationStringWaiting(value: String) = post(EMAIL_CONF_STRING_WAITING, value)
-    suspend fun emailConfirmationStringWaiting() = emailConfirmationStringWaitingFlow.first()
-
-
-    /**
      * [emailVerified] is true if email verification code was deemed correct by server
      * set this to false if server gives an INCORRECT_EMAIL_ADDRESS error
      */

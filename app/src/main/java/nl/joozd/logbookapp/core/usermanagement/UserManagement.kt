@@ -28,6 +28,7 @@ import nl.joozd.logbookapp.comm.*
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.generateKey
 
@@ -63,11 +64,11 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
 
     //requesting a verification email is done by just re-submitting current email address.
     fun requestEmailVerificationMail(){
-        taskFlags.postUpdateEmailWithServer(true)
+        taskFlags.updateEmailWithServer(true)
     }
 
     fun requestLoginLink(){
-        taskFlags.postSendLoginLink(true)
+        taskFlags.sendLoginLink(true)
     }
 
     /**
@@ -125,15 +126,10 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
     suspend fun confirmEmail(confirmationString: String) {
         if (checkConfirmationString(confirmationString))
             withContext(DispatcherProvider.io()){
-                ServerPrefs.emailConfirmationStringWaiting = confirmationString
-                TaskFlags.verifyEmailCode = true
+                TaskPayloads.emailConfirmationStringWaiting(confirmationString)
+                TaskFlags.verifyEmailCode(true)
             }
         else MessagesWaiting.postBadVerificationCodeClicked(true)
-    }
-
-    private fun cancelEmailCodeVerification() {
-        TaskFlags.postVerifyEmailCode(false)
-        ServerPrefs.postEmailConfirmationStringWaiting("")
     }
 
     fun invalidateEmail(){

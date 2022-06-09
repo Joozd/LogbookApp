@@ -43,12 +43,12 @@ class BackupCenter {
                         is BackupAction.NOTIFY -> {
                             if (backupAction.emailNeeded) {
                                 //try to send a backup email, give it a second to see if it works, else retry.
-                                TaskFlags.postSendBackupEmail(true)
+                                TaskFlags.sendBackupEmail(true)
                                 delay(5000)
                                 makeOrScheduleBackupNotification(activity) // call this recursively, if TaskFlags.sendBackupEmail == true, this will go to [else] statement below this line.
                             } else MessageCenter.pushMessageBarFragment(BackupNotificationFragment())
                         }
-                        BackupAction.EMAIL -> TaskFlags.postSendBackupEmail(true)
+                        BackupAction.EMAIL -> TaskFlags.sendBackupEmail(true)
                         is BackupAction.SCHEDULE -> scheduleBackupNotification(backupAction.delay)
                     }
                 }
@@ -69,7 +69,7 @@ class BackupCenter {
     }
 
     private val backupActionFlow: Flow<BackupAction> =
-        combine(BackupPrefs.nextBackupNeededFlow, TaskFlags.sendBackupEmailFlow, backupEmailEnabledFlow()) {
+        combine(BackupPrefs.nextBackupNeededFlow, TaskFlags.sendBackupEmail.flow, backupEmailEnabledFlow()) {
             backupNeededAt, emailBackupAlreadyScheduled, emailBackupEnabled ->
                 val backupOverdueBy = Instant.now().epochSecond - backupNeededAt
                 when {

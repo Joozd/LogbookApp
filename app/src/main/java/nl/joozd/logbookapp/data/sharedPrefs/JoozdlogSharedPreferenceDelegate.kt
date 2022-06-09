@@ -29,16 +29,11 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private
 
         suspend fun value(): T = flow.first()
 
-        fun postValue(value: T) = MainScope().launch {
-            setValue(value)
-        }
-
         suspend fun setValue(value: T) { // doing this on MainScope is OK as Datastore will give it Dispatchers.IO
             dataStore.edit { p ->
                 p[prefsKey] = value
             }
         }
-
 
         suspend operator fun invoke() = value()
         operator fun invoke(newValue: T) = MainScope().launch { setValue(newValue) }

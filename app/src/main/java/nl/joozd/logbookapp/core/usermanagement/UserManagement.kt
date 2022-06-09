@@ -48,18 +48,13 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         taskFlags.createNewUser(true)
     }
 
-    //blocking IO in DispatcherProvider.io()
-    suspend fun storeNewLoginData(username: String, key: ByteArray) = withContext(DispatcherProvider.io()){
-        Prefs.username = username
-        Prefs.key = key
-        Prefs.lastUpdateTime = -1
-    }
+
 
     //blocking IO in DispatcherProvider.io()
     suspend fun storeNewLoginData(username: String, keyString: String) = withContext(DispatcherProvider.io()){
         Prefs.username = username
         Prefs.keyString = keyString
-        Prefs.lastUpdateTime = -1
+        TaskFlags.syncFlights(true)
     }
 
     //requesting a verification email is done by just re-submitting current email address.
@@ -78,7 +73,7 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
      * @param newEmailAddress - the email address to store. This is NOT checked to see if it is a valid email address.
      */
     fun changeEmailAddress(newEmailAddress: String) {
-        ServerPrefs.emailAddress = newEmailAddress
+        ServerPrefs.emailAddress(newEmailAddress)
         requestEmailVerificationMail()
     }
 
@@ -103,8 +98,6 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         Prefs.useCloud(false)
         Prefs.username = null
         Prefs.keyString = null
-        Prefs.lastUpdateTime = -1
-
     }
 
     fun generateLoginLink(): String? = Prefs.username?.let { username ->
@@ -133,9 +126,8 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
     }
 
     fun invalidateEmail(){
-        ServerPrefs.postEmailAddress("")
-        ServerPrefs.postEmailVerified(false)
-        Prefs.postBackupFromCloud(false)
+        ServerPrefs.emailAddress("")
+        ServerPrefs.emailVerified(false)
     }
 
     /**

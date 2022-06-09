@@ -42,7 +42,7 @@ class BackupCenter {
                     when (backupAction) {
                         is BackupAction.NOTIFY -> {
                             if (backupAction.emailNeeded) {
-                                //try to send a backup email, give it a second to see if it works, else retry.
+                                //try to send a backup email, give it a few seconds so server can send an email, then launch function again. If email was sent, this will end up at SCHEDULE, else emailNeeded will be false as it is already scheduled.
                                 TaskFlags.sendBackupEmail(true)
                                 delay(5000)
                                 makeOrScheduleBackupNotification(activity) // call this recursively, if TaskFlags.sendBackupEmail == true, this will go to [else] statement below this line.
@@ -81,7 +81,7 @@ class BackupCenter {
                 }
         }
 
-    private fun backupEmailEnabledFlow() = combine(ServerPrefs.emailAddressFlow, ServerPrefs.emailVerifiedFlow, Prefs.backupFromCloudFlow){
+    private fun backupEmailEnabledFlow() = combine(ServerPrefs.emailAddress.flow, ServerPrefs.emailVerified.flow, Prefs.backupFromCloud.flow){
             address, verified, enabled ->
         address.isNotBlank() && verified && enabled
     }
@@ -91,6 +91,8 @@ class BackupCenter {
                 && backupFromCloudEnabled
                 && !alreadyScheduled                    // a request for a backup email is not still pending
 
+
+    // This will give an extra day margin if backupFromCloud is supposed to send a backup email, so users don't get a notification while an email is on the way.
     private fun backupNotificationNeeded(backupFromCloud: Boolean, backupOverdueBy: Long) =
         if (backupFromCloud) backupOverdueBy > ONE_DAY_IN_SECONDS
         else backupOverdueBy > 0
@@ -101,8 +103,8 @@ class BackupCenter {
 
         suspend fun makeBackupUri(): Uri {
             val dateString = LocalDate.now().toDateStringForFiles()
-            BackupPrefs.backupIgnoredUntil = 0
-            BackupPrefs.mostRecentBackup = Instant.now().epochSecond
+            BackupPrefs.backupIgnoredUntil(0)
+            BackupPrefs.mostRecentBackup(Instant.now().epochSecond)
             return JoozdlogExport.shareCsvExport("joozdlog_backup_$dateString")
         }
     }

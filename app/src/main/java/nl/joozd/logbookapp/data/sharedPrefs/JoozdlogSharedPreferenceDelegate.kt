@@ -10,33 +10,52 @@ import kotlinx.coroutines.runBlocking
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private val defaultValue: T): ReadOnlyProperty<JoozdLogPreferences, JoozdlogSharedPreferenceDelegate.Pref<T>> {
+class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private val defaultValue: T): ReadOnlyProperty<JoozdLogPreferences, JoozdlogSharedPreferenceDelegate.ReadOnlyPref<T>> {
     private var _instance : Pref<T>? = null
 
+    interface Pref<T: Any>: ReadOnlyPref<T>, WriteablePref<T>{
+        fun <R: Any> mapBothWays(transformer: PrefTransformer<T, R>) =
+            DualMappedPref(this, transformer)
+    }
 
-    class Pref<T: Any>(thisRef: JoozdLogPreferences, key: String, private val defaultValue: T){
+    interface ReadOnlyPref<T>{
+        val flow: Flow<T>
+        suspend operator fun invoke(): T
+        fun <R> map(transform: (T) -> R): ReadOnlyPref<R> =
+            MappedPref(this, transform)
+    }
+
+    interface WriteablePref<T: Any>{
+        var valueBlocking: T
+        suspend fun setValue(value: T) // difference with invoke is that caller can make this blocking or choose context
+        operator fun invoke(newValue: T)
+    }
+
+    class PrefImpl<T: Any>(thisRef: JoozdLogPreferences, key: String, private val defaultValue: T): Pref<T>{
         @Suppress("UNCHECKED_CAST")
         private val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
         private val dataStore = thisRef.dataStore
 
-        var valueBlocking: T
+        override var valueBlocking: T
             get() = readBlocking()
             set(value) = writeBlocking(value)
 
-        val flow: Flow<T> get() = dataStore.data.map { p ->
+        override val flow get() = dataStore.data.map { p ->
             p[prefsKey] ?: defaultValue
         }
 
-        suspend fun value(): T = flow.first()
+        private suspend fun value() = flow.first()
 
-        suspend fun setValue(value: T) { // doing this on MainScope is OK as Datastore will give it Dispatchers.IO
+        override suspend fun setValue(value: T) { // doing this on MainScope is OK as Datastore will give it Dispatchers.IO
             dataStore.edit { p ->
                 p[prefsKey] = value
             }
         }
 
-        suspend operator fun invoke() = value()
-        operator fun invoke(newValue: T) = MainScope().launch { setValue(newValue) }
+        override suspend operator fun invoke() = value()
+        override operator fun invoke(newValue: T) {
+            MainScope().launch { setValue(newValue) }
+        }
 
         private fun readBlocking(): T =
             runBlocking {
@@ -48,7 +67,46 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private
             }
     }
 
+    class MappedPref<T, R>(private val source: ReadOnlyPref<T>, private val transform: (T) -> R): ReadOnlyPref<R>{
+        override val flow: Flow<R>
+            get() = source.flow.map{ transform(it) }
+
+        override suspend fun invoke(): R =
+            transform(source())
+    }
+
+    class DualMappedPref<T: Any, R: Any>(
+        private val source: Pref<T>,
+        private val transformer: PrefTransformer<T, R>
+    ): Pref<R>{
+        override val flow: Flow<R>
+            get() = source.flow.map{ transformer.map(it) }
+
+
+
+        override var valueBlocking: R
+            get() = transformer.map(source.valueBlocking)
+            set(value) { source.valueBlocking = transformer.mapBack(value) }
+
+        override suspend fun setValue(value: R) {
+            source.setValue(transformer.mapBack(value))
+        }
+
+        override suspend fun invoke(): R =
+            transformer.map(source())
+
+        override fun invoke(newValue: R) {
+            source(transformer.mapBack(newValue))
+        }
+    }
+
+
+    interface PrefTransformer<T: Any, R: Any>{
+        fun map(source: T): R
+        fun mapBack(transformedValue: R): T
+    }
+
     override fun getValue(thisRef: JoozdLogPreferences, property: KProperty<*>): Pref<T> = getInstance(thisRef)
 
-    private fun getInstance(thisRef: JoozdLogPreferences) = _instance ?: Pref(thisRef, key, defaultValue)
+    private fun getInstance(thisRef: JoozdLogPreferences) = _instance ?: PrefImpl(thisRef, key, defaultValue)
 }

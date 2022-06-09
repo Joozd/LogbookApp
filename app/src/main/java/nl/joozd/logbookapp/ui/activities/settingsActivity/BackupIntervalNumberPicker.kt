@@ -1,6 +1,12 @@
 package nl.joozd.logbookapp.ui.activities.settingsActivity
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.NumberPicker
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
@@ -12,7 +18,14 @@ class BackupIntervalNumberPicker: NumberPickerDialog() {
      * Override this to actually do something with the picked number
      */
     override fun onNumberPicked(pickedNumber: Int) {
-        Prefs.backupInterval = pickedNumber
+        Prefs.backupInterval(pickedNumber)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        lifecycleScope.launch {
+            selectedValue = Prefs.backupInterval()
+        }
+        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     override val formatter = NumberPicker.Formatter{

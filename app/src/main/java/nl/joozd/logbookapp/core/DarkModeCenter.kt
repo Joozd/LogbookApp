@@ -20,18 +20,18 @@
 package nl.joozd.logbookapp.core
 
 import androidx.appcompat.app.AppCompatDelegate
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 object DarkModeCenter {
-    fun setDarkMode(darkMode: Int){
-        Prefs.darkMode = if (darkMode in SUPPORTED_MODES) darkMode else AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        AppCompatDelegate.setDefaultNightMode(Prefs.darkMode)
+    fun setDarkMode(darkMode: Int) = MainScope().launch {
+        Prefs.darkMode(if (darkMode in SUPPORTED_MODES) darkMode else AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        AppCompatDelegate.setDefaultNightMode(Prefs.darkMode())
     }
 
-    fun getDarkMode() = Prefs.darkMode
-
-    fun setDarkMode(){
-        AppCompatDelegate.setDefaultNightMode(Prefs.darkMode)
+    fun setDarkMode() = MainScope().launch {
+        AppCompatDelegate.setDefaultNightMode(Prefs.darkMode())
     }
 
     private val SUPPORTED_MODES = listOf(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM, AppCompatDelegate.MODE_NIGHT_YES, AppCompatDelegate.MODE_NIGHT_NO)

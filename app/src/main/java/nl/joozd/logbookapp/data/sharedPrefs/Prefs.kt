@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.data.sharedPrefs
 
-import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
@@ -37,7 +36,9 @@ object Prefs: JoozdLogPreferences() {
     private const val NO_CALENDAR_SELECTED = ""
     private const val PASSWORD_SHAREDPREF_KEY = "passwordSharedPrefKey"
 
-
+    private const val GET_NAMES_FROM_ROSTERS = "GET_NAMES_FROM_ROSTERS"
+    private const val STANDARD_TAKEOFF_LANDING_TIMES = "STANDARD_TAKEOFF_LANDING_TIMES"
+    private const val SELECTED_CALENDAR = "SELECTED_CALENDAR"
     private const val USE_CLOUD = "USE_CLOUD"
     private const val ACCEPTED_CLOUD_TERMS = "ACCEPTED_CLOUD_TERMS"
 
@@ -110,13 +111,12 @@ object Prefs: JoozdLogPreferences() {
      * Amount of days that need to have passed for a notice to be shown
      */
     private const val BACKUP_INTERVAL = "BACKUP_INTERVAL"
-    var backupInterval: Int by JoozdLogSharedPreferenceNotNull(BACKUP_INTERVAL,0)
-    val backupIntervalFlow by PrefsFlow(BACKUP_INTERVAL, 0)
-
     private const val BACKUP_FROM_CLOUD = "BACKUP_FROM_CLOUD"
-    var backupFromCloud: Boolean by JoozdLogSharedPreferenceNotNull(BACKUP_FROM_CLOUD,false)
-    val backupFromCloudFlow by PrefsFlow(BACKUP_FROM_CLOUD, false)
-    fun postBackupFromCloud(value: Boolean) = post(BACKUP_FROM_CLOUD, value)
+
+    val backupInterval by JoozdlogSharedPreferenceDelegate(BACKUP_INTERVAL,14)
+
+
+    val backupFromCloud by JoozdlogSharedPreferenceDelegate(BACKUP_FROM_CLOUD,false)
 
     //Instant epochSeconds of most recent backup
     private const val MOST_RECENT_BACKUP = "MOST_RECENT_BACKUP"
@@ -133,42 +133,37 @@ object Prefs: JoozdLogPreferences() {
      **********************/
 
     private const val DARK_MODE = "DARK_MODE"
-    var darkMode: Int by JoozdLogSharedPreferenceNotNull(DARK_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-    val darkModeFlow by PrefsFlow(DARK_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+    val darkMode by JoozdlogSharedPreferenceDelegate(DARK_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
     /**
      * Use ICAO or Iata? True = IATA, false ICAO
      */
     private const val USE_IATA = "USE_IATA"
-    var useIataAirports: Boolean by JoozdLogSharedPreferenceNotNull(USE_IATA, false)
-    val useIataAirportsFlow by PrefsFlow(USE_IATA, false)
+    val useIataAirports by JoozdlogSharedPreferenceDelegate(USE_IATA, false)
 
     /**
      * If true, if PIC name is not set, flight will be marked incomplete (red)
      */
     private const val PIC_NAME_NEEDED = "PIC_NAME_NEEDED"
-    var picNameNeedsToBeSet: Boolean by JoozdLogSharedPreferenceNotNull(PIC_NAME_NEEDED,true)
-    val picNameNeedsToBeSetFlow by PrefsFlow(PIC_NAME_NEEDED, true)
+    val picNameNeedsToBeSet by JoozdlogSharedPreferenceDelegate(PIC_NAME_NEEDED,true)
 
     /**
      * Get planned flights from calendar?
      */
     private const val USE_CAL_SYNC = "USE_CAL_SYNC"
-    var useCalendarSync: Boolean by JoozdLogSharedPreferenceNotNull(USE_CAL_SYNC, false)
-    val useCalendarSyncFlow by PrefsFlow(USE_CAL_SYNC, false)
+    val useCalendarSync by JoozdlogSharedPreferenceDelegate(USE_CAL_SYNC, false)
 
     private const val _CALENDAR_SYNC_TYPE = "_CALENDAR_SYNC_TYPE"
-    private var calendarSyncTypeValue: Int by JoozdLogSharedPreferenceNotNull(_CALENDAR_SYNC_TYPE,
-        CalendarSyncType.CALENDAR_SYNC_NONE.value
-    )
-    val calendarSyncTypeValueFlow  by PrefsFlow(_CALENDAR_SYNC_TYPE, CalendarSyncType.CALENDAR_SYNC_NONE.value)//  get() = getIntFlowForItem(this::_calendarSyncType.name, CalendarSyncType.CALENDAR_SYNC_NONE.value)
+    private val calendarSyncTypeValue by JoozdlogSharedPreferenceDelegate(_CALENDAR_SYNC_TYPE, CalendarSyncType.CALENDAR_SYNC_NONE.value)
 
-    var calendarSyncType: CalendarSyncType
-        get() = makeCalendarSyncType(calendarSyncTypeValue)
-        set(it) {
-            calendarSyncTypeValue = it.value
-        }
-    val calendarSyncTypeFlow = calendarSyncTypeValueFlow.map { makeCalendarSyncType(it)}
+    private val calendarSyncTypeValueFlow  by PrefsFlow(_CALENDAR_SYNC_TYPE, CalendarSyncType.CALENDAR_SYNC_NONE.value)//  get() = getIntFlowForItem(this::_calendarSyncType.name, CalendarSyncType.CALENDAR_SYNC_NONE.value)
+
+    var calendarSyncType = calendarSyncTypeValue.mapBothWays(object : JoozdlogSharedPreferenceDelegate.PrefTransformer<Int, CalendarSyncType>{
+        override fun map(source: Int): CalendarSyncType =
+            makeCalendarSyncType(source)
+        override fun mapBack(transformedValue: CalendarSyncType): Int =
+            transformedValue.value
+    })
 
     private const val CAL_SYNC_ICAL_ADDR = "CAL_SYNC_ICAL_ADDR"
     var calendarSyncIcalAddress: String by JoozdLogSharedPreferenceNotNull(CAL_SYNC_ICAL_ADDR,"")
@@ -179,8 +174,8 @@ object Prefs: JoozdLogPreferences() {
 
     // in epochSeconds
     private const val CAL_DISABLED_UNTIL = "CAL_DISABLED_UNTIL"
-    var calendarDisabledUntil: Long by JoozdLogSharedPreferenceNotNull(CAL_DISABLED_UNTIL,0L)
-    val calendarDisabledUntilFlow by PrefsFlow(CAL_DISABLED_UNTIL, 0L)
+    val calendarDisabledUntil by JoozdlogSharedPreferenceDelegate(CAL_DISABLED_UNTIL,0L)
+
 
     /**
      * CalendarSync days into the future:
@@ -192,9 +187,7 @@ object Prefs: JoozdLogPreferences() {
      * Postpone calendar sync without asking
      */
     private const val CAL_ALWAYS_POSTPONE = "CAL_ALWAYS_POSTPONE"
-    var alwaysPostponeCalendarSync: Boolean by JoozdLogSharedPreferenceNotNull(CAL_ALWAYS_POSTPONE,false)
-    val alwaysPostponeCalendarSyncFlow by PrefsFlow(CAL_ALWAYS_POSTPONE, false)
-
+    val alwaysPostponeCalendarSync by JoozdlogSharedPreferenceDelegate(CAL_ALWAYS_POSTPONE,false)
 
     /**
      * Accept aircraft change from Monthly Overview without confirmation?
@@ -211,25 +204,10 @@ object Prefs: JoozdLogPreferences() {
     /**
      * Add names from rosters?
      */
-    private const val GET_NAMES_FROM_ROSTERS = "GET_NAMES_FROM_ROSTERS"
-    var getNamesFromRosters: Boolean by JoozdLogSharedPreferenceNotNull(GET_NAMES_FROM_ROSTERS, defaultValue = true)
-    val getNamesFromRostersFlow by PrefsFlow(GET_NAMES_FROM_ROSTERS, true)
 
-    /*************************
-     * Other settings
-     *************************/
-
-    //time to allocate to pilot if flying heavy crew and did takeoff or landing
-    private const val STANDARD_TAKEOFF_LANDING_TIMES = "STANDARD_TAKEOFF_LANDING_TIMES"
-    var standardTakeoffLandingTimes: Int by JoozdLogSharedPreferenceNotNull(STANDARD_TAKEOFF_LANDING_TIMES,30)
-    val standardTakeoffLandingTimesFlow by PrefsFlow(STANDARD_TAKEOFF_LANDING_TIMES, 30)
-
-    //Calendar on device that is used to import flights
-    private const val SELECTED_CALENDAR = "SELECTED_CALENDAR"
-    var selectedCalendar: String by JoozdLogSharedPreferenceNotNull(SELECTED_CALENDAR, NO_CALENDAR_SELECTED)
-    val selectedCalendarFlow by PrefsFlow(SELECTED_CALENDAR, NO_CALENDAR_SELECTED)
-
-
+    val getNamesFromRosters by JoozdlogSharedPreferenceDelegate(GET_NAMES_FROM_ROSTERS, defaultValue = true)
+    val standardTakeoffLandingTimes by JoozdlogSharedPreferenceDelegate(STANDARD_TAKEOFF_LANDING_TIMES,30) //time to allocate to pilot if flying heavy crew and did takeoff or landing
+    val selectedCalendar by JoozdlogSharedPreferenceDelegate(SELECTED_CALENDAR, NO_CALENDAR_SELECTED) //Calendar on device that is used to import flights
     val useCloud by JoozdlogSharedPreferenceDelegate(USE_CLOUD,false)
     val acceptedCloudSyncTerms by JoozdlogSharedPreferenceDelegate(ACCEPTED_CLOUD_TERMS, false)
 

@@ -5,6 +5,7 @@ import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 
 fun handleServerResult(serverResult: ByteArray?) = handleServerResult(serverResult?.toString())
 
@@ -29,6 +30,7 @@ fun handleServerResult(serverResult: String?): CloudFunctionResult? =
     }
 
 private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
+    UserManagement().invalidateEmail()
     MessageCenter.commitMessage {
         titleResource = R.string.email
         descriptionResource = R.string.server_reported_email_not_verified_new_mail_will_be_sent

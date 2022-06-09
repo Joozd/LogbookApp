@@ -78,7 +78,7 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
 
 
 
-    private val validEmailFlow = combine (ServerPrefs.emailAddressFlow, ServerPrefs.emailVerifiedFlow){
+    private val validEmailFlow = combine (ServerPrefs.emailAddress.flow, ServerPrefs.emailVerified.flow){
         address, verified -> address.isNotBlank() && verified
     }
 
@@ -94,7 +94,7 @@ class TaskDispatcher: BackgroundTasksDispatcher() {
         needed, enabled -> needed && enabled
     }
 
-    private fun emailUpdateWantedFlow() = combine(TaskFlags.updateEmailWithServer.flow, useCloudFlow, ServerPrefs.emailAddressFlow){
+    private fun emailUpdateWantedFlow() = combine(TaskFlags.updateEmailWithServer.flow, useCloudFlow, ServerPrefs.emailAddress.flow){
         wanted, enabled, address -> wanted && enabled && address.isNotBlank()
     }
 

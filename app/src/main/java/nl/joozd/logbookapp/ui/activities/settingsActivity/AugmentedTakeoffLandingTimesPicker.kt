@@ -1,11 +1,17 @@
 package nl.joozd.logbookapp.ui.activities.settingsActivity
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.NumberPicker
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.dialogs.NumberPickerDialog
 
-class AugmentedNumberPicker: NumberPickerDialog() {
+class AugmentedTakeoffLandingTimesPicker: NumberPickerDialog() {
     fun setValue(value: Int) {
         selectedValue = when (value) {
             in (0..THIRTY) -> value
@@ -14,11 +20,18 @@ class AugmentedNumberPicker: NumberPickerDialog() {
         }
     }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        lifecycleScope.launch {
+            setValue(Prefs.standardTakeoffLandingTimes())
+        }
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
+
     /**
      * Override this to actually do something with the picked number
      */
     override fun onNumberPicked(pickedNumber: Int) {
-        Prefs.standardTakeoffLandingTimes = unFormat(pickedNumber)
+        Prefs.standardTakeoffLandingTimes(unFormat(pickedNumber))
     }
 
     override val formatter = NumberPicker.Formatter{

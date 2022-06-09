@@ -41,18 +41,16 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
     val statusFlow: StateFlow<EmailDialogStatus?> = MutableStateFlow(null)
     private var status by CastFlowToMutableFlowShortcut(statusFlow)
 
-    val email1Flow: StateFlow<String> = MutableStateFlow(ServerPrefs.emailAddress)
-    val email2Flow: StateFlow<String> = MutableStateFlow(ServerPrefs.emailAddress)
+    val email1Flow: StateFlow<String> = MutableStateFlow("").apply{ viewModelScope.launch { value = ServerPrefs.emailAddress() } }
+    val email2Flow: StateFlow<String> = MutableStateFlow("").apply{ viewModelScope.launch { value = ServerPrefs.emailAddress() } }
 
     var email1 by CastFlowToMutableFlowShortcut(email1Flow)
     private set
     private var email2 by CastFlowToMutableFlowShortcut(email2Flow)
 
     val canBeAcceptedFlow = combine(email1Flow, email2Flow) { e1, e2 ->
-        println("checking $e1 == $e2 -> ${e1.equals(e2,ignoreCase = true)}")
-        println("matches: ${android.util.Patterns.EMAIL_ADDRESS.matcher(e1).matches()}")
         android.util.Patterns.EMAIL_ADDRESS.matcher(e1).matches()
-                && e1.equals(e2,ignoreCase = true)
+            && e1.equals(e2,ignoreCase = true)
     }
 
     /*
@@ -60,11 +58,12 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
      * Will switch to "VERIFY" if clicking it will lead to a verification mail being sent
      * Initially set to OK if email verified or empty, or VERIFY otherwise
      */
-    val okOrVerifyFlow = email1Flow.map {
-        if (it == ServerPrefs.emailAddress && ServerPrefs.emailVerified || it.isEmpty()) android.R.string.ok
-        else R.string.verify
+    val okOrVerifyFlow = combine(email1Flow, ServerPrefs.emailAddress.flow, ServerPrefs.emailVerified.flow){
+        email1, knownEmail, verified ->
+            if (email1 == knownEmail && verified || email1.isEmpty())
+                android.R.string.ok
+            else R.string.verify
     }
-
 
     fun resetStatus(){
         status = null
@@ -77,24 +76,24 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
      * - If Preferences.emailVerified was false or has just been set to that, call UserManagement.changeEmailAddress()
      * - feeds back DONE to fragment if email changed, OK if nothing happened, so it will close itself
      */
-    fun okClicked(){
+    fun okClicked() = viewModelScope.launch{
         if (email1 != email2) {
             status = EmailDialogStatus.Error(EMAILS_DO_NOT_MATCH)
-            return
+            return@launch
         }
 
         if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email1).matches()
         && email1.isNotBlank()) {
             status = EmailDialogStatus.Error(INVALID_EMAIL_ADDRESS)
-            return
+            return@launch
         }
 
-        if (ServerPrefs.emailAddress.lowercase(Locale.ROOT) != email1)
-            ServerPrefs.emailVerified = false
+        if (ServerPrefs.emailAddress().lowercase(Locale.ROOT) != email1)
+            ServerPrefs.emailVerified(false)
 
-        status = if (!ServerPrefs.emailVerified) {
-            if (email1 != ServerPrefs.emailAddress.lowercase(Locale.ROOT))
-                ServerPrefs.emailAddress = email1
+        status = if (!ServerPrefs.emailVerified()) {
+            if (email1 != ServerPrefs.emailAddress().lowercase(Locale.ROOT))
+                ServerPrefs.emailAddress(email1)
 
             if (email1.isNotBlank()) {
                 viewModelScope.launch {

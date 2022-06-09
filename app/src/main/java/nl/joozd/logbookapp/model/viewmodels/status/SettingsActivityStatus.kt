@@ -4,7 +4,6 @@ import android.net.Uri
 
 sealed class SettingsActivityStatus{
     object SignedOut: SettingsActivityStatus()
-    object LoginLinkCopied: SettingsActivityStatus()
     object AskIfNewAccountNeeded: SettingsActivityStatus()
     object CalendarDialogNeeded: SettingsActivityStatus()
 

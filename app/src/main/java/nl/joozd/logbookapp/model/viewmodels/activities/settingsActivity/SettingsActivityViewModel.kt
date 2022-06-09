@@ -48,21 +48,21 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     val statusFlow: StateFlow<SettingsActivityStatus?> = MutableStateFlow(null)
     private var status by CastFlowToMutableFlowShortcut(statusFlow)
 
-    val useIataFlow get() = Prefs.useIataAirportsFlow.notNullFlow()
-    val picNameRequiredFlow get() = Prefs.picNameNeedsToBeSetFlow.notNullFlow()
-    val standardTakeoffLandingTimesFlow get() = Prefs.standardTakeoffLandingTimesFlow.notNullFlow()
+    val useIataFlow get() = Prefs.useIataAirports.flow
+    val picNameRequiredFlow get() = Prefs.picNameNeedsToBeSet.flow
+    val standardTakeoffLandingTimesFlow get() = Prefs.standardTakeoffLandingTimes.flow
 
-    val backupIntervalFlow = Prefs.backupIntervalFlow.notNullFlow()
-    val backupFromCloudFlow = Prefs.backupFromCloudFlow.notNullFlow()
+    val backupIntervalFlow = Prefs.backupInterval.flow
+    val backupFromCloudFlow = Prefs.backupFromCloud.flow
 
-    val useCalendarSyncFlow = Prefs.useCalendarSyncFlow.notNullFlow()
-    val calendarSyncTypeFlow = Prefs.calendarSyncTypeFlow.notNullFlow()
-    val alwaysPostponeCalendarSyncFlow = Prefs.alwaysPostponeCalendarSyncFlow.notNullFlow()
-    private val calendarDisabledUntilFlow = Prefs.calendarDisabledUntilFlow.notNullFlow()
+    val useCalendarSyncFlow = Prefs.useCalendarSync.flow
+    val calendarSyncTypeFlow = Prefs.calendarSyncType.flow
+    val alwaysPostponeCalendarSyncFlow = Prefs.alwaysPostponeCalendarSync.flow
+    private val calendarDisabledUntilFlow = Prefs.calendarDisabledUntil.flow
 
     val calendarDisabledFlow = calendarDisabledUntilFlow.map { calendarIsDisabledNow(it) }
-    val calendarDisabled: Boolean
-        get() = calendarIsDisabledNow(Prefs.calendarDisabledUntil)
+    suspend fun calendarDisabled(): Boolean =
+        calendarIsDisabledNow(Prefs.calendarDisabledUntil())
 
     val useCloudFlow = Prefs.useCloud.flow
 
@@ -70,17 +70,16 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val usernameFlow = Prefs.usernameFlow
 
-    private val emailAddressFlow = ServerPrefs.emailAddressFlow.notNullFlow()
+    private val emailAddressFlow = ServerPrefs.emailAddress.flow
 
-    private val emailVerifiedFlow = ServerPrefs.emailVerifiedFlow.notNullFlow()
+    private val emailVerifiedFlow = ServerPrefs.emailVerified.flow
     val emailDataFlow = buildEmailDataFlow()
 
-    val getNamesFromRostersFlow = Prefs.getNamesFromRostersFlow.notNullFlow()
+    val getNamesFromRostersFlow = Prefs.getNamesFromRosters.flow.notNullFlow()
 
 
-    val calendarDisabledUntilString: String
-        get(){
-            val time = LocalDateTime.ofInstant(Instant.ofEpochSecond(Prefs.calendarDisabledUntil), ZoneOffset.UTC)
+    suspend fun calendarDisabledUntilString(): String {
+            val time = LocalDateTime.ofInstant(Instant.ofEpochSecond(Prefs.calendarDisabledUntil()), ZoneOffset.UTC)
             return "${time.toDateStringLocalized()} ${time.toTimeStringLocalized()} Z"
         }
 
@@ -90,8 +89,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         get() = AppCompatDelegate.getDefaultNightMode().takeIf{ it in (1..2)} ?: 0
 
 
-    val emailGoodAndVerified
-        get() = ServerPrefs.emailAddress.isNotBlank() && ServerPrefs.emailVerified
+    suspend fun emailGoodAndVerified() =
+        ServerPrefs.emailAddress().isNotBlank() && ServerPrefs.emailVerified()
 
 
     /*********************************************************************************************
@@ -106,81 +105,59 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         DarkModeCenter.setDarkMode(darkMode)
     }
 
-    fun toggleUseIataAirports() {
-        Prefs.useIataAirports = !Prefs.useIataAirports
+    fun toggleUseIataAirports() = viewModelScope.launch {
+        Prefs.useIataAirports(!Prefs.useIataAirports())
     }
 
-    fun toggleRequirePicName(){
-        Prefs.picNameNeedsToBeSet = !Prefs.picNameNeedsToBeSet
+    fun toggleRequirePicName() = viewModelScope.launch {
+        Prefs.picNameNeedsToBeSet(!Prefs.picNameNeedsToBeSet())
     }
 
     /**
      * If [Prefs.useCalendarSync] is true, (switch is on) set it to off
      * else, if a type of sync is selected, switch it to on; if it isn't show dialog (which will switch it on on success)
      */
-    fun setGetFlightsFromCalendarClicked() {
-        if (!Prefs.useCalendarSync) { // if it is switched on from being off
-            Prefs.calendarDisabledUntil = 0
+    fun setGetFlightsFromCalendarClicked() = viewModelScope.launch {
+        if (!Prefs.useCalendarSync()) { // if it is switched on from being off
+            Prefs.calendarDisabledUntil(0)
 
             // If no calendar sync type chosen, show dialog, else just set it to on
-            if (Prefs.calendarSyncType == CalendarSyncType.CALENDAR_SYNC_NONE)
+            if (Prefs.calendarSyncType() == CalendarSyncType.CALENDAR_SYNC_NONE)
                 status = SettingsActivityStatus.CalendarDialogNeeded
             else
-                Prefs.useCalendarSync = true
+                Prefs.useCalendarSync(true)
         }
         else
-            Prefs.useCalendarSync = false
+            Prefs.useCalendarSync(false)
     }
 
-    fun toggleAutoPostponeCalendarSync(){
-        Prefs.alwaysPostponeCalendarSync = !Prefs.alwaysPostponeCalendarSync
+    fun toggleAutoPostponeCalendarSync() = viewModelScope.launch{
+        Prefs.alwaysPostponeCalendarSync(!Prefs.alwaysPostponeCalendarSync())
     }
 
-    fun toggleAddNamesFromRoster(){
-        Prefs.getNamesFromRosters = !Prefs.getNamesFromRosters
+    fun toggleAddNamesFromRoster() = viewModelScope.launch{
+        Prefs.getNamesFromRosters(!Prefs.getNamesFromRosters())
     }
 
-    /*
-    // Not implemented
-    fun setShowOldTimesOnChronoUpdate(it: Boolean) {
-        Preferences.showOldTimesOnChronoUpdate = it
-    }
-    */
-
-    fun useCloudSyncToggled(){
-        Prefs.useCloud(!Prefs.useCloud.valueBlocking)
-        viewModelScope.launch {
-            with(UserManagement()) {
-                if (!isLoggedIn())
-                    createNewUser()
-            }
-            Prefs.lastUpdateTime = 0 // returning to MainActivity will trigger a Sync request if Cloud is enabled
-        }
+    // Toggles useCloud
+    // tells Activity to launch a dialog to create a new user (and show t&c's if needed) if user data is not present and useCloud is toggled to true.
+    fun useCloudSyncToggled() = viewModelScope.launch{
+        val useCloudOnAfterToggle = !Prefs.useCloud()
+        Prefs.useCloud(useCloudOnAfterToggle)
+        if (useCloudOnAfterToggle && !UserManagement().isLoggedIn())
+            status = SettingsActivityStatus.AskIfNewAccountNeeded
     }
 
-    fun forceUseCloud(){
-        Prefs.useCloud(true)
-    }
-
-    fun copyLoginLinkToClipboard(){
-        UserManagement().generateLoginLink()?.let { loginLink ->
-            status =
-            with (App.instance) {
-                (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
-                    ClipData.newPlainText(getString(R.string.login_link_title), loginLink)
-                )
-                SettingsActivityStatus.LoginLinkCopied
-            }
-
-        } ?: SettingsActivityStatus.Error(R.string.not_signed_in_bug_please_tell_joozd)
+    fun forceUseCloud(useCloud: Boolean){
+        Prefs.useCloud(useCloud)
     }
 
     fun dontPostponeCalendarSync(){
-        Prefs.calendarDisabledUntil = 0
+        Prefs.calendarDisabledUntil(0)
     }
 
-    private fun calendarIsDisabledNow(disabledUntil: Long) =
-        Prefs.useCalendarSync && disabledUntil > Instant.now().epochSecond
+    private suspend fun calendarIsDisabledNow(disabledUntil: Long) =
+        Prefs.useCalendarSync() && disabledUntil > Instant.now().epochSecond
 
     private fun buildEmailDataFlow() =
         combine(emailAddressFlow, emailVerifiedFlow){ address, verified ->

@@ -19,6 +19,10 @@
 
 package nl.joozd.logbookapp.ui.activities.settingsActivity
 
+import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -90,7 +94,6 @@ class SettingsActivity : JoozdlogActivity() {
             when(it){
                 null -> { }
                 SettingsActivityStatus.SignedOut -> setLoggedInInfo(Prefs.username)
-                SettingsActivityStatus.LoginLinkCopied -> toast(R.string.login_link_created)
                 SettingsActivityStatus.AskIfNewAccountNeeded -> showNewAccountDialog()
                 SettingsActivityStatus.CalendarDialogNeeded -> showCalendarDialog()
 
@@ -109,7 +112,6 @@ class SettingsActivity : JoozdlogActivity() {
 
         viewModel.useIataFlow.launchCollectWhileLifecycleStateStarted {
             setSettingsUseIataSelector(it)
-
         }
 
         viewModel.useCalendarSyncFlow.launchCollectWhileLifecycleStateStarted{
@@ -207,12 +209,10 @@ class SettingsActivity : JoozdlogActivity() {
     private fun ActivitySettingsBinding.setItemOnClickedListeners() {
         settingsUseIataSelector.setOnClickListener{
             viewModel.toggleUseIataAirports()
-            setSettingsUseIataSelector(Prefs.useIataAirports)
         }
 
         settingsPicNameRequiredSwitch.setOnClickListener {
             viewModel.toggleRequirePicName()
-            settingsPicNameRequiredSwitch.isChecked = Prefs.picNameNeedsToBeSet
         }
 
         settingsGetFlightsFromCalendarSelector.setOnClickListener {
@@ -228,7 +228,6 @@ class SettingsActivity : JoozdlogActivity() {
 
         autoPostponeCalendarSyncSelector.setOnClickListener {
             viewModel.toggleAutoPostponeCalendarSync()
-            autoPostponeCalendarSyncSelector.isChecked = Prefs.alwaysPostponeCalendarSync
         }
 
         dontPostponeTextView.setOnClickListener {
@@ -240,7 +239,12 @@ class SettingsActivity : JoozdlogActivity() {
         }
 
         youAreSignedInAsButton.setOnClickListener {
-            viewModel.copyLoginLinkToClipboard()
+            UserManagement().generateLoginLink()?.let { loginLink ->
+                (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
+                    ClipData.newPlainText(getString(R.string.login_link_title), loginLink)
+                )
+                toast(R.string.login_link_created)
+            }
         }
 
         emailAddressButton.setOnClickListener {
@@ -259,7 +263,6 @@ class SettingsActivity : JoozdlogActivity() {
 
         addNamesFromRosterSwitch.setOnClickListener {
             viewModel.toggleAddNamesFromRoster()
-            addNamesFromRosterSwitch.isChecked = Prefs.getNamesFromRosters
         }
 
         augmentedCrewButton.setOnClickListener { showAugmentedTimesNumberPicker() }
@@ -267,9 +270,11 @@ class SettingsActivity : JoozdlogActivity() {
         backupIntervalButton.setOnClickListener { showBackupIntervalNumberPicker() }
 
         backupFromCloudSwitch.setOnClickListener {
-            toggleBackupFromCloudWithDialogIfNeeded()
-            backupFromCloudSwitch.isChecked = Prefs.backupFromCloud
+            lifecycleScope.launch {
+                toggleBackupFromCloudWithDialogIfNeeded()
+            }
         }
+
 
         backupNowButton.setBackupNowButtonToActive()
     }
@@ -322,23 +327,24 @@ class SettingsActivity : JoozdlogActivity() {
      * If [Prefs.acceptedCloudSyncTerms] it will enable [Prefs.useCloud]
      * if not, it will open a dialog that will allow user to accept terms and if so, sets those both to true.
      */
-    private fun showNewAccountDialog(){
-        JoozdlogAlertDialog().show(activity){
-            titleResource = R.string.cloud_sync_title
-            messageResource = R.string.make_new_account_question
-            setNegativeButton(android.R.string.cancel)
-            setPositiveButton(android.R.string.ok) {
+    private suspend fun showNewAccountDialog(){
+        AlertDialog.Builder(activity).apply{
+
+            setTitle(R.string.cloud_sync_title)
+            setMessage(R.string.make_new_account_question)
+            setNegativeButton(android.R.string.cancel){ _, _ -> viewModel.forceUseCloud(false) }
+            setPositiveButton(android.R.string.ok) { _, _ ->
                 lifecycleScope.launch {
                     UserManagement().createNewUser()
-                }
-                if (Prefs.acceptedCloudSyncTerms.valueBlocking)
-                    viewModel.forceUseCloud()
-                else supportFragmentManager.commit {
-                    add(
-                        R.id.settingsActivityLayout,
-                        CloudSyncTermsDialog(sync = true)
-                    ) // secondary constructor used, works on recreate
-                    addToBackStack(null)
+                    if (Prefs.acceptedCloudSyncTerms())
+                        viewModel.forceUseCloud(true)
+                    else supportFragmentManager.commit {
+                        add(
+                            R.id.settingsActivityLayout,
+                            CloudSyncTermsDialog(sync = true)
+                        ) // secondary constructor used, works on recreate
+                        addToBackStack(null)
+                    }
                 }
             }
         }
@@ -395,12 +401,12 @@ class SettingsActivity : JoozdlogActivity() {
      * Shows/hides Calendar controls if calendar is en/disabled.
      * Has some extra logic for things that should be hidden even if the rest is allowed to be shown again
      */
-    private fun ActivitySettingsBinding.showAllCalendarSyncViews(visible: Boolean){
+    private suspend fun ActivitySettingsBinding.showAllCalendarSyncViews(visible: Boolean){
         val show = if (visible) View.VISIBLE else View.GONE
         calendarSyncTypeButton.visibility = show
         autoPostponeCalendarSyncSelector.visibility = show
-        calendarSyncPostponedTextView.visibility = if (viewModel.calendarDisabled) show else View.GONE
-        dontPostponeTextView.visibility = if (viewModel.calendarDisabled) show else View.GONE
+        calendarSyncPostponedTextView.visibility = if (viewModel.calendarDisabled()) show else View.GONE
+        dontPostponeTextView.visibility = if (viewModel.calendarDisabled()) show else View.GONE
     }
 
     private fun ActivitySettingsBinding.changeCloudSyncItemsVisibility(isVisible: Int){
@@ -427,8 +433,8 @@ class SettingsActivity : JoozdlogActivity() {
             else getStringWithMakeup(R.string.email_button_text_not_verified, emailAddress ?: getString(R.string.no_email_provided))
     }
 
-    private fun ActivitySettingsBinding.showCalendarDisabled(){
-        calendarSyncPostponedTextView.text = getString(R.string.disabled_until, viewModel.calendarDisabledUntilString)
+    private suspend fun ActivitySettingsBinding.showCalendarDisabled(){
+        calendarSyncPostponedTextView.text = getString(R.string.disabled_until, viewModel.calendarDisabledUntilString())
         calendarSyncPostponedTextView.visibility = View.VISIBLE
         dontPostponeTextView.visibility = View.VISIBLE
     }
@@ -456,11 +462,10 @@ class SettingsActivity : JoozdlogActivity() {
     }
 
     private fun showAugmentedTimesNumberPicker(){
-        AugmentedNumberPicker().apply {
+        AugmentedTakeoffLandingTimesPicker().apply {
             title= App.instance.getString(R.string.timeForTakeoffLanding)
             wrapSelectorWheel = false
-            maxValue = AugmentedNumberPicker.EIGHT_HOURS
-            setValue(Prefs.standardTakeoffLandingTimes)
+            maxValue = AugmentedTakeoffLandingTimesPicker.EIGHT_HOURS
         }.show(supportFragmentManager, null)
     }
 
@@ -469,15 +474,15 @@ class SettingsActivity : JoozdlogActivity() {
             title = App.instance.getString(R.string.pick_backup_interval)
             wrapSelectorWheel = false
             maxValue = 365
-            selectedValue = Prefs.backupInterval
+
         }.show(supportFragmentManager, null)
     }
 
-    private fun toggleBackupFromCloudWithDialogIfNeeded(){
+    private suspend fun toggleBackupFromCloudWithDialogIfNeeded(){
         when{
-            Prefs.backupFromCloud -> Prefs.backupFromCloud = false
-            !viewModel.emailGoodAndVerified -> showEmailDialog { Prefs.backupFromCloud = true }
-            else -> Prefs.backupFromCloud = true
+            Prefs.backupFromCloud() -> Prefs.backupFromCloud(false)
+            !viewModel.emailGoodAndVerified() -> showEmailDialog { Prefs.backupFromCloud(true) }
+            else -> Prefs.backupFromCloud(true)
         }
     }
 

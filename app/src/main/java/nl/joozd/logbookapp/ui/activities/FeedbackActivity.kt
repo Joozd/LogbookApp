@@ -28,6 +28,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.asLiveData
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.databinding.ActivityFeedbackBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
@@ -88,8 +89,8 @@ class FeedbackActivity : JoozdlogActivity() {
     }
 
     private fun ActivityFeedbackBinding.collectFlows() {
-        Prefs.feedbackWaiting.flow.launchCollectWhileLifecycleStateStarted { feedbackEditText.setText(it) }
-        Prefs.feedbackContactInfoWaiting.flow.launchCollectWhileLifecycleStateStarted { contactEditText.setText(it) }
+        TaskPayloads.feedbackWaiting.flow.launchCollectWhileLifecycleStateStarted { feedbackEditText.setText(it) }
+        TaskPayloads.feedbackContactInfoWaiting.flow.launchCollectWhileLifecycleStateStarted { contactEditText.setText(it) }
 
         viewModel.finishedFlow.launchCollectWhileLifecycleStateStarted{
             if (it)

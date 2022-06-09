@@ -21,12 +21,12 @@ class ConfirmEmailWorker(appContext: Context, workerParams: WorkerParameters, pr
         TaskPayloads.emailConfirmationStringWaiting().takeIf{ checkConfirmationString(it) }?.let{ email ->
             return@withContext confirmEmail(email, cloud).also{
                 if (it == ServerFunctionResult.SUCCESS)
-                    MessagesWaiting.postEmailConfirmed(true)
+                    MessagesWaiting.emailConfirmed(true)
             }.toListenableWorkerResult()
         }
         // Fallback, this should not happen.
         TaskFlags.verifyEmailCode(false) // no code to verify, will never succeed
-        MessagesWaiting.postBadVerificationCodeSavedBug(true)
+        MessagesWaiting.noVerificationCodeSavedBug(true)
         return@withContext Result.failure()
     }
 }

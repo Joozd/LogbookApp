@@ -129,7 +129,7 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
                 TaskPayloads.emailConfirmationStringWaiting(confirmationString)
                 TaskFlags.verifyEmailCode(true)
             }
-        else MessagesWaiting.postBadVerificationCodeClicked(true)
+        else MessagesWaiting.badVerificationCodeClicked(true)
     }
 
     fun invalidateEmail(){

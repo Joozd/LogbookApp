@@ -19,25 +19,25 @@ class PersistentMessagesDispatcher: BackgroundTasksDispatcher() {
     }
 
     private suspend fun handleNoEmailEntered() {
-        MessagesWaiting.noEmailEnteredFlow.doIfTrueCollected {
+        MessagesWaiting.noEmailEntered.flow.doIfTrueCollected {
             postNoEmailEnteredMessage()
         }
     }
 
     private suspend fun handleNoVerificationCodeSavedBug() {
-        MessagesWaiting.noVerificationCodeSavedBugFlow.doIfTrueCollected {
+        MessagesWaiting.noVerificationCodeSavedBug.flow.doIfTrueCollected {
             postNoVerificationCodeSavedBugMessage()
         }
     }
 
     private suspend fun handleBadVerificationCodeCLicked() {
-        MessagesWaiting.badVerificationCodeClickedFlow.doIfTrueCollected {
+        MessagesWaiting.badVerificationCodeClicked.flow.doIfTrueCollected {
             postBadVerificationCodeClickedMessage()
         }
     }
 
     private suspend fun handleEmailConfirmed() {
-        MessagesWaiting.emailConfirmedFlow.doIfTrueCollected {
+        MessagesWaiting.emailConfirmed.flow.doIfTrueCollected {
             showEmailConfirmedMessage()
         }
     }
@@ -49,7 +49,7 @@ class PersistentMessagesDispatcher: BackgroundTasksDispatcher() {
         MessageCenter.commitMessage {
             titleResource = R.string.no_email
             descriptionResource = R.string.no_email_text
-            setPositiveButton(android.R.string.ok){ MessagesWaiting.postNoEmailEntered(false) }
+            setPositiveButton(android.R.string.ok){ MessagesWaiting.noEmailEntered(false) }
         }
     }
 
@@ -57,7 +57,7 @@ class PersistentMessagesDispatcher: BackgroundTasksDispatcher() {
         MessageCenter.commitMessage {
             titleResource = R.string.error
             descriptionResource = R.string.email_verification_code_not_saved_bug
-            setPositiveButton(android.R.string.ok){ MessagesWaiting.postBadVerificationCodeSavedBug(false) }
+            setPositiveButton(android.R.string.ok){ MessagesWaiting.noVerificationCodeSavedBug(false) }
         }
     }
 
@@ -66,12 +66,12 @@ class PersistentMessagesDispatcher: BackgroundTasksDispatcher() {
             titleResource = R.string.verification_mail
             descriptionResource = R.string.email_verification_invalid_data
             setPositiveButton(android.R.string.ok){
-                MessagesWaiting.postBadVerificationCodeClicked(false)
+                MessagesWaiting.badVerificationCodeClicked(false)
                 UserManagement().requestEmailVerificationMail()
                 showEmailRequestedMessage()
             }
             setNegativeButton(android.R.string.cancel){
-                MessagesWaiting.postBadVerificationCodeClicked(false)
+                MessagesWaiting.badVerificationCodeClicked(false)
             }
         }
     }

@@ -27,6 +27,7 @@ import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.core.TaskFlags
+import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.DispatcherProvider
 
@@ -48,8 +49,8 @@ class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
     }
 
     fun submitClicked() = viewModelScope.launch{
-        enteredFeedback?.let { Prefs.feedbackWaiting(it) }
-        enteredContactInfo?.let { Prefs.feedbackContactInfoWaiting(it) }
+        enteredFeedback?.let { TaskPayloads.feedbackWaiting(it) }
+        enteredContactInfo?.let { TaskPayloads.feedbackContactInfoWaiting(it) }
         TaskFlags.feedbackWaiting(true)
         finished = true
     }

@@ -196,7 +196,7 @@ private suspend fun getEmailAddressFromPrefs(): String? =
         // Any functions being called should only be triggered when an emal address is entered.
         // Therefore, this should only happen after user triggered an action in a way unforeseen at the time of this writing
         Log.e("getEmailAddressFromPrefs", "getEmailAddressFromPrefs() was called but an EmailPrefs.emailAddress is blank. User is notified to fix this.")
-        MessagesWaiting.postNoEmailEntered(true) // this will trigger display of "no email entered" message to user.
+        MessagesWaiting.noEmailEntered(true) // this will trigger display of "no email entered" message to user.
         ServerPrefs.emailVerified = false
 
         null

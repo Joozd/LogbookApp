@@ -19,9 +19,7 @@
 
 package nl.joozd.logbookapp.data.miscClasses.crew
 
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.getBit
-import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.extensions.setBit
 import java.time.Duration
 
@@ -35,7 +33,7 @@ import java.time.Duration
 data class AugmentedCrew(val size: Int = 2,
                          val takeoff: Boolean = true,
                          val landing: Boolean = true,
-                         val times: Int = 0)
+                         val times: Int)
 {
     fun toInt():Int {
         var value = if (size > 15) 15 else size
@@ -72,11 +70,10 @@ data class AugmentedCrew(val size: Int = 2,
      */
     fun getLogTime(totalTime: Int, pic: Boolean): Int{
         if (pic || size <=2) return totalTime
-        val t = times.nullIfZero() ?: Prefs.standardTakeoffLandingTimes
-        val divideableTime = (totalTime - 2*t).toFloat()
+        val divideableTime = (totalTime - 2*times).toFloat()
         val timePerShare = divideableTime / size
         val minutesInSeat = (timePerShare*2).toInt()
-        return maxOf (minutesInSeat + (if(takeoff) t else 0) + (if (landing) t else 0), 0)
+        return maxOf (minutesInSeat + (if(takeoff) times else 0) + (if (landing) times else 0), 0)
     }
 
     fun getLogTime(totalTime: Long, pic: Boolean): Long = getLogTime(totalTime.toInt(), pic).toLong()
@@ -113,15 +110,16 @@ data class AugmentedCrew(val size: Int = 2,
         const val MIN_CREW_SIZE = 1
         const val MAX_CREW_SIZE = 15
 
-        val COCO: AugmentedCrew
-            get() = AugmentedCrew(3, takeoff = false, landing = false, times = Prefs.standardTakeoffLandingTimes)
+        fun coco(takeoffLandingTimes: Int): AugmentedCrew = AugmentedCrew(3, takeoff = false, landing = false, times = takeoffLandingTimes)
 
-        fun of(value: Int) = if (value == 0) AugmentedCrew() else AugmentedCrew(
-            size = 15.and(value),
-            takeoff = value.getBit(4),
-            landing = value.getBit(5),
-            times = value.ushr(6)
-        )
+        fun of(value: Int) =
+            if (value == 0) AugmentedCrew(times = 0) // 0 is not augmented so times don't matter
+            else AugmentedCrew(
+                size = 15.and(value),
+                takeoff = value.getBit(4),
+                landing = value.getBit(5),
+                times = value.ushr(6)
+            )
         fun of(crewSize: Int, didTakeoff: Boolean, didLanding: Boolean, nonStandardTimes: Int) = AugmentedCrew(crewSize,didTakeoff,didLanding,nonStandardTimes)
 
     }

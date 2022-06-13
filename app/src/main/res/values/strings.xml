@@ -170,7 +170,7 @@
     <string name="aircraft_type_in_consensus">Type entered by other users</string>
     <string name="aircraft_type_from_server">Type match from server</string>
     <string name="aircraft_type_not_found">Unknown registration, please select a type</string>
-    <string name="airport_not_found_no_night_time">Unknown airport, no night time logged.</string>
+    <string name="airport_not_found_no_night_time">Airport location unknown, no night time logged.</string>
 
     <string name="file_not_found_title">File not found</string>
     <string name="file_not_found_message">An error occurred while retreiving the file you are trying to import.</string>

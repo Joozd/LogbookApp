@@ -68,7 +68,7 @@ android {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
-        freeCompilerArgs += ['-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi'] // for Flow.flatmapLatest in AirportPickerViewModel
+        freeCompilerArgs += ['-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi'] // for Flow.flatmapLatest in AirportPickerViewModel
     }
 
     testOptions {

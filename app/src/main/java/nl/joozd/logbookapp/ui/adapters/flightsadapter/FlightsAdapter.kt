@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.ui.adapters.flightsadapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
@@ -42,6 +43,19 @@ class FlightsAdapter(
     FlightDiffCallback()) {
     private val listListeners = ArrayList<ListListener> ()
 
+    var useIata: Boolean = false
+        set(it){
+            if (it != field) notifyDataSetChanged()
+            field = it
+        }
+    var picNameMustBeSet: Boolean = false
+        set(it){
+            val oldField = field
+            field = it
+            if (oldField != field) notifyPicNameMustBeSetChanged()
+
+        }
+
             /**
      * Text displayed when fastscrolling using RecyclerViewFastScroller
      */
@@ -60,7 +74,7 @@ class FlightsAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as FlightsListItemViewHolder).bindItem(getItem(position), itemClick, onDelete)
+        (holder as FlightsListItemViewHolder).bindItem(getItem(position), useIata, picNameMustBeSet, itemClick, onDelete)
     }
 
     override fun onCurrentListChanged(
@@ -89,8 +103,24 @@ class FlightsAdapter(
     private fun inflateSimListItemView(parent: ViewGroup) =
         LayoutInflater.from(parent.ctx).inflate(R.layout.item_sim, parent, false)
 
+    private fun notifyPicNameMustBeSetChanged(){
+        currentList.mapIndexedNotNull {index, f ->
+            index.takeIf{ f.name.isBlank() && !f.isPlanned }
+        }.forEach { item ->
+            notifyItemChanged(item)
+        }
+    }
+
     fun interface ListListener{
         fun onListUpdated()
+    }
+
+    private class FlightDiffCallback: DiffUtil.ItemCallback<ModelFlight>() {
+        override fun areItemsTheSame(oldItem: ModelFlight, newItem: ModelFlight): Boolean =
+            oldItem.flightID == newItem.flightID
+
+        override fun areContentsTheSame(oldItem: ModelFlight, newItem: ModelFlight): Boolean =
+            oldItem == newItem
     }
 
     companion object{

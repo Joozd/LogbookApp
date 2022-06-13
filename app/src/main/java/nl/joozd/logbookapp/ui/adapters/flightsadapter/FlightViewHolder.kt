@@ -31,7 +31,13 @@ import nl.joozd.logbookapp.ui.utils.customs.Swiper
 
 class FlightViewHolder(containerView: View) : FlightsListItemViewHolder(containerView) {
     val binding = ItemFlightCardBinding.bind(containerView)
-    override fun bindItem(flight: ModelFlight, onClick: (ModelFlight) -> Unit, onDelete: (ModelFlight) -> Unit) {
+    override fun bindItem(
+        flight: ModelFlight,
+        useIata: Boolean,
+        picNameMustBeSet: Boolean,
+        onClick: (ModelFlight) -> Unit,
+        onDelete: (ModelFlight) -> Unit
+    ) {
         binding.apply {
             with(flight) {
                 Swiper(binding.deleteLayer).apply {
@@ -42,15 +48,15 @@ class FlightViewHolder(containerView: View) : FlightsListItemViewHolder(containe
                         }
                     }
                 }
-                flightLayout.setTextViewChildrenColorAccordingstatus(isPlanned, this.checkIfIncomplete())
+                flightLayout.setTextViewChildrenColorAccordingstatus(isPlanned, this.checkIfIncomplete(picNameMustBeSet))
                 dateDayText.text = date().dayOfMonth.toString()
                 dateMonthYearText.text = timeOut.toMonthYear()
                 namesText.text = namesString()
                 aircraftText.text = aircraft.toString()
                 remarksText.text = remarks
                 flightNumberText.text = flightNumber
-                origText.text = orig.displayString()
-                destText.text = dest.displayString()
+                origText.text = orig.displayString(useIata)
+                destText.text = dest.displayString(useIata)
                 timeOutText.text = timeOut.toTimeString()
                 totalTimeText.text = calculateTotalTime().minutesToHoursAndMinutesString()
                 timeInText.text = timeIn.toTimeString()
@@ -70,8 +76,8 @@ class FlightViewHolder(containerView: View) : FlightsListItemViewHolder(containe
         }
     }
 
-    private fun Airport.displayString(): String =
-        if (Prefs.useIataAirports.valueBlocking)
+    private fun Airport.displayString(useIata: Boolean): String =
+        if (useIata)
             iata_code.takeIf{ it.isNotBlank() } ?: ident
         else ident
 }

@@ -25,7 +25,6 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -111,14 +110,6 @@ class MainActivity : JoozdlogActivity() {
         setContentView(binding.root)
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        //TODO this should go to `core`
-        // JoozdlogWorkersHubOld.syncTimeAndFlightsIfEnoughTimePassed()
-        updateCalendarEventsIfEnabled()
-    }
-
     private fun handleIntent() {
         lifecycleScope.launch {
             IntentHandler(intent).handle()
@@ -144,7 +135,11 @@ class MainActivity : JoozdlogActivity() {
         collectFlightsListFlow()
         collectUndoRedoChangedFlow()
         collectAmountOfFlightsFlow()
+
         collectIcaoIataSwappedFlow()
+        collectPicNameNeedsToBeSetFlow()
+
+        collectUseCalendarSyncFlow()
 
         collectMessageCenterMessages()
         collectMessageCenterFragments()
@@ -195,8 +190,25 @@ class MainActivity : JoozdlogActivity() {
 
     @SuppressLint("NotifyDataSetChanged") // in this case, entire dataset will be changed.
     private fun ActivityMainNewBinding.collectIcaoIataSwappedFlow(){
-        Prefs.useIataAirportsFlow.launchCollectWhileLifecycleStateStarted{
-            flightsList.adapter?.notifyDataSetChanged()
+        Prefs.useIataAirports.flow.launchCollectWhileLifecycleStateStarted{
+            (flightsList.adapter as FlightsAdapter).apply{
+                useIata = it
+            }
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged") // in this case, entire dataset will be changed.
+    private fun ActivityMainNewBinding.collectPicNameNeedsToBeSetFlow(){
+        Prefs.picNameNeedsToBeSet.flow.launchCollectWhileLifecycleStateStarted{
+            (flightsList.adapter as FlightsAdapter).apply{
+                picNameMustBeSet = it
+            }
+        }
+    }
+
+    private fun collectUseCalendarSyncFlow() {
+        Prefs.useCalendarSync.flow.launchCollectWhileLifecycleStateStarted {
+            if (it) updateCalendarEvents()
         }
     }
 
@@ -403,31 +415,22 @@ class MainActivity : JoozdlogActivity() {
     }.create().show()
 
     // @SuppressLint("MissingPermission") // BECAUSE IT IS NOT MISSING PERMISSION
-    private fun updateCalendarEventsIfEnabled(){
-        if (Prefs.useCalendarSync){
-            lifecycleScope.launch {
-                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
-                    getFlightsFromCalendar()?.let {
-                        val ff = ImportedLogbookAutoCompleter().autocomplete(it)
-                        ImportedFlightsSaver.make(FlightRepository.instance).save(ff)
-                    }
-                else requestCalendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+    private suspend fun updateCalendarEvents(){
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
+            getFlightsFromCalendar()?.let {
+                val ff = ImportedLogbookAutoCompleter().autocomplete(it)
+                ImportedFlightsSaver.make(FlightRepository.instance).save(ff)
             }
+        else {
+            //granting permission will reset Prefs.useCalendarSync, which will be collected and this function will be called again.
+            Prefs.useCalendarSync(false)
+            requestCalendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
         }
     }
 
-    // Register the permissions callback, which handles the user's response to the
-    // system permissions dialog. Save the return value, an instance of
-    // ActivityResultLauncher. You can use either a val, as shown in this snippet,
-    // or a lateinit var in your onAttach() or onCreate() method.
     private val requestCalendarPermissionLauncher =
-        registerForActivityResult(RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                updateCalendarEventsIfEnabled()
-            } else {
-                Prefs.useCalendarSync = false
-            }
+        registerForActivityResult(RequestPermission()) { hasPermission ->
+            Prefs.useCalendarSync(hasPermission)
         }
 
     private inner class ScrollOnNextUpdateListener(private val binding: ActivityMainNewBinding): FlightsAdapter.ListListener {

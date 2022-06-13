@@ -31,14 +31,20 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.model.ModelFlight
 
 abstract class FlightsListItemViewHolder(containerView: View): RecyclerView.ViewHolder(containerView) {
-    abstract fun bindItem(flight: ModelFlight, onClick: (ModelFlight) -> Unit, onDelete: (ModelFlight) -> Unit)
+    abstract fun bindItem(
+        flight: ModelFlight,
+        useIata: Boolean = false,
+        picNameMustBeSet: Boolean = false,
+        onClick: (ModelFlight) -> Unit,
+        onDelete: (ModelFlight) -> Unit
+    )
 
-    protected fun ModelFlight.checkIfIncomplete(checkNames: Boolean = Prefs.picNameNeedsToBeSet): Boolean =
+    protected fun ModelFlight.checkIfIncomplete(picNameMustBeSet: Boolean): Boolean =
         orig.ident.isBlank()
                 || dest.ident.isBlank()
                 || aircraft.type == null
                 || aircraft.registration.isBlank()
-                || (checkNames && name.isBlank())
+                || (picNameMustBeSet && name.isBlank())
 
     protected fun ModelFlight.namesString(): String{
         val names = (listOf(name) + name2).filter { it.isNotBlank() }

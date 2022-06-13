@@ -34,7 +34,7 @@ import kotlin.reflect.KProperty
  * A navigation bar to be used with a ViewPager2.
  * Can be used to show which page is being viewed, and has two customizable buttons (actually TextViews)
  * @params @see [ConstraintLayout]
- * //TODO this does not have protection against huge amounts of dots yet.
+ * NOTE this does not have protection against huge amounts of dots.
  */
 @Suppress("unused")
 class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, defStyleRes: Int = 0): ConstraintLayout(context, attrs, defStyleAttr, defStyleRes) {
@@ -496,7 +496,7 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
 
 
     /**
-     * You can implement [ViewPager2NavigatorBar.Adapter] in your ViewPager2's adapter to make different naavigation button behaviours per page.
+     * You can implement [ViewPager2NavigatorBar.Adapter] in your ViewPager2's adapter to make different navigation button behaviours per page.
      */
     interface Adapter {
         /**

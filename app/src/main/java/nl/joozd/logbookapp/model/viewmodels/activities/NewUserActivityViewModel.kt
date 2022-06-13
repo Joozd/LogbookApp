@@ -31,9 +31,17 @@ import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityE
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
+import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivity
 import java.util.*
 
 class NewUserActivityViewModel: JoozdlogActivityViewModel() {
+    /**
+     * Keeps track of which page is open in case of activity recreations
+     */
+    var lastOpenPageState: Int? = null
+
+
+
 
     /*******************************************************************************************
      * Private parts
@@ -116,10 +124,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     /*******************************************************************************************
      * NewUserActivity functions / variables
      *******************************************************************************************/
-    /**
-     * Keeps track of which page is open in case of activity recreations
-     */
-    var lastOpenPageState: Int? = null
+
 
     /*******************************************************************************************
      * Shared functions
@@ -145,14 +150,14 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
 
     fun continueClicked(position: Int) {
         when(position){
-            PAGE_INTRO -> feedback(NewUserActivityEvents.NEXT_PAGE)
-            PAGE_CLOUD -> feedback(NewUserActivityEvents.NEXT_PAGE)
-            PAGE_EMAIL -> {
+            NewUserActivity.PAGE_INTRO -> feedback(NewUserActivityEvents.NEXT_PAGE)
+            NewUserActivity.PAGE_CLOUD -> feedback(NewUserActivityEvents.NEXT_PAGE)
+            NewUserActivity.PAGE_EMAIL -> {
                 emailPageContinueClicked()
                 feedback(NewUserActivityEvents.NEXT_PAGE)
             }
-            PAGE_CALENDAR -> feedback(NewUserActivityEvents.NEXT_PAGE)
-            PAGE_FINAL -> {
+            NewUserActivity.PAGE_CALENDAR -> feedback(NewUserActivityEvents.NEXT_PAGE)
+            NewUserActivity.PAGE_FINAL -> {
                 finalPageDoneClicked()
                 feedback(NewUserActivityEvents.FINISHED)
             }
@@ -165,7 +170,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
             1 -> { // skip email page -> make email1 and 2 empty
                 email1 = ""
                 email2 = ""
-                feedback(NewUserActivityEvents.CLEAR_PAGE, PAGE_EMAIL)
+                feedback(NewUserActivityEvents.CLEAR_PAGE, NewUserActivity.PAGE_EMAIL)
                 feedback(NewUserActivityEvents.NEXT_PAGE)
             }
             else -> feedback(NewUserActivityEvents.NEXT_PAGE)
@@ -205,7 +210,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
     fun useCloudCheckboxClicked(){
         if (Prefs.acceptedCloudSyncTerms.valueBlocking)
             Prefs.useCloud.valueBlocking = !Prefs.useCloud.valueBlocking
-        else feedback(NewUserActivityEvents.SHOW_TERMS_DIALOG, PAGE_CLOUD)
+        else feedback(NewUserActivityEvents.SHOW_TERMS_DIALOG, NewUserActivity.PAGE_CLOUD)
     }
 
     /*******************************************************************************************
@@ -319,13 +324,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
      *******************************************************************************************/
 
     companion object{
-        const val PAGE_INTRO = 0
-        const val PAGE_CLOUD = 1
-        const val PAGE_EMAIL = 2
-        const val PAGE_CALENDAR = 3
-        const val PAGE_FINAL = 4
 
-        const val NUMBER_OF_PAGES = 5
 
         private const val FEEDBACK_CHANNELS = 10
 
@@ -333,4 +332,7 @@ class NewUserActivityViewModel: JoozdlogActivityViewModel() {
         private const val DELAY_CHECK_EMAIL2 = 1500L // ms
 
     }
+
+
+
 }

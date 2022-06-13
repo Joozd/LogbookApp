@@ -61,12 +61,6 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
         super.onDestroy()
         cancel()
     }
-
-    @Deprecated("Use styled background", ReplaceWith("style=\"@style/DialogBodyLayout\""))
-    protected fun View.joozdLogSetBackgroundColor(color: Int = requireActivity().getColorFromAttr(R.attr.colorPrimary)){
-        (this.background as GradientDrawable).colorFilter = PorterDuffColorFilter( color, PorterDuff.Mode.SRC_IN)
-    }
-
     /**
      * dp to pixels and reverse
      */
@@ -75,7 +69,6 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
     protected fun Float.dpToPixels() = this * resources.displayMetrics.density
     protected fun Int.pixelsToDp() = this.toFloat() / resources.displayMetrics.density
     protected fun Int.dpToPixels() = this.toFloat() * resources.displayMetrics.density
-
 
     protected fun removeFragment() = supportFragmentManager.commit { remove(fragment) }
 

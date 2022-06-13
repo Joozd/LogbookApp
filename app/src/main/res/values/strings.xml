@@ -35,6 +35,7 @@
     <string name="n_flights">%1$d Flights</string>
     <string name="search_type">Search Type</string>
     <string name="_continue">Continue</string>
+    <string name="back">Back</string>
     <string name="skip">Skip</string>
     <string name="retry">Retry</string>
 

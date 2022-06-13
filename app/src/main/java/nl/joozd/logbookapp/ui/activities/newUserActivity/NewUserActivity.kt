@@ -20,21 +20,33 @@
 package nl.joozd.logbookapp.ui.activities.newUserActivity
 
 import android.os.Bundle
-import androidx.activity.viewModels
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityNewUserBinding
-import nl.joozd.logbookapp.extensions.minusOneWithMinimumValue
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
-import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
-import nl.joozd.logbookapp.ui.utils.customs.viewpagernavigatorbar.ViewPager2NavigatorBar
-import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
 
 class NewUserActivity : JoozdlogActivity() {
+    private lateinit var mViewPager: ViewPager2
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+
+        setTheme(R.style.AppTheme)
+        ActivityNewUserBinding.inflate(layoutInflater).apply {
+            mViewPager = viewPager
+            setContentView(root)
+        }
+    }
+
+    fun continueClicked(page: Int){
+        mViewPager.currentItem = page + 1
+    }
+
+    fun previousClicked(page: Int){
+        mViewPager.currentItem = page - 1
+    }
+/*
     val viewModel: NewUserActivityViewModel by viewModels()
 
     private lateinit var mViewPager: ViewPager2
@@ -54,11 +66,6 @@ class NewUserActivity : JoozdlogActivity() {
                 adapter = ScreenSlidePagerAdapter(this@NewUserActivity)
                 setPageTransformer(DepthPageTransformer(TRANSFORMER_MIN_SCALE))
                 navigationBar.attach(this)
-                /*
-                TabLayoutMediator(tabLayout, this) { _, _ ->
-                    // empty for now
-                }.attach()
-                */
                 currentItem = viewModel.lastOpenPageState ?: 0
             }
 
@@ -94,17 +101,14 @@ class NewUserActivity : JoozdlogActivity() {
 
     private inner class ScreenSlidePagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa), ViewPager2NavigatorBar.Adapter {
 
-        override fun getItemCount(): Int =  NewUserActivityViewModel.NUMBER_OF_PAGES
+        override fun getItemCount(): Int =  PAGE_FINAL + 1
 
         override fun createFragment(position: Int): Fragment = when(position){
-            /**
-             * This order must match the order in [NewUserActivityViewModel.Companion]
-             */
-            0 -> NewUserActivityIntroPage()
-            1 -> NewUserActivityCloudPage()
-            2 -> NewUserActivityEmailPage()
-            3 -> NewUserActivityCalendarPage()
-            4 -> NewUserActivityFinalPage()
+            PAGE_INTRO -> NewUserActivityIntroPage()
+            PAGE_CLOUD -> NewUserActivityCloudPage()
+            PAGE_EMAIL -> NewUserActivityEmailPage()
+            PAGE_CALENDAR -> NewUserActivityCalendarPage()
+            PAGE_FINAL -> NewUserActivityFinalPage()
             else -> error("ScreenSlidePagerAdapter asked to provide non-existing page")
         }
 
@@ -152,7 +156,15 @@ class NewUserActivity : JoozdlogActivity() {
         }
     }
 
+
+ */
     companion object{
         private const val TRANSFORMER_MIN_SCALE = 0.75f
+
+        const val PAGE_INTRO = 0
+        const val PAGE_CLOUD = 1
+        const val PAGE_EMAIL = 2
+        const val PAGE_CALENDAR = 3
+        const val PAGE_FINAL = 4
     }
 }

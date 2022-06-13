@@ -32,13 +32,13 @@ import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 /**
  * Page 0 is just a basic introduction saying welcome to the new user
  */
-class NewUserActivityIntroPage: Fragment() {
-    val viewModel: NewUserActivityViewModel by activityViewModels()
+class NewUserActivityIntroPage(override var pageNumber: Int? = null): NewUseractivityPage() {
+    constructor(): this(null)
 
-    val pageNumber = NewUserActivityViewModel.PAGE_INTRO
+    val viewModel: NewUserActivityViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageIntroBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_intro, container, false)).apply {
-        //intentionally blank
+        continueButton.setOnClickListener { continueClicked() }
     }.root
 }

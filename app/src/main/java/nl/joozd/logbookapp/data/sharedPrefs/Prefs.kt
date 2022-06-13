@@ -133,48 +133,30 @@ object Prefs: JoozdLogPreferences() {
      **********************/
 
     private const val DARK_MODE = "DARK_MODE"
+    private const val USE_IATA = "USE_IATA"
+    private const val PIC_NAME_NEEDED = "PIC_NAME_NEEDED"
+    private const val USE_CAL_SYNC = "USE_CAL_SYNC"
+    private const val _CALENDAR_SYNC_TYPE = "_CALENDAR_SYNC_TYPE"
+    private const val CAL_SYNC_ICAL_ADDR = "CAL_SYNC_ICAL_ADDR"
+    private const val NEXT_CAL_CHECK_TIME = "NEXT_CAL_CHECK_TIME"
+    private const val CAL_DISABLED_UNTIL = "CAL_DISABLED_UNTIL"
+
     val darkMode by JoozdlogSharedPreferenceDelegate(DARK_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
-    /**
-     * Use ICAO or Iata? True = IATA, false ICAO
-     */
-    private const val USE_IATA = "USE_IATA"
     val useIataAirports by JoozdlogSharedPreferenceDelegate(USE_IATA, false)
-
-    /**
-     * If true, if PIC name is not set, flight will be marked incomplete (red)
-     */
-    private const val PIC_NAME_NEEDED = "PIC_NAME_NEEDED"
     val picNameNeedsToBeSet by JoozdlogSharedPreferenceDelegate(PIC_NAME_NEEDED,true)
 
-    /**
-     * Get planned flights from calendar?
-     */
-    private const val USE_CAL_SYNC = "USE_CAL_SYNC"
     val useCalendarSync by JoozdlogSharedPreferenceDelegate(USE_CAL_SYNC, false)
 
-    private const val _CALENDAR_SYNC_TYPE = "_CALENDAR_SYNC_TYPE"
     private val calendarSyncTypeValue by JoozdlogSharedPreferenceDelegate(_CALENDAR_SYNC_TYPE, CalendarSyncType.CALENDAR_SYNC_NONE.value)
-
-    private val calendarSyncTypeValueFlow  by PrefsFlow(_CALENDAR_SYNC_TYPE, CalendarSyncType.CALENDAR_SYNC_NONE.value)//  get() = getIntFlowForItem(this::_calendarSyncType.name, CalendarSyncType.CALENDAR_SYNC_NONE.value)
-
     var calendarSyncType = calendarSyncTypeValue.mapBothWays(object : JoozdlogSharedPreferenceDelegate.PrefTransformer<Int, CalendarSyncType>{
-        override fun map(source: Int): CalendarSyncType =
-            makeCalendarSyncType(source)
-        override fun mapBack(transformedValue: CalendarSyncType): Int =
-            transformedValue.value
+        override fun map(source: Int): CalendarSyncType = makeCalendarSyncType(source)
+        override fun mapBack(transformedValue: CalendarSyncType): Int = transformedValue.value
     })
 
-    private const val CAL_SYNC_ICAL_ADDR = "CAL_SYNC_ICAL_ADDR"
-    var calendarSyncIcalAddress: String by JoozdLogSharedPreferenceNotNull(CAL_SYNC_ICAL_ADDR,"")
-    val calendarSyncIcalAddressFlow by PrefsFlow(CAL_SYNC_ICAL_ADDR, "")
-
-    private const val NEXT_CAL_CHECK_TIME = "NEXT_CAL_CHECK_TIME"
-    var nextCalendarCheckTime: Long by JoozdLogSharedPreferenceNotNull(NEXT_CAL_CHECK_TIME,-1)
-
-    // in epochSeconds
-    private const val CAL_DISABLED_UNTIL = "CAL_DISABLED_UNTIL"
-    val calendarDisabledUntil by JoozdlogSharedPreferenceDelegate(CAL_DISABLED_UNTIL,0L)
+    val calendarSyncIcalAddress by JoozdlogSharedPreferenceDelegate(CAL_SYNC_ICAL_ADDR,"")
+    val nextCalendarCheckTime by JoozdlogSharedPreferenceDelegate(NEXT_CAL_CHECK_TIME,-1)
+    val calendarDisabledUntil by JoozdlogSharedPreferenceDelegate(CAL_DISABLED_UNTIL,0L) // in epochSeconds
 
 
     /**

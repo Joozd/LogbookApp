@@ -42,6 +42,7 @@ import nl.joozd.joozdcalendarapi.CalendarDescriptor
 import nl.joozd.joozdcalendarapi.getCalendars
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.DialogCalendarSyncBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.extensions.setSelectionWithArrayAdapter
@@ -115,6 +116,15 @@ class CalendarSyncDialog: JoozdlogFragment() {
     }
 
     private fun DialogCalendarSyncBinding.launchFlowCollectors(){
+        Prefs.calendarSyncType.flow.launchCollectWhileLifecycleStateStarted{
+            viewModel.calendarSyncType = it
+        }
+
+        Prefs.calendarSyncIcalAddress.flow.launchCollectWhileLifecycleStateStarted{
+            viewModel.calendarSyncIcalAddress = it
+        }
+
+
         viewModel.foundCalendarsFlow.launchCollectWhileLifecycleStateStarted{ list ->
             if (list != null) {
                 getAdapter().apply {
@@ -154,7 +164,7 @@ class CalendarSyncDialog: JoozdlogFragment() {
     }
 
 
-    private fun DialogCalendarSyncBinding.makeLayoutForSyncType(syncType: CalendarSyncType){
+    private fun DialogCalendarSyncBinding.makeLayoutForSyncType(syncType: CalendarSyncType?){
         when(syncType){
             CalendarSyncType.CALENDAR_SYNC_DEVICE -> {
                 icalAddressLayout.visibility = View.INVISIBLE

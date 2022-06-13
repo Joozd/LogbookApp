@@ -31,7 +31,6 @@ import androidx.fragment.app.viewModels
 import com.google.android.material.textfield.TextInputEditText
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.LayoutEditFlightFragmentBinding
 import nl.joozd.logbookapp.extensions.*
@@ -459,7 +458,7 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun LayoutEditFlightFragmentBinding.collectNamesForAutoCompleteTextViews() {
-        viewModel.namesFlow().launchCollectWhileLifecycleStateStarted {
+        viewModel.namesFlow.launchCollectWhileLifecycleStateStarted {
             @Suppress("UNCHECKED_CAST")
             (flightNameField.adapter as ArrayAdapter<String>).apply {
                 clear()
@@ -474,7 +473,7 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun LayoutEditFlightFragmentBinding.collectRegistrationsForAutoCompleteTextView(){
-        viewModel.sortedRegistrationsFlow().launchCollectWhileLifecycleStateStarted{
+        viewModel.sortedRegistrationsFlow.launchCollectWhileLifecycleStateStarted{
             (flightAircraftField.adapter as AircraftAutoCompleteAdapter).apply {
                 setItems(it)
             }
@@ -509,7 +508,7 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun LayoutEditFlightFragmentBinding.collectDateFlow(){
-        viewModel.dateFlow().launchCollectWhileLifecycleStateStarted{
+        viewModel.dateFlow.launchCollectWhileLifecycleStateStarted{
             val s = it.toDateString()
             simDateField.setText(s)
             flightDateField.setText(s)
@@ -517,7 +516,7 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun LayoutEditFlightFragmentBinding.collectFlightNumberFlow(){
-        viewModel.flightNumberFlow().launchCollectWhileLifecycleStateStarted{
+        viewModel.flightNumberFlow.launchCollectWhileLifecycleStateStarted{
             flightFlightNumberField.setText(it)
         }
     }
@@ -528,41 +527,39 @@ class EditFlightFragment: JoozdlogFragment() {
      * (which is done when losing focus so also ok)
      */
     private fun LayoutEditFlightFragmentBinding.collectOrigFLow(){
-        viewModel.origFlow().launchCollectWhileLifecycleStateStarted{
-            if (!it.checkIfValidCoordinates()) toastAirportNotFound()
+        viewModel.origTextFlow.launchCollectWhileLifecycleStateStarted{
+            flightOrigEditText.setTextIfNotFocused(it)
+        }
+        viewModel.origValidFlow.launchCollectWhileLifecycleStateStarted{
             flightOrigEditText.setAirportFieldToValidOrInvalidLayout(it)
-            flightOrigEditText.setTextIfNotFocused(getAirportIdent(it))
+            if (it) toastAirportNotFound()
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectDestFlow(){
-        viewModel.destFlow().launchCollectWhileLifecycleStateStarted{
-            if (!it.checkIfValidCoordinates()) toastAirportNotFound()
+        viewModel.destTextFlow.launchCollectWhileLifecycleStateStarted{
+            flightDestEditText.setTextIfNotFocused(it)
+        }
+        viewModel.destValidFlow.launchCollectWhileLifecycleStateStarted{
             flightDestEditText.setAirportFieldToValidOrInvalidLayout(it)
-            flightDestEditText.setTextIfNotFocused(getAirportIdent(it))
+            if (it) toastAirportNotFound()
         }
     }
 
-    private fun toastAirportNotFound() {
-        toast(R.string.airport_not_found_no_night_time)
-    }
-
     private fun LayoutEditFlightFragmentBinding.collectTimeOutFlow(){
-        viewModel.timeOutFlow().launchCollectWhileLifecycleStateStarted{
+        viewModel.timeOutFlow.launchCollectWhileLifecycleStateStarted{
             flightTimeOutEditText.setTextIfNotFocused(it.toTimeString())
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectTimeInFlow(){
-        viewModel.timeInFlow().launchCollectWhileLifecycleStateStarted{
+        viewModel.timeInFlow.launchCollectWhileLifecycleStateStarted{
             flightTimeInEditText.setTextIfNotFocused(it.toTimeString())
         }
     }
 
-
-
     private fun LayoutEditFlightFragmentBinding.collectAircraftFlow(){
-        viewModel.aircraftFlow().launchCollectWhileLifecycleStateStarted{
+        viewModel.aircraftFlow.launchCollectWhileLifecycleStateStarted{
             if(it.source == Aircraft.UNKNOWN) launchSimOrAircraftPicker()
             flightAircraftField.setText(it.toString())
             simAircraftField.setTextIfNotFocused(it.type?.shortName ?: "")
@@ -570,7 +567,7 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun LayoutEditFlightFragmentBinding.collectTakeoffLandingsFlow(){
-        viewModel.takeoffLandingsFlow().launchCollectWhileLifecycleStateStarted{
+        viewModel.takeoffLandingsFlow.launchCollectWhileLifecycleStateStarted{
             val s = it.toString()
             flightTakeoffLandingField.setText(s)
             simTakeoffLandingsField.setTextIfNotFocused(s)
@@ -578,13 +575,13 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun LayoutEditFlightFragmentBinding.collectNameFlow(){
-        viewModel.nameFlow().launchCollectWhileLifecycleStateStarted{
+        viewModel.nameFlow.launchCollectWhileLifecycleStateStarted{
             flightNameField.setTextIfNotFocused(it)
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectName2Flow(){
-        viewModel.name2Flow().launchCollectWhileLifecycleStateStarted{
+        viewModel.name2Flow.launchCollectWhileLifecycleStateStarted{
             val s = it.joinToString(";")
             flightName2Field.setTextIfNotFocused(s)
             simNamesField.setTextIfNotFocused(s)
@@ -592,7 +589,7 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun LayoutEditFlightFragmentBinding.collectRemarksFlow(){
-        viewModel.remarksFlow().launchCollectWhileLifecycleStateStarted{
+        viewModel.remarksFlow.launchCollectWhileLifecycleStateStarted{
             flightRemarksField.setTextIfNotFocused(it)
             simRemarksField.setTextIfNotFocused(it)
         }
@@ -600,7 +597,7 @@ class EditFlightFragment: JoozdlogFragment() {
 
 
     private fun LayoutEditFlightFragmentBinding.collectIsSimFlow(){
-        viewModel.isSimFlow().launchCollectWhileLifecycleStateStarted{ isSim ->
+        viewModel.isSimFlow.launchCollectWhileLifecycleStateStarted{ isSim ->
             // We don't need to set simSimSelector as active because it is hardcoded like that
             // in XML layout file and only visible in Sim layout.
             // Same goes for inactive simSelector.
@@ -616,7 +613,7 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun LayoutEditFlightFragmentBinding.collectIsSignedFlow(){
-        viewModel.isSignedFlow().launchCollectWhileLifecycleStateStarted{
+        viewModel.isSignedFlow.launchCollectWhileLifecycleStateStarted{
             signSelector.showAsActiveIf(it)
             simSignSelector.showAsActiveIf(it)
 
@@ -624,43 +621,43 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun LayoutEditFlightFragmentBinding.collectDualInstructorFlow(){
-        viewModel.dualInstructorFlow().launchCollectWhileLifecycleStateStarted{ flag ->
+        viewModel.dualInstructorFlow.launchCollectWhileLifecycleStateStarted{ flag ->
             dualInstructorSelector.setDualInstructorField(flag)
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectIsMultiPilotFlow() {
-        viewModel.isMultiPilotFlow().launchCollectWhileLifecycleStateStarted {
+        viewModel.isMultiPilotFlow.launchCollectWhileLifecycleStateStarted {
             multiPilotSelector.showAsActiveIf(it)
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectIsIfrFlow() {
-        viewModel.isIfrFlow().launchCollectWhileLifecycleStateStarted {
+        viewModel.isIfrFlow.launchCollectWhileLifecycleStateStarted {
             ifrSelector.showAsActiveIf(it)
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectPicPicusFlow() {
-        viewModel.picPicusFlow().launchCollectWhileLifecycleStateStarted { flag ->
+        viewModel.picPicusFlow.launchCollectWhileLifecycleStateStarted { flag ->
             picPicusSelector.setPicPicusField(flag)
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectIsPfFlow() {
-        viewModel.isPfFlow().launchCollectWhileLifecycleStateStarted {
+        viewModel.isPfFlow.launchCollectWhileLifecycleStateStarted {
             pfSelector.showAsActiveIf(it)
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectSimTimeFlow() {
-        viewModel.simTimeFlow().launchCollectWhileLifecycleStateStarted{
+        viewModel.simTimeFlow.launchCollectWhileLifecycleStateStarted{
             simTimeField.setText(it.minutesToHoursAndMinutesString())
         }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectIsAutoValuesFlow() {
-        viewModel.isAutoValuesFlow().launchCollectWhileLifecycleStateStarted {
+        viewModel.isAutoValuesFlow.launchCollectWhileLifecycleStateStarted {
             autoFillCheckBox.isChecked = it
         }
     }
@@ -701,12 +698,12 @@ class EditFlightFragment: JoozdlogFragment() {
         flightBox.setOnClickListener { }
     }
 
-    private fun getAirportIdent(airport: Airport) =
-        if (Prefs.useIataAirports && airport.iata_code.isNotBlank()) airport.iata_code
-        else airport.ident
+    private fun toastAirportNotFound() {
+        toast(R.string.airport_not_found_no_night_time)
+    }
 
-    private fun TextInputEditText.setAirportFieldToValidOrInvalidLayout(airport: Airport) {
-        val drawable = if (airport.checkIfValidCoordinates()) null else ContextCompat.getDrawable(
+    private fun TextInputEditText.setAirportFieldToValidOrInvalidLayout(isValid: Boolean) {
+        val drawable = if (isValid) null else ContextCompat.getDrawable(
             requireContext(),
             R.drawable.ic_error_outline_20px
         )

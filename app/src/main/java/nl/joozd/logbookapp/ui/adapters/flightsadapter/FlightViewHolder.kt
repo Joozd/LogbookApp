@@ -29,7 +29,7 @@ import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.utils.customs.Swiper
 
-class FlightViewHolder(containerView: View) : ListItemViewHolder(containerView) {
+class FlightViewHolder(containerView: View) : FlightsListItemViewHolder(containerView) {
     val binding = ItemFlightCardBinding.bind(containerView)
     override fun bindItem(flight: ModelFlight, onClick: (ModelFlight) -> Unit, onDelete: (ModelFlight) -> Unit) {
         binding.apply {

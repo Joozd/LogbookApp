@@ -60,7 +60,7 @@ class FlightsAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as ListItemViewHolder).bindItem(getItem(position), itemClick, onDelete)
+        (holder as FlightsListItemViewHolder).bindItem(getItem(position), itemClick, onDelete)
     }
 
     override fun onCurrentListChanged(

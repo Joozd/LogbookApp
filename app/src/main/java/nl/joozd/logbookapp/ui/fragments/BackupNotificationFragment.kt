@@ -47,18 +47,21 @@ class BackupNotificationFragment: MessageBarFragment() {
     }
 
     private fun FragmentGenericNotificationBinding.launchBackupMessageFlow(){
-        BackupPrefs.mostRecentBackupFlow.launchCollectWhileLifecycleStateStarted { t ->
-            val elapsedTime = Instant.now().epochSecond - t
-            genericNotificationMessage.text = if (BackupPrefs.mostRecentBackup == 0L)
-                getString(R.string.you_have_never_backed_up)
-            else
-                getString(R.string.you_have_not_backed_up_n_days, elapsedTime / ONE_DAY_IN_SECONDS)
+        BackupPrefs.mostRecentBackup.flow.launchCollectWhileLifecycleStateStarted { t ->
+            genericNotificationMessage.text = makeTimeSinceLastBackupMessage(t)
         }
+    }
+
+    private fun makeTimeSinceLastBackupMessage(timeOfLastBackup: Long) = if (timeOfLastBackup == 0L)
+        getString(R.string.you_have_never_backed_up)
+    else {
+        val elapsedTime = Instant.now().epochSecond - timeOfLastBackup
+        getString(R.string.you_have_not_backed_up_n_days, elapsedTime / ONE_DAY_IN_SECONDS)
     }
 
     private fun FragmentGenericNotificationBinding.setIgnoreOnClickListener(){
         negativeButton.setOnClickListener {
-            BackupPrefs.backupIgnoredUntil = Instant.now().atStartOfDay(ZoneOffset.UTC).epochSecond + ONE_DAY_IN_SECONDS
+            BackupPrefs.backupIgnoredUntil(Instant.now().atStartOfDay(ZoneOffset.UTC).epochSecond + ONE_DAY_IN_SECONDS)
             onCompleted()
         }
     }

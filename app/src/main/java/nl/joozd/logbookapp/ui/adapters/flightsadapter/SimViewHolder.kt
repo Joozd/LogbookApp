@@ -28,7 +28,7 @@ import nl.joozd.logbookapp.ui.utils.customs.Swiper
 
 class SimViewHolder(containerView: View) : FlightsListItemViewHolder(containerView) {
     val binding = ItemSimBinding.bind(containerView)
-    override fun bindItem(flight: ModelFlight, onClick: (ModelFlight) -> Unit, onDelete: (ModelFlight) -> Unit) {
+    override fun bindItem(flight: ModelFlight, useIata: Boolean, picNameMustBeSet: Boolean, onClick: (ModelFlight) -> Unit, onDelete: (ModelFlight) -> Unit) {
         with(binding) {
             with(flight) {
                 Swiper(binding.simDeleteLayer).apply {

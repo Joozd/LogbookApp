@@ -33,7 +33,7 @@ import java.time.Duration
 data class AugmentedCrew(val size: Int = 2,
                          val takeoff: Boolean = true,
                          val landing: Boolean = true,
-                         val times: Int)
+                         val times: Int = 0)
 {
     fun toInt():Int {
         var value = if (size > 15) 15 else size

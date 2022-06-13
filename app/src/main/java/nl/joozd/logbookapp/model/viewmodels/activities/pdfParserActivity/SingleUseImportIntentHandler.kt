@@ -105,7 +105,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
     private suspend fun parsePlannedFlights(file: PlannedFlightsFile){
         status = HandlerStatus.EXTRACTING_FLIGHTS
         val extractedFlights: ExtractedPlannedFlights = extractAndAutocomplete(file)
-        if (Prefs.alwaysPostponeCalendarSync) {
+        if (Prefs.alwaysPostponeCalendarSync()) {
             status = HandlerStatus.SAVING_FLIGHTS
             saveAndPostponeCalendarSync(extractedFlights)
             status = HandlerStatus.DONE
@@ -186,7 +186,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
             choice2Resource = android.R.string.cancel
             setAction1 {
                 launch {
-                    Prefs.alwaysPostponeCalendarSync = true
+                    Prefs.alwaysPostponeCalendarSync(true)
                     status = HandlerStatus.SAVING_FLIGHTS
                     saveAndPostponeCalendarSync(extractedFlights)
                     status = HandlerStatus.DONE
@@ -198,8 +198,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
         }.build()
 
     private suspend fun saveAndPostponeCalendarSync(extractedFlights: ExtractedPlannedFlights) {
-        Prefs.calendarDisabledUntil =
-            extractedFlights.period?.endInclusive ?: return // no period = no sync
+        Prefs.calendarDisabledUntil(extractedFlights.period?.endInclusive ?: return) // no period = no sync
         ImportedFlightsSaver.instance.save(extractedFlights)
     }
 

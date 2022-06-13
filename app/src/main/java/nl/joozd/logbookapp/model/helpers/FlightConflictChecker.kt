@@ -35,14 +35,14 @@ object FlightConflictChecker {
      * - Is the flight changed in a way that will make it not match a planned flight?     *
      * @return time (epochSecond) to disable calendarSync to if conflict, 0 if not
      */
-    fun checkConflictingWithCalendarSync(originalFlight: Flight?, changedFlight: Flight): Long {
+    suspend fun checkConflictingWithCalendarSync(originalFlight: Flight?, changedFlight: Flight): Long {
         return when {
-            !Prefs.useCalendarSync -> 0L                                                                           // not using calendar sync
-            Prefs.calendarDisabledUntil >= maxOf(originalFlight?.timeIn ?: 0, changedFlight.timeIn) -> 0L              // not using calendar sync for flight being edited
+            !Prefs.useCalendarSync() -> 0L                                                                           // not using calendar sync
+            Prefs.calendarDisabledUntil() >= maxOf(originalFlight?.timeIn ?: 0, changedFlight.timeIn) -> 0L              // not using calendar sync for flight being edited
             !changedFlight.prepareForSave().isPlanned -> 0L                                                                     // not planned, no problem
             originalFlight?.isSamedPlannedFlightAs(changedFlight.prepareForSave()) == true -> 0L                                // editing a planned flight in a way that doesn't break sync
             maxOf (originalFlight?.timeOut ?: 0, changedFlight.timeOut) <
-                    maxOf(Prefs.calendarDisabledUntil,Instant.now().epochSecond) -> 0L                                    // editing a flight that starts before calendar sync cutoff
+                    maxOf(Prefs.calendarDisabledUntil(),Instant.now().epochSecond) -> 0L                                    // editing a flight that starts before calendar sync cutoff
             originalFlight == null && changedFlight.timeOut > Instant.now().epochSecond -> changedFlight.timeIn + 1L            // If editing a new flight that starts in the future, 1 second after end of that flight
             else -> maxOf(originalFlight?.timeIn ?: 0, changedFlight.timeIn) + 1L                                            // In other cases, 1 second after latest timeIn of planned flight and workingFlight
         }

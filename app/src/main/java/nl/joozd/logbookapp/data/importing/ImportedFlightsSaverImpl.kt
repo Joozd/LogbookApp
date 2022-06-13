@@ -77,7 +77,9 @@ class ImportedFlightsSaverImpl(
     override suspend fun save(completedFlights: ExtractedCompletedFlights): SaveCompletedFlightsResult {
         val flights = prepareFlightsForSaving(completedFlights) ?: return SaveCompletedFlightsResult(false)
         val flightsOnDevice = flightsRepo.getAllFlights()
-        val relevantFlightsOnDevice = flightsOnDevice.filter { !it.isSim && it.timeOut in completedFlights.period ?: return SaveCompletedFlightsResult(false) }
+        val relevantFlightsOnDevice = flightsOnDevice.filter {
+            !it.isSim && it.timeOut in (completedFlights.period ?: return SaveCompletedFlightsResult(false))
+        }
         val matchingFlights = getMatchingFlightsSameDay(relevantFlightsOnDevice, flights)
         val mergedFlights = mergeFlights(matchingFlights).autocomplete(airportRepository, aircraftRepository)
         val newFlights = getNonMatchingFlightsSameDay(relevantFlightsOnDevice, flights)
@@ -152,7 +154,7 @@ class ImportedFlightsSaverImpl(
         }
     }
 
-    private fun List<Flight>.removeNamesIfNeeded(): List<Flight> =
-        if (Prefs.getNamesFromRosters) this
+    private suspend fun List<Flight>.removeNamesIfNeeded(): List<Flight> =
+        if (Prefs.getNamesFromRosters()) this
         else this.map { it.copy(name = "", name2 = "") }
 }

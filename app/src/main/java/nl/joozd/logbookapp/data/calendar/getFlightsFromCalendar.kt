@@ -35,7 +35,7 @@ import java.time.Duration
 import java.time.Instant
 
 private val startCutoff
-    get() = maxOf(Instant.now(), Instant.ofEpochSecond(Prefs.calendarDisabledUntil))
+    get() = maxOf(Instant.now(), Instant.ofEpochSecond(Prefs.calendarDisabledUntil.valueBlocking))
 
 private val period
     get() = (startCutoff..Instant.now().plus(Duration.ofDays(Prefs.calendarSyncAmountOfDays)))
@@ -49,7 +49,7 @@ suspend fun Context.getFlightsFromCalendar(): ExtractedPlannedFlights? {
 
 @RequiresPermission(Manifest.permission.READ_CALENDAR)
 private suspend fun Context.activeCalendar(): CalendarDescriptor? = withContext(DispatcherProvider.io()) {
-    getCalendars().firstOrNull { it.displayName == Prefs.selectedCalendar }
+    getCalendars().firstOrNull { it.displayName == Prefs.selectedCalendar() }
 }
 
 private suspend fun Context.getEventsInPeriod(calendar: CalendarDescriptor, period: ClosedRange<Instant>): List<CalendarEvent>{

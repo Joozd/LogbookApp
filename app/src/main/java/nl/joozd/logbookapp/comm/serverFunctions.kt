@@ -62,7 +62,7 @@ suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud()): ServerFunctionRe
         getEmailAddressFromPrefs()?.let{ emailAddress ->
             sendEmailAddressToServer(loginData, emailAddress, cloud).also{
                 if (it.isOK()) {
-                    ServerPrefs.postEmailVerified(false)
+                    ServerPrefs.emailVerified(false)
                     TaskFlags.updateEmailWithServer(false)
                 }
             }
@@ -80,7 +80,7 @@ suspend fun confirmEmail(confirmationString: String, cloud: Cloud = Cloud()): Se
     sendEmailConfirmationCode(confirmationString, cloud).also{
         if (it == ServerFunctionResult.SUCCESS) withContext (DispatcherProvider.io()) {
             resetEmailCodeVerificationFlag()
-            ServerPrefs.emailVerified = true // blocking is OK in this context
+            ServerPrefs.emailVerified(true) // blocking is OK in this context
         }
     }
 
@@ -197,13 +197,13 @@ private suspend fun getEmailAddressFromPrefs(): String? =
         // Therefore, this should only happen after user triggered an action in a way unforeseen at the time of this writing
         Log.e("getEmailAddressFromPrefs", "getEmailAddressFromPrefs() was called but an EmailPrefs.emailAddress is blank. User is notified to fix this.")
         MessagesWaiting.noEmailEntered(true) // this will trigger display of "no email entered" message to user.
-        ServerPrefs.emailVerified = false
+        ServerPrefs.emailVerified(false)
 
         null
     }
 
 private fun resetEmailData() {
-    ServerPrefs.postEmailVerified(false)
+    ServerPrefs.emailVerified(false)
     UserManagement().requestEmailVerificationMail()
 }
 

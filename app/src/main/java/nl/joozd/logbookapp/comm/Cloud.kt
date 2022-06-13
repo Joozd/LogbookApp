@@ -173,12 +173,6 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
     private suspend fun Client.readServerResponse() =
         readFromServer()?.toString(Charsets.UTF_8)
 
-    private fun generateLoginDataWithEmail(username: String? = null, key: ByteArray? = null, email: String? = null): LoginDataWithEmail? {
-        return LoginDataWithEmail(username ?: Prefs.username ?: return null,
-            key ?: Prefs.key ?: return null,
-            BasicFlight.VERSION.version, email ?: ServerPrefs.emailAddress)
-    }
-
     // all client usage should use this function so locking is properly taken care of.
     private suspend inline fun <T> withClient(block: Client.() -> T): T = clientMutex.withLock {
         client().use {

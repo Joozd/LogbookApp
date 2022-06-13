@@ -71,7 +71,7 @@ class FlightViewHolder(containerView: View) : ListItemViewHolder(containerView) 
     }
 
     private fun Airport.displayString(): String =
-        if (Prefs.useIataAirports)
+        if (Prefs.useIataAirports.valueBlocking)
             iata_code.takeIf{ it.isNotBlank() } ?: ident
         else ident
 }

@@ -1,5 +1,7 @@
 package nl.joozd.logbookapp.data.calendar
 
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.importing.matchesFlightnumberTimeOrigAndDestWith
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
@@ -25,20 +27,20 @@ object CalendarControl {
      * If a flight has been manually saved, this checks if CalendarSync causes a conflict.
      * If so, it puts a UserMessage in [MessageCenter]
      */
-    fun handleManualFlightSave(flight: Flight){
+    suspend fun handleManualFlightSave(flight: Flight){
         if (flight.causesConflictWithCalendar())
             setMessage(makeCalendarConflictMessage(flight, CalendarConflict.EDITING_FLIGHT_IN_PERIOD))
     }
 
-    fun handleManualDelete(flight: Flight) {
+    suspend fun handleManualDelete(flight: Flight) {
         if (flight.causesConflictWithCalendar())
             setMessage(makeCalendarConflictMessage(flight, CalendarConflict.DELETING_FLIGHT_IN_PERIOD))
     }
 
-    private fun Flight.causesConflictWithCalendar(): Boolean =
+    private suspend fun Flight.causesConflictWithCalendar(): Boolean =
         isPlanned
-                && Prefs.useCalendarSync
-                && timeIn > Prefs.calendarDisabledUntil
+                && Prefs.useCalendarSync()
+                && timeIn > Prefs.calendarDisabledUntil()
                 && timeIn > Instant.now().epochSecond
 
 
@@ -57,8 +59,10 @@ object CalendarControl {
         UserMessage.Builder().apply{
             titleResource = R.string.calendar_sync_conflict
             descriptionResource = msg
-            setPositiveButton(android.R.string.ok){
-                Prefs.calendarDisabledUntil = time + 1
+            setPositiveButton(android.R.string.ok) {
+                MainScope().launch {
+                    Prefs.calendarDisabledUntil(time + 1)
+                }
             }
             setNegativeButton(R.string.ignore){ /* intentionally left blank */ }
         }.build()

@@ -21,9 +21,9 @@ package nl.joozd.logbookapp.data.repository.airportrepository
 
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import nl.joozd.logbookapp.data.dataclasses.Airport
+import nl.joozd.logbookapp.data.repository.Preloader
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
@@ -32,6 +32,15 @@ class AirportRepositoryImpl(
     dataBase: JoozdlogDatabase
 ): AirportRepository, CoroutineScope by dispatchersProviderMainScope()  {
     private val airportDao = dataBase.airportDao()
+
+    override val hasData: StateFlow<Boolean> = MutableStateFlow(false)
+    init{
+        MainScope().launch {
+            if (airportDao.airportsFlow().firstOrNull() == null)
+                updateAirports(Preloader().getPreloadedAirports())
+            (hasData as MutableStateFlow).value = true
+        }
+    }
 
 
     override fun airportsFlow() = airportDao.airportsFlow()

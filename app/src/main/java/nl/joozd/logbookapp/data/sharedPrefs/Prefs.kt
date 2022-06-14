@@ -96,12 +96,6 @@ object Prefs: JoozdLogPreferences() {
     private const val AIRPORT_DB_VERSION = "AIRPORT_DB_VERSION"
     var airportDbVersion: Int by JoozdLogSharedPreferenceNotNull(AIRPORT_DB_VERSION,0)
 
-    private const val AIRCRAFT_TYPES_VERSION = "AIRCRAFT_TYPES_VERSION"
-    var aircraftTypesVersion: Int by JoozdLogSharedPreferenceNotNull(AIRCRAFT_TYPES_VERSION,0)
-
-    private const val AIRCRAFT_FORCED_TYPES_VERSION = "AIRCRAFT_FORCED_TYPES_VERSION"
-    var aircraftForcedVersion: Int by JoozdLogSharedPreferenceNotNull(AIRCRAFT_FORCED_TYPES_VERSION,0)
-
     /**
      * Amount of days that need to have passed for a notice to be shown
      */
@@ -109,19 +103,13 @@ object Prefs: JoozdLogPreferences() {
     private const val BACKUP_FROM_CLOUD = "BACKUP_FROM_CLOUD"
 
     val backupInterval by JoozdlogSharedPreferenceDelegate(BACKUP_INTERVAL,14)
-
-
     val backupFromCloud by JoozdlogSharedPreferenceDelegate(BACKUP_FROM_CLOUD,false)
 
-    //Instant epochSeconds of most recent backup
-    private const val MOST_RECENT_BACKUP = "MOST_RECENT_BACKUP"
-    var mostRecentBackup: Long by JoozdLogSharedPreferenceNotNull(MOST_RECENT_BACKUP,0L)
-
     private const val NEW_USER_ACT_FINISHED = "NEW_USER_ACT_FINISHED"
-    var newUserActivityFinished: Boolean by JoozdLogSharedPreferenceNotNull(NEW_USER_ACT_FINISHED,false)
-
     private const val EFF_FIRST_USE = "EFF_FIRST_USE"
-    var editFlightFragmentWelcomeMessageShouldBeDisplayed: Boolean by JoozdLogSharedPreferenceNotNull(EFF_FIRST_USE,true)
+
+    val newUserActivityFinished by JoozdlogSharedPreferenceDelegate(NEW_USER_ACT_FINISHED,false)
+    val editFlightFragmentWelcomeMessageShouldBeDisplayed by JoozdlogSharedPreferenceDelegate(EFF_FIRST_USE,true)
 
     /***********************
      *   UI preferences:   *

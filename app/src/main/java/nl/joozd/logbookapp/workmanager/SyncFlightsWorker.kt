@@ -37,12 +37,15 @@ import nl.joozd.logbookapp.utils.DispatcherProvider
  *  - Failure() if server refused to perform task, should not touch its flag
  *      (server refusal handling should have set another flag which will prevent this worker from being called until it is fixed)
  */
-class SyncFlightsWorker(appContext: Context, workerParams: WorkerParameters,
-                        private val repository: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance,
-                        private val cloud: Cloud = Cloud())
+class SyncFlightsWorker(appContext: Context,
+                        workerParams: WorkerParameters,
+                        private val repository: FlightRepositoryWithDirectAccess,
+                        private val cloud: Cloud)
     : CoroutineWorker(appContext, workerParams) {
+    constructor(appContext: Context, workerParams: WorkerParameters): this(appContext, workerParams, FlightRepositoryWithDirectAccess.instance, Cloud()) // constructor needed to instantiate as a Worker
 
     override suspend fun doWork(): Result = withContext(DispatcherProvider.io()) {
+        println("SyncFlightsWorker started")
         return@withContext syncFlights(cloud, repository).toListenableWorkerResult()
     }
 }

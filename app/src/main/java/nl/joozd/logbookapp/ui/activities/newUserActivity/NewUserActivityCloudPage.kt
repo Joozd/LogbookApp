@@ -52,6 +52,7 @@ class NewUserActivityCloudPage: NewUseractivityPage() {
             useCloudCheckbox.setOnClickListener {
                 Prefs.useCloud.toggle()
             }
+
         }.root
 
     private fun turnOffOrShowTermsDialog() {
@@ -63,7 +64,8 @@ class NewUserActivityCloudPage: NewUseractivityPage() {
     }
 
     private fun ActivityNewUserPageCloudBinding.collectCloudTermsAcceptedFlow() = Prefs.acceptedCloudSyncTerms.flow.launchCollectWhileLifecycleStateStarted{
-        useCloudCheckbox.isChecked = it
+        println("Prefs.acceptedCloudSyncTerms = $it")
+        acceptTermsCheckbox.isChecked = it
         useCloudCheckbox.isEnabled = it
     }
 

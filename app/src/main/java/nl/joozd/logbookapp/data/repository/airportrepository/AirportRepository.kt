@@ -20,10 +20,12 @@
 package nl.joozd.logbookapp.data.repository.airportrepository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 
 interface AirportRepository {
+    val hasData: StateFlow<Boolean>
     /**
      * Provide a flow with updates when airport Database gets updated
      */

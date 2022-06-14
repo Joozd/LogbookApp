@@ -21,9 +21,18 @@ package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
 import android.content.ContentResolver
 import android.content.Intent
+import kotlinx.coroutines.flow.combine
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 
-class PdfParserActivityViewModel: JoozdlogActivityViewModel() {
+class PdfParserActivityViewModel(
+    airportRepository: AirportRepository = AirportRepository.instance,
+    aircraftRepository: AircraftRepository = AircraftRepository.instance
+): JoozdlogActivityViewModel() {
+    val repositoriesReadyFlow = combine(aircraftRepository.hasData, airportRepository.hasData){ aircraftReady, airportsReady ->
+        aircraftReady && airportsReady
+    }
     private val handler = SingleUseImportIntentHandler()
     val status = handler.statusFlow
 

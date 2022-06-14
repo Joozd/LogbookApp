@@ -30,7 +30,6 @@ class FlightsSynchronizer(
 
         doInOneClientSession {
             login(Prefs.username()!!, Prefs.key()!!).also{ if (!it.isOK()) return@doInOneClientSession it }
-            //But hard to read but,
             val isSynchronized: Boolean =
                 Cloud.Result<Boolean>().apply{
                     val cloudFunctionResult = checkIfIsSynchronizedAndPutResultInParam1(this)
@@ -40,7 +39,6 @@ class FlightsSynchronizer(
                 markMostRecentSyncAsNow()
                 return@doInOneClientSession CloudFunctionResult.OK
             }
-
             //If we get here, we need to synchronize!
             performSync()
         }.correspondingServerFunctionResult()
@@ -152,7 +150,7 @@ class FlightsSynchronizer(
     // Will update flights directly in DB
     private suspend fun updateIDsForNewFlights(serverIDsWithTimestamps: List<IDWithTimeStamp>){
         val newFlights = repository.getAllFlights().filter { it.unknownToServer }
-        val highestIDOnServer = serverIDsWithTimestamps.maxOf { it.ID }
+        val highestIDOnServer = serverIDsWithTimestamps.maxOfOrNull { it.ID } ?: -1
         if (newFlights.none { it.flightID <= highestIDOnServer }) return // if no conflicts, do nothing
         val updatedNewFlights = newFlights.map {
             it.copy(flightID = repository.generateAndReserveNewFlightID(highestIDOnServer))

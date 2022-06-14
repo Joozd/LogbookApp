@@ -99,6 +99,7 @@ class MainActivity : JoozdlogActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        startNewUserActivityIfNewInstall()
         val binding = (ActivityMainNewBinding.inflate(layoutInflater)).apply {
             setSupportActionBar(mainToolbar)
             handleIntent()
@@ -385,7 +386,7 @@ class MainActivity : JoozdlogActivity() {
     }
 
     private fun startNewUserActivityIfNewInstall() {
-        if (!Prefs.newUserActivityFinished)
+        if (!Prefs.newUserActivityFinished.valueBlocking) // intentionally blocking. Could collect flow but then mainActivity would load before newUserActitivy
             startActivity(Intent(this, NewUserActivity::class.java))
     }
 

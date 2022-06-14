@@ -20,6 +20,7 @@
 package nl.joozd.logbookapp.data.repository.aircraftrepository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.joozdlogcommon.ForcedTypeData
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
@@ -28,6 +29,7 @@ import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 
 interface AircraftRepository {
+    val hasData: StateFlow<Boolean>
     /**
      * Provide a Flow with updates to AircraftTypes in DB
      */

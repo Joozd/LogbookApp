@@ -25,6 +25,7 @@ import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.core.Constants
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.comm.*
+import nl.joozd.logbookapp.core.background.PersistentMessagesDispatcher
 import nl.joozd.logbookapp.core.background.SyncCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
@@ -159,7 +160,7 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         }
 
     private fun notifyNoUserDataSet(){
-        TODO("Notify user no login data is set")
+        MessagesWaiting
     }
 
     companion object {

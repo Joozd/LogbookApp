@@ -23,9 +23,9 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivityPdfParserBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.DoneCompletedFlightsWithResult
@@ -44,6 +44,7 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
     private val viewModel: PdfParserActivityViewModel by viewModels()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -56,9 +57,16 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
     }
 
     private fun ActivityPdfParserBinding.launchIntentHandler() {
-        if (checkAirportDatabaseAvailable())
-            viewModel.handleIntent(intent, contentResolver)
-        else downloadAirportsThenLaunchIntentHandler()
+        var collectJob: Job = Job()
+        collectJob = lifecycleScope.launch {
+            viewModel.repositoriesReadyFlow.collect{
+                if (it) {
+                    viewModel.handleIntent(intent, contentResolver)
+                    collectJob.cancel()
+                }
+                else pdfParserStatusTextView.setText(R.string.loading_aircraft_and_airports_database)
+            }
+        }
     }
 
     private fun ActivityPdfParserBinding.collectHandlerStatus() {
@@ -108,32 +116,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
             }
         }.create().show()
 
-    private fun checkAirportDatabaseAvailable(): Boolean =
-        Prefs.airportDbVersion > 0
 
-    private fun ActivityPdfParserBinding.downloadAirportsThenLaunchIntentHandler(){
-        launch{
-            pdfParserStatusTextView.text = getString(R.string.downloading_airports)
-            if(downloadAirportDatabase())
-                viewModel.handleIntent(intent, contentResolver)
-            else AlertDialog.Builder(activity).apply{
-                setMessage(R.string.no_airport_db_for_importing)
-                setTitle(R.string.error)
-                setPositiveButton(android.R.string.ok){ _, _ ->
-                    finish()
-                }
-            }
-        }
-    }
-
-    private fun downloadAirportDatabase(): Boolean = false /*{
-        val result = OldCloud.downloadAirportsDatabase{
-            if (it%10 == 0)
-                Log.d(this::class.simpleName, "Downloading airports DB - $it%")
-        }
-        return result == ServerFunctionResult.OK
-    }
-    */
 
 
 }

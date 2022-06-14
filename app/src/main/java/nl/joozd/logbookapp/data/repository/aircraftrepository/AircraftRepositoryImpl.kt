@@ -20,12 +20,11 @@
 package nl.joozd.logbookapp.data.repository.aircraftrepository
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.joozdlogcommon.ForcedTypeData
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
+import nl.joozd.logbookapp.data.repository.Preloader
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.helpers.formatRegistration
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
@@ -46,6 +45,15 @@ class AircraftRepositoryImpl(
 ): AircraftRepository, CoroutineScope by dispatchersProviderMainScope() {
     private val aircraftTypeDao = dataBase.aircraftTypeDao()
     private val preloadedRegistrationsDao = dataBase.preloadedRegistrationsDao()
+
+    override val hasData: StateFlow<Boolean> = MutableStateFlow(false)
+    init{
+        MainScope().launch {
+            if (aircraftTypeDao.aircraftTypesFlow().firstOrNull() == null)
+                updateAircraftTypes(Preloader().getPreloadedAircraftTypes())
+            (hasData as MutableStateFlow).value = true
+        }
+    }
 
     override fun aircraftTypesFlow() = aircraftTypeDao.aircraftTypesFlow().map {
         it.toAircraftTypes()

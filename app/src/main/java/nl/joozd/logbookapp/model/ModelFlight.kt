@@ -129,7 +129,9 @@ data class ModelFlight(
             takeoffLandings = makeTakeoffLandings().updateTakeoffLandingsForNightTime(),
             multiPilotTime = calculateMultiPilotTime(),
             isCoPilot = isCopilot()
-        )
+        ).also{
+            println("Aircraft: $aircraft, type ${aircraft.type}")
+        }
 
     fun date(): LocalDate = timeOut.toLocalDate()
 

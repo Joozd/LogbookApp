@@ -23,6 +23,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.toggle
@@ -45,13 +47,17 @@ class NewUserActivityFinalPage: NewUseractivityPage() {
             }
 
             doneButton.setOnClickListener {
-                newUserActivity.finish()
+                lifecycleScope.launch{
+                    Prefs.newUserActivityFinished.valueBlocking = true // make sure this is taken care of before launching MainActivity, so it won't jump straight back to NewUserActivity
+                    newUserActivity.finish()
+                }
             }
         }.root
 
     private fun ActivityNewUserPageFinalBinding.launchCollectUseIataFlow(){
         Prefs.useIataAirports.flow.launchCollectWhileLifecycleStateStarted{
             icaoIataSwitch.isChecked = it
+            icaoIataSwitch.setText(if (it) R.string.useIataAirports else R.string.useIcaoAirports)
         }
     }
 }

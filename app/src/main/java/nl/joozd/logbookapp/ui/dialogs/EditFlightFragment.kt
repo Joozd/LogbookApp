@@ -68,8 +68,7 @@ class EditFlightFragment: JoozdlogFragment() {
             setOnFocusChangedListeners()
             startFlowCollectors()
             catchAndIgnoreClicksOnEmptyPartOfDialog()
-            if (Prefs.editFlightFragmentWelcomeMessageShouldBeDisplayed)
-                showWelcomeMessage()
+
 
 
         }
@@ -452,9 +451,17 @@ class EditFlightFragment: JoozdlogFragment() {
 
 
     private fun LayoutEditFlightFragmentBinding.startFlowCollectors(){
+        showWelcomeMessageIfNeeded()
         collectNamesForAutoCompleteTextViews()
         collectRegistrationsForAutoCompleteTextView()
         collectFlightPropertyFlows()
+    }
+
+    private fun showWelcomeMessageIfNeeded() {
+        Prefs.editFlightFragmentWelcomeMessageShouldBeDisplayed.flow.launchCollectWhileLifecycleStateStarted {
+            if (it)
+                showWelcomeMessage()
+        }
     }
 
     private fun LayoutEditFlightFragmentBinding.collectNamesForAutoCompleteTextViews() {
@@ -532,7 +539,7 @@ class EditFlightFragment: JoozdlogFragment() {
         }
         viewModel.origValidFlow.launchCollectWhileLifecycleStateStarted{
             flightOrigEditText.setAirportFieldToValidOrInvalidLayout(it)
-            if (it) toastAirportNotFound()
+            if (!it) toastAirportNotFound()
         }
     }
 
@@ -542,7 +549,7 @@ class EditFlightFragment: JoozdlogFragment() {
         }
         viewModel.destValidFlow.launchCollectWhileLifecycleStateStarted{
             flightDestEditText.setAirportFieldToValidOrInvalidLayout(it)
-            if (it) toastAirportNotFound()
+            if (!it) toastAirportNotFound()
         }
     }
 
@@ -690,7 +697,7 @@ class EditFlightFragment: JoozdlogFragment() {
         titleResource = R.string.edit_flight_welcome_title
         messageResource = R.string.edit_flight_welcome_message
         setPositiveButton(android.R.string.ok){
-            Prefs.editFlightFragmentWelcomeMessageShouldBeDisplayed = false
+            Prefs.editFlightFragmentWelcomeMessageShouldBeDisplayed(false)
         }
     }
 

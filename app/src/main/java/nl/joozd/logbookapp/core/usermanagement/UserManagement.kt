@@ -48,6 +48,11 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         taskFlags.createNewUser(true)
     }
 
+    suspend fun createNewUserIfNotLoggedIn(){
+        if(!isLoggedIn())
+        taskFlags.createNewUser(true)
+    }
+
 
 
     //blocking IO in DispatcherProvider.io()

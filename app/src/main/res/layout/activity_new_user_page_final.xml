@@ -36,10 +36,8 @@
             <TextView
                 android:id="@+id/textView3"
                 style="@style/HeaderText.Bold"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
                 android:text="@string/almost_done"
-                app:layout_constraintBottom_toTopOf="@+id/textView5"
+                app:layout_constraintBottom_toTopOf="@+id/icaoIataDescription"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -48,63 +46,53 @@
                 app:layout_constraintVertical_chainStyle="packed" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/icaoIataDescription"
                 style="@style/SecondaryTextCentered"
-                android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/you_can_set_settings_in_settings"
-                app:layout_constraintBottom_toTopOf="@+id/icaoIataSwitch"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView3" />
+                android:text="@string/icao_iata_description"
+                app:layout_constraintBottom_toTopOf="@+id/icaoIataSwitch"
+                app:layout_constraintTop_toBottomOf="@+id/textView3"
+                tools:layout_editor_absoluteX="32dp" />
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/icaoIataSwitch"
                 style="@style/SettingsActivitySwitch"
                 android:layout_marginTop="16dp"
                 android:text="@string/useIataAirports"
-                app:layout_constraintBottom_toTopOf="@+id/icaoIataDescription"
+                app:layout_constraintBottom_toTopOf="@+id/textView5"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView5" />
+                app:layout_constraintTop_toBottomOf="@+id/icaoIataDescription"/>
 
             <TextView
-                android:id="@+id/icaoIataDescription"
-                style="@style/TertiaryText"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/icao_iata_description"
-                app:layout_constraintBottom_toTopOf="@+id/consensusSwitch"
+                android:id="@+id/textView5"
+                style="@style/SecondaryTextCentered"
+                android:layout_marginTop="16dp"
+                android:text="@string/you_can_set_settings_in_settings"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/icaoIataSwitch" />
 
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/consensusSwitch"
-                style="@style/SettingsActivitySwitch"
-                android:layout_marginTop="16dp"
-                android:text="@string/use_consensus_data"
-                app:layout_constraintBottom_toTopOf="@+id/consensusDescription"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/icaoIataDescription" />
 
-            <TextView
-                android:id="@+id/consensusDescription"
-                style="@style/TertiaryText"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/consensus_description"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/consensusSwitch" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+    <TextView
+        android:id="@+id/doneButton"
+        style="@style/DialogButtonText"
+        android:text="@string/done"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/backButton"
+        style="@style/DialogButtonText"
+        android:text="@string/back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

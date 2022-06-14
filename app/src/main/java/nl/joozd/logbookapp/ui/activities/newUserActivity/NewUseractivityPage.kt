@@ -1,31 +1,29 @@
 package nl.joozd.logbookapp.ui.activities.newUserActivity
 
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
 import androidx.fragment.app.Fragment
+import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
-abstract class NewUseractivityPage: Fragment() {
+abstract class NewUseractivityPage: JoozdlogFragment() {
     val newUserActivity: NewUserActivity get() = requireActivity() as NewUserActivity
 
-    abstract var pageNumber: Int?
-
-    fun continueClicked(){
-        newUserActivity.continueClicked(pageNumber!!)
+    private fun continueClicked(){
+        newUserActivity.continueClicked()
+    }
+    private fun previousClicked(){
+        newUserActivity.previousClicked()
     }
 
-    fun previousClicked(){
-        newUserActivity.previousClicked(pageNumber!!)
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        pageNumber?.let { outState.putInt(NEW_USER_PAGE_PAGE_NUMBER, it) }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        pageNumber = savedInstanceState?.getInt(NEW_USER_PAGE_PAGE_NUMBER)
-    }
-
-    companion object {
-        const val NEW_USER_PAGE_PAGE_NUMBER = "NEW_USER_PAGE_PAGE_NUMBER"
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.findViewById<TextView>(R.id.continueButton)?.setOnClickListener {
+            continueClicked()
+        }
+        view.findViewById<TextView>(R.id.backButton)?.setOnClickListener {
+            previousClicked()
+        }
     }
 }

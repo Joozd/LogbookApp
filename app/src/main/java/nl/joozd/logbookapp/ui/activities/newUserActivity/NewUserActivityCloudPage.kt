@@ -20,70 +20,64 @@
 package nl.joozd.logbookapp.ui.activities.newUserActivity
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.NewUserActivityEvents
-import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
+import nl.joozd.logbookapp.data.sharedPrefs.toggle
 import nl.joozd.logbookapp.ui.dialogs.CloudSyncTermsDialog
-import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageCloudBinding
-import nl.joozd.logbookapp.ui.utils.toast
 
 /**
  * Preferences pertaining to cloud.
  * If Cloud is enabled, sync worker will create a new account if needed.
  */
-class NewUserActivityCloudPage: JoozdlogFragment() {
-    val viewModel: NewUserActivityViewModel by activityViewModels()
-
-    val pageNumber = NewUserActivityViewModel.PAGE_CLOUD
+class NewUserActivityCloudPage: NewUseractivityPage() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageCloudBinding.bind(inflater.inflate(R.layout.activity_new_user_page_cloud, container, false)).apply {
-            useCloudCheckbox.isChecked = Prefs.useCloud.valueBlocking
 
-            /*******************************************************************************************
-             * OnClickedListeners
-             *******************************************************************************************/
+            collectCloudTermsAcceptedFlow()
+            collectUseCloudFlow()
+
+            acceptTermsCheckbox.setOnClickListener {
+                turnOffOrShowTermsDialog()
+            }
 
             useCloudCheckbox.setOnClickListener {
-                viewModel.useCloudCheckboxClicked()
-                useCloudCheckbox.isChecked = Prefs.useCloud.valueBlocking
-            }
-
-            /*******************************************************************************************
-             * Observers:
-             *******************************************************************************************/
-
-            /**
-             * set [ActivityNewUserPageCloudBinding.useCloudCheckbox] according to if it should be set
-             */
-            viewModel.useCloudCheckboxStatus.observe(viewLifecycleOwner){
-                useCloudCheckbox.isChecked = it
-                if (it) viewModel.setNextButtonEnabled(pageNumber, true) // if checkbox checked, 'CONTINUE' is enabled, it will stay that way if it is unchecked again.
-            }
-
-            viewModel.getFeedbackChannel(pageNumber).observe(viewLifecycleOwner) {
-                Log.d("Event!", "${it.type}, already consumed: ${it.consumed}")
-                when (it.getEvent()) {
-                    NewUserActivityEvents.NOT_IMPLEMENTED -> {
-                        toast("Not implemented!")
-                    }
-                    NewUserActivityEvents.SHOW_TERMS_DIALOG -> supportFragmentManager.commit {
-                        add(R.id.newUserActivityLayout, CloudSyncTermsDialog())
-                        addToBackStack(null)
-                    }
-                }
+                Prefs.useCloud.toggle()
             }
         }.root
 
-    companion object{
-        private const val USERNAME_BUNDLE_KEY = "USERNAME"
+    private fun turnOffOrShowTermsDialog() {
+        lifecycleScope.launch {
+            if (Prefs.acceptedCloudSyncTerms())
+                Prefs.acceptedCloudSyncTerms.toggle()
+            else launchCloudSyncTermsDialog()
+        }
+    }
+
+    private fun ActivityNewUserPageCloudBinding.collectCloudTermsAcceptedFlow() = Prefs.acceptedCloudSyncTerms.flow.launchCollectWhileLifecycleStateStarted{
+        useCloudCheckbox.isChecked = it
+        useCloudCheckbox.isEnabled = it
+    }
+
+    private fun ActivityNewUserPageCloudBinding.collectUseCloudFlow() = Prefs.useCloud.flow.launchCollectWhileLifecycleStateStarted{
+        useCloudCheckbox.isChecked = it
+        continueButton.setText(if (it) R.string._continue else R.string.dont_use)
+        if(it)
+            UserManagement().createNewUserIfNotLoggedIn()
+    }
+
+    private fun launchCloudSyncTermsDialog(){
+        supportFragmentManager.commit {
+            add(R.id.newUserActivityLayout, CloudSyncTermsDialog())
+            addToBackStack(null)
+        }
     }
 }

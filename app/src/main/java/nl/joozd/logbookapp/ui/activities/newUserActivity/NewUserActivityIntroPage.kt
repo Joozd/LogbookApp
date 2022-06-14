@@ -23,22 +23,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageIntroBinding
-import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 
 /**
  * Page 0 is just a basic introduction saying welcome to the new user
  */
-class NewUserActivityIntroPage(override var pageNumber: Int? = null): NewUseractivityPage() {
-    constructor(): this(null)
-
-    val viewModel: NewUserActivityViewModel by activityViewModels()
-
+class NewUserActivityIntroPage: NewUseractivityPage() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageIntroBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_intro, container, false)).apply {
-        continueButton.setOnClickListener { continueClicked() }
+        // continueButton.setOnClickListener { continueClicked() } // should be handled by super
     }.root
 }

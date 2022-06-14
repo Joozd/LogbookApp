@@ -23,71 +23,44 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.SettingsActivityEvents
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.data.sharedPrefs.toggle
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageCalendarBinding
-import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.CalendarSyncDialog
-import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
 /**
  * Calendar import
  */
-class NewUserActivityCalendarPage: JoozdlogFragment() {
-    val pageNumber = NewUserActivityViewModel.PAGE_CALENDAR
-
-    val viewModel: NewUserActivityViewModel by activityViewModels()
-
+class NewUserActivityCalendarPage: NewUseractivityPage() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageCalendarBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_calendar, container, false)).apply {
-
-
-            /*******************************************************************************************
-             * OnClickedListeners
-             *******************************************************************************************/
-
-            /**
-             * When useCalendarImportSwitch is clicked, viewModel will open UseCalendarDialog if switching to on,
-             * or switch [Prefs.useCalendarSync] when switching to off.
-             * This will intitially also set switch state to [Prefs.useCalendarSync],
-             *      which will update later when that gets updated through viewModel.getFlightsFromCalendar.observe
-             */
+            collectCalendarSyncFlow()
             useCalendarImportSwitch.setOnClickListener {
-                viewModel.setGetFlightsFromCalendarClicked()
-                useCalendarImportSwitch.isChecked = Prefs.useCalendarSync
+                disableCalendarSyncOrShowDialog()
             }
-
-
-            /*******************************************************************************************
-             * Observers
-             *******************************************************************************************/
-
-            // set useCalendarImportSwitch and "Continue" button enabled to it
-            viewModel.getFlightsFromCalendar.observe(viewLifecycleOwner){
-                useCalendarImportSwitch.isChecked = it
-                viewModel.setNextButtonEnabled(pageNumber, it)
-            }
-
-            /**
-             * Observe feedback from viewModel
-             */
-            viewModel.getFeedbackChannel(pageNumber).observe(viewLifecycleOwner){
-                when (it.getEvent()){
-                    SettingsActivityEvents.CALENDAR_DIALOG_NEEDED -> showCalendarDialogNoSync()
-                }
-            }
-
         }.root
 
-    /**
-     * This dialog will ask all info for calendar sync (ical + address, scraper + calendar)
-     * If [Prefs.useCalendarSync] is false it will set it to true on OK
-     * if not, it will open a dialog that will allow user to accept terms and if so, sets those both to true.
-     */
-    private fun showCalendarDialogNoSync(){
+    private fun ActivityNewUserPageCalendarBinding.collectCalendarSyncFlow(){
+        Prefs.useCalendarSync.flow.launchCollectWhileLifecycleStateStarted{
+            useCalendarImportSwitch.isChecked = it
+            continueButton.setText(if (it) R.string._continue else R.string.dont_use)
+        }
+    }
+
+    private fun disableCalendarSyncOrShowDialog(){
+        lifecycleScope.launch {
+            if (Prefs.useCalendarSync())
+                Prefs.useCalendarSync.toggle()
+            else
+                showCalendarDialog()
+        }
+    }
+
+    private fun showCalendarDialog(){
         supportFragmentManager.commit {
             add(R.id.newUserActivityLayout, CalendarSyncDialog())
             addToBackStack(null)

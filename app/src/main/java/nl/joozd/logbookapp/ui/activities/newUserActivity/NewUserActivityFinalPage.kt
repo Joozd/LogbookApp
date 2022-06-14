@@ -23,40 +23,35 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.data.sharedPrefs.toggle
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageFinalBinding
-import nl.joozd.logbookapp.model.viewmodels.activities.NewUserActivityViewModel
 
 /**
  * Final puntjes op de i
  */
-class NewUserActivityFinalPage: Fragment() {
-    val pageNumber = NewUserActivityViewModel.PAGE_FINAL
-
-    private val viewModel: NewUserActivityViewModel by activityViewModels()
-
+class NewUserActivityFinalPage: NewUseractivityPage() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageFinalBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_final, container, false)).apply {
-            icaoIataSwitch.isChecked = Prefs.useIataAirports
+            launchCollectUseIataFlow()
 
             /*******************************************************************************************
              * OnClickListeners
              *******************************************************************************************/
 
-            icaoIataSwitch.setOnCheckedChangeListener { _, isChecked ->
-                viewModel.setUseIataAirports(isChecked)
+            icaoIataSwitch.setOnClickListener {
+                Prefs.useIataAirports.toggle()
             }
 
-            /*******************************************************************************************
-             * Observers
-             *******************************************************************************************/
-
-            viewModel.useIataAirports.observe(viewLifecycleOwner) { useIata ->
-                icaoIataSwitch.isChecked = useIata
-                // icaoIataSwitch.text = requireActivity().getString(if (useIata) R.string.useIataAirports else R.string.useIcaoAirports)
+            doneButton.setOnClickListener {
+                newUserActivity.finish()
             }
         }.root
+
+    private fun ActivityNewUserPageFinalBinding.launchCollectUseIataFlow(){
+        Prefs.useIataAirports.flow.launchCollectWhileLifecycleStateStarted{
+            icaoIataSwitch.isChecked = it
+        }
+    }
 }

@@ -272,7 +272,7 @@
     <string name="accept_terms_conditions">Accept Terms&amp;Conditions</string>
     <string name="already_have_account">If you already have a cloud account, you can leave this unchecked and use your login link after all settings are done!</string>
 
-    <string name="you_can_set_settings_in_settings">If you want to adjust any more settings, take a look at the Settings menu after you click "done"!</string>
+    <string name="you_can_set_settings_in_settings">If you want to adjust any more settings, take a look at the Settings menu after you click \"done\"!</string>
 
     <string name="edit_flight_welcome_title">Edit Flight</string>
     <string name="edit_flight_welcome_message">You can edit your flights here. The triangles are buttons, click them to see what they do!\nYou can long-press any field to see if it offers any help.</string>
@@ -397,10 +397,11 @@
     <string name="cannot_restore_password">Don\'t lose your password. You cannot restore it.</string>
     <string name="cloud_sync_terms">Cloud Sync terms</string>
     <string name="about">About Joozdlog</string>
+    <string name="dont_use">Don\'t use</string>
     <string name="calendar_import">Calendar Import</string>
     <string name="calendar_import_description">You can automatically import flights into your logbook. The planned flights in Joozdlog will be synced to the calendar you pick.</string>
     <string name="calendar_import_description_line1">You can import flights from your device\'s calendar.</string>
-    <string name="calendar_import_description_line2">This will look for entries like \"KL1234 AMS-LCY" in whatever calendar you pick.</string>
+    <string name="calendar_import_description_line2">This will look for entries like \"KL1234 AMS-LCY\" in whatever calendar you pick.</string>
     <string name="calendar_import_description_line3">Apart from these entries, none of your calendar contents are being saved or transmitted.</string>
     <string name="do_you_want_to_enable_this">Do you want to enable this?</string>
     <string name="use_calendar_import">Use Calendar Import</string>
@@ -408,7 +409,8 @@
     <string name="disabled">Disabled</string>
     <string name="ical_link">iCalendar link</string>
 
-    <string name="use_cloud_sync">Accept Terms and Use Cloud Sync</string>
+    <string name="accept_terms">Accept terms</string>
+    <string name="use_cloud_sync">Use Cloud Sync</string>
     <string name="use_wifi_for_large_files">Only use WiFi for larger files</string>
 
     <string name="cloud_sync_title">Cloud Sync</string>
@@ -424,7 +426,7 @@
     <string name="loggings_prefs_description">General preferences pertaining to (automatic) logging and times.</string>
     <string name="use_consensus_data">Use Aircraft Consensus Data</string>
     <string name="consensus_description">JoozdLog Cloud collects (anonymous) Aircraft Registration and type data so you don\'t have to enter aircraft types that somebody else already entered. Typical collected data would be \"4 users said PH-XXX is a Cessna 172\". Switching this off will stop sending and receiving this data.</string>
-    <string name="icao_iata_description">Display airports with their IATA identifier ("AMS") if this is switched on, or with their ICAO identifier ("EHAM") if it is off.</string>
+    <string name="icao_iata_description">Do you want to display airports in ICAO (4 letter) or as IATA (3 letter) format?</string>
 
     <string name="mark_incomplete_without_pic">PIC name required</string>
     <string name="mark_incomplete_without_pic_description">If no PIC name is set on a completed flight, flight will be marked as incomplete</string>

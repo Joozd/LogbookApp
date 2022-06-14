@@ -37,8 +37,6 @@
                 style="@style/HeaderText.Bold"
                 android:text="@string/calendar_import"
                 app:layout_constraintBottom_toTopOf="@+id/descriptionLine1"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -49,8 +47,6 @@
             <TextView
                 android:id="@+id/descriptionLine1"
                 style="@style/SecondaryTextCentered"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
                 android:text="@string/calendar_import_description_line1"
                 app:layout_constraintBottom_toTopOf="@+id/descriptionLine2"
@@ -61,21 +57,16 @@
             <TextView
                 android:id="@+id/descriptionLine2"
                 style="@style/SecondaryTextCentered"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:text="@string/calendar_import_description_line2"
                 app:layout_constraintBottom_toTopOf="@+id/descriptionLine3"
-                app:layout_constraintTop_toBottomOf="@+id/descriptionLine1"
-                tools:layout_editor_absoluteX="32dp" />
+                app:layout_constraintTop_toBottomOf="@+id/descriptionLine1" />
 
             <TextView
                 android:id="@+id/descriptionLine3"
                 style="@style/SecondaryTextCentered"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -87,9 +78,7 @@
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/useCalendarImportSwitch"
                 style="@style/SettingsActivitySwitch"
-                android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
                 android:text="@string/use_calendar_import"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -98,5 +87,18 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+    <TextView
+        android:id="@+id/continueButton"
+        style="@style/DialogButtonText"
+        android:text="@string/dont_use"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/backButton"
+        style="@style/DialogButtonText"
+        android:text="@string/back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

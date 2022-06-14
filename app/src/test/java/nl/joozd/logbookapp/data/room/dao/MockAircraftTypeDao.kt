@@ -36,7 +36,6 @@ class MockAircraftTypeDao: AircraftTypeDao {
     override fun aircraftTypesFlow(): Flow<List<AircraftTypeData>> = simulatedFlow
 
     override suspend fun save(vararg aircraftTypeData: AircraftTypeData) {
-        //println("${this::class.simpleName} Saving ${aircraftTypeData.size} type data")
         aircraftTypeData.forEach {
             simulatedDatabase[it.name] = it
         }

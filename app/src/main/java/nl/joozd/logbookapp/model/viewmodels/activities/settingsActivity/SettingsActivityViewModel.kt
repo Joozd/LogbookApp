@@ -19,19 +19,13 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.settingsActivity
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.core.App
-import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.extensions.notNullFlow
 import nl.joozd.logbookapp.extensions.toDateStringLocalized
 import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
@@ -66,7 +60,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val useCloudFlow = Prefs.useCloud.flow
 
-    val lastUpdateTimeFlow = Prefs.lastUpdateTimeFlow.notNullFlow()
+    val lastUpdateTimeFlow = ServerPrefs.mostRecentFlightsSyncEpochSecond.flow
 
     val usernameFlow = Prefs.usernameFlow
 
@@ -75,7 +69,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     private val emailVerifiedFlow = ServerPrefs.emailVerified.flow
     val emailDataFlow = buildEmailDataFlow()
 
-    val getNamesFromRostersFlow = Prefs.getNamesFromRosters.flow.notNullFlow()
+    val getNamesFromRostersFlow = Prefs.getNamesFromRosters.flow
 
 
     suspend fun calendarDisabledUntilString(): String {

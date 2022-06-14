@@ -114,9 +114,7 @@ abstract class BaseAircraftPicker: JoozdlogFragment(){
 
     private fun DialogPickAircraftTypeBinding.makeOnListChangedListener() =
         AircraftPickerAdapter.ListChangedListener { newList ->
-            println("OnListChangedListener is running")
             indexOfFirstPickedItemOrNull(newList) ?.let{
-                println("OnListChangedListener is scrolling to position $it")
                 typesPickerRecyclerView.scrollToPosition(it)
             }
         }

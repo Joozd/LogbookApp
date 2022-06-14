@@ -10,8 +10,9 @@ import nl.joozd.logbookapp.comm.updateDataFiles
 import nl.joozd.logbookapp.data.sharedPrefs.DataVersions
 import nl.joozd.logbookapp.utils.TimestampMaker
 
-class SyncDataFilesWorker(appContext: Context, workerParams: WorkerParameters, private val server: HTTPServer = HTTPServer())
+class SyncDataFilesWorker(appContext: Context, workerParams: WorkerParameters, private val server: HTTPServer)
     : CoroutineWorker(appContext, workerParams) {
+    constructor(appContext: Context, workerParams: WorkerParameters): this(appContext, workerParams, HTTPServer())
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         updateDataFiles(server).also {
             if(it.isOK())

@@ -31,6 +31,7 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.model.viewmodels.dialogs.CloudSyncTermsDialogViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.core.TaskFlags
+import nl.joozd.logbookapp.core.background.SyncCenter
 
 /**
  * This dialog will show terms and conditions for Cloud.
@@ -50,7 +51,7 @@ class CloudSyncTermsDialog(): JoozdlogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogCloudSyncTermsBinding.bind(inflater.inflate(R.layout.dialog_cloud_sync_terms, container, false)).apply {
-            if (syncOnClose) TaskFlags.syncFlights(true)
+            if (syncOnClose) SyncCenter().syncFlights()
             cloudSyncTermsDialogBackground.setOnClickListener { } // catch clicks so they don't fall through
 
             // termsTextView.movementMethod = ScrollingMovementMethod()

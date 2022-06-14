@@ -67,7 +67,6 @@ class HTTPServer(private val server: String = Protocol.SERVER_URL) {
                 URL(server + Protocol.DATAFILES_URL_PREFIX + Protocol.DATAFILES_METADATA_FILENAME).readText()
             }
         } catch (ioe: IOException){
-            Log.w("readMetaDataJsonString", "IO error when trying to read url")
             null
         }
 

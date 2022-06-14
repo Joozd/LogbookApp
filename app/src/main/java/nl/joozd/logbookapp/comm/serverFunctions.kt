@@ -10,7 +10,7 @@ import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.core.usermanagement.UsernameWithKey
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.core.usermanagement.checkConfirmationString
-import nl.joozd.logbookapp.data.FlightsSynchronizer
+import nl.joozd.logbookapp.data.sync.FlightsSynchronizer
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
@@ -133,13 +133,14 @@ suspend fun updateDataFiles(server: HTTPServer,
                             airportRepository: AirportRepository = AirportRepository.instance
 ): ServerFunctionResult {
     val metaData = server.getDataFilesMetaData() ?: return ServerFunctionResult.RETRY
+
     if(metaData.aircraftTypesVersion > DataVersions.aircraftTypesVersion()){
         aircraftRepository.updateAircraftTypes(server.getAircraftTypes(metaData) ?: return ServerFunctionResult.RETRY)
         DataVersions.aircraftTypesVersion(metaData.aircraftTypesVersion)
     }
     if(metaData.aircraftForcedTypesVersion > DataVersions.aircraftForcedTypesVersion()){
         aircraftRepository.updateForcedTypes(server.getForcedTypes(metaData) ?: return ServerFunctionResult.RETRY)
-        DataVersions.aircraftTypesVersion(metaData.aircraftTypesVersion)
+        DataVersions.aircraftForcedTypesVersion(metaData.aircraftForcedTypesVersion)
     }
 
     if(metaData.airportsVersion > DataVersions.airportsVersion()){
@@ -153,7 +154,9 @@ suspend fun updateDataFiles(server: HTTPServer,
 suspend fun syncFlights(server: Cloud = Cloud(), repository: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance): ServerFunctionResult =
     //This has its own class as it would make too big a function.
     FlightsSynchronizer(server, repository).synchronizeIfNotSynced().also{
-        if (it.isOK()) TaskFlags.syncFlights(false)
+        if (it.isOK()){
+            TaskFlags.syncFlights(false)
+        }
     }
 
 suspend fun sendFeedback(cloud: Cloud = Cloud()): ServerFunctionResult =
@@ -211,6 +214,6 @@ private fun resetEmailData() {
 private fun storeLoginData(username: String, key: ByteArray) {
     Prefs.username = username
     Prefs.key = key
-    Prefs.postLastUpdateTime(-1)
+    ServerPrefs.mostRecentFlightsSyncEpochSecond(-1L)
 }
 

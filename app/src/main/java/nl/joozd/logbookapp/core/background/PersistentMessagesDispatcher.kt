@@ -1,6 +1,7 @@
 package nl.joozd.logbookapp.core.background
 
 
+import kotlinx.coroutines.CoroutineScope
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
@@ -11,33 +12,33 @@ import nl.joozd.logbookapp.core.usermanagement.UserManagement
  * This does not change any flags other than the message flags.
  */
 class PersistentMessagesDispatcher: BackgroundTasksDispatcher() {
-    override suspend fun startCollectors() {
-        handleNoEmailEntered()
-        handleNoVerificationCodeSavedBug()
-        handleBadVerificationCodeCLicked()
-        handleEmailConfirmed()
+    override fun startCollectors(scope: CoroutineScope) {
+        handleNoEmailEntered(scope)
+        handleNoVerificationCodeSavedBug(scope)
+        handleBadVerificationCodeCLicked(scope)
+        handleEmailConfirmed(scope)
     }
 
-    private suspend fun handleNoEmailEntered() {
-        MessagesWaiting.noEmailEntered.flow.doIfTrueCollected {
+    private fun handleNoEmailEntered(scope: CoroutineScope) {
+        MessagesWaiting.noEmailEntered.flow.launchDoIfTrueCollected(scope) {
             postNoEmailEnteredMessage()
         }
     }
 
-    private suspend fun handleNoVerificationCodeSavedBug() {
-        MessagesWaiting.noVerificationCodeSavedBug.flow.doIfTrueCollected {
+    private fun handleNoVerificationCodeSavedBug(scope: CoroutineScope) {
+        MessagesWaiting.noVerificationCodeSavedBug.flow.launchDoIfTrueCollected(scope) {
             postNoVerificationCodeSavedBugMessage()
         }
     }
 
-    private suspend fun handleBadVerificationCodeCLicked() {
-        MessagesWaiting.badVerificationCodeClicked.flow.doIfTrueCollected {
+    private fun handleBadVerificationCodeCLicked(scope: CoroutineScope) {
+        MessagesWaiting.badVerificationCodeClicked.flow.launchDoIfTrueCollected(scope) {
             postBadVerificationCodeClickedMessage()
         }
     }
 
-    private suspend fun handleEmailConfirmed() {
-        MessagesWaiting.emailConfirmed.flow.doIfTrueCollected {
+    private fun handleEmailConfirmed(scope: CoroutineScope) {
+        MessagesWaiting.emailConfirmed.flow.launchDoIfTrueCollected(scope) {
             showEmailConfirmedMessage()
         }
     }

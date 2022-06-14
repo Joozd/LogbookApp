@@ -42,7 +42,6 @@ abstract class JoozdLogPreferences {
     }
 
     protected fun getBooleanFlowForItem(itemName: String, defaultValue: Boolean? = null): Flow<Boolean?> = dataStore.data.map { p ->
-        println("Getting value for $itemName: ${p[booleanPreferencesKey(itemName)]}")
         p[booleanPreferencesKey(itemName)] ?: defaultValue
     }
 

@@ -1,5 +1,6 @@
 package nl.joozd.logbookapp.core.background
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
@@ -12,70 +13,67 @@ import nl.joozd.logbookapp.workmanager.ServerFunctionsWorkersHub
  * All tasks will go straight to Worker as none is very time-sensitive.
  */
 class TaskDispatcher: BackgroundTasksDispatcher() {
-    override suspend fun startCollectors() {
+    override fun startCollectors(scope: CoroutineScope) {
         //these functions collect their respective Flow and handle that flow's output.
-        handleNewUserWanted()
-        handleEmailUpdateWanted()
-        handleEmailConfirmationWanted()
-        handleBackupEmailWanted()
-        handleLoginLinkWanted()
-        handleFeedbackWaiting()
-        handleSyncDataFiles()
-        handleSyncFlights()
+        handleNewUserWanted(scope)
+        handleEmailUpdateWanted(scope)
+        handleEmailConfirmationWanted(scope)
+        handleBackupEmailWanted(scope)
+        handleLoginLinkWanted(scope)
+        handleFeedbackWaiting(scope)
+        handleSyncDataFiles(scope)
+        handleSyncFlights(scope)
     }
 
-    private suspend fun handleNewUserWanted() {
-        newUserWantedFlow().doIfTrueCollected {
+    private fun handleNewUserWanted(scope: CoroutineScope) {
+        newUserWantedFlow().launchDoIfTrueCollected(scope) {
                 ServerFunctionsWorkersHub().scheduleCreateNewUser()
         }
     }
 
-    private suspend fun handleEmailUpdateWanted() {
-        emailUpdateWantedFlow().doIfTrueCollected {
+    private fun handleEmailUpdateWanted(scope: CoroutineScope) {
+        emailUpdateWantedFlow().launchDoIfTrueCollected(scope) {
             ServerFunctionsWorkersHub().scheduleUpdateEmail()
         }
     }
 
 
 
-    private suspend fun handleEmailConfirmationWanted() {
-        emailConfirmationWantedFlow().doIfTrueCollected {
+    private fun handleEmailConfirmationWanted(scope: CoroutineScope) {
+        emailConfirmationWantedFlow().launchDoIfTrueCollected(scope) {
             ServerFunctionsWorkersHub().scheduleConfirmEmail() // Worker takes care of checking for bad email confirmation string to prevent infinite loop.
         }
     }
 
-    private suspend fun handleBackupEmailWanted() {
-        backupEmailWantedFlow().doIfTrueCollected {
+    private fun handleBackupEmailWanted(scope: CoroutineScope) {
+        backupEmailWantedFlow().launchDoIfTrueCollected(scope) {
             ServerFunctionsWorkersHub().scheduleBackupEmail()
         }
     }
 
-    private suspend fun handleLoginLinkWanted() {
-        loginLinkWantedFlow().doIfTrueCollected {
+    private fun handleLoginLinkWanted(scope: CoroutineScope) {
+        loginLinkWantedFlow().launchDoIfTrueCollected(scope) {
             ServerFunctionsWorkersHub().scheduleLoginLinkEmail()
         }
     }
 
-    private suspend fun handleFeedbackWaiting() {
-        TaskFlags.feedbackWaiting.flow.doIfTrueCollected {
+    private fun handleFeedbackWaiting(scope: CoroutineScope) {
+        TaskFlags.feedbackWaiting.flow.launchDoIfTrueCollected(scope) {
             ServerFunctionsWorkersHub().scheduleSubmitFeedback()
         }
     }
 
-    private suspend fun handleSyncDataFiles() {
-        TaskFlags.syncDataFiles.flow.doIfTrueCollected {
+    private fun handleSyncDataFiles(scope: CoroutineScope) {
+        TaskFlags.syncDataFiles.flow.launchDoIfTrueCollected(scope) {
             ServerFunctionsWorkersHub().scheduleSyncDataFiles()
         }
     }
 
-    private suspend fun handleSyncFlights(){
-        syncNeededFlow().doIfTrueCollected {
+    private fun handleSyncFlights(scope: CoroutineScope){
+        syncNeededFlow().launchDoIfTrueCollected(scope) {
             ServerFunctionsWorkersHub().scheduleSyncFlights()
         }
     }
-
-
-
 
 
     private val validEmailFlow = combine (ServerPrefs.emailAddress.flow, ServerPrefs.emailVerified.flow){

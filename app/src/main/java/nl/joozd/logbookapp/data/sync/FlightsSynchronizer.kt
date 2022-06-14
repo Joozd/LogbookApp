@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.data
+package nl.joozd.logbookapp.data.sync
 
 
 import kotlinx.coroutines.MainScope
@@ -30,10 +30,16 @@ class FlightsSynchronizer(
 
         doInOneClientSession {
             login(Prefs.username()!!, Prefs.key()!!).also{ if (!it.isOK()) return@doInOneClientSession it }
-            val isSynchronized = Cloud.Result<Boolean>().apply{
-                isSynchronized(this).also { if (!it.isOK()) return@doInOneClientSession it }
-            }.value!! // if this is null, isSynchronized(this) would not have returned OK
-            if (isSynchronized) return@doInOneClientSession CloudFunctionResult.OK
+            //But hard to read but,
+            val isSynchronized: Boolean =
+                Cloud.Result<Boolean>().apply{
+                    val cloudFunctionResult = checkIfIsSynchronizedAndPutResultInParam1(this)
+                    if (!cloudFunctionResult.isOK()) return@doInOneClientSession cloudFunctionResult
+                }.value!! // if this is null, isSynchronized(this) would not have returned OK
+            if (isSynchronized) {
+                markMostRecentSyncAsNow()
+                return@doInOneClientSession CloudFunctionResult.OK
+            }
 
             //If we get here, we need to synchronize!
             performSync()
@@ -60,12 +66,16 @@ class FlightsSynchronizer(
         downloadNewOrNewerFlightsFromServer(repoIDsWithTimeStamps, serverIDsWithTimestamps)
         sendNewOrNewerFlightsToServer(repoIDsWithTimeStamps, serverIDsWithTimestamps)
 
-        ServerPrefs.mostRecentFlightsSyncEpochSecond(TimestampMaker().now)
+        markMostRecentSyncAsNow()
 
         CloudFunctionResult.OK
     }
 
-    private suspend fun Client.isSynchronized(result: Cloud.Result<Boolean>): CloudFunctionResult {
+    private fun markMostRecentSyncAsNow() {
+        ServerPrefs.mostRecentFlightsSyncEpochSecond(TimestampMaker().now)
+    }
+
+    private suspend fun Client.checkIfIsSynchronizedAndPutResultInParam1(result: Cloud.Result<Boolean>): CloudFunctionResult {
         with(cloud) {
             val repositoryChecksumAsync = MainScope().async { getChecksumFromRepository() }
             val r = Cloud.Result<FlightsListChecksum>().apply{

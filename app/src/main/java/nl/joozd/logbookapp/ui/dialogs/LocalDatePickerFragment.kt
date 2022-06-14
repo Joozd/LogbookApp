@@ -85,7 +85,6 @@ abstract class LocalDatePickerFragment: JoozdlogFragment() {
      */
     private var selectedMonth: LocalDate = today.withDayOfMonth(1)
     set(it){
-        println("BANAAN Selected month: $it")
         field = it
         mBinding?.let { binding ->
             binding.monthText.text = it.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
@@ -113,11 +112,9 @@ abstract class LocalDatePickerFragment: JoozdlogFragment() {
                 ?: run { selectedDate = today } // this will select today
 
             prevMonth.setOnClickListener {
-                println("PrevMonth clickedy click!@")
                 selectedMonth = selectedMonth.minusMonths(1)
             }
             nextMonth.setOnClickListener {
-                println("nextMonth clickedy click!@")
                 selectedMonth = selectedMonth.plusMonths(1)
             }
 
@@ -142,20 +139,11 @@ abstract class LocalDatePickerFragment: JoozdlogFragment() {
             bodyLayout.setOnClickListener {  } // catch clicks
         }.root
 
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        DialogDatepickerBinding.bind(view).apply {
-            println("View created, daysLayout width: ${daysLayout.width}")
-        }
-    }
-
     /**
      * Add day number TextViews to [container]
      * @param container:  an empty [ConstraintLayout] that will be filled.
      */
     private fun populateDays(inflater: LayoutInflater, container: ConstraintLayout, dayInMonth: LocalDate) = with(container) {
-        println("Populating month $dayInMonth")
         removeAllViews() // clear layout soa  new one can be populated
         val firstDayOfMonth = dayInMonth.withDayOfMonth(1)
         val locale = Locale.getDefault()

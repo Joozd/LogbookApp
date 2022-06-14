@@ -102,7 +102,6 @@ class EmailDialog(): JoozdlogFragment() {
         }
 
         viewModel.canBeAcceptedFlow.launchCollectWhileLifecycleStateStarted{
-            println("canbeaccepted = $it")
             enableOkButton(it)
         }
 

@@ -46,10 +46,9 @@ open class JoozdlogActivity: AppCompatActivity() {
         return true
     }
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         startBackgroundTasks()
-
     }
 
     protected val activity: JoozdlogActivity
@@ -69,7 +68,6 @@ open class JoozdlogActivity: AppCompatActivity() {
     }
 
     protected fun <T> Flow<T>.launchCollectWhileLifecycleStateStarted(collector: FlowCollector<T>){
-        println("DEBUG: Collecting ${this::class.simpleName}")
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 collect(collector)

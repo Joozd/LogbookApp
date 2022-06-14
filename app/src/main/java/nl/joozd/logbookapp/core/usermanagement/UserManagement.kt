@@ -25,6 +25,7 @@ import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.core.Constants
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.comm.*
+import nl.joozd.logbookapp.core.background.SyncCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
@@ -59,7 +60,7 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
     suspend fun storeNewLoginData(username: String, keyString: String) = withContext(DispatcherProvider.io()){
         Prefs.username = username
         Prefs.keyString = keyString
-        TaskFlags.syncFlights(true)
+        SyncCenter(taskFlags).syncFlights()
     }
 
     //requesting a verification email is done by just re-submitting current email address.

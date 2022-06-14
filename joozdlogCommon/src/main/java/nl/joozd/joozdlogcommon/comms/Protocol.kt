@@ -7,7 +7,7 @@ object Protocol {
 
     val KEY_SIZE = 16 // bytes
 
-    val SERVER_URL = "joozd.nl"
+    val SERVER_URL = "https://joozd.nl/"
     val SERVER_PORT = 1337
 
     val DATAFILES_METADATA_FILENAME = "datafiles_metadata.json"

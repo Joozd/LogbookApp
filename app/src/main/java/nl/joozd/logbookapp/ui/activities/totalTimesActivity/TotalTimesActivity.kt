@@ -56,7 +56,6 @@ class TotalTimesActivity : JoozdlogActivity() {
             totalTimesExListView.layoutManager = LinearLayoutManager(activity)
 
             viewModel.allLists.observe(activity){ lists ->
-                println("XXXXXXXXXXXXXX submitting list: $lists")
                     totalTimesExpandableListAdapter.submitList(lists)
 
             }

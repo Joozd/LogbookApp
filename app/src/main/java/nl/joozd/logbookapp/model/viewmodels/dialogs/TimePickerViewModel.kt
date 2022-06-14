@@ -73,9 +73,7 @@ class TimePickerViewModel: JoozdlogDialogViewModel() {
 
     fun setIfrTime(enteredTime: String?) {
         enteredTime?.hoursAndMinutesStringToInt()?.let{
-            flightEditor.ifrTime = it.maxedAtTotalTime().also{
-                println("IFR TIME $it")
-            }
+            flightEditor.ifrTime = it.maxedAtTotalTime()
         }
     }
 

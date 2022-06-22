@@ -20,25 +20,25 @@ class PersistentMessagesDispatcher: BackgroundTasksDispatcher() {
     }
 
     private fun handleNoEmailEntered(scope: CoroutineScope) {
-        MessagesWaiting.noEmailEntered.flow.launchDoIfTrueCollected(scope) {
+        MessagesWaiting.noEmailEntered.flow.doIfTrueEmitted(scope) {
             postNoEmailEnteredMessage()
         }
     }
 
     private fun handleNoVerificationCodeSavedBug(scope: CoroutineScope) {
-        MessagesWaiting.noVerificationCodeSavedBug.flow.launchDoIfTrueCollected(scope) {
+        MessagesWaiting.noVerificationCodeSavedBug.flow.doIfTrueEmitted(scope) {
             postNoVerificationCodeSavedBugMessage()
         }
     }
 
     private fun handleBadVerificationCodeCLicked(scope: CoroutineScope) {
-        MessagesWaiting.badVerificationCodeClicked.flow.launchDoIfTrueCollected(scope) {
+        MessagesWaiting.badVerificationCodeClicked.flow.doIfTrueEmitted(scope) {
             postBadVerificationCodeClickedMessage()
         }
     }
 
     private fun handleEmailConfirmed(scope: CoroutineScope) {
-        MessagesWaiting.emailConfirmed.flow.launchDoIfTrueCollected(scope) {
+        MessagesWaiting.emailConfirmed.flow.doIfTrueEmitted(scope) {
             showEmailConfirmedMessage()
         }
     }

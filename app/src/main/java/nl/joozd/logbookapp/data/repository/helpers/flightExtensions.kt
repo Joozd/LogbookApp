@@ -122,6 +122,7 @@ fun Flight.overlaps(other: Flight?): Boolean {
  *  - Aircraft Type
  *  - isPlanned flag if not planned
  */
+@Deprecated("deprecated, use Flight.mergeOnto", replaceWith = ReplaceWith("Flight.mergeOnto"))
 fun Flight.mergeInto(other: Flight) = other.copy(
     flightNumber = flightNumber.nullIfEmpty() ?: other.flightNumber,
     ifrTime = ifrTime,

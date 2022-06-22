@@ -22,6 +22,7 @@ package nl.joozd.logbookapp.data.importing
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.model.dataclasses.Flight
+import nl.joozd.logbookapp.utils.TimestampMaker
 
 
 /**
@@ -55,7 +56,7 @@ fun mergeFlights(flights: Collection<MatchingFlights>): List<Flight> =
  * - isCoPilot,
  * Other things will stay as they were in [flightOnDevice]
  */
-private fun Flight.mergeOnto(flightOnDevice: Flight): Flight =
+fun Flight.mergeOnto(flightOnDevice: Flight): Flight =
     flightOnDevice.copy(
         timeOut = timeOut,
         timeIn = timeIn,
@@ -70,7 +71,8 @@ private fun Flight.mergeOnto(flightOnDevice: Flight): Flight =
         nightTime = chooseNightTime(this, flightOnDevice),
         isPIC = decideIsPic(this, flightOnDevice),
         isPICUS = decideIsPicus(this, flightOnDevice),
-        isCoPilot = decideIfCopilot(this, flightOnDevice)
+        isCoPilot = decideIfCopilot(this, flightOnDevice),
+        timeStamp = if (timeStamp == flightOnDevice.timeStamp) timeStamp else TimestampMaker().nowForSycPurposes // update timestamp if something was changed
     )
 
 /* Try to be smart about getting the wanted data:

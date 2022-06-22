@@ -4,9 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 
@@ -21,8 +19,8 @@ abstract class BackgroundTasksDispatcher {
         }
     }
 
-    protected fun Flow<Boolean>.launchDoIfTrueCollected(scope: CoroutineScope, block: () -> Unit) = scope.launch {
-        this@launchDoIfTrueCollected.collect {
+    protected fun Flow<Boolean>.doIfTrueEmitted(scope: CoroutineScope, block: () -> Unit) = scope.launch {
+        this@doIfTrueEmitted.collect {
             if (it)
                 block()
         }

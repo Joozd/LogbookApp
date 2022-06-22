@@ -12,6 +12,10 @@ class SyncCenter(private val taskFlags: TaskFlags = TaskFlags) {
         taskFlags.syncDataFiles(true)
     }
 
+    fun mergeAllDataFromServer(){
+        taskFlags.mergeAllDataFromServer(true)
+    }
+
     suspend fun syncDataFilesIfNotJustDone(){
         if (Instant.now().epochSecond - DataVersions.mostRecentSyncEpochSecond() > TIME_BETWEEN_SYNC_CHECKS)
             syncDataFiles()

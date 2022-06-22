@@ -34,6 +34,10 @@ class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
         enqueueOneTimeWorker<SyncFlightsWorker>(Tags.SYNC_FLIGHTS, needNetwork = true)
     }
 
+    fun scheduleMerge(){
+        enqueueOneTimeWorker<MergeWithServerWorker>(Tags.MERGE_WITH_SERVER, needNetwork = true)
+    }
+
     object Tags{
         const val CREATE_NEW_USER = "CREATE_NEW_USER"
         const val UPDATE_EMAIL = "UPDATE_EMAIL"
@@ -43,5 +47,6 @@ class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
         const val SUBMIT_FEEDBACK = "SUBMIT_FEEDBACK"
         const val SYNC_DATA_FILES = "SYNC_DATA_FILES"
         const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
+        const val MERGE_WITH_SERVER = "MERGE_WITH_SERVER"
     }
 }

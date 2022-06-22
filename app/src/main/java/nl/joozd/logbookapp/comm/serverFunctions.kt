@@ -152,10 +152,17 @@ suspend fun updateDataFiles(server: HTTPServer,
 }
 
 suspend fun syncFlights(server: Cloud = Cloud(), repository: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance): ServerFunctionResult =
-    //This has its own class as it would make too big a function.
     FlightsSynchronizer(server, repository).synchronizeIfNotSynced().also{
         if (it.isOK()){
             TaskFlags.syncFlights(false)
+        }
+    }
+
+// Note to self: If this fails halfway (e.g. server conenction drops before re-uploading all flights), next try will not update anything, still re-upload all files and report OK
+suspend fun mergeFlightsWithServer(server: Cloud = Cloud(), repository: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance): ServerFunctionResult =
+    FlightsSynchronizer(server, repository).mergeRepoWithServer().also{
+        if (it.isOK()){
+            TaskFlags.mergeAllDataFromServer(false)
         }
     }
 

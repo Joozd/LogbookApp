@@ -112,6 +112,7 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
 
     /*
      * Log in to server until Client is closed again
+     * This will handle responses from server like no username / bad key / bad data etc.
      */
     suspend fun Client.login(username: String, key: ByteArray): CloudFunctionResult {
         //payLoad is LoginData.serialize()

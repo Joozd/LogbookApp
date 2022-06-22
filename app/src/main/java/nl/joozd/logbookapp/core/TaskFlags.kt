@@ -18,6 +18,7 @@ object TaskFlags: JoozdLogPreferences() {
     private const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
     private const val SYNC_DATA_FILES = "SYNC_DATA_FILES"
     private const val FEEDBACK_WAITING = "FEEDBACK_WAITING"
+    private const val MERGE_ALL_DATA_FROM_SERVER = "MERGE_ALL_DATA_FROM_SERVER"
 
 
     val sendBackupEmail by JoozdlogSharedPreferenceDelegate(SEND_BACKUP_EMAIL,false)
@@ -28,4 +29,5 @@ object TaskFlags: JoozdLogPreferences() {
     val feedbackWaiting by JoozdlogSharedPreferenceDelegate(FEEDBACK_WAITING, false)
     val syncDataFiles by JoozdlogSharedPreferenceDelegate(SYNC_DATA_FILES,false)
     val syncFlights by JoozdlogSharedPreferenceDelegate(SYNC_FLIGHTS, false)
+    val mergeAllDataFromServer by JoozdlogSharedPreferenceDelegate(MERGE_ALL_DATA_FROM_SERVER, false)
 }

@@ -7,10 +7,14 @@ import nl.joozd.comms.Client
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogcommon.FlightsListChecksum
 import nl.joozd.joozdlogcommon.IDWithTimeStamp
+import nl.joozd.listmerger.ListMerger
 import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.comm.CloudFunctionResult
 import nl.joozd.logbookapp.comm.ServerFunctionResult
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.data.importing.IncrementFlightIDStrategy
+import nl.joozd.logbookapp.data.importing.MergeOntoMergingStrategy
+import nl.joozd.logbookapp.data.importing.OrigDestAircraftAndTimesCompareStrategy
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
@@ -43,6 +47,37 @@ class FlightsSynchronizer(
             performSync()
         }.correspondingServerFunctionResult()
     }
+
+    suspend fun mergeRepoWithServer(): ServerFunctionResult = with(cloud){
+        doInOneClientSession {
+            login(Prefs.username()!!, Prefs.key()!!).also{ if (!it.isOK()) return@doInOneClientSession it }
+            val serverIDs: List<Int> = Cloud.Result<List<IDWithTimeStamp>>().apply{
+                putIDWithTimestampsListInResult(this).also{ if (!it.isOK()) return@doInOneClientSession it }
+            }.value!!.map { it.ID }
+            val serversFlights = Cloud.Result<List<BasicFlight>>().apply{
+                putFlightsFromServerInResult(serverIDs, this).also { if (!it.isOK()) return@doInOneClientSession it }
+            }.value!!.map { Flight(it)}
+            val repoFlights = repository.getAllFlightsInDB()
+            val mergedFlightsList = mergeFlights(serversFlights, repoFlights)
+            repository.deleteHard(repoFlights)
+            repository.saveDirectToDB(mergedFlightsList)
+
+            // just send entire list. Result of this function will be returned; any earlier failures will be returned from the 'also' blocks
+            sendFlights(mergedFlightsList.map { it.toBasicFlight() })
+        }.correspondingServerFunctionResult()
+
+    }
+
+    private fun mergeFlights(
+        serversFlights: List<Flight>,
+        repoFlights: List<Flight>,
+    ) = ListMerger(
+        masterList = serversFlights,
+        otherList = repoFlights,
+        compareStrategy = OrigDestAircraftAndTimesCompareStrategy(),
+        mergingStrategy = MergeOntoMergingStrategy(),
+        idUpdatingStrategy = IncrementFlightIDStrategy((serversFlights + repoFlights).maxOf{it.flightID})
+    ).merge()
 
     suspend fun forceSync(): ServerFunctionResult = with(cloud){
         doInOneClientSession {

@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.data.importing
+package nl.joozd.logbookapp.data.importing.merging
 
 import nl.joozd.listmerger.CompareStrategy
 import nl.joozd.logbookapp.model.dataclasses.Flight

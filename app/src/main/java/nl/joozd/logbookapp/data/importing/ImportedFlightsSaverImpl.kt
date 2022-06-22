@@ -25,6 +25,7 @@ import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
+import nl.joozd.logbookapp.data.importing.merging.mergeFlights
 import nl.joozd.logbookapp.data.importing.results.SaveCompleteLogbookResult
 import nl.joozd.logbookapp.data.importing.results.SaveCompletedFlightsResult
 import nl.joozd.logbookapp.data.importing.results.SavePlannedFlightsResult

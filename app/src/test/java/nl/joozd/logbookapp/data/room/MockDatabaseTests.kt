@@ -212,7 +212,7 @@ class MockDatabaseTests {
                 assert(awaitItem().isEmpty())
 
                 //test save
-                dao.save(AircraftTestData.preloadedList)
+                dao.save(AircraftTestData.preloadedList.map { PreloadedRegistration(it) })
                 assertEquals(2, awaitItem().size)
 
                 // test requestAllRegistrations

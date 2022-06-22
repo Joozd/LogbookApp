@@ -74,7 +74,7 @@ class FlightRepositoryTests {
 
 
                 //test save(Flight)
-                val now = TimestampMaker(mock = true).nowForSycPurposes
+                val now = TimestampMaker().nowForSycPurposes
                 repo.save(FlightsTestData.mostRecentCompletedFlight)
 
                 //check correct number of flights (1) saved

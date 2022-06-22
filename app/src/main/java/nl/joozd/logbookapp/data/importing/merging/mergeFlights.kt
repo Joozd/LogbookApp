@@ -17,8 +17,10 @@
  *
  */
 
-package nl.joozd.logbookapp.data.importing
+package nl.joozd.logbookapp.data.importing.merging
 
+import nl.joozd.listmerger.ListMerger
+import nl.joozd.logbookapp.data.importing.MatchingFlights
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -56,8 +58,9 @@ fun mergeFlights(flights: Collection<MatchingFlights>): List<Flight> =
  * - isCoPilot,
  * Other things will stay as they were in [flightOnDevice]
  */
-fun Flight.mergeOnto(flightOnDevice: Flight): Flight =
+fun Flight.mergeOnto(flightOnDevice: Flight, keepIdOfFlightOnDevice: Boolean = true): Flight =
     flightOnDevice.copy(
+        flightID = if (keepIdOfFlightOnDevice) flightOnDevice.flightID else flightID,
         timeOut = timeOut,
         timeIn = timeIn,
         flightNumber = flightNumber.nullIfBlank() ?: flightOnDevice.flightNumber,
@@ -74,6 +77,17 @@ fun Flight.mergeOnto(flightOnDevice: Flight): Flight =
         isCoPilot = decideIfCopilot(this, flightOnDevice),
         timeStamp = if (timeStamp == flightOnDevice.timeStamp) timeStamp else TimestampMaker().nowForSycPurposes // update timestamp if something was changed
     )
+
+fun mergeFlightsLists(
+    masterFlights: List<Flight>,
+    otherFlights: List<Flight>,
+) = ListMerger(
+    masterList = masterFlights,
+    otherList = otherFlights,
+    compareStrategy = OrigDestAircraftAndTimesCompareStrategy(),
+    mergingStrategy = MergeOntoMergingStrategy(),
+    idUpdatingStrategy = IncrementFlightIDStrategy((masterFlights + otherFlights).maxOf{it.flightID}, masterFlights)
+).merge()
 
 /* Try to be smart about getting the wanted data:
  * - if autofill, set it to new data if not zero, or old data if new data is zero.

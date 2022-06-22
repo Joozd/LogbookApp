@@ -146,6 +146,7 @@ dependencies {
 
     // Own classes
     implementation project(":joozdlogCommon")
+    implementation project(":listmerger")
     implementation project(':JoozdlogImport')
 
     //test libraries

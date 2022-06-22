@@ -102,7 +102,6 @@ class MainActivity : JoozdlogActivity() {
         startNewUserActivityIfNewInstall()
         val binding = (ActivityMainNewBinding.inflate(layoutInflater)).apply {
             setSupportActionBar(mainToolbar)
-            handleIntent()
             makeFlightsList()
             scrollOnNextUpdate()
             startCollectors()
@@ -112,9 +111,17 @@ class MainActivity : JoozdlogActivity() {
         setContentView(binding.root)
     }
 
-    private fun handleIntent() {
-        lifecycleScope.launch {
-            IntentHandler(intent).handle()
+    override fun onNewIntent(intent: Intent?) {
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        println("HANDLE_INTENT()")
+        intent?.let {
+            println("GOT INTENT $intent with data ${intent.data}")
+            lifecycleScope.launch {
+                IntentHandler(it).handle()
+            }
         }
     }
 

@@ -34,6 +34,7 @@ class IntentHandler(intent: Intent) {
         getLoginLinkFromIntent()?.let {
             showLoginDataSavedMessage()
             storeNewLoginData(makeLoginPassPair(it))
+
         }
     }
 

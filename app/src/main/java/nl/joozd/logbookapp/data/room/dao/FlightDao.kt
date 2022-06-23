@@ -30,22 +30,22 @@ import nl.joozd.logbookapp.data.dataclasses.FlightData
 
 @Dao
 interface FlightDao {
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 ORDER BY timeOut DESC")
+    @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 ORDER BY timeOut DESC")
     fun validFlightsFlow(): Flow<List<FlightData>>
 
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 AND flightID = :id LIMIT 1")
+    @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 AND flightID = :id LIMIT 1")
     suspend fun getFlightById(id: Int): FlightData?
 
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 AND flightID IN (:ids)")
+    @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 AND flightID IN (:ids)")
     suspend fun getFlightsByID(ids: Collection<Int>): List<FlightData>
 
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 AND timeOut >= :startEpochSecond AND timeOut <= :endEpochSecond")
+    @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 AND timeOut >= :startEpochSecond AND timeOut <= :endEpochSecond")
     suspend fun getFlightsStartingBetween(startEpochSecond: Long, endEpochSecond: Long): List<FlightData>
 
     @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
     suspend fun getAllFlights(): List<FlightData>
 
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG == 0 ORDER BY timeOut DESC")
+    @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 ORDER BY timeOut DESC")
     suspend fun getValidFlights(): List<FlightData>
 
     @Query("SELECT MAX(flightID) FROM FlightData")

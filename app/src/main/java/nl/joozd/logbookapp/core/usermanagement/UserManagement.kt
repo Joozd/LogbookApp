@@ -28,6 +28,7 @@ import nl.joozd.logbookapp.comm.*
 import nl.joozd.logbookapp.core.background.PersistentMessagesDispatcher
 import nl.joozd.logbookapp.core.background.SyncCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
@@ -61,7 +62,7 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
     suspend fun storeNewLoginData(username: String, keyString: String) = withContext(DispatcherProvider.io()){
         Prefs.username = username
         Prefs.keyString = keyString
-        SyncCenter(taskFlags).syncFlights()
+        scheduleMergeIfRequired()
     }
 
     //requesting a verification email is done by just re-submitting current email address.
@@ -145,8 +146,10 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
      */
     suspend fun checkIfLoginDataSet(): Boolean =
         isLoggedIn().also {
-            if (!it)
+            if (!it) {
+                Prefs.useCloud(false)
                 notifyNoUserDataSet()
+            }
         }
 
     /**
@@ -160,7 +163,12 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         }
 
     private fun notifyNoUserDataSet(){
-        MessagesWaiting
+        MessagesWaiting.noLoginDataSaved(true)
+    }
+
+    private suspend fun scheduleMergeIfRequired(){
+        if (FlightRepository.instance.getAllFlights().isNotEmpty())
+            taskFlags.mergeAllDataFromServer(true)
     }
 
     companion object {

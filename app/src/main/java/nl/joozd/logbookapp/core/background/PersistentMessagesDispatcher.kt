@@ -11,35 +11,42 @@ import nl.joozd.logbookapp.core.usermanagement.UserManagement
  * Send all persistant messages to [MessageCenter]
  * This does not change any flags other than the message flags.
  */
-class PersistentMessagesDispatcher: BackgroundTasksDispatcher() {
+class PersistentMessagesDispatcher(private val messagesWaiting: MessagesWaiting = MessagesWaiting): BackgroundTasksDispatcher() {
     override fun startCollectors(scope: CoroutineScope) {
         handleNoEmailEntered(scope)
         handleNoVerificationCodeSavedBug(scope)
         handleBadVerificationCodeCLicked(scope)
         handleEmailConfirmed(scope)
+        handleNoLoginDataSaved(scope)
     }
 
     private fun handleNoEmailEntered(scope: CoroutineScope) {
-        MessagesWaiting.noEmailEntered.flow.doIfTrueEmitted(scope) {
+        messagesWaiting.noEmailEntered.flow.doIfTrueEmitted(scope) {
             postNoEmailEnteredMessage()
         }
     }
 
     private fun handleNoVerificationCodeSavedBug(scope: CoroutineScope) {
-        MessagesWaiting.noVerificationCodeSavedBug.flow.doIfTrueEmitted(scope) {
+        messagesWaiting.noVerificationCodeSavedBug.flow.doIfTrueEmitted(scope) {
             postNoVerificationCodeSavedBugMessage()
         }
     }
 
     private fun handleBadVerificationCodeCLicked(scope: CoroutineScope) {
-        MessagesWaiting.badVerificationCodeClicked.flow.doIfTrueEmitted(scope) {
+        messagesWaiting.badVerificationCodeClicked.flow.doIfTrueEmitted(scope) {
             postBadVerificationCodeClickedMessage()
         }
     }
 
     private fun handleEmailConfirmed(scope: CoroutineScope) {
-        MessagesWaiting.emailConfirmed.flow.doIfTrueEmitted(scope) {
+        messagesWaiting.emailConfirmed.flow.doIfTrueEmitted(scope) {
             showEmailConfirmedMessage()
+        }
+    }
+
+    private fun handleNoLoginDataSaved(scope: CoroutineScope) {
+        messagesWaiting.noLoginDataSaved.flow.doIfTrueEmitted(scope) {
+            showNoLoginDataSavedMessage()
         }
     }
 
@@ -50,7 +57,7 @@ class PersistentMessagesDispatcher: BackgroundTasksDispatcher() {
         MessageCenter.commitMessage {
             titleResource = R.string.no_email
             descriptionResource = R.string.no_email_text
-            setPositiveButton(android.R.string.ok){ MessagesWaiting.noEmailEntered(false) }
+            setPositiveButton(android.R.string.ok){ messagesWaiting.noEmailEntered(false) }
         }
     }
 
@@ -58,7 +65,7 @@ class PersistentMessagesDispatcher: BackgroundTasksDispatcher() {
         MessageCenter.commitMessage {
             titleResource = R.string.error
             descriptionResource = R.string.email_verification_code_not_saved_bug
-            setPositiveButton(android.R.string.ok){ MessagesWaiting.noVerificationCodeSavedBug(false) }
+            setPositiveButton(android.R.string.ok){ messagesWaiting.noVerificationCodeSavedBug(false) }
         }
     }
 
@@ -67,15 +74,36 @@ class PersistentMessagesDispatcher: BackgroundTasksDispatcher() {
             titleResource = R.string.verification_mail
             descriptionResource = R.string.email_verification_invalid_data
             setPositiveButton(android.R.string.ok){
-                MessagesWaiting.badVerificationCodeClicked(false)
+                messagesWaiting.badVerificationCodeClicked(false)
                 UserManagement().requestEmailVerificationMail()
                 showEmailRequestedMessage()
             }
             setNegativeButton(android.R.string.cancel){
-                MessagesWaiting.badVerificationCodeClicked(false)
+                messagesWaiting.badVerificationCodeClicked(false)
             }
         }
     }
+
+    private fun showMergeWithServerPerformedMessage() {
+        MessageCenter.commitMessage {
+            titleResource = R.string.login_error
+            descriptionResource = R.string.server_merge_performed
+            setPositiveButton(android.R.string.ok){
+                messagesWaiting.mergeWithServerPerformed(false)
+            }
+        }
+    }
+
+    private fun showNoLoginDataSavedMessage() {
+        MessageCenter.commitMessage {
+            titleResource = R.string.login_error
+            descriptionResource = R.string.no_login_data_cloud_disabled
+            setPositiveButton(android.R.string.ok){
+                messagesWaiting.noLoginDataSaved(false)
+            }
+        }
+    }
+
 
     private fun showEmailRequestedMessage(){
         MessageCenter.commitMessage {
@@ -89,7 +117,11 @@ class PersistentMessagesDispatcher: BackgroundTasksDispatcher() {
         MessageCenter.commitMessage {
             titleResource = R.string.verification_mail
             descriptionResource = R.string.email_verified
-            setPositiveButton(android.R.string.ok){ }
+            setPositiveButton(android.R.string.ok){
+
+            }
         }
     }
+
+
 }

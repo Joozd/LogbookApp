@@ -163,6 +163,7 @@ suspend fun mergeFlightsWithServer(server: Cloud = Cloud(), repository: FlightRe
     FlightsSynchronizer(server, repository).mergeRepoWithServer().also{
         if (it.isOK()){
             TaskFlags.mergeAllDataFromServer(false)
+            MessagesWaiting.mergeWithServerPerformed(true)
         }
     }
 

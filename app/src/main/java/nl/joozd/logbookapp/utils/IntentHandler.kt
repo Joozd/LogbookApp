@@ -34,7 +34,6 @@ class IntentHandler(intent: Intent) {
         getLoginLinkFromIntent()?.let {
             showLoginDataSavedMessage()
             storeNewLoginData(makeLoginPassPair(it))
-
         }
     }
 
@@ -63,6 +62,8 @@ class IntentHandler(intent: Intent) {
         Prefs.acceptedCloudSyncTerms(true) // I guess they must have accepted it sometime in the past or they wouldn't have login data
         UserManagement().requestEmailVerificationMail()
     }
+
+
 
     private fun showLoginDataSavedMessage(){
         MessageCenter.commitMessage {

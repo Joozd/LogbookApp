@@ -17,6 +17,7 @@ class PersistentMessagesDispatcher(private val messagesWaiting: MessagesWaiting 
         handleNoVerificationCodeSavedBug(scope)
         handleBadVerificationCodeCLicked(scope)
         handleEmailConfirmed(scope)
+        handleMergeWithServerPerformed(scope)
         handleNoLoginDataSaved(scope)
     }
 
@@ -41,6 +42,12 @@ class PersistentMessagesDispatcher(private val messagesWaiting: MessagesWaiting 
     private fun handleEmailConfirmed(scope: CoroutineScope) {
         messagesWaiting.emailConfirmed.flow.doIfTrueEmitted(scope) {
             showEmailConfirmedMessage()
+        }
+    }
+
+    private fun handleMergeWithServerPerformed(scope: CoroutineScope) {
+        messagesWaiting.mergeWithServerPerformed.flow.doIfTrueEmitted(scope) {
+            showMergeWithServerPerformedMessage()
         }
     }
 

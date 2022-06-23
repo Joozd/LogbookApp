@@ -20,12 +20,13 @@
 package nl.joozd.logbookapp.data.dataclasses
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import nl.joozd.joozdlogcommon.BasicAirport
 
 @Entity
 data class Airport(
-    @PrimaryKey val id: Int = 0,
+    @PrimaryKey val id: Int,
     val ident: String = "", // ICAO ident
     val type: String = "",
     val name: String = "",
@@ -44,7 +45,17 @@ data class Airport(
 //    val wikipedia_link: String = "",
 //    val keywords: String = ""
 ){
+    @Ignore
     constructor(a: BasicAirport): this(a.id, a.ident, a.type, a.name, a.latitude_deg, a.longitude_deg, a.elevation_ft, a.municipality, a.iata_code)
+    @Ignore
+    constructor(ident: String = "",
+                type: String = "",
+                name: String = "",
+                latitude_deg: Double = 0.0,
+                longitude_deg: Double = 0.0,
+                elevation_ft: Int = 0,
+                municipality: String = "",
+                iata_code: String = ""): this(0, ident, type, name, latitude_deg, longitude_deg, elevation_ft, municipality, iata_code)
 
     infix fun identMatches(query: String): Boolean{
         val q = query.uppercase()

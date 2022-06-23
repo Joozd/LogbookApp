@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.room.dao
 
+
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.dataclasses.FlightData
@@ -56,7 +57,7 @@ interface FlightDao {
     @Query("SELECT MAX(timeStamp) FROM FlightData WHERE isPlanned = 0")
     suspend fun getMostRecentTimestampOfACompletedFlight(): Long?
 
-    @Insert (onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(flightData: Collection<FlightData>)
 
     @Delete

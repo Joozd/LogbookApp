@@ -239,11 +239,13 @@ class SettingsActivity : JoozdlogActivity() {
         }
 
         youAreSignedInAsButton.setOnClickListener {
-            UserManagement().generateLoginLink()?.let { loginLink ->
-                (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
-                    ClipData.newPlainText(getString(R.string.login_link_title), loginLink)
-                )
-                toast(R.string.login_link_created)
+            lifecycleScope.launch {
+                UserManagement().generateLoginLink()?.let { loginLink ->
+                    (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
+                        ClipData.newPlainText(getString(R.string.login_link_title), loginLink)
+                    )
+                    toast(R.string.login_link_created)
+                }
             }
         }
 
@@ -256,9 +258,11 @@ class SettingsActivity : JoozdlogActivity() {
         }
 
         loginLinkButton.setOnClickListener {
-            UserManagement().generateLoginLinkMessage()?.let{
-                sendMessageToOtherApp(it, getString(R.string.login_link_title))
-            } ?: toast(R.string.not_signed_in_bug_please_tell_joozd)
+            lifecycleScope.launch {
+                UserManagement().generateLoginLinkMessage()?.let {
+                    sendMessageToOtherApp(it, getString(R.string.login_link_title))
+                } ?: toast(R.string.not_signed_in_bug_please_tell_joozd)
+            }
         }
 
         addNamesFromRosterSwitch.setOnClickListener {

@@ -115,10 +115,12 @@ class ChangePasswordActivity : JoozdlogActivity() {
         AlertDialog.Builder(activity).apply{
             setTitle(R.string.changed_login_link)
             setMessage(R.string.changed_login_link_message)
-            setPositiveButton(android.R.string.ok){ _, _ ->
-                UserManagement().generateLoginLinkMessage()?.let {
-                    sendMessageToOtherApp(it, getString(R.string.login_link_title))
-                } ?: longToast(R.string.change_pass_error_1)
+            setPositiveButton(android.R.string.ok) { _, _ ->
+                lifecycleScope.launch {
+                    UserManagement().generateLoginLinkMessage()?.let {
+                        sendMessageToOtherApp(it, getString(R.string.login_link_title))
+                    } ?: longToast(R.string.change_pass_error_1)
+                }
             }
         }
     }

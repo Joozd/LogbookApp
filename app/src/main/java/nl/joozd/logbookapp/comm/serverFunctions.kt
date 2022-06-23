@@ -20,6 +20,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.utils.DispatcherProvider
+import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.generateKey
 
 /**
@@ -57,8 +58,8 @@ private suspend fun saveLoginDataAsNewUser(loginData: UsernameWithKey) {
  * - Sends email to server with current login data
  * - On success, sets EmailVerified to false and resets TaskFlag.
  */
-suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud()): ServerFunctionResult =
-    UsernameWithKey.fromPrefs()?.let { loginData ->
+suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), userManagement: UserManagement = UserManagement()): ServerFunctionResult =
+    userManagement.getUsernameWithKey()?.let { loginData ->
         getEmailAddressFromPrefs()?.let{ emailAddress ->
             sendEmailAddressToServer(loginData, emailAddress, cloud).also{
                 if (it.isOK()) {
@@ -91,8 +92,8 @@ suspend fun confirmEmail(confirmationString: String, cloud: Cloud = Cloud()): Se
  *  --- CHECK CONFIRMATION STRING IN CALLING FUNCTION (use [checkConfirmationString])
  * - On success, sets EmailVerified to true, removes stored confirmation string and resets TaskFlag.
  */
-suspend fun requestBackupMail(cloud: Cloud = Cloud()): ServerFunctionResult =
-    UsernameWithKey.fromPrefs()?.let { uk ->
+suspend fun requestBackupMail(cloud: Cloud = Cloud(), userManagement: UserManagement = UserManagement()): ServerFunctionResult =
+    userManagement.getUsernameWithKey()?.let { uk ->
         getEmailAddressFromPrefs()?.let { email ->
             cloud.requestBackupEmail(uk.username, uk.key, email).correspondingServerFunctionResult().also{
                 if(it.isOK())
@@ -108,8 +109,8 @@ suspend fun requestBackupMail(cloud: Cloud = Cloud()): ServerFunctionResult =
  *  --- CHECK CONFIRMATION STRING IN CALLING FUNCTION (use [checkConfirmationString])
  * - On success, sets EmailVerified to true, removes stored confirmation string and resets TaskFlag.
  */
-suspend fun requestLoginLinkEmail(cloud: Cloud = Cloud()): ServerFunctionResult =
-    UsernameWithKey.fromPrefs()?.let { uk ->
+suspend fun requestLoginLinkEmail(cloud: Cloud = Cloud(), userManagement: UserManagement = UserManagement()): ServerFunctionResult =
+    userManagement.getUsernameWithKey()?.let { uk ->
         getEmailAddressFromPrefs()?.let { email ->
             cloud.requestLoginLinkMail(uk.username, uk.key, email).correspondingServerFunctionResult().also{
                 if(it.isOK())
@@ -163,7 +164,8 @@ suspend fun mergeFlightsWithServer(server: Cloud = Cloud(), repository: FlightRe
     FlightsSynchronizer(server, repository).mergeRepoWithServer().also{
         if (it.isOK()){
             TaskFlags.mergeAllDataFromServer(false)
-            MessagesWaiting.mergeWithServerPerformed(true)
+            ServerPrefs.mostRecentFlightsSyncEpochSecond(TimestampMaker().nowForSycPurposes)
+            MessagesWaiting.mergeWithServerPerformed
         }
     }
 
@@ -218,10 +220,9 @@ private fun resetEmailData() {
     UserManagement().requestEmailVerificationMail()
 }
 
-// has blocking IO ops
-private fun storeLoginData(username: String, key: ByteArray) {
+private suspend fun storeLoginData(username: String, key: ByteArray, userManagement: UserManagement = UserManagement()) {
+    userManagement.storeNewLoginData(username, key)
     Prefs.username = username
     Prefs.key = key
-    ServerPrefs.mostRecentFlightsSyncEpochSecond(-1L)
 }
 

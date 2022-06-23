@@ -25,13 +25,12 @@ import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.core.Constants
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.comm.*
-import nl.joozd.logbookapp.core.background.PersistentMessagesDispatcher
-import nl.joozd.logbookapp.core.background.SyncCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
+import nl.joozd.logbookapp.ui.utils.base64Encode
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.generateKey
 
@@ -41,8 +40,6 @@ import nl.joozd.logbookapp.utils.generateKey
  * Flags are the business of TaskManager and workers. This only provides entries for the rest of the program to set something in motion.
  * It is allowed send messages to MessageCentre in case user needs to be made aware of something, or needs to make a decision for a real-time function.
  */
-//TODO move all functions that get called as the result of a TaskFlag being set to Workers.
-// Functions here are to be replaced by just setting TaskFlag. Currently this work would be done in two places, which violates DRY, or leads to opaque back-and-forth-ing.
 class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
     /**
      * Schedule the creation of a new user account.
@@ -56,13 +53,16 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         taskFlags.createNewUser(true)
     }
 
+    suspend fun storeNewLoginData(username: String, keyString: String) {
+        Prefs.username(username)
+        Prefs.keyString(keyString)
+        handleNewUserDataSet()
+    }
 
-
-    //blocking IO in DispatcherProvider.io()
-    suspend fun storeNewLoginData(username: String, keyString: String) = withContext(DispatcherProvider.io()){
-        Prefs.username = username
-        Prefs.keyString = keyString
-        scheduleMergeIfRequired()
+    suspend fun storeNewLoginData(username: String, key: ByteArray) = withContext(DispatcherProvider.io()){
+        Prefs.username(username)
+        Prefs.key(key)
+        handleNewUserDataSet()
     }
 
     //requesting a verification email is done by just re-submitting current email address.
@@ -70,7 +70,7 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         taskFlags.updateEmailWithServer(true)
     }
 
-    fun requestLoginLink(){
+    fun requestLoginLinkEmail(){
         taskFlags.sendLoginLink(true)
     }
 
@@ -93,26 +93,30 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
      * Calling function gets to handle message to user about success or failure. Consider coercing user to save new login link in that message.
      */
     suspend fun changeLoginKey(cloud: Cloud = Cloud()): Boolean =
-        UsernameWithKey.fromPrefs()?.let{ lp ->
+        getUsernameWithKey()?.let{ lp ->
             val newKey = generateKey()
             val result = cloud.changeLoginKey(lp.username, lp.key, newKey)
             if (result == CloudFunctionResult.OK)
-                withContext(DispatcherProvider.io()) { Prefs.key = newKey }
+                Prefs.key(newKey)
             return result == CloudFunctionResult.OK
         } ?: false
 
 
     fun logOut() {
         Prefs.useCloud(false)
-        Prefs.username = null
-        Prefs.keyString = null
+        Prefs.username(null)
+        Prefs.keyString(null)
     }
 
-    fun generateLoginLink(): String? = Prefs.username?.let { username ->
-        "${Constants.JOOZDLOG_LOGIN_LINK_PREFIX}$username:${Prefs.keyString?.replace('/', '-')}"
-    }
+    suspend fun generateLoginLink(): String? =
+        getUsernameWithKey()?.let { uwk ->
+            val username = uwk.username
+            val keyString = keyToLinkableBase64String(uwk.key)
 
-    fun generateLoginLinkMessage(): String? = generateLoginLink()?.let { link ->
+            Constants.JOOZDLOG_LOGIN_LINK_PREFIX + "$username:$keyString"
+        }
+
+    suspend fun generateLoginLinkMessage(): String? = generateLoginLink()?.let { link ->
          App.instance.resources.openRawResource(R.raw.joozdlog_login_link_email)
              .reader()
              .readText()
@@ -138,6 +142,17 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         ServerPrefs.emailVerified(false)
     }
 
+    suspend fun getUsernameWithKey(): UsernameWithKey? {
+        val n = Prefs.username()
+        val k = Prefs.key()
+        if (n == null || k == null) {
+            Prefs.useCloud(false)
+            notifyNoUserDataSet()
+            return null
+        }
+        return UsernameWithKey(n, k)
+    }
+
     /**
      * Use this for functions that need to be logged in.
      * If you just want to know, and not have any consequences from not being logged in, use [isLoggedIn]
@@ -145,31 +160,25 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
      * False will also cause messages to user to be generated.
      */
     suspend fun checkIfLoginDataSet(): Boolean =
-        isLoggedIn().also {
-            if (!it) {
-                Prefs.useCloud(false)
-                notifyNoUserDataSet()
-            }
-        }
+        getUsernameWithKey() != null
+
 
     /**
      * True if logged in, false if not. For purposes that need to be logged in or else handle that, use [checkIfLoginDataSet]
      */
     suspend fun isLoggedIn() = Prefs.username() != null && Prefs.key() != null
 
-    private fun makeLoginPassPair(loginPassString: String): Pair<String, String> =
-        loginPassString.replace('-', '/').split(":").let { lp ->
-            lp.first() to lp.last()
-        }
-
     private fun notifyNoUserDataSet(){
         MessagesWaiting.noLoginDataSaved(true)
     }
 
-    private suspend fun scheduleMergeIfRequired(){
+    private suspend fun handleNewUserDataSet(){
+        ServerPrefs.mostRecentFlightsSyncEpochSecond(-1L)
         if (FlightRepository.instance.getAllFlights().isNotEmpty())
             taskFlags.mergeAllDataFromServer(true)
     }
+
+    private fun keyToLinkableBase64String(key: ByteArray) = base64Encode(key).replace('/', '-')
 
     companion object {
         private const val EMAIL_LINK_PLACEHOLDER = "[INSERT_LINK_HERE]"

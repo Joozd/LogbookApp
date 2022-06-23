@@ -63,38 +63,31 @@ object Prefs: JoozdLogPreferences() {
         usernameIfSet(it)
     }
     suspend fun username() = usernameFlow.first()
-    fun postUsername(name: String?) = post(USERNAME_RESOURCE, name ?: USERNAME_NOT_SET)
+    fun username(newName: String?) = post(USERNAME_RESOURCE, newName ?: USERNAME_NOT_SET)
 
     /**
      * password is the users password, as a Base64 encoded Bytearray (encoded to String)
      * can only be set from a base64 encoded key
      */
     var keyString: String?
-        get() = dataStore.getString(PASSWORD_SHAREDPREF_KEY, null)
-        set(p) { dataStore.putString(PASSWORD_SHAREDPREF_KEY, p) }
+        get() = dataStore.getString(PASSWORD_SHAREDPREF_KEY, "")?.takeIf { it.isNotBlank() }
+        set(p) { dataStore.putString(PASSWORD_SHAREDPREF_KEY, p ?: "") }
     private val keyStringFlow = dataStore.data.map { p ->
         p[stringPreferencesKey(PASSWORD_SHAREDPREF_KEY)]}
-    fun postKeyString(ks: String) = post(PASSWORD_SHAREDPREF_KEY, ks)
+    fun keyString(ks: String?) = post(PASSWORD_SHAREDPREF_KEY, ks ?: "")
 
     //ByteArray version that will actually be used as key. Actually stored as base64 encoded string in keyString.
     var key: ByteArray?
         get() = keyString?.let { base64Decode(it) }
         set(key){ keyString = key?.let { base64Encode(it) } }
-    fun postKey(key: ByteArray) = postKeyString(base64Encode(key))
+    fun key(newKey: ByteArray) = keyString(base64Encode(newKey))
 
     val keyFlow = keyStringFlow.map { p -> p?.let { base64Decode(p) }}
     suspend fun key() = keyFlow.first()
 
-    //Placeholder for new password when changing pass. If app gets killed during password change, this will remain set.
-    private const val NEW_PASSWORD = "NEW_PASSWORD"
-    var newPassword: String by JoozdLogSharedPreferenceNotNull(NEW_PASSWORD, "")
-
     private const val SERVER_TIME_OFFSET = "SERVER_TIME_OFFSET"
     var serverTimeOffset: Long by JoozdLogSharedPreferenceNotNull(SERVER_TIME_OFFSET,0)
     fun postServerTimeOffset(value: Long) = post(SERVER_TIME_OFFSET, value)
-
-    private const val AIRPORT_DB_VERSION = "AIRPORT_DB_VERSION"
-    var airportDbVersion: Int by JoozdLogSharedPreferenceNotNull(AIRPORT_DB_VERSION,0)
 
     /**
      * Amount of days that need to have passed for a notice to be shown
@@ -119,7 +112,7 @@ object Prefs: JoozdLogPreferences() {
     private const val USE_IATA = "USE_IATA"
     private const val PIC_NAME_NEEDED = "PIC_NAME_NEEDED"
     private const val USE_CAL_SYNC = "USE_CAL_SYNC"
-    private const val _CALENDAR_SYNC_TYPE = "_CALENDAR_SYNC_TYPE"
+    private const val CALENDAR_SYNC_TYPE = "_CALENDAR_SYNC_TYPE"
     private const val CAL_SYNC_ICAL_ADDR = "CAL_SYNC_ICAL_ADDR"
     private const val NEXT_CAL_CHECK_TIME = "NEXT_CAL_CHECK_TIME"
     private const val CAL_DISABLED_UNTIL = "CAL_DISABLED_UNTIL"
@@ -131,7 +124,7 @@ object Prefs: JoozdLogPreferences() {
 
     val useCalendarSync by JoozdlogSharedPreferenceDelegate(USE_CAL_SYNC, false)
 
-    private val calendarSyncTypeValue by JoozdlogSharedPreferenceDelegate(_CALENDAR_SYNC_TYPE, CalendarSyncType.CALENDAR_SYNC_NONE.value)
+    private val calendarSyncTypeValue by JoozdlogSharedPreferenceDelegate(CALENDAR_SYNC_TYPE, CalendarSyncType.CALENDAR_SYNC_NONE.value)
     var calendarSyncType = calendarSyncTypeValue.mapBothWays(object : JoozdlogSharedPreferenceDelegate.PrefTransformer<Int, CalendarSyncType>{
         override fun map(source: Int): CalendarSyncType = makeCalendarSyncType(source)
         override fun mapBack(transformedValue: CalendarSyncType): Int = transformedValue.value

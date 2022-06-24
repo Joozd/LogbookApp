@@ -52,13 +52,13 @@ class FlightsSynchronizer(
             val serverIDs = getIDWithTimestampsListFromServer().let {
                 if (it !is CloudFunctionResult.ResultWithPayload<*>) return@doInOneClientSession it
                 @Suppress("UNCHECKED_CAST")
-                it.result as List<IDWithTimeStamp>
+                it.payload as List<IDWithTimeStamp>
             }.map { it.ID }
 
             val serversFlights = downloadFlightsFromServer(serverIDs).let {
                 if (it !is CloudFunctionResult.ResultWithPayload<*>) return@doInOneClientSession it
                 @Suppress("UNCHECKED_CAST")
-                it.result as List<BasicFlight>
+                it.payload as List<BasicFlight>
             }.map { Flight(it)}
             val repoFlights = repository.getAllFlightsInDB()
             val mergedFlightsList = mergeFlightsLists(serversFlights, repoFlights)
@@ -83,7 +83,7 @@ class FlightsSynchronizer(
         val serverIDsWithTimestamps = getIDWithTimestampsListFromServer().let {
             if (it !is CloudFunctionResult.ResultWithPayload<*>) return it
             @Suppress("UNCHECKED_CAST")
-            it.result as List<IDWithTimeStamp>
+            it.payload as List<IDWithTimeStamp>
         }
 
         val repoIDsWithTimeStamps = getIDsWithTimestampsFromRepository()
@@ -130,7 +130,7 @@ class FlightsSynchronizer(
         val downloadedFlights = downloadNewOrNewerFlightsFromServer(repoIDsWithTimeStamps, serverIDsWithTimestamps).let{
             if (it !is CloudFunctionResult.ResultWithPayload<*>) return it
             @Suppress("UNCHECKED_CAST")
-            it.result as List<BasicFlight>
+            it.payload as List<BasicFlight>
         }
         repository.saveDirectToDB(downloadedFlights.map { Flight(it) })
         return CloudFunctionResult.OK
@@ -194,19 +194,24 @@ class FlightsSynchronizer(
 
     private fun IDWithTimeStamp.isNewOrIsNewerVersion(
         listToCompareTo: Collection<IDWithTimeStamp>
-    ) = listToCompareTo.firstOrNull { repoItem -> repoItem.ID == this.ID }
+    ) = listToCompareTo.firstOrNull { listItem -> listItem.ID == this.ID }.also{
+        println("match for $this is $it / this.id = ${this.ID}, list has ${listToCompareTo.map {it.ID}}")
+    }
         ?.let {
+            println("match: $it (this = $this")
             it.timeStamp < this.timeStamp   // if found return whether this is newer
         } ?: true                           // if not found, this is new so return true
 
     // Will update flights directly in DB
     private suspend fun updateIDsForNewFlights(serverIDsWithTimestamps: List<IDWithTimeStamp>){
         val newFlights = repository.getAllFlights().filter { it.unknownToServer }
+        println("newFlights BEFORE: $newFlights")
         val highestIDOnServer = serverIDsWithTimestamps.maxOfOrNull { it.ID } ?: -1
         if (newFlights.none { it.flightID <= highestIDOnServer }) return // if no conflicts, do nothing
         val updatedNewFlights = newFlights.map {
             it.copy(flightID = repository.generateAndReserveNewFlightID(highestIDOnServer))
         }
+        println("newFlights AFTER: $updatedNewFlights")
         repository.saveDirectToDB(updatedNewFlights)
         repository.deleteHard(newFlights)
     }
@@ -214,6 +219,6 @@ class FlightsSynchronizer(
     private suspend fun markFlightsAsKnownToServerInRepository(idsToMark: Collection<IDWithTimeStamp>){
         val flightsToUpdate = repository.getFlightsByID(idsToMark.map { it.ID })
             .filter { it.unknownToServer }
-        repository.saveDirectToDB(flightsToUpdate.map { it.copy(unknownToServer = true) })
+        repository.saveDirectToDB(flightsToUpdate.map { it.copy(unknownToServer = false) })
     }
 }

@@ -22,6 +22,11 @@ package nl.joozd.logbookapp.core
 import nl.joozd.logbookapp.utils.DelegatesExt
 import android.app.Application
 import android.content.Context
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
+import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 
 class App : Application(){
     companion object {
@@ -32,8 +37,22 @@ class App : Application(){
     override fun onCreate() {
         super.onCreate()
         instance = this
+        //Make sure repositories are up and running
+        initializeRepositories()
 
         // Set dark mode preference from Preferences
         DarkModeCenter.setDarkMode()
+    }
+
+    private fun initializeRepositories() {
+        MainScope().launch {
+            AirportRepository.instance
+        }
+        MainScope().launch {
+            AircraftRepository.instance
+        }
+        MainScope().launch {
+            FlightRepository.instance
+        }
     }
 }

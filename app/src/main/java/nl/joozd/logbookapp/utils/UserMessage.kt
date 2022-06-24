@@ -12,9 +12,20 @@ open class UserMessage(
     private val action2: UserChoiceListener,
     private val cleanUp: MutableList<() -> Unit> = ArrayList()
 ) {
+    override operator fun equals(other: Any?): Boolean =
+        other is UserMessage
+                && other.titleResource == titleResource
+                && other.descriptionResource == descriptionResource
+                && other.choice1Resource == choice1Resource
+                && other.choice2Resource == choice2Resource
+
     fun addCleanUpAction(action: () -> Unit){
         cleanUp.add(action)
     }
+
+    override fun hashCode(): Int =
+        titleResource + descriptionResource + (choice1Resource ?: 0) + (choice2Resource ?: 0)
+
 
     fun interface UserChoiceListener{
         operator fun invoke()

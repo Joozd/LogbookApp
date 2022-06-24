@@ -4,6 +4,7 @@ package nl.joozd.logbookapp.comm
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.messages.MessageCenter
+import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 
@@ -56,11 +57,7 @@ private fun handleBadEmailAddress(): CloudFunctionResult {
 
 private fun handleBadLoginData(): CloudFunctionResult {
     UserManagement().logOut()
-    MessageCenter.commitMessage {
-        titleResource = R.string.login_error
-        descriptionResource = R.string.no_login_data_cloud_disabled
-        setPositiveButton(android.R.string.ok){ }
-    }
+    MessagesWaiting.noLoginDataSaved(true)
     return CloudFunctionResult.SERVER_REFUSED
 }
 

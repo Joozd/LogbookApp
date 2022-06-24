@@ -19,6 +19,8 @@
 
 package nl.joozd.logbookapp.core.usermanagement
 
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.App
@@ -30,6 +32,7 @@ import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
+import nl.joozd.logbookapp.data.sharedPrefs.toggle
 import nl.joozd.logbookapp.ui.utils.base64Encode
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.generateKey
@@ -45,12 +48,19 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
      * Schedule the creation of a new user account.
      */
     fun createNewUser(){
-        taskFlags.createNewUser(true)
+        taskFlags.createNewUserAndEnableCloud(true)
     }
 
-    suspend fun createNewUserIfNotLoggedIn(){
-        if(!isLoggedIn())
-        taskFlags.createNewUser(true)
+    suspend fun toggleCloudOrCreateNewUser(){
+            if(Prefs.useCloud() || isLoggedIn())
+                Prefs.useCloud.toggle()
+            else TaskFlags.createNewUserAndEnableCloud.toggle()
+    }
+
+    suspend fun setCloudOrCreateNewUser(value: Boolean){
+        if(isLoggedIn())
+            Prefs.useCloud(value)
+        else TaskFlags.createNewUserAndEnableCloud(value)
     }
 
     suspend fun storeNewLoginData(username: String, keyString: String) {

@@ -27,7 +27,7 @@ class TaskDispatcher(private val taskFlags: TaskFlags = TaskFlags): BackgroundTa
     }
 
     private fun handleNewUserWanted(scope: CoroutineScope) {
-        newUserWantedFlow().doIfTrueEmitted(scope) {
+        taskFlags.createNewUserAndEnableCloud.flow.doIfTrueEmitted(scope) {
                 ServerFunctionsWorkersHub().scheduleCreateNewUser()
         }
     }
@@ -93,10 +93,6 @@ class TaskDispatcher(private val taskFlags: TaskFlags = TaskFlags): BackgroundTa
 
     private fun emailConfirmationWantedFlow() = combine(taskFlags.verifyEmailCode.flow, useCloudFlow, TaskPayloads.emailConfirmationStringWaiting.flow){
         wanted, enabled, value -> wanted && enabled && value.isNotBlank()
-    }
-
-    private fun newUserWantedFlow() = combine(taskFlags.createNewUser.flow, useCloudFlow) {
-        needed, enabled -> needed && enabled
     }
 
     private fun emailUpdateWantedFlow() = combine(taskFlags.updateEmailWithServer.flow, useCloudFlow, ServerPrefs.emailAddress.flow){

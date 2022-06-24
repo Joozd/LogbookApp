@@ -25,8 +25,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.toggle
@@ -50,7 +52,9 @@ class NewUserActivityCloudPage: NewUseractivityPage() {
             }
 
             useCloudCheckbox.setOnClickListener {
-                Prefs.useCloud.toggle()
+                lifecycleScope.launch {
+                    UserManagement().toggleCloudOrCreateNewUser()
+                }
             }
 
         }.root
@@ -69,12 +73,16 @@ class NewUserActivityCloudPage: NewUseractivityPage() {
         useCloudCheckbox.isEnabled = it
     }
 
-    private fun ActivityNewUserPageCloudBinding.collectUseCloudFlow() = Prefs.useCloud.flow.launchCollectWhileLifecycleStateStarted{
+    val cloudIsEnabled = combine(Prefs.useCloud.flow, TaskFlags.createNewUserAndEnableCloud.flow){ cloudEnabled, newUserWanted ->
+        cloudEnabled || newUserWanted
+    }
+
+    private fun ActivityNewUserPageCloudBinding.collectUseCloudFlow() = cloudIsEnabled.launchCollectWhileLifecycleStateStarted{
         useCloudCheckbox.isChecked = it
         continueButton.setText(if (it) R.string._continue else R.string.dont_use)
-        if(it)
-            UserManagement().createNewUserIfNotLoggedIn()
     }
+
+
 
     private fun launchCloudSyncTermsDialog(){
         supportFragmentManager.commit {

@@ -35,6 +35,7 @@ class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
     }
 
     fun scheduleMerge(){
+        println ("MERGE SCHEDULED")
         enqueueOneTimeWorker<MergeWithServerWorker>(Tags.MERGE_WITH_SERVER, needNetwork = true)
     }
 

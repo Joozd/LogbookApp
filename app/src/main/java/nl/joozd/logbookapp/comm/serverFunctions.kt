@@ -37,7 +37,8 @@ suspend fun generateNewUserAndCreateOnServer(cloud: Cloud = Cloud()): ServerFunc
         when (createNewUserOnServer(loginData, cloud)) {
                 ServerFunctionResult.SUCCESS -> {
                     saveLoginDataAsNewUser(loginData)
-                    TaskFlags.createNewUser(false)
+                    TaskFlags.createNewUserAndEnableCloud(false)
+                    Prefs.useCloud(true)
                     ServerFunctionResult.SUCCESS
                 }
                 ServerFunctionResult.RETRY -> ServerFunctionResult.RETRY

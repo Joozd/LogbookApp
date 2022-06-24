@@ -66,7 +66,8 @@ object MessageCenter {
     }
 
     private fun addMessageToQueue(msg: UserMessage){
-        messageQueue.add(msg)
+        if (msg !in messageQueue)
+            messageQueue.add(msg)
 
         //push message if none active yet
         if (currentMessage == null)

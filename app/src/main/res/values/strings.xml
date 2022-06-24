@@ -215,7 +215,7 @@
 
     <string name="no_internet_create_account">No internet connection available. You can create and account in the settings screen when you have one, or you can connect to the internet now and retry.</string>
     <string name="no_server_create_account">Server seems to be unavailable. Please retry to create an account at a later time via the settings menu.</string>
-    <string name="no_internet_login">Your login data has been stored, data has not been checked with server.</string>
+    <string name="no_internet_login">Your login data has been stored!</string>
     <string name="password_cannot_be_empty">Password cannot be empty</string>
     <string name="username_cannot_be_empty">Username cannot be empty</string>
     <string name="does_not_match">Does not match</string>

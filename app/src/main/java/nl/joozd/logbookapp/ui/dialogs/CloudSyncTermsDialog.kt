@@ -24,6 +24,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.DialogCloudSyncTermsBinding
@@ -32,6 +34,7 @@ import nl.joozd.logbookapp.model.viewmodels.dialogs.CloudSyncTermsDialogViewMode
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.background.SyncCenter
+import nl.joozd.logbookapp.core.usermanagement.UserManagement
 
 /**
  * This dialog will show terms and conditions for Cloud.
@@ -66,9 +69,11 @@ class CloudSyncTermsDialog(): JoozdlogFragment() {
 
             iAcceptTextView.apply {
                 setOnClickListener {
-                    Prefs.acceptedCloudSyncTerms(true)
-                    Prefs.useCloud(true)
-                    closeFragment()
+                    lifecycleScope.launch {
+                        Prefs.acceptedCloudSyncTerms(true)
+                        UserManagement().setCloudOrCreateNewUser(true)
+                        closeFragment()
+                    }
                 }
                 val clickable = viewModel.waitedLongEnough.value ?: false
                 setTextColor(if (clickable) requireActivity().getColorFromAttr(android.R.attr.colorAccent) else requireActivity().getColorFromAttr(android.R.attr.textColorTertiary))

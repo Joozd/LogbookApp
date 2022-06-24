@@ -7,8 +7,8 @@ import nl.joozd.joozdlogcommon.*
 import nl.joozd.joozdlogcommon.comms.Protocol
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.core.TaskFlags
+import nl.joozd.logbookapp.core.usermanagement.UsernameWithKey
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.serializing.longFromBytes
 import nl.joozd.serializing.packSerializable
 import nl.joozd.serializing.unpackSerialized
@@ -22,7 +22,10 @@ import nl.joozd.serializing.wrap
  *  - a [CloudFunctionResult] for server commands like "request confirmation email"
  *  - the requested data, or null if failed for any reason.
  */
-class Cloud(private val server: String = Protocol.SERVER_URL, private val port: Int = Protocol.SERVER_PORT) {
+class Cloud(
+    private val server: String = Protocol.SERVER_URL,
+    private val port: Int = Protocol.SERVER_PORT
+) {
     private val basicFlightVersion get() = BasicFlight.VERSION.version
     /**
      * @return true if data accepted, false if username and/or key are rejected by server.
@@ -60,7 +63,7 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
     suspend fun changeLoginKey(username: String, currentKey: ByteArray, newKey: ByteArray): CloudFunctionResult =
         withClient {
             require(newKey.size == Protocol.KEY_SIZE) // maybe handle this a bit more gracefully? Should not happen anyway.
-            val r = login(username, currentKey)
+            val r = login(UsernameWithKey(username, currentKey))
             if(r != CloudFunctionResult.OK) return r
             return changePasswordOnServer(newKey, ServerPrefs.emailAddress())
         }
@@ -114,6 +117,8 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
      * Log in to server until Client is closed again
      * This will handle responses from server like no username / bad key / bad data etc.
      */
+
+    @Deprecated("Deprecated, use Client.login(usernameWithKey: UsernameWithKey)")
     suspend fun Client.login(username: String, key: ByteArray): CloudFunctionResult {
         //payLoad is LoginData.serialize()
         val payLoad = LoginData(username, key, BasicFlight.VERSION.version)
@@ -122,6 +127,16 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
         sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
         return handleResponse()!!
     }
+
+    suspend fun Client.login(usernameWithKey: UsernameWithKey): CloudFunctionResult {
+        //payLoad is LoginData.serialize()
+        val payLoad = LoginData(usernameWithKey.username, usernameWithKey.key, BasicFlight.VERSION.version)
+            .serialize()
+
+        sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
+        return handleResponse()!!
+    }
+
 
     suspend fun Client.putFlightsListChecksumInResult(result: Result<FlightsListChecksum>): CloudFunctionResult {
         sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS_LIST_CHECKSUM)
@@ -132,23 +147,34 @@ class Cloud(private val server: String = Protocol.SERVER_URL, private val port: 
         return CloudFunctionResult.OK
     }
 
+    suspend fun Client.getIDWithTimestampsListFromServer(): CloudFunctionResult {
+        sendRequest(JoozdlogCommsKeywords.REQUEST_ID_WITH_TIMESTAMPS_LIST)
+        readFromServer().let { response ->
+            handleServerResult(response)?.let { return it } // this also catches response == null
+            return CloudFunctionResult.ResultWithPayload(CloudFunctionResult.OK, response!!.toIdWithTimestampList())
+        }
+    }
+
+    @Deprecated("deprecated")
     suspend fun Client.putIDWithTimestampsListInResult(result: Result<List<IDWithTimeStamp>>): CloudFunctionResult {
         sendRequest(JoozdlogCommsKeywords.REQUEST_ID_WITH_TIMESTAMPS_LIST)
         readFromServer().let{ response ->
             handleServerResult(response)?.let { return it }
-            result.value = unpackSerialized(response!!).map { IDWithTimeStamp.deserialize (it) } //if response was null, handleServerResult would have caught it
+            result.value = response?.toIdWithTimestampList() //if response was null, handleServerResult would have caught it
         }
         return CloudFunctionResult.OK
     }
 
-    suspend fun Client.putFlightsFromServerInResult(flightIDsToDownload: List<Int>, result: Result<List<BasicFlight>>): CloudFunctionResult{
+    private fun ByteArray.toIdWithTimestampList() = unpackSerialized(this).map { IDWithTimeStamp.deserialize(it) }
+
+    suspend fun Client.downloadFlightsFromServer(flightIDsToDownload: List<Int>): CloudFunctionResult{
         val extraData = wrap(flightIDsToDownload) // NOTE TO SELF on server use unwrapList(data)
         sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS, extraData)
-        readFromServer().let{ response ->
+        val flights = readFromServer().let{ response ->
             handleServerResult(response)?.let { return it }
-            result.value = unpackSerialized(response!!).map { BasicFlight.deserialize (it) } //if response was null, handleServerResult would have caught it
+            unpackSerialized(response!!).map { BasicFlight.deserialize (it) }
         }
-        return CloudFunctionResult.OK
+        return CloudFunctionResult.ResultWithPayload<List<BasicFlight>>(CloudFunctionResult.OK, flights)
     }
 
     suspend fun Client.sendFlights(flights: List<BasicFlight>): CloudFunctionResult{

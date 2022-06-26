@@ -56,9 +56,11 @@ class CheckForDuplicates {
         val flights = getSampleFlights()
         val duplicates = checkForDuplicates(flights)
         val originals = flights.filter { it !in duplicates }
-        println("Originals:\n${originals.joinToString("\n")}")
-        println("-oOo-")
-        println("Duplicates:\n${duplicates.joinToString("\n")}")
         assertEquals(flights.sortedBy { it.flightID }, (duplicates + originals).sortedBy { it.flightID })
+        assert(duplicates.none { it in originals})
+        assert(originals.none { it in duplicates})
+        assert(originals.all { it in flights})
+        assert(duplicates.all { it in flights})
     }
 }
+

@@ -28,6 +28,7 @@ import nl.joozd.logbookapp.data.importing.results.SavePlannedFlightsResult
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 
 interface ImportedFlightsSaver {
@@ -35,6 +36,7 @@ interface ImportedFlightsSaver {
      * Save a complete logbook (from a backup or import)
      */
     suspend fun save(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult
+    suspend fun merge(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult
     suspend fun save(completedFlights: ExtractedCompletedFlights): SaveCompletedFlightsResult
     suspend fun save(plannedFlights: ExtractedPlannedFlights): SavePlannedFlightsResult
 
@@ -42,11 +44,12 @@ interface ImportedFlightsSaver {
         val instance get() = make()
 
         fun make(
-            flightsRepo: FlightRepository = FlightRepositoryWithUndo.instance,
+            flightsRepo: FlightRepositoryWithUndo = FlightRepositoryWithUndo.instance,
+            flightRepositoryWithDirectAccess: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance,
             airportsRepo: AirportRepository = AirportRepository.instance,
             aircraftRepo: AircraftRepository = AircraftRepository.instance
         ): ImportedFlightsSaver{
-            return ImportedFlightsSaverImpl(flightsRepo, airportsRepo, aircraftRepo)
+            return ImportedFlightsSaverImpl(flightsRepo, flightRepositoryWithDirectAccess, airportsRepo, aircraftRepo)
         }
     }
 }

@@ -139,6 +139,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
         launch {
             status = HandlerStatus.EXTRACTING_FLIGHTS
             status = HandlerStatus.SAVING_FLIGHTS
+
             ImportedFlightsSaver.instance.save(extractedFlights)
             status = HandlerStatus.DONE
         }

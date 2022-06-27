@@ -26,16 +26,20 @@ import nl.joozd.joozdlogimporter.dataclasses.ExtractedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.logbookapp.data.importing.merging.mergeFlights
+import nl.joozd.logbookapp.data.importing.merging.mergeFlightsLists
 import nl.joozd.logbookapp.data.importing.results.SaveCompleteLogbookResult
 import nl.joozd.logbookapp.data.importing.results.SaveCompletedFlightsResult
 import nl.joozd.logbookapp.data.importing.results.SavePlannedFlightsResult
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.repository.helpers.iataToIcaoAirports
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.DispatcherProvider
+import nl.joozd.logbookapp.utils.UndoableCommand
 
 
 /**
@@ -43,7 +47,8 @@ import nl.joozd.logbookapp.utils.DispatcherProvider
  * It accepts both ICAO and IATA formats for airports.
  */
 class ImportedFlightsSaverImpl(
-    private val flightsRepo: FlightRepository,
+    private val flightsRepoWithUndo: FlightRepositoryWithUndo,
+    private val flightsRepoWithDirectAccess: FlightRepositoryWithDirectAccess,
     private val airportRepository: AirportRepository,
     private val aircraftRepository: AircraftRepository
 ): ImportedFlightsSaver {
@@ -55,7 +60,7 @@ class ImportedFlightsSaverImpl(
      */
     override suspend fun save(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult {
         val flights = makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(completeLogbook)?: emptyList()
-        val flightsOnDevice = flightsRepo.getAllFlights()
+        val flightsOnDevice = flightsRepoWithUndo.getAllFlights()
         // This makes a list of pairs.
         // mergeFlights will merge second onto first, overwriting any non-empty data.
         // This can take some time for large datasets
@@ -65,8 +70,19 @@ class ImportedFlightsSaverImpl(
         val mergedFlights = mergeFlights(matchingFlights)
         val newFlights = getNonMatchingFlightsExactTimes(flightsOnDevice, flights)
 
-        flightsRepo.save(mergedFlights + newFlights)
+        flightsRepoWithUndo.save(mergedFlights + newFlights)
 
+        return SaveCompleteLogbookResult(true)
+    }
+
+    override suspend fun merge(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult {
+        val flights = makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(completeLogbook)?: emptyList()
+        val flightsOnDevice = flightsRepoWithUndo.getAllFlights()
+        val mergedFlights = mergeFlightsLists(flightsOnDevice, flights)
+
+        val command = makeReplaceDBCommand(mergedFlights)
+        command()
+        flightsRepoWithUndo.insertUndoAction(command)
         return SaveCompleteLogbookResult(true)
     }
 
@@ -77,7 +93,7 @@ class ImportedFlightsSaverImpl(
      */
     override suspend fun save(completedFlights: ExtractedCompletedFlights): SaveCompletedFlightsResult {
         val flights = prepareFlightsForSaving(completedFlights) ?: return SaveCompletedFlightsResult(false)
-        val flightsOnDevice = flightsRepo.getAllFlights()
+        val flightsOnDevice = flightsRepoWithUndo.getAllFlights()
         val relevantFlightsOnDevice = flightsOnDevice.filter {
             !it.isSim && it.timeOut in (completedFlights.period ?: return SaveCompletedFlightsResult(false))
         }
@@ -85,7 +101,7 @@ class ImportedFlightsSaverImpl(
         val mergedFlights = mergeFlights(matchingFlights).autocomplete(airportRepository, aircraftRepository)
         val newFlights = getNonMatchingFlightsSameDay(relevantFlightsOnDevice, flights)
         val flightsNotInCompletedFlights = getNonMatchingFlightsSameDay(flights, relevantFlightsOnDevice)
-        flightsRepo.save(mergedFlights + newFlights)
+        flightsRepoWithUndo.save(mergedFlights + newFlights)
 
         return SaveCompletedFlightsResult(
             success = true,
@@ -116,10 +132,23 @@ class ImportedFlightsSaverImpl(
         val flightsToDelete = getNonMatchingFlightsExactTimes(flights, plannedFlightsOnDevice)
 
             //Deleting planned flights does not pollute DB as they are not synced to server and thus deleted hard.
-        flightsRepo.delete(flightsToDelete)
-        flightsRepo.save(mergedFlights + newFlights)
+        flightsRepoWithUndo.delete(flightsToDelete)
+        flightsRepoWithUndo.save(mergedFlights + newFlights)
 
         return SavePlannedFlightsResult(true)
+    }
+
+    private suspend fun makeReplaceDBCommand(mergedFlights: List<Flight>): UndoableCommand {
+        val action = suspend {
+            flightsRepoWithDirectAccess.clear()
+            flightsRepoWithDirectAccess.save(mergedFlights)
+        }
+        val currentFlightsInDB = flightsRepoWithDirectAccess.getAllFlightsInDB()
+        val undoAction = suspend {
+            flightsRepoWithDirectAccess.clear()
+            flightsRepoWithDirectAccess.save(currentFlightsInDB)
+        }
+        return UndoableCommand(action = action, undoAction = undoAction)
     }
 
     /*
@@ -143,7 +172,7 @@ class ImportedFlightsSaverImpl(
         }
 
     private suspend fun getPlannedFlightsOnDevice(period: ClosedRange<Long>): List<Flight> =
-        flightsRepo.getAllFlights().filter { it.isPlanned }.filter { it.timeOut in (period) }
+        flightsRepoWithUndo.getAllFlights().filter { it.isPlanned }.filter { it.timeOut in (period) }
 
 
     private suspend fun makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(flightsToPrepare: ExtractedFlights): List<Flight>?{

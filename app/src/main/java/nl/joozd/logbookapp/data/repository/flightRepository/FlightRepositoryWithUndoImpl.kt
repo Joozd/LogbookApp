@@ -20,10 +20,10 @@
 package nl.joozd.logbookapp.data.repository.flightRepository
 
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -31,7 +31,6 @@ import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.UndoableCommand
-import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 import java.util.*
 
 class FlightRepositoryWithUndoImpl(
@@ -46,18 +45,18 @@ class FlightRepositoryWithUndoImpl(
     private val undoStack = Stack<UndoableCommand>()
     private val redoStack = Stack<UndoableCommand>()
 
-    private val _undoAvailable = MutableStateFlow(false)
-    private val _redoAvailable = MutableStateFlow(false)
+    override val undoAvailableFlow: StateFlow<Boolean> = MutableStateFlow(false)
+    override val redoAvailableFlow: StateFlow<Boolean> = MutableStateFlow(false)
 
-    override var undoAvailable: Boolean by CastFlowToMutableFlowShortcut(_undoAvailable)
+    override var undoAvailable: Boolean by CastFlowToMutableFlowShortcut(undoAvailableFlow)
         private set
 
-    override var redoAvailable: Boolean by CastFlowToMutableFlowShortcut(_redoAvailable)
+    override var redoAvailable: Boolean by CastFlowToMutableFlowShortcut(redoAvailableFlow)
         private set
 
 
-    override val undoAvailableFlow: Flow<Boolean> = _undoAvailable
-    override val redoAvailableFlow: Flow<Boolean> = _redoAvailable
+    //override val undoAvailableFlow: Flow<Boolean> = _undoAvailable
+    //override val redoAvailableFlow: Flow<Boolean> = _redoAvailable
 
     private val undoRedoMutex = Mutex()
     /**
@@ -66,11 +65,11 @@ class FlightRepositoryWithUndoImpl(
     override suspend fun undo() {
         undoRedoMutex.withLock {
             val command = undoStack.pop()
-            _undoAvailable.value = !undoStack.empty()
+            undoAvailable = !undoStack.empty()
 
             command.undo()
             redoStack.push(command)
-            _redoAvailable.value = true
+            redoAvailable = true
         }
     }
 
@@ -84,13 +83,18 @@ class FlightRepositoryWithUndoImpl(
                 Log.e(this::class.simpleName, "Trying to redo but redo stack is empty")
             else {
                 val command = redoStack.pop()
-                _redoAvailable.value = !redoStack.empty()
+                redoAvailable = !redoStack.empty()
 
                 command()
                 undoStack.push(command)
-                _undoAvailable.value = true
+                undoAvailable = true
             }
         }
+    }
+
+    override fun insertUndoAction(undoableCommand: UndoableCommand) {
+        undoStack.push(undoableCommand)
+        undoAvailable = true
     }
 
 
@@ -138,7 +142,7 @@ class FlightRepositoryWithUndoImpl(
      */
     override suspend fun save(flights: Collection<Flight>) {
         saveWithUndo(flights)
-        _redoAvailable.value = false // new save means any previous redo can no longer be done
+        redoAvailable = false // new save means any previous redo can no longer be done
     }
 
     /**
@@ -150,7 +154,7 @@ class FlightRepositoryWithUndoImpl(
 
     override suspend fun delete(flights: Collection<Flight>) {
         deleteWithUndo(flights)
-        _redoAvailable.value = false // new delete means any previous redo can no longer be done
+        redoAvailable = false // new delete means any previous redo can no longer be done
     }
 
     override suspend fun generateAndReserveNewFlightID(highestTakenID: Int): Int =
@@ -193,16 +197,12 @@ class FlightRepositoryWithUndoImpl(
         }
     }
 
-    private fun generateSaveFlightsAction(flightsToSave: Collection<Flight>): () -> Unit = {
-        MainScope().launch {
-            repositoryWithDirectAccess.save(flightsToSave)
-        }
+    private suspend fun generateSaveFlightsAction(flightsToSave: Collection<Flight>) = suspend {
+        repositoryWithDirectAccess.save(flightsToSave)
     }
 
-    private fun generateDeleteFlightsAction(flightsToSave: Collection<Flight>): () -> Unit = {
-        MainScope().launch {
-            repositoryWithDirectAccess.delete(flightsToSave)
-        }
+    private fun generateDeleteFlightsAction(flightsToSave: Collection<Flight>) = suspend {
+        repositoryWithDirectAccess.delete(flightsToSave)
     }
 
     /*
@@ -221,10 +221,10 @@ class FlightRepositoryWithUndoImpl(
 
 
 
-    private fun executeUndoableCommand(command: UndoableCommand){
+    private suspend fun executeUndoableCommand(command: UndoableCommand){
         undoStack.push(command)
         redoStack.clear()
-        _undoAvailable.value = true
+        undoAvailable = true
         command()
     }
 

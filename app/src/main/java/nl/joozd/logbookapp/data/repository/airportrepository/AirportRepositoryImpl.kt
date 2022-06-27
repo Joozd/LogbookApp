@@ -36,8 +36,9 @@ class AirportRepositoryImpl(
     override val hasData: StateFlow<Boolean> = MutableStateFlow(false)
     init{
         MainScope().launch {
-            if (airportDao.airportsFlow().firstOrNull() == null)
+            if (airportDao.airportsFlow().firstOrNull().isNullOrEmpty()) {
                 updateAirports(Preloader().getPreloadedAirports())
+            }
             (hasData as MutableStateFlow).value = true
         }
     }

@@ -62,4 +62,7 @@ interface FlightDao {
 
     @Delete
     suspend fun delete(flightData: Collection<FlightData>)
+
+    @Query("DELETE FROM FlightData")
+    suspend fun clear()
 }

@@ -48,6 +48,9 @@ class FlightRepositoryImpl(
     init{
         //At initialization, remove all duplicates.
         MainScope().launch{
+            println("******DEBUG*****")
+            println(getAllFlights().joinToString(("\n")))
+            println("************")
             removeDuplicates()
         }
     }
@@ -129,6 +132,11 @@ class FlightRepositoryImpl(
         else withContext(DispatcherProvider.io()) {
             flightDao.delete(flights.map { it.toData() })
         }
+    }
+
+    override suspend fun clear() {
+        flightDao.clear()
+        println("Cleared FlightRepository DB: ${getAllFlights().size} flights now in DB")
     }
 
     private suspend fun deleteSoft(flights: Collection<Flight>) = withContext(DispatcherProvider.io()){

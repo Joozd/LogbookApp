@@ -2,7 +2,6 @@ package nl.joozd.logbookapp.data.sharedPrefs
 
 import kotlinx.coroutines.flow.combine
 import nl.joozd.logbookapp.core.Constants.ONE_DAY_IN_SECONDS
-import java.time.Instant
 
 object BackupPrefs: JoozdLogPreferences() {
     override val preferencesFileKey = "nl.joozd.logbookapp.BACKUP_PREFS_FILE"
@@ -18,8 +17,6 @@ object BackupPrefs: JoozdLogPreferences() {
 
     val nextBackupNeededFlow = combine(Prefs.backupInterval.flow, mostRecentBackup.flow, backupIgnoredUntil.flow)
     { interval, mostRecent, backupIgnoredUntil ->
-        println("now = ${Instant.now().epochSecond}")
-        println("nextBackupNeededFlow:\ninterval = $interval\nmostRecent = $mostRecent\nbackupIgnoredUntil = $backupIgnoredUntil")
         maxOf(mostRecent + interval * ONE_DAY_IN_SECONDS, backupIgnoredUntil)
     }
 }

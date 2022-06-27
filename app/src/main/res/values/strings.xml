@@ -467,6 +467,9 @@
     <string name="not_implemented_body">This operation is not implemented yet. Nothing will happen now.</string>
 
 
+    <string name="new_cloud_account_made">New Cloud account made</string>
+    <string name="new_cloud_account_made_message_please_send_link_to_yourself">A new Cloud account has been created. If and email address was saved, an email with a login link will be mailed to you. In any case, I recommend you send a login link to yourself now.</string>
+    <string name="share_link">Share link</string>
     <string name="fake_hidden_password">••••••••••</string>
     <string name="you_have_never_backed_up">No backup of logbook has been remembered.</string>
     <string name="you_have_not_backed_up_n_days">You have not backed up your logbook for %1$d days.</string>

@@ -31,6 +31,7 @@ import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.core.DarkModeCenter
+import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import java.time.Instant
@@ -58,7 +59,9 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     suspend fun calendarDisabled(): Boolean =
         calendarIsDisabledNow(Prefs.calendarDisabledUntil())
 
-    val useCloudFlow = Prefs.useCloud.flow
+    val useCloudFlow = combine(Prefs.useCloud.flow, TaskFlags.createNewUserAndEnableCloud.flow) { cloudEnabled, newUserWanted ->
+        cloudEnabled || newUserWanted
+    }
 
     val lastUpdateTimeFlow = ServerPrefs.mostRecentFlightsSyncEpochSecond.flow
 
@@ -131,19 +134,6 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     fun toggleAddNamesFromRoster() = viewModelScope.launch{
         Prefs.getNamesFromRosters(!Prefs.getNamesFromRosters())
-    }
-
-    // Toggles useCloud
-    // tells Activity to launch a dialog to create a new user (and show t&c's if needed) if user data is not present and useCloud is toggled to true.
-    fun useCloudSyncToggled() = viewModelScope.launch{
-        val useCloudOnAfterToggle = !Prefs.useCloud()
-        Prefs.useCloud(useCloudOnAfterToggle)
-        if (useCloudOnAfterToggle && !UserManagement().isLoggedIn())
-            status = SettingsActivityStatus.AskIfNewAccountNeeded
-    }
-
-    fun forceUseCloud(useCloud: Boolean){
-        Prefs.useCloud(useCloud)
     }
 
     fun dontPostponeCalendarSync(){

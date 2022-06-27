@@ -1,11 +1,19 @@
 package nl.joozd.logbookapp.core.background
 
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.ui.utils.toast
 
 /**
  * Send all persistant messages to [MessageCenter]
@@ -13,12 +21,19 @@ import nl.joozd.logbookapp.core.usermanagement.UserManagement
  */
 class PersistentMessagesDispatcher(private val messagesWaiting: MessagesWaiting = MessagesWaiting): BackgroundTasksDispatcher() {
     override fun startCollectors(scope: CoroutineScope) {
+        handleNewCloudAccountCreated(scope)
         handleNoEmailEntered(scope)
         handleNoVerificationCodeSavedBug(scope)
         handleBadVerificationCodeCLicked(scope)
         handleEmailConfirmed(scope)
         handleMergeWithServerPerformed(scope)
         handleNoLoginDataSaved(scope)
+    }
+
+    private fun handleNewCloudAccountCreated(scope: CoroutineScope) {
+        messagesWaiting.newCloudAccountCreated.flow.doIfTrueEmitted(scope) {
+            postNewCloudAccountCreatedMessage()
+        }
     }
 
     private fun handleNoEmailEntered(scope: CoroutineScope) {
@@ -58,7 +73,21 @@ class PersistentMessagesDispatcher(private val messagesWaiting: MessagesWaiting 
     }
 
 
-
+    private fun postNewCloudAccountCreatedMessage(){
+        MessageCenter.commitMessage {
+            titleResource = R.string.new_cloud_account_made
+            descriptionResource = R.string.new_cloud_account_made_message_please_send_link_to_yourself
+            setPositiveButton(R.string.share_link){
+                lifecycleScope.launch {
+                    sendLoginLinkIntent()
+                    messagesWaiting.newCloudAccountCreated(false)
+                }
+            }
+            setNegativeButton(android.R.string.cancel){
+                messagesWaiting.newCloudAccountCreated(false)
+            }
+        }
+    }
 
     private fun postNoEmailEnteredMessage(){
         MessageCenter.commitMessage {
@@ -111,7 +140,7 @@ class PersistentMessagesDispatcher(private val messagesWaiting: MessagesWaiting 
         }
     }
 
-
+    // Secondary message, does not need to reset a flag.
     private fun showEmailRequestedMessage(){
         MessageCenter.commitMessage {
             titleResource = R.string.verification_mail
@@ -125,8 +154,21 @@ class PersistentMessagesDispatcher(private val messagesWaiting: MessagesWaiting 
             titleResource = R.string.verification_mail
             descriptionResource = R.string.email_verified
             setPositiveButton(android.R.string.ok){
-
+                messagesWaiting.emailConfirmed(false)
             }
+        }
+    }
+
+    private suspend fun ComponentActivity.sendLoginLinkIntent() {
+        UserManagement().generateLoginLink()?.let { loginLink ->
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, loginLink)
+                type = "text/plain"
+            }
+
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
         }
     }
 

@@ -26,9 +26,11 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.toggle
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageFinalBinding
+import java.time.Instant
 
 /**
  * Final puntjes op de i
@@ -48,6 +50,7 @@ class NewUserActivityFinalPage: NewUseractivityPage() {
 
             doneButton.setOnClickListener {
                 lifecycleScope.launch{
+                    markBackupAsDoneNow() // so users won't start with a "you haven't backed up yet" message
                     Prefs.newUserActivityFinished.valueBlocking = true // make sure this is taken care of before launching MainActivity, so it won't jump straight back to NewUserActivity
                     newUserActivity.finish()
                 }
@@ -59,5 +62,9 @@ class NewUserActivityFinalPage: NewUseractivityPage() {
             icaoIataSwitch.isChecked = it
             icaoIataSwitch.setText(if (it) R.string.useIataAirports else R.string.useIcaoAirports)
         }
+    }
+
+    private fun markBackupAsDoneNow(){
+        BackupPrefs.mostRecentBackup(Instant.now().epochSecond)
     }
 }

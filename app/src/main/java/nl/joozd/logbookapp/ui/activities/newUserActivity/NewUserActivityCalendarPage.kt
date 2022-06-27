@@ -38,6 +38,7 @@ import nl.joozd.logbookapp.ui.dialogs.CalendarSyncDialog
 class NewUserActivityCalendarPage: NewUseractivityPage() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageCalendarBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_calendar, container, false)).apply {
+            useCalendarImportSwitch.bindToFlow(Prefs.useCalendarSync.flow)
             collectCalendarSyncFlow()
             useCalendarImportSwitch.setOnClickListener {
                 disableCalendarSyncOrShowDialog()
@@ -46,7 +47,6 @@ class NewUserActivityCalendarPage: NewUseractivityPage() {
 
     private fun ActivityNewUserPageCalendarBinding.collectCalendarSyncFlow(){
         Prefs.useCalendarSync.flow.launchCollectWhileLifecycleStateStarted{
-            useCalendarImportSwitch.isChecked = it
             continueButton.setText(if (it) R.string._continue else R.string.dont_use)
         }
     }

@@ -17,7 +17,7 @@ import java.util.*
 object MessageCenter {
     private val messageQueue = LinkedList<UserMessage>()
     private val messageBarFragmentQueue = LinkedList<MessageBarFragment>()
-    private var waitingForNextFragmentPush: Boolean = false
+    private var readyToDisplayNextFragment: Boolean = false
 
     val messageFlow: StateFlow<UserMessage?> = MutableStateFlow(null)
     private var currentMessage by CastFlowToMutableFlowShortcut(messageFlow)
@@ -39,14 +39,20 @@ object MessageCenter {
     }
 
     fun pushMessageBarFragment(fragment: MessageBarFragment){
+        println("DEBUG: PushMessageBarFragment called with ${fragment.messageTag}")
         if (notYetInQueue(fragment)) {
+            println("DEBUG: 1")
             fragment.setOnCompleted {
-                waitingForNextFragmentPush = true
+                println("DEBUG: 2")
                 currentMessageBarFragment = null
+                readyToDisplayNextFragment = true
                 MainScope().launch { nextFragmentWithDelay() }
             }
+            println("DEBUG: 6")
             addFragmentToQueue(fragment)
+            println("DEBUG: 7")
         }
+        println("DEBUG: messageBarFragmentQueue.size = ${messageBarFragmentQueue.size}")
     }
 
     //Remove a messageBarFragment from queue if it is in there, by tag.
@@ -76,9 +82,10 @@ object MessageCenter {
 
     private fun addFragmentToQueue(fragment: MessageBarFragment){
         messageBarFragmentQueue.add(fragment)
+        println("added (proof: ${messageBarFragmentQueue.size}")
 
         //push fragment if none active yet
-        if (currentMessageBarFragment == null && !waitingForNextFragmentPush)
+        if (currentMessageBarFragment == null && !readyToDisplayNextFragment)
             nextFragment()
     }
 
@@ -90,7 +97,7 @@ object MessageCenter {
     // Will put null if no next fragment present
     private fun nextFragment(){
         currentMessageBarFragment = messageBarFragmentQueue.poll()
-        waitingForNextFragmentPush = false
+        readyToDisplayNextFragment = false
     }
 
     // Will put null if no next fragment present
@@ -156,8 +163,10 @@ object MessageCenter {
         }
     }
 
-    private fun notYetInQueue(fragment: MessageBarFragment) =
-        fragment.messageTag == null ||
-                (fragment.messageTag !in messageBarFragmentQueue.map { it.tag }
-                        && fragment.messageTag != currentMessageBarFragment?.messageTag)
+    private fun notYetInQueue(fragment: MessageBarFragment): Boolean {
+        println("Called notYetInQueue. tag: ${fragment.messageTag}, queue: ${messageBarFragmentQueue.map { it.tag }} ")
+        return (fragment.messageTag == null
+                || (fragment.messageTag !in messageBarFragmentQueue.map { it.tag }
+                && fragment.messageTag != currentMessageBarFragment?.messageTag)).also { println ( "Returned $it" )}
+    }
 }

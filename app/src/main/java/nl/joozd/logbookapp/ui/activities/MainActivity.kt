@@ -111,6 +111,11 @@ class MainActivity : JoozdlogActivity() {
         setContentView(binding.root)
     }
 
+    override fun onResume() {
+        super.onResume()
+        collectMessageCenterMessages()
+    }
+
     override fun onNewIntent(intent: Intent?) {
         handleIntent(intent)
     }
@@ -149,8 +154,6 @@ class MainActivity : JoozdlogActivity() {
         collectPicNameNeedsToBeSetFlow()
 
         collectUseCalendarSyncFlow()
-
-        collectMessageCenterMessages()
         collectMessageCenterFragments()
     }
 

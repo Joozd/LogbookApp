@@ -71,6 +71,7 @@ class BackupCenter {
     private val backupActionFlow: Flow<BackupAction> =
         combine(BackupPrefs.nextBackupNeededFlow, TaskFlags.sendBackupEmail.flow, backupEmailEnabledFlow()) {
             backupNeededAt, emailBackupAlreadyScheduled, emailBackupEnabled ->
+                println("backupActionFlow:\nbackupNeededAt = $backupNeededAt\nemailBackupAlreadyScheduled = $emailBackupAlreadyScheduled\nemailBackupEnabled = $emailBackupEnabled")
                 val backupOverdueBy = Instant.now().epochSecond - backupNeededAt
                 when {
                     backupNotificationNeeded(emailBackupEnabled, backupOverdueBy) -> BackupAction.NOTIFY(

@@ -61,7 +61,7 @@ class BackupNotificationFragment: MessageBarFragment() {
 
     private fun FragmentGenericNotificationBinding.setIgnoreOnClickListener(){
         negativeButton.setOnClickListener {
-            BackupPrefs.backupIgnoredUntil(Instant.now().atStartOfDay(ZoneOffset.UTC).epochSecond + ONE_DAY_IN_SECONDS)
+            BackupPrefs.backupIgnoredUntil(Instant.now().atStartOfDay(currentLocalZoneOffset()).epochSecond + ONE_DAY_IN_SECONDS)
             onCompleted()
         }
     }
@@ -92,4 +92,6 @@ class BackupNotificationFragment: MessageBarFragment() {
         setBackupNowOnClickListener()
         positiveButton.setText(R.string.backup_now)
     }
+
+    private fun currentLocalZoneOffset(): ZoneOffset = ZoneOffset.systemDefault().rules.getOffset(Instant.now())
 }

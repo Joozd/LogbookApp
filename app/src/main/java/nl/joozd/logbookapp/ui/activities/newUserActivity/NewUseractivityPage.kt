@@ -2,6 +2,7 @@ package nl.joozd.logbookapp.ui.activities.newUserActivity
 
 import android.os.Bundle
 import android.view.View
+import android.widget.CompoundButton
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
@@ -28,20 +29,6 @@ abstract class NewUseractivityPage: JoozdlogFragment() {
         }
         view.findViewById<TextView>(R.id.backButton)?.setOnClickListener {
             previousClicked()
-        }
-    }
-
-    protected fun SwitchCompat.bindToFlow(flow: Flow<Boolean>){
-        setOnCheckedChangeListener { _, _ ->
-            lifecycleScope.launch {
-                flow.first().let{
-                    if (isChecked != it)
-                        isChecked = it
-                }
-            }
-        }
-        flow.launchCollectWhileLifecycleStateStarted{
-            isChecked = it
         }
     }
 }

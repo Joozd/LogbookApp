@@ -40,10 +40,14 @@ import nl.joozd.logbookapp.databinding.ActivityNewUserPageCloudBinding
  * If Cloud is enabled, sync worker will create a new account if needed.
  */
 class NewUserActivityCloudPage: NewUseractivityPage() {
+    private val cloudIsEnabledFlow = makeUseCloudFlow()
+
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageCloudBinding.bind(inflater.inflate(R.layout.activity_new_user_page_cloud, container, false)).apply {
-
+            acceptTermsCheckbox.bindToFlow(Prefs.acceptedCloudSyncTerms.flow)
+            useCloudCheckbox.bindToFlow(cloudIsEnabledFlow)
             collectCloudTermsAcceptedFlow()
             collectUseCloudFlow()
 
@@ -67,20 +71,21 @@ class NewUserActivityCloudPage: NewUseractivityPage() {
         }
     }
 
-    private fun ActivityNewUserPageCloudBinding.collectCloudTermsAcceptedFlow() = Prefs.acceptedCloudSyncTerms.flow.launchCollectWhileLifecycleStateStarted{
-        println("Prefs.acceptedCloudSyncTerms = $it")
-        acceptTermsCheckbox.isChecked = it
-        useCloudCheckbox.isEnabled = it
-    }
-
-    val cloudIsEnabled = combine(Prefs.useCloud.flow, TaskFlags.createNewUserAndEnableCloud.flow){ cloudEnabled, newUserWanted ->
+    private fun makeUseCloudFlow() = combine(Prefs.useCloud.flow, TaskFlags.createNewUserAndEnableCloud.flow) { cloudEnabled, newUserWanted ->
         cloudEnabled || newUserWanted
     }
 
-    private fun ActivityNewUserPageCloudBinding.collectUseCloudFlow() = cloudIsEnabled.launchCollectWhileLifecycleStateStarted{
-        useCloudCheckbox.isChecked = it
+    private fun ActivityNewUserPageCloudBinding.collectCloudTermsAcceptedFlow() = Prefs.acceptedCloudSyncTerms.flow.launchCollectWhileLifecycleStateStarted{
+        useCloudCheckbox.isEnabled = it
+    }
+
+    private fun ActivityNewUserPageCloudBinding.collectUseCloudFlow() = cloudIsEnabledFlow.launchCollectWhileLifecycleStateStarted{
         continueButton.setText(if (it) R.string._continue else R.string.dont_use)
     }
+
+
+
+
 
 
 

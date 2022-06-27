@@ -25,6 +25,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.widget.CompoundButton
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -33,6 +34,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.App
@@ -57,12 +59,12 @@ open class JoozdlogActivity: AppCompatActivity() {
     /**
      * use  setSupportActionBarWithReturn(this_activities_toolbar)?.apply { title="HALLON AUB GRGR" }
      */
-    fun setSupportActionBarWithReturn(toolbar: Toolbar?): ActionBar? {
+    protected fun setSupportActionBarWithReturn(toolbar: Toolbar?): ActionBar? {
         super.setSupportActionBar(toolbar)
         return supportActionBar
     }
 
-    fun closeAndStartMainActivity(){
+    protected fun closeAndStartMainActivity(){
         startMainActivity(this)
         finish()
     }
@@ -75,17 +77,37 @@ open class JoozdlogActivity: AppCompatActivity() {
         }
     }
 
-    fun startMainActivity(context: Context) = with (context) {
+    private fun startMainActivity(context: Context) = with (context) {
         startActivity(packageManager.getLaunchIntentForPackage(packageName))
     }
 
-    fun sendMessageToOtherApp(message: String, subject: String? = null){
+
+    protected fun sendMessageToOtherApp(message: String, subject: String? = null){
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             subject?.let { putExtra(Intent.EXTRA_SUBJECT, it) }
             putExtra(Intent.EXTRA_TEXT, message)
         }
         startActivity(Intent.createChooser(intent, null))
+    }
+
+    /**
+     * Bind a CompoundButton (e.g. a Switch) to a Flow<Boolean>.
+     * The only way to change this buttons state after calling this function is to change the output of [flow]
+     */
+    protected fun CompoundButton.bindToFlow(flow: Flow<Boolean>){
+        setOnCheckedChangeListener { _, _ ->
+            lifecycleScope.launch {
+                flow.first().let{
+                    if (isChecked != it)
+                        isChecked = it
+                }
+            }
+        }
+        flow.launchCollectWhileLifecycleStateStarted{
+            println("COLLECTED: $it from $flow")
+            isChecked = it
+        }
     }
 
     /**

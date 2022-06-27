@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.ui.activities.newUserActivity
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -36,14 +37,22 @@ import nl.joozd.logbookapp.ui.dialogs.CalendarSyncDialog
  * Calendar import
  */
 class NewUserActivityCalendarPage: NewUseractivityPage() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        ActivityNewUserPageCalendarBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_calendar, container, false)).apply {
+    private lateinit var _binding: ActivityNewUserPageCalendarBinding
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = ActivityNewUserPageCalendarBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_calendar, container, false)).apply {
+            println("at onCreateView: ${Prefs.useCalendarSync.valueBlocking}")
             useCalendarImportSwitch.bindToFlow(Prefs.useCalendarSync.flow)
             collectCalendarSyncFlow()
             useCalendarImportSwitch.setOnClickListener {
+                println("Clicked useCalendarImportSwitch")
+                println("before action: ${Prefs.useCalendarSync.valueBlocking}")
                 disableCalendarSyncOrShowDialog()
+
             }
-        }.root
+        }
+        return _binding.root
+    }
 
     private fun ActivityNewUserPageCalendarBinding.collectCalendarSyncFlow(){
         Prefs.useCalendarSync.flow.launchCollectWhileLifecycleStateStarted{

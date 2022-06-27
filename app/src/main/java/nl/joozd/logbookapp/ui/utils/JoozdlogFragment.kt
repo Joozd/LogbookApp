@@ -25,6 +25,7 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
 import android.text.Editable
 import android.view.View
+import android.widget.CompoundButton
 import android.widget.EditText
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
@@ -36,6 +37,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.first
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.extensions.getColorFromAttr
@@ -130,4 +132,23 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
         }
     }
 
+
+    /**
+     * Bind a CompoundButton (e.g. a Switch) to a Flow<Boolean>.
+     * The only way to change this buttons state after calling this function is to change the output of [flow]
+     */
+    protected fun CompoundButton.bindToFlow(flow: Flow<Boolean>){
+        setOnCheckedChangeListener { _, _ ->
+            lifecycleScope.launch {
+                flow.first().let{
+                    if (isChecked != it)
+                        isChecked = it
+                }
+            }
+        }
+        flow.launchCollectWhileLifecycleStateStarted{
+            println("COLLECTED: $it from $flow")
+            isChecked = it
+        }
+    }
 }

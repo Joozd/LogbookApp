@@ -38,6 +38,7 @@ import java.time.Instant
 class NewUserActivityFinalPage: NewUseractivityPage() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivityNewUserPageFinalBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_final, container, false)).apply {
+            icaoIataSwitch.bindToFlow(Prefs.useIataAirports.flow)
             launchCollectUseIataFlow()
 
             /*******************************************************************************************
@@ -59,7 +60,6 @@ class NewUserActivityFinalPage: NewUseractivityPage() {
 
     private fun ActivityNewUserPageFinalBinding.launchCollectUseIataFlow(){
         Prefs.useIataAirports.flow.launchCollectWhileLifecycleStateStarted{
-            icaoIataSwitch.isChecked = it
             icaoIataSwitch.setText(if (it) R.string.useIataAirports else R.string.useIcaoAirports)
         }
     }

@@ -41,6 +41,11 @@ class SyncCenter(private val taskFlags: TaskFlags = TaskFlags) {
         }
     }
 
+    // Delay next unforced sync by pretending we just synchronized
+    fun delaySync(){
+        ServerPrefs.mostRecentFlightsSyncEpochSecond(Instant.now().epochSecond)
+    }
+
     companion object{
         private const val TIME_BETWEEN_SYNC_CHECKS: Long = 15*60L // 15 minutes * 60 seconds per minute
     }

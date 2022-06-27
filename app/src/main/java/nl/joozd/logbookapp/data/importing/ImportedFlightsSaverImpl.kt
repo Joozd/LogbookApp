@@ -25,6 +25,7 @@ import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
+import nl.joozd.logbookapp.core.background.SyncCenter
 import nl.joozd.logbookapp.data.importing.merging.mergeFlights
 import nl.joozd.logbookapp.data.importing.merging.mergeFlightsLists
 import nl.joozd.logbookapp.data.importing.results.SaveCompleteLogbookResult
@@ -39,6 +40,7 @@ import nl.joozd.logbookapp.data.repository.helpers.iataToIcaoAirports
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.DispatcherProvider
+import nl.joozd.logbookapp.utils.InsertedUndoableCommand
 import nl.joozd.logbookapp.utils.UndoableCommand
 
 
@@ -58,19 +60,12 @@ class ImportedFlightsSaverImpl(
      * Imported flights will be merged onto flights already in logbook
      * @see mergeFlights
      */
-    override suspend fun save(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult {
+    override suspend fun replace(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult {
         val flights = makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(completeLogbook)?: emptyList()
-        val flightsOnDevice = flightsRepoWithUndo.getAllFlights()
-        // This makes a list of pairs.
-        // mergeFlights will merge second onto first, overwriting any non-empty data.
-        // This can take some time for large datasets
-        // (eg. checking 10K flights against 10K other flights might be 100M checks)
-        // so I offloaded it to a different coroutine to keep Main thread from filling up.
-        val matchingFlights = withContext(DispatcherProvider.default()){ getMatchingFlightsExactTimes(flightsOnDevice, flights) }
-        val mergedFlights = mergeFlights(matchingFlights)
-        val newFlights = getNonMatchingFlightsExactTimes(flightsOnDevice, flights)
-
-        flightsRepoWithUndo.save(mergedFlights + newFlights)
+        val command = makeReplaceDBCommand(flights)
+        command()
+        flightsRepoWithUndo.insertUndoAction(command)
+        SyncCenter().delaySync() // A server sync will remove undo possibility, give user some time.
 
         return SaveCompleteLogbookResult(true)
     }
@@ -118,7 +113,7 @@ class ImportedFlightsSaverImpl(
      * Will remove all other planned flights in its period.
      * TODO this generates two undo actions, needs fixing
      */
-    override suspend fun save(plannedFlights: ExtractedPlannedFlights): SavePlannedFlightsResult {
+    override suspend fun save(plannedFlights: ExtractedPlannedFlights, canUndo: Boolean): SavePlannedFlightsResult {
         val flights = prepareFlightsForSaving(plannedFlights) ?: return SavePlannedFlightsResult(false)
         val plannedFlightsOnDevice = getPlannedFlightsOnDevice(plannedFlights.period ?: return SavePlannedFlightsResult(false))
 
@@ -131,14 +126,16 @@ class ImportedFlightsSaverImpl(
         val newFlights = getNonMatchingFlightsExactTimes(plannedFlightsOnDevice, flights)
         val flightsToDelete = getNonMatchingFlightsExactTimes(flights, plannedFlightsOnDevice)
 
+        val repo = if (canUndo) flightsRepoWithUndo else flightsRepoWithDirectAccess
+
             //Deleting planned flights does not pollute DB as they are not synced to server and thus deleted hard.
-        flightsRepoWithUndo.delete(flightsToDelete)
-        flightsRepoWithUndo.save(mergedFlights + newFlights)
+        repo.delete(flightsToDelete)
+        repo.save(mergedFlights + newFlights)
 
         return SavePlannedFlightsResult(true)
     }
 
-    private suspend fun makeReplaceDBCommand(mergedFlights: List<Flight>): UndoableCommand {
+    private suspend fun makeReplaceDBCommand(mergedFlights: List<Flight>): InsertedUndoableCommand {
         val action = suspend {
             flightsRepoWithDirectAccess.clear()
             flightsRepoWithDirectAccess.save(mergedFlights)
@@ -148,7 +145,7 @@ class ImportedFlightsSaverImpl(
             flightsRepoWithDirectAccess.clear()
             flightsRepoWithDirectAccess.save(currentFlightsInDB)
         }
-        return UndoableCommand(action = action, undoAction = undoAction)
+        return InsertedUndoableCommand(action = action, undoAction = undoAction)
     }
 
     /*

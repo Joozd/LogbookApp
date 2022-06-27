@@ -431,7 +431,7 @@ class MainActivity : JoozdlogActivity() {
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
             getFlightsFromCalendar()?.let {
                 val ff = ImportedLogbookAutoCompleter().autocomplete(it)
-                ImportedFlightsSaver.make(FlightRepository.instance).save(ff)
+                ImportedFlightsSaver.make().save(ff, canUndo = false)
             }
         else {
             //granting permission will reset Prefs.useCalendarSync, which will be collected and this function will be called again.

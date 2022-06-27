@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.utils
 
-class UndoableCommand(private val action: suspend () -> Unit, private val undoAction: suspend () -> Unit){
+open class UndoableCommand(private val action: suspend () -> Unit, private val undoAction: suspend () -> Unit){
     suspend operator fun invoke() = action()
 
     suspend fun undo() = undoAction()

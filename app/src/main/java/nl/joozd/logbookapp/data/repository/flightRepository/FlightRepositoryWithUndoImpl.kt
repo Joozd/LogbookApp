@@ -30,6 +30,7 @@ import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
+import nl.joozd.logbookapp.utils.InsertedUndoableCommand
 import nl.joozd.logbookapp.utils.UndoableCommand
 import java.util.*
 
@@ -92,9 +93,16 @@ class FlightRepositoryWithUndoImpl(
         }
     }
 
-    override fun insertUndoAction(undoableCommand: UndoableCommand) {
+    override fun insertUndoAction(undoableCommand: InsertedUndoableCommand) {
         undoStack.push(undoableCommand)
         undoAvailable = true
+    }
+
+    override fun invalidateInsertedUndoCommands() {
+        undoStack.removeAll { it is InsertedUndoableCommand }
+        undoAvailable = undoStack.isNotEmpty()
+        redoStack.removeAll { it is InsertedUndoableCommand }
+        redoAvailable = redoStack.isNotEmpty()
     }
 
 

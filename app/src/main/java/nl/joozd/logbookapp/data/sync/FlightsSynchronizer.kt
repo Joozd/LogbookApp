@@ -13,6 +13,7 @@ import nl.joozd.logbookapp.comm.ServerFunctionResult
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.importing.merging.mergeFlightsLists
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
@@ -31,11 +32,10 @@ class FlightsSynchronizer(
 
         doInOneClientSession {
             loginToServer().also{ if (!it.isOK()) return@doInOneClientSession it }
-            val isSynchronized: Boolean =
-                Cloud.Result<Boolean>().apply{
-                    val cloudFunctionResult = checkIfIsSynchronizedAndPutResultInParam1(this)
-                    if (!cloudFunctionResult.isOK()) return@doInOneClientSession cloudFunctionResult
-                }.value!! // if this is null, isSynchronized(this) would not have returned OK
+            val isSynchronized = checkIfIsSynchronized().let {
+                if (it !is CloudFunctionResult.ResultWithPayload<*>) return@doInOneClientSession it
+                it.payload as Boolean
+            }
             if (isSynchronized) {
                 markMostRecentSyncAsNow()
                 return@doInOneClientSession CloudFunctionResult.OK
@@ -85,12 +85,12 @@ class FlightsSynchronizer(
 
     // Do this only when logged in to server, or user should get an error message asking them to report this bug.
     private suspend fun Client.performSync(): CloudFunctionResult = with(cloud) {
+        FlightRepositoryWithUndo.instance.invalidateInsertedUndoCommands() // undo/redo operations on imports do not play well with synchronizing.
         val serverIDsWithTimestamps = getIDWithTimestampsListFromServer().let {
             if (it !is CloudFunctionResult.ResultWithPayload<*>) return it
             @Suppress("UNCHECKED_CAST")
             it.payload as List<IDWithTimeStamp>
         }
-
         updateIDsForNewFlights(serverIDsWithTimestamps)
         val correctedRepoIDsWithTimeStamps = getIDsWithTimestampsFromRepository()
 
@@ -100,6 +100,7 @@ class FlightsSynchronizer(
         markFlightsAsKnownToServerInRepository(correctedRepoIDsWithTimeStamps)
 
         markMostRecentSyncAsNow()
+
 
         CloudFunctionResult.OK
     }
@@ -114,14 +115,14 @@ class FlightsSynchronizer(
         } ?: return CloudFunctionResult.SERVER_REFUSED
     }
 
-    private suspend fun Client.checkIfIsSynchronizedAndPutResultInParam1(result: Cloud.Result<Boolean>): CloudFunctionResult {
+    private suspend fun Client.checkIfIsSynchronized(): CloudFunctionResult {
         with(cloud) {
             val repositoryChecksumAsync = MainScope().async { getChecksumFromRepository() }
             val r = Cloud.Result<FlightsListChecksum>().apply{
                 putFlightsListChecksumInResult(this).also { if (!it.isOK()) return it }
             }
-            result.value = repositoryChecksumAsync.await() == r.value
-            return CloudFunctionResult.OK
+            val result = repositoryChecksumAsync.await() == r.value
+            return CloudFunctionResult.ResultWithPayload(CloudFunctionResult.OK, result)
         }
     }
 

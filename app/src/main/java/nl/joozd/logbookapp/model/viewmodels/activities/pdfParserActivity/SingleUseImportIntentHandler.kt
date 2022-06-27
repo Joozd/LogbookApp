@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
+import android.app.AlertDialog
 import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
@@ -34,7 +35,9 @@ import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.interfaces.FileImporter
 import nl.joozd.joozdlogimporter.supportedFileTypes.*
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
+import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.DoneCompletedFlightsWithResult
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerError
@@ -129,18 +132,36 @@ class SingleUseImportIntentHandler: CoroutineScope {
         status = buildMergeOrReplaceCompleteLogbookChoice(extractedLogbook)
     }
 
+    private fun confirmReplaceCompleteLogbook(extractedLogbook: ExtractedCompleteLogbook) =
+        UserChoice.Builder().apply {
+            titleResource = R.string.are_you_sure_qmk
+            descriptionResource = R.string.this_will_replace_your_entire_logbook
+            choice1Resource = R.string.replace
+            choice2Resource = R.string.merge
+            setAction1 {
+                createNewUserDataIfUsingCloud()
+                replaceCompleteLogbook(extractedLogbook)
+
+            }
+            setAction2 {
+                mergeCompleteLogbook(extractedLogbook)
+            }
+        }.build()
+
+
     private fun replaceCompleteLogbook(extractedFlights: ExtractedCompleteLogbook){
         launch {
-            status = HandlerStatus.NOT_IMPLEMENTED
+            status = HandlerStatus.SAVING_FLIGHTS
+            ImportedFlightsSaver.instance.replace(extractedFlights)
+            status = HandlerStatus.DONE
         }
     }
 
     private fun mergeCompleteLogbook(extractedFlights: ExtractedCompleteLogbook){
         launch {
-            status = HandlerStatus.EXTRACTING_FLIGHTS
             status = HandlerStatus.SAVING_FLIGHTS
 
-            ImportedFlightsSaver.instance.save(extractedFlights)
+            ImportedFlightsSaver.instance.merge(extractedFlights)
             status = HandlerStatus.DONE
         }
     }
@@ -152,6 +173,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
             choice1Resource = R.string.replace
             choice2Resource = R.string.merge
             setAction1 {
+                status = confirmReplaceCompleteLogbook(extractedLogbook)
                 replaceCompleteLogbook(extractedLogbook)
             }
             setAction2 {
@@ -249,6 +271,19 @@ class SingleUseImportIntentHandler: CoroutineScope {
         } catch (e: FileNotFoundException) {
             status = HandlerError(R.string.file_not_found_message)
             null
+    }
+
+    private fun createNewUserDataIfUsingCloud(){
+        launch{
+            with(UserManagement()) {
+                if (Prefs.useCloud()) {
+                    logOut()
+                    setCloudOrCreateNewUser(true)
+                }
+                else logOut()
+            }
+
+        }
     }
 
     private fun String.isCsvMimeType() =

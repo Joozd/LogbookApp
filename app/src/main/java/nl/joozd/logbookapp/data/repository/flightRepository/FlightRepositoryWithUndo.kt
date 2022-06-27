@@ -21,6 +21,7 @@ package nl.joozd.logbookapp.data.repository.flightRepository
 
 import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
+import nl.joozd.logbookapp.utils.InsertedUndoableCommand
 import nl.joozd.logbookapp.utils.UndoableCommand
 
 /**
@@ -58,7 +59,12 @@ interface FlightRepositoryWithUndo: FlightRepository {
      */
     suspend fun redo()
 
-    fun insertUndoAction(undoableCommand: UndoableCommand)
+    fun insertUndoAction(undoableCommand: InsertedUndoableCommand)
+
+    /**
+     * Invalidates all undo and redo actions (eg after sync with server)
+     */
+    fun invalidateInsertedUndoCommands()
 
     companion object{
         // This has its own singleton instance that does NOT have direct access to database.

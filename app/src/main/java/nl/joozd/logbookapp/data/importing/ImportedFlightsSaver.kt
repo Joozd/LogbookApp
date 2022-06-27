@@ -35,10 +35,10 @@ interface ImportedFlightsSaver {
     /**
      * Save a complete logbook (from a backup or import)
      */
-    suspend fun save(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult
+    suspend fun replace(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult
     suspend fun merge(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult
     suspend fun save(completedFlights: ExtractedCompletedFlights): SaveCompletedFlightsResult
-    suspend fun save(plannedFlights: ExtractedPlannedFlights): SavePlannedFlightsResult
+    suspend fun save(plannedFlights: ExtractedPlannedFlights, canUndo: Boolean = true): SavePlannedFlightsResult
 
     companion object{
         val instance get() = make()

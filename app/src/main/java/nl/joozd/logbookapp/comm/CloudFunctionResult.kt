@@ -19,5 +19,5 @@ sealed class CloudFunctionResult {
         is ResultWithPayload<*> -> this.result.correspondingServerFunctionResult()
     }
 
-    fun isOK() = this == OK
+    fun isOK(): Boolean = this == OK || (this is ResultWithPayload<*> && this.result.isOK())
 }

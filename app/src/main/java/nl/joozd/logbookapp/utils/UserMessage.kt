@@ -2,6 +2,8 @@ package nl.joozd.logbookapp.utils
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
+import androidx.activity.ComponentActivity
 
 open class UserMessage(
     private val titleResource: Int,
@@ -27,8 +29,10 @@ open class UserMessage(
         titleResource + descriptionResource + (choice1Resource ?: 0) + (choice2Resource ?: 0)
 
 
+
+
     fun interface UserChoiceListener{
-        operator fun invoke()
+        fun ComponentActivity.execute()
     }
 
     open class Builder{
@@ -72,13 +76,13 @@ open class UserMessage(
             )
     }
 
-    fun toAlertDialog(activity: Activity): AlertDialog =
+    fun toAlertDialog(activity: ComponentActivity): AlertDialog =
         AlertDialog.Builder(activity).apply {
             setTitle(titleResource)
             setMessage(descriptionResource)
             choice1Resource?.let{
                 setPositiveButton(it){ _, _ ->
-                    action1()
+                    with (action1) { activity.execute() }
                     cleanUp.forEach {
                         it()
                     }
@@ -86,7 +90,7 @@ open class UserMessage(
             }
             choice2Resource?.let{
                 setNegativeButton(it){ _, _ ->
-                    action2()
+                    with (action2) { activity.execute() }
                     cleanUp.forEach {
                         it()
                     }

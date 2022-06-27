@@ -30,7 +30,7 @@ import java.time.LocalDate
 /**
  * Takes care of all things backup that need to be done in background.
  */
-class BackupCenter {
+class BackupCenter private constructor() {
     /**
      * This will trigger again when relevant preferences are updated
      * @see backupActionFlow for which preferences are monitored.
@@ -99,6 +99,8 @@ class BackupCenter {
 
 
     companion object{
+        val instance by lazy { BackupCenter() }
+
         private const val BACKUP_NOTIFICATION_TAG = "BACKUP_NOTIFICATION_TAG"
 
         suspend fun makeBackupUri(): Uri {

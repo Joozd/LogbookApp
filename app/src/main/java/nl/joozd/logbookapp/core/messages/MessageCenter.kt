@@ -33,9 +33,11 @@ object MessageCenter {
     }
 
     fun commitMessage(message: UserMessage.Builder.() -> Unit){
+        println("Adding message to queue, queue now ${messageQueue.size} long (before)")
         val builder = UserMessage.Builder()
         builder.message()
         pushMessage(builder.build())
+        println("Added message to queue, queue now ${messageQueue.size} long (after)")
     }
 
     fun pushMessageBarFragment(fragment: MessageBarFragment){

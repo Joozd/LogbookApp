@@ -7,7 +7,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.DataVersions
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import java.time.Instant
 
-class SyncCenter(private val taskFlags: TaskFlags = TaskFlags) {
+class SyncCenter private constructor(private val taskFlags: TaskFlags = TaskFlags) {
     fun syncDataFiles(){
         taskFlags.syncDataFiles(true)
     }
@@ -47,6 +47,7 @@ class SyncCenter(private val taskFlags: TaskFlags = TaskFlags) {
     }
 
     companion object{
+        val instance by lazy { SyncCenter() }
         private const val TIME_BETWEEN_SYNC_CHECKS: Long = 15*60L // 15 minutes * 60 seconds per minute
     }
 }

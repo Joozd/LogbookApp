@@ -167,7 +167,7 @@ class FlightRepositoryImpl(
         saveDirectToDB(
             flights.updateIDsIfNeeded().updateTimestampsToNow()
         )
-        SyncCenter().syncFlights()
+        SyncCenter.instance.syncFlights()
     }
 
     private fun Collection<Flight>.updateTimestampsToNow(): List<Flight> {

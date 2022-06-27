@@ -65,7 +65,7 @@ class ImportedFlightsSaverImpl(
         val command = makeReplaceDBCommand(flights)
         command()
         flightsRepoWithUndo.insertUndoAction(command)
-        SyncCenter().delaySync() // A server sync will remove undo possibility, give user some time.
+        SyncCenter.instance.delaySync() // A server sync will remove undo possibility, give user some time.
 
         return SaveCompleteLogbookResult(true)
     }

@@ -6,78 +6,83 @@ import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
+import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.workmanager.ServerFunctionsWorkersHub
 
 /**
  * Run all tasks set in [taskFlags].
  * All tasks will go straight to Worker as none is very time-sensitive.
  */
-class TaskDispatcher(private val taskFlags: TaskFlags = TaskFlags): BackgroundTasksDispatcher() {
-    override fun startCollectors(scope: CoroutineScope) {
+class TaskDispatcher private constructor(private val taskFlags: TaskFlags = TaskFlags): BackgroundTasksDispatcher() {
+    override fun startCollectors(activity: JoozdlogActivity) {
+        println("Starting Collectors! XOXOXOXOXOXOXOXOXOXOXOXOXO")
         //these functions collect their respective Flow and handle that flow's output.
-        handleNewUserWanted(scope)
-        handleEmailUpdateWanted(scope)
-        handleEmailConfirmationWanted(scope)
-        handleBackupEmailWanted(scope)
-        handleLoginLinkWanted(scope)
-        handleFeedbackWaiting(scope)
-        handleSyncDataFiles(scope)
-        handleSyncFlights(scope)
-        handleMergeAllDataFromServer(scope)
+        handleNewUserWanted(activity)
+        handleEmailUpdateWanted(activity)
+        handleEmailConfirmationWanted(activity)
+        handleBackupEmailWanted(activity)
+        handleLoginLinkWanted(activity)
+        handleFeedbackWaiting(activity)
+        handleSyncDataFiles(activity)
+        handleSyncFlights(activity)
+        handleMergeAllDataFromServer(activity)
     }
 
-    private fun handleNewUserWanted(scope: CoroutineScope) {
-        taskFlags.createNewUserAndEnableCloud.flow.doIfTrueEmitted(scope) {
-                ServerFunctionsWorkersHub().scheduleCreateNewUser()
+    private fun handleNewUserWanted(activity: JoozdlogActivity) {
+        println("Collecting handleNewUserWanted")
+        taskFlags.createNewUserAndEnableCloud.flow.doIfTrueEmitted(activity) {
+            println("taskFlags.createNewUserAndEnableCloud emitted true!")
+            ServerFunctionsWorkersHub().scheduleCreateNewUser()
         }
     }
 
-    private fun handleEmailUpdateWanted(scope: CoroutineScope) {
-        emailUpdateWantedFlow().doIfTrueEmitted(scope) {
+    private fun handleEmailUpdateWanted(activity: JoozdlogActivity) {
+        emailUpdateWantedFlow().doIfTrueEmitted(activity) {
             ServerFunctionsWorkersHub().scheduleUpdateEmail()
         }
     }
 
 
 
-    private fun handleEmailConfirmationWanted(scope: CoroutineScope) {
-        emailConfirmationWantedFlow().doIfTrueEmitted(scope) {
+    private fun handleEmailConfirmationWanted(activity: JoozdlogActivity) {
+        emailConfirmationWantedFlow().doIfTrueEmitted(activity) {
             ServerFunctionsWorkersHub().scheduleConfirmEmail() // Worker takes care of checking for bad email confirmation string to prevent infinite loop.
         }
     }
 
-    private fun handleBackupEmailWanted(scope: CoroutineScope) {
-        backupEmailWantedFlow().doIfTrueEmitted(scope) {
+    private fun handleBackupEmailWanted(activity: JoozdlogActivity) {
+        backupEmailWantedFlow().doIfTrueEmitted(activity) {
             ServerFunctionsWorkersHub().scheduleBackupEmail()
         }
     }
 
-    private fun handleLoginLinkWanted(scope: CoroutineScope) {
-        loginLinkWantedFlow().doIfTrueEmitted(scope) {
+    private fun handleLoginLinkWanted(activity: JoozdlogActivity) {
+        loginLinkWantedFlow().doIfTrueEmitted(activity) {
             ServerFunctionsWorkersHub().scheduleLoginLinkEmail()
         }
     }
 
-    private fun handleFeedbackWaiting(scope: CoroutineScope) {
-        taskFlags.feedbackWaiting.flow.doIfTrueEmitted(scope) {
+    private fun handleFeedbackWaiting(activity: JoozdlogActivity) {
+        taskFlags.feedbackWaiting.flow.doIfTrueEmitted(activity) {
             ServerFunctionsWorkersHub().scheduleSubmitFeedback()
         }
     }
 
-    private fun handleSyncDataFiles(scope: CoroutineScope) {
-        taskFlags.syncDataFiles.flow.doIfTrueEmitted(scope) {
+    private fun handleSyncDataFiles(activity: JoozdlogActivity) {
+        taskFlags.syncDataFiles.flow.doIfTrueEmitted(activity) {
             ServerFunctionsWorkersHub().scheduleSyncDataFiles()
         }
     }
 
-    private fun handleSyncFlights(scope: CoroutineScope){
-        syncNeededFlow().doIfTrueEmitted(scope) {
+    private fun handleSyncFlights(activity: JoozdlogActivity){
+        syncNeededFlow().doIfTrueEmitted(activity) {
             ServerFunctionsWorkersHub().scheduleSyncFlights()
         }
     }
 
-    private fun handleMergeAllDataFromServer(scope: CoroutineScope){
-        mergeNeededFlow().doIfTrueEmitted(scope){
+    private fun handleMergeAllDataFromServer(activity: JoozdlogActivity){
+        mergeNeededFlow().doIfTrueEmitted(activity){
+            println("Merge Needed emitted true!")
             ServerFunctionsWorkersHub().scheduleMerge()
         }
     }
@@ -113,5 +118,12 @@ class TaskDispatcher(private val taskFlags: TaskFlags = TaskFlags): BackgroundTa
 
     private fun mergeNeededFlow() = combine(taskFlags.mergeAllDataFromServer.flow, useCloudFlow){ needed, enabled ->
         needed && enabled
+    }
+
+    companion object{
+        val instance by lazy{
+            TaskDispatcher()
+        }
+        fun mock(taskFlags: TaskFlags) = TaskDispatcher(taskFlags)
     }
 }

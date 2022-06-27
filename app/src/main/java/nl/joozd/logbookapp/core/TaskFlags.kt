@@ -25,7 +25,7 @@ object TaskFlags: JoozdLogPreferences() {
     val verifyEmailCode by JoozdlogSharedPreferenceDelegate(VERIFY_EMAIL_CODE, false)
     val updateEmailWithServer by JoozdlogSharedPreferenceDelegate(UPDATE_EMAIL, false)
     val sendLoginLink by JoozdlogSharedPreferenceDelegate(SEND_LOGIN_LINK,false)
-    val createNewUserAndEnableCloud by JoozdlogSharedPreferenceDelegate(CREATE_NEW_USER,false) // create a new user both local and on server
+    val createNewUserAndEnableCloud by JoozdlogSharedPreferenceDelegate(CREATE_NEW_USER,false, debug = true) // create a new user both local and on server
     val feedbackWaiting by JoozdlogSharedPreferenceDelegate(FEEDBACK_WAITING, false)
     val syncDataFiles by JoozdlogSharedPreferenceDelegate(SYNC_DATA_FILES,false)
     val syncFlights by JoozdlogSharedPreferenceDelegate(SYNC_FLIGHTS, false)

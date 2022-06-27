@@ -170,14 +170,20 @@ suspend fun mergeFlightsWithServer(
     server: Cloud = Cloud(),
     userManagement: UserManagement = UserManagement(),
     repository: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance
-): ServerFunctionResult =
-    FlightsSynchronizer(server, userManagement, repository).mergeRepoWithServer().also{
-        if (it.isOK()){
-            TaskFlags.mergeAllDataFromServer(false)
-            ServerPrefs.mostRecentFlightsSyncEpochSecond(TimestampMaker().nowForSycPurposes)
-            MessagesWaiting.mergeWithServerPerformed(true)
+): ServerFunctionResult {
+    val countBefore = repository.getAllFlights().size
+    return FlightsSynchronizer(server, userManagement, repository).mergeRepoWithServer()
+        .also {
+            if (it.isOK()) {
+                TaskFlags.mergeAllDataFromServer(false)
+                ServerPrefs.mostRecentFlightsSyncEpochSecond(TimestampMaker().nowForSycPurposes)
+                val countAfter = repository.getAllFlights().size
+                if (countBefore != countAfter)
+                    MessagesWaiting.mergeWithServerPerformed(true)
+            }
         }
     }
+
 
 suspend fun sendFeedback(cloud: Cloud = Cloud()): ServerFunctionResult =
     (TaskPayloads.feedbackWaiting().nullIfBlank()?.let{ feedback ->

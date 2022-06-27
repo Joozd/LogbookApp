@@ -54,7 +54,7 @@ class CloudSyncTermsDialog(): JoozdlogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogCloudSyncTermsBinding.bind(inflater.inflate(R.layout.dialog_cloud_sync_terms, container, false)).apply {
-            if (syncOnClose) SyncCenter().syncFlights()
+            if (syncOnClose) SyncCenter.instance.syncFlights()
             cloudSyncTermsDialogBackground.setOnClickListener { } // catch clicks so they don't fall through
 
             // termsTextView.movementMethod = ScrollingMovementMethod()

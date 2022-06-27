@@ -7,8 +7,8 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
  * Start all background tasks
  */
 fun JoozdlogActivity.startBackgroundTasks() {
-    TaskDispatcher().start(this)
-    PersistentMessagesDispatcher().start(this)
-    BackupCenter().makeOrScheduleBackupNotification(this)
-    SyncCenter().launchSyncAllIfNotJustDone(this.lifecycleScope)
+    TaskDispatcher.instance.start(this)
+    PersistentMessagesDispatcher.instance.start(this)
+    BackupCenter.instance.makeOrScheduleBackupNotification(this)
+    SyncCenter.instance.launchSyncAllIfNotJustDone(this.lifecycleScope)
 }

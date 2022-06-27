@@ -1,9 +1,6 @@
 package nl.joozd.logbookapp.core.background
 
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
@@ -13,60 +10,60 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
-import nl.joozd.logbookapp.ui.utils.toast
+import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 
 /**
  * Send all persistant messages to [MessageCenter]
  * This does not change any flags other than the message flags.
  */
-class PersistentMessagesDispatcher(private val messagesWaiting: MessagesWaiting = MessagesWaiting): BackgroundTasksDispatcher() {
-    override fun startCollectors(scope: CoroutineScope) {
-        handleNewCloudAccountCreated(scope)
-        handleNoEmailEntered(scope)
-        handleNoVerificationCodeSavedBug(scope)
-        handleBadVerificationCodeCLicked(scope)
-        handleEmailConfirmed(scope)
-        handleMergeWithServerPerformed(scope)
-        handleNoLoginDataSaved(scope)
+class PersistentMessagesDispatcher private constructor (private val messagesWaiting: MessagesWaiting = MessagesWaiting): BackgroundTasksDispatcher() {
+    override fun startCollectors(activity: JoozdlogActivity) {
+        handleNewCloudAccountCreated(activity)
+        handleNoEmailEntered(activity)
+        handleNoVerificationCodeSavedBug(activity)
+        handleBadVerificationCodeCLicked(activity)
+        handleEmailConfirmed(activity)
+        handleMergeWithServerPerformed(activity)
+        handleNoLoginDataSaved(activity)
     }
 
-    private fun handleNewCloudAccountCreated(scope: CoroutineScope) {
+    private fun handleNewCloudAccountCreated(scope: JoozdlogActivity) {
         messagesWaiting.newCloudAccountCreated.flow.doIfTrueEmitted(scope) {
             postNewCloudAccountCreatedMessage()
         }
     }
 
-    private fun handleNoEmailEntered(scope: CoroutineScope) {
+    private fun handleNoEmailEntered(scope: JoozdlogActivity) {
         messagesWaiting.noEmailEntered.flow.doIfTrueEmitted(scope) {
             postNoEmailEnteredMessage()
         }
     }
 
-    private fun handleNoVerificationCodeSavedBug(scope: CoroutineScope) {
+    private fun handleNoVerificationCodeSavedBug(scope: JoozdlogActivity) {
         messagesWaiting.noVerificationCodeSavedBug.flow.doIfTrueEmitted(scope) {
             postNoVerificationCodeSavedBugMessage()
         }
     }
 
-    private fun handleBadVerificationCodeCLicked(scope: CoroutineScope) {
+    private fun handleBadVerificationCodeCLicked(scope: JoozdlogActivity) {
         messagesWaiting.badVerificationCodeClicked.flow.doIfTrueEmitted(scope) {
             postBadVerificationCodeClickedMessage()
         }
     }
 
-    private fun handleEmailConfirmed(scope: CoroutineScope) {
+    private fun handleEmailConfirmed(scope: JoozdlogActivity) {
         messagesWaiting.emailConfirmed.flow.doIfTrueEmitted(scope) {
             showEmailConfirmedMessage()
         }
     }
 
-    private fun handleMergeWithServerPerformed(scope: CoroutineScope) {
+    private fun handleMergeWithServerPerformed(scope: JoozdlogActivity) {
         messagesWaiting.mergeWithServerPerformed.flow.doIfTrueEmitted(scope) {
             showMergeWithServerPerformedMessage()
         }
     }
 
-    private fun handleNoLoginDataSaved(scope: CoroutineScope) {
+    private fun handleNoLoginDataSaved(scope: JoozdlogActivity) {
         messagesWaiting.noLoginDataSaved.flow.doIfTrueEmitted(scope) {
             showNoLoginDataSavedMessage()
         }
@@ -79,11 +76,13 @@ class PersistentMessagesDispatcher(private val messagesWaiting: MessagesWaiting 
             descriptionResource = R.string.new_cloud_account_made_message_please_send_link_to_yourself
             setPositiveButton(R.string.share_link){
                 lifecycleScope.launch {
-                    sendLoginLinkIntent()
+                    println("lalala yes clicked")
                     messagesWaiting.newCloudAccountCreated(false)
+                    sendLoginLinkIntent()
                 }
             }
             setNegativeButton(android.R.string.cancel){
+                println("lalala no clicked")
                 messagesWaiting.newCloudAccountCreated(false)
             }
         }
@@ -122,7 +121,7 @@ class PersistentMessagesDispatcher(private val messagesWaiting: MessagesWaiting 
 
     private fun showMergeWithServerPerformedMessage() {
         MessageCenter.commitMessage {
-            titleResource = R.string.login_error
+            titleResource = R.string.data_has_been_merged
             descriptionResource = R.string.server_merge_performed
             setPositiveButton(android.R.string.ok){
                 messagesWaiting.mergeWithServerPerformed(false)
@@ -170,6 +169,10 @@ class PersistentMessagesDispatcher(private val messagesWaiting: MessagesWaiting 
             val shareIntent = Intent.createChooser(sendIntent, null)
             startActivity(shareIntent)
         }
+    }
+
+    companion object{
+        val instance by lazy { PersistentMessagesDispatcher() }
     }
 
 

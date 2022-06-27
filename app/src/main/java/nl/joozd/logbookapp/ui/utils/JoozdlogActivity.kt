@@ -36,21 +36,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.App
-import nl.joozd.logbookapp.core.background.startBackgroundTasks
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        startBackgroundTasks()
     }
 
     protected val activity: JoozdlogActivity

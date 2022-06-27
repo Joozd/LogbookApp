@@ -34,6 +34,7 @@ import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
@@ -72,6 +73,8 @@ class SettingsActivity : JoozdlogActivity() {
                 title = getString(R.string.settings)
             }
 
+            useCloudSyncSwitch.bindToFlow(viewModel.useCloudFlow)
+
             initializeDarkModeSpinner()
 
             setGroupOpenCloseOnClickListeners()
@@ -94,7 +97,7 @@ class SettingsActivity : JoozdlogActivity() {
             when(it){
                 null -> { }
                 SettingsActivityStatus.SignedOut -> setLoggedInInfo(Prefs.username)
-                SettingsActivityStatus.AskIfNewAccountNeeded -> showNewAccountDialog()
+
                 SettingsActivityStatus.CalendarDialogNeeded -> showCalendarDialog()
 
                 is SettingsActivityStatus.Error -> errorDialog(getString(it.errorResource))
@@ -150,7 +153,7 @@ class SettingsActivity : JoozdlogActivity() {
 
 
         viewModel.useCloudFlow.launchCollectWhileLifecycleStateStarted{
-            useCloudSyncSwitch.isChecked = it
+
             changeCloudSyncItemsVisibility(if (it) View.VISIBLE else View.GONE)
         }
 
@@ -235,7 +238,11 @@ class SettingsActivity : JoozdlogActivity() {
         }
 
         useCloudSyncSwitch.setOnClickListener {
-            viewModel.useCloudSyncToggled()
+            lifecycleScope.launch {
+                if (viewModel.useCloudFlow.first() || Prefs.acceptedCloudSyncTerms())
+                    UserManagement().toggleCloudOrCreateNewUser()
+                else showAcceptTermsDialog()
+            }
         }
 
         youAreSignedInAsButton.setOnClickListener {
@@ -326,31 +333,13 @@ class SettingsActivity : JoozdlogActivity() {
         }
     }
 
-    /**
-     * This dialog will ask viewModel to make a new account.
-     * If [Prefs.acceptedCloudSyncTerms] it will enable [Prefs.useCloud]
-     * if not, it will open a dialog that will allow user to accept terms and if so, sets those both to true.
-     */
-    private suspend fun showNewAccountDialog(){
-        AlertDialog.Builder(activity).apply{
-
-            setTitle(R.string.cloud_sync_title)
-            setMessage(R.string.make_new_account_question)
-            setNegativeButton(android.R.string.cancel){ _, _ -> viewModel.forceUseCloud(false) }
-            setPositiveButton(android.R.string.ok) { _, _ ->
-                lifecycleScope.launch {
-                    UserManagement().createNewUser()
-                    if (Prefs.acceptedCloudSyncTerms())
-                        viewModel.forceUseCloud(true)
-                    else supportFragmentManager.commit {
-                        add(
-                            R.id.settingsActivityLayout,
-                            CloudSyncTermsDialog(sync = true)
-                        ) // secondary constructor used, works on recreate
-                        addToBackStack(null)
-                    }
-                }
-            }
+    private fun showAcceptTermsDialog() {
+        supportFragmentManager.commit {
+            add(
+                R.id.settingsActivityLayout,
+                CloudSyncTermsDialog(sync = true)
+            ) // secondary constructor used, works on recreate
+            addToBackStack(null)
         }
     }
 

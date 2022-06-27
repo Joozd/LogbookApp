@@ -26,10 +26,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ItemPickerDialogBinding
-import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
 /**
@@ -57,7 +55,7 @@ class SelectableStringAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.ctx).inflate(itemLayout, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(itemLayout, parent, false)
         return ViewHolder(view)
     }
 
@@ -70,7 +68,7 @@ class SelectableStringAdapter(
                 nameTextView.text = item.first
                 itemBackground.setBackgroundColor(
                     if (item.second)
-                        color ?: itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary)
+                        color ?: itemBackground.context.getColorFromAttr(android.R.attr.colorPrimary)
                     else
                         TRANSPARENT
                 )

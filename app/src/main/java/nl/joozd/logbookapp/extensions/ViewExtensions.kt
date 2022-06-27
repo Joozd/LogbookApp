@@ -32,9 +32,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import com.google.android.material.textfield.TextInputEditText
 
 
-val View.ctx: Context
-    get() = context
-
 fun View.setVisibilityVisibleAndFadeIn() {
     val duration = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
     visibility = View.VISIBLE

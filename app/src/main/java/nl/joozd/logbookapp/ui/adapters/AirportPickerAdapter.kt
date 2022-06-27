@@ -29,7 +29,6 @@ import androidx.recyclerview.widget.RecyclerView
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.databinding.ItemAirportPickerBinding
-import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.findActivity
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
@@ -37,7 +36,7 @@ class AirportPickerAdapter(private val itemClick: (Airport) -> Unit)
     : ListAdapter<Pair<Airport, Boolean>, AirportPickerAdapter.APViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): APViewHolder {
-        val view = LayoutInflater.from(parent.ctx).inflate(R.layout.item_airport_picker, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_airport_picker, parent, false)
         return APViewHolder(view, itemClick)
     }
 

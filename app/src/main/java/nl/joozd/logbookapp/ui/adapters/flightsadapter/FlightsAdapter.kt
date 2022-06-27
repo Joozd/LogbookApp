@@ -25,9 +25,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
-
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.model.ModelFlight
 
 /**
@@ -98,10 +96,10 @@ class FlightsAdapter(
 
 
     private fun inflateFlightListItemView(parent: ViewGroup) =
-        LayoutInflater.from(parent.ctx).inflate(R.layout.item_flight_card, parent, false)
+        LayoutInflater.from(parent.context).inflate(R.layout.item_flight_card, parent, false)
 
     private fun inflateSimListItemView(parent: ViewGroup) =
-        LayoutInflater.from(parent.ctx).inflate(R.layout.item_sim, parent, false)
+        LayoutInflater.from(parent.context).inflate(R.layout.item_sim, parent, false)
 
     private fun notifyPicNameMustBeSetChanged(){
         currentList.mapIndexedNotNull {index, f ->

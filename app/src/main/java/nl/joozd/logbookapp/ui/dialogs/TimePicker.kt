@@ -28,12 +28,9 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 
 import nl.joozd.logbookapp.databinding.DialogTimesInOutBinding
-import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.extensions.showAsActiveIf
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
@@ -172,7 +169,7 @@ open class TimePicker: JoozdlogFragment() {
         ifrTimeTextview.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val imm: InputMethodManager =
-                    v.ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    v.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.hideSoftInputFromWindow(v.windowToken, 0)
                 v.clearFocus()
             }

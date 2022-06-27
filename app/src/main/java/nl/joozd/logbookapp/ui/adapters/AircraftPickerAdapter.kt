@@ -24,14 +24,12 @@ import android.graphics.Color.TRANSPARENT
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ItemPickerAircraftTypeBinding
-import nl.joozd.logbookapp.extensions.ctx
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 
 /**
@@ -57,7 +55,7 @@ class AircraftPickerAdapter(
     }
 
     private fun inflateAircraftTypePickerItem(parent: ViewGroup) =
-        LayoutInflater.from(parent.ctx).inflate(R.layout.item_picker_aircraft_type, parent, false)
+        LayoutInflater.from(parent.context).inflate(R.layout.item_picker_aircraft_type, parent, false)
 
     class ViewHolder(containerView: View, private val itemClick: OnCLickListener) :
         RecyclerView.ViewHolder(containerView) {
@@ -74,7 +72,7 @@ class AircraftPickerAdapter(
                 itemView.setOnClickListener { itemClick(ac) }
                 itemBackground.setBackgroundColor(
                     if (picked)
-                        itemBackground.ctx.getColorFromAttr(android.R.attr.colorPrimary)
+                        itemBackground.context.getColorFromAttr(android.R.attr.colorPrimary)
                     else TRANSPARENT
                 )
             }

@@ -11,10 +11,11 @@ import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.serializing.unpackSerialized
 
 class Preloader(private val context: Context = App.instance) {
-    suspend fun getPreloadedAirports(): List<Airport> =
-        unpackSerialized(withContext(DispatcherProvider.io()) {context.resources.openRawResource(R.raw.airports_0).readBytes() }).map{
+    suspend fun getPreloadedAirports(): List<Airport> = withContext(DispatcherProvider.default()) {
+        unpackSerialized(withContext(DispatcherProvider.io()) { context.resources.openRawResource(R.raw.airports_0).readBytes() }).map {
             Airport(BasicAirport.deserialize(it))
         }
+    }
 
     suspend fun getPreloadedAircraftTypes(): List<AircraftType> =
         unpackSerialized(withContext(DispatcherProvider.io()) {context.resources.openRawResource(R.raw.aircrafttypes_0).readBytes() }).map{

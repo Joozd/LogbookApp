@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import nl.joozd.joozdlogcommon.utilities.checkForDuplicates
 import nl.joozd.logbookapp.core.background.SyncCenter
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -43,6 +44,13 @@ class FlightRepositoryImpl(
     private val database = injectedDatabase ?: JoozdlogDatabase.getInstance() // this way we can detect if a DB is injected
     private val flightDao = database.flightDao()
     private val idGenerator = IDGenerator()
+
+    init{
+        //At initialization, remove all duplicates.
+        MainScope().launch{
+            removeDuplicates()
+        }
+    }
 
     override suspend fun getFlightByID(flightID: Int): Flight? =
         flightDao.getFlightById(flightID)?.toFlight()
@@ -181,6 +189,12 @@ class FlightRepositoryImpl(
 
     private suspend fun getValidFlightsFromDao() = withContext(Dispatchers.IO) {
         flightDao.getValidFlights().toFlights()
+    }
+
+
+    private suspend fun removeDuplicates(){
+        val duplicates = checkForDuplicates(getAllFlights().map { it.toBasicFlight() })
+        deleteHard(duplicates.map { Flight(it) })
     }
 
     /**

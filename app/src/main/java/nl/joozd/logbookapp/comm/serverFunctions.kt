@@ -174,7 +174,7 @@ suspend fun mergeFlightsWithServer(
         if (it.isOK()){
             TaskFlags.mergeAllDataFromServer(false)
             ServerPrefs.mostRecentFlightsSyncEpochSecond(TimestampMaker().nowForSycPurposes)
-            MessagesWaiting.mergeWithServerPerformed
+            MessagesWaiting.mergeWithServerPerformed(true)
         }
     }
 

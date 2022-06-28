@@ -39,8 +39,9 @@ class IntentHandler(intent: Intent) {
 
     private suspend fun handleEmailCodeConfirmation(){
         getEmailConfirmationCodeFromIntent()?.let{
+            val usableString = it.replace('-', '/')
             showEmailConfirmationSheduledMessage()
-            UserManagement().confirmEmail(it)
+            UserManagement().confirmEmail(usableString)
         }
     }
 

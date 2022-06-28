@@ -23,7 +23,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
@@ -88,25 +87,9 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
             return@launch
         }
 
-        if (ServerPrefs.emailAddress().lowercase(Locale.ROOT) != email1)
-            ServerPrefs.emailVerified(false)
+        UserManagement().changeEmailAddress(email1)
 
-        status = if (!ServerPrefs.emailVerified()) {
-            if (email1 != ServerPrefs.emailAddress().lowercase(Locale.ROOT))
-                ServerPrefs.emailAddress(email1)
-
-            if (email1.isNotBlank()) {
-                viewModelScope.launch {
-                    // UserManagement takes care of any errors that may arise
-                    UserManagement().changeEmailAddress(email1)
-                }
-            }
-            EmailDialogStatus.Done
-        }
-        else EmailDialogStatus.DoneNoChanges
-
-
-
+        status = EmailDialogStatus.Done
     }
 
     fun updateEmail1(e: String){

@@ -19,8 +19,6 @@
 
 package nl.joozd.logbookapp.core.usermanagement
 
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.App
@@ -90,7 +88,8 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
      * If no connection it will schedule sending to server when internet gets available.
      * @param newEmailAddress - the email address to store. This is NOT checked to see if it is a valid email address.
      */
-    fun changeEmailAddress(newEmailAddress: String) {
+    suspend fun changeEmailAddress(newEmailAddress: String) {
+        ServerPrefs.emailVerified(ServerPrefs.emailVerified() && newEmailAddress.equals(ServerPrefs.emailAddress(), ignoreCase = true))
         ServerPrefs.emailAddress(newEmailAddress)
         requestEmailVerificationMail()
     }

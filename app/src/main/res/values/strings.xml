@@ -177,7 +177,7 @@
     <string name="file_not_found_message">An error occurred while retreiving the file you are trying to import.</string>
 
     <string name="unknown_file_title">Unknown File</string>
-    <string name="unknown_file_message">The file you are trying to import into Joozdlog is not supported yet. If you want it to be, please mail it to joozdlog@joozd.nl and I might support it in a future version.</string>
+    <string name="unknown_file_message">The file you are trying to import into Joozdlog is not supported. If you want it to be, please mail it (or preferably a few) to joozdlog@joozd.nl and I might support it in a future version.</string>
     <string name="bad_intent_error">Error importing file: bad_intent_error</string>
     <string name="error_saving_flights">Error saving flights, could not get flights to save from file.</string>
 

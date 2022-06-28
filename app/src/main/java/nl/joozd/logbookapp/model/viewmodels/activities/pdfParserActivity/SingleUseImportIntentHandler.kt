@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
-import android.app.AlertDialog
 import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
@@ -37,7 +36,6 @@ import nl.joozd.joozdlogimporter.supportedFileTypes.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
-import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.DoneCompletedFlightsWithResult
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerError

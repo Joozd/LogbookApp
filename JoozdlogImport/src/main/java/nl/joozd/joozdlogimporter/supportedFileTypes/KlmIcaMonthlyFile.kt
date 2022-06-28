@@ -21,10 +21,11 @@ package nl.joozd.joozdlogimporter.supportedFileTypes
 
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.CompletedFlightsExtractor
+import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.KlmIcaMonthlyExtractor
 
 class KlmIcaMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
     override val extractor: CompletedFlightsExtractor
-        get() = TODO("Not yet implemented")
+        get() = KlmIcaMonthlyExtractor()
 
     override val identFormat = AirportIdentFormat.IATA
 

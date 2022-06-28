@@ -66,11 +66,11 @@ class NewEditFlightFragmentViewModel: JoozdlogViewModel() {
 
     private val origFlow = flightFlow.map { it.orig }
     val origTextFlow = combine(origFlow, Prefs.useIataAirports.flow){ ap, useIata -> if(useIata && ap.iata_code.isNotBlank() ) ap.iata_code else ap.ident }
-    val origValidFlow = origFlow.map { it.checkIfValidCoordinates() }
+    val origValidFlow = origFlow.map { it.ident.isBlank() || it.checkIfValidCoordinates() }
 
     private val destFlow = flightFlow.map { it.dest }
     val destTextFlow = combine(destFlow, Prefs.useIataAirports.flow){ ap, useIata -> if(useIata && ap.iata_code.isNotBlank() ) ap.iata_code else ap.ident }
-    val destValidFlow = destFlow.map { it.checkIfValidCoordinates() }
+    val destValidFlow = destFlow.map { it.ident.isBlank() || it.checkIfValidCoordinates() }
 
     val aircraftFlow = flightFlow.map { it.aircraft }
     val takeoffLandingsFlow = flightFlow.map{ it.takeoffLandings }

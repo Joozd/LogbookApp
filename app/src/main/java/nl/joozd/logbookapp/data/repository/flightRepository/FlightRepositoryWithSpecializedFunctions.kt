@@ -39,6 +39,12 @@ interface FlightRepositoryWithSpecializedFunctions: FlightRepository {
      */
     suspend fun getMostRecentCompletedFlight(): Flight?
 
+    /**
+     * Delete duplicate flights from DB
+     * @return number of deleted flights
+     */
+    suspend fun removeDuplicates(): Int
+
     companion object{
         val instance: FlightRepositoryWithSpecializedFunctions get() = FlightRepositoryImpl.instance
         fun mock(mockDataBase: JoozdlogDatabase): FlightRepositoryWithSpecializedFunctions =

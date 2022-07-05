@@ -45,13 +45,6 @@ class FlightRepositoryImpl(
     private val flightDao = database.flightDao()
     private val idGenerator = IDGenerator()
 
-    init{
-        //At initialization, remove all duplicates.
-        MainScope().launch{
-            removeDuplicates()
-        }
-    }
-
     override suspend fun getFlightByID(flightID: Int): Flight? =
         flightDao.getFlightById(flightID)?.toFlight()
 
@@ -151,6 +144,13 @@ class FlightRepositoryImpl(
             flightDao.getMostRecentCompleted()?.toFlight()
     }
 
+    override suspend fun removeDuplicates(): Int {
+        val ff = getAllFlights().map { it.toBasicFlight() }
+        val duplicates = withContext (DispatcherProvider.default()) { checkForDuplicates(ff) }
+        deleteHard(duplicates.map { Flight(it) })
+        return duplicates.size
+    }
+
 
     private fun List<FlightData>.toFlights() =
         this.map { it.toFlight() }
@@ -196,11 +196,6 @@ class FlightRepositoryImpl(
         flightDao.getValidFlights().toFlights()
     }
 
-
-    private suspend fun removeDuplicates(){
-        val duplicates = checkForDuplicates(getAllFlights().map { it.toBasicFlight() })
-        deleteHard(duplicates.map { Flight(it) })
-    }
 
     /**
      * Generate unique IDs.

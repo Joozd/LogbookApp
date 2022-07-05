@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.ui.activities.settingsActivity
 
-import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -40,6 +39,7 @@ import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.background.BackupCenter
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivitySettingsBinding
@@ -278,6 +278,8 @@ class SettingsActivity : JoozdlogActivity() {
 
         augmentedCrewButton.setOnClickListener { showAugmentedTimesNumberPicker() }
 
+        settingsFixFlightDb.setOnClickListener { fixDB() }
+
         backupIntervalButton.setOnClickListener { showBackupIntervalNumberPicker() }
 
         backupFromCloudSwitch.setOnClickListener {
@@ -460,6 +462,16 @@ class SettingsActivity : JoozdlogActivity() {
             wrapSelectorWheel = false
             maxValue = AugmentedTakeoffLandingTimesPicker.EIGHT_HOURS
         }.show(supportFragmentManager, null)
+    }
+
+    private fun fixDB(){
+        lifecycleScope.launch {
+        val removedFlightsCount = FlightRepositoryWithSpecializedFunctions.instance.removeDuplicates()
+            toast(getString(R.string.n_duplicates_have_been_removed, removedFlightsCount))
+            //TODO if using Cloud, notify user that DB has been polluted and tell them to run this function on all devices they are using as well to prevent cloud from being re-polluted
+            //TODO make explanation box like [augmentedTakeoffTimeHintButton]
+            //TODO make this appear busy while it is busy (and not clickable another time as well)
+        }
     }
 
     private fun showBackupIntervalNumberPicker(){

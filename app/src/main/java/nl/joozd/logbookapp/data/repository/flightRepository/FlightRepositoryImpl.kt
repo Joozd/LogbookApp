@@ -48,9 +48,6 @@ class FlightRepositoryImpl(
     init{
         //At initialization, remove all duplicates.
         MainScope().launch{
-            println("******DEBUG*****")
-            println(getAllFlights().joinToString(("\n")))
-            println("************")
             removeDuplicates()
         }
     }

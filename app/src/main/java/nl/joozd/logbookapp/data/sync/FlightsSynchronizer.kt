@@ -63,7 +63,7 @@ class FlightsSynchronizer(
             val repoFlights = repository.getAllFlightsInDB()
             val mergedFlightsList = mergeFlightsLists(serversFlights, repoFlights)
             repository.clear()
-            repository.saveDirectToDB(mergedFlightsList)
+            repository.saveDirectToDB(mergedFlightsList.filter { !it.isPlanned })
 
             // just send entire list. Result of this function will be returned; any earlier failures will be returned from the 'also' blocks
             sendFlights(mergedFlightsList.map { it.copy(unknownToServer = false).toBasicFlight() }).also{
@@ -165,8 +165,7 @@ class FlightsSynchronizer(
     }
 
     private suspend fun getIDsWithTimestampsFromRepository() =
-        repository.getAllFlights()
-            .filter { !it.isPlanned }
+        repository.getUnplannedFlights()
             .map {
                 IDWithTimeStamp(
                     it.toBasicFlight()
@@ -175,8 +174,7 @@ class FlightsSynchronizer(
 
     private suspend fun getChecksumFromRepository(): FlightsListChecksum =
         FlightsListChecksum(
-            repository.getAllFlights()
-                .filter { !it.isPlanned }
+            repository.getUnplannedFlights()
                 .map {
                     it.toBasicFlight()
                 }
@@ -217,4 +215,6 @@ class FlightsSynchronizer(
             .filter { it.unknownToServer }
         repository.saveDirectToDB(flightsToUpdate.map { it.copy(unknownToServer = false) })
     }
+
+    private suspend fun FlightRepositoryWithDirectAccess.getUnplannedFlights() = getAllFlights().filter { !it.isPlanned }
 }

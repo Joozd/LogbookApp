@@ -31,6 +31,7 @@ import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.InsertedUndoableCommand
+import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.UndoableCommand
 import java.util.*
 
@@ -223,8 +224,16 @@ class FlightRepositoryWithUndoImpl(
     ): () -> Unit = {
         MainScope().launch {
             repositoryWithDirectAccess.deleteHard(newFlights)
-            repositoryWithDirectAccess.saveDirectToDB(overwrittenFlights) // bypasses new timestamp / ID generation
+            // bypasses new ID generation;
+            // timestamp is updated so syncing will not place back [newFlights] if they had been synced already.
+            //  - [overwrittenFlights] are sent to the server again instead.
+            repositoryWithDirectAccess.saveDirectToDB(overwrittenFlights.withUpdatedTimestamps())
         }
+    }
+
+    private fun Collection<Flight>.withUpdatedTimestamps(): List<Flight> {
+        val now = TimestampMaker().nowForSycPurposes
+        return this.map { it.copy(timeStamp = now) }
     }
 
 

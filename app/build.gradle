@@ -19,7 +19,7 @@
 
 
 plugins {
-    id 'com.google.devtools.ksp' version '1.7.0-1.0.6'
+    id 'com.google.devtools.ksp' version "$kotlin_version-1.0.6"
 }
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
@@ -32,8 +32,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 26
         targetSdkVersion 32
-        versionCode 109 // my version, increment this every build
-        versionName "JoozdLog 1.1.1.dev.5"
+        versionCode 110 // my version, increment this every build
+        versionName "JoozdLog 1.1.1.dev.6"
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -95,10 +95,10 @@ dependencies {
     implementation files("C:\\Users\\joozd\\IdeaProjects\\libs\\comms\\comms.jar")
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.6' // 1.2.0 gives an error on 2022/07/08
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    // implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     //androidX
     implementation 'androidx.appcompat:appcompat:1.4.2'
@@ -164,7 +164,7 @@ dependencies {
     //test libraries
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1"
     testImplementation 'app.cash.turbine:turbine:0.7.0'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

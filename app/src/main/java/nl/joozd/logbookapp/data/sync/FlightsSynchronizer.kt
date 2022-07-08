@@ -61,18 +61,27 @@ class FlightsSynchronizer(
                 it.payload as List<BasicFlight>
             }.map { Flight(it)}
             val repoFlights = repository.getAllFlightsInDB()
-            val mergedFlightsList = mergeFlightsLists(serversFlights, repoFlights)
+            val mergedFlightsList = mergeFlightsLists(serversFlights, repoFlights) // NOTE this contains planned flights, they should NOT go to server.
             repository.clear()
-            repository.saveDirectToDB(mergedFlightsList.filter { !it.isPlanned })
+            repository.saveDirectToDB(mergedFlightsList)
 
-            // just send entire list. Result of this function will be returned; any earlier failures will be returned from the 'also' blocks
-            sendFlights(mergedFlightsList.map { it.copy(unknownToServer = false).toBasicFlight() }).also{
-                markFlightsAsKnownToServer(mergedFlightsList)
-            }
+            // Result of this function will be returned; any earlier failures will be returned from the 'also' blocks
+            sendMergedFlightsToServerAndMarkAsKnown(mergedFlightsList, this)
         }.correspondingServerFunctionResult()
     }
 
-    private suspend fun markFlightsAsKnownToServer(mergedFlightsList: List<Flight>) {
+    // just send entire list.
+    private suspend fun Cloud.sendMergedFlightsToServerAndMarkAsKnown(mergedFlights: Collection<Flight>, client: Client): CloudFunctionResult {
+        val flightsToSend = mergedFlights.filter { !it.isPlanned }
+        return client.sendFlights(flightsToSend.map { it.copy(unknownToServer = false).toBasicFlight() })
+            .also {
+                if (it.isOK())
+                    markFlightsAsKnownToServer(flightsToSend)
+            }
+    }
+
+
+    private suspend fun markFlightsAsKnownToServer(mergedFlightsList: Collection<Flight>) {
         repository.save(mergedFlightsList.filter { it.unknownToServer }.map { it.copy(unknownToServer = false) })
     }
 

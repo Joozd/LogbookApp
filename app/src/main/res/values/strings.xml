@@ -266,8 +266,10 @@
     <!--
     - Strings for new user experience
     -->
-    <string name="welcome_message_header">Welcome to Joozdlog.</string>
-    <string name="welcome_message">The next few screens will allow you to set some preferences and make a Cloud account if you want to.\n\nAll this will take under a minute, and after that you are all set to start logging (or importing) your flights!\n\nIf you have any feedback or bugreports, the main menu has a Feedback function. Feedback is appreciated!\n\nEnjoy the app,\n\nJoozd</string>
+    <string name="welcome_message_header">Welcome to Joozdlog 1.1</string>
+    <string name="welcome_message">The next few screens will allow you to set some preferences and make a Cloud account if you want to.\n\nAll this will take under a minute, and after that you are all set to start logging (or importing) your flights!\n\nIf you have any feedback or bugreports, the main menu has a Feedback function. Feedback is appreciated!</string>
+    <string name="welcome_message_upgrade">If you are upgrading from version 1.0: You see this dialog because the whole settings system has been vastly upgraded and all old preferences are deleted in the process.</string>
+
     <string name="cloud_explanation" tools:ignore="Typos">Sync your data to the cloud!\nThis is not a backup, read terms&amp;conditions.\nInactive accounts can be removed.</string>
     <string name="read_terms_conditions">Read Terms&amp;Conditions</string>
     <string name="accept_terms_conditions">Accept Terms&amp;Conditions</string>
@@ -516,9 +518,11 @@
     <string name="confirm">confirm</string>
     <string name="delete">delete</string>
     <string name="share">share</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
+
+    <!-- ContentDescription strings -->
+
+    <string name="joozdlog_logo">Joozdlog Logo</string>
 
 </resources>
 

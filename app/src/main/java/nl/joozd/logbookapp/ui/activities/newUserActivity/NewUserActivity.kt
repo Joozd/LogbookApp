@@ -21,8 +21,11 @@ package nl.joozd.logbookapp.ui.activities.newUserActivity
 
 import android.os.Bundle
 import android.os.PersistableBundle
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.databinding.ActivityNewUserBinding
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
@@ -31,18 +34,24 @@ class NewUserActivity : JoozdlogActivity() {
 
     private lateinit var mViewPager: ViewPager2
 
+    private var removeDuplicatesstarted = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        getRemoveDuplicatesStartedFromSavedInstanceState(savedInstanceState)
 
         setTheme(R.style.AppTheme)
         ActivityNewUserBinding.inflate(layoutInflater).apply {
             mViewPager = viewPager.apply {
                 adapter = NewUserActivityViewPagerAdapter(this@NewUserActivity)
                 setPageTransformer(DepthPageTransformer(TRANSFORMER_MIN_SCALE))
-                currentItem = savedInstanceState?.getInt(SAVED_INSTANCE_STATE_PAGE_KEY) ?: 0
+                currentItem = getPageFromSavedInstanceState(savedInstanceState)
             }
             setContentView(root)
+
+            lifecycleScope.launch{
+                FlightRepositoryWithSpecializedFunctions.instance.removeDuplicates()
+            }
         }
     }
 
@@ -57,7 +66,14 @@ class NewUserActivity : JoozdlogActivity() {
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
         outState.putInt(SAVED_INSTANCE_STATE_PAGE_KEY, mViewPager.currentItem)
+        outState.putBoolean(SAVED_INSTANCE_STATE_REMOVE_DUPLICATES_STARTED_KEY, removeDuplicatesstarted)
     }
+
+    private fun getRemoveDuplicatesStartedFromSavedInstanceState(savedInstanceState: Bundle?) {
+        savedInstanceState?.getBoolean(SAVED_INSTANCE_STATE_REMOVE_DUPLICATES_STARTED_KEY)?.let { removeDuplicatesstarted = it }
+    }
+
+    private fun getPageFromSavedInstanceState(savedInstanceState: Bundle?) = savedInstanceState?.getInt(SAVED_INSTANCE_STATE_PAGE_KEY) ?: 0
 
     companion object{
         private const val TRANSFORMER_MIN_SCALE = 0.75f
@@ -68,5 +84,6 @@ class NewUserActivity : JoozdlogActivity() {
         const val PAGE_FINAL = 3
 
         private const val SAVED_INSTANCE_STATE_PAGE_KEY = "PAGE"
+        private const val SAVED_INSTANCE_STATE_REMOVE_DUPLICATES_STARTED_KEY = "REMOVE_DUPLICATES_STARTED_KEY"
     }
 }

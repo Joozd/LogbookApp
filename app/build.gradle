@@ -30,7 +30,7 @@ android {
 
     defaultConfig {
         applicationId "nl.joozd.logbookapp"
-        minSdkVersion 26
+        minSdkVersion 23
         targetSdkVersion 32
         versionCode 110 // my version, increment this every build
         versionName "JoozdLog 1.1.1.dev.6"
@@ -66,7 +66,7 @@ android {
 
     compileOptions {
         // Flag to enable support for the new language APIs
-        coreLibraryDesugaringEnabled true
+        //coreLibraryDesugaringEnabled true
 
         // Sets Java compatibility to Java 8
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -95,7 +95,7 @@ dependencies {
     implementation files("C:\\Users\\joozd\\IdeaProjects\\libs\\comms\\comms.jar")
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.6' // 1.2.0 gives an error on 2022/07/08
+    //coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.6' // 1.2.0 gives an error on 2022/07/08
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     // implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"

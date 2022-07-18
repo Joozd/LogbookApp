@@ -48,7 +48,6 @@ class SyncFlightsWorker(
     constructor(appContext: Context, workerParams: WorkerParameters): this(appContext, workerParams, Cloud(), UserManagement(), FlightRepositoryWithDirectAccess.instance) // constructor needed to instantiate as a Worker
 
     override suspend fun doWork(): Result = withContext(DispatcherProvider.io()) {
-        println("SyncFlightsWorker started")
         return@withContext syncFlights(cloud, userManagement, repository).toListenableWorkerResult()
     }
 }

@@ -42,13 +42,17 @@ class BackupCenter private constructor() {
                     when (backupAction) {
                         is BackupAction.NOTIFY -> {
                             if (backupAction.emailNeeded) {
-                                //try to send a backup email, give it a few seconds so server can send an email, then launch function again. If email was sent, this will end up at SCHEDULE, else emailNeeded will be false as it is already scheduled.
+                                /*
+                                   try to send a backup email.
+                                   Doing this will make backupActionFlow emit again (because that combines TaskFlags.sendBackupEmail which is set here).
+                                   backupActionFlow will emit either NOTIFY(emailNeeded = false) or SCHEDULE.
+                                 */
                                 TaskFlags.sendBackupEmail(true)
-                                delay(5000)
-                                makeOrScheduleBackupNotification(activity) // call this recursively, if TaskFlags.sendBackupEmail == true, this will go to [else] statement below this line.
                             } else MessageCenter.pushMessageBarFragment(BackupNotificationFragment())
                         }
                         BackupAction.EMAIL -> TaskFlags.sendBackupEmail(true)
+                        // SCHEDULE will reschedule in case a successful backup has been made,
+                        // because a successful backup will update a flow which eventually makes backupActionFlow emit again.
                         is BackupAction.SCHEDULE -> scheduleBackupNotification(backupAction.delay)
                     }
                 }

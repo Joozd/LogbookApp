@@ -14,14 +14,12 @@ import nl.joozd.logbookapp.data.sync.FlightsSynchronizer
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
-import nl.joozd.logbookapp.data.sharedPrefs.DataVersions
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
+import nl.joozd.logbookapp.data.sharedPrefs.*
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.generateKey
+import java.time.Instant
 
 /**
  * This will invalidate current login data.
@@ -98,8 +96,10 @@ suspend fun requestBackupMail(cloud: Cloud = Cloud(), userManagement: UserManage
     userManagement.getUsernameWithKey()?.let { uk ->
         getEmailAddressFromPrefs()?.let { email ->
             cloud.requestBackupEmail(uk.username, uk.key, email).correspondingServerFunctionResult().also{
-                if(it.isOK())
+                if(it.isOK()) {
                     TaskFlags.sendBackupEmail(false)
+                    BackupPrefs.mostRecentBackup(Instant.now().epochSecond)
+                }
             }
         }
     } ?: ServerFunctionResult.FAILURE

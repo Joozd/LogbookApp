@@ -55,7 +55,8 @@ interface FlightRepository {
     /**
      * make a [FlightDataCache] with snapshot flight data
      */
-    suspend fun getFLightDataCache(): FlightDataCache
+    @Deprecated("Use flightDataCacheFlow.first()")
+    suspend fun getFlightDataCache(): FlightDataCache
 
     /**
      * Get a flow of updated FlightDataCaches
@@ -98,6 +99,25 @@ interface FlightRepository {
      *        so you can use this a number of times in a row without having to update the parameter.
      */
     suspend fun generateAndReserveNewFlightID(highestTakenID: Int = 1): Int
+
+    /**
+     * Register a listener that triggers whenever the Flights database gets changed.
+     * This should trigger on [save] and [delete].
+     * Functions that circumvent these functions to save data (e.g. in [FlightRepositoryWithDirectAccess]) will not trigger it.
+     * When no longer needed, unregister the listeners with [unregisterOnDataChangedListener]
+     * Registering the same listener multiple times should have no effect. (i.e. they are stored in a HashSet)
+     */
+    fun registerOnDataChangedListener(listener: OnDataChangedListener)
+
+    /**
+     * Unregister a listener registered by [registerOnDataChangedListener]
+     * @return true if successfully unregistered, false if listener was not found in registered listeners.
+     */
+    fun unregisterOnDataChangedListener(listener: OnDataChangedListener): Boolean
+
+    fun interface OnDataChangedListener{
+        fun onFlightRepositoryChanged(changedFlightIDs: List<Int>): Unit
+    }
 
 
     companion object{

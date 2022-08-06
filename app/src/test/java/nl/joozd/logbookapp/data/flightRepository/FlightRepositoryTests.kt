@@ -154,10 +154,10 @@ class FlightRepositoryTests {
             }
 
             //test getFLightDataCache()
-            assertEquals(expectedSize, repo.getFLightDataCache().flights.size)
+            assertEquals(expectedSize, repo.getFlightDataCache().flights.size)
             repo.save(FlightsTestData.flightWithoutID)
             expectedSize++
-            assertEquals(expectedSize, repo.getFLightDataCache().flights.size)
+            assertEquals(expectedSize, repo.getFlightDataCache().flights.size)
         }
 
     }

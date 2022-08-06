@@ -41,7 +41,7 @@ class FlightsRepositoryExporter(
     val flightRepository: FlightRepository,
     private val mock: Boolean = false
 ): CoroutineScope by dispatchersProviderMainScope() {
-    private val allFlightsAsync = async { flightRepository.getFLightDataCache().flights.filter{ !it.isPlanned} }
+    private val allFlightsAsync = async { flightRepository.getFlightDataCache().flights.filter{ !it.isPlanned} }
 
     suspend fun buildCsvString(): String = (listOf(FIRST_LINE_V5)  +
         allFlightsAsync.await().map{ it.toCsvV5() }).joinToString("\n")

@@ -130,8 +130,9 @@ class FlightRepositoryWithUndoImpl(
     /**
      * make a [FlightDataCache] with snapshot flight data
      */
-    override suspend fun getFLightDataCache(): FlightDataCache =
-        repositoryWithDirectAccess.getFLightDataCache()
+    @Deprecated("Deprecated in interface")
+    override suspend fun getFlightDataCache(): FlightDataCache =
+        repositoryWithDirectAccess.getFlightDataCache()
 
     /**
      * Get a flow of updated FlightDataCaches
@@ -168,6 +169,13 @@ class FlightRepositoryWithUndoImpl(
 
     override suspend fun generateAndReserveNewFlightID(highestTakenID: Int): Int =
         repositoryWithDirectAccess.generateAndReserveNewFlightID(highestTakenID)
+
+    override fun registerOnDataChangedListener(listener: FlightRepository.OnDataChangedListener) {
+        repositoryWithDirectAccess.registerOnDataChangedListener(listener)
+    }
+
+    override fun unregisterOnDataChangedListener(listener: FlightRepository.OnDataChangedListener): Boolean =
+        repositoryWithDirectAccess.unregisterOnDataChangedListener(listener)
 
 
     private suspend fun saveWithUndo(flightsToSave: Collection<Flight>){

@@ -45,6 +45,10 @@ class FlightRepositoryImpl(
     private val flightDao = database.flightDao()
     private val idGenerator = IDGenerator()
 
+    private val registeredDataChangedListeners = HashSet<FlightRepository.OnDataChangedListener>()
+
+    private val noParallelAccessMutex = Mutex()
+
     override suspend fun getFlightByID(flightID: Int): Flight? =
         flightDao.getFlightById(flightID)?.toFlight()
 
@@ -66,7 +70,8 @@ class FlightRepositoryImpl(
     override suspend fun getAllFlights(): List<Flight> =
         getValidFlightsFromDao()
 
-    override suspend fun getFLightDataCache(): FlightDataCache =
+    @Deprecated("Deprecated in interface")
+    override suspend fun getFlightDataCache(): FlightDataCache =
         FlightDataCache.make(getValidFlightsFromDao())
 
     override fun flightDataCacheFlow(): Flow<FlightDataCache> =
@@ -79,7 +84,12 @@ class FlightRepositoryImpl(
     }
 
     override suspend fun save(flights: Collection<Flight>) {
-        saveWithIDAndTimestamp(flights)
+        noParallelAccessMutex.withLock {
+            saveWithIDAndTimestamp(flights)
+            registeredDataChangedListeners.forEach { listener ->
+                listener.onFlightRepositoryChanged(flights.map { it.flightID })
+            }
+        }
     }
 
     override suspend fun saveDirectToDB(flight: Flight) {
@@ -87,12 +97,14 @@ class FlightRepositoryImpl(
     }
 
     override suspend fun saveDirectToDB(flights: Collection<Flight>) {
-        //If size too big, it will chunk and retry.
-        if (flights.size > MAX_SQL_BATCH_SIZE)
-            flights.chunked(MAX_SQL_BATCH_SIZE).forEach { withContext(DispatcherProvider.io()) { saveDirectToDB(it) } }
+        noParallelAccessMutex.withLock {
+            //If size too big, it will chunk and retry.
+            if (flights.size > MAX_SQL_BATCH_SIZE)
+                flights.chunked(MAX_SQL_BATCH_SIZE).forEach { withContext(DispatcherProvider.io()) { saveDirectToDB(it) } }
 
-        else withContext(DispatcherProvider.io()) {
-            withContext(DispatcherProvider.io()) { flightDao.save(flights.map { it.toData() }) }
+            else withContext(DispatcherProvider.io()) {
+                withContext(DispatcherProvider.io()) { flightDao.save(flights.map { it.toData() }) }
+            }
         }
     }
 
@@ -101,10 +113,15 @@ class FlightRepositoryImpl(
     }
 
     override suspend fun delete(flights: Collection<Flight>) {
-        val flightsToDeleteHard = flights.filter { it.unknownToServer }
-        val flightsToDeleteSoft = flights.filter { !it.unknownToServer }
-        deleteHard(flightsToDeleteHard)
-        deleteSoft(flightsToDeleteSoft)
+        noParallelAccessMutex.withLock {
+            val flightsToDeleteHard = flights.filter { it.unknownToServer }
+            val flightsToDeleteSoft = flights.filter { !it.unknownToServer }
+            deleteHard(flightsToDeleteHard)
+            deleteSoft(flightsToDeleteSoft)
+            registeredDataChangedListeners.forEach { listener ->
+                listener.onFlightRepositoryChanged(flights.map { it.flightID })
+            }
+        }
     }
 
     override suspend fun generateAndReserveNewFlightID(highestTakenID: Int): Int =
@@ -115,18 +132,22 @@ class FlightRepositoryImpl(
     }
 
     override suspend fun deleteHard(flights: Collection<Flight>) {
-        //If size too big, it will chunk and retry.
-        if (flights.size > MAX_SQL_BATCH_SIZE)
-            flights.chunked(MAX_SQL_BATCH_SIZE).forEach { deleteHard(it)}
+        noParallelAccessMutex.withLock {
+            //If size too big, it will chunk and retry.
+            if (flights.size > MAX_SQL_BATCH_SIZE)
+                flights.chunked(MAX_SQL_BATCH_SIZE).forEach { deleteHard(it)}
 
-        else withContext(DispatcherProvider.io()) {
-            flightDao.delete(flights.map { it.toData() })
+            else withContext(DispatcherProvider.io()) {
+                flightDao.delete(flights.map { it.toData() })
+            }
         }
     }
 
     override suspend fun clear() {
-        flightDao.clear()
-        println("Cleared FlightRepository DB: ${getAllFlights().size} flights now in DB")
+        noParallelAccessMutex.withLock {
+            flightDao.clear()
+            println("Cleared FlightRepository DB: ${getAllFlights().size} flights now in DB")
+        }
     }
 
     private suspend fun deleteSoft(flights: Collection<Flight>) = withContext(DispatcherProvider.io()){
@@ -150,6 +171,14 @@ class FlightRepositoryImpl(
         deleteHard(duplicates.map { Flight(it) })
         return duplicates.size
     }
+
+    override fun registerOnDataChangedListener(listener: FlightRepository.OnDataChangedListener) {
+        registeredDataChangedListeners.add(listener)
+    }
+
+    override fun unregisterOnDataChangedListener(listener: FlightRepository.OnDataChangedListener): Boolean =
+        registeredDataChangedListeners.remove(listener)
+
 
 
     private fun List<FlightData>.toFlights() =

@@ -64,7 +64,7 @@ object BasicFlightVersionFunctions {
         BasicFlight(flightID = flightID, orig = orig, dest = dest, timeOut = timeOut, timeIn = timeIn, correctedTotalTime = correctedTotalTime, multiPilotTime = 0, nightTime = nightTime, ifrTime = ifrTime, simTime = simTime,
             aircraft = aircraft, registration = registration, name = name, name2 = name2, takeOffDay = takeOffDay, takeOffNight = takeOffNight, landingDay = landingDay, landingNight = landingNight,
             autoLand = autoLand, flightNumber = flightNumber, remarks = remarks, isPIC = isPIC, isPICUS = isPICUS, isCoPilot = isCoPilot, isDual = isDual, isInstructor = isInstructor, isSim = isSim,
-            isPF = isPF, isPlanned = isPlanned, changed = changed, autoFill = autoFill, augmentedCrew = augmentedCrew, DELETEFLAG = DELETEFLAG, timeStamp = timeStamp, signature = signature
+            isPF = isPF, isPlanned = isPlanned, unknownToServer = changed, autoFill = autoFill, augmentedCrew = augmentedCrew, DELETEFLAG = DELETEFLAG, timeStamp = timeStamp, signature = signature
         )
     }
 
@@ -80,7 +80,7 @@ object BasicFlightVersionFunctions {
         BasicFlight_version4(flightID = flightID, orig = orig, dest = dest, timeOut = timeOut, timeIn = timeIn, correctedTotalTime = correctedTotalTime, nightTime = nightTime, ifrTime = ifrTime, simTime = simTime,
             aircraft = aircraft, registration = registration, name = name, name2 = name2, takeOffDay = takeOffDay, takeOffNight = takeOffNight, landingDay = landingDay, landingNight = landingNight,
             autoLand = autoLand, flightNumber = flightNumber, remarks = remarks, isPIC = isPIC, isPICUS = isPICUS, isCoPilot = isCoPilot, isDual = isDual, isInstructor = isInstructor, isSim = isSim,
-            isPF = isPF, isPlanned = isPlanned, changed = changed, autoFill = autoFill, augmentedCrew = augmentedCrew, DELETEFLAG = DELETEFLAG, timeStamp = timeStamp, signature = signature
+            isPF = isPF, isPlanned = isPlanned, changed = unknownToServer, autoFill = autoFill, augmentedCrew = augmentedCrew, DELETEFLAG = DELETEFLAG, timeStamp = timeStamp, signature = signature
         )
     }
 

@@ -7,6 +7,7 @@ import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
+import nl.joozd.logbookapp.exceptions.CloudException
 
 fun handleServerResult(serverResult: ByteArray?) = handleServerResult(serverResult?.toString())
 
@@ -29,6 +30,15 @@ fun handleServerResult(serverResult: String?): CloudFunctionResult? =
         // example: val x = readFromServer(); handleServerResult(x)?.let { return it }; doSomethingWith(x)
         else -> null
     }
+
+fun handleServerResultAndThrowExceptionOnError(serverResult: String?){
+    val result = handleServerResult(serverResult)
+    if (result == null || result.isOK()) return // result is OK or data
+    else throw CloudException(result)
+}
+
+fun handleServerResultAndThrowExceptionOnError(serverResult: ByteArray?) =
+    handleServerResultAndThrowExceptionOnError(serverResult.toString())
 
 private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
     UserManagement().invalidateEmail()

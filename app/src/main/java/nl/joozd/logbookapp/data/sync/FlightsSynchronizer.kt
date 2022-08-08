@@ -1,6 +1,6 @@
 package nl.joozd.logbookapp.data.sync
 
-
+import android.util.Log
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import nl.joozd.comms.Client
@@ -12,263 +12,206 @@ import nl.joozd.logbookapp.comm.CloudFunctionResult
 import nl.joozd.logbookapp.comm.ServerFunctionResult
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.importing.merging.mergeFlightsLists
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
+import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker
 
-/**
- * This has full access to both a [Client] (i.e. direct access to server) and [FlightRepositoryWithDirectAccess]
- * It uses that access to synchronize flights between current repository and server.
- */
 class FlightsSynchronizer(
-    private val cloud: Cloud = Cloud(),
-    private val userManagement: UserManagement = UserManagement(),
-    repository: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance
+    private val cloud: Cloud,
+    private val userManagement: UserManagement,
+    private val repository: FlightRepositoryWithDirectAccess
 ) {
-    private val repository = RepositoryHandler(repository)
-    suspend fun synchronizeIfNotSynced(): ServerFunctionResult = with(cloud){
-        if (!UserManagement().checkIfLoginDataSet()) return ServerFunctionResult.FAILURE
 
-        doInOneClientSession {
-            loginToServer().also{ if (!it.isOK()) return@doInOneClientSession it }
-            val isSynchronized = checkIfIsSynchronized().let {
-                if (it !is CloudFunctionResult.ResultWithPayload<*>) return@doInOneClientSession it
-                it.payload as Boolean
+    /*
+     * This part makes sure we
+     */
+    private var repositoryWasChanged: Boolean = false
+
+    private val repositoryChangedListener = FlightRepository.OnDataChangedListener{
+        if (it.isNotEmpty()) repositoryWasChanged = true
+    }
+
+    suspend fun synchronizeIfNotSynced(): ServerFunctionResult = with(cloud) {
+        if (!UserManagement().checkIfLoginDataSet())
+            ServerFunctionResult.FAILURE
+        else {
+            registerRepositoryChangedListener()
+            try {
+                performSyncIfNotSynced()
             }
-            if (isSynchronized) {
-                markMostRecentSyncAsNow()
-                return@doInOneClientSession CloudFunctionResult.OK
-            }
-            //If we get here, we need to synchronize!
-            performSync()
-        }.correspondingServerFunctionResult()
+            finally { unregisterRepositoryChangedListener() }
+        }
     }
 
     suspend fun mergeRepoWithServer(): ServerFunctionResult = with(cloud){
         doInOneClientSession {
-            loginToServer().also{ if (!it.isOK()) return@doInOneClientSession it }
-
-            val serverIDs = getIDWithTimestampsListFromServer().let {
-                if (it !is CloudFunctionResult.ResultWithPayload<*>) return@doInOneClientSession it
-                @Suppress("UNCHECKED_CAST")
-                it.payload as List<IDWithTimeStamp>
-            }.map { it.ID }
-
-            val serversFlights = downloadFlightsFromServer(serverIDs).let {
-                if (it !is CloudFunctionResult.ResultWithPayload<*>) return@doInOneClientSession it
-                @Suppress("UNCHECKED_CAST")
-                it.payload as List<BasicFlight>
-            }.map { Flight(it)}
-            val repoFlights = repository.getSyncableFlights()
-            val mergedFlightsList = mergeFlightsLists(serversFlights, repoFlights) // NOTE this contains planned flights, they should NOT go to server.
-            repository.replaceAllFlightsWith(mergedFlightsList)
-
-            // Result of this function will be returned; any earlier failures will be returned from the 'also' blocks
-            sendMergedFlightsToServerAndMarkAsKnown(mergedFlightsList, this)
-        }.correspondingServerFunctionResult()
-    }
-
-    // just send entire list.
-    private suspend fun Cloud.sendMergedFlightsToServerAndMarkAsKnown(mergedFlights: Collection<Flight>, client: Client): CloudFunctionResult {
-        val flightsToSend = mergedFlights.filter { !it.isPlanned }
-        return client.sendFlights(flightsToSend.map { it.copy(unknownToServer = false).toBasicFlight() })
-            .also {
-                if (it.isOK())
-                    repository.markFlightsAsKnownToServer(flightsToSend)
+            try {
+                login()
+                val serversFlights = getAllFlightsFromServer().map { Flight(it) }
+                repository.doLocked {
+                    val repoFlights = getAllFlightsInDB() // note: This contains planned flights which must not go to server
+                    val mergedFlightsList = mergeFlightsLists(serversFlights, repoFlights)
+                    replaceAllFlightsWith(mergedFlightsList)
+                }
+                performSync()
+                ServerFunctionResult.SUCCESS
             }
-    }
-
-
-    suspend fun forceSync(): ServerFunctionResult = with(cloud){
-        doInOneClientSession {
-            loginToServer().also{ if (!it.isOK()) return@doInOneClientSession it }
-            performSync()
-        }.correspondingServerFunctionResult()
-    }
-
-    // Do this only when logged in to server, or user should get an error message asking them to report this bug.
-    private suspend fun Client.performSync(): CloudFunctionResult = with(cloud) {
-        println("Client.performSync()")
-        FlightRepositoryWithUndo.instance.invalidateInsertedUndoCommands() // undo/redo operations on imports do not play well with synchronizing.
-        val serverIDsWithTimestamps = getIDWithTimestampsListFromServer().let {
-            if (it !is CloudFunctionResult.ResultWithPayload<*>) return it
-            @Suppress("UNCHECKED_CAST")
-            it.payload as List<IDWithTimeStamp>
+            catch (e: CloudException){
+                e.cloudFunctionResult.correspondingServerFunctionResult()
+            }
         }
-        val updatedIDs = updateIDsForNewFlights(serverIDsWithTimestamps)
-        val correctedRepoIDsWithTimeStamps = getIDsWithTimestampsFromRepository()
-        println("Corrected repo IDs with timestamps includes new ID: ${updatedIDs.all{ it in correctedRepoIDsWithTimeStamps.map{ it.ID
-            
-        }}}")
+    }
 
-        saveNewOrNewerFlightsFromServer(correctedRepoIDsWithTimeStamps, serverIDsWithTimestamps).also { if (!it.isOK()) return it}
-        sendNewOrNewerFlightsToServer(correctedRepoIDsWithTimeStamps, serverIDsWithTimestamps).also { if (!it.isOK()) return it}
+    private suspend fun performSyncIfNotSynced(): ServerFunctionResult = with(cloud){
+        try {
+            doInOneClientSession {
+                login()
+                if (!checkIfIsSynchronized())
+                    performSync()
+            }
+            markMostRecentSyncAsNow()
+            return ServerFunctionResult.SUCCESS
+        }
+        catch (e: CloudException){
+            return e.cloudFunctionResult.correspondingServerFunctionResult()
+        }
+    }
 
-        repository.markIDsAsKnownToServer(updatedIDs)
-
-        markMostRecentSyncAsNow()
 
 
-        CloudFunctionResult.OK
+    private suspend fun Client.performSync(): Unit = with(cloud) {
+        val serverIdsAndTimestamps = getIDWithTimestampsListFromServer()
+        resetRepositoryInterruptionCheck()
+        correctIDsForNewFlights(serverIdsAndTimestamps) // No need to remember, they get fetched again.
+        downloadUpdatedFlightsFromServer(serverIdsAndTimestamps)
+        sendUpdatedFlightsToServer(serverIdsAndTimestamps)
+        if (repositoryWasChanged) return performSync() // if somebody touched repository, sync again.
+    }
+
+    private suspend fun Client.login() = with (cloud){
+        loginOrThrowException(
+            userManagement.getUsernameWithKey()
+                ?: throw(CloudException(CloudFunctionResult.SERVER_REFUSED))
+        )
+    }
+
+    //Throws a CloudException if unable to get server checksum
+    private suspend fun Client.checkIfIsSynchronized(): Boolean {
+        val serverChecksumAsync = getFLightsListChecksumFromServerAsync()
+        val repositoryChecksumAsync = getFlightsListChecksumFromRepositoryAsync()
+        return repositoryChecksumAsync.await() == serverChecksumAsync.await()
+    }
+
+    private fun getFlightsListChecksumFromRepositoryAsync() =
+        MainScope().async { FlightsListChecksum(repository.getSyncableBasicFlights()) }
+
+    private fun Client.getFLightsListChecksumFromServerAsync() = with (cloud) {
+        MainScope().async { getFlightsListChecksum() }
+    }
+
+    private suspend fun correctIDsForNewFlights(takenIDs: List <IDWithTimeStamp>): List<Flight> =
+        repository.doLocked { // locked so these flights won't change while being updated, which could lead to duplicate entries{
+            val newFlightsUncheckedIDs = getSyncableFlights().filter { it.unknownToServer }
+            val highestTakenID = takenIDs.maxOfOrNull { it.ID } ?: -1
+            fixIDs(newFlightsUncheckedIDs, highestTakenID)
+        }
+
+    private suspend fun Client.downloadUpdatedFlightsFromServer(serverIdWithTimestamps: List<IDWithTimeStamp>) = with(cloud) {
+        repository.doLocked {
+            val localIDWithTimeStamps = getSyncableBasicFlights().map { IDWithTimeStamp(it) }
+            val idsToDownload = getNewOrNewerIDsInSecondParam(localIDWithTimeStamps, serverIdWithTimestamps)
+            val downloadedFlights = downloadFlightsFromServer(idsToDownload).map { Flight(it) }
+            repository.saveDirectToDB(downloadedFlights)
+        }
+    }
+
+    private suspend fun Client.getAllFlightsFromServer(): List<BasicFlight> = with(cloud) {
+        val ids = getIDWithTimestampsListFromServer().map { it.ID }
+        downloadFlightsFromServer(ids)
+    }
+
+    private suspend fun Client.sendUpdatedFlightsToServer(serverIdWithTimestamps: List<IDWithTimeStamp>) = with(cloud){
+        repository.doLocked {
+            val localIDWithTimeStamps = getSyncableBasicFlights().map { IDWithTimeStamp(it) }
+            val idsToUpload = getNewOrNewerIDsInSecondParam(serverIdWithTimestamps, localIDWithTimeStamps)
+            val flightsToUpload = getFlightsByID(idsToUpload)
+            sendFlightsToServer(flightsToUpload)
+        }
+    }
+
+    private fun getNewOrNewerIDsInSecondParam(
+        idsToCheckTo: List<IDWithTimeStamp>,
+        listWithPossibleNewerIDs: List<IDWithTimeStamp>)
+            : List<Int> {
+        val map = idsToCheckTo.toMap()
+        return listWithPossibleNewerIDs.filter { it.timeStamp > (map[it.ID] ?: Long.MIN_VALUE) }.map { it.ID }
+    }
+
+
+    private suspend fun FlightRepositoryWithDirectAccess.fixIDs(flightsToFix: List<Flight>, highestTakenID: Int): List<Flight>{
+        if (flightsToFix.none { it.flightID <= highestTakenID}) return flightsToFix
+        val highestTakenIdIncludingFlightsToFix = maxOf(highestTakenID, flightsToFix.maxOf { it.flightID })
+
+        // This is done flight-by-flight to minimize damage done if app gets killed/crashes/device dies.
+        val fixedFlights = buildList {
+            flightsToFix.forEach { old ->
+                val new = old.copy(flightID = generateAndReserveNewFlightID(highestTakenIdIncludingFlightsToFix))
+                saveDirectToDB(new)
+                deleteHard(old)
+                add(new)
+            }
+        }
+        return fixedFlights
+    }
+
+
+    private suspend fun FlightRepositoryWithDirectAccess.getSyncableBasicFlights() =
+        getSyncableFlights()
+            .map {
+                it.toBasicFlight()
+            }
+
+    private suspend fun FlightRepositoryWithDirectAccess.getSyncableFlights() =
+        getAllFlightsInDB()
+            .filter { !it.isPlanned }
+
+    private suspend fun Client.sendFlightsToServer(flightsToSend: Collection<Flight>) = with(cloud) {
+        val fff = flightsToSend
+            .map { it.toBasicFlight()
+                .copy(unknownToServer = false)
+            }
+        sendFlights(fff)
+        repository.markFlightsAsKnownToServer(flightsToSend)
+    }
+
+    private suspend fun FlightRepositoryWithDirectAccess.markFlightsAsKnownToServer(flights: Collection<Flight>){
+        val flightsToMark = flights.filter { it.unknownToServer }
+        saveDirectToDB(flightsToMark.map { it.copy(unknownToServer = false) } )
+    }
+
+    suspend fun replaceAllFlightsWith(newFlights: Collection<Flight>){
+        repository.clear()
+        repository.saveDirectToDB(newFlights)
+    }
+
+    private fun registerRepositoryChangedListener() {
+        repository.registerOnDataChangedListener(repositoryChangedListener)
+    }
+
+    private fun unregisterRepositoryChangedListener() {
+        repository.unregisterOnDataChangedListener(repositoryChangedListener)
+    }
+
+    private fun resetRepositoryInterruptionCheck(){
+        repositoryWasChanged = false
     }
 
     private fun markMostRecentSyncAsNow() {
         ServerPrefs.mostRecentFlightsSyncEpochSecond(TimestampMaker().now)
     }
 
-    private suspend fun Client.loginToServer(): CloudFunctionResult = with (cloud){
-        userManagement.getUsernameWithKey()?.let { usernameWithKey ->
-            login(usernameWithKey).also { if (!it.isOK()) return it }
-        } ?: return CloudFunctionResult.SERVER_REFUSED
-    }
-
-    private suspend fun Client.checkIfIsSynchronized(): CloudFunctionResult {
-        with(cloud) {
-            val repositoryChecksumAsync = MainScope().async { getChecksumFromRepository() }
-            val r = Cloud.Result<FlightsListChecksum>().apply{
-                putFlightsListChecksumInResult(this).also { if (!it.isOK()) return it }
-            }
-            val result = repositoryChecksumAsync.await() == r.value
-            return CloudFunctionResult.ResultWithPayload(CloudFunctionResult.OK, result)
-        }
-    }
-
-    private suspend fun Client.saveNewOrNewerFlightsFromServer(
-        repoIDsWithTimeStamps: Collection<IDWithTimeStamp>,
-        serverIDsWithTimestamps: Collection<IDWithTimeStamp>
-    ): CloudFunctionResult{
-        val downloadedFlights = downloadNewOrNewerFlightsFromServer(repoIDsWithTimeStamps, serverIDsWithTimestamps).let{
-            if (it !is CloudFunctionResult.ResultWithPayload<*>) return it
-            @Suppress("UNCHECKED_CAST")
-            (it.payload as List<BasicFlight>).also{
-                println("Got new flights from server:\n${it.joinToString("\n")}")
-            }
-        }
-        repository.save(downloadedFlights.map { Flight(it) })
-        return CloudFunctionResult.OK
-    }
-
-
-    private suspend fun Client.downloadNewOrNewerFlightsFromServer(
-        repoIDsWithTimeStamps: Collection<IDWithTimeStamp>,
-        serverIDsWithTimestamps: Collection<IDWithTimeStamp>
-    ): CloudFunctionResult = with(cloud) {
-        val idsToGet = getFlightsToGetFromServer(repoIDsWithTimeStamps, serverIDsWithTimestamps).map { it.ID }
-
-        return if (idsToGet.isEmpty())
-            CloudFunctionResult.OK
-        else
-            downloadFlightsFromServer(idsToGet)
-    }
-
-    private suspend fun Client.sendNewOrNewerFlightsToServer(
-        repoIDsWithTimeStamps: Collection<IDWithTimeStamp>,
-        serverIDsWithTimestamps: Collection<IDWithTimeStamp>
-    ): CloudFunctionResult = with(cloud) {
-        val idsToSend = getFlightsToSendToServer(repoIDsWithTimeStamps, serverIDsWithTimestamps).map { it.ID }
-        if (idsToSend.isEmpty())
-            return CloudFunctionResult.OK
-
-        sendFlightsToServer(repository.getSyncableFlights(idsToSend))
-    }
-
-    private suspend fun getIDsWithTimestampsFromRepository() =
-        repository.getSyncableFlights()
-            .map {
-                IDWithTimeStamp(
-                    it.toBasicFlight()
-                )
-            }
-
-    private suspend fun getChecksumFromRepository(): FlightsListChecksum =
-        FlightsListChecksum(
-            repository.getSyncableFlights()
-                .map {
-                    it.toBasicFlight()
-                }
-        )
-
-
-    private fun getFlightsToGetFromServer(repoIDsWithTimeStamps: Collection<IDWithTimeStamp>, serverIDsWithTimestamps: Collection<IDWithTimeStamp>): List<IDWithTimeStamp> =
-        serverIDsWithTimestamps.filter {
-            it.isNewOrIsNewerVersion(repoIDsWithTimeStamps)
-        }
-
-    private fun getFlightsToSendToServer(repoIDsWithTimeStamps: Collection<IDWithTimeStamp>, serverIDsWithTimestamps: Collection<IDWithTimeStamp>): List<IDWithTimeStamp> =
-        repoIDsWithTimeStamps.filter {
-            it.isNewOrIsNewerVersion(serverIDsWithTimestamps)
-        }
-
-    private fun IDWithTimeStamp.isNewOrIsNewerVersion(
-        listToCompareTo: Collection<IDWithTimeStamp>
-    ) = listToCompareTo.firstOrNull { listItem -> listItem.ID == this.ID }
-        ?.let {
-            it.timeStamp < this.timeStamp   // if found return whether this is newer
-        } ?: true                           // if not found, this is new so return true
-
-    // Will update flights directly in DB. Returns updated IDs.
-    private suspend fun updateIDsForNewFlights(serverIDsWithTimestamps: List<IDWithTimeStamp>): List<Int>{
-        val updatedIDs = ArrayList<Int>()
-        val newFlights = repository.getSyncableFlights().filter { it.unknownToServer }
-        println("updateIDsForNewFlights: New flights: ${newFlights.joinToString("\n")}")
-        val highestIDOnServer = serverIDsWithTimestamps.maxOfOrNull { it.ID } ?: -1
-        if (newFlights.none { it.flightID <= highestIDOnServer }) return emptyList()// if no conflicts, do nothing
-        val updatedNewFlights = newFlights.map {
-            val newID = repository.generateID(highestIDOnServer).also { id ->
-                updatedIDs.add(id)
-            }
-            it.copy(flightID = newID)
-        }
-        repository.save(updatedNewFlights)
-        repository.deleteHard(newFlights)
-        println("updateIDsForNewFlights: Updated flights: ${updatedNewFlights.joinToString("\n")}")
-        return updatedIDs
-    }
-
-    //This marks all flights that are sent to server as "known to server"
-    private suspend fun Client.sendFlightsToServer(flightsToSend: Collection<Flight>): CloudFunctionResult =
-        with(cloud) {
-            val ff = flightsToSend.map { it.toBasicFlight().copy(changed = false) }
-            sendFlights(ff)
-        }
-
-
-    // Repository ONLY gets handled through this helper class, to prevent double functions etc.
-    private class RepositoryHandler(private val repository: FlightRepositoryWithDirectAccess){
-        suspend fun generateID(mustBeHigherThan: Int) =
-            repository.generateAndReserveNewFlightID(mustBeHigherThan)
-
-
-        suspend fun save(flightsToSave: Collection<Flight>){
-            repository.saveDirectToDB(flightsToSave)
-        }
-
-        suspend fun deleteHard(flightsToDelete: Collection<Flight>){
-            println("DELETING ${flightsToDelete.joinToString("\n")}")
-            repository.deleteHard(flightsToDelete)
-        }
-
-        suspend fun getSyncableFlights() = repository.getAllFlightsInDB().filter { !it.isPlanned }
-
-        suspend fun getSyncableFlights(idsToGet: Collection<Int>) = getSyncableFlights().filter { it.flightID in idsToGet }
-
-        suspend fun markFlightsAsKnownToServer(mergedFlightsList: Collection<Flight>) {
-            repository.save(mergedFlightsList.filter { it.unknownToServer }.map { it.copy(unknownToServer = false) })
-        }
-
-        suspend fun markIDsAsKnownToServer(idsToMark: Collection<Int>){
-            println("markIDsAsKnownToServer()")
-            println("Marking IDs: $idsToMark")
-            val flightsToUpdate = repository.getFlightsByID(idsToMark)
-            println("Marking flights: ${flightsToUpdate.joinToString("\n")}")
-            markFlightsAsKnownToServer(flightsToUpdate)
-        }
-
-        suspend fun replaceAllFlightsWith(newFlights: Collection<Flight>){
-            repository.clear()
-            repository.saveDirectToDB(newFlights)
-        }
-    }
+    private fun List<IDWithTimeStamp>.toMap() = associate { it.ID to it.timeStamp }
 }

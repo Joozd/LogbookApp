@@ -9,6 +9,7 @@ import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.usermanagement.UsernameWithKey
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
+import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.serializing.longFromBytes
 import nl.joozd.serializing.packSerializable
 import nl.joozd.serializing.unpackSerialized
@@ -108,10 +109,12 @@ class Cloud(
 
     //This is meant for operations which require some back-and-forth transfers with server.
     // At the time of this writing only flights syncing uses it.
-    suspend fun doInOneClientSession(block: suspend Client.() -> CloudFunctionResult): CloudFunctionResult =
+    suspend fun <T> doInOneClientSession(block: suspend Client.() -> T): T =
         withClient{
             block()
         }
+
+
 
     /*
      * Log in to server until Client is closed again
@@ -137,7 +140,16 @@ class Cloud(
         return handleResponse()!!
     }
 
+    suspend fun Client.loginOrThrowException(usernameWithKey: UsernameWithKey) {
+        //payLoad is LoginData.serialize()
+        val payLoad = LoginData(usernameWithKey.username, usernameWithKey.key, BasicFlight.VERSION.version)
+            .serialize()
 
+        sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
+        handleResponse()
+    }
+
+    @Deprecated("use getFlightsListChecksum")
     suspend fun Client.putFlightsListChecksumInResult(result: Result<FlightsListChecksum>): CloudFunctionResult {
         sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS_LIST_CHECKSUM)
         readFromServer().let{ response ->
@@ -147,12 +159,34 @@ class Cloud(
         return CloudFunctionResult.OK
     }
 
-    suspend fun Client.getIDWithTimestampsListFromServer(): CloudFunctionResult {
+    /**
+     * Throws a [CloudException] if [handleServerResult] has objections
+     */
+    suspend fun Client.getFlightsListChecksum(): FlightsListChecksum {
+        sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS_LIST_CHECKSUM)
+        readFromServer().let{ response ->
+            handleServerResult(response)
+            return FlightsListChecksum.deserialize(response!!)
+        }
+    }
+
+    @Deprecated("use getIDWithTimestampsListFromServer")
+    suspend fun Client.getIDWithTimestampsListFromServerToResult(): CloudFunctionResult {
         sendRequest(JoozdlogCommsKeywords.REQUEST_ID_WITH_TIMESTAMPS_LIST)
         readFromServer().let { response ->
             handleServerResult(response)?.let { return it } // this also catches response == null
             return CloudFunctionResult.ResultWithPayload(CloudFunctionResult.OK, response!!.toIdWithTimestampList())
         }
+    }
+
+    /**
+     * Throws a [CloudException] if [handleServerResult] has objections
+     */
+    suspend fun Client.getIDWithTimestampsListFromServer(): List<IDWithTimeStamp> {
+        sendRequest(JoozdlogCommsKeywords.REQUEST_ID_WITH_TIMESTAMPS_LIST)
+        val response = readFromServer()
+        handleServerResultAndThrowExceptionOnError(response)
+        return response!!.toIdWithTimestampList()
     }
 
     @Deprecated("deprecated")
@@ -167,7 +201,8 @@ class Cloud(
 
     private fun ByteArray.toIdWithTimestampList() = unpackSerialized(this).map { IDWithTimeStamp.deserialize(it) }
 
-    suspend fun Client.downloadFlightsFromServer(flightIDsToDownload: List<Int>): CloudFunctionResult{
+    @Deprecated("use downloadFlightsFromServer")
+    suspend fun Client.downloadFlightsFromServerToResult(flightIDsToDownload: List<Int>): CloudFunctionResult{
         val extraData = wrap(flightIDsToDownload) // NOTE TO SELF on server use unwrapList(data)
         sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS, extraData)
         val flights = readFromServer().let{ response ->
@@ -177,10 +212,25 @@ class Cloud(
         return CloudFunctionResult.ResultWithPayload<List<BasicFlight>>(CloudFunctionResult.OK, flights)
     }
 
-    suspend fun Client.sendFlights(flights: List<BasicFlight>): CloudFunctionResult{
+    suspend fun Client.downloadFlightsFromServer(flightIDsToDownload: List<Int>): List<BasicFlight> {
+        val extraData = wrap(flightIDsToDownload) // NOTE TO SELF on server use unwrapList(data)
+        sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS, extraData)
+        val response = readFromServer()
+        handleServerResultAndThrowExceptionOnError(response)
+
+        return unpackSerialized(response!!).map { BasicFlight.deserialize(it) }
+    }
+
+    @Deprecated("use sendFlights")
+    suspend fun Client.sendFlightsWithResult(flights: List<BasicFlight>): CloudFunctionResult{
         val extraData = packSerializable(flights)
         sendRequest(JoozdlogCommsKeywords.SENDING_NEWER_FLIGHTS, extraData)
         return handleResponse()!!
+    }
+
+    suspend fun Client.sendFlights(flights: List<BasicFlight>) {
+        sendRequest(JoozdlogCommsKeywords.SENDING_NEWER_FLIGHTS, packSerializable(flights))
+        handleResponseAndThrowExceptionOnError()
     }
 
 
@@ -219,6 +269,8 @@ class Cloud(
     }
 
     private suspend fun Client.handleResponse() = handleServerResult(readServerResponse())
+
+    private suspend fun Client.handleResponseAndThrowExceptionOnError() = handleServerResultAndThrowExceptionOnError(readServerResponse())
 
     // Pass this to functions giving a result to get returned data.
     // The return of the function will only be a CloudFunctionResult, so if you want anything else you can drop it in here.

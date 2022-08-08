@@ -232,7 +232,7 @@ class FlightsRepositoryExporter(
                 isSim = v[26] == true.toString(),
                 isPF = v[27] == true.toString(),
                 isPlanned = v[28] == true.toString(),
-                changed =true,
+                unknownToServer =true,
                 autoFill = v[29] == true.toString(),
                 augmentedCrew = v[30].toInt(),
                 DELETEFLAG = false,

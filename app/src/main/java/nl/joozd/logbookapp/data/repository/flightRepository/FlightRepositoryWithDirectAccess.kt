@@ -28,6 +28,12 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
  */
 interface FlightRepositoryWithDirectAccess: FlightRepository {
     /**
+     * lock the repository (with a Mutex) while performing [block]
+     * The mutex is the same as [save] and [delete] use, so those functions will be delayed as well.
+     */
+    suspend fun <T> doLocked(block: suspend FlightRepositoryWithDirectAccess.() -> T): T
+
+    /**
      * Save a Flight bypassing all updating that is usually done before saving
      * (e.g. updating timestamp)
      */

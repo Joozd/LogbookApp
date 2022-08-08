@@ -23,8 +23,8 @@ import nl.joozd.serializing.*
 
 data class BasicFlight(
     val flightID: Int,
-    val orig: String ,
-    val dest: String ,
+    val orig: String,
+    val dest: String,
     val timeOut: Long,                 // timeOut and timeIn are seconds since epoch
     val timeIn: Long,                  // timeOut and timeIn are seconds since epoch
     val correctedTotalTime: Int,
@@ -51,7 +51,7 @@ data class BasicFlight(
     val isSim: Boolean,
     val isPF: Boolean,
     val isPlanned: Boolean,
-    val changed: Boolean,              // unknownToServer - can be hard-deleted when cast to flight if this is true
+    val unknownToServer: Boolean,              // unknownToServer - can be hard-deleted when cast to flight if this is true
     val autoFill: Boolean,
     val augmentedCrew: Int,
     val DELETEFLAG: Boolean,
@@ -185,7 +185,7 @@ data class BasicFlight(
                 isSim = false,
                 isPF = false,
                 isPlanned = true,
-                changed = true,
+                unknownToServer = true,
                 autoFill = true,
                 augmentedCrew = 0,
                 DELETEFLAG = false,

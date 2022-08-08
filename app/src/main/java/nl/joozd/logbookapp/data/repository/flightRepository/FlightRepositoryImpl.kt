@@ -92,12 +92,18 @@ class FlightRepositoryImpl(
         }
     }
 
+    override suspend fun <T> doLocked(block: suspend FlightRepositoryWithDirectAccess.() -> T): T =
+        noParallelAccessMutex.withLock {
+            this.block()
+        }
+
+    //not locked, lock this with [doLocked]
     override suspend fun saveDirectToDB(flight: Flight) {
         saveDirectToDB(listOf(flight))
     }
 
+    //not locked, lock this with [doLocked]
     override suspend fun saveDirectToDB(flights: Collection<Flight>) {
-        noParallelAccessMutex.withLock {
             //If size too big, it will chunk and retry.
             if (flights.size > MAX_SQL_BATCH_SIZE)
                 flights.chunked(MAX_SQL_BATCH_SIZE).forEach { withContext(DispatcherProvider.io()) { saveDirectToDB(it) } }
@@ -105,7 +111,6 @@ class FlightRepositoryImpl(
             else withContext(DispatcherProvider.io()) {
                 withContext(DispatcherProvider.io()) { flightDao.save(flights.map { it.toData() }) }
             }
-        }
     }
 
     override suspend fun delete(flight: Flight) {
@@ -127,27 +132,26 @@ class FlightRepositoryImpl(
     override suspend fun generateAndReserveNewFlightID(highestTakenID: Int): Int =
         idGenerator.generateID(highestTakenID)
 
+    //not locked, lock this with [doLocked]
     override suspend fun deleteHard(flight: Flight) {
         deleteHard(listOf(flight))
     }
 
+    //not locked, lock this with [doLocked]
     override suspend fun deleteHard(flights: Collection<Flight>) {
-        noParallelAccessMutex.withLock {
-            //If size too big, it will chunk and retry.
-            if (flights.size > MAX_SQL_BATCH_SIZE)
-                flights.chunked(MAX_SQL_BATCH_SIZE).forEach { deleteHard(it)}
+        //If size too big, it will chunk and retry.
+        if (flights.size > MAX_SQL_BATCH_SIZE)
+            flights.chunked(MAX_SQL_BATCH_SIZE).forEach { deleteHard(it)}
 
-            else withContext(DispatcherProvider.io()) {
-                flightDao.delete(flights.map { it.toData() })
-            }
+        else withContext(DispatcherProvider.io()) {
+            flightDao.delete(flights.map { it.toData() })
         }
     }
 
+    //not locked, lock this with [doLocked]
     override suspend fun clear() {
-        noParallelAccessMutex.withLock {
             flightDao.clear()
             println("Cleared FlightRepository DB: ${getAllFlights().size} flights now in DB")
-        }
     }
 
     private suspend fun deleteSoft(flights: Collection<Flight>) = withContext(DispatcherProvider.io()){

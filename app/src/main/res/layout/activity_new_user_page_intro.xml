@@ -37,6 +37,7 @@
                 android:id="@+id/imageView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/joozdlog_logo"
                 app:layout_constraintBottom_toTopOf="@+id/welcome_text_header"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -44,27 +45,27 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.33"
                 app:layout_constraintVertical_chainStyle="packed"
-                app:srcCompat="@mipmap/ic_launcher"
-                android:contentDescription="@string/joozdlog_logo" />
+                app:srcCompat="@mipmap/ic_launcher" />
 
             <TextView
                 android:id="@+id/welcome_text_header"
                 style="@style/HeaderText.Bold"
+                android:layout_width="0dp"
                 android:layout_marginTop="16dp"
                 android:text="@string/welcome_message_header"
                 app:layout_constraintBottom_toTopOf="@+id/welcome_text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageView2"
-                app:layout_constraintVertical_chainStyle="packed" />
+                app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
             <TextView
                 android:id="@+id/welcome_text"
                 style="@style/SecondaryTextCentered"
                 android:layout_marginTop="16dp"
                 android:text="@string/welcome_message"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:textAlignment="center"
+                app:layout_constraintBottom_toTopOf="@+id/welcome_text_2"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
@@ -75,11 +76,12 @@
                 style="@style/SecondaryTextCentered"
                 android:layout_marginTop="16dp"
                 android:text="@string/welcome_message_upgrade"
+                android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/welcome_text_header" />
+                app:layout_constraintTop_toBottomOf="@+id/welcome_text" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

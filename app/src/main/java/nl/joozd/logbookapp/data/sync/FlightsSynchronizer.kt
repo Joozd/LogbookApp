@@ -1,6 +1,5 @@
 package nl.joozd.logbookapp.data.sync
 
-import android.util.Log
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import nl.joozd.comms.Client
@@ -189,7 +188,8 @@ class FlightsSynchronizer(
 
     private suspend fun FlightRepositoryWithDirectAccess.markFlightsAsKnownToServer(flights: Collection<Flight>){
         val flightsToMark = flights.filter { it.unknownToServer }
-        saveDirectToDB(flightsToMark.map { it.copy(unknownToServer = false) } )
+        val markedFlights = flightsToMark.map  { it.copy(unknownToServer = false) }
+        saveDirectToDB(markedFlights)
     }
 
     suspend fun replaceAllFlightsWith(newFlights: Collection<Flight>){

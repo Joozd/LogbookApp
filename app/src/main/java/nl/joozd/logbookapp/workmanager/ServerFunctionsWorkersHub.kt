@@ -1,5 +1,7 @@
 package nl.joozd.logbookapp.workmanager
 
+import androidx.work.ExistingWorkPolicy
+
 // This is a class and not an object so I can inject stuff for testing when I think about that sort of thing
 class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
     fun scheduleCreateNewUser(){
@@ -31,7 +33,7 @@ class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
     }
 
     fun scheduleSyncFlights(){
-        enqueueOneTimeWorker<SyncFlightsWorker>(Tags.SYNC_FLIGHTS, needNetwork = true)
+        enqueueOneTimeWorker<SyncFlightsWorker>(Tags.SYNC_FLIGHTS, needNetwork = true, existingWorkPolicy = ExistingWorkPolicy.KEEP)
     }
 
     fun scheduleMerge(){

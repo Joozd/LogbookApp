@@ -28,7 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
-import nl.joozd.logbookapp.data.repository.BalanceForwardRepository
+import nl.joozd.logbookapp.data.repository.BalanceForwardRepositoryImpl
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardDialogEvents
 import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
@@ -202,7 +202,7 @@ class AddBalanceForwardDialogViewmodel: JoozdlogDialogViewModel() {
 
     fun saveBalanceForward(){
         viewModelScope.launch(Dispatchers.IO + NonCancellable) {
-            BalanceForwardRepository.instance.save(balanceForwardSetter)
+            BalanceForwardRepositoryImpl.instance.save(balanceForwardSetter)
             feedback(BalanceForwardDialogEvents.CLOSE_DIALOG)
         }
     }

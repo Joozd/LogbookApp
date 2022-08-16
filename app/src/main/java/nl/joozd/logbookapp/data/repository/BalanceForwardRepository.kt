@@ -1,116 +1,40 @@
-/*
- *  JoozdLog Pilot's Logbook
- *  Copyright (c) 2020-2022 Joost Welle
- *
- *      This program is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU Affero General Public License as
- *      published by the Free Software Foundation, either version 3 of the
- *      License, or (at your option) any later version.
- *
- *      This program is distributed in the hope that it will be useful,
- *      but WITHOUT ANY WARRANTY; without even the implied warranty of
- *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *      GNU Affero General Public License for more details.
- *
- *      You should have received a copy of the GNU Affero General Public License
- *      along with this program.  If not, see https://www.gnu.org/licenses
- *
- */
-
 package nl.joozd.logbookapp.data.repository
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
-import nl.joozd.logbookapp.data.room.JoozdlogDatabase
-import nl.joozd.logbookapp.data.room.dao.BalanceForwardDao
-import nl.joozd.logbookapp.utils.DispatcherProvider
-import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
-class BalanceForwardRepository private constructor(
-    private val balanceforwardDao: BalanceForwardDao
-): CoroutineScope by dispatchersProviderMainScope()  {
-    private val dispatcher = DispatcherProvider.io()
+interface BalanceForwardRepository {
+    val balanceForwardsFlow: Flow<List<BalanceForward>>
 
-    /**********************************************************************************************
-     * Private parts
-     **********************************************************************************************/
+    suspend fun getBalancesForward(): List<BalanceForward>
 
     /**
      * Save a [BalanceForward] to DB
-     */
-    private fun saveToDisk(bf: BalanceForward) = launch(dispatcher + NonCancellable) { balanceforwardDao.save(bf) }
-
-    /**
-     * Deleted BalanceForward for undo purposes
-     */
-    private var deletedBF: BalanceForward? = null
-
-    /**********************************************************************************************
-     * Public parts
-     **********************************************************************************************/
-
-    suspend fun getAll(): List<BalanceForward> = balanceforwardDao.requestAll()
-
-    /**
-     * Get LiveData reference to all BalanceForwards
-     */
-    fun getLive() = balanceforwardDao.requestLiveBalancesForward()
-
-    /**
-     * Save a BalanceForward to DB
      * A BalanceForward with ID -1 gets a new one autoAssigned
-     * @param bf: The BalanceForward to save
+     * @param balanceForward: The BalanceForward to save
      */
-    fun save (bf: BalanceForward) {
-        if (bf.id != -1) saveToDisk(bf)
-        else {
-            launch(dispatcher) {
-                val highestID = getAll().maxByOrNull { it.id }?.id ?: -1
-                save(bf.copy(id = highestID + 1))
-            }
-        }
-    }
+    suspend fun save (balanceForward: BalanceForward)
 
     /**
-     * Save a list of BalanceForwards
-     * @param bff: Balance Forwards
+     * Save a list of [BalanceForward]s to DB
+     * A BalanceForward with ID -1 gets a new one autoAssigned
+     * @param balancesForward: The BalanceForwards to save
      */
-    fun save (bff: List<BalanceForward>) = launch(dispatcher + NonCancellable) {
-        balanceforwardDao.save(*bff.toTypedArray())
-    }
+    suspend fun save (balancesForward: List<BalanceForward>)
 
     /**
      * Delete a specific BalanceForward from DB
      */
-    fun delete(bf: BalanceForward) = launch(dispatcher + NonCancellable) {
-        deletedBF = bf
-        balanceforwardDao.delete(bf)
-    }
+    suspend fun delete(balanceForward: BalanceForward)
 
     /**
-     * Undo most recent deletion of a balance forward
-     * NOTE only the most decent deletion can be undeleted.
+     * Delete a list of BalanceForwards from DB
      */
-    fun undelete(): Boolean {
-        deletedBF?.let{
-            save(it)
-            return true
-        } ?: return false
-    }
+    suspend fun delete (balancesForward: List<BalanceForward>)
 
-    /**********************************************************************************************
-     * Companion object
-     **********************************************************************************************/
-
-    companion object {
+    companion object{
         val instance: BalanceForwardRepository by lazy {
-            val dataBase = JoozdlogDatabase.getInstance()
-            val balanceForwardDao = dataBase.balanceForwardDao()
-            BalanceForwardRepository(balanceForwardDao)
+            BalanceForwardRepositoryImpl.instance
         }
-
-        fun mock(db: JoozdlogDatabase) = BalanceForwardRepository(db.balanceForwardDao())
     }
-
-
 }

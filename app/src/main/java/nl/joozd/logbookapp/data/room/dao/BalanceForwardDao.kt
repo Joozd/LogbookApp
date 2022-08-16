@@ -21,19 +21,17 @@ package nl.joozd.logbookapp.data.room.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 
 @Dao
 interface BalanceForwardDao {
     @Query("SELECT * FROM BalanceForward")
-    suspend fun requestAll(): List<BalanceForward>
-
-    @Query("SELECT * FROM BalanceForward")
-    fun requestLiveBalancesForward(): LiveData<List<BalanceForward>>
+    fun balanceForwardFlow(): Flow<List<BalanceForward>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(vararg balanceForwards: BalanceForward)
 
     @Delete
-    suspend fun delete(bf: BalanceForward)
+    suspend fun delete(vararg bf: BalanceForward)
 }

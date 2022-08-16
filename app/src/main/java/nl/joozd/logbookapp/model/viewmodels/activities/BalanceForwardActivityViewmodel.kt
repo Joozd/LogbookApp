@@ -20,29 +20,27 @@
 package nl.joozd.logbookapp.model.viewmodels.activities
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
-import nl.joozd.logbookapp.data.repository.BalanceForwardRepository
+import nl.joozd.logbookapp.data.repository.BalanceForwardRepositoryImpl
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardActivityEvents
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 
 class BalanceForwardActivityViewmodel: JoozdlogActivityViewModel() {
-    private val balanceForwardRepository = BalanceForwardRepository.instance
+    private val balanceForwardRepository = BalanceForwardRepositoryImpl.instance
 
-    val balancesForward: LiveData<List<BalanceForward>> = balanceForwardRepository.getLive()
+    val balancesForward: LiveData<List<BalanceForward>> = balanceForwardRepository.balanceForwardsFlow.asLiveData()
 
-    fun delete(bf: BalanceForward){
+    fun delete(bf: BalanceForward) = viewModelScope.launch{
         balanceForwardRepository.delete(bf)
         feedback(BalanceForwardActivityEvents.DELETED)
     }
 
-    fun unDelete(){
-        if (balanceForwardRepository.undelete())
-            feedback(BalanceForwardActivityEvents.UNDELETE_OK)
-        else feedback(BalanceForwardActivityEvents.UNDELETE_FAILED)
-    }
-
     fun itemClicked(bf: BalanceForward, item: Int){
         //TODO implement this
+        println("$bf / $item")
         feedback(BalanceForwardActivityEvents.NOT_IMPLEMENTED)
     }
 }

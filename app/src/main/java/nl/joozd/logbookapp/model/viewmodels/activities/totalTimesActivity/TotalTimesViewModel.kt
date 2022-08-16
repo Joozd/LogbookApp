@@ -24,15 +24,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.data.repository.BalanceForwardRepository
+import nl.joozd.logbookapp.data.repository.BalanceForwardRepositoryImpl
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.extensions.replaceValueAt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders.*
-import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesList
 
 
 class TotalTimesViewModel: JoozdlogActivityViewModel() {
@@ -50,7 +48,7 @@ class TotalTimesViewModel: JoozdlogActivityViewModel() {
         viewModelScope.launch{
             //Get all flights and balances forward
             val allFlights = async { FlightRepository.instance.getAllFlights().filter{ !it.isPlanned} }
-            val allBalancesForward = async { BalanceForwardRepository.instance.getAll() }
+            val allBalancesForward = async { BalanceForwardRepositoryImpl.instance.getBalancesForward() }
 
             // build lists
             val totalTimes = async { TotalTimes.of(allFlights.await(), allBalancesForward.await()) }

@@ -34,6 +34,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -67,6 +68,16 @@ open class JoozdlogActivity: AppCompatActivity() {
             }
         }
     }
+
+    protected fun <T> Flow<T>.launchCollectLatestWhileLifecycleStateStarted(collector: suspend (T) -> Unit){
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                collectLatest(collector)
+            }
+        }
+    }
+
+
 
     private fun startMainActivity(context: Context) = with (context) {
         startActivity(packageManager.getLaunchIntentForPackage(packageName))

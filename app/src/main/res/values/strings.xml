@@ -338,7 +338,10 @@
     <string name="dualTime">Dual time</string>
     <string name="instructorTime">Instructor time</string>
     <string name="balanceForward">Balance Forward</string>
-    <string name="saving_pdf">Saving PDF</string>
+    <string name="building_pdf">Building PDF…</string>
+    <string name="ready_to_save_pdf">Ready to save PDF</string>
+    <string name="saving_pdf">Saving PDF…</string>
+    <string name="pdf_saved">PDF Saved</string>
 
 
     <!--

@@ -21,45 +21,37 @@ package nl.joozd.logbookapp.ui.activities
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityMakePdfBinding
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.MakePdfActivityEvents
-import nl.joozd.logbookapp.model.viewmodels.activities.MakePdfActivityViewModel
+import nl.joozd.logbookapp.model.viewmodels.activities.makePdfActivity.MakePdfActivityViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.toast
 
 class MakePdfActivity : JoozdlogActivity() {
-
     private val viewModel = MakePdfActivityViewModel()
 
-    /*
-    Deprecated:
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
-        super.onActivityResult(requestCode, resultCode, resultData)
-        if (requestCode == CREATE_FILE
-            && resultCode == Activity.RESULT_OK) {
-            // The result data contains a URI for the document or directory that
-            // the user selected.
-            resultData?.data?.also { uri ->
-                viewModel.useUri(uri)
-            }
-        }
-    }
-    */
-
-    private val resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+    private val createFileResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             Log.d("MakePdfActivity", "RESULT_OK received")
             // There are no request codes
             // The result data contains a URI for the document or directory that
             // the user selected.
             result.data?.data?.also { uri ->
-                viewModel.useUri(uri)
+                viewModel.targetUri = uri
+                lifecycleScope.launch{
+                    viewModel.saveLogbook(uri)
+                }
             }
         }
     }
@@ -67,9 +59,6 @@ class MakePdfActivity : JoozdlogActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        //start building logbook on (re-)creating so up-to-date data is always used
-        viewModel.buildLogbook()
 
         ActivityMakePdfBinding.inflate(layoutInflater).apply{
             setSupportActionBarWithReturn(pdfMakeActivityToolbar)?.apply {
@@ -80,7 +69,8 @@ class MakePdfActivity : JoozdlogActivity() {
             /***************************************************************************************
              * OnClicklisteners etc
              ***************************************************************************************/
-            tempButton.setOnClickListener {
+            saveToPdfButton.setOnClickListener {
+                saveToPdfButton.isEnabled = false
                 createFile()
             }
 
@@ -88,42 +78,30 @@ class MakePdfActivity : JoozdlogActivity() {
                 sendShareIntent()
             }
 
+            writingProgressBar.max = PROGRESS_BAR_RESOLUTION
 
-            /***************************************************************************************
-             * Observers
-             ***************************************************************************************/
-
-            viewModel.pdfLogbookReady.observe(activity) {
-                if (it) {
-                    tempButton.visibility = View.VISIBLE
-                    shareButton.visibility = View.INVISIBLE
-                }
-                else {
-                    tempButton.visibility = View.GONE
-                    shareButton.visibility = View.GONE
-                }
-            }
-
-            viewModel.feedbackEvent.observe(activity) {
-                when (it.getEvent()){
-                    MakePdfActivityEvents.WRITING -> {
-                        writingTextView.visibility = View.VISIBLE
-                        writingProgressBar.visibility = View.VISIBLE
-                    }
-
-                    MakePdfActivityEvents.FILE_CREATED -> {
-                        writingTextView.visibility = View.GONE
-                        writingProgressBar.visibility = View.GONE
-                        shareButton.visibility = View.VISIBLE
-                    }
-                }
-            }
-
+            startCollectors()
             setContentView(root)
         }
+    }
 
+    private fun ActivityMakePdfBinding.startCollectors(){
+        viewModel.progressFlow.launchCollectWhileLifecycleStateStarted{
+            println("Progress is $it")
+            writingProgressBar.progress = (it * PROGRESS_BAR_RESOLUTION).toInt()
+        }
+        collectStatus()
+    }
 
-
+    private fun ActivityMakePdfBinding.collectStatus(){
+        viewModel.statusFlow.launchCollectWhileLifecycleStateStarted{
+            when(it){
+                MakePdfActivityEvents.BUILDING_LOGBOOK -> buildingLogbook()
+                MakePdfActivityEvents.LOGBOOK_READY -> logbookReady()
+                MakePdfActivityEvents.WRITING -> savingFile()
+                MakePdfActivityEvents.FILE_CREATED -> fileCreated()
+            }
+        }
     }
 
     /**
@@ -135,20 +113,48 @@ class MakePdfActivity : JoozdlogActivity() {
             type = "application/pdf"
             putExtra(Intent.EXTRA_TITLE, "logbook.pdf")
         }
-        resultLauncher.launch(intent)
+        createFileResultLauncher.launch(intent)
+    }
+
+    private fun ActivityMakePdfBinding.buildingLogbook(){
+        saveToPdfButton.isEnabled = false
+        writingProgressBar.visibility = View.VISIBLE
+        writingTextView.setText(R.string.building_pdf)
+        shareButton.visibility = View.GONE
+    }
+
+    private fun ActivityMakePdfBinding.logbookReady(){
+        saveToPdfButton.isEnabled = true
+        writingTextView.setText(R.string.ready_to_save_pdf)
+    }
+
+    private fun ActivityMakePdfBinding.savingFile(){
+        writingProgressBar.visibility = View.INVISIBLE
+        writingProgressBarCircle.visibility = View.VISIBLE
+        writingTextView.setText(R.string.saving_pdf)
+    }
+
+    private fun ActivityMakePdfBinding.fileCreated(){
+        writingTextView.setText(R.string.pdf_saved)
+        writingProgressBarCircle.visibility = View.INVISIBLE
+        shareButton.visibility = View.VISIBLE
     }
 
     private fun sendShareIntent(){
-        viewModel.uriWithLogbook?.let{
-            startActivity(Intent.createChooser(Intent().apply{
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_STREAM, it)
-                type = PDF_MIME_TYPE
-            }, null))
-        } ?: toast("URI is null")
+        lifecycleScope.launch {
+            viewModel.targetUri?.let {
+                startActivity(Intent.createChooser(Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_STREAM, it)
+                    type = PDF_MIME_TYPE
+                }, null))
+            } ?: toast("URI is null")
+        }
     }
 
     companion object{
         const val PDF_MIME_TYPE = "application/pdf"
+
+        private const val PROGRESS_BAR_RESOLUTION = Short.MAX_VALUE.toInt()
     }
 }

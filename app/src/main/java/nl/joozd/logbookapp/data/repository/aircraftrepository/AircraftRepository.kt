@@ -26,10 +26,9 @@ import nl.joozd.joozdlogcommon.ForcedTypeData
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
-import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
 
 interface AircraftRepository {
-    val hasData: StateFlow<Boolean>
+    val dataLoaded: StateFlow<Boolean>
     /**
      * Provide a Flow with updates to AircraftTypes in DB
      */

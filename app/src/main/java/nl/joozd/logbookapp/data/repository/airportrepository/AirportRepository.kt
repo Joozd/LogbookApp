@@ -25,7 +25,7 @@ import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 
 interface AirportRepository {
-    val hasData: StateFlow<Boolean>
+    val dataLoaded: StateFlow<Boolean>
     /**
      * Provide a flow with updates when airport Database gets updated
      */

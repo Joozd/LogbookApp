@@ -46,12 +46,11 @@ class AircraftRepositoryImpl(
     private val aircraftTypeDao = dataBase.aircraftTypeDao()
     private val preloadedRegistrationsDao = dataBase.preloadedRegistrationsDao()
 
-    override val hasData: StateFlow<Boolean> = MutableStateFlow(false)
-    init{
+    override val dataLoaded: StateFlow<Boolean> = MutableStateFlow(false).apply{
         MainScope().launch {
             if (aircraftTypeDao.aircraftTypesFlow().firstOrNull().isNullOrEmpty())
                 updateAircraftTypes(Preloader().getPreloadedAircraftTypes())
-            (hasData as MutableStateFlow).value = true
+            value = true
         }
     }
 

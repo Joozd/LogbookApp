@@ -33,16 +33,14 @@ class AirportRepositoryImpl(
 ): AirportRepository, CoroutineScope by dispatchersProviderMainScope()  {
     private val airportDao = dataBase.airportDao()
 
-    override val hasData: StateFlow<Boolean> = MutableStateFlow(false)
-    init{
+    override val dataLoaded: StateFlow<Boolean> = MutableStateFlow(false).apply{
         MainScope().launch {
             if (airportDao.airportsFlow().firstOrNull().isNullOrEmpty()) {
                 updateAirports(Preloader().getPreloadedAirports())
             }
-            (hasData as MutableStateFlow).value = true
+            value = true
         }
     }
-
 
     override fun airportsFlow() = airportDao.airportsFlow()
 

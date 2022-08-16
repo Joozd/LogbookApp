@@ -35,11 +35,7 @@ import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 
 /**
- * PdfParserActivity does the following:
- * - Get an intent with a PDF file
- * - Send that intent to ViewModel
- * - Get result from Viewmodel and display feedback to user
- * - launch MainActivity
+ * PdfParserActivity parses PDF files from an Intent. After parsing, it starts MainActivity.
  */
 class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
     private val viewModel: PdfParserActivityViewModel by viewModels()
@@ -50,13 +46,14 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
 
         Log.d("PdfParserActivity", "started")
         ActivityPdfParserBinding.inflate(layoutInflater).apply {
-            launchIntentHandler()
             collectHandlerStatus()
+            launchIntentHandler()
             setContentView(root)
         }
     }
 
     private fun ActivityPdfParserBinding.launchIntentHandler() {
+        @Suppress("RedundantExplicitType")  // it is not redundant; lifecycleScope.launch needs a Job instead of a CompleteableJob
         var collectJob: Job = Job()
         collectJob = lifecycleScope.launch {
             viewModel.repositoriesReadyFlow.collect{
@@ -70,7 +67,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
     }
 
     private fun ActivityPdfParserBinding.collectHandlerStatus() {
-        viewModel.status.launchCollectWhileLifecycleStateStarted {
+        viewModel.handlerStatus.launchCollectWhileLifecycleStateStarted {
             when (it) {
                 HandlerStatus.WAITING_FOR_INTENT -> pdfParserStatusTextView.text = getString(R.string.waiting_for_data)
                 HandlerStatus.READING_URI -> pdfParserStatusTextView.text = getString(R.string.reading_file)
@@ -115,10 +112,6 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                 finish()
             }
         }.create().show()
-
-
-
-
 }
 
 

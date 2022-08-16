@@ -30,11 +30,11 @@ class PdfParserActivityViewModel(
     airportRepository: AirportRepository = AirportRepository.instance,
     aircraftRepository: AircraftRepository = AircraftRepository.instance
 ): JoozdlogActivityViewModel() {
-    val repositoriesReadyFlow = combine(aircraftRepository.hasData, airportRepository.hasData){ aircraftReady, airportsReady ->
+    val repositoriesReadyFlow = combine(aircraftRepository.dataLoaded, airportRepository.dataLoaded){ aircraftReady, airportsReady ->
         aircraftReady && airportsReady
     }
     private val handler = SingleUseImportIntentHandler()
-    val status = handler.statusFlow
+    val handlerStatus get() = handler.statusFlow
 
     fun handleIntent(intent: Intent, contentResolver: ContentResolver){
         handler.handleIntent(intent, contentResolver)

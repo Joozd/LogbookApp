@@ -30,7 +30,7 @@ android {
 
     defaultConfig {
         applicationId "nl.joozd.logbookapp"
-        minSdkVersion 23
+        minSdkVersion 26
         targetSdkVersion 32
         versionCode 116 // my version, increment this every build
         versionName "JoozdLog 1.1.2.dev.3"

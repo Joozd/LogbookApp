@@ -41,52 +41,10 @@ class FlightsRepositoryExporter(
     val flightRepository: FlightRepository,
     private val mock: Boolean = false
 ): CoroutineScope by dispatchersProviderMainScope() {
-    private val allFlightsAsync = async { flightRepository.getFlightDataCache().flights.filter{ !it.isPlanned} }
+    private val allFlightsAsync = async { flightRepository.getAllFlights().filter{ !it.isPlanned} }
 
     suspend fun buildCsvString(): String = (listOf(FIRST_LINE_V5)  +
         allFlightsAsync.await().map{ it.toCsvV5() }).joinToString("\n")
-
-
-    private fun Flight.toCsvV4(): String {
-        return with (this.toBasicFlight()){
-            listOf<String>(
-                flightID.toString(),
-                orig,
-                dest,
-                Instant.ofEpochSecond(timeOut).toString(),// from original Flight
-                Instant.ofEpochSecond(timeIn).toString(), // from original Flight
-                correctedTotalTime.toString(),
-                nightTime.toString(),
-                ifrTime.toString(),
-                simTime.toString(),
-                aircraftType,
-                registration,
-                name,
-                name2,
-                takeOffDay.toString(),
-                takeOffNight.toString(),
-                landingDay.toString(),
-                landingNight.toString(),
-                autoLand.toString(),
-                flightNumber,
-                remarks,
-                isPIC.toString(),
-                isPICUS.toString(),
-                isCoPilot.toString(),
-                isDual.toString(),
-                isInstructor.toString(),
-                isSim.toString(),
-                isPF.toString(),
-                isPlanned.toString(),
-                // unknownToServer.toString(),
-                autoFill.toString(),
-                augmentedCrew.toString(),
-                // DELETEFLAG,
-                // timeStamp,
-                Base64.encodeToString(signature.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
-            ).joinToString(";") { it.replace(';', '|') }
-        }
-    }
 
     private fun Flight.toCsvV5(): String {
         return with (this.toBasicFlight()){
@@ -127,119 +85,10 @@ class FlightsRepositoryExporter(
                 // timeStamp,
                 Base64.encodeToString(signature.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
             ).joinToString(";") { it.replace(';', '|') }
-
         }
     }
 
-
-
-
     companion object {
-        const val MOST_RECENT_VERSION = 5
-        const val FIRST_LINE_V4 = "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature"
         const val FIRST_LINE_V5 = "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature"
-                                // flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature
-        /**
-         *  Read a csv with basicFlights to a list of Flights. Flight ID's will need to be assigned before saving.
-         */
-        @Deprecated("Import using CsvImporter in module JoozdlogImport")
-        fun csvToFlights(csvBasicFlights: String, mock: Boolean = false) = csvToFlights(csvBasicFlights.lines(), mock)
-
-        /**
-         *  Read a csv with basicFlights to a list of Flights. Flight ID's will need to be assigned before saving.
-         *  @param csvBasicFlights = list of lines each containing a csv encoded basicFlight
-         */
-        @Deprecated("Import using CsvImporter in module JoozdlogImport")
-        fun csvToFlights(csvBasicFlights: List<String>, mock: Boolean = false): List<Flight> = when (csvBasicFlights.first()){
-            FIRST_LINE_V4 -> csvBasicFlights.drop(1).map{Flight(upgrade4to5(csvFlightToBasicFlightv4(it, mock)))}
-            FIRST_LINE_V5 -> csvBasicFlights.drop(1).map{Flight(csvFlightToBasicFlightv5(it, mock))}
-            else -> throw (IllegalArgumentException("Not a supported CSV format"))
-        }
-
-
-        /**
-         * Convert a flight in CSV String format to a flight in [BasicFlight_version4] format
-         */
-        private fun csvFlightToBasicFlightv4(csvFlight: String, mock: Boolean = false): BasicFlight_version4 = csvFlight.split(';').map{ it.replace('|', ';')}.let { v->
-            require(BasicFlight_version4.VERSION.version == 4)
-            BasicFlight_version4(
-                flightID = -1,
-                orig = v[1],
-                dest = v[2],
-                timeOut = Instant.parse(v[3]).epochSecond,
-                timeIn = Instant.parse(v[4]).epochSecond,
-                correctedTotalTime = v[5].toInt(),
-                nightTime = v[6].toInt(),
-                ifrTime = v[7].toInt(),
-                simTime = v[8].toInt(),
-                aircraft = v[9],
-                registration = v[10],
-                name = v[11],
-                name2 = v[12],
-                takeOffDay = v[13].toInt(),
-                takeOffNight = v[14].toInt(),
-                landingDay = v[15].toInt(),
-                landingNight = v[16].toInt(),
-                autoLand = v[17].toInt(),
-                flightNumber = v[18],
-                remarks = v[19],
-                isPIC = v[20] == true.toString(),
-                isPICUS = v[21] == true.toString(),
-                isCoPilot = v[22] == true.toString(),
-                isDual = v[23] == true.toString(),
-                isInstructor = v[24] == true.toString(),
-                isSim = v[25] == true.toString(),
-                isPF = v[26] == true.toString(),
-                isPlanned = v[27] == true.toString(),
-                changed =true,
-                autoFill = v[28] == true.toString(),
-                augmentedCrew = v[29].toInt(),
-                DELETEFLAG = false,
-                timeStamp = TimestampMaker().nowForSycPurposes,
-                signature = if (mock) "" else Base64.decode(v[30], Base64.NO_WRAP).toString(Charsets.UTF_8)
-            )
-        }
-
-        private fun csvFlightToBasicFlightv5(csvFlight: String, mock: Boolean = false): BasicFlight = csvFlight.split(';').map{ it.replace('|', ';')}.let { v->
-            require(BasicFlight.VERSION.version == 5)
-            BasicFlight(
-                flightID = -1,
-                orig = v[1],
-                dest = v[2],
-                timeOut = Instant.parse(v[3]).epochSecond,
-                timeIn = Instant.parse(v[4]).epochSecond,
-                correctedTotalTime = v[5].toInt(),
-                multiPilotTime = v[6].toInt(),
-                nightTime = v[7].toInt(),
-                ifrTime = v[8].toInt(),
-                simTime = v[9].toInt(),
-                aircraft = v[10],
-                registration = v[11],
-                name = v[12],
-                name2 = v[13],
-                takeOffDay = v[14].toInt(),
-                takeOffNight = v[15].toInt(),
-                landingDay = v[16].toInt(),
-                landingNight = v[17].toInt(),
-                autoLand = v[18].toInt(),
-                flightNumber = v[19],
-                remarks = v[20],
-                isPIC = v[21] == true.toString(),
-                isPICUS = v[22] == true.toString(),
-                isCoPilot = v[23] == true.toString(),
-                isDual = v[24] == true.toString(),
-                isInstructor = v[25] == true.toString(),
-                isSim = v[26] == true.toString(),
-                isPF = v[27] == true.toString(),
-                isPlanned = v[28] == true.toString(),
-                unknownToServer =true,
-                autoFill = v[29] == true.toString(),
-                augmentedCrew = v[30].toInt(),
-                DELETEFLAG = false,
-                timeStamp = TimestampMaker().nowForSycPurposes,
-                signature = if (mock) "" else Base64.decode(v[31], Base64.NO_WRAP).toString(Charsets.UTF_8)
-            )
-        }
-
     }
 }

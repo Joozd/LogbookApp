@@ -2,7 +2,13 @@
 JOOZDLOG TODO LIST (in no particular order)
 ******************
 
-Brand new release with no known issues! (I do expect some to arise though)
+- Some issues with names on KLC Briefing sheets with 5 crew
 
+- Reporting of how many flights have been changed when importing a monthly overview can be unreliable
 
+- Balance Forward is not synced to cloud yet
+
+- Aircraft picker dialog search field has issues
+
+- Names picker dialog is rather user-unfriendly
 

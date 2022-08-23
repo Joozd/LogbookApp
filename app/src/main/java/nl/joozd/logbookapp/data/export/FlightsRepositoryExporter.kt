@@ -43,8 +43,8 @@ class FlightsRepositoryExporter(
 ): CoroutineScope by dispatchersProviderMainScope() {
     private val allFlightsAsync = async { flightRepository.getAllFlights().filter{ !it.isPlanned} }
 
-    suspend fun buildCsvString(): String = (listOf(FIRST_LINE_V5)  +
-        allFlightsAsync.await().map{ it.toCsvV5() }).joinToString("\n")
+    suspend fun buildCsvString(): String =
+        FIRST_LINE_V5 + "\n" + allFlightsAsync.await().joinToString("\n") { it.toCsvV5() }
 
     private fun Flight.toCsvV5(): String {
         return with (this.toBasicFlight()){

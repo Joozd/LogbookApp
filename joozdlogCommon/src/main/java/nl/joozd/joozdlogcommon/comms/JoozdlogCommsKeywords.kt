@@ -64,6 +64,7 @@ object JoozdlogCommsKeywords {
     const val REQUEST_ID_WITH_TIMESTAMPS_LIST = "REQUEST_ID_WITH_TIMESTAMPS_LIST" // Client can expect a packed List<serialized IDWithTimeStamp>
     const val REQUEST_FLIGHTS = "REQUEST_FLIGHTS" // expects in extraData a list of Ints, representing a list of FlightIDs to send. Client can expect a list of all found flights as List<serialized BasicFlight>; nonexistent IDs will be ignored.
     const val SENDING_NEWER_FLIGHTS = "SENDING_NEWER_FLIGHTS" // server will expect a packed List<serialized BasicFlight> as extraData
+    const val KILL_DUPLICATES = "KILL_DUPLICATES" // server will check for duplicates using utilities.checkForDuplicates() and delete all duplicates found that way
 
     //deprecated, but here for backwards compatibility
     const val SENDING_FLIGHTS = "SENDING_FLIGHTS"

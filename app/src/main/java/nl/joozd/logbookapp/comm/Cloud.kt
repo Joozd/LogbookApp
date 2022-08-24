@@ -171,6 +171,11 @@ class Cloud(
         return unpackSerialized(response!!).map { BasicFlight.deserialize(it) }
     }
 
+    suspend fun Client.killDuplicates() {
+        sendRequest(JoozdlogCommsKeywords.KILL_DUPLICATES)
+        handleResponseAndThrowExceptionOnError()
+    }
+
     suspend fun Client.sendFlights(flights: List<BasicFlight>) {
         sendRequest(JoozdlogCommsKeywords.SENDING_NEWER_FLIGHTS, packSerializable(flights))
         handleResponseAndThrowExceptionOnError()

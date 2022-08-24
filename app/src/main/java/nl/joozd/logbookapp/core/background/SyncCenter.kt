@@ -25,6 +25,11 @@ class SyncCenter private constructor(private val taskFlags: TaskFlags = TaskFlag
         taskFlags.syncFlights(true)
     }
 
+    fun killDuplicates(){
+        taskFlags.killDuplicates(true)
+        taskFlags.syncFlights(true)
+    }
+
     suspend fun syncFlightsIfNotJustDone(){
         if (Instant.now().epochSecond - ServerPrefs.mostRecentFlightsSyncEpochSecond() > TIME_BETWEEN_SYNC_CHECKS)
             syncFlights()

@@ -2,6 +2,7 @@ package nl.joozd.logbookapp.data.sync
 
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import nl.joozd.comms.Client
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogcommon.FlightsListChecksum
@@ -9,6 +10,7 @@ import nl.joozd.joozdlogcommon.IDWithTimeStamp
 import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.comm.CloudFunctionResult
 import nl.joozd.logbookapp.comm.ServerFunctionResult
+import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.importing.merging.mergeFlightsLists
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
@@ -68,6 +70,9 @@ class FlightsSynchronizer(
         try {
             doInOneClientSession {
                 login()
+                if(TaskFlags.killDuplicates.flow.first()){
+                    killDuplicatesOnServer()
+                }
                 if (!checkIfIsSynchronized())
                     performSync()
             }
@@ -88,6 +93,11 @@ class FlightsSynchronizer(
         downloadUpdatedFlightsFromServer(serverIdsAndTimestamps)
         sendUpdatedFlightsToServer(serverIdsAndTimestamps)
         if (repositoryWasChanged) return performSync() // if somebody touched repository, sync again.
+    }
+
+    private suspend fun Client.killDuplicatesOnServer(): Unit = with(cloud){
+        killDuplicates()
+        TaskFlags.killDuplicates(false) // if killDuplicates() fails, it will throw exception and we will not get here
     }
 
     private suspend fun Client.login() = with (cloud){

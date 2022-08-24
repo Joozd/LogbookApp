@@ -174,7 +174,7 @@
                     tools:visibility="visible" />
 
                 <Button
-                    android:id="@+id/settingsFixFlightDb"
+                    android:id="@+id/settings_fix_flight_db_button"
                     style="@style/SettingsActivityButton"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"

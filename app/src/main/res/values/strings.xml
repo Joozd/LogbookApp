@@ -446,6 +446,7 @@
     <string name="standard_augmented_time"><![CDATA[<b>Augmented Crew takeoff/landing time</b><br><small>%1$s minutes</small>&nbsp;]]></string>
     <string name="fix_flights_db">Remove duplicate flights from DB</string>
     <string name="n_duplicates_have_been_removed">%1$d duplicate flights have been removed.</string>
+    <string name="n_duplicates_have_been_removed_long_message">%1$d duplicate flights have been removed.\nThey will also be removed from Cloud.\nHowever, to prevent them re-appearing again, remove duplicates or disable cloud syncing on any other devices you use Joozdlog on as well, or they will come back.</string>
 
     <string name="backup_interval_time"><![CDATA[<b>Remind me to make a backup every</b><br><small>%1$s</small>&nbsp;]]></string>
     <string name="backup_from_cloud">Send backup emails from cloud</string>

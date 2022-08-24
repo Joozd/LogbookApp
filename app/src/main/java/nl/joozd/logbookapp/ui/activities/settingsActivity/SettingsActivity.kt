@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.ui.activities.settingsActivity
 
+import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -37,7 +38,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.background.BackupCenter
+import nl.joozd.logbookapp.core.background.SyncCenter
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
@@ -278,7 +281,10 @@ class SettingsActivity : JoozdlogActivity() {
 
         augmentedCrewButton.setOnClickListener { showAugmentedTimesNumberPicker() }
 
-        settingsFixFlightDb.setOnClickListener { fixDB() }
+        settingsFixFlightDbButton.setOnClickListener {
+            it.isEnabled = false
+            fixDB(it)
+        }
 
         backupIntervalButton.setOnClickListener { showBackupIntervalNumberPicker() }
 
@@ -464,14 +470,27 @@ class SettingsActivity : JoozdlogActivity() {
         }.show(supportFragmentManager, null)
     }
 
-    private fun fixDB(){
+    private fun fixDB(viewToEnableWhenDone: View){
         lifecycleScope.launch {
-        val removedFlightsCount = FlightRepositoryWithSpecializedFunctions.instance.removeDuplicates()
-            toast(getString(R.string.n_duplicates_have_been_removed, removedFlightsCount))
-            //TODO if using Cloud, notify user that DB has been polluted and tell them to run this function on all devices they are using as well to prevent cloud from being re-polluted
-            //TODO make explanation box like [augmentedTakeoffTimeHintButton]
-            //TODO make this appear busy while it is busy (and not clickable another time as well)
+            val removedFlightsCount = FlightRepositoryWithSpecializedFunctions.instance.removeDuplicates()
+            if (removedFlightsCount == 0)
+                toast(getString(R.string.n_duplicates_have_been_removed, removedFlightsCount))
+            else{
+                SyncCenter.instance.killDuplicates()
+                showDuplicatesFoundDialog(removedFlightsCount)
+            }
+            viewToEnableWhenDone.isEnabled = true
         }
+    }
+
+    private fun showDuplicatesFoundDialog(removedFlightsCount: Int){
+        AlertDialog.Builder(this).apply{
+            setTitle(R.string.delete)
+            setMessage(getString(R.string.n_duplicates_have_been_removed_long_message, removedFlightsCount))
+            setPositiveButton(android.R.string.ok){ _, _ ->
+                // intentionally left blank
+            }
+        }.create().show()
     }
 
     private fun showBackupIntervalNumberPicker(){

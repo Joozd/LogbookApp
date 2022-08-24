@@ -20,6 +20,8 @@
 package nl.joozd.joozdlogcommon
 
 import nl.joozd.serializing.*
+import java.time.Instant
+import java.util.*
 
 data class BasicFlight(
     val flightID: Int,
@@ -111,6 +113,47 @@ data class BasicFlight(
 
         return serialized
     }
+    fun toCsv(): String {
+        return listOf<String>(
+            flightID.toString(),
+            orig,
+            dest,
+            Instant.ofEpochSecond(timeOut).toString(),// from original Flight
+            Instant.ofEpochSecond(timeIn).toString(), // from original Flight
+            correctedTotalTime.toString(),
+            multiPilotTime.toString(),
+            nightTime.toString(),
+            ifrTime.toString(),
+            simTime.toString(),
+            aircraft,
+            registration,
+            name,
+            name2,
+            takeOffDay.toString(),
+            takeOffNight.toString(),
+            landingDay.toString(),
+            landingNight.toString(),
+            autoLand.toString(),
+            flightNumber,
+            remarks,
+            isPIC.toString(),
+            isPICUS.toString(),
+            isCoPilot.toString(),
+            isDual.toString(),
+            isInstructor.toString(),
+            isSim.toString(),
+            isPF.toString(),
+            isPlanned.toString(),
+            // unknownToServer.toString(),
+            autoFill.toString(),
+            augmentedCrew.toString(),
+            // DELETEFLAG,
+            // timeStamp,
+            Base64.getEncoder().encodeToString(signature.toByteArray(Charsets.UTF_8))
+        ).joinToString(";") { it.replace(';', '|') }
+    }
+
+
     companion object: JoozdSerializable.Deserializer<BasicFlight> {
 
         override fun deserialize(source: ByteArray): BasicFlight {

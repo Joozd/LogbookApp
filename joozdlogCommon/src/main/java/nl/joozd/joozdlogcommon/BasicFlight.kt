@@ -57,7 +57,7 @@ data class BasicFlight(
     val autoFill: Boolean,
     val augmentedCrew: Int,
     val DELETEFLAG: Boolean,
-    val timeStamp: Long = -1,          // timeStamp is time of synch with server for this flight
+    val timeStamp: Long = -1,
     val signature: String = ""
 ): JoozdSerializable {
     object VERSION {
@@ -113,6 +113,7 @@ data class BasicFlight(
 
         return serialized
     }
+
     fun toCsv(): String {
         return listOf<String>(
             flightID.toString(),
@@ -153,9 +154,7 @@ data class BasicFlight(
         ).joinToString(";") { it.replace(';', '|') }
     }
 
-
     companion object: JoozdSerializable.Deserializer<BasicFlight> {
-
         override fun deserialize(source: ByteArray): BasicFlight {
             val wraps = serializedToWraps(source)
             return BasicFlight(

@@ -23,7 +23,7 @@ apply plugin: 'kotlin-android'
 android{
     compileSdkVersion 32
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 26
         targetSdkVersion 32
     }
     namespace 'nl.joozd.joozdlogimporter'

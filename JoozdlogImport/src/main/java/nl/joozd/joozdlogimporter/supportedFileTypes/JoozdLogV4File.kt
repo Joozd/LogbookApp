@@ -21,10 +21,14 @@ package nl.joozd.joozdlogimporter.supportedFileTypes
 
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
+import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.JoozdlogCsvV4Extractor
+import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.JoozdlogCsvV5Extractor
 
+
+//Joozdlog V4 does not have MultiPilotTime
 class JoozdLogV4File(lines: List<String>): CompleteLogbookFile(lines) {
     override val extractor: CompleteLogbookExtractor
-        get() = TODO("Not yet implemented")
+        get() = JoozdlogCsvV4Extractor()
     override val identFormat = AirportIdentFormat.ICAO
 
     companion object {

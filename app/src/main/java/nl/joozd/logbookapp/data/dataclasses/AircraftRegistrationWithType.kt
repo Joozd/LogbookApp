@@ -22,7 +22,7 @@ package nl.joozd.logbookapp.data.dataclasses
 import nl.joozd.joozdlogcommon.AircraftType
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
 
-//knownToServer is not used anymore, I am leaving it in because I don't want to update database. (I am lazy)
+//knownToServer and previousType are not used anymore, I am leaving it in for now because I don't want to update database. (I am lazy)
 data class AircraftRegistrationWithType(val registration: String, val type: AircraftType, val knownToServer: Boolean = false, val previousType: AircraftType? = null){
     constructor(model: AircraftRegistrationWithTypeData): this(
         model.registration,

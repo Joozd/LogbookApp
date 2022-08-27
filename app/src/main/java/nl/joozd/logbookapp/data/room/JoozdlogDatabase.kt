@@ -27,7 +27,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.data.room.model.AircraftRegistrationWithTypeData
-import nl.joozd.logbookapp.data.room.model.AircraftTypeConsensusData
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.data.room.dao.*
 import nl.joozd.logbookapp.data.room.model.AircraftTypeData
@@ -38,13 +37,12 @@ import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
  * Version 8: added multiPilotTime to FlightData
  * Version 9: Changed AircraftRegistrationWithTypeData
  */
-@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, AircraftTypeConsensusData::class, PreloadedRegistration::class, BalanceForward::class], version = 9, exportSchema = true)
+@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, PreloadedRegistration::class, BalanceForward::class], version = 9, exportSchema = true)
 abstract class JoozdlogDatabase protected constructor(): RoomDatabase() { // protected constructor instead of private due to room needing access to it
     abstract fun flightDao(): FlightDao
     abstract fun airportDao(): AirportDao
     abstract fun aircraftTypeDao(): AircraftTypeDao
     abstract fun registrationDao(): RegistrationDao
-    abstract fun aircraftTypeConsensusDao(): AircraftTypeConsensusDao
     abstract fun preloadedRegistrationsDao(): PreloadedRegistrationsDao
     abstract fun balanceForwardDao(): BalanceForwardDao
 
@@ -78,12 +76,13 @@ abstract class JoozdlogDatabase protected constructor(): RoomDatabase() { // pro
             }
         }
 
- */
         private val UPDATE_7_8 = object : Migration(7, 8) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE FlightData ADD COLUMN multiPilotTime INTEGER NOT NULL DEFAULT 0")
             }
         }
+        */
+        
         private val UPDATE_8_9 = object : Migration(8, 9) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("DROP TABLE AircraftRegistrationWithTypeData")

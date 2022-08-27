@@ -27,11 +27,9 @@ import androidx.room.PrimaryKey
  * This class matches aircraft registrations to types
  * This is what is used FIRST if looking to match an aircraft to a type
  * @param registration: Primary key, aircraft registration (can be any string, but usually something like "PH-EZE"
- * @param type: AircraftTypeData.name<String> to match with AircraftType
- * @param knownToServer: If false, let server know about this for consensus
- * @param previousType: Previous type known by server
- *      if ![knownToServer] this is to be sent to server for consensus (subtract counter)
- *      if [knownToServer], if [type] is changed, change this to previous type
+ * @param serializedType: Serialized AircraftType
+ * @param knownToServer: knownToServer is not used anymore, I am leaving it in because I don't want to update database. (I am lazy)
+ * @param serializedPreviousType: previousType is not used anymore, I am leaving it in because I don't want to update database. (I am lazy)
  */
 @Suppress("ArrayInDataClass")
 @Entity
@@ -39,7 +37,7 @@ data class AircraftRegistrationWithTypeData(
     @PrimaryKey val registration: String,
 
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    var serializedType: ByteArray, // serialized AircraftType
+    var serializedType: ByteArray,
     var knownToServer: Boolean = false,
 
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)

@@ -33,10 +33,6 @@ class MockDatabase: JoozdlogDatabase() {
 
     override fun registrationDao(): RegistrationDao = MockRegstrationDao()
 
-    override fun aircraftTypeConsensusDao(): AircraftTypeConsensusDao {
-        TODO("Not used at the moment") // not used at the moment but don't want to run updates on DB
-    }
-
     override fun preloadedRegistrationsDao(): PreloadedRegistrationsDao = MockPreloadedRegistrationsDao()
 
     override fun balanceForwardDao(): BalanceForwardDao = MockBalanceForwardDao()

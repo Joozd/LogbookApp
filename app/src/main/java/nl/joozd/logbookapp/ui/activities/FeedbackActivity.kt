@@ -27,14 +27,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.commit
 import androidx.lifecycle.asLiveData
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.databinding.ActivityFeedbackBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.GeneralEvents
 import nl.joozd.logbookapp.model.viewmodels.FeedbackActivityViewModel
 import nl.joozd.logbookapp.ui.dialogs.TextDisplayDialog
-import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.toast
 

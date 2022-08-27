@@ -165,12 +165,6 @@
 
     <string name="custom_airport_caution_text">You are entering a custom airport. If you do not enter lat/long coordinates (TODO: NOT IMPLEMENTED IN THIS VERSION), automatic night time errors might occur.\n(You are reminded in Edit Flight screen by (!) next to airport identifier)</string>
 
-    <string name="aircraft_type_found">Found locally</string>
-    <string name="aircraft_type_in_flights">Found in Flights</string>
-    <string name="aircraft_type_in_flights_conflict">Different types found for this registration</string>
-    <string name="aircraft_type_in_consensus">Type entered by other users</string>
-    <string name="aircraft_type_from_server">Type match from server</string>
-    <string name="aircraft_type_not_found">Unknown registration, please select a type</string>
     <string name="airport_not_found_no_night_time">Airport location unknown, no night time logged.</string>
 
     <string name="file_not_found_title">File not found</string>
@@ -185,7 +179,7 @@
     <string name="unknown_link_message">This link is unknown or contains bad data. Please check the link and try again.</string>
 
 
-    <string name="total_time_too_large">Total time cannot be more than offblocks to on blocks</string>
+    <string name="total_time_too_large">Total time cannot be more than off blocks to on blocks</string>
     <string name="invalid_total_time">Could not parse total time</string>
 
     <string name="new_user_error_0001">Error creating new user: error 0001. This error is not expected to occur. Please inform Joozd though the "feedback" menu.</string>

@@ -130,6 +130,7 @@
     <string name="takeoffs_landings">Takeoffs/Landings</string>
     <string name="arrowRight">➔</string>
     <string name="settings">Settings</string>
+    <string name ="transfer_data">Transfer Data</string>
     <string name="error">Error</string>
     <string name="error_dialog_message">An error %1$d has occurred. Please let Joozd know though the "Feedback" menu option.\n\nError description:\n%2$s</string>
     <string name="never">Never</string>
@@ -371,6 +372,8 @@
     <string name="are_you_sure_qmk">Are you sure?</string>
     <string name="this_will_replace_your_entire_logbook">This will replace your entire logbook, and might not be undoable. If you are using Cloud function this will also create a new Cloud account as it can cause problems when synchronizing multiple devices. Please make sure you really want this, and always have a backup of your current data!</string>
     <string name="this_will_enter_all_flights_into_logbook">This will place all imported flights into your logbook, and might not be undoable. Please make sure you really want this, and always have a backup of your current data!</string>
+    <string name="replace_or_merge">Replace or merge?</string>
+    <string name="replace_or_merge_long">Do you want to replace all flights by incoming flights, or merge them? NOTE: This cannot be undone!</string>
     <string name="replace">Replace</string>
     <string name="merge">Merge</string>
     <string name="import_complete_logbook_sanitize">You are importing a complete logbook. Do you want to automatically calculate missing values such as night- or multi-pilot times?</string>

@@ -36,6 +36,7 @@ object JoozdlogCommsKeywords {
     const val NEXT_IS_COMPRESSED = "NEXT_IS_COMPRESSED"
     const val HELLO = "HELLO" // to be done before any communications with PROTOCOL_VERSION. Do this right after creating SSL connection.
     const val END_OF_SESSION = "END_OF_SESSION"
+    const val P2P_SESSION_NOT_FOUND = "P2P_SESSION_NOT_FOUND"
 
     //general keywords
     const val REQUEST_TIMESTAMP = "REQUEST_TIMESTAMP"
@@ -66,7 +67,13 @@ object JoozdlogCommsKeywords {
     const val SENDING_NEWER_FLIGHTS = "SENDING_NEWER_FLIGHTS" // server will expect a packed List<serialized BasicFlight> as extraData
     const val KILL_DUPLICATES = "KILL_DUPLICATES" // server will check for duplicates using utilities.checkForDuplicates() and delete all duplicates found that way
 
-    //deprecated, but here for backwards compatibility
+    //p2p keywords
+    const val SENDING_P2P_DATA = "SENDING_P2P_DATA"   // Client is sending data for retrieval by another client. Data to store in extraData.
+    const val REQUEST_P2P_DATA = "REQUEST_P2P_DATA"     // Client requests to join a p2p session as p2p client with another client. ID in extraData. Client can expect the requested data or P2P_SESSION_NOT_FOUND. After this client will be added to this session if found.
+
+    /*
+        deprecated, but here for backwards compatibility
+     */
     const val SENDING_FLIGHTS = "SENDING_FLIGHTS"
     const val REQUEST_FLIGHTS_SINCE_TIMESTAMP = "REQUEST_FLIGHTS_SINCE_TIMESTAMP" // can be used with timestamp -1 for all flights
 

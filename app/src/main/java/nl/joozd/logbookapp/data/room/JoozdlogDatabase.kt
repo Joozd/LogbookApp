@@ -37,7 +37,7 @@ import nl.joozd.logbookapp.data.room.model.PreloadedRegistration
  * Version 8: added multiPilotTime to FlightData
  * Version 9: Changed AircraftRegistrationWithTypeData
  */
-@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, PreloadedRegistration::class, BalanceForward::class], version = 9, exportSchema = true)
+@Database(entities = [FlightData::class, Airport::class, AircraftTypeData::class, AircraftRegistrationWithTypeData::class, PreloadedRegistration::class, BalanceForward::class], version = JoozdlogDatabase.VERSION, exportSchema = true)
 abstract class JoozdlogDatabase protected constructor(): RoomDatabase() { // protected constructor instead of private due to room needing access to it
     abstract fun flightDao(): FlightDao
     abstract fun airportDao(): AirportDao
@@ -49,6 +49,8 @@ abstract class JoozdlogDatabase protected constructor(): RoomDatabase() { // pro
     companion object {
         private var INSTANCE: JoozdlogDatabase? = null
 
+        const val VERSION = 10
+
         @Synchronized
         fun getInstance(): JoozdlogDatabase {
             INSTANCE?.let { return it }
@@ -56,7 +58,7 @@ abstract class JoozdlogDatabase protected constructor(): RoomDatabase() { // pro
                 App.instance.applicationContext,
                 JoozdlogDatabase::class.java,
                 "flights_database"
-            ).addMigrations(UPDATE_8_9)
+            ).addMigrations(UPDATE_8_9, UPDATE_9_10)
                 .build()
             INSTANCE = instance
             return instance
@@ -87,6 +89,12 @@ abstract class JoozdlogDatabase protected constructor(): RoomDatabase() { // pro
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("DROP TABLE AircraftRegistrationWithTypeData")
                 database.execSQL("CREATE TABLE IF NOT EXISTS `AircraftRegistrationWithTypeData` (`registration` TEXT NOT NULL, `serializedType` BLOB NOT NULL, `knownToServer` INTEGER NOT NULL, `serializedPreviousType` BLOB NOT NULL, PRIMARY KEY(`registration`))")
+            }
+        }
+
+        private val UPDATE_9_10 = object : Migration(9, 10) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("DROP TABLE AircraftTypeConsensusData")
             }
         }
     }

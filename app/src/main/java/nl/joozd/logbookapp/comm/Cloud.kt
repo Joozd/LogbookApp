@@ -10,10 +10,7 @@ import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.usermanagement.UsernameWithKey
 import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.exceptions.CloudException
-import nl.joozd.serializing.longFromBytes
-import nl.joozd.serializing.packSerializable
-import nl.joozd.serializing.unpackSerialized
-import nl.joozd.serializing.wrap
+import nl.joozd.serializing.*
 
 /**
  * Cloud does the communication with the server.
@@ -28,10 +25,11 @@ class Cloud(
     private val port: Int = Protocol.SERVER_PORT
 ) {
     private val basicFlightVersion get() = BasicFlight.VERSION.version
+
     /**
      * @return true if data accepted, false if username and/or key are rejected by server.
      */
-    suspend fun createNewUser(username: String, key: ByteArray): CloudFunctionResult{
+    suspend fun createNewUser(username: String, key: ByteArray): CloudFunctionResult {
         val payLoad = LoginData(username, key, BasicFlight.VERSION.version).serialize()
         return resultForRequest(JoozdlogCommsKeywords.NEW_ACCOUNT, payLoad)
     }
@@ -53,7 +51,7 @@ class Cloud(
      */
     suspend fun sendNewEmailAddress(username: String, key: ByteArray, emailToSend: String): CloudFunctionResult {
         val data = LoginDataWithEmail(username, key, basicFlightVersion, emailToSend).serialize()
-        return resultForRequest (JoozdlogCommsKeywords.SET_EMAIL, data)
+        return resultForRequest(JoozdlogCommsKeywords.SET_EMAIL, data)
     }
 
     /**
@@ -65,7 +63,7 @@ class Cloud(
         withClient {
             require(newKey.size == Protocol.KEY_SIZE) // maybe handle this a bit more gracefully? Should not happen anyway.
             val r = login(UsernameWithKey(username, currentKey))
-            if(r != CloudFunctionResult.OK) return r
+            if (r != CloudFunctionResult.OK) return r
             return changePasswordOnServer(newKey, ServerPrefs.emailAddress())
         }
 
@@ -109,10 +107,9 @@ class Cloud(
     //This is meant for operations which require some back-and-forth transfers with server.
     // At the time of this writing only flights syncing uses it.
     suspend fun <T> doInOneClientSession(block: suspend Client.() -> T): T =
-        withClient{
+        withClient {
             block()
         }
-
 
 
     /*
@@ -142,7 +139,7 @@ class Cloud(
      */
     suspend fun Client.getFlightsListChecksum(): FlightsListChecksum {
         sendRequest(JoozdlogCommsKeywords.REQUEST_FLIGHTS_LIST_CHECKSUM)
-        readFromServer().let{ response ->
+        readFromServer().let { response ->
             handleServerResult(response)
             return FlightsListChecksum.deserialize(response!!)
         }
@@ -181,6 +178,20 @@ class Cloud(
         handleResponseAndThrowExceptionOnError()
     }
 
+    suspend fun sendP2PData(data: ByteArray): Long {
+        println("SendP2PData (${data.size})")
+        return unwrapLong(resultForRequestOrException(JoozdlogCommsKeywords.SENDING_P2P_DATA, data))
+    }
+
+    suspend fun receiveP2PData(sessionID: Long): ByteArray {
+        println("receiveP2PData")
+        val payload = wrap(sessionID)
+        println("wrapped session ID")
+        return resultForRequestOrException(JoozdlogCommsKeywords.REQUEST_P2P_DATA, payload).also{
+            println("receiveP2PData returns ${it.size} bytes")
+        }
+    }
+
 
     //Doesn't handle bad login data, but server will refuse empty usernames etc.
     //However, it is better to check this (e.g. with with UserManagement.checkIfLoginDataSet()) before making bad data.
@@ -205,10 +216,18 @@ class Cloud(
         }
     }
 
-    private suspend fun resultForRequest(request: String, extraData: ByteArray? ): CloudFunctionResult = withClient {
+    private suspend fun resultForRequest(request: String, extraData: ByteArray?): CloudFunctionResult = withClient {
         sendRequest(request, extraData)
         handleResponse()!!
     }
+
+    private suspend fun resultForRequestOrException(request: String, extraData: ByteArray?, progressListener: ProgressListener? = null): ByteArray = withClient {
+        sendRequest(request, extraData)
+        val response = if (progressListener != null) readFromServer(progressListener::progress) else readFromServer()
+        handleServerResultAndThrowExceptionOnError(response)
+        return response!! // null gets caught by handleServerResultAndThrowExceptionOnError()
+    }
+
 
     private suspend fun Client.changePasswordOnServer(newPassword: ByteArray, email: String): CloudFunctionResult {
         val payload = LoginDataWithEmail("", newPassword, 0, email).serialize() // username and basicFlightVersion are unused in this function
@@ -219,6 +238,11 @@ class Cloud(
     private suspend fun Client.handleResponse() = handleServerResult(readServerResponse())
 
     private suspend fun Client.handleResponseAndThrowExceptionOnError() = handleServerResultAndThrowExceptionOnError(readServerResponse())
+
+
+    fun interface ProgressListener{
+        fun progress(progress: Int)
+    }
 
     // Pass this to functions giving a result to get returned data.
     // The return of the function will only be a CloudFunctionResult, so if you want anything else you can drop it in here.

@@ -78,6 +78,7 @@ class MainActivity : JoozdlogActivity() {
             R.id.app_bar_search -> viewModel.menuSelectedSearch()
             R.id.menu_feedback -> startFeedbackActivity()
             R.id.menu_about -> showAboutDialog()
+            R.id.menu_transfer -> showTransferActivity()
             R.id.menu_export_pdf -> startMakePdfActivity()
             else -> return false
         }
@@ -115,6 +116,7 @@ class MainActivity : JoozdlogActivity() {
     }
 
     override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
         handleIntent(intent)
     }
 
@@ -407,6 +409,10 @@ class MainActivity : JoozdlogActivity() {
             add(R.id.mainActivityLayout, AboutDialog())
             addToBackStack(null)
         }
+    }
+
+    private fun showTransferActivity(){
+        startActivity(Intent(this, SharingActivity::class.java))
     }
 
     private fun showDeletingCompletedFlightDialog(flight: ModelFlight){

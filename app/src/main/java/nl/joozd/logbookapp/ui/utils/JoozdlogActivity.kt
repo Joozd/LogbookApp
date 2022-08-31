@@ -27,6 +27,7 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import android.widget.CompoundButton
 import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Lifecycle
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.R
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
@@ -108,7 +110,9 @@ open class JoozdlogActivity: AppCompatActivity() {
         }
         flow.launchCollectWhileLifecycleStateStarted{
             println("COLLECTED: $it from $flow")
-            isChecked = it
+            isChecked = it.apply{
+
+            }
         }
     }
 

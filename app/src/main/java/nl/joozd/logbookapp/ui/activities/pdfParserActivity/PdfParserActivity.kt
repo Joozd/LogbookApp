@@ -107,7 +107,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
     private fun showNotImplementedDialog() =
         AlertDialog.Builder(this).apply{
             setTitle(R.string.not_implemented_title)
-            setTitle(R.string.not_implemented_body)
+            setMessage(R.string.not_implemented_body)
             setPositiveButton(android.R.string.ok){ _, _ ->
                 finish()
             }

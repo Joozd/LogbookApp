@@ -29,7 +29,7 @@ import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 
-
+//TODO get rid of LiveData, use Flow.
 class CloudSyncTermsDialogViewModel: JoozdlogDialogViewModel() {
     private val _text = MutableLiveData(App.instance.resources.openRawResource(R.raw.joozdlog_cloud_terms).use { it.reader().readText() })
     private val _waitedLongEnough = MutableLiveData(false)

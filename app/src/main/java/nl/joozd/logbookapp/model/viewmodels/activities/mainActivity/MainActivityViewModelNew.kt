@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.calendar.CalendarControl
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
@@ -34,8 +33,7 @@ import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
-import nl.joozd.logbookapp.data.repository.helpers.revert
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.data.repository.helpers.makeReturnFlight
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.helpers.filterByQuery
@@ -43,7 +41,6 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogViewModel
 import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.DispatcherProvider
-import nl.joozd.logbookapp.utils.UserMessage
 
 //TODO this is still WIP
 class MainActivityViewModelNew: JoozdlogViewModel() {
@@ -91,7 +88,7 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
     fun newFlight(){
         viewModelScope.launch {
             FlightRepositoryWithSpecializedFunctions.instance.getMostRecentCompletedFlight()
-                ?.revert()?.let{ f ->
+                ?.makeReturnFlight()?.let{ f ->
                     FlightEditor.setFromFlight(f)
                 } ?: FlightEditor.setNewflight()
         }

@@ -21,23 +21,12 @@ package nl.joozd.logbookapp.data.repository.helpers
 
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportDataCache
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.extensions.atEndOfDay
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.TwilightCalculator
 import java.time.*
 import java.util.*
-
-const val PLANNING_MARGIN = 300 // seconds = 5 minutes. Flights saved with timeIn more than this
-                                // amount of time into the future will be marked isPlanned
-
-fun Flight.prepareForSave(): Flight{
-    val now = Instant.now().epochSecond
-    //planned if time in later than now (with a bit of margin) or sim later than end of local day
-    return this.copy(isPlanned = if (isSim) timeIn > Instant.now().atEndOfDay(ZonedDateTime.now().offset).epochSecond else (timeIn > now + PLANNING_MARGIN), timeStamp = TimestampMaker().nowForSycPurposes)
-}
 
 fun Flight.isSamedPlannedFlightAs(f: Flight) =
     isSameFlightAs(f) && isPlanned
@@ -50,67 +39,7 @@ fun Flight.isSameFlightAs(f: Flight, withMargins: Boolean = false) = (Prefs.maxC
             && dest == f.dest
             && if (withMargins) timeOut in (f.timeOut - margin..f.timeOut + margin) else timeOut == f.timeOut
             && if (withMargins) timeIn in (f.timeIn - margin..f.timeIn + margin) else timeIn == f.timeIn
-            && hasSameflightNumberAs(f)
-}
-
-/**
- * This checks if a flight is the completed version of a planned flight:
- * - it is not a planned flight
- * - origin, destinatoin and flightnumber match
- * - it starts on the same day (in UTC)
- */
-fun Flight.isUpdatedVersionOf(other: Flight): Boolean =
-    !isPlanned
-            && orig == other.orig
-            && dest == other.dest
-            && hasSameflightNumberAs(other)
-            && tOut().toLocalDate() == other.tOut().toLocalDate()
-
-
-
-
-/**
- * Check if flight is the same with [isSameFlightAs] but also check remarks, name, name2 and registration
- */
-fun Flight.isSameFlightWithSameInfo(other: Flight) = isSameFlightAs(other) &&
-        (remarks.isEmpty() || remarks.equals(other.remarks, ignoreCase = true)) &&
-        (name.isEmpty() || name.equals(other.name, ignoreCase = true)) &&
-        (name2.isEmpty() || name2.equals(other.name2, ignoreCase = true)) &&
-        (registration.isEmpty() || registration.equals(other.registration, ignoreCase = true))
-
-
-
-/**
- * Checks if flights are the same, times may be off by max [margin] seconds
- * This is to be used when entering flights from Monthly Overviews, to detect flights with slightly incorrect times
- */
-    fun Flight.isSameCompletedFlight(f: Flight, margin: Long) =
-    orig == f.orig
-            && dest == f.dest
-            && timeOut in (f.timeOut-margin .. f.timeOut+margin)
-            && timeIn in (f.timeIn-margin .. f.timeIn+margin)
-
-    fun Flight.isSameCompletedFlight(f: Flight) = isSameCompletedFlight(f, Prefs.maxChronoAdjustment * 60L)
-
-
-/**
- * Checks if flights are the same
- * Counts as the same as same orig/dest/flightnumber on same departure date (Z time)
- */
-fun Flight.isSameFlightOnSameDay(f: Flight) =
-    orig == f.orig
-            && dest == f.dest
-            && tOut().toLocalDate() == f.tOut().toLocalDate()
-            && hasSameflightNumberAs(f)
-
-/**
- * true if this flights time in or out are between other flights time in and out
- * returns false if other is null
- */
-fun Flight.overlaps(other: Flight?): Boolean {
-    if (other == null) return false
-    val range = other.timeOut..other.timeIn
-    return timeOut in range || timeIn in range
+            && hasSameFlightNumberAs(f)
 }
 
 /**
@@ -143,7 +72,7 @@ fun Flight.setNightTime(airportDataCache: AirportDataCache): Flight {
     return this.copy(nightTime = nightTime)
 }
 
-fun Flight.revert(): Flight {
+fun Flight.makeReturnFlight(): Flight {
     val now = ZonedDateTime.now().withSecond(0)
     val nowRoundedDownToFiveMinutes = now.withMinute((now.minute/5) * 5).toEpochSecond()
     return Flight(
@@ -155,7 +84,7 @@ fun Flight.revert(): Flight {
         name2 = name2,
         isPIC = isPIC,
         isSim = isSim,
-        flightNumber = increaseFlightnumberByOne(flightNumber),
+        flightNumber = increaseFlightNumberByOne(flightNumber),
         timeOut = nowRoundedDownToFiveMinutes,
         timeIn = nowRoundedDownToFiveMinutes + 3600,
         isPlanned = true
@@ -164,13 +93,13 @@ fun Flight.revert(): Flight {
 
 //increase the last number in a string
 //eg KL1234 becomes KL1235, HB901D becomes HB902D and HV999 becomes HV1000
-private fun increaseFlightnumberByOne(fn: String): String {
+private fun increaseFlightNumberByOne(fn: String): String {
     val regex = """\d+""".toRegex()
     val lastHit = regex.findAll(fn).lastOrNull()?.value ?: return fn
     return fn.replace(lastHit, (lastHit.toInt() + 1).toString())
 }
 
-fun Flight.hasSameflightNumberAs(other: Flight) = flightNumber.uppercase(Locale.ROOT).trim() == other.flightNumber.uppercase(Locale.ROOT).trim()
+fun Flight.hasSameFlightNumberAs(other: Flight) = flightNumber.uppercase(Locale.ROOT).trim() == other.flightNumber.uppercase(Locale.ROOT).trim()
 
 fun Flight.iataToIcaoAirports(adc: AirportDataCache): Flight {
     val o = adc.iataToIcao(orig) ?: orig

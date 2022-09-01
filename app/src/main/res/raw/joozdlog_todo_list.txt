@@ -2,13 +2,9 @@
 JOOZDLOG TODO LIST (in no particular order)
 ******************
 
-- Some issues with names on KLC Briefing sheets with 5 crew
+- Dialogs are ugly
 
-- Reporting of how many flights have been changed when importing a monthly overview can be unreliable
+- Cloud function will be removed as it is a huge source of bugs and doesn't add a lot of usefulness
 
-- Balance Forward is not synced to cloud yet
-
-- Aircraft picker dialog search field has issues
-
-- Names picker dialog is rather user-unfriendly
+- For known bugs and issues, see https://github.com/Joozd/LogbookApp/issues/
 

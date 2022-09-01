@@ -1,9 +1,8 @@
 package nl.joozd.logbookapp.core.background
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
+import nl.joozd.logbookapp.comm.ServerPrefs
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity

@@ -23,7 +23,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.comm.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.toDateStringLocalized
@@ -33,7 +33,6 @@ import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.core.DarkModeCenter
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset

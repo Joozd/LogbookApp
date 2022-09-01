@@ -19,18 +19,19 @@
 
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
+import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
-import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.JoozdlogCsvV5Extractor
+import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.JoozdlogCsvExtractor
 
-class JoozdLogV5File(lines: List<String>): CompleteLogbookFile(lines) {
+class CurrentJoozdlogCsvFile(lines: List<String>): CompleteLogbookFile(lines) {
     override val extractor: CompleteLogbookExtractor
-        get() = JoozdlogCsvV5Extractor()
+        get() = JoozdlogCsvExtractor()
 
     override val identFormat = AirportIdentFormat.ICAO
 
     companion object {
-        private const val TEXT_TO_SEARCH_FOR = "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature"
+        private const val TEXT_TO_SEARCH_FOR = BasicFlight.CSV_IDENTIFIER_STRING
 
         fun buildIfMatches(lines: List<String>): CurrentJoozdlogCsvFile? =
             if ((lines.firstOrNull() ?: "").startsWith(TEXT_TO_SEARCH_FOR))

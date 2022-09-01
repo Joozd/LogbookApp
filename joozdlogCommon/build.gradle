@@ -24,6 +24,7 @@ apply plugin: 'kotlin'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api files("C:\\Users\\joozd\\IdeaProjects\\libs\\joozdserializing-jvm-0.1.1.jar")
+    implementation files("C:\\Users\\joozd\\IdeaProjects\\libs\\comms\\comms-jvm.jar")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     api 'org.json:json:20220320'

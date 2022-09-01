@@ -28,7 +28,6 @@ import nl.joozd.logbookapp.comm.*
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.data.sharedPrefs.toggle
 import nl.joozd.logbookapp.ui.utils.base64Encode
@@ -161,6 +160,9 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         }
         return UsernameWithKey(n, k)
     }
+
+    suspend fun getUsername(): String? =
+        Prefs.username()
 
     /**
      * Use this for functions that need to be logged in.

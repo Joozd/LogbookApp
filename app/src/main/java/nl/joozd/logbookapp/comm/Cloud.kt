@@ -8,7 +8,6 @@ import nl.joozd.joozdlogcommon.comms.Protocol
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.usermanagement.UsernameWithKey
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.serializing.*
 
@@ -85,6 +84,10 @@ class Cloud(
      */
     suspend fun requestBackupEmail(username: String, key: ByteArray, emailAddress: String): CloudFunctionResult =
         resultForRequest(JoozdlogCommsKeywords.REQUEST_BACKUP_MAIL, makeLoginDataWithEmailPayload(username, key, emailAddress))
+
+    suspend fun sendBackupMailThroughServer(backupEmailData: BackupEmailData){
+        resultForRequestOrException(JoozdlogCommsKeywords.SENDING_BACKUP_EMAIL_DATA, backupEmailData.serialize())
+    }
 
     /**
      * sends a REQUEST TIMESTAMP to server

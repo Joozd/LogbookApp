@@ -10,7 +10,6 @@ import nl.joozd.logbookapp.comm.confirmEmail
 import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.comm.ServerFunctionResult
 import nl.joozd.logbookapp.core.usermanagement.checkConfirmationString
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.utils.DispatcherProvider
 

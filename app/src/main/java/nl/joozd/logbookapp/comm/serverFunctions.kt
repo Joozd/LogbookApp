@@ -4,17 +4,20 @@ package nl.joozd.logbookapp.comm
 
 import android.util.Log
 import kotlinx.coroutines.withContext
+import nl.joozd.joozdlogcommon.BackupEmailData
 import nl.joozd.joozdlogcommon.FeedbackData
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.core.usermanagement.UsernameWithKey
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.core.usermanagement.checkConfirmationString
+import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
 import nl.joozd.logbookapp.data.sync.FlightsSynchronizer
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.sharedPrefs.*
+import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.TimestampMaker
@@ -103,6 +106,28 @@ suspend fun requestBackupMail(cloud: Cloud = Cloud(), userManagement: UserManage
             }
         }
     } ?: ServerFunctionResult.FAILURE
+
+suspend fun sendBackupMailThroughServer(
+    cloud: Cloud = Cloud(),
+    userManagement: UserManagement = UserManagement()
+){
+    val backupEmailData = generateBackupEmailData(userManagement)
+    cloud.sendBackupMailThroughServer(backupEmailData) // if this fails it will throw exception
+    TaskFlags.sendBackupEmail(false)
+    BackupPrefs.mostRecentBackup(Instant.now().epochSecond)
+
+}
+
+suspend fun generateBackupEmailData(
+    userManagement: UserManagement,
+    flightsRepositoryExporter: FlightsRepositoryExporter = FlightsRepositoryExporter()
+): BackupEmailData {
+    val csv = flightsRepositoryExporter.buildCsvString()
+    val username: String = userManagement.getUsername() ?: throw(CloudException(CloudFunctionResult.SERVER_REFUSED))
+    val emailAddress: String = ServerPrefs.emailAddress()
+    return BackupEmailData(username, emailAddress, csv)
+}
+
 
 /**
  * This will request a Login Link email from the server.
@@ -240,5 +265,25 @@ private suspend fun storeLoginData(username: String, key: ByteArray, userManagem
     userManagement.storeNewLoginData(username, key)
     Prefs.username = username
     Prefs.key = key
+}
+
+object ServerPrefs: JoozdLogPreferences() {
+    override val preferencesFileKey = "nl.joozd.logbookapp.SERVER_PREFS_KEY"
+
+    /*
+    private const val XXXXXXXXXX = "XXXXXXXXXX"
+     */
+
+    private const val EMAIL_ADDRESS = "EMAIL_ADDRESS"
+    private const val EMAIL_VERIFIED = "EMAIL_VERIFIED"
+    private const val MOST_RECENT_FLIGHT_SYNC_EPOCH_SECOND = "MOST_RECENT_FLIGHT_SYNC_EPOCH_SECOND"
+
+    val emailAddress by JoozdlogSharedPreferenceDelegate(EMAIL_ADDRESS,"")
+    /**
+     * [emailVerified] is true if email verification code was deemed correct by server
+     * set this to false if server gives an INCORRECT_EMAIL_ADDRESS error
+     */
+    val emailVerified by JoozdlogSharedPreferenceDelegate(EMAIL_VERIFIED,false)
+    val mostRecentFlightsSyncEpochSecond by JoozdlogSharedPreferenceDelegate(MOST_RECENT_FLIGHT_SYNC_EPOCH_SECOND, -1L)
 }
 

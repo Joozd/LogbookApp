@@ -35,60 +35,15 @@ import java.time.Instant
 /**
  * Exporter class for flights
  * @param flightRepository: Flight Repository to use
- * @param mock: True if testing without Android environment (bypasses Preferences)
  */
 class FlightsRepositoryExporter(
-    val flightRepository: FlightRepository,
-    private val mock: Boolean = false
+    val flightRepository: FlightRepository = FlightRepository.instance
 ): CoroutineScope by dispatchersProviderMainScope() {
-    private val allFlightsAsync = async { flightRepository.getAllFlights().filter{ !it.isPlanned} }
+    private val allFlightsAsync = async { flightRepository.getAllFlights().filter{ !it.isPlanned && !it.DELETEFLAG } }
 
     suspend fun buildCsvString(): String =
-        FIRST_LINE_V5 + "\n" + allFlightsAsync.await().joinToString("\n") { it.toCsvV5() }
+        buildCsvString(allFlightsAsync.await())
 
-    private fun Flight.toCsvV5(): String {
-        return with (this.toBasicFlight()){
-            listOf<String>(
-                flightID.toString(),
-                orig,
-                dest,
-                Instant.ofEpochSecond(timeOut).toString(),// from original Flight
-                Instant.ofEpochSecond(timeIn).toString(), // from original Flight
-                correctedTotalTime.toString(),
-                multiPilotTime.toString(),
-                nightTime.toString(),
-                ifrTime.toString(),
-                simTime.toString(),
-                aircraftType,
-                registration,
-                name,
-                name2,
-                takeOffDay.toString(),
-                takeOffNight.toString(),
-                landingDay.toString(),
-                landingNight.toString(),
-                autoLand.toString(),
-                flightNumber,
-                remarks,
-                isPIC.toString(),
-                isPICUS.toString(),
-                isCoPilot.toString(),
-                isDual.toString(),
-                isInstructor.toString(),
-                isSim.toString(),
-                isPF.toString(),
-                isPlanned.toString(),
-                // unknownToServer.toString(),
-                autoFill.toString(),
-                augmentedCrew.toString(),
-                // DELETEFLAG,
-                // timeStamp,
-                Base64.encodeToString(signature.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
-            ).joinToString(";") { it.replace(';', '|') }
-        }
-    }
-
-    companion object {
-        const val FIRST_LINE_V5 = "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signature"
-    }
+    private fun buildCsvString(flights: List<Flight>): String =
+        BasicFlight.CSV_IDENTIFIER_STRING + "\n" + flights.joinToString("\n") { it.toBasicFlight().toCsv() }
 }

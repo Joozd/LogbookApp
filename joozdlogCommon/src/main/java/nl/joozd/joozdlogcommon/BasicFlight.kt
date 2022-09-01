@@ -21,8 +21,10 @@ package nl.joozd.joozdlogcommon
 
 import nl.joozd.serializing.*
 import java.time.Instant
-import java.util.*
 
+/**
+ * BasicFLight holds all data of a Flight, and has options for serialization (both to byteArray and to Csv)
+ */
 data class BasicFlight(
     val flightID: Int,
     val orig: String,
@@ -61,10 +63,11 @@ data class BasicFlight(
     val signature: String = ""
 ): JoozdSerializable {
     object VERSION {
-        const val version = 5
+        const val version = 6
         // version 3: Added signature: String
         // version 4: Booleans now actual Booleans
         // version 5: Added multiPilotTime: Int
+        // version 6: Signature is not Base64 encoded anymore
     }
 
     /**
@@ -115,7 +118,7 @@ data class BasicFlight(
     }
 
     fun toCsv(): String {
-        return listOf<String>(
+        return listOf(
             flightID.toString(),
             orig,
             dest,
@@ -150,7 +153,7 @@ data class BasicFlight(
             augmentedCrew.toString(),
             // DELETEFLAG,
             // timeStamp,
-            Base64.getEncoder().encodeToString(signature.toByteArray(Charsets.UTF_8))
+            signature
         ).joinToString(";") { it.replace(';', '|') }
     }
 
@@ -196,6 +199,44 @@ data class BasicFlight(
             )
         }
 
+        fun ofCsv(csvFlight: String): BasicFlight =
+        csvFlight.split(';')
+        .map{ it.replace('|', ';')}.let { v->
+            PROTOTYPE.copy(
+                orig = v[1],
+                dest = v[2],
+                timeOut = Instant.parse(v[3]).epochSecond,
+                timeIn = Instant.parse(v[4]).epochSecond,
+                correctedTotalTime = v[5].toInt(),
+                multiPilotTime = v[6].toInt(),
+                nightTime = v[7].toInt(),
+                ifrTime = v[8].toInt(),
+                simTime = v[9].toInt(),
+                aircraft = v[10],
+                registration = v[11],
+                name = v[12],
+                name2 = v[13],
+                takeOffDay = v[14].toInt(),
+                takeOffNight = v[15].toInt(),
+                landingDay = v[16].toInt(),
+                landingNight = v[17].toInt(),
+                autoLand = v[18].toInt(),
+                flightNumber = v[19],
+                remarks = v[20],
+                isPIC = v[21] == true.toString(),
+                isPICUS = v[22] == true.toString(),
+                isCoPilot = v[23] == true.toString(),
+                isDual = v[24] == true.toString(),
+                isInstructor = v[25] == true.toString(),
+                isSim = v[26] == true.toString(),
+                isPF = v[27] == true.toString(),
+                isPlanned = v[28] == true.toString(),
+                autoFill = v[29] == true.toString(),
+                augmentedCrew = v[30].toInt(),
+                signature = v[31]
+            )
+        }
+
         val PROTOTYPE by lazy{
             BasicFlight(
                 flightID = -1,
@@ -235,5 +276,7 @@ data class BasicFlight(
                 signature = ""
             )
         }
+
+        const val CSV_IDENTIFIER_STRING = "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signatureSVG"
     }
 }

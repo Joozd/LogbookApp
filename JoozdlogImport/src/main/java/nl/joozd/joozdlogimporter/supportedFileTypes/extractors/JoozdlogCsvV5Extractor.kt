@@ -20,7 +20,7 @@
 package nl.joozd.joozdlogimporter.supportedFileTypes.extractors
 
 
-import android.util.Base64
+import java.util.Base64
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.interfaces.CompleteLogbookExtractor
 import java.time.Instant
@@ -42,7 +42,6 @@ class JoozdlogCsvV5Extractor: CompleteLogbookExtractor {
         private fun csvFlightToBasicFlightv5(csvFlight: String): BasicFlight =
             csvFlight.split(';')
                 .map{ it.replace('|', ';')}.let { v->
-                    require(BasicFlight.VERSION.version == 5)
                     BasicFlight.PROTOTYPE.copy(
                         orig = v[1],
                         dest = v[2],
@@ -74,7 +73,7 @@ class JoozdlogCsvV5Extractor: CompleteLogbookExtractor {
                         isPlanned = v[28] == true.toString(),
                         autoFill = v[29] == true.toString(),
                         augmentedCrew = v[30].toInt(),
-                        signature = Base64.decode(v[31], Base64.NO_WRAP).toString(Charsets.UTF_8)
+                        signature = Base64.getDecoder().decode(v[31]).toString(Charsets.UTF_8)
                     )
                 }
 

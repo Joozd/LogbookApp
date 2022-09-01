@@ -7,10 +7,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.comm.ServerPrefs
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.core.Constants.ONE_DAY_IN_SECONDS
 import nl.joozd.logbookapp.core.messages.MessageCenter
@@ -18,7 +18,6 @@ import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.extensions.toDateStringForFiles
 import nl.joozd.logbookapp.ui.fragments.BackupNotificationFragment
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity

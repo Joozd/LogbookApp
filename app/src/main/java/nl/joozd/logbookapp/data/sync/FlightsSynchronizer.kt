@@ -10,12 +10,12 @@ import nl.joozd.joozdlogcommon.IDWithTimeStamp
 import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.comm.CloudFunctionResult
 import nl.joozd.logbookapp.comm.ServerFunctionResult
+import nl.joozd.logbookapp.comm.ServerPrefs
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
 import nl.joozd.logbookapp.data.importing.merging.mergeFlightsLists
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.TimestampMaker

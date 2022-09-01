@@ -43,7 +43,7 @@ object JoozdlogExport {
         OutputStreamWriter(file.outputStream()).use{
             withContext(DispatcherProvider.io()) {
                 @Suppress("BlockingMethodInNonBlockingContext") //blocking call wrapped in DispatcherProvider.io() is OK
-                it.write(FlightsRepositoryExporter(FlightRepository.instance).buildCsvString())
+                it.write(FlightsRepositoryExporter().buildCsvString())
             }
         }
         return FileProvider.getUriForFile(context, "nl.joozd.joozdlog.fileprovider", file)

@@ -29,14 +29,17 @@ import java.io.InputStream
  */
 class CsvImporter(private val lines: List<String>): FileImporter() {
 
-    override fun getFile() = getType(lines)
+    override fun getFile() = findTypeOfFile(lines)
 
-    private fun getType(lines: List<String>): ImportedFile =
-        MccPilotLogFile.buildIfMatches(lines)
-            ?: LogTenProFile.buildIfMatches(lines)
-            ?: JoozdLogV4File.buildIfMatches(lines)
-            ?: JoozdLogV5File.buildIfMatches(lines)
-            ?: UnsupportedCsvFile(lines)
+    private fun findTypeOfFile(lines: List<String>): ImportedFile =
+    CurrentJoozdlogCsvFile.buildIfMatches(lines)
+        ?: JoozdLogV5File.buildIfMatches(lines)
+        ?: JoozdLogV4File.buildIfMatches(lines)
+
+        ?: MccPilotLogFile.buildIfMatches(lines)
+        ?: LogTenProFile.buildIfMatches(lines)
+
+        ?: UnsupportedCsvFile(lines)
 
     companion object{
         @Throws(IOException::class)

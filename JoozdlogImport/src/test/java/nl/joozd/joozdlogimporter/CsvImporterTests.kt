@@ -4,7 +4,6 @@ import nl.joozd.joozdlogimporter.supportedFileTypes.*
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.File
-import java.nio.charset.Charset
 
 class CsvImporterTests {
     private val joozdLogV4FileName = "C:\\joozdlog\\test\\importables\\joozdlog_joozd_v4.csv"
@@ -31,7 +30,7 @@ class CsvImporterTests {
     fun testJoozdlogV5Bad(){
         val lines = File(joozdLogV5BadFileName).readLines()
         val file = CsvImporter(lines).getFile()
-        assert(file is JoozdLogV5File)
+        assert(file is CurrentJoozdlogCsvFile)
         val flights = getFlightsFromFile(file)
         assertEquals(lines.size - 1, flights!!.size)
         println("JOOZDLOG V5 BAD VERSION PARSED OK - tested with ${lines.size -1} flights.")
@@ -41,7 +40,7 @@ class CsvImporterTests {
     fun testJoozdlogV5(){
         val lines = File(joozdLogV5FileName).readLines()
         val file = CsvImporter(lines).getFile()
-        assert(file is JoozdLogV5File)
+        assert(file is CurrentJoozdlogCsvFile)
         val flights = getFlightsFromFile(file)
         assertEquals(lines.size - 1, flights!!.size)
         println("JOOZDLOG V5 PARSED OK - tested with ${lines.size -1} flights.")

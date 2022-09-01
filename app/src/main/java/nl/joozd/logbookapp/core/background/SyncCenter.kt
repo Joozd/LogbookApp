@@ -2,9 +2,9 @@ package nl.joozd.logbookapp.core.background
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.comm.ServerPrefs
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.DataVersions
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import java.time.Instant
 
 class SyncCenter private constructor(private val taskFlags: TaskFlags = TaskFlags) {

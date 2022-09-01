@@ -6,7 +6,6 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.exceptions.CloudException
 
 fun handleServerResult(serverResult: ByteArray?) = handleServerResult(serverResult?.toString())

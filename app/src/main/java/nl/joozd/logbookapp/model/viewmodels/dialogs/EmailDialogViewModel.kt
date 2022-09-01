@@ -25,8 +25,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.comm.ServerPrefs
 import nl.joozd.logbookapp.core.usermanagement.UserManagement
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.EmailDialogStatus
 import nl.joozd.logbookapp.model.viewmodels.status.EmailDialogStatus.EmailDialogStatusError.*

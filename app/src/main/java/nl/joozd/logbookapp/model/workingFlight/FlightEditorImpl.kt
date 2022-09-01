@@ -272,16 +272,30 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
      * and removes values that do not belong in sim/not sim records.
      */
     private fun ModelFlight.prepareForSaving(): Flight =
-        toFlight().copy(
-            isPlanned = isPlanned(),
-            orig = if (isSim) "" else orig.ident,
-            dest = if (isSim) "" else dest.ident,
-            ifrTime = if (isSim) 0 else ifrTime,
-            nightTime = if (isSim) 0 else nightTime,
-            multiPilotTime = if (isSim) 0 else multiPilotTime,
-            simTime = if (isSim) simTime else 0,
-            augmentedCrew = if (isSim) AugmentedCrew().toInt() else augmentedCrew
+        if (isSim) prepareSimFlightForSaving()
+        else prepareNonSimFlightForSaving()
+
+    private fun ModelFlight.prepareSimFlightForSaving(): Flight{
+        require (isSim){ "Only use this for simulator sessions" }
+        return toFlight().copy(
+            orig = "",
+            dest = "",
+            name = "",
+            ifrTime = 0,
+            nightTime = 0,
+            multiPilotTime = 0,
+            simTime = simTime,
+            augmentedCrew = AugmentedCrew().toInt(),
+            isPlanned = isPlanned()
         )
+    }
+
+    private fun ModelFlight.prepareNonSimFlightForSaving(): Flight {
+        require (!isSim){ "Only use this for non-simulator sessions" }
+        return toFlight().copy(
+            isPlanned = isPlanned()
+        )
+    }
 }
 
 

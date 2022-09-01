@@ -110,7 +110,7 @@ class FeedbackActivity : JoozdlogActivity() {
         setTitle(R.string.submit)
         setMessage(R.string.your_feedback_will_be_submitted)
         setPositiveButton(android.R.string.ok){ _, _ -> finish() }
-    }
+    }.create().show()
 
     /**
      * Show dialog asking if this is indeed the feedback they want to submit

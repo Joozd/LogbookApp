@@ -88,25 +88,6 @@ suspend fun confirmEmail(confirmationString: String, cloud: Cloud = Cloud()): Se
         }
     }
 
-/**
- * This will request a backup email from the server.
- * - Ask Cloud to send a request for a backup email
- * - will send code to server, login data is needed to check confirmation code. If code check fails, will throw Exception.
- *  --- CHECK CONFIRMATION STRING IN CALLING FUNCTION (use [checkConfirmationString])
- * - On success, sets EmailVerified to true, removes stored confirmation string and resets TaskFlag.
- */
-suspend fun requestBackupMail(cloud: Cloud = Cloud(), userManagement: UserManagement = UserManagement()): ServerFunctionResult =
-    userManagement.getUsernameWithKey()?.let { uk ->
-        getEmailAddressFromPrefs()?.let { email ->
-            cloud.requestBackupEmail(uk.username, uk.key, email).correspondingServerFunctionResult().also{
-                if(it.isOK()) {
-                    TaskFlags.sendBackupEmail(false)
-                    BackupPrefs.mostRecentBackup(Instant.now().epochSecond)
-                }
-            }
-        }
-    } ?: ServerFunctionResult.FAILURE
-
 suspend fun sendBackupMailThroughServer(
     cloud: Cloud = Cloud(),
     userManagement: UserManagement = UserManagement()

@@ -34,7 +34,7 @@ import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.interfaces.FileImporter
 import nl.joozd.joozdlogimporter.supportedFileTypes.*
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.DoneCompletedFlightsWithResult
@@ -273,7 +273,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
 
     private fun createNewUserDataIfUsingCloud(){
         launch{
-            with(UserManagement()) {
+            with(EmailCenter()) {
                 if (Prefs.useCloud()) {
                     logOut()
                     setCloudOrCreateNewUser(true)

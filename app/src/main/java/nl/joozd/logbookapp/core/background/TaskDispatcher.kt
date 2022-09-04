@@ -14,17 +14,13 @@ import nl.joozd.logbookapp.workmanager.ServerFunctionsWorkersHub
  */
 class TaskDispatcher private constructor(private val taskFlags: TaskFlags = TaskFlags): BackgroundTasksDispatcher() {
     override fun startCollectors(activity: JoozdlogActivity) {
-        println("Starting Collectors! XOXOXOXOXOXOXOXOXOXOXOXOXO")
         //these functions collect their respective Flow and handle that flow's output.
         handleNewUserWanted(activity)
         handleEmailUpdateWanted(activity)
         handleEmailConfirmationWanted(activity)
         handleBackupEmailWanted(activity)
-        handleLoginLinkWanted(activity)
         handleFeedbackWaiting(activity)
         handleSyncDataFiles(activity)
-        handleSyncFlights(activity)
-        handleMergeAllDataFromServer(activity)
     }
 
     private fun handleNewUserWanted(activity: JoozdlogActivity) {
@@ -41,8 +37,6 @@ class TaskDispatcher private constructor(private val taskFlags: TaskFlags = Task
         }
     }
 
-
-
     private fun handleEmailConfirmationWanted(activity: JoozdlogActivity) {
         emailConfirmationWantedFlow().doIfTrueEmitted(activity) {
             ServerFunctionsWorkersHub().scheduleConfirmEmail() // Worker takes care of checking for bad email confirmation string to prevent infinite loop.
@@ -55,12 +49,6 @@ class TaskDispatcher private constructor(private val taskFlags: TaskFlags = Task
         }
     }
 
-    private fun handleLoginLinkWanted(activity: JoozdlogActivity) {
-        loginLinkWantedFlow().doIfTrueEmitted(activity) {
-            ServerFunctionsWorkersHub().scheduleLoginLinkEmail()
-        }
-    }
-
     private fun handleFeedbackWaiting(activity: JoozdlogActivity) {
         taskFlags.feedbackWaiting.flow.doIfTrueEmitted(activity) {
             ServerFunctionsWorkersHub().scheduleSubmitFeedback()
@@ -70,19 +58,6 @@ class TaskDispatcher private constructor(private val taskFlags: TaskFlags = Task
     private fun handleSyncDataFiles(activity: JoozdlogActivity) {
         taskFlags.syncDataFiles.flow.doIfTrueEmitted(activity) {
             ServerFunctionsWorkersHub().scheduleSyncDataFiles()
-        }
-    }
-
-    private fun handleSyncFlights(activity: JoozdlogActivity){
-        syncNeededFlow().doIfTrueEmitted(activity) {
-            ServerFunctionsWorkersHub().scheduleSyncFlights()
-        }
-    }
-
-    private fun handleMergeAllDataFromServer(activity: JoozdlogActivity){
-        mergeNeededFlow().doIfTrueEmitted(activity){
-            println("Merge Needed emitted true!")
-            ServerFunctionsWorkersHub().scheduleMerge()
         }
     }
 
@@ -103,20 +78,8 @@ class TaskDispatcher private constructor(private val taskFlags: TaskFlags = Task
         wanted, enabled, address -> wanted && enabled && address.isNotBlank()
     }
 
-    private fun loginLinkWantedFlow() = combine(taskFlags.sendLoginLink.flow, useCloudFlow, validEmailFlow ){
-        wanted, enabled, valid -> wanted && enabled && valid
-    }
-
     private fun backupEmailWantedFlow() = combine(taskFlags.sendBackupEmail.flow, useCloudFlow, validEmailFlow){
         wanted, enabled, valid -> wanted && enabled && valid
-    }
-
-    private fun syncNeededFlow() = combine(taskFlags.syncFlights.flow, taskFlags.mergeAllDataFromServer.flow, useCloudFlow){ needed, mergeNeeded, enabled ->
-        needed && !mergeNeeded && enabled
-    }
-
-    private fun mergeNeededFlow() = combine(taskFlags.mergeAllDataFromServer.flow, useCloudFlow){ needed, enabled ->
-        needed && enabled
     }
 
     companion object{

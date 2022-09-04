@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.toggle
 import nl.joozd.logbookapp.ui.dialogs.CloudSyncTermsDialog
@@ -57,7 +57,7 @@ class NewUserActivityCloudPage: NewUseractivityPage() {
 
             useCloudCheckbox.setOnClickListener {
                 lifecycleScope.launch {
-                    UserManagement().toggleCloudOrCreateNewUser()
+                    EmailCenter().toggleCloudOrCreateNewUser()
                 }
             }
 

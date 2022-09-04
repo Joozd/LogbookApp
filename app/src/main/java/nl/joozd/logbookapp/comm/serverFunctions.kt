@@ -8,19 +8,16 @@ import nl.joozd.joozdlogcommon.BackupEmailData
 import nl.joozd.joozdlogcommon.FeedbackData
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
-import nl.joozd.logbookapp.core.usermanagement.UsernameWithKey
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
-import nl.joozd.logbookapp.core.usermanagement.checkConfirmationString
+import nl.joozd.logbookapp.core.emailFunctions.UsernameWithKey
+import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
+import nl.joozd.logbookapp.core.emailFunctions.checkConfirmationString
 import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
-import nl.joozd.logbookapp.data.sync.FlightsSynchronizer
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.sharedPrefs.*
 import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.utils.DispatcherProvider
-import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.generateKey
 import java.time.Instant
 
@@ -61,7 +58,7 @@ private suspend fun saveLoginDataAsNewUser(loginData: UsernameWithKey) {
  * - Sends email to server with current login data
  * - On success, sets EmailVerified to false and resets TaskFlag.
  */
-suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), userManagement: UserManagement = UserManagement()): ServerFunctionResult =
+suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), userManagement: EmailCenter = EmailCenter()): ServerFunctionResult =
     userManagement.getUsernameWithKey()?.let { loginData ->
         getEmailAddressFromPrefs()?.let{ emailAddress ->
             sendEmailAddressToServer(loginData, emailAddress, cloud).also{
@@ -90,7 +87,7 @@ suspend fun confirmEmail(confirmationString: String, cloud: Cloud = Cloud()): Se
 
 suspend fun sendBackupMailThroughServer(
     cloud: Cloud = Cloud(),
-    userManagement: UserManagement = UserManagement()
+    userManagement: EmailCenter = EmailCenter()
 ){
     val backupEmailData = generateBackupEmailData(userManagement)
     cloud.sendBackupMailThroughServer(backupEmailData) // if this fails it will throw exception
@@ -100,7 +97,7 @@ suspend fun sendBackupMailThroughServer(
 }
 
 suspend fun generateBackupEmailData(
-    userManagement: UserManagement,
+    userManagement: EmailCenter,
     flightsRepositoryExporter: FlightsRepositoryExporter = FlightsRepositoryExporter()
 ): BackupEmailData {
     val csv = flightsRepositoryExporter.buildCsvString()
@@ -108,24 +105,6 @@ suspend fun generateBackupEmailData(
     val emailAddress: String = ServerPrefs.emailAddress()
     return BackupEmailData(username, emailAddress, csv)
 }
-
-
-/**
- * This will request a Login Link email from the server.
- * - Ask Cloud to send a request for a backup email
- * - will send code to server, login data is needed to check confirmation code. If code check fails, will throw Exception.
- *  --- CHECK CONFIRMATION STRING IN CALLING FUNCTION (use [checkConfirmationString])
- * - On success, sets EmailVerified to true, removes stored confirmation string and resets TaskFlag.
- */
-suspend fun requestLoginLinkEmail(cloud: Cloud = Cloud(), userManagement: UserManagement = UserManagement()): ServerFunctionResult =
-    userManagement.getUsernameWithKey()?.let { uk ->
-        getEmailAddressFromPrefs()?.let { email ->
-            cloud.requestLoginLinkMail(uk.username, uk.key, email).correspondingServerFunctionResult().also{
-                if(it.isOK())
-                    TaskFlags.sendLoginLink(false)
-            }
-        }
-    } ?: ServerFunctionResult.FAILURE
 
 /**
  * Get time from server, or not.
@@ -159,37 +138,6 @@ suspend fun updateDataFiles(server: HTTPServer,
 
     return ServerFunctionResult.SUCCESS
 }
-
-suspend fun syncFlights(
-    server: Cloud = Cloud(),
-    userManagement: UserManagement = UserManagement(),
-    repository: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance
-): ServerFunctionResult =
-    FlightsSynchronizer(server, userManagement, repository).synchronizeIfNotSynced().also{
-        if (it.isOK()){
-            TaskFlags.syncFlights(false)
-        }
-    }
-
-// Note to self: If this fails halfway (e.g. server conenction drops before re-uploading all flights), next try will not update anything, still re-upload all files and report OK
-suspend fun mergeFlightsWithServer(
-    server: Cloud = Cloud(),
-    userManagement: UserManagement = UserManagement(),
-    repository: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance
-): ServerFunctionResult {
-    val countBefore = repository.getAllFlights().size
-    return FlightsSynchronizer(server, userManagement, repository).mergeRepoWithServer()
-        .also {
-            if (it.isOK()) {
-                TaskFlags.mergeAllDataFromServer(false)
-                ServerPrefs.mostRecentFlightsSyncEpochSecond(TimestampMaker().nowForSycPurposes)
-                val countAfter = repository.getAllFlights().size
-                if (countBefore != countAfter)
-                    MessagesWaiting.mergeWithServerPerformed(true)
-            }
-        }
-    }
-
 
 suspend fun sendFeedback(cloud: Cloud = Cloud()): ServerFunctionResult =
     (TaskPayloads.feedbackWaiting().nullIfBlank()?.let{ feedback ->
@@ -239,10 +187,10 @@ private suspend fun getEmailAddressFromPrefs(): String? =
 
 private fun resetEmailData() {
     ServerPrefs.emailVerified(false)
-    UserManagement().requestEmailVerificationMail()
+    EmailCenter().requestEmailVerificationMail()
 }
 
-private suspend fun storeLoginData(username: String, key: ByteArray, userManagement: UserManagement = UserManagement()) {
+private fun storeLoginData(username: String, key: ByteArray, userManagement: EmailCenter = EmailCenter()) {
     userManagement.storeNewLoginData(username, key)
     Prefs.username = username
     Prefs.key = key

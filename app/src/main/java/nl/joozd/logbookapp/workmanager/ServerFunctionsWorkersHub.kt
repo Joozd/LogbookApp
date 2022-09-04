@@ -20,10 +20,6 @@ class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
         enqueueOneTimeWorker<SendBackupEmailWorker>(Tags.GET_BACKUP_EMAIL, needNetwork = true)
     }
 
-    fun scheduleLoginLinkEmail(){
-        enqueueOneTimeWorker<SendLoginLinkEmailWorker>(Tags.REQUEST_LOGIN_LINK_MAIL, needNetwork = true)
-    }
-
     fun scheduleSubmitFeedback(){
         enqueueOneTimeWorker<SubmitFeedbackWorker>(Tags.SUBMIT_FEEDBACK, needNetwork = true)
     }
@@ -32,14 +28,6 @@ class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
         enqueueOneTimeWorker<SyncDataFilesWorker>(Tags.SYNC_DATA_FILES, needNetwork = true)
     }
 
-    fun scheduleSyncFlights(){
-        enqueueOneTimeWorker<SyncFlightsWorker>(Tags.SYNC_FLIGHTS, needNetwork = true, existingWorkPolicy = ExistingWorkPolicy.KEEP)
-    }
-
-    fun scheduleMerge(){
-        println ("MERGE SCHEDULED")
-        enqueueOneTimeWorker<MergeWithServerWorker>(Tags.MERGE_WITH_SERVER, needNetwork = true)
-    }
 
     object Tags{
         const val CREATE_NEW_USER = "CREATE_NEW_USER"

@@ -17,7 +17,13 @@
  *
  */
 
-package nl.joozd.logbookapp.core.usermanagement
+/* TODO The switch from cloud to email forwarding backups needs some thinking and designing.
+ * As I want intermediate versions to work, I am keeping some Cloud parts up for now. They get to be deleted when I know how to do stuff
+ * Proposition:
+ *  - Server keeps list of IDs with email hashes. New email also generates new ID.
+ *      - This makes sure you can't get spammed by somebody else if your email is registered (your ID + email address is only known locally, your ID + email hash on server so they can be matched)
+ */
+package nl.joozd.logbookapp.core.emailFunctions
 
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.R
@@ -26,7 +32,6 @@ import nl.joozd.logbookapp.core.Constants
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.comm.*
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.data.sharedPrefs.toggle
@@ -40,14 +45,7 @@ import nl.joozd.logbookapp.utils.generateKey
  * Flags are the business of TaskManager and workers. This only provides entries for the rest of the program to set something in motion.
  * It is allowed send messages to MessageCentre in case user needs to be made aware of something, or needs to make a decision for a real-time function.
  */
-class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
-    /**
-     * Schedule the creation of a new user account.
-     */
-    fun createNewUser(){
-        taskFlags.createNewUserAndEnableCloud(true)
-    }
-
+class EmailCenter(private val taskFlags: TaskFlags = TaskFlags) {
     suspend fun toggleCloudOrCreateNewUser(){
             if(Prefs.useCloud() || isLoggedIn())
                 Prefs.useCloud.toggle()
@@ -60,25 +58,19 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         else TaskFlags.createNewUserAndEnableCloud(value)
     }
 
-    suspend fun storeNewLoginData(username: String, keyString: String) {
+    fun storeNewLoginData(username: String, keyString: String) {
         Prefs.username(username)
         Prefs.keyString(keyString)
-        handleNewUserDataSet()
     }
 
-    suspend fun storeNewLoginData(username: String, key: ByteArray) = withContext(DispatcherProvider.io()){
+    fun storeNewLoginData(username: String, key: ByteArray) {
         Prefs.username(username)
         Prefs.key(key)
-        handleNewUserDataSet()
     }
 
     //requesting a verification email is done by just re-submitting current email address.
     fun requestEmailVerificationMail(){
         taskFlags.updateEmailWithServer(true)
-    }
-
-    fun requestLoginLinkEmail(){
-        taskFlags.sendLoginLink(true)
     }
 
     /**
@@ -183,11 +175,6 @@ class UserManagement(private val taskFlags: TaskFlags = TaskFlags) {
         MessagesWaiting.noLoginDataSaved(true)
     }
 
-    private suspend fun handleNewUserDataSet(){
-        ServerPrefs.mostRecentFlightsSyncEpochSecond(-1L)
-        if (FlightRepository.instance.getAllFlights().isNotEmpty())
-            taskFlags.mergeAllDataFromServer(true)
-    }
 
     private fun keyToLinkableBase64String(key: ByteArray) = base64Encode(key).replace('/', '-')
 

@@ -5,7 +5,7 @@ import android.net.Uri
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.messages.MessageCenter
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 class IntentHandler(intent: Intent) {
@@ -41,7 +41,7 @@ class IntentHandler(intent: Intent) {
         getEmailConfirmationCodeFromIntent()?.let{
             val usableString = it.replace('-', '/')
             showEmailConfirmationSheduledMessage()
-            UserManagement().confirmEmail(usableString)
+            EmailCenter().confirmEmail(usableString)
         }
     }
 
@@ -58,10 +58,10 @@ class IntentHandler(intent: Intent) {
 
 
     private suspend fun storeNewLoginData(lpPair: Pair<String, String>)= withContext(DispatcherProvider.io()) {
-        UserManagement().storeNewLoginData(lpPair.first, lpPair.second)
+        EmailCenter().storeNewLoginData(lpPair.first, lpPair.second)
         Prefs.useCloud(true)
         Prefs.acceptedCloudSyncTerms(true) // I guess they must have accepted it sometime in the past or they wouldn't have login data
-        UserManagement().requestEmailVerificationMail()
+        EmailCenter().requestEmailVerificationMail()
     }
 
 

@@ -38,10 +38,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.background.BackupCenter
-import nl.joozd.logbookapp.core.background.SyncCenter
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
@@ -243,14 +241,14 @@ class SettingsActivity : JoozdlogActivity() {
         useCloudSyncSwitch.setOnClickListener {
             lifecycleScope.launch {
                 if (viewModel.useCloudFlow.first() || Prefs.acceptedCloudSyncTerms())
-                    UserManagement().toggleCloudOrCreateNewUser()
+                    EmailCenter().toggleCloudOrCreateNewUser()
                 else showAcceptTermsDialog()
             }
         }
 
         youAreSignedInAsButton.setOnClickListener {
             lifecycleScope.launch {
-                UserManagement().generateLoginLink()?.let { loginLink ->
+                EmailCenter().generateLoginLink()?.let { loginLink ->
                     (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
                         ClipData.newPlainText(getString(R.string.login_link_title), loginLink)
                     )
@@ -269,7 +267,7 @@ class SettingsActivity : JoozdlogActivity() {
 
         loginLinkButton.setOnClickListener {
             lifecycleScope.launch {
-                UserManagement().generateLoginLinkMessage()?.let {
+                EmailCenter().generateLoginLinkMessage()?.let {
                     sendMessageToOtherApp(it, getString(R.string.login_link_title))
                 } ?: toast(R.string.not_signed_in_bug_please_tell_joozd)
             }
@@ -345,7 +343,7 @@ class SettingsActivity : JoozdlogActivity() {
         supportFragmentManager.commit {
             add(
                 R.id.settingsActivityLayout,
-                CloudSyncTermsDialog(sync = true)
+                CloudSyncTermsDialog()
             ) // secondary constructor used, works on recreate
             addToBackStack(null)
         }
@@ -474,11 +472,9 @@ class SettingsActivity : JoozdlogActivity() {
         lifecycleScope.launch {
             val removedFlightsCount = FlightRepositoryWithSpecializedFunctions.instance.removeDuplicates()
             if (removedFlightsCount == 0)
-                toast(getString(R.string.n_duplicates_have_been_removed, removedFlightsCount))
-            else{
-                SyncCenter.instance.killDuplicates()
+                toast(R.string.no_duplicate_flights_found)
+            else
                 showDuplicatesFoundDialog(removedFlightsCount)
-            }
             viewToEnableWhenDone.isEnabled = true
         }
     }

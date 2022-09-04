@@ -26,12 +26,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.comm.ServerPrefs
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.EmailDialogStatus
 import nl.joozd.logbookapp.model.viewmodels.status.EmailDialogStatus.EmailDialogStatusError.*
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import java.util.*
 
 class EmailDialogViewModel: JoozdlogDialogViewModel() {
     //intentionally public
@@ -87,7 +86,7 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
             return@launch
         }
 
-        UserManagement().changeEmailAddress(email1)
+        EmailCenter().changeEmailAddress(email1)
 
         status = EmailDialogStatus.Done
     }

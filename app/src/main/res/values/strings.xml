@@ -442,6 +442,7 @@
     <string name="not_signed_in_bug_please_tell_joozd">Server replied you are not signed in during an operation that requires you to sign in. This most probably means you encountered a bug. Please tell Joozd what you were trying to do via the Feedback menu.</string>
     <string name="standard_augmented_time"><![CDATA[<b>Augmented Crew takeoff/landing time</b><br><small>%1$s minutes</small>&nbsp;]]></string>
     <string name="fix_flights_db">Remove duplicate flights from DB</string>
+    <string name="no_duplicate_flights_found">No duplicate flights found.</string>
     <string name="n_duplicates_have_been_removed">%1$d duplicate flights have been removed.</string>
     <string name="n_duplicates_have_been_removed_long_message">%1$d duplicate flights have been removed.\nThey will also be removed from Cloud.\nHowever, to prevent them re-appearing again, remove duplicates or disable cloud syncing on any other devices you use Joozdlog on as well, or they will come back.</string>
 

@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.core.usermanagement
+package nl.joozd.logbookapp.core.emailFunctions
 
 import nl.joozd.logbookapp.ui.utils.base64Decode
 
@@ -6,7 +6,7 @@ import nl.joozd.logbookapp.ui.utils.base64Decode
  * Checks if confirmation string can be read by server.
  * Sending a bad confirmation string to server will result in BAD_DATA_RECEIVED which is handled the same as a connection error and will lead to an infinite loop.
  */
-suspend fun checkConfirmationString(confirmationString: String, userManagement: UserManagement = UserManagement()) =
+suspend fun checkConfirmationString(confirmationString: String, userManagement: EmailCenter = EmailCenter()) =
     userManagement.getUsernameWithKey()?.let{
         checkConfirmationString(confirmationString, it)
     } ?: false

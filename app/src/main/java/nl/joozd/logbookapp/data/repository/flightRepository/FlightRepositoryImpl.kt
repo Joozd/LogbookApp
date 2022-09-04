@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.joozd.joozdlogcommon.utilities.checkForDuplicates
-import nl.joozd.logbookapp.core.background.SyncCenter
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
@@ -193,12 +192,9 @@ class FlightRepositoryImpl(
      * - if flightID is set to Flight.NOT_INITIALIZED it will generate a new ID and set it.
      * - This will also set TaskFlags.syncFlights as saving something with an updated timestamp will always warrant a sync.
      */
-    private suspend fun saveWithIDAndTimestamp(flights: Collection<Flight>){
-        saveDirectToDB(
-            flights.updateIDsIfNeeded().updateTimestampsToNow()
-        )
-        SyncCenter.instance.syncFlights()
-    }
+    private suspend fun saveWithIDAndTimestamp(flights: Collection<Flight>) =
+        saveDirectToDB(flights.updateIDsIfNeeded().updateTimestampsToNow())
+
 
     private fun Collection<Flight>.updateTimestampsToNow(): List<Flight> {
         val now = TimestampMaker().nowForSycPurposes

@@ -15,11 +15,8 @@ object TaskFlags: JoozdLogPreferences() {
     private const val UPDATE_EMAIL = "UPDATE_EMAIL"
     private const val SEND_LOGIN_LINK = "SEND_LOGIN_LINK"
     private const val CREATE_NEW_USER = "CREATE_NEW_USER"
-    private const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
-    private const val KILL_DUPLICATES = "KILL_DUPLICATES"
     private const val SYNC_DATA_FILES = "SYNC_DATA_FILES"
     private const val FEEDBACK_WAITING = "FEEDBACK_WAITING"
-    private const val MERGE_ALL_DATA_FROM_SERVER = "MERGE_ALL_DATA_FROM_SERVER"
 
 
     val sendBackupEmail by JoozdlogSharedPreferenceDelegate(SEND_BACKUP_EMAIL,false)
@@ -29,7 +26,4 @@ object TaskFlags: JoozdLogPreferences() {
     val createNewUserAndEnableCloud by JoozdlogSharedPreferenceDelegate(CREATE_NEW_USER,false, debug = true) // create a new user both local and on server
     val feedbackWaiting by JoozdlogSharedPreferenceDelegate(FEEDBACK_WAITING, false)
     val syncDataFiles by JoozdlogSharedPreferenceDelegate(SYNC_DATA_FILES,false)
-    val syncFlights by JoozdlogSharedPreferenceDelegate(SYNC_FLIGHTS, false)
-    val killDuplicates by JoozdlogSharedPreferenceDelegate(KILL_DUPLICATES, false)
-    val mergeAllDataFromServer by JoozdlogSharedPreferenceDelegate(MERGE_ALL_DATA_FROM_SERVER, false)
 }

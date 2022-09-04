@@ -5,7 +5,7 @@ import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 import nl.joozd.logbookapp.exceptions.CloudException
 
 fun handleServerResult(serverResult: ByteArray?) = handleServerResult(serverResult?.toString())
@@ -40,12 +40,12 @@ fun handleServerResultAndThrowExceptionOnError(serverResult: ByteArray?) =
     handleServerResultAndThrowExceptionOnError(serverResult.toString())
 
 private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
-    UserManagement().invalidateEmail()
+    EmailCenter().invalidateEmail()
     MessageCenter.commitMessage {
         titleResource = R.string.email
         descriptionResource = R.string.server_reported_email_not_verified_new_mail_will_be_sent
         setPositiveButton(android.R.string.ok){
-            UserManagement().requestEmailVerificationMail()
+            EmailCenter().requestEmailVerificationMail()
         }
     }
     return CloudFunctionResult.SERVER_REFUSED
@@ -55,7 +55,7 @@ private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
  * This one should have been caught by checking for valid email when user enters email address.
  */
 private fun handleBadEmailAddress(): CloudFunctionResult {
-    UserManagement().invalidateEmail()
+    EmailCenter().invalidateEmail()
     MessageCenter.commitMessage {
         titleResource = R.string.email
         descriptionResource = R.string.server_not_an_email_address_please_enter_again
@@ -65,7 +65,7 @@ private fun handleBadEmailAddress(): CloudFunctionResult {
 }
 
 private fun handleBadLoginData(): CloudFunctionResult {
-    UserManagement().logOut()
+    EmailCenter().logOut()
     MessagesWaiting.noLoginDataSaved(true)
     return CloudFunctionResult.SERVER_REFUSED
 }

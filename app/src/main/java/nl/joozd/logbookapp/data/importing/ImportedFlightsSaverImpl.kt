@@ -25,7 +25,6 @@ import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
-import nl.joozd.logbookapp.core.background.SyncCenter
 import nl.joozd.logbookapp.data.importing.merging.mergeFlights
 import nl.joozd.logbookapp.data.importing.merging.mergeFlightsLists
 import nl.joozd.logbookapp.data.importing.results.SaveCompleteLogbookResult
@@ -39,9 +38,7 @@ import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWith
 import nl.joozd.logbookapp.data.repository.helpers.iataToIcaoAirports
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.InsertedUndoableCommand
-import nl.joozd.logbookapp.utils.UndoableCommand
 
 
 /**
@@ -65,8 +62,6 @@ class ImportedFlightsSaverImpl(
         val command = makeReplaceDBCommand(flights)
         command()
         flightsRepoWithUndo.insertUndoAction(command)
-        SyncCenter.instance.delaySync() // A server sync will remove undo possibility, give user some time.
-
         return SaveCompleteLogbookResult(true)
     }
 

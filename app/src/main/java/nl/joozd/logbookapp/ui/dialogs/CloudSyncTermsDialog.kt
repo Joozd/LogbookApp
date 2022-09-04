@@ -32,29 +32,21 @@ import nl.joozd.logbookapp.databinding.DialogCloudSyncTermsBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.model.viewmodels.dialogs.CloudSyncTermsDialogViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
-import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.core.background.SyncCenter
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 
 /**
  * This dialog will show terms and conditions for Cloud.
  * If OK clicked, it will set [Prefs.useCloud] and [Prefs.acceptedCloudSyncTerms] to true
  */
 class CloudSyncTermsDialog(): JoozdlogFragment() {
-    constructor(sync: Boolean): this() {
-        syncOnClose = sync
-    }
-
     val viewModel: CloudSyncTermsDialogViewModel by viewModels()
 
     /**
      * If true, will request a sync as soon as terms are accepted
      */
-    private var syncOnClose = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogCloudSyncTermsBinding.bind(inflater.inflate(R.layout.dialog_cloud_sync_terms, container, false)).apply {
-            if (syncOnClose) SyncCenter.instance.syncFlights()
             cloudSyncTermsDialogBackground.setOnClickListener { } // catch clicks so they don't fall through
 
             // termsTextView.movementMethod = ScrollingMovementMethod()
@@ -71,7 +63,7 @@ class CloudSyncTermsDialog(): JoozdlogFragment() {
                 setOnClickListener {
                     lifecycleScope.launch {
                         Prefs.acceptedCloudSyncTerms(true)
-                        UserManagement().setCloudOrCreateNewUser(true)
+                        EmailCenter().setCloudOrCreateNewUser(true)
                         closeFragment()
                     }
                 }
@@ -99,13 +91,4 @@ class CloudSyncTermsDialog(): JoozdlogFragment() {
                     iAcceptTextView.setTextColor(requireActivity().getColorFromAttr(android.R.attr.colorAccent))
             }
         }.root
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(SYNC_ON_OK, syncOnClose)
-    }
-
-    companion object{
-        private const val SYNC_ON_OK = "SYNC_ON_OK"
-    }
 }

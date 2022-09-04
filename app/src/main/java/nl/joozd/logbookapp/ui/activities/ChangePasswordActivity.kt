@@ -25,11 +25,10 @@ import android.view.View
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 import nl.joozd.logbookapp.databinding.ActivityChangePasswordBinding
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.longToast
-import nl.joozd.logbookapp.ui.utils.toast
 
 
 /**
@@ -90,7 +89,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
     private fun ActivityChangePasswordBinding.changePasswordAndUpdateButton() {
         makeSubmitButtonShowLoading()
         lifecycleScope.launch {
-            if (UserManagement().changeLoginKey()) {
+            if (EmailCenter().changeLoginKey()) {
                 showLoginLinkChangedDialog()
                 makeSubmitButtonRecentlyChanged()
             }
@@ -117,7 +116,7 @@ class ChangePasswordActivity : JoozdlogActivity() {
             setMessage(R.string.changed_login_link_message)
             setPositiveButton(android.R.string.ok) { _, _ ->
                 lifecycleScope.launch {
-                    UserManagement().generateLoginLinkMessage()?.let {
+                    EmailCenter().generateLoginLinkMessage()?.let {
                         sendMessageToOtherApp(it, getString(R.string.login_link_title))
                     } ?: longToast(R.string.change_pass_error_1)
                 }

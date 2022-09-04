@@ -4,12 +4,11 @@ package nl.joozd.logbookapp.core.background
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
-import nl.joozd.logbookapp.core.usermanagement.UserManagement
+import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 
 /**
@@ -110,7 +109,7 @@ class PersistentMessagesDispatcher private constructor (private val messagesWait
             descriptionResource = R.string.email_verification_invalid_data
             setPositiveButton(android.R.string.ok){
                 messagesWaiting.badVerificationCodeClicked(false)
-                UserManagement().requestEmailVerificationMail()
+                EmailCenter().requestEmailVerificationMail()
                 showEmailRequestedMessage()
             }
             setNegativeButton(android.R.string.cancel){
@@ -159,7 +158,7 @@ class PersistentMessagesDispatcher private constructor (private val messagesWait
     }
 
     private suspend fun ComponentActivity.sendLoginLinkIntent() {
-        UserManagement().generateLoginLink()?.let { loginLink ->
+        EmailCenter().generateLoginLink()?.let { loginLink ->
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_TEXT, loginLink)

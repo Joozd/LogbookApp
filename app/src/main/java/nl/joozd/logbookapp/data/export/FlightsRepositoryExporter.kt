@@ -19,18 +19,12 @@
 
 package nl.joozd.logbookapp.data.export
 
-import android.util.Base64
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import nl.joozd.joozdlogcommon.BasicFlight
-import nl.joozd.joozdlogcommon.BasicFlight_version4
-import nl.joozd.joozdlogcommon.legacy.basicflight.BasicFlightVersionFunctions.upgrade4to5
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
-import java.time.Instant
-
 
 /**
  * Exporter class for flights

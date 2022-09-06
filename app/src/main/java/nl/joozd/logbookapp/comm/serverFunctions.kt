@@ -190,10 +190,10 @@ private fun resetEmailData() {
     EmailCenter().requestEmailVerificationMail()
 }
 
+//TODO THIS NEEDS WORK
 private fun storeLoginData(username: String, key: ByteArray, userManagement: EmailCenter = EmailCenter()) {
     userManagement.storeNewLoginData(username, key)
     Prefs.username = username
-    Prefs.key = key
 }
 
 object ServerPrefs: JoozdLogPreferences() {

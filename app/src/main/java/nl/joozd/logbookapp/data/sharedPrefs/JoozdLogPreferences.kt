@@ -18,15 +18,11 @@ import kotlin.reflect.KProperty
 abstract class JoozdLogPreferences {
     protected abstract val preferencesFileKey: String
 
-    protected open val needsMigration = false
-
     protected val context: Context get () = App.instance
 
     //Initialized lazy because initializing it immediately would use uninitialized FILE_KEY.
     val dataStore by lazy {
-        if (needsMigration)
-            DataStoreProviderWithMigration(context, preferencesFileKey).dataStore
-        else DataStoreProviderNoMigration(context,preferencesFileKey).dataStore
+        DataStoreProviderNoMigration(context,preferencesFileKey).dataStore
     }
 
     protected fun <T: Any> post(key: String, newValue: T){

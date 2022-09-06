@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.comm.HTTPServer
 import nl.joozd.logbookapp.comm.updateDataFiles
 import nl.joozd.logbookapp.data.sharedPrefs.DataVersions
-import nl.joozd.logbookapp.utils.TimestampMaker
+import java.time.Instant
 
 class SyncDataFilesWorker(appContext: Context, workerParams: WorkerParameters, private val server: HTTPServer)
     : CoroutineWorker(appContext, workerParams) {
@@ -16,7 +16,7 @@ class SyncDataFilesWorker(appContext: Context, workerParams: WorkerParameters, p
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         updateDataFiles(server).also {
             if(it.isOK())
-                DataVersions.mostRecentDataFilesSyncEpochSecond(TimestampMaker().now)
+                DataVersions.mostRecentDataFilesSyncEpochSecond(Instant.now().epochSecond)
         }.toListenableWorkerResult()
 
     }

@@ -31,12 +31,6 @@ interface FlightRepositoryWithSpecializedFunctions: FlightRepository {
      * Get most recent timestamp of a completed flight.
      * If none found, returns null.
      */
-    suspend fun getMostRecentTimestampOfACompletedFlight(): Long?
-
-    /**
-     * Get most recent timestamp of a completed flight.
-     * If none found, returns null.
-     */
     suspend fun getMostRecentCompletedFlight(): Flight?
 
     /**

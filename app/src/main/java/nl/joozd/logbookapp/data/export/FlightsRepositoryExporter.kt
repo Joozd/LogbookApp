@@ -33,7 +33,7 @@ import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 class FlightsRepositoryExporter(
     val flightRepository: FlightRepository = FlightRepository.instance
 ): CoroutineScope by dispatchersProviderMainScope() {
-    private val allFlightsAsync = async { flightRepository.getAllFlights().filter{ !it.isPlanned && !it.DELETEFLAG } }
+    private val allFlightsAsync = async { flightRepository.getAllFlights().filter{ !it.isPlanned } }
 
     suspend fun buildCsvString(): String =
         buildCsvString(allFlightsAsync.await())

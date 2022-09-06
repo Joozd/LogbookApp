@@ -31,7 +31,6 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.data.room.model.toFlight
 import nl.joozd.logbookapp.utils.DispatcherProvider
-import nl.joozd.logbookapp.utils.TimestampMaker
 import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 
@@ -118,10 +117,7 @@ class FlightRepositoryImpl(
 
     override suspend fun delete(flights: Collection<Flight>) {
         noParallelAccessMutex.withLock {
-            val flightsToDeleteHard = flights.filter { it.unknownToServer }
-            val flightsToDeleteSoft = flights.filter { !it.unknownToServer }
-            deleteHard(flightsToDeleteHard)
-            deleteSoft(flightsToDeleteSoft)
+            deleteHard(flights)
             registeredDataChangedListeners.forEach { listener ->
                 listener.onFlightRepositoryChanged(flights.map { it.flightID })
             }
@@ -153,16 +149,6 @@ class FlightRepositoryImpl(
             println("Cleared FlightRepository DB: ${getAllFlights().size} flights now in DB")
     }
 
-    private suspend fun deleteSoft(flights: Collection<Flight>) = withContext(DispatcherProvider.io()){
-        val softDeletedFlights = flights.map {it.copy(DELETEFLAG = true) }
-        saveWithIDAndTimestamp(softDeletedFlights)
-    }
-
-    override suspend fun getMostRecentTimestampOfACompletedFlight(): Long? =
-        withContext(DispatcherProvider.io()) {
-            flightDao.getMostRecentTimestampOfACompletedFlight()
-        }
-
     override suspend fun getMostRecentCompletedFlight(): Flight? =
         withContext(DispatcherProvider.io()){
             flightDao.getMostRecentCompleted()?.toFlight()
@@ -183,7 +169,6 @@ class FlightRepositoryImpl(
         registeredDataChangedListeners.remove(listener)
 
 
-
     private fun List<FlightData>.toFlights() =
         this.map { it.toFlight() }
 
@@ -193,15 +178,7 @@ class FlightRepositoryImpl(
      * - This will also set TaskFlags.syncFlights as saving something with an updated timestamp will always warrant a sync.
      */
     private suspend fun saveWithIDAndTimestamp(flights: Collection<Flight>) =
-        saveDirectToDB(flights.updateIDsIfNeeded().updateTimestampsToNow())
-
-
-    private fun Collection<Flight>.updateTimestampsToNow(): List<Flight> {
-        val now = TimestampMaker().nowForSycPurposes
-        return map {
-            it.copy(timeStamp = now)
-        }
-    }
+        saveDirectToDB(flights.updateIDsIfNeeded())
 
     private suspend fun Collection<Flight>.updateIDsIfNeeded(): List<Flight> {
         //make sure generated fLightIDs are incremented far enough

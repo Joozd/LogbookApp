@@ -56,11 +56,8 @@ fun FlightData.toFlight(): Flight =
         isSim,
         isPF,
         isPlanned,
-        changed,
         autoFill,
         augmentedCrew,
-        DELETEFLAG,
-        timeStamp,
         signature
     )
 

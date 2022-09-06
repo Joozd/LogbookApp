@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.joozdlogcommon
+package nl.joozd.joozdlogcommon.legacy.basicflight
 
 import nl.joozd.serializing.*
 import java.time.Instant
@@ -25,7 +25,7 @@ import java.time.Instant
 /**
  * BasicFLight holds all data of a Flight, and has options for serialization (both to byteArray and to Csv)
  */
-data class BasicFlight(
+data class BasicFlight_version6(
     val flightID: Int,
     val orig: String,
     val dest: String,
@@ -55,8 +55,11 @@ data class BasicFlight(
     val isSim: Boolean,
     val isPF: Boolean,
     val isPlanned: Boolean,
+    val unknownToServer: Boolean,              // unknownToServer - can be hard-deleted when cast to flight if this is true
     val autoFill: Boolean,
     val augmentedCrew: Int,
+    val DELETEFLAG: Boolean,
+    val timeStamp: Long = -1,
     val signature: String = ""
 ): JoozdSerializable {
     object VERSION {
@@ -106,6 +109,9 @@ data class BasicFlight(
         serialized += wrap(component30())
         serialized += wrap(component31())
         serialized += wrap(component32())
+        serialized += wrap(component33())
+        serialized += wrap(component34())
+        serialized += wrap(component35())
 //        serialized += wrap(component36())
 
         return serialized
@@ -116,8 +122,8 @@ data class BasicFlight(
             flightID.toString(),
             orig,
             dest,
-            Instant.ofEpochSecond(timeOut).toString(),
-            Instant.ofEpochSecond(timeIn).toString(),
+            Instant.ofEpochSecond(timeOut).toString(),// from original Flight
+            Instant.ofEpochSecond(timeIn).toString(), // from original Flight
             correctedTotalTime.toString(),
             multiPilotTime.toString(),
             nightTime.toString(),
@@ -142,16 +148,19 @@ data class BasicFlight(
             isSim.toString(),
             isPF.toString(),
             isPlanned.toString(),
+            // unknownToServer.toString(),
             autoFill.toString(),
             augmentedCrew.toString(),
+            // DELETEFLAG,
+            // timeStamp,
             signature
         ).joinToString(";") { it.replace(';', '|') }
     }
 
-    companion object: JoozdSerializable.Deserializer<BasicFlight> {
-        override fun deserialize(source: ByteArray): BasicFlight {
+    companion object: JoozdSerializable.Deserializer<BasicFlight_version6> {
+        override fun deserialize(source: ByteArray): BasicFlight_version6 {
             val wraps = serializedToWraps(source)
-            return BasicFlight(
+            return BasicFlight_version6(
                 unwrap(wraps[0]),
                 unwrap(wraps[1]),
                 unwrap(wraps[2]),
@@ -183,50 +192,53 @@ data class BasicFlight(
                 unwrap(wraps[28]),
                 unwrap(wraps[29]),
                 unwrap(wraps[30]),
-                unwrap(wraps[31])
+                unwrap(wraps[31]),
+                unwrap(wraps[32]),
+                unwrap(wraps[33]),
+                unwrap(wraps[34])
             )
         }
 
-        fun ofCsv(csvFlight: String): BasicFlight =
-        csvFlight.split(';')
-        .map{ it.replace('|', ';')}.let { v->
-            PROTOTYPE.copy(
-                orig = v[1],
-                dest = v[2],
-                timeOut = Instant.parse(v[3]).epochSecond,
-                timeIn = Instant.parse(v[4]).epochSecond,
-                correctedTotalTime = v[5].toInt(),
-                multiPilotTime = v[6].toInt(),
-                nightTime = v[7].toInt(),
-                ifrTime = v[8].toInt(),
-                simTime = v[9].toInt(),
-                aircraft = v[10],
-                registration = v[11],
-                name = v[12],
-                name2 = v[13],
-                takeOffDay = v[14].toInt(),
-                takeOffNight = v[15].toInt(),
-                landingDay = v[16].toInt(),
-                landingNight = v[17].toInt(),
-                autoLand = v[18].toInt(),
-                flightNumber = v[19],
-                remarks = v[20],
-                isPIC = v[21] == true.toString(),
-                isPICUS = v[22] == true.toString(),
-                isCoPilot = v[23] == true.toString(),
-                isDual = v[24] == true.toString(),
-                isInstructor = v[25] == true.toString(),
-                isSim = v[26] == true.toString(),
-                isPF = v[27] == true.toString(),
-                isPlanned = v[28] == true.toString(),
-                autoFill = v[29] == true.toString(),
-                augmentedCrew = v[30].toInt(),
-                signature = v[31].filter { it !in "\r\n" }
-            )
-        }
+        fun ofCsv(csvFlight: String): BasicFlight_version6 =
+            csvFlight.split(';')
+                .map{ it.replace('|', ';')}.let { v->
+                    PROTOTYPE.copy(
+                        orig = v[1],
+                        dest = v[2],
+                        timeOut = Instant.parse(v[3]).epochSecond,
+                        timeIn = Instant.parse(v[4]).epochSecond,
+                        correctedTotalTime = v[5].toInt(),
+                        multiPilotTime = v[6].toInt(),
+                        nightTime = v[7].toInt(),
+                        ifrTime = v[8].toInt(),
+                        simTime = v[9].toInt(),
+                        aircraft = v[10],
+                        registration = v[11],
+                        name = v[12],
+                        name2 = v[13],
+                        takeOffDay = v[14].toInt(),
+                        takeOffNight = v[15].toInt(),
+                        landingDay = v[16].toInt(),
+                        landingNight = v[17].toInt(),
+                        autoLand = v[18].toInt(),
+                        flightNumber = v[19],
+                        remarks = v[20],
+                        isPIC = v[21] == true.toString(),
+                        isPICUS = v[22] == true.toString(),
+                        isCoPilot = v[23] == true.toString(),
+                        isDual = v[24] == true.toString(),
+                        isInstructor = v[25] == true.toString(),
+                        isSim = v[26] == true.toString(),
+                        isPF = v[27] == true.toString(),
+                        isPlanned = v[28] == true.toString(),
+                        autoFill = v[29] == true.toString(),
+                        augmentedCrew = v[30].toInt(),
+                        signature = v[31]
+                    )
+                }
 
         val PROTOTYPE by lazy{
-            BasicFlight(
+            BasicFlight_version6(
                 flightID = -1,
                 orig = "",
                 dest = "",
@@ -256,8 +268,11 @@ data class BasicFlight(
                 isSim = false,
                 isPF = false,
                 isPlanned = true,
+                unknownToServer = true,
                 autoFill = true,
                 augmentedCrew = 0,
+                DELETEFLAG = false,
+                timeStamp = -1,          // timeStamp is time of synch with server for this flight
                 signature = ""
             )
         }

@@ -30,32 +30,29 @@ import nl.joozd.logbookapp.data.dataclasses.FlightData
 
 @Dao
 interface FlightDao {
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 ORDER BY timeOut DESC")
+    @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
     fun validFlightsFlow(): Flow<List<FlightData>>
 
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 AND flightID = :id LIMIT 1")
+    @Query("SELECT * FROM FlightData WHERE flightID = :id LIMIT 1")
     suspend fun getFlightById(id: Int): FlightData?
 
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 AND flightID IN (:ids)")
+    @Query("SELECT * FROM FlightData WHERE flightID IN (:ids)")
     suspend fun getFlightsByID(ids: Collection<Int>): List<FlightData>
 
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 AND timeOut >= :startEpochSecond AND timeOut <= :endEpochSecond")
+    @Query("SELECT * FROM FlightData WHERE timeOut >= :startEpochSecond AND timeOut <= :endEpochSecond")
     suspend fun getFlightsStartingBetween(startEpochSecond: Long, endEpochSecond: Long): List<FlightData>
 
     @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
     suspend fun getAllFlights(): List<FlightData>
 
-    @Query("SELECT * FROM FlightData WHERE DELETEFLAG = 0 ORDER BY timeOut DESC")
+    @Query("SELECT * FROM FlightData ORDER BY timeOut DESC")
     suspend fun getValidFlights(): List<FlightData>
 
     @Query("SELECT MAX(flightID) FROM FlightData")
     suspend fun highestUsedID(): Int?
 
-    @Query("SELECT * FROM FlightData WHERE isPlanned = 0 AND DELETEFLAG = 0 ORDER BY timeIn DESC LIMIT 1")
+    @Query("SELECT * FROM FlightData WHERE isPlanned = 0 ORDER BY timeIn DESC LIMIT 1")
     suspend fun getMostRecentCompleted(): FlightData?
-
-    @Query("SELECT MAX(timeStamp) FROM FlightData WHERE isPlanned = 0")
-    suspend fun getMostRecentTimestampOfACompletedFlight(): Long?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(flightData: Collection<FlightData>)

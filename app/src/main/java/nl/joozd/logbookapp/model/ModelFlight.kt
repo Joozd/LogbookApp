@@ -68,7 +68,6 @@ data class ModelFlight(
     val isSim: Boolean,
     val isPF: Boolean,
     val isPlanned: Boolean,
-    val unknownToServer: Boolean,                    // Changed 1 means server doesn't know about this flight and it can be safely hard-deleted from DB.
     val autoFill: Boolean,
     val augmentedCrew: Int,                             // timestamp should be moment of creation / last change, or when incoming sync: timestamp of sync
     val signature: String
@@ -103,11 +102,8 @@ data class ModelFlight(
         isSim,
         isPF,
         isPlanned,
-        unknownToServer,
         autoFill,
         augmentedCrew,
-        DELETEFLAG = false,
-        timeStamp = Flight.NO_TIMESTAMP,
         signature
     )
 
@@ -261,7 +257,6 @@ data class ModelFlight(
                 isSim,
                 isPF,
                 isPlanned,
-                unknownToServer,
                 autoFill,
                 augmentedCrew,
                 signature

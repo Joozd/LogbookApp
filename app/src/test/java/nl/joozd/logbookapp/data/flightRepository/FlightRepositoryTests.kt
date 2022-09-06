@@ -29,9 +29,7 @@ import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWith
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.FlightsTestData
 import nl.joozd.logbookapp.data.room.MockDatabase
-import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.DispatcherProvider
-import nl.joozd.logbookapp.utils.TimestampMaker
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -72,9 +70,6 @@ class FlightRepositoryTests {
             repo.allFlightsFlow().test {
                 assertEquals(expectedSize, expectMostRecentItem().size)
 
-
-                //test save(Flight)
-                val now = TimestampMaker().nowForSycPurposes
                 repo.save(FlightsTestData.mostRecentCompletedFlight)
 
                 //check correct number of flights (1) saved
@@ -83,13 +78,6 @@ class FlightRepositoryTests {
                 assertEquals(expectedSize, savedFlights.size)
 
                 val firstSavedFlight = savedFlights.first()
-
-                //check saved flights get timestamp
-                assert(firstSavedFlight.timeStamp in (now-3..now+3))
-                assert(firstSavedFlight.timeStamp != FlightsTestData.mostRecentCompletedFlight.timeStamp)
-
-                //check saved flight is same as orignial flight apart from timestamp
-                assertEquals(FlightsTestData.mostRecentCompletedFlight.withTimestampOf(firstSavedFlight), firstSavedFlight)
 
                 //check flights without ID get a new ID assigned and are saved
                 repeat(3){
@@ -119,7 +107,7 @@ class FlightRepositoryTests {
                 expectedSize++
                 val lastSavedFlightID = savedFlights.last().flightID // last saved flight was
                 val found = repo.getFlightByID(lastSavedFlightID)
-                assertEquals(f.withTimestampOf(found!!).copy(flightID = lastSavedFlightID), found)
+                assertEquals(f, found)
 
                 //test delete(Collection)
                 val ff = repo.getAllFlights()
@@ -129,7 +117,6 @@ class FlightRepositoryTests {
 
                 //test save(collection)
                 repo.save(FlightsTestData.flights)
-                expectedSize = FlightsTestData.flights.filter { !it.DELETEFLAG }.size
                 assertEquals(expectedSize, expectMostRecentItem().size)
 
                 //test generateAndReserveNewFlightID
@@ -161,7 +148,4 @@ class FlightRepositoryTests {
         }
 
     }
-
-    private fun Flight.withTimestampOf(other: Flight) =
-        copy(timeStamp = other.timeStamp)
 }

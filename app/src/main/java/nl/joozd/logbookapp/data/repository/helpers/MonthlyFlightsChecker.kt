@@ -30,7 +30,7 @@ import kotlin.math.absoluteValue
  */
 class MonthlyFlightsChecker(private val allFlights: List<Flight>, private val monthlyFlights: List<Flight>, private val tolerance: Int) {
     private val timeBracket = ((monthlyFlights.minByOrNull { it.timeOut }?.timeOut ?: 0) .. (monthlyFlights.maxByOrNull { it.timeIn }?.timeIn ?: 0))
-    private val originalFlights = allFlights.filter { !it.DELETEFLAG && (it.timeIn in timeBracket || it.timeOut in timeBracket || (it.timeOut < timeBracket.minOrNull()!! && it.timeIn > timeBracket.maxOrNull()!!))}
+    private val originalFlights = allFlights.filter { it.timeIn in timeBracket || it.timeOut in timeBracket || (it.timeOut < timeBracket.minOrNull()!! && it.timeIn > timeBracket.maxOrNull()!!)}
 
     /**
      * List of Pairs [monthlyFlights] to all matching [allFlights]

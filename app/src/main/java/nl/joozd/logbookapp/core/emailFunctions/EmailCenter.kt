@@ -58,14 +58,15 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags) {
         else TaskFlags.createNewUserAndEnableCloud(value)
     }
 
+    //TODO THIS NEEDS WORK
     fun storeNewLoginData(username: String, keyString: String) {
         Prefs.username(username)
-        Prefs.keyString(keyString)
+
     }
 
+    //TODO THIS NEEDS WORK
     fun storeNewLoginData(username: String, key: ByteArray) {
         Prefs.username(username)
-        Prefs.key(key)
     }
 
     //requesting a verification email is done by just re-submitting current email address.
@@ -92,20 +93,24 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags) {
      * @return false if password not changed due to server refusal (eg bad login data, which is handled by cloud) or no connection.
      * Calling function gets to handle message to user about success or failure. Consider coercing user to save new login link in that message.
      */
+    //TODO THIS NEEDS WORK
     suspend fun changeLoginKey(cloud: Cloud = Cloud()): Boolean =
         getUsernameWithKey()?.let{ lp ->
             val newKey = generateKey()
             val result = cloud.changeLoginKey(lp.username, lp.key, newKey)
-            if (result == CloudFunctionResult.OK)
+            /*if (result == CloudFunctionResult.OK)
                 Prefs.key(newKey)
+
+             */
             return result == CloudFunctionResult.OK
         } ?: false
 
 
+    //TODO this will go out
+    @Deprecated("Remove this")
     fun logOut() {
         Prefs.useCloud(false)
         Prefs.username(null)
-        Prefs.keyString(null)
     }
 
     suspend fun generateLoginLink(): String? =
@@ -142,16 +147,9 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags) {
         ServerPrefs.emailVerified(false)
     }
 
-    suspend fun getUsernameWithKey(): UsernameWithKey? {
-        val n = Prefs.username()
-        val k = Prefs.key()
-        if (n == null || k == null) {
-            Prefs.useCloud(false)
-            notifyNoUserDataSet()
-            return null
-        }
-        return UsernameWithKey(n, k)
-    }
+    //TODO this goes out
+    @Deprecated("Remove this")
+    suspend fun getUsernameWithKey(): UsernameWithKey? = null
 
     suspend fun getUsername(): String? =
         Prefs.username()
@@ -169,7 +167,8 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags) {
     /**
      * True if logged in, false if not. For purposes that need to be logged in or else handle that, use [checkIfLoginDataSet]
      */
-    suspend fun isLoggedIn() = Prefs.username() != null && Prefs.key() != null
+    //TODO this gets to go as well
+    suspend fun isLoggedIn() = Prefs.username() != null
 
     private fun notifyNoUserDataSet(){
         MessagesWaiting.noLoginDataSaved(true)

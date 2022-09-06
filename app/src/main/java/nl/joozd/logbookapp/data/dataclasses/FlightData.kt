@@ -53,11 +53,7 @@ data class FlightData(
     val isSim: Boolean,
     val isPF: Boolean,
     val isPlanned: Boolean,
-    val changed: Boolean,
     val autoFill: Boolean,
     val augmentedCrew: Int,
-    val DELETEFLAG: Boolean,
-// val signed: Boolean,
-    val timeStamp: Long, // timeStamp is time of synch with server for this flight
     val signature: String = ""
 )

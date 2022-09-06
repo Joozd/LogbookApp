@@ -49,7 +49,7 @@ abstract class JoozdlogDatabase protected constructor(): RoomDatabase() { // pro
     companion object {
         private var INSTANCE: JoozdlogDatabase? = null
 
-        const val VERSION = 10
+        const val VERSION = 11
 
         @Synchronized
         fun getInstance(): JoozdlogDatabase {
@@ -58,7 +58,7 @@ abstract class JoozdlogDatabase protected constructor(): RoomDatabase() { // pro
                 App.instance.applicationContext,
                 JoozdlogDatabase::class.java,
                 "flights_database"
-            ).addMigrations(UPDATE_8_9, UPDATE_9_10)
+            ).addMigrations(UPDATE_8_9, UPDATE_9_10, UPDATE_10_11)
                 .build()
             INSTANCE = instance
             return instance
@@ -95,6 +95,17 @@ abstract class JoozdlogDatabase protected constructor(): RoomDatabase() { // pro
         private val UPDATE_9_10 = object : Migration(9, 10) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("DROP TABLE AircraftTypeConsensusData")
+            }
+        }
+
+        private val UPDATE_10_11 = object : Migration(10, 11) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                with(database) {
+                    execSQL("CREATE TABLE Flights_Backup (flightID INTEGER NOT NULL, orig TEXT NOT NULL, dest TEXT NOT NULL, timeOut INTEGER NOT NULL, timeIn INTEGER NOT NULL, correctedTotalTime INTEGER NOT NULL, multiPilotTime INTEGER NOT NULL, nightTime INTEGER NOT NULL, ifrTime INTEGER NOT NULL, simTime INTEGER NOT NULL, aircraft TEXT NOT NULL, registration TEXT NOT NULL, name TEXT NOT NULL, name2 TEXT NOT NULL, takeOffDay INTEGER NOT NULL, takeOffNight INTEGER NOT NULL, landingDay INTEGER NOT NULL, landingNight INTEGER NOT NULL, autoLand INTEGER NOT NULL, flightNumber TEXT NOT NULL, remarks TEXT NOT NULL, isPIC INTEGER NOT NULL, isPICUS INTEGER NOT NULL, isCoPilot INTEGER NOT NULL, isDual INTEGER NOT NULL, isInstructor INTEGER NOT NULL, isSim INTEGER NOT NULL, isPF INTEGER NOT NULL, isPlanned INTEGER NOT NULL, autoFill INTEGER NOT NULL, augmentedCrew INTEGER NOT NULL, signature TEXT NOT NULL, PRIMARY KEY (flightID))")
+                    execSQL("INSERT INTO Flights_Backup SELECT flightID, orig, dest, timeOut, timeIn, correctedTotalTime, multiPilotTime, nightTime, ifrTime, simTime, aircraft, registration, name, name2, takeOffDay, takeOffNight, landingDay, landingNight, autoLand, flightNumber, remarks, isPIC, isPICUS, isCoPilot, isDual, isInstructor, isSim, isPF, isPlanned, autoFill, augmentedCrew, signature FROM FlightData")
+                    execSQL("DROP TABLE FlightData")
+                    execSQL("ALTER TABLE Flights_Backup RENAME to FlightData")
+                }
             }
         }
     }

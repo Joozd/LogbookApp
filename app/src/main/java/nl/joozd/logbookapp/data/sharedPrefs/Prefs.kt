@@ -20,17 +20,12 @@
 package nl.joozd.logbookapp.data.sharedPrefs
 
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import nl.joozd.logbookapp.ui.utils.base64Decode
-import nl.joozd.logbookapp.ui.utils.base64Encode
 
 
 object Prefs: JoozdLogPreferences() {
     override val preferencesFileKey = "nl.joozd.logbookapp.PREFERENCE_FILE_KEY"
-    override val needsMigration = true
-
 
     private const val USERNAME_NOT_SET = "USERNAME_NOT_SET"
     private const val NO_CALENDAR_SELECTED = ""
@@ -62,32 +57,8 @@ object Prefs: JoozdLogPreferences() {
     val usernameFlow = usernameResourceFlow.map {
         usernameIfSet(it)
     }
-    suspend fun username() = usernameFlow.first()
+    suspend fun username() = usernameFlow.first()   // usernameFlow gives null if USERNAME_NOT_SET
     fun username(newName: String?) = post(USERNAME_RESOURCE, newName ?: USERNAME_NOT_SET)
-
-    /**
-     * password is the users password, as a Base64 encoded Bytearray (encoded to String)
-     * can only be set from a base64 encoded key
-     */
-    var keyString: String?
-        get() = dataStore.getString(PASSWORD_SHAREDPREF_KEY, "")?.takeIf { it.isNotBlank() }
-        set(p) { dataStore.putString(PASSWORD_SHAREDPREF_KEY, p ?: "") }
-    private val keyStringFlow = dataStore.data.map { p ->
-        p[stringPreferencesKey(PASSWORD_SHAREDPREF_KEY)]}
-    fun keyString(ks: String?) = post(PASSWORD_SHAREDPREF_KEY, ks ?: "")
-
-    //ByteArray version that will actually be used as key. Actually stored as base64 encoded string in keyString.
-    var key: ByteArray?
-        get() = keyString?.let { base64Decode(it) }
-        set(key){ keyString = key?.let { base64Encode(it) } }
-    fun key(newKey: ByteArray) = keyString(base64Encode(newKey))
-
-    val keyFlow = keyStringFlow.map { p -> p?.let { base64Decode(p) }}
-    suspend fun key() = keyFlow.first()
-
-    private const val SERVER_TIME_OFFSET = "SERVER_TIME_OFFSET"
-    var serverTimeOffset: Long by JoozdLogSharedPreferenceNotNull(SERVER_TIME_OFFSET,0)
-    fun postServerTimeOffset(value: Long) = post(SERVER_TIME_OFFSET, value)
 
     /**
      * Amount of days that need to have passed for a notice to be shown
@@ -98,11 +69,11 @@ object Prefs: JoozdLogPreferences() {
     val backupInterval by JoozdlogSharedPreferenceDelegate(BACKUP_INTERVAL,14)
     val backupFromCloud by JoozdlogSharedPreferenceDelegate(BACKUP_FROM_CLOUD,false)
 
-    private const val NEW_USER_ACT_FINISHED = "NEW_USER_ACT_FINISHED"
-    private const val EFF_FIRST_USE = "EFF_FIRST_USE"
+    private const val NEW_USER_ACTIVITY_FINISHED = "NEW_USER_ACT_FINISHED"
+    private const val EDIT_FLIGHT_FRAGMENT_FIRST_USE = "EFF_FIRST_USE"
 
-    val newUserActivityFinished by JoozdlogSharedPreferenceDelegate(NEW_USER_ACT_FINISHED,false)
-    val editFlightFragmentWelcomeMessageShouldBeDisplayed by JoozdlogSharedPreferenceDelegate(EFF_FIRST_USE,true)
+    val newUserActivityFinished by JoozdlogSharedPreferenceDelegate(NEW_USER_ACTIVITY_FINISHED,false)
+    val editFlightFragmentWelcomeMessageShouldBeDisplayed by JoozdlogSharedPreferenceDelegate(EDIT_FLIGHT_FRAGMENT_FIRST_USE,true)
 
     /***********************
      *   UI preferences:   *
@@ -159,21 +130,11 @@ object Prefs: JoozdLogPreferences() {
     private const val MAX_CHRONO_DIFF = "MAX_CHRONO_DIFF"
     var maxChronoAdjustment: Int by JoozdLogSharedPreferenceNotNull(MAX_CHRONO_DIFF,180)
 
-    /**
-     * Add names from rosters?
-     */
-
     val getNamesFromRosters by JoozdlogSharedPreferenceDelegate(GET_NAMES_FROM_ROSTERS, defaultValue = true)
     val standardTakeoffLandingTimes by JoozdlogSharedPreferenceDelegate(STANDARD_TAKEOFF_LANDING_TIMES,30) //time to allocate to pilot if flying heavy crew and did takeoff or landing
     val selectedCalendar by JoozdlogSharedPreferenceDelegate(SELECTED_CALENDAR, NO_CALENDAR_SELECTED) //Calendar on device that is used to import flights
     val useCloud by JoozdlogSharedPreferenceDelegate(USE_CLOUD,false)
     val acceptedCloudSyncTerms by JoozdlogSharedPreferenceDelegate(ACCEPTED_CLOUD_TERMS, false)
-
-    /**
-     * Small things being saved:
-     */
-
-
 
 
     private fun usernameIfSet(name: String) = name.takeIf { usernameResource != USERNAME_NOT_SET }

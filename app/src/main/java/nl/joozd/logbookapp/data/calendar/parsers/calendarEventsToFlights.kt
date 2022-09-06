@@ -23,7 +23,6 @@ import nl.joozd.joozdcalendarapi.CalendarEvent
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
-import nl.joozd.logbookapp.utils.TimestampMaker
 import java.time.Instant
 
 // Matches KL123(4) ABC( )-( )DEF // int this example characters in parentheses are optional
@@ -55,7 +54,6 @@ private fun flightEventsToBasicFlights(
             flightNumber = data.flightNumber(),
             timeOut = event.startEpochMillis / 1000, // given in epochMillis, need epochSeconds
             timeIn = event.endEpochMillis / 1000,    // given in epochMillis, need epochSeconds
-            timeStamp = TimestampMaker().nowForSycPurposes,
             isPlanned = true
         )
     }

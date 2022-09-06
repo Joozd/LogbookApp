@@ -25,7 +25,6 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.comm.Cloud
-import nl.joozd.logbookapp.comm.requestLoginLinkEmail
 import nl.joozd.logbookapp.comm.sendFeedback
 
 class SubmitFeedbackWorker(

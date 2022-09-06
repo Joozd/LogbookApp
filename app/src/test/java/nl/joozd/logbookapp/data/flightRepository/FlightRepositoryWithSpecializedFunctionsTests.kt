@@ -47,9 +47,6 @@ class FlightRepositoryWithSpecializedFunctionsTests: CoroutineTestingClass() {
     @Test
     fun testFlightRepositoryWithSpecializedFunctionsFunctions(){
         runTest {
-            //test getMostRecentTimestampOfACompletedFlight
-            assertEquals(FlightsTestData.mostRecentTimestampFlight.timeStamp, repo.getMostRecentTimestampOfACompletedFlight())
-
             //test getMostRecentCompletedFlight
             assertEquals(FlightsTestData.mostRecentCompletedFlight, repo.getMostRecentCompletedFlight())
 

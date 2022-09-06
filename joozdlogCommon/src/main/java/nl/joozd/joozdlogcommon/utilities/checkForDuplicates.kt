@@ -24,4 +24,4 @@ fun checkForDuplicates(flights: List<BasicFlight>): List<BasicFlight> {
 // A flight is a duplicate if everything except flightID, timestamp and changed are the same.
 // TODO This can be sped up by a lot by checking everything with AND; preferably with lowest chance compares first.
 private fun BasicFlight.isDuplicateOf(other: BasicFlight) =
-    this.copy(flightID = 0, unknownToServer = false, timeStamp = 0) == other.copy(flightID = 0, unknownToServer = false, timeStamp = 0)
+    this.copy(flightID = 0) == other.copy(flightID = 0)

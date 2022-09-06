@@ -27,7 +27,7 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
  */
 class RosterFlightsChecker(private val allFlights: List<Flight>, private val rosterFlights: List<Flight>) {
     private val timeBracket = ((rosterFlights.minByOrNull { it.timeOut }?.timeOut ?: 0) .. (rosterFlights.maxByOrNull { it.timeIn }?.timeIn ?: 0))
-    private val originalFlights = allFlights.filter { !it.DELETEFLAG && (it.timeIn in timeBracket || it.timeOut in timeBracket || (it.timeOut < timeBracket.minOrNull()!! && it.timeIn > timeBracket.maxOrNull()!!))}
+    private val originalFlights = allFlights.filter { it.timeIn in timeBracket || it.timeOut in timeBracket || (it.timeOut < timeBracket.minOrNull()!! && it.timeIn > timeBracket.maxOrNull()!!)}
 
     private val overlapsList: List<Pair<Flight, List<Flight>>> = rosterFlights.map {f -> f to findOverlapping(f) }
 

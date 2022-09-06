@@ -59,7 +59,7 @@ class MockDatabaseTests {
                 dao.save(FlightsTestData.flights.map { it.toData() })
 
                 val allFlightsSize = FlightsTestData.flights.size
-                val validFlightsSize = allFlightsSize - FlightsTestData.flights.filter { it.DELETEFLAG }.size
+                val validFlightsSize = allFlightsSize - FlightsTestData.flights.size
                 // should not emit item with DELETEFLAG
                 assertEquals(validFlightsSize, awaitItem().size )
 
@@ -85,9 +85,6 @@ class MockDatabaseTests {
 
                 //getMostRecentCompleted
                 assertEquals(f1, dao.getMostRecentCompleted()?.toFlight())
-
-                //getMostRecentTimestampOfACompletedFlight
-                assertEquals(4000L, dao.getMostRecentTimestampOfACompletedFlight())
 
                 //delete
                 dao.delete(listOf(f1.toData()))

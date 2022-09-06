@@ -56,15 +56,12 @@ data class Flight(
     val isSim: Boolean = false,
     val isPF: Boolean = false,
     val isPlanned: Boolean = true,
-    val unknownToServer: Boolean = true,                    // Changed 1 means server doesn't know about this flight and it can be safely hard-deleted from DB.
     val autoFill: Boolean = true,
     val augmentedCrew: Int = 0,
-    val DELETEFLAG: Boolean = false,
-    val timeStamp: Long = -1,                               // timestamp should be moment of creation / last change, or when incoming sync: timestamp of sync
     val signature: String = ""
 ){
     //can be constructed as (Flight(BasicFlight))
-    constructor(b: BasicFlight): this(b.flightID, b.orig, b.dest, b.timeOut, b.timeIn, b.correctedTotalTime, b.multiPilotTime, b.nightTime, b.ifrTime, b.simTime, b.aircraft, b.registration, b.name, b.name2, b.takeOffDay, b.takeOffNight, b.landingDay, b.landingNight, b.autoLand, b.flightNumber, b.remarks, b.isPIC, b.isPICUS, b.isCoPilot, b.isDual, b.isInstructor, b.isSim, b.isPF, b.isPlanned, b.unknownToServer, b.autoFill, b.augmentedCrew, b.DELETEFLAG, b.timeStamp, b.signature)
+    constructor(b: BasicFlight): this(b.flightID, b.orig, b.dest, b.timeOut, b.timeIn, b.correctedTotalTime, b.multiPilotTime, b.nightTime, b.ifrTime, b.simTime, b.aircraft, b.registration, b.name, b.name2, b.takeOffDay, b.takeOffNight, b.landingDay, b.landingNight, b.autoLand, b.flightNumber, b.remarks, b.isPIC, b.isPICUS, b.isCoPilot, b.isDual, b.isInstructor, b.isSim, b.isPF, b.isPlanned, b.autoFill, b.augmentedCrew, b.signature)
 
 
 
@@ -98,11 +95,8 @@ data class Flight(
         isSim,
         isPF,
         isPlanned,
-        unknownToServer,
         autoFill,
         augmentedCrew,
-        DELETEFLAG,
-        timeStamp,
         signature
     )
     fun toData() = FlightData(
@@ -135,11 +129,8 @@ data class Flight(
         isSim,
         isPF,
         isPlanned,
-        unknownToServer,
         autoFill,
         augmentedCrew,
-        DELETEFLAG,
-        timeStamp,
         signature
     )
 
@@ -173,7 +164,7 @@ data class Flight(
     }
 
     infix fun isExactMatchOf(other: Flight): Boolean =
-        this.copy (flightID = 0, timeStamp = 0) == other.copy(flightID = 0, timeStamp = 0)
+        this.copy (flightID = 0) == other.copy(flightID = 0)
 
     companion object{
         const val FLIGHT_ID_NOT_INITIALIZED = -1

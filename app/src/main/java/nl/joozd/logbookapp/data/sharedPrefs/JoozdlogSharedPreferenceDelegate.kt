@@ -11,7 +11,7 @@ import kotlinx.coroutines.runBlocking
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private val defaultValue: T, private val debug: Boolean = false): ReadOnlyProperty<JoozdLogPreferences, JoozdlogSharedPreferenceDelegate.ReadOnlyPref<T>> {
+class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private val defaultValue: T): ReadOnlyProperty<JoozdLogPreferences, JoozdlogSharedPreferenceDelegate.ReadOnlyPref<T>> {
     private var _instance : Pref<T>? = null
 
     interface Pref<T: Any>: ReadOnlyPref<T>, WriteablePref<T>{
@@ -32,7 +32,7 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private
         operator fun invoke(newValue: T)
     }
 
-    class PrefImpl<T: Any>(thisRef: JoozdLogPreferences, private val key: String, private val defaultValue: T, private val debug: Boolean): Pref<T>{
+    class PrefImpl<T: Any>(thisRef: JoozdLogPreferences, key: String, private val defaultValue: T): Pref<T>{
         @Suppress("UNCHECKED_CAST")
         private val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
         private val dataStore = thisRef.dataStore
@@ -48,7 +48,6 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private
         private suspend fun value() = flow.first()
 
         override suspend fun setValue(value: T) { // doing this on MainScope is OK as Datastore will give it Dispatchers.IO
-            if (debug) println("value for $key set to $value")
             dataStore.edit { p ->
                 p[prefsKey] = value
             }
@@ -110,5 +109,5 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private
 
     override fun getValue(thisRef: JoozdLogPreferences, property: KProperty<*>): Pref<T> = getInstance(thisRef)
 
-    private fun getInstance(thisRef: JoozdLogPreferences) = _instance ?: PrefImpl(thisRef, key, defaultValue, debug)
+    private fun getInstance(thisRef: JoozdLogPreferences) = _instance ?: PrefImpl(thisRef, key, defaultValue)
 }

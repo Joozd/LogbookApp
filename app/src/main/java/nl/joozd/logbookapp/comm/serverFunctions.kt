@@ -2,14 +2,10 @@ package nl.joozd.logbookapp.comm
 
 //These functions know where Preferences such as login data or email addresses can be found.
 
-import android.util.Log
 import kotlinx.coroutines.withContext
-import nl.joozd.joozdlogcommon.BackupEmailData
+import nl.joozd.joozdlogcommon.EmailData
 import nl.joozd.joozdlogcommon.FeedbackData
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.core.messages.MessagesWaiting
-import nl.joozd.logbookapp.core.emailFunctions.UsernameWithKey
-import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 import nl.joozd.logbookapp.core.emailFunctions.checkConfirmationString
 import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
@@ -18,57 +14,26 @@ import nl.joozd.logbookapp.data.sharedPrefs.*
 import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.utils.DispatcherProvider
-import nl.joozd.logbookapp.utils.generateKey
 import java.time.Instant
 
-/**
- * This will invalidate current login data.
- * - Asks a username from server
- * - generates a password
- * - Creates a new user on server with those data.
- * - On success, saves the data, requests a confirmation email and resets TaskFlag.
- * @return success() if new data received and saved, retry() if connection error, failure() if server refused.
- */
-suspend fun generateNewUserAndCreateOnServer(cloud: Cloud = Cloud()): ServerFunctionResult =
-    cloud.requestUsername()?.let { n ->
-        val loginData = UsernameWithKey(n, generateKey())
-        when (createNewUserOnServer(loginData, cloud)) {
-                ServerFunctionResult.SUCCESS -> {
-                    saveLoginDataAsNewUser(loginData)
-                    TaskFlags.createNewUserAndEnableCloud(false)
-                    Prefs.useCloud(true)
-                    MessagesWaiting.newCloudAccountCreated(true)
-                    ServerFunctionResult.SUCCESS
-                }
-                ServerFunctionResult.RETRY -> ServerFunctionResult.RETRY
-                ServerFunctionResult.FAILURE -> generateNewUserAndCreateOnServer(cloud)
-            }
-        } ?: ServerFunctionResult.RETRY
-
-private suspend fun saveLoginDataAsNewUser(loginData: UsernameWithKey) {
-    withContext(DispatcherProvider.io()) { storeLoginData(loginData.username, loginData.key) } // blocking is OK in this context
-    resetEmailData()
-}
 
 
 /**
  * This will send a new email address to server
- * - Will attempt to get login data
- * - Will attempt to get email address
- * - Sends email to server with current login data
- * - On success, sets EmailVerified to false and resets TaskFlag.
+ * - Will attempt to get email address and emailID.
+ * - Sends email to server with current email data
+ * - On success, sets EmailVerified to false and saves emailID received from server.
+ *      (if emailID was not set this will be a new one, if not it will probably stay the same)
  */
-suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), userManagement: EmailCenter = EmailCenter()): ServerFunctionResult =
-    userManagement.getUsernameWithKey()?.let { loginData ->
-        getEmailAddressFromPrefs()?.let{ emailAddress ->
-            sendEmailAddressToServer(loginData, emailAddress, cloud).also{
-                if (it.isOK()) {
-                    ServerPrefs.emailVerified(false)
-                    TaskFlags.updateEmailWithServer(false)
-                }
-            }
-        }
-    } ?: ServerFunctionResult.FAILURE
+suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), serverPrefs: ServerPrefs = ServerPrefs) {
+    val id = serverPrefs.emailID()
+    val emailAddress = serverPrefs.emailAddress()
+    cloud.sendNewEmailAddress(id, emailAddress)?.let{
+        serverPrefs.emailID(it)
+        serverPrefs.emailVerified(false)
+    }
+}
+
 
 /**
  * This will confirm email confirmation code with server
@@ -85,32 +50,41 @@ suspend fun confirmEmail(confirmationString: String, cloud: Cloud = Cloud()): Se
         }
     }
 
+// This does NOT check to see if migration is possible or needed. Do that in calling function.
+suspend fun migrateEmail(username: String, emailAddress: String, cloud: Cloud = Cloud()): Long? =
+    cloud.migrateEmailData(username, emailAddress)
+
+/*
+ * Sending a mail is normally done from a worker, which is triggered by a TaskFlag.
+ * In case there are no (or bad) email data set, server will reply with NOT_A_VALID_EMAIL_ADDRESS, for which Cloud will schedule a dialog through MessageCenter.
+ * In case the email data is not yet confirmed or registered, server will reply EMAIL_NOT_KNOWN_OR_VERIFIED for which Cloud will schedule a dialog as well.
+ * In both cases, the TaskFlag will be left alone and Cloud will schedule things so that when email is verified,
+ *  so the worker will run again when the email address has been verified.
+ *
+ * migrateLoginDataIfNeeded() will make sure email data is migrated on the server to the emailID system, from the userName system.
+ */
 suspend fun sendBackupMailThroughServer(
-    cloud: Cloud = Cloud(),
-    userManagement: EmailCenter = EmailCenter()
+    cloud: Cloud = Cloud()
 ){
-    val backupEmailData = generateBackupEmailData(userManagement)
-    cloud.sendBackupMailThroughServer(backupEmailData) // if this fails it will throw exception
+    migrateLoginDataIfNeeded()
+    val backupEmailData = generateBackupEmailData()
+    try{
+        cloud.sendBackupMailThroughServer(backupEmailData)
+    } catch (e: CloudException){
+        return
+    }
     TaskFlags.sendBackupEmail(false)
     BackupPrefs.mostRecentBackup(Instant.now().epochSecond)
-
 }
 
-suspend fun generateBackupEmailData(
-    userManagement: EmailCenter,
+private suspend fun generateBackupEmailData(
     flightsRepositoryExporter: FlightsRepositoryExporter = FlightsRepositoryExporter()
-): BackupEmailData {
+): EmailData {
     val csv = flightsRepositoryExporter.buildCsvString()
-    val username: String = userManagement.getUsername() ?: throw(CloudException(CloudFunctionResult.SERVER_REFUSED))
+    val id: Long = ServerPrefs.emailID()
     val emailAddress: String = ServerPrefs.emailAddress()
-    return BackupEmailData(username, emailAddress, csv)
+    return EmailData(id, emailAddress, csv.toByteArray(Charsets.UTF_8))
 }
-
-/**
- * Get time from server, or not.
- */
-suspend fun getTimeFromServer(cloud: Cloud = Cloud()): Long? =
-    cloud.getTime()
 
 /**
  * Update data files if needed
@@ -157,62 +131,26 @@ private suspend fun sendEmailConfirmationCode(confirmationString: String, cloud:
     }
 }
 
+private suspend fun migrateLoginDataIfNeeded(){
+    val userName = Prefs.username()
+    val emailAddress = ServerPrefs.emailAddress()
+    val migrationNeeded =
+        userName != null
+            && emailAddress.isNotBlank()
+            && ServerPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
+    if (migrationNeeded){
+        migrateEmail(userName!!, emailAddress)?.let{
+            Prefs.username(null)
+            ServerPrefs.emailID(it)
+        }
+    }
+    val creationNeeded = ServerPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
+    if (creationNeeded){
+        updateEmailAddressOnServer()
+    }
+}
+
 private fun resetEmailCodeVerificationFlag() {
     TaskFlags.verifyEmailCode(false)
     TaskPayloads.emailConfirmationStringWaiting("")
 }
-
-private suspend fun sendEmailAddressToServer(loginData: UsernameWithKey, emailAddress: String, cloud: Cloud): ServerFunctionResult =
-    //NOTE this does NOT save the email address nor does any other marking, flagging or anything.
-    cloud.sendNewEmailAddress(loginData.username, loginData.key, emailAddress).correspondingServerFunctionResult()
-
-private suspend fun createNewUserOnServer(loginData: UsernameWithKey, cloud: Cloud): ServerFunctionResult =
-    cloud.createNewUser(loginData.username, loginData.key).correspondingServerFunctionResult()
-    // FAILURE only happens in very rare case when a retry if
-
-
-
-// If there is no email address stored, this will handle it (eg. prompt user to enter email address so requested calling function can be performed)
-private suspend fun getEmailAddressFromPrefs(): String? =
-    ServerPrefs.emailAddress().ifBlank {
-        // Fallback handling of no email address entered when one is needed.
-        // Any functions being called should only be triggered when an emal address is entered.
-        // Therefore, this should only happen after user triggered an action in a way unforeseen at the time of this writing
-        Log.e("getEmailAddressFromPrefs", "getEmailAddressFromPrefs() was called but an EmailPrefs.emailAddress is blank. User is notified to fix this.")
-        MessagesWaiting.noEmailEntered(true) // this will trigger display of "no email entered" message to user.
-        ServerPrefs.emailVerified(false)
-
-        null
-    }
-
-private fun resetEmailData() {
-    ServerPrefs.emailVerified(false)
-    EmailCenter().requestEmailVerificationMail()
-}
-
-//TODO THIS NEEDS WORK
-private fun storeLoginData(username: String, key: ByteArray, userManagement: EmailCenter = EmailCenter()) {
-    userManagement.storeNewLoginData(username, key)
-    Prefs.username = username
-}
-
-object ServerPrefs: JoozdLogPreferences() {
-    override val preferencesFileKey = "nl.joozd.logbookapp.SERVER_PREFS_KEY"
-
-    /*
-    private const val XXXXXXXXXX = "XXXXXXXXXX"
-     */
-
-    private const val EMAIL_ADDRESS = "EMAIL_ADDRESS"
-    private const val EMAIL_VERIFIED = "EMAIL_VERIFIED"
-    private const val MOST_RECENT_FLIGHT_SYNC_EPOCH_SECOND = "MOST_RECENT_FLIGHT_SYNC_EPOCH_SECOND"
-
-    val emailAddress by JoozdlogSharedPreferenceDelegate(EMAIL_ADDRESS,"")
-    /**
-     * [emailVerified] is true if email verification code was deemed correct by server
-     * set this to false if server gives an INCORRECT_EMAIL_ADDRESS error
-     */
-    val emailVerified by JoozdlogSharedPreferenceDelegate(EMAIL_VERIFIED,false)
-    val mostRecentFlightsSyncEpochSecond by JoozdlogSharedPreferenceDelegate(MOST_RECENT_FLIGHT_SYNC_EPOCH_SECOND, -1L)
-}
-

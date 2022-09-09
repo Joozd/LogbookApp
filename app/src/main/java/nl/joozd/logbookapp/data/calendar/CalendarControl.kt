@@ -8,7 +8,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.core.messages.MessageCenter
-import nl.joozd.logbookapp.utils.UserMessage
+import nl.joozd.logbookapp.core.messages.UserMessage
 import java.time.Instant
 
 object CalendarControl {
@@ -44,7 +44,7 @@ object CalendarControl {
                 && timeIn > Instant.now().epochSecond
 
 
-    private fun makeCalendarConflictMessage(flight: Flight, reason: CalendarConflict): UserMessage{
+    private fun makeCalendarConflictMessage(flight: Flight, reason: CalendarConflict): UserMessage {
         val time = flight.timeIn
         return when (reason){
             CalendarConflict.EDITING_FLIGHT_IN_PERIOD ->

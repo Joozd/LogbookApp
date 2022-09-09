@@ -29,23 +29,13 @@ object Prefs: JoozdLogPreferences() {
 
     private const val USERNAME_NOT_SET = "USERNAME_NOT_SET"
     private const val NO_CALENDAR_SELECTED = ""
-    private const val PASSWORD_SHAREDPREF_KEY = "passwordSharedPrefKey"
 
     private const val GET_NAMES_FROM_ROSTERS = "GET_NAMES_FROM_ROSTERS"
     private const val STANDARD_TAKEOFF_LANDING_TIMES = "STANDARD_TAKEOFF_LANDING_TIMES"
     private const val SELECTED_CALENDAR = "SELECTED_CALENDAR"
-    private const val USE_CLOUD = "USE_CLOUD"
-    private const val ACCEPTED_CLOUD_TERMS = "ACCEPTED_CLOUD_TERMS"
 
 
-    /*
-    private const val XXXXXXXXXX = "XXXXXXXXXX"
-     */
-
-    /**
-     * username is the users' username.
-     * cannot delegate as that doesn't support null
-     */
+    //This will be replaced by emailID, just here so we can migrate when upgrading. one month after 1.2 update, this can go out.
     private const val USERNAME_RESOURCE = "USERNAME_RESOURCE"
     private var usernameResource: String by JoozdLogSharedPreferenceNotNull(USERNAME_RESOURCE, USERNAME_NOT_SET)
     var username: String?
@@ -59,6 +49,9 @@ object Prefs: JoozdLogPreferences() {
     }
     suspend fun username() = usernameFlow.first()   // usernameFlow gives null if USERNAME_NOT_SET
     fun username(newName: String?) = post(USERNAME_RESOURCE, newName ?: USERNAME_NOT_SET)
+
+    private fun usernameIfSet(name: String) = name.takeIf { usernameResource != USERNAME_NOT_SET }
+
 
     /**
      * Amount of days that need to have passed for a notice to be shown
@@ -101,6 +94,9 @@ object Prefs: JoozdLogPreferences() {
         override fun mapBack(transformedValue: CalendarSyncType): Int = transformedValue.value
     })
 
+    private fun makeCalendarSyncType(type: Int): CalendarSyncType =
+        CalendarSyncType.fromInt(type) ?: CalendarSyncType.CALENDAR_SYNC_NONE
+
     val calendarSyncIcalAddress by JoozdlogSharedPreferenceDelegate(CAL_SYNC_ICAL_ADDR,"")
     val nextCalendarCheckTime by JoozdlogSharedPreferenceDelegate(NEXT_CAL_CHECK_TIME,-1)
     val calendarDisabledUntil by JoozdlogSharedPreferenceDelegate(CAL_DISABLED_UNTIL,0L) // in epochSeconds
@@ -133,14 +129,9 @@ object Prefs: JoozdLogPreferences() {
     val getNamesFromRosters by JoozdlogSharedPreferenceDelegate(GET_NAMES_FROM_ROSTERS, defaultValue = true)
     val standardTakeoffLandingTimes by JoozdlogSharedPreferenceDelegate(STANDARD_TAKEOFF_LANDING_TIMES,30) //time to allocate to pilot if flying heavy crew and did takeoff or landing
     val selectedCalendar by JoozdlogSharedPreferenceDelegate(SELECTED_CALENDAR, NO_CALENDAR_SELECTED) //Calendar on device that is used to import flights
-    val useCloud by JoozdlogSharedPreferenceDelegate(USE_CLOUD,false)
-    val acceptedCloudSyncTerms by JoozdlogSharedPreferenceDelegate(ACCEPTED_CLOUD_TERMS, false)
 
 
-    private fun usernameIfSet(name: String) = name.takeIf { usernameResource != USERNAME_NOT_SET }
 
-    private fun makeCalendarSyncType(type: Int): CalendarSyncType =
-        CalendarSyncType.fromInt(type) ?: CalendarSyncType.CALENDAR_SYNC_NONE
 }
 
 

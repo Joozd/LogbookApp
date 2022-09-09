@@ -19,7 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status
 
-import nl.joozd.logbookapp.utils.UserMessage
+import nl.joozd.logbookapp.core.messages.UserMessage
 
 /**
  * Used to communicate a user choice to UI.
@@ -30,8 +30,8 @@ class UserChoice(
     descriptionResource: Int,
     choice1Resource: Int?,
     choice2Resource: Int?,
-    action1: UserChoiceListener,
-    action2: UserChoiceListener
+    action1: ActionListener,
+    action2: ActionListener
 ): HandlerStatus, UserMessage(titleResource, descriptionResource, choice1Resource, choice2Resource, action1, action2) {
     class Builder : UserMessage.Builder() {
         override fun build(): UserChoice =

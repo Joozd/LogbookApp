@@ -1,17 +1,16 @@
-package nl.joozd.logbookapp.utils
+package nl.joozd.logbookapp.core.messages
 
-import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import androidx.activity.ComponentActivity
+import nl.joozd.logbookapp.R
 
 open class UserMessage(
     private val titleResource: Int,
     private val descriptionResource: Int,
     private val choice1Resource: Int?,
     private val choice2Resource: Int?,
-    private val action1: UserChoiceListener,
-    private val action2: UserChoiceListener,
+    private val action1: ActionListener,
+    private val action2: ActionListener,
     private val cleanUp: MutableList<() -> Unit> = ArrayList()
 ) {
     override operator fun equals(other: Any?): Boolean =
@@ -31,7 +30,7 @@ open class UserMessage(
 
 
 
-    fun interface UserChoiceListener{
+    fun interface ActionListener{
         fun ComponentActivity.execute()
     }
 
@@ -40,26 +39,26 @@ open class UserMessage(
         var descriptionResource: Int? = null
         var choice1Resource: Int? = null
         var choice2Resource: Int? = null
-        var action1Listener = UserChoiceListener {  }
-        var action2Listener = UserChoiceListener {  }
+        var action1Listener = ActionListener {  }
+        var action2Listener = ActionListener {  }
 
-        fun setAction1(action: UserChoiceListener): Builder{
+        fun setAction1(action: ActionListener): Builder {
             action1Listener = action
             return this
         }
 
-        fun setAction2(action: UserChoiceListener): Builder{
+        fun setAction2(action: ActionListener): Builder {
             action2Listener = action
             return this
         }
 
-        fun setPositiveButton(resource: Int, action: UserChoiceListener): Builder{
+        fun setPositiveButton(resource: Int, action: ActionListener): Builder {
             choice1Resource = resource
             action1Listener = action
             return this
         }
 
-        fun setNegativeButton(resource: Int, action: UserChoiceListener): Builder{
+        fun setNegativeButton(resource: Int, action: ActionListener): Builder {
             choice2Resource = resource
             action2Listener = action
             return this
@@ -67,8 +66,8 @@ open class UserMessage(
 
         open fun build(): UserMessage =
             UserMessage(
-                titleResource ?: android.R.string.unknownName,
-                descriptionResource ?: android.R.string.unknownName,
+                titleResource ?: R.string.unknown,
+                descriptionResource ?: R.string.unknown,
                 choice1Resource,
                 choice2Resource,
                 action1Listener,

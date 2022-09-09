@@ -1,33 +1,29 @@
 package nl.joozd.logbookapp.comm
 
-
-import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
-import nl.joozd.logbookapp.R
+import nl.joozd.joozdlogcommon.comms.JoozdlogCommsResponses
 import nl.joozd.logbookapp.core.messages.MessageCenter
-import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
+import nl.joozd.logbookapp.core.messages.Messages
 import nl.joozd.logbookapp.exceptions.CloudException
 
 fun handleServerResult(serverResult: ByteArray?) = handleServerResult(serverResult?.toString())
 
 fun handleServerResult(serverResult: String?): CloudFunctionResult? =
-    when(serverResult){
-        JoozdlogCommsKeywords.OK  -> CloudFunctionResult.OK
+    when(JoozdlogCommsResponses.toKeyword(serverResult?: JoozdlogCommsResponses.CONNECTION_ERROR.keyword)){
+        JoozdlogCommsResponses.OK -> CloudFunctionResult.OK
 
-        null,
-        JoozdlogCommsKeywords.SERVER_ERROR,
-        JoozdlogCommsKeywords.BAD_DATA_RECEIVED -> CloudFunctionResult.CONNECTION_ERROR
+        JoozdlogCommsResponses.CONNECTION_ERROR,
+        JoozdlogCommsResponses.SERVER_ERROR,
+        JoozdlogCommsResponses.BAD_DATA_RECEIVED -> CloudFunctionResult.CONNECTION_ERROR
 
-        JoozdlogCommsKeywords.EMAIL_NOT_KNOWN_OR_VERIFIED -> handleUnknownOrUnverifiedEmail()
-        JoozdlogCommsKeywords.NOT_A_VALID_EMAIL_ADDRESS -> handleBadEmailAddress()
-        JoozdlogCommsKeywords.UNKNOWN_USER_OR_PASS -> handleBadLoginData()
-        JoozdlogCommsKeywords.NOT_LOGGED_IN -> handleNotLoggedInSituation()
-        JoozdlogCommsKeywords.USER_ALREADY_EXISTS -> handleUserAlreadyExists()
+        JoozdlogCommsResponses.EMAIL_NOT_KNOWN_OR_VERIFIED -> handleUnknownOrUnverifiedEmail()
+        JoozdlogCommsResponses.NOT_A_VALID_EMAIL_ADDRESS -> handleBadEmailAddress()
 
+        JoozdlogCommsResponses.P2P_SESSION_NOT_FOUND, // this will get passed on to receiving function; it must always be handled during P2P session as those happen in foreground.
+        JoozdlogCommsResponses.UNKNOWN_KEYWORD -> null
         // null means something else was sent by server; probably data that we want to receive.
         // This way, we can check a serverResult for one of the above responses.
-        // example: val x = readFromServer(); handleServerResult(x)?.let { return it }; doSomethingWith(x)
-        else -> null
+        // example: val x = readFromServer(); handleServerResult(x)?.let { throw(CloudException(it)) }; doSomethingWith(x)
     }
 
 fun handleServerResultAndThrowExceptionOnError(serverResult: String?){
@@ -40,14 +36,8 @@ fun handleServerResultAndThrowExceptionOnError(serverResult: ByteArray?) =
     handleServerResultAndThrowExceptionOnError(serverResult.toString())
 
 private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
-    EmailCenter().invalidateEmail()
-    MessageCenter.commitMessage {
-        titleResource = R.string.email
-        descriptionResource = R.string.server_reported_email_not_verified_new_mail_will_be_sent
-        setPositiveButton(android.R.string.ok){
-            EmailCenter().requestEmailVerificationMail()
-        }
-    }
+    EmailCenter().setEmailUnverified()
+    MessageCenter.pushMessage(Messages.unknownOrUnverifiedEmailMessage)
     return CloudFunctionResult.SERVER_REFUSED
 }
 
@@ -56,29 +46,6 @@ private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
  */
 private fun handleBadEmailAddress(): CloudFunctionResult {
     EmailCenter().invalidateEmail()
-    MessageCenter.commitMessage {
-        titleResource = R.string.email
-        descriptionResource = R.string.server_not_an_email_address_please_enter_again
-        setPositiveButton(android.R.string.ok){ }
-    }
-    return CloudFunctionResult.SERVER_REFUSED
-}
-
-private fun handleBadLoginData(): CloudFunctionResult {
-    EmailCenter().logOut()
-    MessagesWaiting.noLoginDataSaved(true)
-    return CloudFunctionResult.SERVER_REFUSED
-}
-
-private fun handleNotLoggedInSituation(): CloudFunctionResult {
-    MessageCenter.commitMessage {
-        titleResource = R.string.login_error
-        descriptionResource = R.string.not_signed_in_bug_please_tell_joozd
-        setPositiveButton(android.R.string.ok){ }
-    }
-    return CloudFunctionResult.SERVER_REFUSED
-}
-// this only happens when creating a new user, in extremely rare cases. The calling function will try again on a SERVER_REFUSED.
-private fun handleUserAlreadyExists(): CloudFunctionResult {
+    MessageCenter.pushMessage(Messages.invalidEmailAddressSentToServer)
     return CloudFunctionResult.SERVER_REFUSED
 }

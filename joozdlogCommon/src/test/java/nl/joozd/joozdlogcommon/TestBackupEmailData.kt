@@ -12,17 +12,17 @@ class TestBackupEmailData {
 
     val flights = listOf(f1, f2)
 
-    val csv = buildCsvString(flights)
+    val csv = buildCsvString(flights).toByteArray(Charsets.UTF_8)
 
     private val email = "one@two.com"
-    private val username = "123abc"
+    private val username = 123L
 
     @Test
     fun testBackupEmailData(){
-        val data = BackupEmailData(username, email, csv)
+        val data = EmailData(username, email, csv)
         val serializedData = data.serialize()
-        assertEquals(data, BackupEmailData.deserialize(serializedData))
-        val grabbedflights = flightsFromCsv(BackupEmailData.deserialize(serializedData).flightsCsvString)
+        assertEquals(data, EmailData.deserialize(serializedData))
+        val grabbedflights = flightsFromCsv(EmailData.deserialize(serializedData).attachment.toString(Charsets.UTF_8))
         assertEquals(flights, grabbedflights)
         println(grabbedflights[1].signature)
         println("yolo")

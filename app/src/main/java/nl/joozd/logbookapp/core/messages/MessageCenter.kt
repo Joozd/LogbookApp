@@ -11,7 +11,6 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.ui.fragments.makeGenericMessageBarFragment
 import nl.joozd.logbookapp.ui.utils.MessageBarFragment
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import nl.joozd.logbookapp.utils.UserMessage
 import java.util.*
 
 object MessageCenter {
@@ -33,11 +32,10 @@ object MessageCenter {
     }
 
     fun commitMessage(message: UserMessage.Builder.() -> Unit){
-        println("Adding message to queue, queue now ${messageQueue.size} long (before)")
-        val builder = UserMessage.Builder()
-        builder.message()
-        pushMessage(builder.build())
-        println("Added message to queue, queue now ${messageQueue.size} long (after)")
+        UserMessage.Builder().apply{
+            message()
+            pushMessage(this.build())
+        }
     }
 
     fun pushMessageBarFragment(fragment: MessageBarFragment){

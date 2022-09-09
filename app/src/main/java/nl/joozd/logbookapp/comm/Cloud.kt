@@ -1,13 +1,14 @@
 package nl.joozd.logbookapp.comm
 
+import android.util.Log
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.joozd.comms.Client
 import nl.joozd.joozdlogcommon.*
 import nl.joozd.joozdlogcommon.comms.Protocol
-import nl.joozd.joozdlogcommon.comms.JoozdlogCommsKeywords
+import nl.joozd.joozdlogcommon.comms.JoozdlogCommsRequests
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.core.emailFunctions.UsernameWithKey
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.serializing.*
 
@@ -24,104 +25,64 @@ class Cloud(
     private val port: Int = Protocol.SERVER_PORT
 ) {
     private val basicFlightVersion get() = BasicFlight.VERSION.version
-    /**
-     * @return true if data accepted, false if username and/or key are rejected by server.
-     */
-    suspend fun createNewUser(username: String, key: ByteArray): CloudFunctionResult {
-        val payLoad = LoginData(username, key, BasicFlight.VERSION.version).serialize()
-        return resultForRequest(JoozdlogCommsKeywords.NEW_ACCOUNT, payLoad)
-    }
-
-    /**
-     * Ask server to make us an unused username
-     * @return generated username, or null if connection failed.
-     */
-    suspend fun requestUsername(): String? =
-        withClient {
-            sendRequest(JoozdlogCommsKeywords.REQUEST_NEW_USERNAME)
-            return readServerResponse()
-        }
 
     /**
      * Send new email address to server
      * Server will send a confirmation mail if it worked.
      * If no success, sets [TaskFlags.updateEmailWithServer] to true
      */
-    suspend fun sendNewEmailAddress(username: String, key: ByteArray, emailToSend: String): CloudFunctionResult {
-        val data = LoginDataWithEmail(username, key, basicFlightVersion, emailToSend).serialize()
-        return resultForRequest(JoozdlogCommsKeywords.SET_EMAIL, data)
+    suspend fun sendNewEmailAddress(id: Long, emailAddress: String): Long? {
+        val data = EmailData(id, emailAddress, ByteArray(0))
+        val result = try{
+            resultForRequestOrException(JoozdlogCommsRequests.SET_EMAIL, data)
+        } catch(e: CloudException){
+            Log.d("sendNewEmailAddress", "server replied ${e.cloudFunctionResult}")
+            TaskFlags.updateEmailWithServer(true)
+            return null
+        }
+        return unwrap(result)
     }
 
     /**
-     * Change password. Will return true if success, false if failed due to no connection or server refused.
-     * Server refusal will be handled by [handleResponse].
-     *
+     * Migrate email data on server to new system (Long ID instead of String Username)
      */
-    suspend fun changeLoginKey(username: String, currentKey: ByteArray, newKey: ByteArray): CloudFunctionResult =
-        withClient {
-            require(newKey.size == Protocol.KEY_SIZE) // maybe handle this a bit more gracefully? Should not happen anyway.
-            val r = login(UsernameWithKey(username, currentKey))
-            if (r != CloudFunctionResult.OK) return r
-            return changePasswordOnServer(newKey, ServerPrefs.emailAddress())
+    suspend fun migrateEmailData(username: String, emailAddress: String): Long? {
+        val data = LoginDataWithEmail(username, ByteArray(0), -1, emailAddress).serialize()
+        val result = try{
+            resultForRequestOrException(JoozdlogCommsRequests.SET_EMAIL, data)
+        } catch(e: CloudException){
+            Log.d("sendNewEmailAddress", "server replied ${e.cloudFunctionResult}")
+            return null
         }
+        return unwrap(result)
+    }
+
 
     /**
      * Send email confirmation string (from confirmation email) to server for checking.
      */
     suspend fun confirmEmail(confirmationString: String): CloudFunctionResult =
-        resultForRequest(JoozdlogCommsKeywords.CONFIRM_EMAIL, wrap(confirmationString))
+        resultForRequest(JoozdlogCommsRequests.CONFIRM_EMAIL, wrap(confirmationString))
 
-    /**
-     * Request an email with a login link from the server
-     */
-    suspend fun requestLoginLinkMail(username: String, key: ByteArray, emailAddress: String): CloudFunctionResult =
-        resultForRequest(JoozdlogCommsKeywords.REQUEST_LOGIN_LINK_MAIL, makeLoginDataWithEmailPayload(username, key, emailAddress))
-
-    suspend fun sendBackupMailThroughServer(backupEmailData: BackupEmailData){
-        resultForRequestOrException(JoozdlogCommsKeywords.SENDING_BACKUP_EMAIL_DATA, backupEmailData.serialize())
+    suspend fun sendBackupMailThroughServer(backupEmailData: EmailData){
+        resultForRequestOrException(JoozdlogCommsRequests.SENDING_BACKUP_EMAIL_DATA, backupEmailData.serialize())
     }
-
-    /**
-     * sends a REQUEST TIMESTAMP to server
-     * Expects server to reply with a single Long (8 Bytes)
-     * @return the Timestamp from server as a Long (epochSeconds) or -1 if error
-     */
-    suspend fun getTime(): Long? =
-        withClient {
-            sendRequest(JoozdlogCommsKeywords.REQUEST_TIMESTAMP)
-            readFromServer()?.let {
-                longFromBytes(it)
-            }
-        }
 
     suspend fun sendFeedback(feedbackData: FeedbackData): CloudFunctionResult = withClient {
-        sendRequest(JoozdlogCommsKeywords.SENDING_FEEDBACK, feedbackData.serialize())
+        sendRequest(JoozdlogCommsRequests.SENDING_FEEDBACK, feedbackData.serialize())
         handleResponse()!!
-    }
-
-    /*
-     * Log in to server until Client is closed again
-     * This will handle responses from server like no username / bad key / bad data etc.
-     */
-    suspend fun Client.login(usernameWithKey: UsernameWithKey): CloudFunctionResult {
-        //payLoad is LoginData.serialize()
-        val payLoad = LoginData(usernameWithKey.username, usernameWithKey.key, BasicFlight.VERSION.version)
-            .serialize()
-
-        sendRequest(JoozdlogCommsKeywords.LOGIN, payLoad)
-        return handleResponse()!!
     }
 
     suspend fun sendP2PData(data: ByteArray): Long {
         println("SendP2PData (${data.size})")
-        return unwrapLong(resultForRequestOrException(JoozdlogCommsKeywords.SENDING_P2P_DATA, data))
+        return unwrapLong(resultForRequestOrException(JoozdlogCommsRequests.SENDING_P2P_DATA, data))
     }
 
     suspend fun receiveP2PData(sessionID: Long): ByteArray {
         println("receiveP2PData")
         val payload = wrap(sessionID)
         println("wrapped session ID")
-        return resultForRequestOrException(JoozdlogCommsKeywords.REQUEST_P2P_DATA, payload).also{
+        return resultForRequestOrException(JoozdlogCommsRequests.REQUEST_P2P_DATA, payload).also{
             println("receiveP2PData returns ${it.size} bytes")
         }
     }
@@ -150,24 +111,25 @@ class Cloud(
         }
     }
 
-    private suspend fun resultForRequest(request: String, extraData: ByteArray?): CloudFunctionResult = withClient {
+    private suspend fun resultForRequest(request: JoozdlogCommsRequests, extraData: ByteArray?): CloudFunctionResult = withClient {
         sendRequest(request, extraData)
         handleResponse()!!
     }
 
-    private suspend fun resultForRequestOrException(request: String, extraData: ByteArray?, progressListener: ProgressListener? = null): ByteArray = withClient {
+    private suspend fun resultForRequestOrException(request: JoozdlogCommsRequests, extraData: ByteArray?, progressListener: ProgressListener? = null): ByteArray = withClient {
         sendRequest(request, extraData)
         val response = if (progressListener != null) readFromServer(progressListener::progress) else readFromServer()
         handleServerResultAndThrowExceptionOnError(response)
         return response!! // null gets caught by handleServerResultAndThrowExceptionOnError()
     }
 
+    private suspend fun resultForRequestOrException(
+        request: JoozdlogCommsRequests,
+        extraData: JoozdSerializable,
+        progressListener: ProgressListener? = null
+    ): ByteArray =
+        resultForRequestOrException(request, extraData.serialize(), progressListener)
 
-    private suspend fun Client.changePasswordOnServer(newPassword: ByteArray, email: String): CloudFunctionResult {
-        val payload = LoginDataWithEmail("", newPassword, 0, email).serialize() // username and basicFlightVersion are unused in this function
-        sendRequest(JoozdlogCommsKeywords.UPDATE_PASSWORD, payload)
-        return handleResponse()!!
-    }
 
     private suspend fun Client.handleResponse() = handleServerResult(readServerResponse())
 
@@ -181,6 +143,9 @@ class Cloud(
     // Pass this to functions giving a result to get returned data.
     // The return of the function will only be a CloudFunctionResult, so if you want anything else you can drop it in here.
     data class Result<T>(var value: T? = null)
+
+    private suspend fun Client.sendRequest(request: JoozdlogCommsRequests, extraData: ByteArray?) =
+        sendRequest(request.keyword, extraData)
 
 
     companion object {

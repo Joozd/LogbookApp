@@ -458,7 +458,7 @@
     <string name="exporting_csv">Exporting CSV file…</string>
 
     <string name="pick_backup_interval">Pick backup interval</string>
-    <string name="augmented_crew_time_explanation">In case of an augmented crew (3 or more pilots), Joozdlog calculates the time that can be logged for copilots by subtracting this amount of time for each takeoff and landing, allocating the remaining time evenly over the pilots, then adds this time again for every takeoff/landing performed in the pilot\'s seat.</string>
+    <string name="augmented_crew_time_explanation">In case of an augmented crew (3 or more pilots), Joozdlog calculates the time that can be logged for copilots by subtracting this amount of time for each takeoff and landing, allocating the remaining time evenly over the pilots, then adds this time again for every takeoff/landing performed in the pilot\'s seat. Default value is 30 (10 minutes taxi, 20 minutes after takeoff/before landing)</string>
 
     <string name="change_password">Change Login Link</string>
     <string name="create_login_link">Copy login link</string>

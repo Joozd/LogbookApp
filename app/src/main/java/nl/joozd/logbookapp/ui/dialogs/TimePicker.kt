@@ -140,27 +140,20 @@ open class TimePicker: JoozdlogFragment() {
     }
 
     private fun DialogTimesInOutBinding.settTotalTimeOfFLightTextViewOnFocusChangedListener() {
-        totalTimeOfFlightTextview.onFocusChangeListener =
-            View.OnFocusChangeListener { _, hasFocus ->
-                totalTimeOfFlightTextview.separateDataDisplayAndEntry(hasFocus) {
-                    viewModel.setTotalTimeOfFlight(it?.toString()?.nullIfBlank())
-                }
-            }
+        totalTimeOfFlightTextview.separateDataDisplayAndEntry{
+            viewModel.setTotalTimeOfFlight(it?.toString()?.nullIfBlank())
+        }
     }
 
     private fun DialogTimesInOutBinding.setNightTimeTextViewOnFocusChangedListener() {
-        nightTimeTextview.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            nightTimeTextview.separateDataDisplayAndEntry(hasFocus) {
-                viewModel.setNightTime(it?.toString())
-            }
+        nightTimeTextview.separateDataDisplayAndEntry {
+            viewModel.setNightTime(it?.toString())
         }
     }
 
     private fun DialogTimesInOutBinding.setIfrTimeTextViewOnFocusChangedListener() {
-        ifrTimeTextview.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            ifrTimeTextview.separateDataDisplayAndEntry(hasFocus) {
-                viewModel.setIfrTime(it?.toString())
-            }
+        ifrTimeTextview.separateDataDisplayAndEntry{
+            viewModel.setIfrTime(it?.toString())
         }
     }
 

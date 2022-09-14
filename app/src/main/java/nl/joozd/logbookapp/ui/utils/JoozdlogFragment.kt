@@ -46,23 +46,18 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * Contains boilerplate used in all my fragments, including
- * coroutinescope,
  * viewModel,
  * repository, and
  * supportFragmentManager
  */
 //TODO remove things and replace with viewModel per fragment
-abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProviderMainScope() {
+abstract class JoozdlogFragment: Fragment() {
     protected val supportFragmentManager: FragmentManager by lazy { requireActivity().supportFragmentManager }
     protected val fragment: JoozdlogFragment
         get() = this
     protected val ctx: Context
         get() = App.instance
 
-    override fun onDestroy() {
-        super.onDestroy()
-        cancel()
-    }
     /**
      * dp to pixels and reverse
      */
@@ -80,7 +75,7 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
      * Disable the "back" button so you cannot close a fragment by pressing it
      */
     protected fun disableBackPressed() = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            // With blank your fragment BackPressed will be disabled.
+            // fragment BackPressed will be disabled because nothing happens here.
     }
 
     protected fun recreate(){
@@ -104,8 +99,8 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
         }
     }
 
-    protected var textToBeReplacedWhenNoDataEntered: Editable? = null
-    /**
+    private var textToBeReplacedWhenNoDataEntered: Editable? = null
+    /*
      * When an editText gains focus, save its contents in here.
      * When it loses focus, replace it again.
      * The idea is that data in editTexts will only be changed from viewModel,
@@ -116,7 +111,7 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
      * @param hasFocus -> true if View gained focus, false it lost focus
      * @param action -> action to be performed when any text is entered.
      */
-    protected inline fun EditText.separateDataDisplayAndEntry(
+    private inline fun EditText.separateDataDisplayAndEntry(
         hasFocus: Boolean,
         action: (Editable?) -> Unit
     ) {
@@ -129,6 +124,18 @@ abstract class JoozdlogFragment: Fragment(),  CoroutineScope by dispatchersProvi
         else{
             textToBeReplacedWhenNoDataEntered = text
             setText("")
+        }
+    }
+
+    /**
+     * This separates ENTRY and DISPLAY functions of an edittext.
+     * Any text that is in the field when it gains focus will be placed in the field again after focus is lost.
+     * Any text that is entered in this wield will sent to [action]
+     * @param action: The action to be performed on the entered data
+     */
+    protected fun EditText.separateDataDisplayAndEntry(action: (Editable?) -> Unit){
+        onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+            separateDataDisplayAndEntry(hasFocus, action)
         }
     }
 

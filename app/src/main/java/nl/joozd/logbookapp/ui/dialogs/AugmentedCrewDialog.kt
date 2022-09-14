@@ -79,10 +79,8 @@ class AugmentedCrewDialog: JoozdlogFragment(){
 
 
     private fun DialogAugmentedCrewBinding.setTimeForTakeoffLandingOnFocusChangedListener() {
-        timeForTakeoffLandingEditText.setOnFocusChangeListener { _, hasFocus ->
-            timeForTakeoffLandingEditText.separateDataDisplayAndEntry(hasFocus) {
-                viewModel.setTakeoffLandingTime(it?.toString())
-            }
+        timeForTakeoffLandingEditText.separateDataDisplayAndEntry {
+            viewModel.setTakeoffLandingTime(it?.toString())
         }
     }
 

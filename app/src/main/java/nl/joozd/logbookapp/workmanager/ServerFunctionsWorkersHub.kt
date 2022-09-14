@@ -1,13 +1,8 @@
 package nl.joozd.logbookapp.workmanager
 
-import androidx.work.ExistingWorkPolicy
 
 // This is a class and not an object so I can inject stuff for testing when I think about that sort of thing
 class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
-    fun scheduleCreateNewUser(){
-        enqueueOneTimeWorker<CreateNewUserWorker>(Tags.CREATE_NEW_USER, needNetwork = true)
-    }
-
     fun scheduleUpdateEmail(){
         enqueueOneTimeWorker<UpdateEmailWorker>(Tags.UPDATE_EMAIL, needNetwork = true)
     }
@@ -30,14 +25,10 @@ class ServerFunctionsWorkersHub: JoozdlogWorkersHub() {
 
 
     object Tags{
-        const val CREATE_NEW_USER = "CREATE_NEW_USER"
         const val UPDATE_EMAIL = "UPDATE_EMAIL"
         const val CONFIRM_EMAIL_CODE = "CONFIRM_EMAIL_CODE"
         const val GET_BACKUP_EMAIL = "GET_BACKUP_EMAIL"
-        const val REQUEST_LOGIN_LINK_MAIL = "REQUEST_LOGIN_LINK_MAIL"
         const val SUBMIT_FEEDBACK = "SUBMIT_FEEDBACK"
         const val SYNC_DATA_FILES = "SYNC_DATA_FILES"
-        const val SYNC_FLIGHTS = "SYNC_FLIGHTS"
-        const val MERGE_WITH_SERVER = "MERGE_WITH_SERVER"
     }
 }

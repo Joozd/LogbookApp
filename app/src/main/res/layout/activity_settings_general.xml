@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/loggingPreferencesLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/loggingPrefsDescriptionTextView">
+
+
+    <!-- Text set programmatically -->
+
+    <TextView
+        android:id="@+id/useDarkModeText"
+        style="@style/SettingsActivitySwitch"
+        android:layout_height="wrap_content"
+        android:text="@string/use_dark_mode"
+        app:layout_constraintEnd_toStartOf="@+id/darkModePickerLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/darkModePickerLayout"
+        style="@style/SpinnerFrameStyle"
+        android:layout_width="wrap_content"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/useDarkModeText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/useDarkModeText">
+
+        <Spinner
+            android:id="@+id/darkModePickerSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:paddingBottom="4dp"
+            tools:visibility="visible" />
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/settingsUseIataSelector"
+        style="@style/SettingsActivityButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/useDarkModeText"
+        tools:text="@string/useIcaoAirports"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/settings_pic_name_required_switch"
+        style="@style/SettingsActivitySwitch"
+        android:text="@string/mark_incomplete_without_pic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settingsUseIataSelector"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/pic_name_required_text"
+        style="@style/SettingsActivityDescriptionText"
+        android:text="@string/mark_incomplete_without_pic_description"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/settings_pic_name_required_switch"
+        app:layout_constraintTop_toBottomOf="@+id/settings_pic_name_required_switch"
+        tools:visibility="visible" />
+
+
+    <Button
+        android:id="@+id/augmentedCrewButton"
+        style="@style/SettingsActivityButton"
+        android:text="@string/standard_augmented_time"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pic_name_required_text"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/augmented_takeoff_time_hint_button"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:contentDescription="@string/help"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:padding="4dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/augmentedCrewButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/augmentedCrewButton"
+        app:srcCompat="@drawable/ic_help_outline_20px"
+        tools:visibility="visible" />
+
+    <Button
+        android:id="@+id/settings_fix_flight_db_button"
+        style="@style/SettingsActivityButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/augmentedCrewButton"
+        android:text="@string/fix_flights_db"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

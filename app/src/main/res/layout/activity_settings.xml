@@ -80,146 +80,22 @@
                 app:layout_constraintBottom_toBottomOf="@+id/loggingPrefsDescriptionTextView"
                 app:layout_constraintTop_toTopOf="@+id/loggingPreferencesTitleTextView" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/loggingPreferencesLayout"
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/general_preferences_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/loggingPrefsDescriptionTextView"
-                tools:visibility="visible">
+                app:layout_constraintTop_toBottomOf="@+id/loggingPrefsDescriptionTextView">
 
+            </androidx.fragment.app.FragmentContainerView>
 
-                <!-- Text set programmatically -->
-
-                <TextView
-                    android:id="@+id/useDarkModeText"
-                    style="@style/SettingsActivitySwitch"
-                    android:layout_height="wrap_content"
-                    android:text="@string/use_dark_mode"
-                    app:layout_constraintEnd_toStartOf="@+id/darkModePickerLayout"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <FrameLayout
-                    android:id="@+id/darkModePickerLayout"
-                    style="@style/SpinnerFrameStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/useDarkModeText"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/useDarkModeText">
-
-                    <Spinner
-                        android:id="@+id/darkModePickerSpinner"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:paddingBottom="4dp"
-                        tools:visibility="visible" />
-                </FrameLayout>
-
-                <Button
-                    android:id="@+id/settingsUseIataSelector"
-                    style="@style/SettingsActivityButton"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/useDarkModeText"
-                    tools:text="@string/useIcaoAirports"
-                    tools:visibility="visible" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/settings_pic_name_required_switch"
-                    style="@style/SettingsActivitySwitch"
-                    android:text="@string/mark_incomplete_without_pic"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/settingsUseIataSelector"
-                    tools:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/pic_name_required_text"
-                    style="@style/SettingsActivityDescriptionText"
-                    android:text="@string/mark_incomplete_without_pic_description"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/settings_pic_name_required_switch"
-                    app:layout_constraintTop_toBottomOf="@+id/settings_pic_name_required_switch"
-                    tools:visibility="visible" />
-
-
-                <Button
-                    android:id="@+id/augmentedCrewButton"
-                    style="@style/SettingsActivityButton"
-                    android:text="@string/standard_augmented_time"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/pic_name_required_text"
-                    tools:visibility="visible" />
-
-                <ImageView
-                    android:id="@+id/augmentedTakeoffTimeHintButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:contentDescription="@string/help"
-                    android:gravity="center|center_horizontal|center_vertical"
-                    android:padding="4dp"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="16dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/augmentedCrewButton"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/augmentedCrewButton"
-                    app:srcCompat="@drawable/ic_help_outline_20px"
-                    tools:visibility="visible" />
-
-                <Button
-                    android:id="@+id/settings_fix_flight_db_button"
-                    style="@style/SettingsActivityButton"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/augmentedCrewButton"
-                    android:text="@string/fix_flights_db"
-                    tools:visibility="visible" />
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/augmented_start_landing_times_hint_cardview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="32dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="24dp"
-                    android:padding="4dp"
-                    android:visibility="gone"
-                    app:cardBackgroundColor="?attr/colorSecondaryBackground"
-                    app:cardCornerRadius="5dp"
-                    app:cardElevation="4dp"
-                    app:layout_constrainedWidth="true"
-                    app:layout_constraintBottom_toBottomOf="@+id/augmentedTakeoffTimeHintButton"
-                    app:layout_constraintEnd_toEndOf="@+id/augmentedTakeoffTimeHintButton"
-                    app:layout_constraintStart_toStartOf="parent">
-
-                    <TextView
-                        android:id="@+id/popupWindowTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:gravity="center_horizontal"
-                        android:padding="8dp"
-                        android:text="@string/augmented_crew_time_explanation"
-                        android:textSize="14sp" />
-
-                </androidx.cardview.widget.CardView>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <View
                 android:id="@+id/lineBetweenLoggingBackup"
                 style="@style/SettingsActivityLine"
                 app:layout_constraintEnd_toEndOf="@+id/loggingPreferencesTitleTextView"
                 app:layout_constraintStart_toStartOf="@+id/loggingPreferencesTitleTextView"
-                app:layout_constraintTop_toBottomOf="@+id/loggingPreferencesLayout"
+                app:layout_constraintTop_toBottomOf="@+id/general_preferences_container"
                 tools:visibility="visible" />
 
             <TextView
@@ -386,128 +262,13 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <View
-                android:id="@+id/lineBetweenCalendarCloud"
+                android:id="@+id/line_between_calendar_and_import"
                 style="@style/SettingsActivityLine"
                 app:layout_constraintEnd_toEndOf="@+id/calendarSyncTitleTextView"
                 app:layout_constraintStart_toStartOf="@+id/calendarSyncTitleTextView"
                 app:layout_constraintTop_toBottomOf="@+id/syncPreferencesLayout"
                 tools:visibility="visible" />
 
-            <TextView
-                android:id="@+id/cloudSynctitleTextView"
-                style="@style/SettingsActivityHeader"
-                android:text="@string/cloud_sync_title"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lineBetweenCalendarCloud"
-                tools:visibility="visible" />
-
-
-            <TextView
-                android:id="@+id/cloudDescriptionTextView"
-                style="@style/SettingsActivityDescriptionText"
-                android:text="@string/sync_flights_across_devices"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/cloudSynctitleTextView"
-                tools:visibility="visible" />
-
-            <View
-                android:id="@+id/cloudPreferencesSelector"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="@+id/cloudDescriptionTextView"
-                app:layout_constraintTop_toTopOf="@+id/cloudSynctitleTextView" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cloudPreferencesLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/cloudDescriptionTextView"
-                tools:visibility="visible">
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/useCloudSyncSwitch"
-                    style="@style/SettingsActivitySwitch"
-                    android:text="@string/use_cloud_sync"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/lastSynchedTimeTextView"
-                    style="@style/SettingsActivitySubText"
-                    android:text="@string/last_synched_at"
-                    app:layout_constraintStart_toStartOf="@+id/useCloudSyncSwitch"
-                    app:layout_constraintTop_toBottomOf="@+id/useCloudSyncSwitch"
-                    tools:visibility="visible" />
-
-                <Button
-                    android:id="@+id/youAreSignedInAsButton"
-                    style="@style/SettingsActivityButton"
-                    android:text="@string/signed_in_as"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/lastSynchedTimeTextView"
-                    tools:visibility="visible" />
-
-                <Button
-                    android:id="@+id/emailAddressButton"
-                    style="@style/SettingsActivityButton"
-                    tools:text="@string/email_button_text_verified"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/youAreSignedInAsButton"
-                    tools:visibility="visible" />
-
-                <Button
-                    android:id="@+id/changePasswordButton"
-                    style="@style/SettingsActivityButton"
-                    android:text="@string/change_password"
-                    android:textAlignment="textStart"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/emailAddressButton"
-                    tools:visibility="visible" />
-
-                <Button
-                    android:id="@+id/loginLinkButton"
-                    style="@style/SettingsActivityButton"
-                    android:text="@string/create_login_link"
-                    android:textAlignment="textStart"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/changePasswordButton"
-                    tools:visibility="visible" />
-
-                <ImageView
-                    android:id="@+id/loginLinkExplanationImageView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:contentDescription="@string/help"
-                    android:gravity="center|center_horizontal|center_vertical"
-                    android:padding="4dp"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="16dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/loginLinkButton"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/loginLinkButton"
-                    app:srcCompat="@drawable/ic_help_outline_20px"
-                    tools:visibility="visible" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <View
-                android:id="@+id/lineBetweenCloudPdf"
-                style="@style/SettingsActivityLine"
-                app:layout_constraintEnd_toEndOf="@+id/cloudSynctitleTextView"
-                app:layout_constraintStart_toStartOf="@+id/cloudSynctitleTextView"
-                app:layout_constraintTop_toBottomOf="@+id/cloudPreferencesLayout"
-                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/monthlyOverviewSettingsTitle"
@@ -515,7 +276,7 @@
                 android:text="@string/import_settings"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lineBetweenCloudPdf"
+                app:layout_constraintTop_toBottomOf="@+id/line_between_calendar_and_import"
                 tools:visibility="visible" />
 
             <TextView

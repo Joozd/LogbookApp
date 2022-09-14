@@ -23,7 +23,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.comm.ServerPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.toDateStringLocalized
@@ -31,23 +31,24 @@ import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.core.DarkModeCenter
-import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 class SettingsActivityViewModel: JoozdlogActivityViewModel(){
-
     val statusFlow: StateFlow<SettingsActivityStatus?> = MutableStateFlow(null)
     private var status by CastFlowToMutableFlowShortcut(statusFlow)
 
+    val showHintFlow: StateFlow<Int?> = MutableStateFlow(null) // holds a ResID
+    private var showHint by CastFlowToMutableFlowShortcut(showHintFlow)
+
     val useIataFlow get() = Prefs.useIataAirports.flow
     val picNameRequiredFlow get() = Prefs.picNameNeedsToBeSet.flow
-    val standardTakeoffLandingTimesFlow get() = Prefs.standardTakeoffLandingTimes.flow
+    val augmentedTakeoffLandingTimesFlow get() = Prefs.augmentedTakeoffLandingTimes.flow
 
     val backupIntervalFlow = Prefs.backupInterval.flow
-    val backupFromCloudFlow = Prefs.backupFromCloud.flow
+    val sendBackupEmailsFlow = Prefs.sendBackupEmails.flow
 
     val useCalendarSyncFlow = Prefs.useCalendarSync.flow
     val calendarSyncTypeFlow = Prefs.calendarSyncType.flow
@@ -57,19 +58,6 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
     val calendarDisabledFlow = calendarDisabledUntilFlow.map { calendarIsDisabledNow(it) }
     suspend fun calendarDisabled(): Boolean =
         calendarIsDisabledNow(Prefs.calendarDisabledUntil())
-
-    val useCloudFlow = combine(Prefs.useCloud.flow, TaskFlags.createNewUserAndEnableCloud.flow) { cloudEnabled, newUserWanted ->
-        cloudEnabled || newUserWanted
-    }
-
-    val lastUpdateTimeFlow = ServerPrefs.mostRecentFlightsSyncEpochSecond.flow
-
-    val usernameFlow = Prefs.usernameFlow
-
-    private val emailAddressFlow = ServerPrefs.emailAddress.flow
-
-    private val emailVerifiedFlow = ServerPrefs.emailVerified.flow
-    val emailDataFlow = buildEmailDataFlow()
 
     val getNamesFromRostersFlow = Prefs.getNamesFromRosters.flow
 
@@ -86,7 +74,7 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
 
     suspend fun emailGoodAndVerified() =
-        ServerPrefs.emailAddress().isNotBlank() && ServerPrefs.emailVerified()
+        EmailPrefs.emailAddress().isNotBlank() && EmailPrefs.emailVerified()
 
 
     /*********************************************************************************************
@@ -139,11 +127,15 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         Prefs.calendarDisabledUntil(0)
     }
 
+    // Pass the ResID of a string to be shown as hint to this function so SettingsActivity can display it.
+    fun showHint(hint: Int){
+        showHint = hint
+    }
+
+    fun hintShown(){
+        showHint = null
+    }
+
     private suspend fun calendarIsDisabledNow(disabledUntil: Long) =
         Prefs.useCalendarSync() && disabledUntil > Instant.now().epochSecond
-
-    private fun buildEmailDataFlow() =
-        combine(emailAddressFlow, emailVerifiedFlow){ address, verified ->
-            address.takeIf{ it.isNotBlank() } to verified
-        }
 }

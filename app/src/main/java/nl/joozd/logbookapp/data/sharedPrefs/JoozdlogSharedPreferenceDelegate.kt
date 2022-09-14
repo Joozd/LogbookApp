@@ -11,6 +11,16 @@ import kotlinx.coroutines.runBlocking
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+/*
+ * NOTE setting is async, so if you set it and immediately read it, it might not have changed.
+ * Example: {
+ *  Prefs.someValue(false)
+ *  f(Prefs.someValue())
+ *  } // will probably not give the updated value.
+ *
+ * If you want that, set valueBlocking or give the data you are setting to the function calling
+ *  eg. x = false; Prefs.someValue(x), f(x)
+ */
 class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private val defaultValue: T): ReadOnlyProperty<JoozdLogPreferences, JoozdlogSharedPreferenceDelegate.ReadOnlyPref<T>> {
     private var _instance : Pref<T>? = null
 

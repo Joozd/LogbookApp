@@ -26,8 +26,9 @@ import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 object DarkModeCenter {
     fun setDarkMode(darkMode: Int) = MainScope().launch {
-        Prefs.darkMode(if (darkMode in SUPPORTED_MODES) darkMode else AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        AppCompatDelegate.setDefaultNightMode(Prefs.darkMode())
+        val mode = if (darkMode in SUPPORTED_MODES) darkMode else AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        Prefs.darkMode(mode)
+        AppCompatDelegate.setDefaultNightMode(mode)
     }
 
     fun setDarkMode() = MainScope().launch {

@@ -67,7 +67,7 @@ abstract class JoozdlogFragment: Fragment() {
     protected fun Int.pixelsToDp() = this.toFloat() / resources.displayMetrics.density
     protected fun Int.dpToPixels() = this.toFloat() * resources.displayMetrics.density
 
-    fun removeFragment() = supportFragmentManager.commit { remove(fragment) }
+    protected fun removeFragment() = supportFragmentManager.commit { remove(fragment) }
 
     protected open fun closeFragment() = supportFragmentManager.popBackStack()
 

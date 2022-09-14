@@ -52,7 +52,7 @@ import kotlin.coroutines.CoroutineContext
  */
 //TODO remove things and replace with viewModel per fragment
 abstract class JoozdlogFragment: Fragment() {
-    protected val supportFragmentManager: FragmentManager by lazy { requireActivity().supportFragmentManager }
+    protected val supportFragmentManager: FragmentManager get() = requireActivity().supportFragmentManager
     protected val fragment: JoozdlogFragment
         get() = this
     protected val ctx: Context
@@ -67,7 +67,7 @@ abstract class JoozdlogFragment: Fragment() {
     protected fun Int.pixelsToDp() = this.toFloat() / resources.displayMetrics.density
     protected fun Int.dpToPixels() = this.toFloat() * resources.displayMetrics.density
 
-    protected fun removeFragment() = supportFragmentManager.commit { remove(fragment) }
+    fun removeFragment() = supportFragmentManager.commit { remove(fragment) }
 
     protected open fun closeFragment() = supportFragmentManager.popBackStack()
 

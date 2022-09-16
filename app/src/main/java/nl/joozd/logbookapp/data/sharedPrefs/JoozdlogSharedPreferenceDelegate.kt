@@ -18,7 +18,7 @@ import kotlin.reflect.KProperty
  *  f(Prefs.someValue())
  *  } // will probably not give the updated value.
  *
- * If you want that, set valueBlocking or give the data you are setting to the function calling
+ * If you want that, use setValue(x), valueBlocking = x, or give the data you are setting to the function calling
  *  eg. x = false; Prefs.someValue(x), f(x)
  */
 class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private val defaultValue: T): ReadOnlyProperty<JoozdLogPreferences, JoozdlogSharedPreferenceDelegate.ReadOnlyPref<T>> {

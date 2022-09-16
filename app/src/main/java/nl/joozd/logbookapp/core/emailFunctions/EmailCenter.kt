@@ -26,11 +26,15 @@
  */
 package nl.joozd.logbookapp.core.emailFunctions
 
+import androidx.core.text.isDigitsOnly
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
+import nl.joozd.logbookapp.ui.utils.base64Decode
 import nl.joozd.logbookapp.utils.DispatcherProvider
 
 /*
@@ -61,8 +65,8 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags) {
      * @param newEmailAddress - the email address to store. This is NOT checked to see if it is a valid email address.
      */
     suspend fun changeEmailAddress(newEmailAddress: String) {
-        ServerPrefs.emailVerified(ServerPrefs.emailVerified() && newEmailAddress.equals(ServerPrefs.emailAddress(), ignoreCase = true))
-        ServerPrefs.emailAddress(newEmailAddress)
+        EmailPrefs.emailVerified(EmailPrefs.emailVerified() && newEmailAddress.equals(EmailPrefs.emailAddress(), ignoreCase = true))
+        EmailPrefs.emailAddress(newEmailAddress)
         requestEmailVerificationMail()
     }
 
@@ -71,24 +75,40 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags) {
      * @param confirmationString    the confirmation string as should have been received in confirmation email.
      *                              This will be sent to the server to verify.
      */
-    suspend fun confirmEmail(confirmationString: String) {
-        if (checkConfirmationString(confirmationString))
-            withContext(DispatcherProvider.io()){
-                TaskPayloads.emailConfirmationStringWaiting(confirmationString)
-                TaskFlags.verifyEmailCode(true)
+    suspend fun confirmEmail(confirmationString: String): Boolean =
+        verifyConfirmationString(confirmationString).also{
+            if(it){
+                MainScope().launch {
+                    TaskPayloads.emailConfirmationStringWaiting.setValue(confirmationString) // Writing it this way will wait until it is saved before emailcode is verified
+                    TaskFlags.verifyEmailCode(true)
+                }
             }
-        else MessagesWaiting.badVerificationCodeClicked(true)
-    }
+        }
+
 
     fun invalidateEmail(){
-        ServerPrefs.emailAddress("")
-        ServerPrefs.emailVerified(false)
+        EmailPrefs.emailAddress("")
+        EmailPrefs.emailVerified(false)
     }
 
     fun setEmailUnverified(){
-        ServerPrefs.emailVerified(false)
+        EmailPrefs.emailVerified(false)
     }
 
+    private fun verifyConfirmationString(confirmationString: String): Boolean =
+        confirmationString.split(":").let{
+            it.size == 2
+                    && it.first().isDigitsOnly()
+                    && it.last().isValidBase64Hash()
+        }
+
+    private fun String.isValidBase64Hash(): Boolean =
+        try{
+            val decoded = base64Decode(this)
+            decoded.size == 32 // SHA256 hash is 32 bytes
+        } catch(e: Exception){
+            false
+        }
 }
 
 

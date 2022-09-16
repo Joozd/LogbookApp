@@ -39,7 +39,6 @@
             android:name=".ui.activities.FeedbackActivity"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".ui.activities.ChangePasswordActivity" />
         <activity android:name=".ui.activities.MakePdfActivity" />
         <activity
             android:name=".ui.activities.newUserActivity.NewUserActivity"
@@ -47,7 +46,8 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.activities.settingsActivity.SettingsActivity"
-            android:theme="@style/AppTheme" >
+            android:theme="@style/AppTheme"
+            android:configChanges="uiMode">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.joozd.logbookapp.ui.activities.MainActivity" />

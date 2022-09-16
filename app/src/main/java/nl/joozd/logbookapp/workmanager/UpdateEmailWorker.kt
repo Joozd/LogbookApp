@@ -6,6 +6,7 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.comm.updateEmailAddressOnServer
 import nl.joozd.logbookapp.comm.Cloud
+import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.logbookapp.utils.DispatcherProvider
 
 /*
@@ -22,6 +23,12 @@ class UpdateEmailWorker(appContext: Context, workerParams: WorkerParameters, pri
     : CoroutineWorker(appContext, workerParams) {
     constructor(appContext: Context, workerParams: WorkerParameters): this(appContext, workerParams, Cloud()) // constructor needed to instantiate as a Worker
     override suspend fun doWork(): Result = withContext(DispatcherProvider.io()) {
-        updateEmailAddressOnServer(cloud).toListenableWorkerResult()
-    }
+        try{
+            updateEmailAddressOnServer(cloud)
+        }
+        catch(e: CloudException){
+            return@withContext e.cloudFunctionResult.correspondingServerFunctionResult().toListenableWorkerResult()
+            }
+        Result.success()
+        }
 }

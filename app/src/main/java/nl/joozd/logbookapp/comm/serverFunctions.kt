@@ -2,18 +2,15 @@ package nl.joozd.logbookapp.comm
 
 //These functions know where Preferences such as login data or email addresses can be found.
 
-import kotlinx.coroutines.withContext
 import nl.joozd.joozdlogcommon.EmailData
 import nl.joozd.joozdlogcommon.FeedbackData
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.core.emailFunctions.checkConfirmationString
 import nl.joozd.logbookapp.data.export.FlightsRepositoryExporter
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.sharedPrefs.*
 import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.logbookapp.extensions.nullIfBlank
-import nl.joozd.logbookapp.utils.DispatcherProvider
 import java.time.Instant
 
 
@@ -24,14 +21,20 @@ import java.time.Instant
  * - Sends email to server with current email data
  * - On success, sets EmailVerified to false and saves emailID received from server.
  *      (if emailID was not set this will be a new one, if not it will probably stay the same)
+ * - on failure, will schedule an update and throw a [CloudException]
  */
-suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), serverPrefs: ServerPrefs = ServerPrefs) {
-    val id = serverPrefs.emailID()
+suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), serverPrefs: EmailPrefs = EmailPrefs) {
     val emailAddress = serverPrefs.emailAddress()
-    cloud.sendNewEmailAddress(id, emailAddress)?.let{
-        serverPrefs.emailID(it)
-        serverPrefs.emailVerified(false)
+    try {
+        cloud.sendNewEmailAddress(emailAddress)?.let {
+            serverPrefs.emailID(it)
+            serverPrefs.emailVerified(false)
+        }
+    } catch( e: CloudException){
+        TaskFlags.updateEmailWithServer(true)
+        throw(e)
     }
+    TaskFlags.updateEmailWithServer(false)
 }
 
 
@@ -39,16 +42,15 @@ suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), serverPrefs: Serv
  * This will confirm email confirmation code with server
  * - Will attempt to get login data
  * - will send code to server, login data is needed to check confirmation code. If code check fails, will throw Exception.
- *  --- CHECK CONFIRMATION STRING IN CALLING FUNCTION (use [checkConfirmationString])
+ *  --- CHECK CONFIRMATION STRING IN CALLING FUNCTION
  * - On success, sets EmailVerified to true, removes stored confirmation string and resets TaskFlag.
  */
 suspend fun confirmEmail(confirmationString: String, cloud: Cloud = Cloud()): ServerFunctionResult =
-    sendEmailConfirmationCode(confirmationString, cloud).also{
-        if (it == ServerFunctionResult.SUCCESS) withContext (DispatcherProvider.io()) {
-            resetEmailCodeVerificationFlag()
-            ServerPrefs.emailVerified(true) // blocking is OK in this context
+    sendEmailConfirmationCode(confirmationString, cloud).also {
+        if (it == ServerFunctionResult.SUCCESS)
+            EmailPrefs.emailVerified(true)
         }
-    }
+
 
 // This does NOT check to see if migration is possible or needed. Do that in calling function.
 suspend fun migrateEmail(username: String, emailAddress: String, cloud: Cloud = Cloud()): Long? =
@@ -81,8 +83,8 @@ private suspend fun generateBackupEmailData(
     flightsRepositoryExporter: FlightsRepositoryExporter = FlightsRepositoryExporter()
 ): EmailData {
     val csv = flightsRepositoryExporter.buildCsvString()
-    val id: Long = ServerPrefs.emailID()
-    val emailAddress: String = ServerPrefs.emailAddress()
+    val id: Long = EmailPrefs.emailID()
+    val emailAddress: String = EmailPrefs.emailAddress()
     return EmailData(id, emailAddress, csv.toByteArray(Charsets.UTF_8))
 }
 
@@ -109,7 +111,6 @@ suspend fun updateDataFiles(server: HTTPServer,
         airportRepository.updateAirports(server.getAirports(metaData) ?: return ServerFunctionResult.RETRY)
         DataVersions.airportsVersion(metaData.airportsVersion)
     }
-
     return ServerFunctionResult.SUCCESS
 }
 
@@ -118,39 +119,29 @@ suspend fun sendFeedback(cloud: Cloud = Cloud()): ServerFunctionResult =
         cloud.sendFeedback(FeedbackData(feedback, TaskPayloads.feedbackContactInfoWaiting()))
             .correspondingServerFunctionResult()
     }  ?: ServerFunctionResult.SUCCESS)
-        .also{ if (it.isOK()) TaskFlags.feedbackWaiting(false) }
 
 
+// NOTE If a bad confirmationString is sent to server it will result in an endless loop, so check data before calling this function
 private suspend fun sendEmailConfirmationCode(confirmationString: String, cloud: Cloud): ServerFunctionResult {
-    // If bad data is sent to server (server cannot discern between malformed data in transport or malformed data because bad data was sent)
-    // we will get into an endless loop, se we check if data is parsable by server here.
-    require(checkConfirmationString(confirmationString)) { "Bad confirmation string $confirmationString received, this should have been checked by calling function" }
-    return cloud.confirmEmail(confirmationString).correspondingServerFunctionResult().also {
-        if (it.isOK())
-            resetEmailCodeVerificationFlag()
-    }
+    return cloud.confirmEmail(confirmationString).correspondingServerFunctionResult()
 }
 
 private suspend fun migrateLoginDataIfNeeded(){
     val userName = Prefs.username()
-    val emailAddress = ServerPrefs.emailAddress()
+    val emailAddress = EmailPrefs.emailAddress()
     val migrationNeeded =
         userName != null
             && emailAddress.isNotBlank()
-            && ServerPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
+            && EmailPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
     if (migrationNeeded){
         migrateEmail(userName!!, emailAddress)?.let{
             Prefs.username(null)
-            ServerPrefs.emailID(it)
+            EmailPrefs.emailID(it)
         }
     }
-    val creationNeeded = ServerPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
+    val creationNeeded = EmailPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
     if (creationNeeded){
         updateEmailAddressOnServer()
     }
 }
 
-private fun resetEmailCodeVerificationFlag() {
-    TaskFlags.verifyEmailCode(false)
-    TaskPayloads.emailConfirmationStringWaiting("")
-}

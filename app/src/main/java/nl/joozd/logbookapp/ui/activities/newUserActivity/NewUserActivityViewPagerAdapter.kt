@@ -8,7 +8,6 @@ class NewUserActivityViewPagerAdapter(activity: NewUserActivity): FragmentStateA
 
     override fun createFragment(position: Int): Fragment = when(position){
         NewUserActivity.PAGE_INTRO -> NewUserActivityIntroPage()
-        NewUserActivity.PAGE_CLOUD -> NewUserActivityCloudPage()
         NewUserActivity.PAGE_CALENDAR -> NewUserActivityCalendarPage()
         NewUserActivity.PAGE_FINAL -> NewUserActivityFinalPage()
         else -> error("ScreenSlidePagerAdapter asked to provide non-existing page")

@@ -8,8 +8,6 @@ import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.comm.confirmEmail
 import nl.joozd.logbookapp.comm.Cloud
-import nl.joozd.logbookapp.comm.ServerFunctionResult
-import nl.joozd.logbookapp.core.emailFunctions.checkConfirmationString
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.utils.DispatcherProvider
 
@@ -18,9 +16,10 @@ class ConfirmEmailWorker(appContext: Context, workerParams: WorkerParameters, pr
     : CoroutineWorker(appContext, workerParams) {
     constructor(appContext: Context, workerParams: WorkerParameters): this(appContext, workerParams, Cloud()) // constructor needed to instantiate as a Worker
     override suspend fun doWork(): Result = withContext(DispatcherProvider.io()) {
-        TaskPayloads.emailConfirmationStringWaiting().takeIf{ checkConfirmationString(it) }?.let{ email ->
-            return@withContext confirmEmail(email, cloud).also{
-                if (it == ServerFunctionResult.SUCCESS)
+        getEmailConfirmationStringWaitingOrNull()?.let{ confirmationString ->
+            return@withContext confirmEmail(confirmationString, cloud).also{
+                if (it.isOK())
+                    resetEmailCodeVerificationFlag()
                     MessagesWaiting.emailConfirmed(true)
             }.toListenableWorkerResult()
         }
@@ -28,5 +27,14 @@ class ConfirmEmailWorker(appContext: Context, workerParams: WorkerParameters, pr
         TaskFlags.verifyEmailCode(false) // no code to verify, will never succeed
         MessagesWaiting.noVerificationCodeSavedBug(true)
         return@withContext Result.failure()
+    }
+
+    private suspend fun getEmailConfirmationStringWaitingOrNull() =
+        TaskPayloads.emailConfirmationStringWaiting().takeIf { it.isNotBlank() }
+
+
+    private fun resetEmailCodeVerificationFlag() {
+        TaskFlags.verifyEmailCode(false)
+        TaskPayloads.emailConfirmationStringWaiting("")
     }
 }

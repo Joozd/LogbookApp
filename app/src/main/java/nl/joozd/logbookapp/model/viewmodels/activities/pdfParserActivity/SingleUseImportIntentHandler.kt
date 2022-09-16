@@ -136,14 +136,8 @@ class SingleUseImportIntentHandler: CoroutineScope {
             descriptionResource = R.string.this_will_replace_your_entire_logbook
             choice1Resource = R.string.replace
             choice2Resource = R.string.merge
-            setAction1 {
-                createNewUserDataIfUsingCloud()
-                replaceCompleteLogbook(extractedLogbook)
-
-            }
-            setAction2 {
-                mergeCompleteLogbook(extractedLogbook)
-            }
+            setAction1 { replaceCompleteLogbook(extractedLogbook) }
+            setAction2 { mergeCompleteLogbook(extractedLogbook) }
         }.build()
 
 
@@ -269,19 +263,6 @@ class SingleUseImportIntentHandler: CoroutineScope {
         } catch (e: FileNotFoundException) {
             status = HandlerError(R.string.file_not_found_message)
             null
-    }
-
-    private fun createNewUserDataIfUsingCloud(){
-        launch{
-            with(EmailCenter()) {
-                if (Prefs.useCloud()) {
-                    logOut()
-                    setCloudOrCreateNewUser(true)
-                }
-                else logOut()
-            }
-
-        }
     }
 
     private fun String.isCsvMimeType() =

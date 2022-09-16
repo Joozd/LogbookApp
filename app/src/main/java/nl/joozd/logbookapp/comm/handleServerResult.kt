@@ -9,17 +9,17 @@ import nl.joozd.logbookapp.exceptions.CloudException
 fun handleServerResult(serverResult: ByteArray?) = handleServerResult(serverResult?.toString())
 
 fun handleServerResult(serverResult: String?): CloudFunctionResult? =
-    when(JoozdlogCommsResponses.toKeyword(serverResult?: JoozdlogCommsResponses.CONNECTION_ERROR.keyword)){
+    when(JoozdlogCommsResponses.from(serverResult?: JoozdlogCommsResponses.CONNECTION_ERROR.keyword)){
         JoozdlogCommsResponses.OK -> CloudFunctionResult.OK
 
-        JoozdlogCommsResponses.CONNECTION_ERROR,
+        JoozdlogCommsResponses.CONNECTION_ERROR, // this happens when serverResult == null
         JoozdlogCommsResponses.SERVER_ERROR,
         JoozdlogCommsResponses.BAD_DATA_RECEIVED -> CloudFunctionResult.CONNECTION_ERROR
 
         JoozdlogCommsResponses.EMAIL_NOT_KNOWN_OR_VERIFIED -> handleUnknownOrUnverifiedEmail()
         JoozdlogCommsResponses.NOT_A_VALID_EMAIL_ADDRESS -> handleBadEmailAddress()
 
-        JoozdlogCommsResponses.P2P_SESSION_NOT_FOUND, // this will get passed on to receiving function; it must always be handled during P2P session as those happen in foreground.
+        JoozdlogCommsResponses.ID_NOT_FOUND, // this will get passed on to receiving function; it must always be handled during P2P session as those happen in foreground.
         JoozdlogCommsResponses.UNKNOWN_KEYWORD -> null
         // null means something else was sent by server; probably data that we want to receive.
         // This way, we can check a serverResult for one of the above responses.

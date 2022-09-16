@@ -23,13 +23,19 @@ package nl.joozd.logbookapp.ui.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.view.View
 import android.widget.CompoundButton
+import androidx.annotation.IdRes
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.add
+import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -39,12 +45,19 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
+import nl.joozd.logbookapp.ui.dialogs.CalendarSyncDialog
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        recreate()
     }
 
     protected val activity: JoozdlogActivity
@@ -79,7 +92,24 @@ open class JoozdlogActivity: AppCompatActivity() {
         }
     }
 
+    protected inline fun <reified  T: Fragment> showFragment(
+        @IdRes containerViewId: Int,
+        tag: String? = null,
+        args: Bundle? = null,
+        addToBackStack: Boolean = true)
+    {
+        supportFragmentManager.commit{
+            println("COMMITTING")
+            setReorderingAllowed(true)
+            add<T>(containerViewId, tag = tag, args = args)
+            println("containrs: ${findViewById<View>(containerViewId)}")
+            if (addToBackStack) addToBackStack(null)
+        }
+    }
 
+    protected fun removeFragment(it: Fragment) {
+        supportFragmentManager.commit { remove(it) }
+    }
 
     private fun startMainActivity(context: Context) = with (context) {
         startActivity(packageManager.getLaunchIntentForPackage(packageName))

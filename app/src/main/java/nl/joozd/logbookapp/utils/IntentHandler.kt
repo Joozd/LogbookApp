@@ -4,8 +4,10 @@ import android.content.Intent
 import android.net.Uri
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.messages.MessageCenter
 import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
+import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 
 class IntentHandler(intent: Intent) {
@@ -16,55 +18,26 @@ class IntentHandler(intent: Intent) {
      */
     suspend fun handle(): Boolean = when(IntentType.ofUri(uri)){
         IntentType.INVALID -> false
-        IntentType.LOGIN_LINK -> {
-            handleLoginLink()
-            true
-        }
+
         IntentType.EMAIL_VERIFICATION_LINK -> {
             handleEmailCodeConfirmation()
             true
-        }
-
-    }
-
-    // Handling a login link means just saving the stored data.
-    // Any problems with the data (i.e. bad login/pass combo) will arise when anything is done with it
-    // so any problems will be known to user when he needs to know.
-    private suspend fun handleLoginLink() {
-        getLoginLinkFromIntent()?.let {
-            showLoginDataSavedMessage()
-            storeNewLoginData(makeLoginPassPair(it))
         }
     }
 
     private suspend fun handleEmailCodeConfirmation(){
         getEmailConfirmationCodeFromIntent()?.let{
             val usableString = it.replace('-', '/')
-            showEmailConfirmationSheduledMessage()
-            EmailCenter().confirmEmail(usableString)
+            if (EmailCenter().confirmEmail(usableString))
+                showEmailConfirmationSheduledMessage()
+            else
+                MessagesWaiting.badVerificationCodeClicked(true)
+
         }
     }
-
-    private fun getLoginLinkFromIntent() =
-        uri?.lastPathSegment
 
     private fun getEmailConfirmationCodeFromIntent() =
         uri?.lastPathSegment
-
-    private fun makeLoginPassPair(loginPassString: String): Pair<String, String> =
-        loginPassString.replace('-', '/').split(":").let { lp ->
-            lp.first() to lp.last()
-        }
-
-
-    private suspend fun storeNewLoginData(lpPair: Pair<String, String>)= withContext(DispatcherProvider.io()) {
-        EmailCenter().storeNewLoginData(lpPair.first, lpPair.second)
-        Prefs.useCloud(true)
-        Prefs.acceptedCloudSyncTerms(true) // I guess they must have accepted it sometime in the past or they wouldn't have login data
-        EmailCenter().requestEmailVerificationMail()
-    }
-
-
 
     private fun showLoginDataSavedMessage(){
         MessageCenter.commitMessage {
@@ -82,23 +55,32 @@ class IntentHandler(intent: Intent) {
         }
     }
 
+    private fun showBadEmailConfirmationStringReceivedMessage(){
+        MessageCenter.commitMessage {
+            titleResource = R.string.error
+            descriptionResource = R.string.email_verification_invalid_data
+            setPositiveButton(android.R.string.ok){
+                TaskFlags.updateEmailWithServer
+            }
+            setNegativeButton(android.R.string.cancel){
+                // intentionally left blank
+            }
+        }
+    }
+
     private enum class IntentType {
-        LOGIN_LINK,
         EMAIL_VERIFICATION_LINK,
         INVALID;
 
         companion object {
             fun ofUri(uri: Uri?): IntentType = when (uri?.pathSegments?.firstOrNull()) {
-                INTENT_LOGIN_LINK_PATH -> LOGIN_LINK
                 INTENT_VERIFY_EMAIL_PATH -> EMAIL_VERIFICATION_LINK
                 else -> INVALID
             }
         }
     }
 
-
     companion object{
         private const val INTENT_VERIFY_EMAIL_PATH = "verify-email"
-        private const val INTENT_LOGIN_LINK_PATH ="inject-key"
     }
 }

@@ -6,6 +6,8 @@ import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
 /**
  * Every task represents something that needs to be done.
  * TaskDispatcher will observe these and dispatch those tasks to whomever is supposed to handle them.
+ * Taskflags can be set by anybody who needs a task done
+ * Taskflags will be reset by the function that calls the function we want to run (usually the worker)
  */
 object TaskFlags: JoozdLogPreferences() {
     override val preferencesFileKey = "nl.joozd.logbookapp.TASK_FLAGS_FILE_KEY"

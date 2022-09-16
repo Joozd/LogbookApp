@@ -25,7 +25,9 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.comm.Cloud
+import nl.joozd.logbookapp.comm.ServerFunctionResult
 import nl.joozd.logbookapp.comm.sendFeedback
+import nl.joozd.logbookapp.core.TaskFlags
 
 class SubmitFeedbackWorker(
     appContext: Context,
@@ -34,6 +36,12 @@ class SubmitFeedbackWorker(
 ) : CoroutineWorker(appContext, workerParams) {
     constructor(appContext: Context, workerParams: WorkerParameters): this(appContext, workerParams, Cloud()) // constructor needed to instantiate as a Worker
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        sendFeedback(cloud).toListenableWorkerResult()
+        sendFeedback(cloud)
+            .also{ resetFeedbackWaitingFlagIfSuccess(it) }
+            .toListenableWorkerResult()
+    }
+
+    private fun resetFeedbackWaitingFlagIfSuccess(it: ServerFunctionResult) {
+        if (it.isOK()) TaskFlags.feedbackWaiting(false)
     }
 }

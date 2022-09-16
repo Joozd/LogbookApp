@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.EmailDialogStatus
@@ -39,8 +39,8 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
     val statusFlow: StateFlow<EmailDialogStatus?> = MutableStateFlow(null)
     private var status by CastFlowToMutableFlowShortcut(statusFlow)
 
-    val email1Flow: StateFlow<String> = MutableStateFlow("").apply{ viewModelScope.launch { value = ServerPrefs.emailAddress() } }
-    val email2Flow: StateFlow<String> = MutableStateFlow("").apply{ viewModelScope.launch { value = ServerPrefs.emailAddress() } }
+    val email1Flow: StateFlow<String> = MutableStateFlow("").apply{ viewModelScope.launch { value = EmailPrefs.emailAddress() } }
+    val email2Flow: StateFlow<String> = MutableStateFlow("").apply{ viewModelScope.launch { value = EmailPrefs.emailAddress() } }
 
     var email1 by CastFlowToMutableFlowShortcut(email1Flow)
     private set
@@ -56,7 +56,7 @@ class EmailDialogViewModel: JoozdlogDialogViewModel() {
      * Will switch to "VERIFY" if clicking it will lead to a verification mail being sent
      * Initially set to OK if email verified or empty, or VERIFY otherwise
      */
-    val okOrVerifyFlow = combine(email1Flow, ServerPrefs.emailAddress.flow, ServerPrefs.emailVerified.flow){
+    val okOrVerifyFlow = combine(email1Flow, EmailPrefs.emailAddress.flow, EmailPrefs.emailVerified.flow){
         email1, knownEmail, verified ->
             if (email1 == knownEmail && verified || email1.isEmpty())
                 android.R.string.ok

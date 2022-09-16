@@ -1,9 +1,8 @@
 package nl.joozd.logbookapp.core.background
 
 import kotlinx.coroutines.flow.combine
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.workmanager.ServerFunctionsWorkersHub
@@ -53,7 +52,7 @@ class TaskDispatcher private constructor(private val taskFlags: TaskFlags = Task
     }
 
 
-    private val validEmailFlow = combine (ServerPrefs.emailAddress.flow, ServerPrefs.emailVerified.flow){
+    private val validEmailFlow = combine (EmailPrefs.emailAddress.flow, EmailPrefs.emailVerified.flow){
         address, verified -> address.isNotBlank() && verified
     }
 
@@ -62,7 +61,7 @@ class TaskDispatcher private constructor(private val taskFlags: TaskFlags = Task
         wanted, value -> wanted && value.isNotBlank()
     }
 
-    private fun emailUpdateWantedFlow() = combine(taskFlags.updateEmailWithServer.flow, ServerPrefs.emailAddress.flow){
+    private fun emailUpdateWantedFlow() = combine(taskFlags.updateEmailWithServer.flow, EmailPrefs.emailAddress.flow){
         wanted, address -> wanted && address.isNotBlank()
     }
 

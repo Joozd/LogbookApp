@@ -60,7 +60,7 @@ object Prefs: JoozdLogPreferences() {
     private const val BACKUP_FROM_CLOUD = "BACKUP_FROM_CLOUD"
 
     val backupInterval by JoozdlogSharedPreferenceDelegate(BACKUP_INTERVAL,14)
-    val backupFromCloud by JoozdlogSharedPreferenceDelegate(BACKUP_FROM_CLOUD,false)
+    val sendBackupEmails by JoozdlogSharedPreferenceDelegate(BACKUP_FROM_CLOUD,false)
 
     private const val NEW_USER_ACTIVITY_FINISHED = "NEW_USER_ACT_FINISHED"
     private const val EDIT_FLIGHT_FRAGMENT_FIRST_USE = "EFF_FIRST_USE"
@@ -127,7 +127,7 @@ object Prefs: JoozdLogPreferences() {
     var maxChronoAdjustment: Int by JoozdLogSharedPreferenceNotNull(MAX_CHRONO_DIFF,180)
 
     val getNamesFromRosters by JoozdlogSharedPreferenceDelegate(GET_NAMES_FROM_ROSTERS, defaultValue = true)
-    val standardTakeoffLandingTimes by JoozdlogSharedPreferenceDelegate(STANDARD_TAKEOFF_LANDING_TIMES,30) //time to allocate to pilot if flying heavy crew and did takeoff or landing
+    val augmentedTakeoffLandingTimes by JoozdlogSharedPreferenceDelegate(STANDARD_TAKEOFF_LANDING_TIMES,30) //time to allocate to pilot if flying heavy crew and did takeoff or landing
     val selectedCalendar by JoozdlogSharedPreferenceDelegate(SELECTED_CALENDAR, NO_CALENDAR_SELECTED) //Calendar on device that is used to import flights
 
 

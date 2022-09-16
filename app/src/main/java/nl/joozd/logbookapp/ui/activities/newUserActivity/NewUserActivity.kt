@@ -79,9 +79,8 @@ class NewUserActivity : JoozdlogActivity() {
         private const val TRANSFORMER_MIN_SCALE = 0.75f
 
         const val PAGE_INTRO = 0
-        const val PAGE_CLOUD = 1
-        const val PAGE_CALENDAR = 2
-        const val PAGE_FINAL = 3
+        const val PAGE_CALENDAR = 1
+        const val PAGE_FINAL = 2
 
         private const val SAVED_INSTANCE_STATE_PAGE_KEY = "PAGE"
         private const val SAVED_INSTANCE_STATE_REMOVE_DUPLICATES_STARTED_KEY = "REMOVE_DUPLICATES_STARTED_KEY"

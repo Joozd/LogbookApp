@@ -10,7 +10,7 @@ import androidx.work.WorkManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.data.sharedPrefs.ServerPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.core.Constants.ONE_DAY_IN_SECONDS
 import nl.joozd.logbookapp.core.messages.MessageCenter
@@ -85,7 +85,7 @@ class BackupCenter private constructor(private val emailCenter: EmailCenter = Em
                 }
         }
 
-    private fun backupEmailEnabledFlow() = combine(ServerPrefs.emailAddress.flow, ServerPrefs.emailVerified.flow, Prefs.backupFromCloud.flow){
+    private fun backupEmailEnabledFlow() = combine(EmailPrefs.emailAddress.flow, EmailPrefs.emailVerified.flow, Prefs.sendBackupEmails.flow){
             address, verified, enabled ->
         address.isNotBlank() && verified && enabled
     }

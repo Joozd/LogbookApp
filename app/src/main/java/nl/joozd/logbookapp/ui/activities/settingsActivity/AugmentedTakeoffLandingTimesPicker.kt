@@ -22,7 +22,7 @@ class AugmentedTakeoffLandingTimesPicker: NumberPickerDialog() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         lifecycleScope.launch {
-            setValue(Prefs.standardTakeoffLandingTimes())
+            setValue(Prefs.augmentedTakeoffLandingTimes())
         }
         return super.onCreateView(inflater, container, savedInstanceState)
     }
@@ -31,7 +31,7 @@ class AugmentedTakeoffLandingTimesPicker: NumberPickerDialog() {
      * Override this to actually do something with the picked number
      */
     override fun onNumberPicked(pickedNumber: Int) {
-        Prefs.standardTakeoffLandingTimes(unFormat(pickedNumber))
+        Prefs.augmentedTakeoffLandingTimes(unFormat(pickedNumber))
     }
 
     override val formatter = NumberPicker.Formatter{

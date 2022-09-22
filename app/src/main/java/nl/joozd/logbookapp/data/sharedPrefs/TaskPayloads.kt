@@ -1,5 +1,8 @@
 package nl.joozd.logbookapp.data.sharedPrefs
 
+/**
+ * Payloads needed for tasks
+ */
 object TaskPayloads: JoozdLogPreferences() {
     override val preferencesFileKey = "TASK_PAYLOADS_KEY"
 

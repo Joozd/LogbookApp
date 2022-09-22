@@ -28,6 +28,7 @@ import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.comm.ServerFunctionResult
 import nl.joozd.logbookapp.comm.sendFeedback
 import nl.joozd.logbookapp.core.TaskFlags
+import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 
 class SubmitFeedbackWorker(
     appContext: Context,
@@ -42,6 +43,9 @@ class SubmitFeedbackWorker(
     }
 
     private fun resetFeedbackWaitingFlagIfSuccess(it: ServerFunctionResult) {
-        if (it.isOK()) TaskFlags.feedbackWaiting(false)
+        if (it.isOK()) {
+            TaskFlags.feedbackWaiting(false)
+            TaskPayloads.feedbackWaiting("")
+        }
     }
 }

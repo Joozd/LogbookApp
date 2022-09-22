@@ -40,7 +40,7 @@ class TaskDispatcher private constructor(private val taskFlags: TaskFlags = Task
     }
 
     private fun handleFeedbackWaiting(activity: JoozdlogActivity) {
-        taskFlags.feedbackWaiting.flow.doIfTrueEmitted(activity) {
+        feedbackReadyFlow().doIfTrueEmitted(activity) {
             ServerFunctionsWorkersHub().scheduleSubmitFeedback()
         }
     }
@@ -67,6 +67,10 @@ class TaskDispatcher private constructor(private val taskFlags: TaskFlags = Task
 
     private fun backupEmailWantedFlow() = combine(taskFlags.sendBackupEmail.flow, validEmailFlow){
         wanted, valid -> wanted && valid
+    }
+
+    private fun feedbackReadyFlow() = combine(taskFlags.feedbackWaiting.flow, TaskPayloads.feedbackWaiting.flow){
+        wanted, feedback -> wanted && feedback.isNotBlank()
     }
 
     companion object{

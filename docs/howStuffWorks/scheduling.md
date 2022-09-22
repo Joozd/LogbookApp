@@ -1,4 +1,4 @@
-#Scheduling
+# Scheduling
 Tasks are scheduled through the TaskFlags object.
 Simply set a flag to true (eg. updateEmailWithServer) will schedule an action.
 Required data from `TaskPayloads` needs to be set before an action will actually be scheduled.

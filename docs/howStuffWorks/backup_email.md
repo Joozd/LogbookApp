@@ -1,4 +1,4 @@
-#Email Backup
+# Email Backup
 Email backups are sent by serverFunctions.sendBackupMailThroughServer()
 It works as follows:
 - Flights are collected and put in a CSV file

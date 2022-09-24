@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="1.7">
-      <module name="LogbookApp.app" target="11" />
-      <module name="LogbookApp.joozdlogCommon" target="1.8" />
-      <module name="LogbookApp.joozdlogCommon.main" target="1.8" />
-      <module name="LogbookApp.joozdlogCommon.test" target="1.8" />
-      <module name="LogbookApp.JoozdlogImport" target="1.8" />
-      <module name="LogbookApp.messagecenter" target="11" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="1.7" />
   </component>
 </project>

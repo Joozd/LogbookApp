@@ -1,4 +1,5 @@
 # Email
+## WORK IN PROGRESS
 ### This document explains how all email related parts work
 Email is currently only used for [automatic backup](backup_email.md).
 Design choices can be found [here](../design_choices/email.md)
@@ -24,6 +25,27 @@ because TaskDispatcher.validEmailFlow will emit, causing all taskFlows that need
 Anytime a user performs an action that would lead to an action needing a verified email, check if email is valid and verified.
 If not, give a dialog allowing user to enter an email address and prompt them to verify it.
 
-*TODO*
+##### Migration
+If user has old data from the username+key system, migrate to the EmailID system, and remove username+key data
+when this has been successfully completed.
+
+**TODO**
 On a daily basis, check if an email is entered but not verified. If not, prompt user to correct that.
 (either resend email address to server and verify it, or remove email from EmailPrefs.)
+
+## TODO
+- Think about if EmailID system needs a form of authentication beyond ID + correct email address
+- Completely rewrite all email creation logic and UI
+    - New Email entry (dialog + logic)
+    - email cofirmation (can steal old method)
+    - checkbox in Settings for email backup function, launches email entry dialog if not entered yet, launches a dialog when not confirmed yet. 
+    - New User pages: Do you want auto email backups? Same checkbox as in Settings.
+- Handle all server email errors automatically in [handleServerResult](../../app/src/main/java/nl/joozd/logbookapp/comm/handleServerResult.kt)
+    - Messages to user. Can be proper android push-like messages? 
+- Complete this TODO list
+
+## DONE
+- Migrate data from old username+key system to EmailID system
+- Write function for sending backup mail
+- Remove all old Email related stuff
+    

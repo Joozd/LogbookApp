@@ -116,7 +116,7 @@ suspend fun updateDataFiles(server: HTTPServer,
 
 suspend fun sendFeedback(cloud: Cloud = Cloud()): ServerFunctionResult =
     (TaskPayloads.feedbackWaiting().nullIfBlank()?.let{ feedback ->
-        cloud.sendFeedback(FeedbackData(feedback, TaskPayloads.feedbackContactInfoWaiting()))
+        cloud.sendFeedback(FeedbackData(feedback, TaskPayloads.feedbackContactInfo()))
             .correspondingServerFunctionResult()
     }  ?: ServerFunctionResult.SUCCESS)
 

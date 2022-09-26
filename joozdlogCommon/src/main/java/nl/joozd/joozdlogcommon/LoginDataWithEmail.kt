@@ -21,6 +21,7 @@ package nl.joozd.joozdlogcommon
 
 import nl.joozd.serializing.*
 
+@Deprecated("This will be removed in a future version, now only here for migration purposes")
 data class LoginDataWithEmail(val userName: String, val password: ByteArray, val basicFlightVersion: Int, val email: String): JoozdSerializable {
     override fun serialize(): ByteArray {
         var serialized = ByteArray(0)

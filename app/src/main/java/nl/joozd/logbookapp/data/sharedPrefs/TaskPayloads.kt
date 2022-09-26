@@ -12,5 +12,5 @@ object TaskPayloads: JoozdLogPreferences() {
 
     val emailConfirmationStringWaiting by JoozdlogSharedPreferenceDelegate(EMAIL_CONF_STRING_WAITING,"")
     val feedbackWaiting by JoozdlogSharedPreferenceDelegate(FEEDBACK_WAITING, "")
-    val feedbackContactInfoWaiting by JoozdlogSharedPreferenceDelegate(FEEDBACK_CONTACT_INFO_WAITING, "")
+    val feedbackContactInfo by JoozdlogSharedPreferenceDelegate(FEEDBACK_CONTACT_INFO_WAITING, "")
 }

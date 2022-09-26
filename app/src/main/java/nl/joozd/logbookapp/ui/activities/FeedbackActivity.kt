@@ -87,7 +87,7 @@ class FeedbackActivity : JoozdlogActivity() {
 
     private fun ActivityFeedbackBinding.collectFlows() {
         TaskPayloads.feedbackWaiting.flow.launchCollectWhileLifecycleStateStarted { feedbackEditText.setText(it) }
-        TaskPayloads.feedbackContactInfoWaiting.flow.launchCollectWhileLifecycleStateStarted { contactEditText.setText(it) }
+        TaskPayloads.feedbackContactInfo.flow.launchCollectWhileLifecycleStateStarted { contactEditText.setText(it) }
 
         viewModel.finishedFlow.launchCollectWhileLifecycleStateStarted{
             if (it)

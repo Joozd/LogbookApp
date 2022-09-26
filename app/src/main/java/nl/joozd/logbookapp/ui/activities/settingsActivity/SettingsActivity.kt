@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.ui.activities.settingsActivity
 
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -295,13 +294,11 @@ class SettingsActivity : JoozdlogActivity() {
 
     /**
      * Show dialog to enter an email address.
-     * @param extra: Extra function to be performed on successfully entering an email address (eg. switching auto backups on after email was entered)
+     * @param OnSuccess: Extra function to be performed on successfully entering an email address (eg. switching auto backups on after email was entered)
+     * NOTE Email backup can be scheduled right away, as it will wait for user to confirm email address.
      */
-    private fun showEmailDialog(extra: () -> Unit = {}) {
-        supportFragmentManager.commit {
-            add(R.id.settingsActivityLayout, EmailDialog(extra), null)
-            addToBackStack(null)
-        }
+    private fun showEmailDialog(OnSuccess: () -> Unit = {}) {
+        TODO("Show email dialog")
     }
 
 

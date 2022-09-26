@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.core.App
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
@@ -49,8 +48,8 @@ class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
     }
 
     fun submitClicked() = viewModelScope.launch{
-        enteredFeedback?.let { TaskPayloads.feedbackWaiting(it) }
-        enteredContactInfo?.let { TaskPayloads.feedbackContactInfoWaiting(it) }
+        enteredFeedback?.let { TaskPayloads.feedbackWaiting.setValue(it) } // suspending, data is needed for proper feedback sending
+        enteredContactInfo?.let { TaskPayloads.feedbackContactInfo.setValue(it) } // suspending, data is needed for proper feedback sending
         TaskFlags.feedbackWaiting(true)
         finished = true
     }

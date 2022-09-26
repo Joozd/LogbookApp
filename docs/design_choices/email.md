@@ -1,4 +1,7 @@
 #Email Design Choices
+See [email](../howStuffWorks/email.md) for how email works. 
+This document is to explain why, not how.
+
 ##### Backup emails
 Backup emails are currently sent through server.
 Sending the data through the app's protocol to the server and then making the server forward it has these reasons:

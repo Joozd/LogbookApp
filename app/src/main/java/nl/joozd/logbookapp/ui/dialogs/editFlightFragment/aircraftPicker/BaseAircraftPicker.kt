@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs.aircraftPicker
+package nl.joozd.logbookapp.ui.dialogs.editFlightFragment.aircraftPicker
 
 import android.os.Bundle
 import android.view.LayoutInflater

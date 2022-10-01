@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs
+package nl.joozd.logbookapp.ui.dialogs.editFlightFragment
 
 import android.os.Bundle
 import android.view.LayoutInflater

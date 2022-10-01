@@ -17,18 +17,8 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs
+package nl.joozd.logbookapp.ui.dialogs.editFlightFragment.aircraftPicker
 
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryImpl
-import nl.joozd.logbookapp.model.workingFlight.FlightEditor
-import java.time.LocalDate
-
-/**
- * Update flight when a date is picked
- * [wf] will take care of exactly that happens
- */
-class LocalDatePickerDialog: LocalDatePickerFragment() {
-    override fun onDateSelectedListener(date: LocalDate?) {
-        date?.let { FlightEditor.instance!!.date = it }
-    }
+class SimTypePicker: BaseAircraftPicker() {
+    override val isSimPicker = true
 }

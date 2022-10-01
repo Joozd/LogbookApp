@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs
+package nl.joozd.logbookapp.ui.dialogs.editFlightFragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -39,13 +39,14 @@ import nl.joozd.logbookapp.ui.utils.toast
 
 import nl.joozd.logbookapp.model.viewmodels.fragments.NewEditFlightFragmentViewModel
 import nl.joozd.logbookapp.ui.adapters.AircraftAutoCompleteAdapter
-import nl.joozd.logbookapp.ui.dialogs.aircraftPicker.AircraftPicker
-import nl.joozd.logbookapp.ui.dialogs.aircraftPicker.BaseAircraftPicker
-import nl.joozd.logbookapp.ui.dialogs.aircraftPicker.SimTypePicker
-import nl.joozd.logbookapp.ui.dialogs.airportPicker.DestPicker
-import nl.joozd.logbookapp.ui.dialogs.airportPicker.OrigPicker
-import nl.joozd.logbookapp.ui.dialogs.namesDialog.PicNameDialog
-import nl.joozd.logbookapp.ui.dialogs.namesDialog.Name2Dialog
+import nl.joozd.logbookapp.ui.dialogs.*
+import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.aircraftPicker.AircraftPicker
+import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.aircraftPicker.BaseAircraftPicker
+import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.aircraftPicker.SimTypePicker
+import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.airportPicker.DestPicker
+import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.airportPicker.OrigPicker
+import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.namesDialog.PicNameDialog
+import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.namesDialog.Name2Dialog
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 import nl.joozd.logbookapp.ui.utils.setDualInstructorField
 import nl.joozd.logbookapp.ui.utils.setPicPicusField

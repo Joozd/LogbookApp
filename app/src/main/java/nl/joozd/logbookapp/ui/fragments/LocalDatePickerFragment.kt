@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs
+package nl.joozd.logbookapp.ui.fragments
 
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape

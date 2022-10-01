@@ -17,18 +17,8 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs.airportPicker
+package nl.joozd.logbookapp.ui.dialogs.editFlightFragment.aircraftPicker
 
-import androidx.fragment.app.viewModels
-import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.model.viewmodels.dialogs.airportPicker.OrigPickerViewModel
-import java.util.*
-
-/**
- * Airport picker that works on Origin
- */
-class OrigPicker: AirportPicker() {
-    override val dialogTitle: String
-        get() = getString(R.string.origin).uppercase(Locale.ROOT)
-    override val viewModel: OrigPickerViewModel by viewModels()
+class AircraftPicker: BaseAircraftPicker() {
+    override val isSimPicker = false
 }

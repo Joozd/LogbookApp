@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs.airportPicker
+package nl.joozd.logbookapp.ui.dialogs.editFlightFragment.airportPicker
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -28,7 +28,6 @@ import android.widget.EditText
 import androidx.lifecycle.lifecycleScope
 
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 import nl.joozd.logbookapp.R
@@ -50,11 +49,10 @@ import kotlin.math.abs
  * This will set correct value in ViewModel, recreation will call constructor without params
  * but viewModel will persist.
  */
+//TODO pass FlightEditor in as constructor argument, save it in viewModel
 abstract class AirportPicker: JoozdlogFragment() {
     protected abstract val dialogTitle: String
     protected abstract val viewModel: AirportPickerViewModel
-
-
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =

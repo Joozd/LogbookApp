@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.ui.dialogs.airportPicker
+package nl.joozd.logbookapp.ui.dialogs.editFlightFragment.airportPicker
 
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R

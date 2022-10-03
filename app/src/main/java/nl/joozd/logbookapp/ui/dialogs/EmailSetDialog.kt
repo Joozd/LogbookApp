@@ -64,7 +64,7 @@ class EmailSetDialog : JoozdlogFragment() {
                 val currentEmail = currentlySavedEmailAsync.await()
                 if (!hasFocus()) {
                     setText(currentEmail)
-                    enableSaveButtonIfValidEmail(savedText)
+                    enableSaveButtonIfValidEmail(currentEmail)
                 }
             }
         }

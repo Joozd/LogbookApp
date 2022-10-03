@@ -18,12 +18,19 @@ import kotlin.reflect.KProperty
  *  f(Prefs.someValue())
  *  } // will probably not give the updated value.
  *
- * If you want that, use setValue(x), valueBlocking = x, or give the data you are setting to the function calling
+ * If you want that, use setValue(x), valueBlocking = x, or give the data you are setting to the function that needs it.
  *  eg. x = false; Prefs.someValue(x), f(x)
  */
-class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private val defaultValue: T): ReadOnlyProperty<JoozdLogPreferences, JoozdlogSharedPreferenceDelegate.ReadOnlyPref<T>> {
+class JoozdlogSharedPreferenceDelegate<T : Any>(
+    private val key: String,
+    private val defaultValue: T
+) : ReadOnlyProperty<JoozdLogPreferences, JoozdlogSharedPreferenceDelegate.ReadOnlyPref<T>> {
     private var _instance : Pref<T>? = null
 
+    /**
+     * This is the standard Pref yo get. I can be read (see [ReadOnlyPref]) and written to (see [WriteablePref])
+     * It can also be mapped, see [DualMappedPref]. A mapped pref will still be a [Pref] for the outside world.
+     */
     interface Pref<T: Any>: ReadOnlyPref<T>, WriteablePref<T>{
         fun <R: Any> mapBothWays(transformer: PrefTransformer<T, R>) =
             DualMappedPref(this, transformer)
@@ -86,6 +93,11 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private
             transform(source())
     }
 
+    /**
+     * A Pref can be mapped to automatically provide the data in the form needed, such as transforming an Int to an enum class.
+     * Do do this, provide a [PrefTransformer] to [Pref.map].
+     * @see PrefTransformer
+     */
     class DualMappedPref<T: Any, R: Any>(
         private val source: Pref<T>,
         private val transformer: PrefTransformer<T, R>
@@ -112,6 +124,10 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(private val key: String, private
     }
 
 
+    /**
+     * [map]: The function that maps the stored data to the wanted output
+     * [mapBack]: The function that changes the given input to the type stored by this [DualMappedPref]
+     */
     interface PrefTransformer<T: Any, R: Any>{
         fun map(source: T): R
         fun mapBack(transformedValue: R): T

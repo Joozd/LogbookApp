@@ -29,13 +29,10 @@ package nl.joozd.logbookapp.core.emailFunctions
 import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.ui.utils.base64Decode
-import nl.joozd.logbookapp.utils.DispatcherProvider
 
 /*
  * UserManagement does NOT take care of setting TaskFlags that need to be (re-)set, other than any other function can.
@@ -60,14 +57,16 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags) {
 
     /**
      * Change email address. It will confirm with server at the first possible time. Server will send a confirmation mail if needed.
-     * If newEmailAddress is null, it will re-confirm stored address with server.
      * If no connection it will schedule sending to server when internet gets available.
      * @param newEmailAddress - the email address to store. This is NOT checked to see if it is a valid email address.
      */
-    suspend fun changeEmailAddress(newEmailAddress: String) {
-        EmailPrefs.emailVerified(EmailPrefs.emailVerified() && newEmailAddress.equals(EmailPrefs.emailAddress(), ignoreCase = true))
-        EmailPrefs.emailAddress(newEmailAddress)
-        requestEmailVerificationMail()
+    fun changeEmailAddress(newEmailAddress: String) {
+        MainScope().launch {
+            //sets are blocking to prevent race conditions with requestEmailVerificationMail()
+            EmailPrefs.emailVerified.setValue(false)
+            EmailPrefs.emailAddress.setValue(newEmailAddress)
+            requestEmailVerificationMail()
+        }
     }
 
     /**

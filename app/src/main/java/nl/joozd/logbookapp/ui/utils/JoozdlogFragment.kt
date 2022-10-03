@@ -20,9 +20,6 @@
 package nl.joozd.logbookapp.ui.utils
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.GradientDrawable
 import android.text.Editable
 import android.view.View
 import android.widget.CompoundButton
@@ -39,9 +36,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.first
 import nl.joozd.logbookapp.core.App
-import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.extensions.getColorFromAttr
-import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -69,7 +63,11 @@ abstract class JoozdlogFragment: Fragment() {
 
     protected fun removeFragment() = supportFragmentManager.commit { remove(fragment) }
 
-    protected open fun closeFragment() = supportFragmentManager.popBackStack()
+    protected open fun closeFragment() {
+        if (getTopFragment() == this)
+            supportFragmentManager.popBackStack()
+        else removeFragment()
+    }
 
     /**
      * Disable the "back" button so you cannot close a fragment by pressing it
@@ -158,4 +156,13 @@ abstract class JoozdlogFragment: Fragment() {
             isChecked = it
         }
     }
+
+    private fun getTopFragment(): Fragment? =
+        with (supportFragmentManager) {
+            return when (backStackEntryCount) {
+                0 -> null
+                else -> findFragmentById(getBackStackEntryAt(backStackEntryCount - 1).id)
+            }
+        }
+
 }

@@ -5,7 +5,7 @@ import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 
 object Messages {
     val unknownOrUnverifiedEmailMessage = UserMessage.Builder().apply{
-        titleResource = R.string.email
+        titleResource = R.string.email_address
         descriptionResource = R.string.server_reported_email_not_verified_new_mail_will_be_sent
         setPositiveButton(android.R.string.ok){
             EmailCenter().requestEmailVerificationMail()
@@ -13,7 +13,7 @@ object Messages {
     }.build()
 
     val invalidEmailAddressSentToServer = UserMessage.Builder().apply{
-        titleResource = R.string.email
+        titleResource = R.string.email_address
         descriptionResource = R.string.server_not_an_email_address_please_enter_again
         setPositiveButton(android.R.string.ok){
             //consider opening email fragment

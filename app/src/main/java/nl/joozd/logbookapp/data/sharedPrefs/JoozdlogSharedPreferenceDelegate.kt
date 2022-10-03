@@ -28,7 +28,7 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(
     private var _instance : Pref<T>? = null
 
     /**
-     * This is the standard Pref yo get. I can be read (see [ReadOnlyPref]) and written to (see [WriteablePref])
+     * This is the standard Pref you get. I can be read (see [ReadOnlyPref]) and written to (see [WriteablePref])
      * It can also be mapped, see [DualMappedPref]. A mapped pref will still be a [Pref] for the outside world.
      */
     interface Pref<T: Any>: ReadOnlyPref<T>, WriteablePref<T>{

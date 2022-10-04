@@ -30,12 +30,7 @@ import nl.joozd.logbookapp.ui.dialogs.JoozdlogAlertDialog
  * @see Errors
  */
 fun Fragment.errorDialog(error: Error) {
-    val ctx = this
-    JoozdlogAlertDialog().show(requireActivity()){
-        titleResource = R.string.error
-        message = ctx.getString(R.string.error_dialog_message, error.code, error.message)
-        setPositiveButton(android.R.string.ok)
-    }
+    showErrorDialog(requireActivity(), error)
 }
 
 /**
@@ -44,28 +39,22 @@ fun Fragment.errorDialog(error: Error) {
  * @see Errors
  */
 fun FragmentActivity.errorDialog(error: Error) {
-    val ctx = this
-    JoozdlogAlertDialog().show(this) {
+    showErrorDialog(this, error)
+}
+
+private fun showErrorDialog(activity: FragmentActivity, error: Error){
+    JoozdlogAlertDialog().show(activity) {
         titleResource = R.string.error
-        message = ctx.getString(R.string.error_dialog_message, error.code, error.message)
+        message = activity.getString(R.string.error_dialog_message, error.code, error.message)
         setPositiveButton(android.R.string.ok)
     }
 }
 
-/**
- * Show an error with a custom code and message from a [Fragment]
- * @param message: Error Message
- * @param code: Error code
- * @param extraData: Extra data
- * Good practice is to always use error code -1 for this, otherwise make an [Errors] entry
- */
-fun Fragment.errorDialog(message: String, code: Int = -1, extraData: String? = null) = errorDialog(Error(code, message, extraData))
 
 /**
  * Show an error with a custom code and message from a [FragmentActivity]
  * @param message: Error Message
  * @param code: Error code
  * @param extraData: Extra data
- * Good practice is to always use error code -1 for this, otherwise make an [Errors] entry
  */
-fun FragmentActivity.errorDialog(message: String, code: Int = -1, extraData: String? = null) = errorDialog(Error(code, message, extraData))
+fun FragmentActivity.errorDialog(message: String, code: Int = Errors.UNDEFINED_ERROR.code, extraData: String? = null) = errorDialog(Error(code, message, extraData))

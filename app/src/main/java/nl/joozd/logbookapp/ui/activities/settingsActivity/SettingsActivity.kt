@@ -19,24 +19,17 @@
 
 package nl.joozd.logbookapp.ui.activities.settingsActivity
 
-import android.net.Uri
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.commit
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.background.BackupCenter
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivitySettingsBinding
 import nl.joozd.logbookapp.errors.errorDialog
-import nl.joozd.logbookapp.extensions.getStringWithMakeup
-import nl.joozd.logbookapp.extensions.makeCsvSharingIntent
+import nl.joozd.logbookapp.extensions.showFragment
 import nl.joozd.logbookapp.model.viewmodels.activities.settingsActivity.SettingsActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.ui.dialogs.*
@@ -59,9 +52,8 @@ class SettingsActivity : JoozdlogActivity() {
 
             setGroupOpenCloseOnClickListeners()
             setItemOnClickedListeners()
-            setHelpOnClickListeners()
 
-            observeStatus()
+            observeControlFlows()
             observeSettingsFlows()
 
             // Set content view
@@ -70,7 +62,7 @@ class SettingsActivity : JoozdlogActivity() {
     }
 
 
-    private fun observeStatus() {
+    private fun observeControlFlows() {
         viewModel.statusFlow.launchCollectWhileLifecycleStateStarted{
             when(it){
                 null -> { }
@@ -78,10 +70,15 @@ class SettingsActivity : JoozdlogActivity() {
                 SettingsActivityStatus.CalendarDialogNeeded -> showFragment<CalendarSyncDialog>(R.id.settingsActivityLayout)
 
                 is SettingsActivityStatus.Error -> errorDialog(getString(it.errorResource))
-
             }
             if (it != null) viewModel.resetStatus()
         }
+
+        viewModel.showHintFlow.launchCollectWhileLifecycleStateStarted{
+            it?.let { showHintDialog(it) }
+        }
+
+
     }
 
     private fun ActivitySettingsBinding.observeSettingsFlows(){
@@ -94,13 +91,6 @@ class SettingsActivity : JoozdlogActivity() {
             autoPostponeCalendarSyncSelector.isChecked = it
         }
 
-        viewModel.backupIntervalFlow.launchCollectWhileLifecycleStateStarted{
-            backupIntervalButton.text = getBackupIntervalString(it)
-        }
-
-        viewModel.sendBackupEmailsFlow.launchCollectWhileLifecycleStateStarted{
-            backupFromCloudSwitch.isChecked = it
-        }
 
         viewModel.calendarSyncTypeFlow.launchCollectWhileLifecycleStateStarted{
             setCalendarSyncTypeButtonText(it)
@@ -129,19 +119,6 @@ class SettingsActivity : JoozdlogActivity() {
         )
     }
 
-    private fun getBackupIntervalString(it: Int) = getStringWithMakeup(
-        R.string.backup_interval_time, (if (it == 0) getString(
-            R.string.never
-        ) else getString(R.string.n_days, it.toString()))
-    )
-
-
-    private fun ActivitySettingsBinding.setHelpOnClickListeners() {
-        popupTextboxesBackground.setOnClickListener {
-            closeAllHintBoxes()
-        }
-    }
-
     private fun ActivitySettingsBinding.setItemOnClickedListeners() {
         settingsGetFlightsFromCalendarSelector.setOnClickListener {
             viewModel.setGetFlightsFromCalendarClicked()
@@ -166,15 +143,6 @@ class SettingsActivity : JoozdlogActivity() {
             viewModel.toggleAddNamesFromRoster()
         }
 
-        backupIntervalButton.setOnClickListener { showBackupIntervalNumberPicker() }
-
-        backupFromCloudSwitch.setOnClickListener {
-            lifecycleScope.launch {
-                toggleBackupFromCloudWithDialogIfNeeded()
-            }
-        }
-
-        backupNowButton.setBackupNowButtonToActive()
     }
 
     private fun ActivitySettingsBinding.setGroupOpenCloseOnClickListeners() {
@@ -183,7 +151,7 @@ class SettingsActivity : JoozdlogActivity() {
         }
 
         backupPreferencesSelector.setOnClickListener {
-            backupPreferencesLayout.toggleVisibility()
+            toggleBackupPreferencesVisible()
         }
 
         syncPreferencesSelector.setOnClickListener {
@@ -198,43 +166,43 @@ class SettingsActivity : JoozdlogActivity() {
     private fun ActivitySettingsBinding.toggleGeneralPreferencesVisible(){
         supportFragmentManager.findFragmentByTag(GENERAL_PREFERENCES_FRAGMENT_TAG)?.let{
             if (it.isResumed) {
-                removeFragment(it)
                 generalPreferencesContainer.visibility = View.GONE // toggling visibility to GONE makes the activity auto-animate removal of fragment
+                removeFragment(it)
             }
             else null
         } ?: showGeneralPreferencesFragment()
     }
+
+    private fun ActivitySettingsBinding.toggleBackupPreferencesVisible(){
+        supportFragmentManager.findFragmentByTag(BACKUP_PREFERENCES_FRAGMENT_TAG)?.let{
+            if (it.isResumed) {
+                backupPreferencesContainer.visibility = View.GONE // toggling visibility to GONE makes the activity auto-animate removal of fragment
+                removeFragment(it)
+            }
+            else null
+        } ?: showBackupPreferencesFragment()
+    }
+
 
     private fun ActivitySettingsBinding.showGeneralPreferencesFragment(){
         showFragment<GeneralPreferencesFragment>(R.id.general_preferences_container, tag = GENERAL_PREFERENCES_FRAGMENT_TAG)
         generalPreferencesContainer.visibility = View.VISIBLE // toggling visibility to VISIBLE makes the activity auto-animate insertion of fragment
     }
 
-
-
-    private fun Button.shareCsvAndActivateBackupNowButton(
-        it: Uri
-    ) {
-        makeCsvSharingIntent(it)
-        setBackupNowButtonToActive()
-        viewModel.resetStatus()
+    private fun ActivitySettingsBinding.showBackupPreferencesFragment(){
+        showFragment<BackupPreferencesFragment>(R.id.backup_preferences_container, tag = BACKUP_PREFERENCES_FRAGMENT_TAG)
+        backupPreferencesContainer.visibility = View.VISIBLE // toggling visibility to VISIBLE makes the activity auto-animate insertion of fragment
     }
 
-
-    private fun Button.setBackupNowButtonToActive() {
-        setOnClickListener {
-            setBackupNowButtonToBuildingCsv()
-            lifecycleScope.launch {
-                shareCsvAndActivateBackupNowButton(BackupCenter.makeBackupUri())
-            }
-            setText(R.string.backup_now)
+    // Expects a Resource ID as parameter
+    private fun showHintDialog(message: Int){
+        AlertDialog.Builder(this).apply{
+            setMessage(message)
+            setPositiveButton(android.R.string.ok){ _, _ -> viewModel.hintShown() } // Tell viewModel not to provide this hint on recreate
         }
     }
 
-    private fun Button.setBackupNowButtonToBuildingCsv() {
-        setOnClickListener {  }
-        setText(R.string.exporting_csv)
-    }
+
 
     /***********************************************************************************************
      * Private functions for changing layout
@@ -270,39 +238,11 @@ class SettingsActivity : JoozdlogActivity() {
         dontPostponeTextView.visibility = View.GONE
     }
 
-    private fun ActivitySettingsBinding.closeAllHintBoxes(){
-        createLoginLinkHintCardview.visibility = View.GONE
-        popupTextboxesBackground.visibility = View.GONE
-    }
 
-    private fun showBackupIntervalNumberPicker(){
-        BackupIntervalNumberPicker().apply{
-            title = App.instance.getString(R.string.pick_backup_interval)
-            wrapSelectorWheel = false
-            maxValue = 365
-
-        }.show(supportFragmentManager, null)
-    }
-
-    private suspend fun toggleBackupFromCloudWithDialogIfNeeded(){
-        when{
-            Prefs.sendBackupEmails() -> Prefs.sendBackupEmails(false)
-            !viewModel.emailGoodAndVerified() -> showEmailDialog { Prefs.sendBackupEmails(true) }
-            else -> Prefs.sendBackupEmails(true)
-        }
-    }
-
-    /**
-     * Show dialog to enter an email address.
-     * @param OnSuccess: Extra function to be performed on successfully entering an email address (eg. switching auto backups on after email was entered)
-     * NOTE Email backup can be scheduled right away, as it will wait for user to confirm email address.
-     */
-    private fun showEmailDialog(OnSuccess: () -> Unit = {}) {
-        TODO("Show email dialog")
-    }
 
 
     companion object{
         private const val GENERAL_PREFERENCES_FRAGMENT_TAG = "GENERAL_PREFERENCES_FRAGMENT_TAG"
+        private const val BACKUP_PREFERENCES_FRAGMENT_TAG = "BACKUP_PREFERENCES_FRAGMENT_TAG"
     }
 }

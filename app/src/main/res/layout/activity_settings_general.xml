@@ -5,9 +5,7 @@
     android:id="@+id/loggingPreferencesLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/loggingPrefsDescriptionTextView">
+    android:animateLayoutChanges="true">
 
 
     <!-- Text set programmatically -->

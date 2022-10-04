@@ -22,31 +22,17 @@ package nl.joozd.logbookapp.ui.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
-import android.os.Bundle
-import android.os.PersistableBundle
-import android.view.View
-import android.widget.CompoundButton
-import androidx.annotation.IdRes
 import androidx.appcompat.app.ActionBar
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
-import nl.joozd.logbookapp.ui.dialogs.CalendarSyncDialog
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
@@ -84,29 +70,6 @@ open class JoozdlogActivity: AppCompatActivity() {
         }
     }
 
-    protected fun <T> Flow<T>.launchCollectLatestWhileLifecycleStateStarted(collector: suspend (T) -> Unit){
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                collectLatest(collector)
-            }
-        }
-    }
-
-    protected inline fun <reified  T: Fragment> showFragment(
-        @IdRes containerViewId: Int,
-        tag: String? = null,
-        args: Bundle? = null,
-        addToBackStack: Boolean = true)
-    {
-        supportFragmentManager.commit{
-            println("COMMITTING")
-            setReorderingAllowed(true)
-            add<T>(containerViewId, tag = tag, args = args)
-            println("containrs: ${findViewById<View>(containerViewId)}")
-            if (addToBackStack) addToBackStack(null)
-        }
-    }
-
     protected fun removeFragment(it: Fragment) {
         supportFragmentManager.commit { remove(it) }
     }
@@ -115,46 +78,18 @@ open class JoozdlogActivity: AppCompatActivity() {
         startActivity(packageManager.getLaunchIntentForPackage(packageName))
     }
 
-
-    protected fun sendMessageToOtherApp(message: String, subject: String? = null){
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            subject?.let { putExtra(Intent.EXTRA_SUBJECT, it) }
-            putExtra(Intent.EXTRA_TEXT, message)
-        }
-        startActivity(Intent.createChooser(intent, null))
-    }
-
-    /**
-     * Bind a CompoundButton (e.g. a Switch) to a Flow<Boolean>.
-     * The only way to change this buttons state after calling this function is to change the output of [flow]
-     */
-    protected fun CompoundButton.bindToFlow(flow: Flow<Boolean>){
-        setOnCheckedChangeListener { _, _ ->
-            lifecycleScope.launch {
-                flow.first().let{
-                    if (isChecked != it)
-                        isChecked = it
-                }
-            }
-        }
-        flow.launchCollectWhileLifecycleStateStarted{
-            println("COLLECTED: $it from $flow")
-            isChecked = it.apply{
-
-            }
-        }
-    }
-
     /**
      * dp to pixels and reverse
      */
 
+    @Suppress("unused")
     protected fun Float.pixelsToDp() = this / resources.displayMetrics.density
+
+    @Suppress("unused")
     protected fun Float.dpToPixels() = this * resources.displayMetrics.density
+
+    @Suppress("unused")
     protected fun Int.pixelsToDp() = this.toFloat() / resources.displayMetrics.density
+
     protected fun Int.dpToPixels() = this.toFloat() * resources.displayMetrics.density
-
-
-
 }

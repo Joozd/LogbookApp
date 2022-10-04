@@ -25,7 +25,7 @@
     <string name="app_link_intent_filter">App Link intent Filter</string>
 
     <string name="flightNumberHint">FlightNumber</string>
-    <string name="dateHint">Date</string>
+    <string name="date">Date</string>
 
     <string name="airField">Airport</string>
     <string name="name">Name</string>
@@ -38,6 +38,8 @@
     <string name="back">Back</string>
     <string name="skip">Skip</string>
     <string name="retry">Retry</string>
+
+    <string name="hint">Hint</string>
 
     <string name="clear">Clear</string>
     <string name="add_flight">Add Flight</string>
@@ -67,6 +69,9 @@
     <string name="server_not_an_email_address_please_enter_again">The server did not like the entered email address for a scheduled action that requires one. Please enter it again in Settings.</string>
     <string name="server_reported_email_not_verified_new_mail_will_be_sent">The server reported that your entered email address is not verified.\nA new verification mail will be sent to the email address entered in Settings.\n\nPlease open the verification link in this app.</string>
     <string name="enter_email">Enter email</string>
+    <string name="verified_email">%1$s (verified)</string>
+    <string name="not_verified_email">%1$s (not verified)</string>
+
     <string name="same_email_as_saved_do_you_want_to_reconfirm_">The entered email is the same as the currently saved email. Do you want to re-confirm your email address?</string>
     <string name="email_reason">Please enter your email for backup and account recovery purposes.\nYour email address will not be stored outside your phone.</string>
     <string name="autovalue">Auto Values</string>
@@ -447,7 +452,7 @@
     <string name="n_duplicates_have_been_removed_long_message">%1$d duplicate flights have been removed.\nThey will also be removed from Cloud.\nHowever, to prevent them re-appearing again, remove duplicates or disable cloud syncing on any other devices you use Joozdlog on as well, or they will come back.</string>
 
     <string name="backup_interval_time"><![CDATA[<b>Remind me to make a backup every</b><br><small>%1$s</small>&nbsp;]]></string>
-    <string name="backup_from_cloud">Send backup emails from cloud</string>
+    <string name="backup_via_email">Auto-send backup emails</string>
     <string name="mail_will_be_sent_to"><![CDATA[Your new login link will be sent to<br><b>%1$s&nbsp;</b>]]></string>
     <string name="backup_cloud_description">An email with your logbook will be emailed to you at the same interval as you get reminded to make a backup. You will still be reminded if server cannot be reached.</string>
 

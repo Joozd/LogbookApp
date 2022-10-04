@@ -31,6 +31,7 @@ import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.core.DarkModeCenter
+import nl.joozd.logbookapp.data.sharedPrefs.toggle
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.time.Instant
 import java.time.LocalDateTime
@@ -61,6 +62,8 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
     val getNamesFromRostersFlow = Prefs.getNamesFromRosters.flow
 
+    val emailDataFlow: Flow<Pair<String, Boolean>> = combine(EmailPrefs.emailAddress.flow, EmailPrefs.emailVerified.flow) { a, v -> a to v }
+
 
     suspend fun calendarDisabledUntilString(): String {
             val time = LocalDateTime.ofInstant(Instant.ofEpochSecond(Prefs.calendarDisabledUntil()), ZoneOffset.UTC)
@@ -73,8 +76,12 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
         get() = AppCompatDelegate.getDefaultNightMode().takeIf{ it in (1..2)} ?: 0
 
 
-    suspend fun emailGoodAndVerified() =
-        EmailPrefs.emailAddress().isNotBlank() && EmailPrefs.emailVerified()
+    suspend fun emailEntered() =
+        EmailPrefs.emailAddress().isNotBlank()
+
+    fun toggleEmailBackupEnabled(){
+        Prefs.sendBackupEmails.toggle()
+    }
 
 
     /*********************************************************************************************

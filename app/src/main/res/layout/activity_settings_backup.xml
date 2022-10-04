@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/backup_preferences_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true">
+
+    <Button
+        android:id="@+id/backupIntervalButton"
+        style="@style/SettingsActivityButton"
+        android:text="@string/backup_interval_time"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/backupFromCloudSwitch"
+        style="@style/SettingsActivitySwitch"
+        android:text="@string/backup_via_email"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/backupIntervalButton"
+        tools:visibility="visible" />
+
+    <!-- email_address_button has PLACEHOLDER TEXT -->
+    <Button
+        android:id="@+id/email_address_button"
+        style="@style/SettingsActivityButton"
+        android:text="@string/verified_email"
+        android:textAlignment="textStart"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/backupFromCloudSwitch"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/backup_from_cloud_description"
+        style="@style/SettingsActivityDescriptionText"
+        android:text="@string/backup_cloud_description"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/backupFromCloudSwitch"
+        app:layout_constraintTop_toBottomOf="@+id/email_address_button"
+        tools:visibility="visible" />
+
+    <Button
+        android:id="@+id/backupNowButton"
+        style="@style/SettingsActivityButton"
+        android:text="@string/backup_now"
+        android:textAlignment="textStart"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/backup_from_cloud_description"
+        tools:visibility="visible" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -71,12 +71,14 @@ class EmailSetDialog : JoozdlogFragment() {
     }
 
 
-    //onClickListener for OK button
+    //onClickListener for OK button and background
     private fun DialogSetEmailBinding.setOnClickListeners(){
         //closes dialog, does nothing else.
         cancelEmailDialogTextview.setOnClickListener {
             closeFragment()
         }
+
+        enterEmailDialogBackground.setOnClickListener { /* Intentionally left blank */ }
     }
 
     //onTextChangedListener for emailInputEditText
@@ -147,7 +149,7 @@ class EmailSetDialog : JoozdlogFragment() {
 
     private fun DialogSetEmailBinding.disableSaveButton(){
         saveEmailDialogTextview.apply{
-            setOnClickListener { /* Intentionally blank */ }
+            setOnClickListener { activity?.currentFocus?.clearFocus() } // clearing focus from EditText will show error on bad email address
             setTextColor(requireActivity().getColorFromAttr(android.R.attr.textColorTertiary))
         }
     }

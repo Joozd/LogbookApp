@@ -85,7 +85,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/loggingPrefsDescriptionTextView">
+                app:layout_constraintTop_toBottomOf="@+id/loggingPrefsDescriptionTextView"
+                tools:layout="@layout/activity_settings_general">
 
             </androidx.fragment.app.FragmentContainerView>
 
@@ -124,61 +125,22 @@
                 app:layout_constraintBottom_toBottomOf="@+id/backupPrefsDescriptionTextView"
                 app:layout_constraintTop_toTopOf="@+id/backupPreferencesTitleTextView" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/backupPreferencesLayout"
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/backup_preferences_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/backupPrefsDescriptionTextView"
-                tools:visibility="visible">
+                tools:layout="@layout/activity_settings_backup"/>
 
-                <Button
-                    android:id="@+id/backupIntervalButton"
-                    style="@style/SettingsActivityButton"
-                    android:text="@string/backup_interval_time"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:visibility="visible" />
 
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/backupFromCloudSwitch"
-                    style="@style/SettingsActivitySwitch"
-                    android:text="@string/backup_from_cloud"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/backupIntervalButton"
-                    tools:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/backupFromCloudDescription"
-                    style="@style/SettingsActivityDescriptionText"
-                    android:text="@string/backup_cloud_description"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/backupFromCloudSwitch"
-                    app:layout_constraintTop_toBottomOf="@+id/backupFromCloudSwitch"
-                    tools:visibility="visible" />
-
-                <Button
-                    android:id="@+id/backupNowButton"
-                    style="@style/SettingsActivityButton"
-                    android:text="@string/backup_now"
-                    android:textAlignment="textStart"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/backupFromCloudDescription"
-                    tools:visibility="visible" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <View
                 android:id="@+id/lineBetweenBackupCalendar"
                 style="@style/SettingsActivityLine"
                 app:layout_constraintEnd_toEndOf="@+id/backupPreferencesTitleTextView"
                 app:layout_constraintStart_toStartOf="@+id/backupPreferencesTitleTextView"
-                app:layout_constraintTop_toBottomOf="@+id/backupPreferencesLayout"
+                app:layout_constraintTop_toBottomOf="@+id/backup_preferences_container"
                 tools:visibility="visible" />
 
             <TextView

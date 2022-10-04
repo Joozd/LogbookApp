@@ -23,7 +23,7 @@ package nl.joozd.logbookapp.errors
  * Predefined error codes
  */
 object Errors {
-    val FOUNDLINK_IS_NULL = Error(1, "CalendarSyncDialogViewModel.foundLink == null")
+    val UNDEFINED_ERROR = Error(-1, "Undefined error -1")
 }
 
 

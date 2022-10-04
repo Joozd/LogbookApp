@@ -5,7 +5,7 @@ Email is currently only used for [automatic backup](backup_email.md).
 Design choices can be found [here](../design_choices/email.md)
 
 Storing email address:
-- User has an opportunity to store an email address through **TODO** fragment.
+- User has an opportunity to store an email address through EmailSetDialog. This is the ONLY way in which user should be able to change/enter their email address.
 - Email address is stored locally, and confirmed with server.
 - Server generates a salt, and saves a hash of the email, so email can be confirmed but not retrieved by server.
 - When a new email address is sent to server, server will send a confirmation mail.
@@ -35,17 +35,18 @@ On a daily basis, check if an email is entered but not verified. If not, prompt 
 
 ## TODO
 - Think about if EmailID system needs a form of authentication beyond ID + correct email address
-- Completely rewrite all email creation logic and UI
-    - New Email entry (dialog + logic)
-    - email cofirmation (can steal old method)
-    - checkbox in Settings for email backup function, launches email entry dialog if not entered yet, launches a dialog when not confirmed yet. 
+- Completely rewrite all email creation logic and UI    
+    - email cofirmation (can steal old method)    
     - New User pages: Do you want auto email backups? Same checkbox as in Settings.
 - Handle all server email errors automatically in [handleServerResult](../../app/src/main/java/nl/joozd/logbookapp/comm/handleServerResult.kt)
     - Messages to user. Can be proper android push-like messages? 
 - Complete this TODO list
 
 ## DONE
+
 - Migrate data from old username+key system to EmailID system
 - Write function for sending backup mail
 - Remove all old Email related stuff
+- New Email entry (dialog + logic)
+- checkbox in Settings for email backup function, launches email entry dialog if not entered yet, launches a dialog when not confirmed yet. 
     

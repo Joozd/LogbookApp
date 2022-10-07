@@ -6,7 +6,7 @@
 - many other improvements
 
 # 1.2: Beaver
-### Name inspired by [post10](https://www.youtube.com/channel/UCsCNU-ptlze2tqAJSDeVGNQ)
+### Name inspired by watching too many [post10](https://www.youtube.com/channel/UCsCNU-ptlze2tqAJSDeVGNQ) unclogging videos
 ##### Removed Cloud, causing lots of related changes
 - Started this changelog
 - No longer sync flights to/from Cloud

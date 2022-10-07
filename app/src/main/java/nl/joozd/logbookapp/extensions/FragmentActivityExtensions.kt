@@ -25,6 +25,6 @@ inline fun <reified  T: Fragment> FragmentActivity.showFragment(
         setReorderingAllowed(true)
         add<T>(containerViewId, tag = tag, args = args)
         println("containrs: ${findViewById<View>(containerViewId)}")
-        if (addToBackStack) addToBackStack(null)
+        if (addToBackStack) addToBackStack(tag)
     }
 }

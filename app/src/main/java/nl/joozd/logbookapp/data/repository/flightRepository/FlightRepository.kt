@@ -53,12 +53,6 @@ interface FlightRepository {
     suspend fun getAllFlights(): List<Flight>
 
     /**
-     * make a [FlightDataCache] with snapshot flight data
-     */
-    @Deprecated("Use flightDataCacheFlow.first()")
-    suspend fun getFlightDataCache(): FlightDataCache
-
-    /**
      * Get a flow of updated FlightDataCaches
      */
     fun flightDataCacheFlow(): Flow<FlightDataCache>
@@ -78,16 +72,12 @@ interface FlightRepository {
     suspend fun save (flights: Collection<Flight>)
 
     /**
-     * Delete a flight.
-     * If flight is not known to server, this will remove it from DB,
-     * else it will set [Flight.DELETEFLAG] to true and save.
+     * Delete a flight. This will remove it from DB.
      */
     suspend fun delete(flight: Flight)
 
     /**
-     * Delete a collection of flights.
-     * If flight is not known to server, this will remove it from DB,
-     * else it will set [Flight.DELETEFLAG] to true and save.
+     * Delete a collection of flights. This will remove them from DB.
      */
     suspend fun delete(flights: Collection<Flight>)
 
@@ -116,7 +106,7 @@ interface FlightRepository {
     fun unregisterOnDataChangedListener(listener: OnDataChangedListener): Boolean
 
     fun interface OnDataChangedListener{
-        fun onFlightRepositoryChanged(changedFlightIDs: List<Int>): Unit
+        fun onFlightRepositoryChanged(changedFlightIDs: List<Int>)
     }
 
 

@@ -127,13 +127,6 @@ class FlightRepositoryWithUndoImpl(
         repositoryWithDirectAccess.getAllFlights()
 
     /**
-     * make a [FlightDataCache] with snapshot flight data
-     */
-    @Deprecated("Deprecated in interface")
-    override suspend fun getFlightDataCache(): FlightDataCache =
-        repositoryWithDirectAccess.getFlightDataCache()
-
-    /**
      * Get a flow of updated FlightDataCaches
      */
     override fun flightDataCacheFlow(): Flow<FlightDataCache> =

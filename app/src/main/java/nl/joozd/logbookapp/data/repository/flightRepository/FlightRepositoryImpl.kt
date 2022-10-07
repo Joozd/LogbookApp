@@ -68,10 +68,6 @@ class FlightRepositoryImpl(
     override suspend fun getAllFlights(): List<Flight> =
         getValidFlightsFromDao()
 
-    @Deprecated("Deprecated in interface")
-    override suspend fun getFlightDataCache(): FlightDataCache =
-        FlightDataCache.make(getValidFlightsFromDao())
-
     override fun flightDataCacheFlow(): Flow<FlightDataCache> =
         flightDao.validFlightsFlow().map {
             FlightDataCache.make(it.toFlights())

@@ -139,12 +139,6 @@ class FlightRepositoryTests {
                 expectedSize++
                 assertEquals(expectedSize, expectMostRecentItem().flights.size)
             }
-
-            //test getFLightDataCache()
-            assertEquals(expectedSize, repo.getFlightDataCache().flights.size)
-            repo.save(FlightsTestData.flightWithoutID)
-            expectedSize++
-            assertEquals(expectedSize, repo.getFlightDataCache().flights.size)
         }
 
     }

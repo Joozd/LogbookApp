@@ -275,7 +275,7 @@
     <string name="accept_terms_conditions">Accept Terms&amp;Conditions</string>
     <string name="already_have_account">If you already have a cloud account, you can leave this unchecked and use your login link after all settings are done!</string>
 
-    <string name="you_can_set_settings_in_settings">If you want to adjust any more settings, take a look at the Settings menu after you click \"done\"!</string>
+    <string name="you_can_set_settings_in_settings">If you want to adjust any more settings (switching on automatic backup emails for example), take a look at the Settings menu after you click \"done\"!</string>
 
     <string name="edit_flight_welcome_title">Edit Flight</string>
     <string name="edit_flight_welcome_message">You can edit your flights here. The triangles are buttons, click them to see what they do!\nYou can long-press any field to see if it offers any help.</string>

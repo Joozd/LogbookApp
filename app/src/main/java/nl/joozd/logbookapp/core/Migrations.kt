@@ -12,7 +12,7 @@ class Migrations(private val prefs: Prefs = Prefs, private val emailPrefs: Email
     // Migrations in Database structure will be handled by Room.
     fun migrateToCurrent(){
         MainScope().launch {
-            val oldVersion = prefs.previousVersion()
+            val oldVersion = prefs.configuredVersion()
             val currentVersion = Version.currentVersion
             (oldVersion until currentVersion).forEach {
                 migrations[it]!!()

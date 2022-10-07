@@ -415,7 +415,7 @@ class MainActivity : JoozdlogActivity() {
     private fun checkIfNewInstallOrUpdated() {
         updateLegacyVersionTrackingIfNeeded()
 
-        when(Prefs.previousVersion.valueBlocking) {
+        when(Prefs.configuredVersion.valueBlocking) {
             Version.NEW_INSTALL ->
                 startActivity(Intent(this, NewUserActivity::class.java))
             Version.ALPACA -> {
@@ -424,7 +424,7 @@ class MainActivity : JoozdlogActivity() {
             }
             Version.currentVersion ->
                 { /* do nothing */ }
-            else -> errorDialog("Version is incorrect: ${Prefs.previousVersion.valueBlocking}")
+            else -> errorDialog("Version is incorrect: ${Prefs.configuredVersion.valueBlocking}")
 
 
         }
@@ -436,9 +436,9 @@ class MainActivity : JoozdlogActivity() {
       and doesn't make the app unresponsive.
      */
     private fun updateLegacyVersionTrackingIfNeeded(){
-        if (Prefs.previousVersion.valueBlocking == Version.NEW_INSTALL)
+        if (Prefs.configuredVersion.valueBlocking == Version.NEW_INSTALL)
             if (Prefs.newUserActivityFinished.valueBlocking)
-                Prefs.previousVersion.valueBlocking = Version.ALPACA
+                Prefs.configuredVersion.valueBlocking = Version.ALPACA
     }
 
     private fun showAboutDialog() {

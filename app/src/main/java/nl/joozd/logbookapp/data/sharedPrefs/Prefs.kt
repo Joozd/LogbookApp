@@ -63,7 +63,7 @@ object Prefs: JoozdLogPreferences() {
     //Replaced by
     val newUserActivityFinished by JoozdlogSharedPreferenceDelegate(NEW_USER_ACTIVITY_FINISHED,false)
 
-    val previousVersion by JoozdlogSharedPreferenceDelegate(PREVIOUS_VERSION, Version.NEW_INSTALL)
+    val configuredVersion by JoozdlogSharedPreferenceDelegate(PREVIOUS_VERSION, Version.NEW_INSTALL)
     val editFlightFragmentWelcomeMessageShouldBeDisplayed by JoozdlogSharedPreferenceDelegate(EDIT_FLIGHT_FRAGMENT_FIRST_USE,true)
 
     /***********************

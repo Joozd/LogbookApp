@@ -22,7 +22,7 @@ package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
-import android.os.Parcelable
+import android.os.Build.VERSION.SDK_INT
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -222,9 +222,11 @@ class SingleUseImportIntentHandler: CoroutineScope {
                 ?.getFile()
         }
 
-    private fun Intent.getUri() =
-        getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri
-        ?: data
+    private fun Intent.getUri() = when {
+        SDK_INT >= 33 -> getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+        else -> @Suppress("DEPRECATION") getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
+    }
+
 
     private suspend fun getTypeDetector(
         uri: Uri?,

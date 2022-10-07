@@ -57,7 +57,7 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.ImportedLogbookAutoCompleter
 import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
-import nl.joozd.logbookapp.core.messages.MessageCenter
+import nl.joozd.logbookapp.core.MessageCenter
 import nl.joozd.logbookapp.extensions.removeByTagAnimated
 import nl.joozd.logbookapp.utils.IntentHandler
 

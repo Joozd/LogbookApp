@@ -7,7 +7,7 @@ import nl.joozd.logbookapp.data.importing.matchesFlightnumberTimeOrigAndDestWith
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.core.messages.MessageCenter
+import nl.joozd.logbookapp.core.MessageCenter
 import nl.joozd.logbookapp.core.messages.UserMessage
 import java.time.Instant
 

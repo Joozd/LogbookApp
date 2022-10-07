@@ -4,7 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.core.messages.MessageCenter
+import nl.joozd.logbookapp.core.MessageCenter
 import nl.joozd.logbookapp.core.EmailCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 

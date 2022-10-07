@@ -1,7 +1,7 @@
 package nl.joozd.logbookapp.comm
 
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsResponses
-import nl.joozd.logbookapp.core.messages.MessageCenter
+import nl.joozd.logbookapp.core.MessageCenter
 import nl.joozd.logbookapp.core.EmailCenter
 import nl.joozd.logbookapp.core.messages.Messages
 import nl.joozd.logbookapp.exceptions.CloudException

@@ -9,7 +9,7 @@ import nl.joozd.joozdlogcommon.comms.Protocol
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsRequests
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsResponses
 import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.core.messages.MessageCenter
+import nl.joozd.logbookapp.core.MessageCenter
 import nl.joozd.logbookapp.core.messages.Messages
 import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.serializing.*
@@ -109,11 +109,6 @@ class Cloud(
         }
     }
 
-    private suspend fun resultForRequest(request: JoozdlogCommsRequests, extraData: ByteArray?): CloudFunctionResult = withClient {
-        sendRequest(request, extraData)
-        handleResponse()!!
-    }
-
     private suspend fun responseForRequestOrException(request: JoozdlogCommsRequests, extraData: ByteArray?, progressListener: ProgressListener? = null): ByteArray = withClient {
         sendRequest(request, extraData)
         val response = if (progressListener != null) readFromServer(progressListener::progress) else readFromServer()
@@ -131,7 +126,8 @@ class Cloud(
 
     private suspend fun Client.handleResponse() = handleServerResult(readServerResponse())
 
-    private suspend fun Client.handleResponseAndThrowExceptionOnError() = handleServerResultAndThrowExceptionOnError(readServerResponse())
+    private suspend fun Client.sendRequest(request: JoozdlogCommsRequests, extraData: ByteArray?) =
+        sendRequest(request.keyword, extraData)
 
 
     fun interface ProgressListener{
@@ -141,9 +137,6 @@ class Cloud(
     // Pass this to functions giving a result to get returned data.
     // The return of the function will only be a CloudFunctionResult, so if you want anything else you can drop it in here.
     data class Result<T>(var value: T? = null)
-
-    private suspend fun Client.sendRequest(request: JoozdlogCommsRequests, extraData: ByteArray?) =
-        sendRequest(request.keyword, extraData)
 
 
     companion object {

@@ -1,7 +1,7 @@
 package nl.joozd.logbookapp.core.background
 
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.messages.MessageCenter
+import nl.joozd.logbookapp.core.MessageCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 import nl.joozd.logbookapp.core.EmailCenter
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity

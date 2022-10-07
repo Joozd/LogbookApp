@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.core.messages
+package nl.joozd.logbookapp.core
 
 
 import kotlinx.coroutines.MainScope
@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.core.messages.UserMessage
 import nl.joozd.logbookapp.ui.fragments.makeGenericMessageBarFragment
 import nl.joozd.logbookapp.ui.utils.MessageBarFragment
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut

@@ -1,6 +1,5 @@
 package nl.joozd.logbookapp.comm
 
-import android.util.Log
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.joozd.comms.Client
@@ -8,7 +7,6 @@ import nl.joozd.joozdlogcommon.*
 import nl.joozd.joozdlogcommon.comms.Protocol
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsRequests
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsResponses
-import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.MessageCenter
 import nl.joozd.logbookapp.core.messages.Messages
 import nl.joozd.logbookapp.exceptions.CloudException
@@ -29,31 +27,21 @@ class Cloud(
     /**
      * Send new email address to server
      * Server will send a confirmation mail if it worked.
-     * If no success, sets [TaskFlags.updateEmailWithServer] to true
+     * Throws CloudException on failure.
      */
     suspend fun sendNewEmailAddress(emailAddress: String): Long? {
         val data = EmailData(EmailData.EMAIL_ID_NOT_SET, emailAddress, ByteArray(0))
-        val result = try{
-            responseForRequestOrException(JoozdlogCommsRequests.SET_EMAIL, data)
-        } catch(e: CloudException){
-            Log.d("sendNewEmailAddress", "server replied ${e.cloudFunctionResult}")
-            throw(e)
-        }
-        TaskFlags.updateEmailWithServer(false)
+        val result = responseForRequestOrException(JoozdlogCommsRequests.SET_EMAIL, data)
         return unwrap(result)
     }
 
     /**
      * Migrate email data on server to new system (Long ID instead of String Username)
+     * Throws CloudException on failure.
      */
     suspend fun migrateEmailData(username: String, emailAddress: String): Long? {
         val data = LoginDataWithEmail(username, ByteArray(0), -1, emailAddress).serialize()
-        val result = try{
-            responseForRequestOrException(JoozdlogCommsRequests.SET_EMAIL, data)
-        } catch(e: CloudException){
-            Log.d("sendNewEmailAddress", "server replied ${e.cloudFunctionResult}")
-            return null
-        }
+        val result = responseForRequestOrException(JoozdlogCommsRequests.MIGRATE_EMAIL_DATA, data)
         return unwrap(result)
     }
 

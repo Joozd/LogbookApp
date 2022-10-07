@@ -32,6 +32,7 @@ suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), emailPrefs: Email
         }
     } catch( e: CloudException){
         TaskFlags.updateEmailWithServer(true)
+        return
     }
     TaskFlags.updateEmailWithServer(false)
 }

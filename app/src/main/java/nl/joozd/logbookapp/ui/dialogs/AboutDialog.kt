@@ -19,38 +19,24 @@
 
 package nl.joozd.logbookapp.ui.dialogs
 
-import android.os.Bundle
-import android.text.method.LinkMovementMethod
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.core.text.HtmlCompat
-import androidx.fragment.app.viewModels
+import kotlinx.coroutines.flow.map
+import nl.joozd.logbookapp.BuildConfig
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.databinding.DialogAboutBinding
-import nl.joozd.logbookapp.model.viewmodels.dialogs.AboutDialogViewModel
-import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 
-class AboutDialog: JoozdlogFragment() {
-    private val viewModel: AboutDialogViewModel by viewModels()
+class AboutDialog: LongTextDialog() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        DialogAboutBinding.bind(inflater.inflate(R.layout.dialog_about, container, false)).apply{
+    override val titleRes = R.string.about
+    override val textFlow = createFlowFromRaw(R.raw.about_joozdlog).map{ s ->
+        HtmlCompat.fromHtml(insertVersionAndBuildCodeIntoString(s), HtmlCompat.FROM_HTML_MODE_COMPACT)
+    }
 
-            aboutTextView.movementMethod = LinkMovementMethod.getInstance()
+    private fun insertVersionAndBuildCodeIntoString(s: String) =
+        s.replace(VERSION_STRING, BuildConfig.VERSION_NAME)
+            .replace(BUILD_STRING, BuildConfig.VERSION_CODE.toString())
 
-            viewModel.text.observe(viewLifecycleOwner){
-                aboutTextView.text = HtmlCompat.fromHtml(it, HtmlCompat.FROM_HTML_MODE_COMPACT)
-            }
-
-            headerLayout.setOnClickListener {  } // do nothing
-            bodyLayout.setOnClickListener {  } // do nothing
-
-            aboutDialogBackground.setOnClickListener { closeFragment() }
-
-            okButton.setOnClickListener { closeFragment() }
-
-
-        }.root
-
+    companion object{
+        const val VERSION_STRING = "\$VERSION\$"
+        const val BUILD_STRING = "\$BUILD\$"
+    }
 }

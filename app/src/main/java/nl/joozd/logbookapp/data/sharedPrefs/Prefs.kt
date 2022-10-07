@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.data.sharedPrefs
 
 import androidx.appcompat.app.AppCompatDelegate
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import nl.joozd.logbookapp.core.metadata.Version
 
 
 object Prefs: JoozdLogPreferences() {
@@ -38,16 +38,10 @@ object Prefs: JoozdLogPreferences() {
     //This will be replaced by emailID, just here so we can migrate when upgrading. one month after 1.2 update, this can go out.
     private const val USERNAME_RESOURCE = "USERNAME_RESOURCE"
     private var usernameResource: String by JoozdLogSharedPreferenceNotNull(USERNAME_RESOURCE, USERNAME_NOT_SET)
-    var username: String?
-        get() = usernameIfSet(usernameResource)
-        set(it) {
-            usernameResource = it ?: USERNAME_NOT_SET
-        }
+
     private val usernameResourceFlow by PrefsFlow(USERNAME_RESOURCE, USERNAME_NOT_SET)
-    val usernameFlow = usernameResourceFlow.map {
-        usernameIfSet(it)
-    }
-    suspend fun username() = usernameFlow.first()   // usernameFlow gives null if USERNAME_NOT_SET
+
+    suspend fun username() = usernameIfSet(usernameResourceFlow.first())   // usernameFlow gives null if USERNAME_NOT_SET
     fun username(newName: String?) = post(USERNAME_RESOURCE, newName ?: USERNAME_NOT_SET)
 
     private fun usernameIfSet(name: String) = name.takeIf { usernameResource != USERNAME_NOT_SET }
@@ -63,9 +57,13 @@ object Prefs: JoozdLogPreferences() {
     val sendBackupEmails by JoozdlogSharedPreferenceDelegate(BACKUP_FROM_CLOUD,false)
 
     private const val NEW_USER_ACTIVITY_FINISHED = "NEW_USER_ACT_FINISHED"
+    private const val PREVIOUS_VERSION = "PREVIOUS_VERSION"
     private const val EDIT_FLIGHT_FRAGMENT_FIRST_USE = "EFF_FIRST_USE"
 
+    //Replaced by
     val newUserActivityFinished by JoozdlogSharedPreferenceDelegate(NEW_USER_ACTIVITY_FINISHED,false)
+
+    val previousVersion by JoozdlogSharedPreferenceDelegate(PREVIOUS_VERSION, Version.NEW_INSTALL)
     val editFlightFragmentWelcomeMessageShouldBeDisplayed by JoozdlogSharedPreferenceDelegate(EDIT_FLIGHT_FRAGMENT_FIRST_USE,true)
 
     /***********************

@@ -58,7 +58,12 @@ import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.ImportedLogbookAutoCompleter
 import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
 import nl.joozd.logbookapp.core.MessageCenter
+import nl.joozd.logbookapp.core.Migrations
+import nl.joozd.logbookapp.core.metadata.Version
+import nl.joozd.logbookapp.errors.errorDialog
 import nl.joozd.logbookapp.extensions.removeByTagAnimated
+import nl.joozd.logbookapp.extensions.showFragment
+import nl.joozd.logbookapp.ui.dialogs.UpdateMessageDialog
 import nl.joozd.logbookapp.utils.IntentHandler
 
 //TODO: Handle Scheduled Errors from ScheduledErrors
@@ -100,7 +105,7 @@ class MainActivity : JoozdlogActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startBackgroundTasks()
-        startNewUserActivityIfNewInstall()
+        checkIfNewInstallOrUpdated()
         val binding = (ActivityMainNewBinding.inflate(layoutInflater)).apply {
             setSupportActionBar(mainToolbar)
             makeFlightsList()
@@ -362,11 +367,15 @@ class MainActivity : JoozdlogActivity() {
     }
 
     private fun launchEditFlightFragment() {
+        showFragment<EditFlightFragment>(tag = EDIT_FLIGHT_FRAGMENT_TAG)
+        /*
         val eff = EditFlightFragment()
         supportFragmentManager.commit {
             add(R.id.mainActivityLayout, eff, EDIT_FLIGHT_FRAGMENT_TAG)
             addToBackStack(EDIT_FLIGHT_FRAGMENT_TAG)
         }
+
+         */
     }
 
     private fun getRedoMenuItem(menu: Menu) =
@@ -397,16 +406,47 @@ class MainActivity : JoozdlogActivity() {
         startActivity(Intent(this, SettingsActivity::class.java))
     }
 
-    private fun startNewUserActivityIfNewInstall() {
-        if (!Prefs.newUserActivityFinished.valueBlocking) // intentionally blocking. Could collect flow but then mainActivity would load before newUserActitivy
-            startActivity(Intent(this, NewUserActivity::class.java))
+    /*
+      intentionally blocking. Could collect flow but then mainActivity would load before newUserActivity.
+      Normally this is frowned upon, but as this ONLY happens when loading the app it just makes the load time a few millis longer
+      and doesn't make the app unresponsive.
+     */
+    // This checks if this is a new install (launches newUserActivity) or an upgrade (launches appropriate migration steps)
+    private fun checkIfNewInstallOrUpdated() {
+        updateLegacyVersionTrackingIfNeeded()
+
+        when(Prefs.previousVersion.valueBlocking) {
+            Version.NEW_INSTALL ->
+                startActivity(Intent(this, NewUserActivity::class.java))
+            Version.ALPACA -> {
+                Migrations().migrateToCurrent()
+                showUpdateMessageDialog()
+            }
+            Version.currentVersion ->
+                { /* do nothing */ }
+            else -> errorDialog("Version is incorrect: ${Prefs.previousVersion.valueBlocking}")
+
+
+        }
+    }
+
+    /*
+      intentionally blocking. Could collect flow but then mainActivity would load before newUserActivity.
+      Normally this is frowned upon, but as this ONLY happens when loading the app it just makes the load time a few millis longer
+      and doesn't make the app unresponsive.
+     */
+    private fun updateLegacyVersionTrackingIfNeeded(){
+        if (Prefs.previousVersion.valueBlocking == Version.NEW_INSTALL)
+            if (Prefs.newUserActivityFinished.valueBlocking)
+                Prefs.previousVersion.valueBlocking = Version.ALPACA
     }
 
     private fun showAboutDialog() {
-        supportFragmentManager.commit{
-            add(R.id.mainActivityLayout, AboutDialog())
-            addToBackStack(null)
-        }
+        showFragment<AboutDialog>()
+    }
+
+    private fun showUpdateMessageDialog(){
+        showFragment<UpdateMessageDialog>()
     }
 
     private fun showTransferActivity(){

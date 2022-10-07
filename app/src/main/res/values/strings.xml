@@ -408,6 +408,7 @@
     <string name="cannot_restore_password">Don\'t lose your password. You cannot restore it.</string>
     <string name="cloud_sync_terms">Cloud Sync terms</string>
     <string name="about">About Joozdlog</string>
+    <string name="whats_new">What\'s New</string>
     <string name="dont_use">Don\'t use</string>
     <string name="calendar_import">Calendar Import</string>
     <string name="calendar_import_description">You can automatically import flights into your logbook. The planned flights in Joozdlog will be synced to the calendar you pick.</string>
@@ -530,6 +531,7 @@
     <!-- ContentDescription strings -->
 
     <string name="joozdlog_logo">Joozdlog Logo</string>
+    <string name="placeholder">PLACEHOLDER_TEXT</string>
 </resources>
 
 

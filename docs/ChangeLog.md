@@ -1,11 +1,12 @@
-# 1.0: NO NAME
+# 1.0: (no name)
 - Minimum Viable Product
 
-# 1.1: ALPACA
+# 1.1: Alpaca
 - Switched from LiveData to Flow, 
 - many other improvements
 
-# 1.2: BEAVER
+# 1.2: Beaver
+### Name inspired by [post10](https://www.youtube.com/channel/UCsCNU-ptlze2tqAJSDeVGNQ)
 ##### Removed Cloud, causing lots of related changes
 - Started this changelog
 - No longer sync flights to/from Cloud

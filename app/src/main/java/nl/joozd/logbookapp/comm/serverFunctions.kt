@@ -125,18 +125,3 @@ private suspend fun sendEmailConfirmationCode(confirmationString: String, cloud:
     return cloud.confirmEmail(confirmationString).correspondingServerFunctionResult()
 }
 
-suspend fun migrateLoginDataIfNeeded(emailPrefs: EmailPrefs){
-    val userName = Prefs.username()
-    val emailAddress = emailPrefs.emailAddress()
-    val migrationNeeded =
-        userName != null
-            && emailAddress.isNotBlank()
-            && emailPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
-    if (migrationNeeded){
-        migrateEmail(userName!!, emailAddress)?.let{
-            Prefs.username(null)
-            emailPrefs.emailID(it)
-        }
-    }
-}
-

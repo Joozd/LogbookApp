@@ -2,7 +2,7 @@
 ### TODO BEFORE NEXT RELEASE
 - complete email
 - complete xfer (merge/replace)
-- imort logbook merge/replace
+- import logbook merge/replace
 
 ### TODO
 - error handling

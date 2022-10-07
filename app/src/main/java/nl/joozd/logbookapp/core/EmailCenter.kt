@@ -29,7 +29,10 @@ package nl.joozd.logbookapp.core
 import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import nl.joozd.joozdlogcommon.EmailData
+import nl.joozd.logbookapp.comm.migrateEmail
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.ui.utils.base64Decode
 
@@ -39,11 +42,11 @@ import nl.joozd.logbookapp.ui.utils.base64Decode
  * Flags are the business of TaskManager and workers. This only provides entries for the rest of the program to set something in motion.
  * It is allowed send messages to MessageCentre in case user needs to be made aware of something, or needs to make a decision for a real-time function.
  */
-class EmailCenter(private val taskFlags: TaskFlags = TaskFlags) {
+class EmailCenter(private val taskFlags: TaskFlags = TaskFlags, private val prefs: Prefs = Prefs, private val emailPrefs: EmailPrefs = EmailPrefs) {
 
     fun scheduleBackupEmail(){
 
-        TaskFlags.sendBackupEmail(true)
+        taskFlags.sendBackupEmail(true)
         TODO("""
             Check if email entered and verified, if not, schedule message through MessageCenter to take care of that (two options, not entered or not verified)            
             """)
@@ -62,8 +65,8 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags) {
     fun changeEmailAddress(newEmailAddress: String) {
         MainScope().launch {
             //sets are blocking to prevent race conditions with requestEmailVerificationMail()
-            EmailPrefs.emailVerified.setValue(false)
-            EmailPrefs.emailAddress.setValue(newEmailAddress)
+            emailPrefs.emailVerified.setValue(false)
+            emailPrefs.emailAddress.setValue(newEmailAddress)
             requestEmailVerificationMail()
         }
     }
@@ -85,12 +88,27 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags) {
 
 
     fun invalidateEmail(){
-        EmailPrefs.emailAddress("")
-        EmailPrefs.emailVerified(false)
+        emailPrefs.emailAddress("")
+        emailPrefs.emailVerified(false)
     }
 
     fun setEmailUnverified(){
-        EmailPrefs.emailVerified(false)
+        emailPrefs.emailVerified(false)
+    }
+
+    suspend fun migrateEmailDataIfNeeded(){
+        val userName = prefs.username()
+        val emailAddress = emailPrefs.emailAddress()
+        val migrationNeeded =
+            userName != null
+                    && emailAddress.isNotBlank()
+                    && emailPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
+        if (migrationNeeded){
+            migrateEmail(userName!!, emailAddress)?.let{
+                Prefs.username(null)
+                emailPrefs.emailID(it)
+            }
+        }
     }
 
     private fun verifyConfirmationString(confirmationString: String): Boolean =

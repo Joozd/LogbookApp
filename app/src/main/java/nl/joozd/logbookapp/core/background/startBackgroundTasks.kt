@@ -1,6 +1,7 @@
 package nl.joozd.logbookapp.core.background
 
-import androidx.lifecycle.lifecycleScope
+import nl.joozd.logbookapp.core.BackupCenter
+import nl.joozd.logbookapp.core.SyncCenter
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 
 /**

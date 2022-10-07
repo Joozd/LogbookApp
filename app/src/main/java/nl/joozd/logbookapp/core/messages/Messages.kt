@@ -1,7 +1,7 @@
 package nl.joozd.logbookapp.core.messages
 
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
+import nl.joozd.logbookapp.core.EmailCenter
 
 object Messages {
     val unknownOrUnverifiedEmailMessage = UserMessage.Builder().apply{

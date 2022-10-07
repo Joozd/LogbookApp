@@ -11,7 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.App
-import nl.joozd.logbookapp.core.background.BackupCenter
+import nl.joozd.logbookapp.core.BackupCenter
 import nl.joozd.logbookapp.databinding.ActivitySettingsBackupBinding
 import nl.joozd.logbookapp.extensions.getStringWithMakeup
 import nl.joozd.logbookapp.extensions.makeCsvSharingIntent

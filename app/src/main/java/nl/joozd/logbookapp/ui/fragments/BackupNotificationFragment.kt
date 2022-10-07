@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.background.BackupCenter
+import nl.joozd.logbookapp.core.BackupCenter
 import nl.joozd.logbookapp.core.Constants.ONE_DAY_IN_SECONDS
 import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
 import nl.joozd.logbookapp.databinding.FragmentGenericNotificationBinding

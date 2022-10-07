@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.core.background
+package nl.joozd.logbookapp.core
 
 import android.net.Uri
 import androidx.lifecycle.Lifecycle
@@ -11,11 +11,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
-import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.core.Constants.ONE_DAY_IN_SECONDS
 import nl.joozd.logbookapp.core.messages.MessageCenter
-import nl.joozd.logbookapp.core.TaskFlags
-import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
 import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs

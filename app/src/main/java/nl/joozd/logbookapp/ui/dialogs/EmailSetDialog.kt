@@ -9,7 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
+import nl.joozd.logbookapp.core.EmailCenter
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.databinding.DialogSetEmailBinding
 import nl.joozd.logbookapp.extensions.getColorFromAttr

@@ -24,12 +24,11 @@
  *      - This makes sure you can't get spammed by somebody else if your email is registered
  *          (your ID + email address is only known locally, your ID + email hash+salt on server so they can be matched)
  */
-package nl.joozd.logbookapp.core.emailFunctions
+package nl.joozd.logbookapp.core
 
 import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.ui.utils.base64Decode

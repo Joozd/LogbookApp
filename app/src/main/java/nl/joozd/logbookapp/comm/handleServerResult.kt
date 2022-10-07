@@ -2,12 +2,9 @@ package nl.joozd.logbookapp.comm
 
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsResponses
 import nl.joozd.logbookapp.core.messages.MessageCenter
-import nl.joozd.logbookapp.core.emailFunctions.EmailCenter
+import nl.joozd.logbookapp.core.EmailCenter
 import nl.joozd.logbookapp.core.messages.Messages
 import nl.joozd.logbookapp.exceptions.CloudException
-
-fun handleServerResult(serverResult: ByteArray?) = handleServerResult(serverResult?.toString())
-
 fun handleServerResult(serverResult: String?): CloudFunctionResult? =
     when(JoozdlogCommsResponses.from(serverResult?: JoozdlogCommsResponses.CONNECTION_ERROR.keyword)){
         JoozdlogCommsResponses.OK -> CloudFunctionResult.OK

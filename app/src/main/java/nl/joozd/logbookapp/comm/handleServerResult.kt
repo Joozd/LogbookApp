@@ -30,7 +30,7 @@ fun handleServerResultAndThrowExceptionOnError(serverResult: String?){
 }
 
 fun handleServerResultAndThrowExceptionOnError(serverResult: ByteArray?) =
-    handleServerResultAndThrowExceptionOnError(serverResult.toString())
+    handleServerResultAndThrowExceptionOnError(serverResult?.toString())
 
 private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
     EmailCenter().setEmailUnverified()

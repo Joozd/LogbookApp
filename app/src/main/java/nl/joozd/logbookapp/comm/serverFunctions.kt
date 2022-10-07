@@ -23,16 +23,15 @@ import java.time.Instant
  *      (if emailID was not set this will be a new one, if not it will probably stay the same)
  * - on failure, will schedule an update and throw a [CloudException]
  */
-suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), serverPrefs: EmailPrefs = EmailPrefs) {
-    val emailAddress = serverPrefs.emailAddress()
+suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), emailPrefs: EmailPrefs = EmailPrefs) {
+    val emailAddress = emailPrefs.emailAddress()
     try {
         cloud.sendNewEmailAddress(emailAddress)?.let {
-            serverPrefs.emailID(it)
-            serverPrefs.emailVerified(false)
+            emailPrefs.emailID(it)
+            emailPrefs.emailVerified(false)
         }
     } catch( e: CloudException){
         TaskFlags.updateEmailWithServer(true)
-        throw(e)
     }
     TaskFlags.updateEmailWithServer(false)
 }
@@ -68,7 +67,6 @@ suspend fun migrateEmail(username: String, emailAddress: String, cloud: Cloud = 
 suspend fun sendBackupMailThroughServer(
     cloud: Cloud = Cloud()
 ){
-    migrateLoginDataIfNeeded()
     val backupEmailData = generateBackupEmailData()
     try{
         cloud.sendBackupMailThroughServer(backupEmailData)
@@ -126,22 +124,18 @@ private suspend fun sendEmailConfirmationCode(confirmationString: String, cloud:
     return cloud.confirmEmail(confirmationString).correspondingServerFunctionResult()
 }
 
-private suspend fun migrateLoginDataIfNeeded(){
+suspend fun migrateLoginDataIfNeeded(emailPrefs: EmailPrefs){
     val userName = Prefs.username()
-    val emailAddress = EmailPrefs.emailAddress()
+    val emailAddress = emailPrefs.emailAddress()
     val migrationNeeded =
         userName != null
             && emailAddress.isNotBlank()
-            && EmailPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
+            && emailPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
     if (migrationNeeded){
         migrateEmail(userName!!, emailAddress)?.let{
             Prefs.username(null)
-            EmailPrefs.emailID(it)
+            emailPrefs.emailID(it)
         }
-    }
-    val creationNeeded = EmailPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
-    if (creationNeeded){
-        updateEmailAddressOnServer()
     }
 }
 

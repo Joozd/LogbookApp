@@ -34,7 +34,7 @@ class BackupCenter private constructor(private val emailCenter: EmailCenter = Em
     fun makeOrScheduleBackupNotification(activity: JoozdlogActivity) {
         activity.lifecycleScope.launch {
             activity.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                backupActionFlow.collect { backupAction ->
+                backupActionFlow().collect { backupAction ->
                     when (backupAction) {
                         is BackupAction.NOTIFY -> {
                             if (backupAction.emailNeeded) {
@@ -68,7 +68,7 @@ class BackupCenter private constructor(private val emailCenter: EmailCenter = Em
 
     }
 
-    private val backupActionFlow: Flow<BackupAction> =
+    private fun backupActionFlow(): Flow<BackupAction> =
         combine(BackupPrefs.nextBackupNeededFlow, TaskFlags.sendBackupEmail.flow, backupEmailEnabledFlow()) {
             backupNeededAt, emailBackupAlreadyScheduled, emailBackupEnabled ->
                 val backupOverdueBy = Instant.now().epochSecond - backupNeededAt

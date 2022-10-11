@@ -53,6 +53,8 @@ object Prefs: JoozdLogPreferences() {
     private const val BACKUP_INTERVAL = "BACKUP_INTERVAL"
     private const val BACKUP_FROM_CLOUD = "BACKUP_FROM_CLOUD"
 
+    // Number of days after which to send an email or a reminder
+    // 0 means don't remind me to make backups, don't send me emails
     val backupInterval by JoozdlogSharedPreferenceDelegate(BACKUP_INTERVAL,14)
     val sendBackupEmails by JoozdlogSharedPreferenceDelegate(BACKUP_FROM_CLOUD,false)
 

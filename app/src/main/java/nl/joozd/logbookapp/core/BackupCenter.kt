@@ -27,15 +27,21 @@ import java.time.LocalDate
  * Takes care of all things backup that need to be done in background.
  */
 class BackupCenter private constructor(private val emailCenter: EmailCenter = EmailCenter()) {
-    /**
+    /*
      * This will trigger again when relevant preferences are updated
      * @see backupActionFlow for which preferences are monitored.
      */
+    // This checks to see what kind of action is needed:
+    // - Send a backup email
+    // - notify user
+    // - schedule a backup email
+    // - do nothing
     fun makeOrScheduleBackupNotification(activity: JoozdlogActivity) {
         activity.lifecycleScope.launch {
             activity.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 backupActionFlow().collect { backupAction ->
                     when (backupAction) {
+                        is BackupAction.DISABLED -> { /* do nothing */ }
                         is BackupAction.NOTIFY -> {
                             if (backupAction.emailNeeded) {
                                 /*
@@ -71,6 +77,7 @@ class BackupCenter private constructor(private val emailCenter: EmailCenter = Em
     private fun backupActionFlow(): Flow<BackupAction> =
         combine(BackupPrefs.nextBackupNeededFlow, TaskFlags.sendBackupEmail.flow, backupEmailEnabledFlow()) {
             backupNeededAt, emailBackupAlreadyScheduled, emailBackupEnabled ->
+                if(backupNeededAt == null) return@combine BackupAction.DISABLED
                 val backupOverdueBy = Instant.now().epochSecond - backupNeededAt
                 when {
                     backupNotificationNeeded(emailBackupEnabled, backupOverdueBy) -> BackupAction.NOTIFY(
@@ -113,6 +120,7 @@ class BackupCenter private constructor(private val emailCenter: EmailCenter = Em
 
     private sealed interface BackupAction {
         object EMAIL: BackupAction
+        object DISABLED: BackupAction
         class NOTIFY(val emailNeeded: Boolean): BackupAction
         class SCHEDULE(val delay: Long): BackupAction
     }

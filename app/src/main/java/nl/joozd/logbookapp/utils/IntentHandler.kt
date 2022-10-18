@@ -63,14 +63,11 @@ class IntentHandler(intent: Intent) {
         INVALID;
 
         companion object {
+            private const val INTENT_VERIFY_EMAIL_PATH = "verify-email"
             fun ofUri(uri: Uri?): IntentType = when (uri?.pathSegments?.firstOrNull()) {
                 INTENT_VERIFY_EMAIL_PATH -> EMAIL_VERIFICATION_LINK
                 else -> INVALID
             }
         }
-    }
-
-    companion object{
-        private const val INTENT_VERIFY_EMAIL_PATH = "verify-email"
     }
 }

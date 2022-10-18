@@ -36,17 +36,16 @@ On a daily basis, check if an email is entered but not verified. If not, prompt 
 (either resend email address to server and verify it, or remove email from EmailPrefs.)
 
 ## TODO
-- Completely rewrite all email creation logic and UI    
-    - email cofirmation (can steal old method)
-- Handle all server email errors automatically in [handleServerResult](../../app/src/main/java/nl/joozd/logbookapp/comm/handleServerResult.kt)
-    - Messages to user. Can be proper android push-like messages? 
-- Complete this TODO list
+- Check and complete server side
 
 ## DONE
-
+- confirmation string stuff
 - Migrate data from old username+key system to EmailID system
 - Write function for sending backup mail
 - Remove all old Email related stuff
 - New Email entry (dialog + logic)
 - checkbox in Settings for email backup function, launches email entry dialog if not entered yet, launches a dialog when not confirmed yet. 
+- Handle all server email errors automatically in [handleServerResult](../../app/src/main/java/nl/joozd/logbookapp/comm/handleServerResult.kt)
+  - Notify user through MessageCenter
+  - handled errors are EMAIL_NOT_KNOWN_OR_VERIFIED and NOT_A_VALID_EMAIL_ADDRESS
     

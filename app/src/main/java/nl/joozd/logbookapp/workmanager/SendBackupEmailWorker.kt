@@ -6,14 +6,17 @@ import androidx.work.WorkerParameters
 import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.comm.CloudFunctionResult
 import nl.joozd.logbookapp.comm.sendBackupMailThroughServer
+import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.exceptions.CloudException
 
-class SendBackupEmailWorker(appContext: Context, workerParams: WorkerParameters, private val cloud: Cloud = Cloud())
+// Primary constructor has injectable Cloud and TaskFlags for testing purposes.
+class SendBackupEmailWorker(appContext: Context, workerParams: WorkerParameters, private val cloud: Cloud = Cloud(), private val taskFlags: TaskFlags = TaskFlags)
     : CoroutineWorker(appContext, workerParams) {
-    constructor(appContext: Context, workerParams: WorkerParameters): this(appContext, workerParams, Cloud()) // constructor needed to instantiate as a Worker
+    constructor(appContext: Context, workerParams: WorkerParameters): this(appContext, workerParams, Cloud(), TaskFlags) // constructor needed to instantiate as a Worker
     override suspend fun doWork(): Result =
         try{
             sendBackupMailThroughServer(cloud)
+            taskFlags.sendBackupEmail(false)
             Result.success()
         } catch (e: CloudException){
             when(e.cloudFunctionResult){

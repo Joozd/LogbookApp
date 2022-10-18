@@ -57,24 +57,18 @@ suspend fun migrateEmail(username: String, emailAddress: String, cloud: Cloud = 
     cloud.migrateEmailData(username, emailAddress)
 
 /*
- * Sending a mail is normally done from a worker, which is triggered by a TaskFlag.
+ * Sending a mail is normally done from a worker, which is triggered by TaskFlags.sendBackupEmail.
  * In case there are no (or bad) email data set, server will reply with NOT_A_VALID_EMAIL_ADDRESS, for which Cloud will schedule a dialog through MessageCenter.
  * In case the email data is not yet confirmed or registered, server will reply EMAIL_NOT_KNOWN_OR_VERIFIED for which Cloud will schedule a dialog as well.
- * In both cases, the TaskFlag will be left alone and Cloud will schedule things so that when email is verified,
- *  so the worker will run again when the email address has been verified.
+ * In both cases, as long as TaskFlags.sendBackupEmail remains true, a new attempt should be scheduled by TaskDispatcher when the problem is solved.
  *
- * migrateLoginDataIfNeeded() will make sure email data is migrated on the server to the emailID system, from the userName system.
+ * If an email was successfully sent, BackupPrefs.mostRecentBackup will be set to now.
  */
 suspend fun sendBackupMailThroughServer(
     cloud: Cloud = Cloud()
 ){
     val backupEmailData = generateBackupEmailData()
-    try{
-        cloud.sendBackupMailThroughServer(backupEmailData)
-    } catch (e: CloudException){
-        return
-    }
-    TaskFlags.sendBackupEmail(false)
+    cloud.sendBackupMailThroughServer(backupEmailData)
     BackupPrefs.mostRecentBackup(Instant.now().epochSecond)
 }
 

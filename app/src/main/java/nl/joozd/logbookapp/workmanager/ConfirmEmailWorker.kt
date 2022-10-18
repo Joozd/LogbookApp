@@ -18,9 +18,10 @@ class ConfirmEmailWorker(appContext: Context, workerParams: WorkerParameters, pr
     override suspend fun doWork(): Result = withContext(DispatcherProvider.io()) {
         getEmailConfirmationStringWaitingOrNull()?.let{ confirmationString ->
             return@withContext confirmEmail(confirmationString, cloud).also{
-                if (it.isOK())
+                if (it.isOK()) {
                     resetEmailCodeVerificationFlag()
                     MessagesWaiting.emailConfirmed(true)
+                }
             }.toListenableWorkerResult()
         }
         // Fallback, this should not happen.

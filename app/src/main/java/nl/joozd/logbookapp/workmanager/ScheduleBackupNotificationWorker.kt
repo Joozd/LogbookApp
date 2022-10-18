@@ -12,7 +12,7 @@ import java.time.Instant
 class ScheduleBackupNotificationWorker(appContext: Context, workerParams: WorkerParameters)
     : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
-        if (BackupPrefs.nextBackupNeededFlow.first() >= Instant.now().epochSecond) // check if still needed
+        if ((BackupPrefs.nextBackupNeededFlow.first() ?: 0) >= Instant.now().epochSecond) // check if still needed
             MessageCenter.pushMessageBarFragment(BackupNotificationFragment())
         return Result.success()
     }

@@ -68,20 +68,8 @@ class EditFlightFragment: JoozdlogFragment() {
             setOnFocusChangedListeners()
             startFlowCollectors()
             catchAndIgnoreClicksOnEmptyPartOfDialog()
-
-
-
         }
         return binding.root
-    }
-
-    private fun clearFocus() {
-        activity?.currentFocus?.clearFocus()
-    }
-
-    private fun toastNotImplementedYet() {
-        clearFocus()
-        toast("Not implemented yet!")
     }
 
     private fun LayoutEditFlightFragmentBinding.setDialogTitle() {
@@ -203,6 +191,7 @@ class EditFlightFragment: JoozdlogFragment() {
         flightFlightNumberSelector.setOnClickListener { toastNotImplementedYet() }
 
         //also: this might not work after rotation etc
+        //TODO check the comment above
         flightOrigSelector.setOnClickListener { showOrigPicker() }
         flightDestSelector.setOnClickListener { showDestPicker() }
         flighttOutSelector.setOnClickListener(makeLaunchTimePickerOnClickListener())
@@ -221,6 +210,15 @@ class EditFlightFragment: JoozdlogFragment() {
         simTakeoffLandingSelector.setOnClickListener { launchLandingsDialog() }
         simNamesSelectorLeft.setOnClickListener { launchName2Dialog() }
         simNamesSelectorRight.setOnClickListener { launchName2Dialog() }
+    }
+
+    private fun clearFocus() {
+        activity?.currentFocus?.clearFocus()
+    }
+
+    private fun toastNotImplementedYet() {
+        clearFocus()
+        toast("Not implemented yet!")
     }
 
     private fun makeLaunchDateDialogOnClickListener() = View.OnClickListener {
@@ -252,6 +250,7 @@ class EditFlightFragment: JoozdlogFragment() {
         clearFocus()
         requireActivity().showFragment<PicNameDialog>()
     }
+
     // Launch dialog to edit name(s) for other crew
     private fun launchName2Dialog() {
         clearFocus()
@@ -282,68 +281,66 @@ class EditFlightFragment: JoozdlogFragment() {
     private fun LayoutEditFlightFragmentBinding.setOnFocusChangedListeners() {
         // flightDateField has an onClickListener, not an onFocusChanged as it always uses dialog
 
+        // this one uses setOnFocusChangeListener als it also has an action when focus is gained.
         flightFlightNumberField.setOnFocusChangeListener { _, hasFocus ->
             flightFlightNumberField.handleFlightNumberFocusChanged(hasFocus)
         }
 
-        flightOrigEditText.setOnFocusChangeListener { _, hasFocus ->
-            flightOrigEditText.handleOrigFocusChanged(hasFocus)
+        flightOrigEditText.setOnFocusLostListener {
+            viewModel.setOrig(it.text?.toString())
         }
 
-        flightDestEditText.setOnFocusChangeListener { _, hasFocus ->
-            flightDestEditText.handleDestFocusChanged(hasFocus)
+        flightDestEditText.setOnFocusLostListener {
+            viewModel.setDest(it.text?.toString())
         }
 
-        flightTimeOutEditText.setOnFocusChangeListener { _, hasFocus ->
-            flightTimeOutEditText.handleTimeOutFocusChanged(hasFocus)
+        flightTimeOutEditText.setOnFocusLostListener {
+            viewModel.setTimeOut(it.text?.toString())
         }
 
-        flightTimeInEditText.setOnFocusChangeListener { _, hasFocus ->
-            flightTimeInEditText.handleTimeInFocusChanged(hasFocus)
+        flightTimeInEditText.setOnFocusLostListener {
+            viewModel.setTimeIn(it.text?.toString())
         }
 
-        flightAircraftField.setOnFocusChangeListener { _, hasFocus ->
-            flightAircraftField.handleAircraftFocusChanged(hasFocus)
+        flightAircraftField.setOnFocusLostListener {
+            viewModel.setRegAndType(it.text?.toString())
         }
 
-        flightTakeoffLandingField.setOnFocusChangeListener { _, hasFocus ->
-            flightTakeoffLandingField.handleTakeoffLandingFocusChanged(hasFocus)
+        flightTakeoffLandingField.setOnFocusLostListener {
+            viewModel.setTakeoffLandings(it.text?.toString())
         }
 
-        flightNameField.setOnFocusChangeListener { _, hasFocus ->
-            flightNameField.handleNameFocusChanged(hasFocus)
+        flightNameField.setOnFocusLostListener {
+            viewModel.setName(it.text?.toString())
         }
 
-        flightName2Field.setOnFocusChangeListener { _, hasFocus ->
-            flightName2Field.handleNamesFieldFocusChanged(hasFocus)
+        flightName2Field.setOnFocusLostListener {
+            viewModel.setName2(it.text?.toString())
         }
 
-        flightRemarksField.setOnFocusChangeListener { _, hasFocus ->
-            flightRemarksField.handleRemarksFieldFocusChanged(hasFocus)
+        flightRemarksField.setOnFocusLostListener {
+            viewModel.setRemarks(it.text?.toString())
         }
 
-
-        simTimeField.setOnFocusChangeListener { _, hasFocus ->
-            simTimeField.handleSimTimeFocusChanged(hasFocus)
+        simTimeField.setOnFocusLostListener {
+            viewModel.setSimTime(it.text?.toString())
         }
 
-        simAircraftField.setOnFocusChangeListener { _, hasFocus ->
-            simAircraftField.handleSimAircraftFieldFocusChanged(hasFocus)
+        simAircraftField.setOnFocusLostListener {
+            viewModel.setSimAircraft(it.text?.toString())
         }
 
-        simTakeoffLandingsField.setOnFocusChangeListener { _, hasFocus ->
-            simTakeoffLandingsField.handleSimTakeoffLandingsFieldFocusChanged(hasFocus)
+        simTakeoffLandingsField.setOnFocusLostListener {
+            viewModel.setTakeoffLandings(it.text?.toString())
         }
 
-        simNamesField.setOnFocusChangeListener { _, hasFocus ->
-            simNamesField.handleNamesFieldFocusChanged(hasFocus)
+        simNamesField.setOnFocusLostListener {
+            viewModel.setName2(it.text?.toString())
         }
 
-        simRemarksField.setOnFocusChangeListener { _, hasFocus ->
-            simRemarksField.handleRemarksFieldFocusChanged(hasFocus)
+        simRemarksField.setOnFocusLostListener {
+            viewModel.setRemarks(it.text?.toString())
         }
-
-        simAircraftField
     }
 
     //This one either sends entered data to viewModel when focus lost,
@@ -359,67 +356,6 @@ class EditFlightFragment: JoozdlogFragment() {
             previousEntry = text.toString()
             removeTrailingDigits()
         }
-    }
-
-    private fun EditText.handleOrigFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setOrig(text?.toString())
-    }
-
-    private fun EditText.handleDestFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setDest(text?.toString())
-    }
-
-
-    private fun EditText.handleTimeOutFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setTimeOut(text?.toString())
-    }
-
-    private fun EditText.handleTimeInFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setTimeIn(text?.toString())
-    }
-
-    private fun EditText.handleAircraftFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setRegAndType(text?.toString())
-    }
-
-    private fun EditText.handleTakeoffLandingFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setTakeoffLandings(text?.toString())
-    }
-
-    private fun EditText.handleNameFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setName(text?.toString())
-    }
-
-    private fun EditText.handleNamesFieldFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setName2(text?.toString())
-    }
-
-    private fun EditText.handleRemarksFieldFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setRemarks(text?.toString())
-    }
-
-    private fun EditText.handleSimTimeFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setSimTime(text?.toString())
-    }
-
-    private fun EditText.handleSimAircraftFieldFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setSimAircraft(text?.toString())
-    }
-
-    private fun EditText.handleSimTakeoffLandingsFieldFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            viewModel.setTakeoffLandings(text?.toString())
     }
 
 

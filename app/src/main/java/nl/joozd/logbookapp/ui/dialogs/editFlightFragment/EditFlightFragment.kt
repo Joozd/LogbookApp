@@ -41,7 +41,6 @@ import nl.joozd.logbookapp.model.viewmodels.fragments.NewEditFlightFragmentViewM
 import nl.joozd.logbookapp.ui.adapters.AircraftAutoCompleteAdapter
 import nl.joozd.logbookapp.ui.dialogs.*
 import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.aircraftPicker.AircraftPicker
-import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.aircraftPicker.BaseAircraftPicker
 import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.aircraftPicker.SimTypePicker
 import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.airportPicker.DestPicker
 import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.airportPicker.OrigPicker
@@ -226,9 +225,10 @@ class EditFlightFragment: JoozdlogFragment() {
 
     private fun makeLaunchDateDialogOnClickListener() = View.OnClickListener {
         clearFocus()
+
         supportFragmentManager.commit {
             add(
-                R.id.mainActivityLayout,
+                android.R.id.content,
                 LocalDatePickerDialog().apply { selectedDate = viewModel.localDate },
                 "datePicker"
             )
@@ -239,72 +239,44 @@ class EditFlightFragment: JoozdlogFragment() {
     private fun makeLaunchTimePickerOnClickListener() = View.OnClickListener {
         clearFocus()
         // Get timePicker dialog, update flight in that dialog.
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, TimePicker())
-            addToBackStack(null)
-        }
+        requireActivity().showFragment<TimePicker>()
     }
 
     private fun launchSignatureDialog() {
         clearFocus()
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, SignatureDialog())
-            addToBackStack(null)
-        }
+        requireActivity().showFragment<SignatureDialog>()
     }
 
     // Launch dialog to edit name for PIC
     private fun launchName1Dialog() {
         clearFocus()
-        supportFragmentManager.commit {
-            add(
-                R.id.mainActivityLayout,
-                PicNameDialog()
-            )
-            addToBackStack(null)
-        }
+        requireActivity().showFragment<PicNameDialog>()
     }
     // Launch dialog to edit name(s) for other crew
     private fun launchName2Dialog() {
         clearFocus()
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, Name2Dialog())
-            addToBackStack(null)
-        }
+        requireActivity().showFragment<Name2Dialog>()
     }
 
     private fun launchLandingsDialog() {
         clearFocus()
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, LandingsDialog())
-            addToBackStack(null)
-        }
+        requireActivity().showFragment<LandingsDialog>()
     }
 
     private fun launchSimOrAircraftPicker() {
         clearFocus()
-        val picker: BaseAircraftPicker = if (viewModel.isSim) SimTypePicker() else AircraftPicker()
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, picker)
-            addToBackStack(null)
-        }
+        if (viewModel.isSim) requireActivity().showFragment<SimTypePicker>()
+        else requireActivity().showFragment<AircraftPicker>()
     }
 
     private fun showDestPicker() {
         clearFocus()
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, DestPicker())
-            addToBackStack(null)
-        }
+        requireActivity().showFragment<DestPicker>()
     }
 
     private fun showOrigPicker() {
         clearFocus()
-        supportFragmentManager.commit {
-            //It's okay to have a parameter in this fragment constructor (see [AirportPicker])
-            add(R.id.mainActivityLayout, OrigPicker())
-            addToBackStack(null)
-        }
+        requireActivity().showFragment<OrigPicker>()
     }
 
     private fun LayoutEditFlightFragmentBinding.setOnFocusChangedListeners() {

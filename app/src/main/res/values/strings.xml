@@ -375,7 +375,7 @@
     <string name="importing_complete_logbook">Importing complete logbook</string>
     <string name="importing_complete_logbook_long">Do you want to delete and replace your current logbook, or merge it?</string>
     <string name="are_you_sure_qmk">Are you sure?</string>
-    <string name="this_will_replace_your_entire_logbook">This will replace your entire logbook, and might not be undoable. If you are using Cloud function this will also create a new Cloud account as it can cause problems when synchronizing multiple devices. Please make sure you really want this, and always have a backup of your current data!</string>
+    <string name="this_will_replace_your_entire_logbook">This will replace your entire logbook, and can NOT be undone. Please make sure you really want this, and always have a backup of your current data!</string>
     <string name="this_will_enter_all_flights_into_logbook">This will place all imported flights into your logbook, and might not be undoable. Please make sure you really want this, and always have a backup of your current data!</string>
     <string name="replace_or_merge">Replace or merge?</string>
     <string name="replace_or_merge_long">Do you want to replace all flights by incoming flights, or merge them? NOTE: This cannot be undone!</string>
@@ -532,6 +532,9 @@
 
     <string name="joozdlog_logo">Joozdlog Logo</string>
     <string name="placeholder">PLACEHOLDER_TEXT</string>
+    <string name="send">Send</string>
+    <string name="receive">Receive</string>
+    <string name="qr_code">QR code</string>
 </resources>
 
 

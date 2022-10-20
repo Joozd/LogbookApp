@@ -11,13 +11,11 @@ import com.journeyapps.barcodescanner.ScanIntentResult
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import nl.joozd.comms.Client
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.comm.Cloud
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithSpecializedFunctions
 import nl.joozd.logbookapp.databinding.ActivitySharingBinding
 import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.logbookapp.model.dataclasses.Flight
@@ -32,6 +30,8 @@ import nl.joozd.serializing.unpackSerialized
 
 
 class SharingActivity : JoozdlogActivity() {
+    // using a property because I don't know how to pass a parameter to [qrCodeReaderLauncher] and am too lazy to find out.
+    // It's not too complicated so it's fine for now.
     private var replace: Boolean? = null
 
 
@@ -73,9 +73,7 @@ class SharingActivity : JoozdlogActivity() {
 
     private fun ActivitySharingBinding.sendButtonClicked() {
         lifecycleScope.launch {
-            println("GETTING DATA")
             val data = withContext(DispatcherProvider.default()) { packSerializable(FlightRepository.instance.getAllFlights().map { it.toBasicFlight() }) }
-            println("DATA PACKED (${data.size} bytes)")
             val key = "NO KEY".toByteArray()
             //TODO encrypt data with key
             val id: Long = try{
@@ -85,15 +83,12 @@ class SharingActivity : JoozdlogActivity() {
                 //TODO feedback reason of failure or something to user
                 return@launch
             }
-            println("ID: $id")
             val p2pData = P2PSessionMetaData(id, key)
             makeQRCodeFromStringAndPutInImageView(
                 qrCodeImageView,
                 QRFunctions.makeJsonStringWithAction(ACTION_IDENTIFIER_XFER, *p2pData.keyDataPairs)
             )
             qrCodeImageView.visibility = View.VISIBLE
-
-
         }
     }
 
@@ -126,6 +121,7 @@ class SharingActivity : JoozdlogActivity() {
 
         if (replace == true) {
             FlightRepositoryWithDirectAccess.instance.apply {
+                println("Replacing all flights!!!!! zOMG")
                 clear()
                 save(unpackFlights(receivedData))
             }
@@ -133,7 +129,6 @@ class SharingActivity : JoozdlogActivity() {
         else {
             toast("Not supported yet")
         }
-
     }
 
     private suspend fun unpackFlights(receivedData: ByteArray) =
@@ -144,13 +139,12 @@ class SharingActivity : JoozdlogActivity() {
                 }
         }
 
-
     private fun ActivitySharingBinding.askMergeOrReplaceThenLaunchScanner(){
         AlertDialog.Builder(activity).apply{
             setTitle(R.string.replace_or_merge)
             setMessage(R.string.replace_or_merge_long)
             setPositiveButton(R.string.replace){ _, _ ->
-                replace = true
+                showAreYouSureYouWantToReplaceDialog()
                 launchQRCodeLauncher()
             }
             setNegativeButton(R.string.merge){ _, _ ->
@@ -161,6 +155,20 @@ class SharingActivity : JoozdlogActivity() {
                 showButtons()
             }
         }.create().show()
+    }
+
+    private fun ActivitySharingBinding.showAreYouSureYouWantToReplaceDialog(){
+        AlertDialog.Builder(activity).apply{
+            setTitle(R.string.are_you_sure_qmk)
+            setMessage(R.string.this_will_replace_your_entire_logbook)
+            setPositiveButton(android.R.string.ok){ _, _ ->
+                replace = true
+                launchQRCodeLauncher()
+            }
+            setNegativeButton(android.R.string.cancel){ _, _ ->
+                showButtons()
+            }
+        }
     }
 
     companion object{

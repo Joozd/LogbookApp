@@ -1,7 +1,5 @@
 package nl.joozd.logbookapp.data.calendar
 
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.importing.matchesFlightnumberTimeOrigAndDestWith
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
@@ -12,11 +10,6 @@ import nl.joozd.logbookapp.core.messages.UserMessage
 import java.time.Instant
 
 object CalendarControl {
-    private fun setMessage(m: UserMessage) {
-        MessageCenter.pushMessage(m)
-    }
-
-
     /**
      * true if changing one flight to another will make changes that calendar sync will overwrite
      */
@@ -25,16 +18,16 @@ object CalendarControl {
 
     /**
      * If a flight has been manually saved, this checks if CalendarSync causes a conflict.
-     * If so, it puts a UserMessage in [MessageCenter]
+     * If so, it postpones calendarSync for a flight that already departed, or puts a UserMessage in [MessageCenter]
      */
     suspend fun handleManualFlightSave(flight: Flight){
         if (flight.causesConflictWithCalendar())
-            setMessage(makeCalendarConflictMessage(flight, CalendarConflict.EDITING_FLIGHT_IN_PERIOD))
+            handleCalendarConflict(flight)
     }
 
     suspend fun handleManualDelete(flight: Flight) {
         if (flight.causesConflictWithCalendar())
-            setMessage(makeCalendarConflictMessage(flight, CalendarConflict.DELETING_FLIGHT_IN_PERIOD))
+            makeCalendarDeleteConflictMessage(flight)
     }
 
     private suspend fun Flight.causesConflictWithCalendar(): Boolean =
@@ -43,34 +36,27 @@ object CalendarControl {
                 && timeIn > Prefs.calendarDisabledUntil()
                 && timeIn > Instant.now().epochSecond
 
+    private fun makeCalendarDeleteConflictMessage(flight: Flight) =
+        makeCalendarConflictMessage(flight.timeIn, R.string.delete_calendar_flight)
 
-    private fun makeCalendarConflictMessage(flight: Flight, reason: CalendarConflict): UserMessage {
-        val time = flight.timeIn
-        return when (reason){
-            CalendarConflict.EDITING_FLIGHT_IN_PERIOD ->
-                makeCalendarConflictMessage(time, R.string.calendar_sync_edited_flight)
-            CalendarConflict.DELETING_FLIGHT_IN_PERIOD ->
-                makeCalendarConflictMessage(time, R.string.delete_calendar_flight)
-        }
+    // This should only receive a conflicting flight.
+    private fun handleCalendarConflict(flight: Flight) = with (flight) {
+        if (timeOut <= Instant.now().epochSecond) // If this flight already departed
+            Prefs.calendarDisabledUntil(timeIn + 1) // disable calendarSync until after this flight
+        else
+            makeCalendarConflictMessage(flight.timeIn, R.string.calendar_sync_edited_flight)
     }
 
-
-    private fun makeCalendarConflictMessage(time: Long, msg: Int): UserMessage =
-        UserMessage.Builder().apply{
-            titleResource = R.string.calendar_sync_conflict
-            descriptionResource = msg
-            setPositiveButton(android.R.string.ok) {
-                MainScope().launch {
+    private fun makeCalendarConflictMessage(time: Long, msg: Int) {
+        MessageCenter.pushMessage(
+            UserMessage.Builder().apply {
+                titleResource = R.string.calendar_sync_conflict
+                descriptionResource = msg
+                setPositiveButton(android.R.string.ok) {
                     Prefs.calendarDisabledUntil(time + 1)
                 }
-            }
-            setNegativeButton(R.string.ignore){ /* intentionally left blank */ }
-        }.build()
-
-    private enum class CalendarConflict{
-        EDITING_FLIGHT_IN_PERIOD,
-        DELETING_FLIGHT_IN_PERIOD
+                setNegativeButton(R.string.ignore) { /* intentionally left blank */ }
+            }.build()
+        )
     }
-
-
 }

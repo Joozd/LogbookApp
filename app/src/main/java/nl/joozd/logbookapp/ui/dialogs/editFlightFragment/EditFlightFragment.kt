@@ -26,7 +26,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import com.google.android.material.textfield.TextInputEditText
 import nl.joozd.logbookapp.R
@@ -109,10 +108,7 @@ class EditFlightFragment: JoozdlogFragment() {
         simSignSelector             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sign_help) }
     }
     private fun showHelpMessage(message: Int): Boolean{
-        supportFragmentManager.commit {
-            add(R.id.editFlightFragmentBackground, MessageDialog.make(message))
-            addToBackStack(null)
-        }
+        requireActivity().showFragment(MessageDialog.make(message))
         return true
     }
 
@@ -223,15 +219,9 @@ class EditFlightFragment: JoozdlogFragment() {
 
     private fun makeLaunchDateDialogOnClickListener() = View.OnClickListener {
         clearFocus()
-
-        supportFragmentManager.commit {
-            add(
-                android.R.id.content,
-                LocalDatePickerDialog().apply { selectedDate = viewModel.localDate },
-                "datePicker"
-            )
-            addToBackStack(null)
-        }
+        requireActivity().showFragment(
+            LocalDatePickerDialog().apply { selectedDate = viewModel.localDate }
+        )
     }
 
     private fun makeLaunchTimePickerOnClickListener() = View.OnClickListener {

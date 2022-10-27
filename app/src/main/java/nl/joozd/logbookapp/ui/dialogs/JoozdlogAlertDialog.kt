@@ -32,6 +32,7 @@ import androidx.fragment.app.commit
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogJoozdlogFourButtonBinding
 import nl.joozd.logbookapp.databinding.DialogJoozdlogTwoButtonBinding
+import nl.joozd.logbookapp.extensions.showFragment
 
 
 /**
@@ -112,10 +113,7 @@ class JoozdlogAlertDialog: Fragment() {
 
     fun show(context: FragmentActivity, tag: String = JOOZDLOG_DIALOG_TAG, block: JoozdlogAlertDialog.() -> Unit = {}): JoozdlogAlertDialog {
         this.block()
-
-        context.supportFragmentManager.commit{
-            add(android.R.id.content,this@JoozdlogAlertDialog, tag)
-        }
+        context.showFragment(this, tag = tag)
         return this
     }
 

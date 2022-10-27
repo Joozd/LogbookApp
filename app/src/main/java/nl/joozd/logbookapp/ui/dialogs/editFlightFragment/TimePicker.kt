@@ -26,13 +26,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
 
 import nl.joozd.logbookapp.databinding.DialogTimesInOutBinding
 import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.extensions.showAsActiveIf
+import nl.joozd.logbookapp.extensions.showFragment
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.dialogs.TimePickerViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
@@ -105,10 +105,7 @@ open class TimePicker: JoozdlogFragment() {
 
     private fun DialogTimesInOutBinding.setOnClickListeners(){
         augmentedTextView.setOnClickListener {
-            supportFragmentManager.commit {
-                add(R.id.mainActivityLayout, AugmentedCrewDialog())
-                addToBackStack(null)
-            }
+            requireActivity().showFragment<AugmentedCrewDialog>()
         }
 
         timesDialogPicPicusTextview.setOnClickListener {

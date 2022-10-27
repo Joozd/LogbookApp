@@ -24,10 +24,9 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
-import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityBalanceForwardBinding
+import nl.joozd.logbookapp.extensions.showFragment
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.BalanceForwardActivityViewmodel
 import nl.joozd.logbookapp.ui.adapters.BalanceForwardAdapter
@@ -48,7 +47,7 @@ class BalanceForwardActivity : JoozdlogActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.addBalanceForwardMenu -> {
-            showAddBalanceForwardDialog()
+            showFragment<AddBalanceForwardDialog>()
             true
         }
         else -> false
@@ -68,7 +67,7 @@ class BalanceForwardActivity : JoozdlogActivity() {
 
 
                 addBalanceButton.setOnClickListener {
-                showAddBalanceForwardDialog()
+                showFragment<AddBalanceForwardDialog>()
             }
 
             val adapter = BalanceForwardAdapter(this@BalanceForwardActivity).apply{
@@ -100,14 +99,6 @@ class BalanceForwardActivity : JoozdlogActivity() {
         }
 
     }
-
-    private fun showAddBalanceForwardDialog(): AddBalanceForwardDialog = AddBalanceForwardDialog().also{
-        supportFragmentManager.commit {
-            add(R.id.balanceForwardLayout, it)
-            addToBackStack(null)
-        }
-    }
-
 }
 
 

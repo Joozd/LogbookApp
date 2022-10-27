@@ -368,14 +368,6 @@ class MainActivity : JoozdlogActivity() {
 
     private fun launchEditFlightFragment() {
         showFragment<EditFlightFragment>(tag = EDIT_FLIGHT_FRAGMENT_TAG)
-        /*
-        val eff = EditFlightFragment()
-        supportFragmentManager.commit {
-            add(R.id.mainActivityLayout, eff, EDIT_FLIGHT_FRAGMENT_TAG)
-            addToBackStack(EDIT_FLIGHT_FRAGMENT_TAG)
-        }
-
-         */
     }
 
     private fun getRedoMenuItem(menu: Menu) =

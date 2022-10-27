@@ -28,3 +28,23 @@ inline fun <reified  T: Fragment> FragmentActivity.showFragment(
         if (addToBackStack) addToBackStack(tag)
     }
 }
+
+/**
+ * Launch a fragment with less boilerplate.
+ * This version takes an instantiated Fragment, in case it needs constructor parameters or an apply block or anything like that:
+ * showFragment()
+ */
+fun <T: Fragment>FragmentActivity.showFragment(
+    fragment: T,
+    @IdRes containerViewId: Int = android.R.id.content,
+    tag: String? = null,
+    addToBackStack: Boolean = true)
+{
+    supportFragmentManager.commit{
+        println("COMMITTING")
+        setReorderingAllowed(true)
+        add(containerViewId, fragment, tag)
+        println("containrs: ${findViewById<View>(containerViewId)}")
+        if (addToBackStack) addToBackStack(tag)
+    }
+}

@@ -19,18 +19,17 @@
 
 package nl.joozd.logbookapp.ui.activities.newUserActivity
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.toggle
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageCalendarBinding
+import nl.joozd.logbookapp.extensions.showFragment
 import nl.joozd.logbookapp.ui.dialogs.CalendarSyncDialog
 
 /**
@@ -70,9 +69,6 @@ class NewUserActivityCalendarPage: NewUseractivityPage() {
     }
 
     private fun showCalendarDialog(){
-        supportFragmentManager.commit {
-            add(R.id.newUserActivityLayout, CalendarSyncDialog())
-            addToBackStack(null)
-        }
+        requireActivity().showFragment<CalendarSyncDialog>()
     }
 }

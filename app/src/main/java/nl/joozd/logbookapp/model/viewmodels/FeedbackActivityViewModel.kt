@@ -23,12 +23,9 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import nl.joozd.logbookapp.utils.DispatcherProvider
 
 class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
     var enteredFeedback: String? = null
@@ -36,16 +33,6 @@ class FeedbackActivityViewModel: JoozdlogActivityViewModel() {
 
     val finishedFlow: Flow<Boolean> = MutableStateFlow(false)
     private var finished by CastFlowToMutableFlowShortcut(finishedFlow)
-
-    val knownIssuesFlow: Flow<String> = MutableStateFlow("")
-    private var knownIssues by CastFlowToMutableFlowShortcut(knownIssuesFlow)
-
-
-    fun loadKnownIssuesLiveData(source: Int) = viewModelScope.launch {
-        knownIssues = App.instance.resources.openRawResource(source).use{
-            withContext(DispatcherProvider.io()) { it.reader().readText() }
-        }
-    }
 
     fun submitClicked() = viewModelScope.launch{
         enteredFeedback?.let { TaskPayloads.feedbackWaiting.setValue(it) } // suspending, data is needed for proper feedback sending

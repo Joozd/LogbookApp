@@ -24,14 +24,13 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.commit
-import androidx.lifecycle.asLiveData
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.databinding.ActivityFeedbackBinding
 import nl.joozd.logbookapp.extensions.onTextChanged
+import nl.joozd.logbookapp.extensions.showFragment
 import nl.joozd.logbookapp.model.viewmodels.FeedbackActivityViewModel
-import nl.joozd.logbookapp.ui.dialogs.TextDisplayDialog
+import nl.joozd.logbookapp.ui.dialogs.KnownIssuesDialog
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.toast
 
@@ -57,11 +56,7 @@ class FeedbackActivity : JoozdlogActivity() {
 
     private fun ActivityFeedbackBinding.setOnClickListeners() {
         knownIssuesButton.setOnClickListener {
-            viewModel.loadKnownIssuesLiveData(R.raw.joozdlog_todo_list)
-            supportFragmentManager.commit {
-                add(R.id.layoutBelowToolbar, TextDisplayDialog(R.string.joozdlog_todo_title, viewModel.knownIssuesFlow.asLiveData()), null)
-                addToBackStack(null)
-            }
+            showFragment<KnownIssuesDialog>()
         }
 
         youCanAlsoSendAnEmailTextview.setOnClickListener {

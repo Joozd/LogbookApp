@@ -23,61 +23,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogTextDisplayBinding
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
+import nl.joozd.logbookapp.utils.DispatcherProvider
 
 /**
  * Fragment for displaying text
  * If using LiveData for filling title/etxt, it will go stale on recreation and use last observed data.
  */
-class TextDisplayDialog() : JoozdlogFragment() {
-    constructor(title: String = "", text: String = ""): this(){
-        _text = text
-        _title = title
-    }
-
-    constructor(titleResource: Int, textLiveData: LiveData<String>): this(){
-        _titleResource = titleResource
-        _textLiveData = textLiveData
-    }
-    //TODO add more constructors as needed
-
-
-    private var _title = ""
-    private var _text = ""
-    private var _titleResource: Int? = null
-    private var _textResource: Int? = null
-
-    private var _titleLiveData: LiveData<String>? = null
-    private var _textLiveData: LiveData<String>? = null
-
+class KnownIssuesDialog: JoozdlogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogTextDisplayBinding.bind(inflater.inflate(R.layout.dialog_text_display, container, false)).apply {
-            // Set title and text if constructor with ResID was used
-            _titleResource?.let {
-                _title = requireActivity().getString(it)
-            }
-            _textResource?.let {
-                _text = requireActivity().getString(it)
-            }
-
-            // Get title and text if recreated
-            savedInstanceState?.let { bundle ->
-                bundle.getString(TEXT_TAG)?.let { _text = it }
-                bundle.getString(TITLE_TAG)?.let { _title = it }
-            }
-            displayTextDialogTitle.text = _title
-            displayTextDialogTextview.text = _text
-
-            _titleLiveData?.observe(requireActivity()) {
-                displayTextDialogTitle.text = it
-                _title = it
-            }
-            _textLiveData?.observe(requireActivity()) {
-                displayTextDialogTextview.text = it
-                _text = it
+            displayTextDialogTitle.text = requireActivity().getString(R.string.joozdlog_todo_title)
+            lifecycleScope.launch {
+                displayTextDialogTextview.text = resources.openRawResource(R.raw.joozdlog_todo_list).use{
+                    withContext(DispatcherProvider.io()) { it.reader().readText() }
+                }
             }
 
             headerLayout.setOnClickListener {  } // catch clicks
@@ -91,20 +56,4 @@ class TextDisplayDialog() : JoozdlogFragment() {
                 requireActivity().supportFragmentManager.popBackStack()
             }
         }.root
-
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        with(outState) {
-            putString(TEXT_TAG, _text)
-            putString(TITLE_TAG, _title)
-        }
-        super.onSaveInstanceState(outState)
-
-    }
-
-    companion object{
-        const val TEXT_TAG = "TEXT_TAG"
-        const val TITLE_TAG = "TITLE_TAG"
-    }
-
 }

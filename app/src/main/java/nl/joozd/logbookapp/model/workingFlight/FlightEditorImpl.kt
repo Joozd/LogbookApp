@@ -80,7 +80,7 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
         set(date) {
             val tOut = timeOut.atDate(date)
             val tIn = timeIn.atDate(date).let{
-                if (it > timeOut) it
+                if (it > tOut) it
                 else it.plusDays(1)
             }
             flight = flight.copy (timeOut = tOut, timeIn = tIn).autoValues()

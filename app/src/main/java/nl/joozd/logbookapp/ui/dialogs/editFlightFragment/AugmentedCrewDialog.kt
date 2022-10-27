@@ -25,6 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.DialogAugmentedCrewBinding
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AugmentedCrewDialogViewModel
@@ -103,8 +104,12 @@ class AugmentedCrewDialog: JoozdlogFragment(){
     }
 
     private fun DialogAugmentedCrewBinding.collectTakeoffLandingTimeFlow() {
-        viewModel.takeoffLandingTimeFlow().launchCollectWhileLifecycleStateStarted {
-            timeForTakeoffLandingEditText.setText(it.minutesToHoursAndMinutesString())
+        viewModel.takeoffLandingTimeFlow().launchCollectWhileLifecycleStateStarted { minutes ->
+            if (minutes == 0 && Prefs.augmentedTakeoffLandingTimes() != 0){
+                viewModel.setTakeoffLandingTime(Prefs.augmentedTakeoffLandingTimes()) // this will make viewModel.takeoffLandingTimeFlow emit again
+            }
+            else
+            timeForTakeoffLandingEditText.setText(minutes.minutesToHoursAndMinutesString())
         }
     }
 }

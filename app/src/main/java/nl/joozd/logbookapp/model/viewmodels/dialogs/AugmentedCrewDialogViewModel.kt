@@ -29,7 +29,7 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
 
     private var crew = AugmentedCrew.of(flightEditor.augmentedCrew)
 
-    val crewFlow = flightEditor.flightFlow.map { AugmentedCrew.of(it.augmentedCrew) }
+    private val crewFlow = flightEditor.flightFlow.map { AugmentedCrew.of(it.augmentedCrew) }
 
     fun crewSizeFlow() = crewFlow.map { it.size }
     fun didTakeoffFlow() = crewFlow.map { it.takeoff }
@@ -74,7 +74,7 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
         flightEditor.augmentedCrew = undoCrew
     }
 
-    private fun setTakeoffLandingTime(time: Int) {
+    fun setTakeoffLandingTime(time: Int) {
         crew = crew.withTimes(time)
         updateCrewInFlightEditor()
     }

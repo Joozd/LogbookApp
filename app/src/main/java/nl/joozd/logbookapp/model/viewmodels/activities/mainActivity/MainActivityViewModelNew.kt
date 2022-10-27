@@ -73,7 +73,7 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         viewModelScope.launch{
             val f = flight.toFlight()
             flightRepository.delete(f)
-            CalendarControl.handleManualDelete(f)
+            CalendarControl.handleManualDelete(f)   //send the deleted flight to CalendarControl to check if Calendar sync needs to be postponed.
         }
     }
 
@@ -109,12 +109,10 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         }
     }
 
-    //returns true so we can use it straight from Menu in Activity
     fun undo(){
         viewModelScope.launch { flightRepository.undo() }
     }
 
-    //returns true so we can use it straight from Menu in Activity
     fun redo(){
         viewModelScope.launch { flightRepository.redo() }
     }

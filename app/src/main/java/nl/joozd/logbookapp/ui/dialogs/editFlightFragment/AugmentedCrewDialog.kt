@@ -109,7 +109,7 @@ class AugmentedCrewDialog: JoozdlogFragment(){
                 viewModel.setTakeoffLandingTime(Prefs.augmentedTakeoffLandingTimes()) // this will make viewModel.takeoffLandingTimeFlow emit again
             }
             else
-            timeForTakeoffLandingEditText.setText(minutes.minutesToHoursAndMinutesString())
+                timeForTakeoffLandingEditText.setText(minutes.minutesToHoursAndMinutesString())
         }
     }
 }

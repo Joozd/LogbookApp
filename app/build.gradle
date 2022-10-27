@@ -32,9 +32,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 26
         targetSdkVersion 33
-        versionCode 120 // my version, increment this every build
-        versionName "JoozdLog BEAVER | 1.2.dev.2"
-        vectorDrawables.useSupportLibrary = true
+        versionCode 121 // my version, increment this every build
+        versionName "JoozdLog BEAVER | 1.2.dev.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -107,15 +106,15 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.annotation:annotation:1.5.0'
 
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.google.android.material:material:1.7.0'
 
     //kotlin Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     //Kotlin Extensions
-    implementation 'androidx.activity:activity-ktx:1.6.0'
-    implementation "androidx.fragment:fragment-ktx:1.5.3"
+    implementation 'androidx.activity:activity-ktx:1.6.1'
+    implementation "androidx.fragment:fragment-ktx:1.5.4"
 
     //room
     implementation "androidx.room:room-runtime:$room_version"
@@ -166,7 +165,7 @@ dependencies {
     //test libraries
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation 'app.cash.turbine:turbine:0.7.0'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

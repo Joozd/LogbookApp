@@ -113,8 +113,8 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun LayoutEditFlightFragmentBinding.setAndAttachAdaptersForAutocompleteFields() {
-        flightNameField.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))
-        flightName2Field.setAdapter(ArrayAdapter<String>(ctx, R.layout.item_custom_autocomplete))
+        flightNameField.setAdapter(ArrayAdapter<String>(requireActivity(), R.layout.item_custom_autocomplete))
+        flightName2Field.setAdapter(ArrayAdapter<String>(requireActivity(), R.layout.item_custom_autocomplete))
         flightAircraftField.setAdapter(AircraftAutoCompleteAdapter(requireActivity(), R.layout.item_custom_autocomplete))
     }
 

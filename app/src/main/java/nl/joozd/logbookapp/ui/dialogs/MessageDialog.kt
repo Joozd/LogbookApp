@@ -46,9 +46,7 @@ class MessageDialog: JoozdlogFragment() {
             message = msg
         }
         fun make(msgResource: Int) = MessageDialog().apply {
-            message = ctx.getString(msgResource)
+            message = requireActivity().getString(msgResource)
         }
-
-        private const val MESSAGE = "MESSAGE"
     }
 }

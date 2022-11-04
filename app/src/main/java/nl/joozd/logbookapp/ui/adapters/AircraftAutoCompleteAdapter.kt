@@ -44,14 +44,12 @@ class AircraftAutoCompleteAdapter(val context: Context, private val resource: In
 
     private inner class AircraftAutoCompleteAdapterFilter: Filter(){
         /**
-         *
          * Invoked in a worker thread to filter the data according to the
          * constraint. Subclasses must implement this method to perform the
          * filtering operation. Results computed by the filtering operation
          * must be returned as a [android.widget.Filter.FilterResults] that
          * will then be published in the UI thread through
          * [.publishResults].
-         *
          *
          * **Contract:** When the constraint is null, the original
          * data must be restored.
@@ -73,7 +71,6 @@ class AircraftAutoCompleteAdapter(val context: Context, private val resource: In
         }
 
         /**
-         *
          * Invoked in the UI thread to publish the filtering results in the
          * user interface. Subclasses must implement this method to display the
          * results computed in [.performFiltering].
@@ -96,28 +93,10 @@ class AircraftAutoCompleteAdapter(val context: Context, private val resource: In
         }
     }
 
-    /**
-     * How many items are in the data set represented by this Adapter.
-     *
-     * @return Count of items.
-     */
     override fun getCount(): Int = outputList.size
 
-    /**
-     * Get the data item associated with the specified position in the data set.
-     *
-     * @param position Position of the item whose data we want within the adapter's
-     * data set.
-     * @return The data at the specified position.
-     */
     override fun getItem(position: Int) = outputList[position]
 
-    /**
-     * Get the row id associated with the specified position in the list.
-     *
-     * @param position The position of the item within the adapter's data set whose row id we want.
-     * @return The id of the item at the specified position.
-     */
     override fun getItemId(position: Int): Long = position.toLong()
 
     /**

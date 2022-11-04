@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.ui.utils
 
-import android.content.Context
 import android.text.Editable
 import android.view.View
 import android.widget.CompoundButton
@@ -35,7 +34,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.first
-import nl.joozd.logbookapp.core.App
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -49,8 +47,6 @@ abstract class JoozdlogFragment: Fragment() {
     protected val supportFragmentManager: FragmentManager get() = requireActivity().supportFragmentManager
     protected val fragment: JoozdlogFragment
         get() = this
-    protected val ctx: Context
-        get() = App.instance
 
     /**
      * dp to pixels and reverse

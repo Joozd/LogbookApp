@@ -179,7 +179,7 @@ class SettingsActivity : JoozdlogActivity() {
                 backupPreferencesContainer.visibility = View.GONE // toggling visibility to GONE makes the activity auto-animate removal of fragment
                 removeFragment(it)
             }
-            else null
+            else null // if fragment is found but not started, do the same as if it wasn't found (findFragmentByTag?.let() returns null)
         } ?: showBackupPreferencesFragment()
     }
 

@@ -148,7 +148,6 @@ abstract class JoozdlogFragment: Fragment() {
             }
         }
         flow.launchCollectWhileLifecycleStateStarted{
-            println("COLLECTED: $it from $flow")
             isChecked = it
         }
     }

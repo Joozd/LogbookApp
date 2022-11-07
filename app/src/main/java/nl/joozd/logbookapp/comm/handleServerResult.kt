@@ -6,12 +6,12 @@ import nl.joozd.logbookapp.core.EmailCenter
 import nl.joozd.logbookapp.core.messages.Messages
 import nl.joozd.logbookapp.exceptions.CloudException
 fun handleServerResult(serverResult: String?): CloudFunctionResult? =
-    when(JoozdlogCommsResponses.from(serverResult?: JoozdlogCommsResponses.CONNECTION_ERROR.keyword)){
+    when(JoozdlogCommsResponses.from(serverResult ?: JoozdlogCommsResponses.CONNECTION_ERROR.keyword)){
         JoozdlogCommsResponses.OK -> CloudFunctionResult.OK
 
         JoozdlogCommsResponses.CONNECTION_ERROR, // this happens when serverResult == null
-        JoozdlogCommsResponses.SERVER_ERROR,
-        JoozdlogCommsResponses.BAD_DATA_RECEIVED -> CloudFunctionResult.CONNECTION_ERROR
+        JoozdlogCommsResponses.SERVER_ERROR -> CloudFunctionResult.SERVER_REFUSED
+        JoozdlogCommsResponses.BAD_DATA_RECEIVED -> CloudFunctionResult.SERVER_REFUSED
 
         JoozdlogCommsResponses.EMAIL_NOT_KNOWN_OR_VERIFIED -> handleUnknownOrUnverifiedEmail()
         JoozdlogCommsResponses.NOT_A_VALID_EMAIL_ADDRESS -> handleBadEmailAddress()
@@ -30,7 +30,7 @@ fun handleServerResultAndThrowExceptionOnError(serverResult: String?){
 }
 
 fun handleServerResultAndThrowExceptionOnError(serverResult: ByteArray?) =
-    handleServerResultAndThrowExceptionOnError(serverResult?.toString())
+    handleServerResultAndThrowExceptionOnError(serverResult?.toString(Charsets.UTF_8))
 
 private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
     EmailCenter().setEmailUnverified()

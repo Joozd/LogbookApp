@@ -29,18 +29,18 @@ class Cloud(
      * Server will send a confirmation mail if it worked.
      * Throws CloudException on failure.
      */
-    suspend fun sendNewEmailAddress(emailAddress: String): Long? {
+    suspend fun sendNewEmailAddress(emailAddress: String): Long {
         val data = EmailData(EmailData.EMAIL_ID_NOT_SET, emailAddress, ByteArray(0))
         val result = responseForRequestOrException(JoozdlogCommsRequests.SET_EMAIL, data)
-        return unwrap(result)
+        return unwrapLong(result)
     }
 
     /**
      * Migrate email data on server to new system (Long ID instead of String Username)
      * Throws CloudException on failure.
      */
-    suspend fun migrateEmailData(username: String, emailAddress: String): Long? {
-        val data = LoginDataWithEmail(username, ByteArray(0), -1, emailAddress).serialize()
+    suspend fun migrateEmailData(username: String, emailAddress: String): Long {
+        @Suppress("DEPRECATION") val data = LoginDataWithEmail(username, ByteArray(0), -1, emailAddress).serialize() // deprecated but here for migration
         val result = responseForRequestOrException(JoozdlogCommsRequests.MIGRATE_EMAIL_DATA, data)
         return unwrap(result)
     }

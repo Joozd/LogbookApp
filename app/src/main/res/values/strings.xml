@@ -202,7 +202,7 @@
     <string name="mail_to_myself">Send it to myself</string>
     <string name="send_using">Pick an app:</string>
     <string name="email_verification_scheduled_title">Verifying email</string>
-    <string name="email_verification_scheduled_message">Your email verification has been scheduled. If you are connected to the internet this should happen pretty fast, otherwise it will be the next time your device connects to the internet.\nPLEASE NOTE: The server only remembers one email address verification per account. Using the same verification on multiple devices means you will get multiple emails as all emails start from your own device (the server doesn\'t remember your email address, only a code to verify it).</string>
+    <string name="email_verification_scheduled_message">Your email verification has been scheduled. If you are connected to the internet this should happen pretty fast, otherwise it will be the next time your device connects to the internet.</string>
 
     <string name="data_has_been_merged">Data has been merged.</string>
     <string name="server_merge_performed">You logged in to an existing Cloud account while some flights were present on the device. The data has been merged with the stored data on the server, and saved both locally and on the server.</string>

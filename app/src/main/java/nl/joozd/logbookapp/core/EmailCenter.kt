@@ -28,6 +28,7 @@ package nl.joozd.logbookapp.core
 
 import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.EmailData
 import nl.joozd.logbookapp.comm.migrateEmail
@@ -54,7 +55,13 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags, private val pref
 
     //requesting a verification email is done by just re-submitting current email address.
     fun requestEmailVerificationMail(){
+        println(taskFlags.updateEmailWithServer.valueBlocking)
+        println("KOEDOE")
         taskFlags.updateEmailWithServer(true)
+        MainScope().launch{
+            delay(500)
+            println("And now it is ${taskFlags.updateEmailWithServer.valueBlocking}")
+        }
     }
 
     /**
@@ -88,14 +95,13 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags, private val pref
 
 
     fun invalidateEmail(){
-        emailPrefs.emailAddress("")
         emailPrefs.emailVerified(false)
+        emailPrefs.emailID(EmailData.EMAIL_ID_NOT_SET)
+        TaskFlags.verifyEmailCode(false)
+        TaskPayloads.emailConfirmationStringWaiting("")
     }
 
-    fun setEmailUnverified(){
-        emailPrefs.emailVerified(false)
-    }
-
+    //TODO schedule this instead of running it strauight away. Also this needs to be in serverFunctions.
     suspend fun migrateEmailDataIfNeeded(){
         val userName = prefs.username()
         val emailAddress = emailPrefs.emailAddress()
@@ -104,7 +110,7 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags, private val pref
                     && emailAddress.isNotBlank()
                     && emailPrefs.emailID() == EmailData.EMAIL_ID_NOT_SET
         if (migrationNeeded){
-            migrateEmail(userName!!, emailAddress)?.let{
+            migrateEmail(userName!!, emailAddress).let{
                 Prefs.username(null)
                 emailPrefs.emailID(it)
             }

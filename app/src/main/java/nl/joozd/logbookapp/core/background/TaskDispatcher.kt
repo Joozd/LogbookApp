@@ -22,7 +22,8 @@ class TaskDispatcher private constructor(private val taskFlags: TaskFlags = Task
     }
 
     private fun handleEmailUpdateWanted(activity: JoozdlogActivity) {
-        emailUpdateWantedFlow().doIfTrueEmitted(activity) {
+        emailUpdateWantedFlow.doIfTrueEmitted(activity) {
+            println("VLIEGTUIG handleEmailUpdateWanted emitted true")
             ServerFunctionsWorkersHub().scheduleUpdateEmail()
         }
     }
@@ -58,11 +59,11 @@ class TaskDispatcher private constructor(private val taskFlags: TaskFlags = Task
 
 
     private fun emailConfirmationWantedFlow() = combine(taskFlags.verifyEmailCode.flow, TaskPayloads.emailConfirmationStringWaiting.flow){
-        wanted, value -> wanted && value.isNotBlank()
+        wanted, value -> (wanted && value.isNotBlank())
     }
 
-    private fun emailUpdateWantedFlow() = combine(taskFlags.updateEmailWithServer.flow, EmailPrefs.emailAddress.flow){
-        wanted, address -> wanted && address.isNotBlank()
+    private val emailUpdateWantedFlow = combine(taskFlags.updateEmailWithServer.flow, EmailPrefs.emailAddress.flow){
+        wanted, address -> wanted && address.isNotBlank().also { println("emailUpdateWantedFlow might emit $it") }
     }
 
     private fun backupEmailWantedFlow() = combine(taskFlags.sendBackupEmail.flow, validEmailFlow){

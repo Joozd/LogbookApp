@@ -67,7 +67,7 @@
     <string name="email_address">Email address</string>
     <string name="not_an_email_address">Not an email address</string>
     <string name="server_not_an_email_address_please_enter_again">The server did not like the entered email address for a scheduled action that requires one. Please enter it again in Settings.</string>
-    <string name="server_reported_email_not_verified_new_mail_will_be_sent">The server reported that your entered email address is not verified.\nA new verification mail will be sent to the email address entered in Settings.\n\nPlease open the verification link in this app.</string>
+    <string name="server_reported_email_not_verified_new_mail_will_be_sent">The server reported that your entered email address is not verified.\nPlease update your email address in Settings to get a new verification mail.</string>
     <string name="enter_email">Enter email</string>
     <string name="verified_email">%1$s (verified)</string>
     <string name="not_verified_email">%1$s (not verified)</string>

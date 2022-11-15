@@ -26,7 +26,7 @@ import java.time.Instant
 suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), emailPrefs: EmailPrefs = EmailPrefs) {
     val emailAddress = emailPrefs.emailAddress()
     try {
-        cloud.sendNewEmailAddress(emailAddress)?.let {
+        cloud.sendNewEmailAddress(emailAddress).let {
             emailPrefs.emailID(it)
             emailPrefs.emailVerified(false)
         }
@@ -34,6 +34,7 @@ suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), emailPrefs: Email
         TaskFlags.updateEmailWithServer(true)
         return
     }
+    println("setting updateEmailWithServer to false")
     TaskFlags.updateEmailWithServer(false)
 }
 
@@ -53,7 +54,7 @@ suspend fun confirmEmail(confirmationString: String, cloud: Cloud = Cloud()): Se
 
 
 // This does NOT check to see if migration is possible or needed. Do that in calling function.
-suspend fun migrateEmail(username: String, emailAddress: String, cloud: Cloud = Cloud()): Long? =
+suspend fun migrateEmail(username: String, emailAddress: String, cloud: Cloud = Cloud()): Long =
     cloud.migrateEmailData(username, emailAddress)
 
 /*

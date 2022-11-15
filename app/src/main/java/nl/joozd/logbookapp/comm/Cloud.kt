@@ -30,6 +30,7 @@ class Cloud(
      * Throws CloudException on failure.
      */
     suspend fun sendNewEmailAddress(emailAddress: String): Long {
+        println("BOTERHAMZAKJE sending new email address")
         val data = EmailData(EmailData.EMAIL_ID_NOT_SET, emailAddress, ByteArray(0))
         val result = responseForRequestOrException(JoozdlogCommsRequests.SET_EMAIL, data)
         return unwrapLong(result)

@@ -41,7 +41,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.background.startBackgroundTasks
 import nl.joozd.logbookapp.data.calendar.getFlightsFromCalendar
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
@@ -104,7 +103,6 @@ class MainActivity : JoozdlogActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        startBackgroundTasks()
         checkIfNewInstallOrUpdated()
         val binding = (ActivityMainNewBinding.inflate(layoutInflater)).apply {
             setSupportActionBar(mainToolbar)

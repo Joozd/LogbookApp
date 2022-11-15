@@ -40,7 +40,6 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
     private val viewModel: PdfParserActivityViewModel by viewModels()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

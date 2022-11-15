@@ -33,9 +33,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import nl.joozd.logbookapp.core.background.startBackgroundTasks
 
 @SuppressLint("Registered")
 open class JoozdlogActivity: AppCompatActivity() {
+    // make this true to not start background tasks in activity
+    open val runBackgroundTasks = true
+
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
@@ -44,6 +48,12 @@ open class JoozdlogActivity: AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         recreate()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if(runBackgroundTasks)
+            startBackgroundTasks()
     }
 
     protected val activity: JoozdlogActivity

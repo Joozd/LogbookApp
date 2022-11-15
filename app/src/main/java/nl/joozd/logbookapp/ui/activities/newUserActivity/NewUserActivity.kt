@@ -31,7 +31,6 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
 
 class NewUserActivity : JoozdlogActivity() {
-
     private lateinit var mViewPager: ViewPager2
 
     private var removeDuplicatesstarted = false

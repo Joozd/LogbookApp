@@ -3,7 +3,6 @@ package nl.joozd.logbookapp.utils
 import android.content.Intent
 import android.net.Uri
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.TaskFlags
 import nl.joozd.logbookapp.core.MessageCenter
 import nl.joozd.logbookapp.core.EmailCenter
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
@@ -23,14 +22,13 @@ class IntentHandler(intent: Intent) {
         }
     }
 
+    //Even though it looks like a Base64 string with '/' replaced by '-', it is never decoded so we leave it "as is"
     private suspend fun handleEmailCodeConfirmation(){
         getEmailConfirmationCodeFromIntent()?.let{
-            val usableString = it.replace('-', '/')
-            if (EmailCenter().confirmEmail(usableString))
+            if (EmailCenter().confirmEmail(it))
                 showEmailConfirmationSheduledMessage()
             else
                 MessagesWaiting.badVerificationCodeClicked(true)
-
         }
     }
 
@@ -42,19 +40,6 @@ class IntentHandler(intent: Intent) {
             titleResource = R.string.email_verification_scheduled_title
             descriptionResource = R.string.email_verification_scheduled_message
             setPositiveButton(android.R.string.ok){ }
-        }
-    }
-
-    private fun showBadEmailConfirmationStringReceivedMessage(){
-        MessageCenter.commitMessage {
-            titleResource = R.string.error
-            descriptionResource = R.string.email_verification_invalid_data
-            setPositiveButton(android.R.string.ok){
-                TaskFlags.updateEmailWithServer
-            }
-            setNegativeButton(android.R.string.cancel){
-                // intentionally left blank
-            }
         }
     }
 

@@ -120,7 +120,7 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags, private val pref
 
     private fun String.isValidBase64Hash(): Boolean =
         try{
-            val decoded = base64Decode(this)
+            val decoded = base64Decode(this.replace('-', '/')) // I replace '/' with  '-' for Base64 that ends up in a link.
             decoded.size == 32 // SHA256 hash is 32 bytes
         } catch(e: Exception){
             false

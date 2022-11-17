@@ -535,6 +535,7 @@
     <string name="send">Send</string>
     <string name="receive">Receive</string>
     <string name="qr_code">QR code</string>
+    <string name="sharing_activity_placeholder_text">WORK IN PROGRESS\nThis is still work in progress, as you can see by the \"minimalistic\" design.\nIt is working, but needs an internet connection to send the data.</string>
 </resources>
 
 

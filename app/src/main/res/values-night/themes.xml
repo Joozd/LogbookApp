@@ -26,7 +26,9 @@
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorDialogBackgroundFilter">#80000000</item>
 
+        <item name="colorPrimaryBackground">#FF202020</item>
         <item name="colorSecondaryBackground">#000000</item>
+
         <item name="colorTextViewBackground">#FF202020</item>
         <item name="colorDialogBackground">#FF404040</item>
         <item name="colorAccent">?attr/colorPrimary</item>
@@ -37,7 +39,7 @@
         <item name="textColorWarning">#80BB0000</item>
         <item name="android:textColor">#D0FFFFFF</item>
         <item name="android:textColorPrimary">#E0FFFFFF</item>
-        <item name="android:textColorSecondary">#C0FFFFFF</item> <!-- #CC3F51B5 -->
+        <item name="android:textColorSecondary">#A0FFFFFF</item> <!-- #CC3F51B5 -->
         <item name="android:actionBarStyle">@style/ToolBar</item>
         <item name="android:textColorTertiary">#80FFFFFF</item>
         <item name="android:textColorHighlight">#CC3F51B5</item>

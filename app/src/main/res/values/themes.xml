@@ -23,10 +23,11 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">#AED6F1</item>
         <item name="colorPrimaryDark">#85C1E9</item>
-        <item name="colorOnPrimary">#F0FFFFFF</item>
+        <item name="colorOnPrimary">#FFFFFFFF</item>
         <item name="colorDialogBackgroundFilter">#80000000</item>
 
-        <item name="colorSecondaryBackground">#F0FAFF</item>
+        <item name="colorPrimaryBackground">#F0FAFF</item>
+        <item name="colorSecondaryBackground">#FFFFFFFF</item>
         <item name="colorTextViewBackground">#FFFFFFFF</item>
         <item name="colorAccent">#0000E0</item>
         <item name="colorOnAccent">#FFFFFF</item>

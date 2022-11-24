@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.data.importing
 
-import kotlinx.coroutines.withContext
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedFlights

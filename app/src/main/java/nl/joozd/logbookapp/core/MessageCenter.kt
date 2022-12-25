@@ -40,20 +40,14 @@ object MessageCenter {
     }
 
     fun pushMessageBarFragment(fragment: MessageBarFragment){
-        println("DEBUG: PushMessageBarFragment called with ${fragment.messageTag}")
         if (notYetInQueue(fragment)) {
-            println("DEBUG: 1")
             fragment.setOnCompleted {
-                println("DEBUG: 2")
                 currentMessageBarFragment = null
                 readyToDisplayNextFragment = true
                 MainScope().launch { nextFragmentWithDelay() }
             }
-            println("DEBUG: 6")
             addFragmentToQueue(fragment)
-            println("DEBUG: 7")
         }
-        println("DEBUG: messageBarFragmentQueue.size = ${messageBarFragmentQueue.size}")
     }
 
     //Remove a messageBarFragment from queue if it is in there, by tag.

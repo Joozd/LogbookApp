@@ -32,8 +32,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 26
         targetSdkVersion 33
-        versionCode 124 // my version, increment this every build
-        versionName "JoozdLog BEAVER | 1.2.dev.6"
+        versionCode 125 // my version, increment this every build
+        versionName "JoozdLog BEAVER | 1.2.dev.7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -114,7 +114,7 @@ dependencies {
 
     //Kotlin Extensions
     implementation 'androidx.activity:activity-ktx:1.6.1'
-    implementation "androidx.fragment:fragment-ktx:1.5.4"
+    implementation "androidx.fragment:fragment-ktx:1.5.5"
 
     //room
     implementation "androidx.room:room-runtime:$room_version"

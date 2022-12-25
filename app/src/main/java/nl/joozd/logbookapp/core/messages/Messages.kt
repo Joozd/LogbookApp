@@ -20,5 +20,13 @@ object Messages {
         }
     }.build()
 
+    val emailNotEneteredButNeeded = UserMessage.Builder().apply{
+        titleResource = R.string.email_address
+        descriptionResource = R.string.no_email_address_entered_but_wanted_for_backup
+        setPositiveButton(android.R.string.ok){
+            //consider opening email fragment
+        }
+    }.build()
+
 
 }

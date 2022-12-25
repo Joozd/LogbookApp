@@ -66,6 +66,7 @@
     <string name="email_saved_message">Your email address has been saved and a confirmation mail will be sent. Please check your inbox on this device, and open the provided confirmation link with Joozdlog.</string>
     <string name="email_address">Email address</string>
     <string name="not_an_email_address">Not an email address</string>
+    <string name="no_email_address_entered_but_wanted_for_backup">No email address has been found, but one is needed for automatic backup emails. Please enter it in Settings.</string>
     <string name="server_not_an_email_address_please_enter_again">The server did not like the entered email address for a scheduled action that requires one. Please enter it again in Settings.</string>
     <string name="server_reported_email_not_verified_new_mail_will_be_sent">The server reported that your entered email address is not verified.\nPlease update your email address in Settings to get a new verification mail.</string>
     <string name="enter_email">Enter email</string>

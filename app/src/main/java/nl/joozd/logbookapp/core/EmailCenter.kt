@@ -32,6 +32,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.EmailData
 import nl.joozd.logbookapp.comm.migrateEmail
+import nl.joozd.logbookapp.core.messages.Messages
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
@@ -48,10 +49,22 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags, private val pref
     fun scheduleBackupEmail(){
 
         taskFlags.sendBackupEmail(true)
-        TODO("""
-            Check if email entered and verified, if not, schedule message through MessageCenter to take care of that (two options, not entered or not verified)            
-            """)
+        MainScope().launch {
+            if(!emailEnteredAndVerified()){
+                if(!emailEntered())
+                MessageCenter.pushMessage(Messages.emailNotEneteredButNeeded)
+            }
+        }
     }
+
+    private suspend fun emailEnteredAndVerified(): Boolean =
+        emailEntered() && emailVerified()
+
+    private suspend fun emailEntered(): Boolean =
+        EmailPrefs.emailAddress().isNotBlank()
+
+    private suspend fun emailVerified(): Boolean =
+        EmailPrefs.emailVerified()
 
     //requesting a verification email is done by just re-submitting current email address.
     fun requestEmailVerificationMail(){

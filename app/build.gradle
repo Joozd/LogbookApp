@@ -32,8 +32,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 26
         targetSdkVersion 33
-        versionCode 125 // my version, increment this every build
-        versionName "JoozdLog BEAVER | 1.2.dev.7"
+        versionCode 126 // my version, increment this every build
+        versionName "JoozdLog BEAVER | 1.2.dev.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -99,7 +99,7 @@ dependencies {
     // implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     //androidX
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation 'androidx.core:core-ktx:1.9.0'
 
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -168,6 +168,6 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation 'app.cash.turbine:turbine:0.7.0'
 
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     //androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }

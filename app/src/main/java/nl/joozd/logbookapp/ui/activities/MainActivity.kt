@@ -36,7 +36,6 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestPermissi
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
@@ -60,7 +59,6 @@ import nl.joozd.logbookapp.core.MessageCenter
 import nl.joozd.logbookapp.core.Migrations
 import nl.joozd.logbookapp.core.metadata.Version
 import nl.joozd.logbookapp.errors.errorDialog
-import nl.joozd.logbookapp.extensions.removeByTagAnimated
 import nl.joozd.logbookapp.extensions.showFragment
 import nl.joozd.logbookapp.ui.dialogs.UpdateMessageDialog
 import nl.joozd.logbookapp.utils.IntentHandler
@@ -224,25 +222,6 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    private fun collectMessageCenterMessages(){
-        MessageCenter.messageFlow.launchCollectWhileLifecycleStateStarted{
-            it?.toAlertDialog(this)?.show()
-        }
-    }
-
-    private fun collectMessageCenterFragments(){
-        MessageCenter.messageBarFragmentFlow.launchCollectWhileLifecycleStateStarted{
-            if (it != null && supportFragmentManager.findFragmentById(it.id) == null) {
-                supportFragmentManager.commit {
-                    setCustomAnimations(R.anim.slide_in_from_top, 0)
-                    add(R.id.message_bar_target, it, MESSAGE_BAR_FRAGMENT_TAG)
-                }
-            } else {
-                supportFragmentManager.removeByTagAnimated(MESSAGE_BAR_FRAGMENT_TAG, R.anim.slide_out_to_top)
-            }
-        }
-    }
-
     private fun ActivityMainNewBinding.initializeSearchFieldViews(){
         initializeSearchTypeSpinner()
         addOnTextChangedListenerToMainSearchField()
@@ -254,9 +233,9 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    private fun collectMessageCenter() {
-        collectMessageCenterFragments()
-        collectMessageCenterMessages()
+    private fun ActivityMainNewBinding.collectMessageCenter() {
+        MessageCenter.registerActivityForMessageBarDisplay(activity, messageBarTarget)
+        MessageCenter.registerActivityForDialogDisplay(activity)
     }
 
     private fun killWorkingFlightEditingFragments(){
@@ -485,7 +464,6 @@ class MainActivity : JoozdlogActivity() {
 
     companion object{
         const val EDIT_FLIGHT_FRAGMENT_TAG = "EDIT_FLIGHT_FRAGMENT_TAG"
-        const val MESSAGE_BAR_FRAGMENT_TAG = "MESSAGE_BAR_FRAGMENT_TAG"
 
         const val PLANNED_FLIGHTS_IN_SIGHT_WHEN_SCROLLING_TO_FIRST_COMPLETED = 2
     }

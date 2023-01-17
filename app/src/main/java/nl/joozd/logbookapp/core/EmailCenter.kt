@@ -32,7 +32,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.EmailData
 import nl.joozd.logbookapp.comm.migrateEmail
-import nl.joozd.logbookapp.core.messages.Messages
+import nl.joozd.logbookapp.core.messages.MessageBarMessage
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
@@ -52,7 +52,7 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags, private val pref
         MainScope().launch {
             if(!emailEnteredAndVerified()){
                 if(!emailEntered())
-                MessageCenter.pushMessage(Messages.emailNotEneteredButNeeded)
+                    MessageCenter.scheduleMessage(MessageBarMessage.NO_EMAIL_ENTERED_FOR_AUTO_BACKUP)
             }
         }
     }

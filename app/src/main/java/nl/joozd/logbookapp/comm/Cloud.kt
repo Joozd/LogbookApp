@@ -8,7 +8,7 @@ import nl.joozd.joozdlogcommon.comms.Protocol
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsRequests
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsResponses
 import nl.joozd.logbookapp.core.MessageCenter
-import nl.joozd.logbookapp.core.messages.Messages
+import nl.joozd.logbookapp.core.messages.MessageBarMessage
 import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.serializing.*
 
@@ -57,7 +57,7 @@ class Cloud(
             return e.cloudFunctionResult
         }
         if(result == JoozdlogCommsResponses.ID_NOT_FOUND) {
-            MessageCenter.pushMessage(Messages.unknownOrUnverifiedEmailMessage)
+            MessageCenter.scheduleMessage(MessageBarMessage.UNKNOWN_OR_UNVERIFIED_EMAIL)
             return CloudFunctionResult.SERVER_REFUSED
         }
         return CloudFunctionResult.OK

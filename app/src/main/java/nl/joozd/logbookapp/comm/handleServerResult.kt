@@ -3,8 +3,9 @@ package nl.joozd.logbookapp.comm
 import nl.joozd.joozdlogcommon.comms.JoozdlogCommsResponses
 import nl.joozd.logbookapp.core.MessageCenter
 import nl.joozd.logbookapp.core.EmailCenter
-import nl.joozd.logbookapp.core.messages.Messages
+import nl.joozd.logbookapp.core.messages.MessageBarMessage
 import nl.joozd.logbookapp.exceptions.CloudException
+
 fun handleServerResult(serverResult: String?): CloudFunctionResult? =
     when(JoozdlogCommsResponses.from(serverResult ?: JoozdlogCommsResponses.CONNECTION_ERROR.keyword)){
         JoozdlogCommsResponses.OK -> CloudFunctionResult.OK
@@ -35,7 +36,8 @@ fun handleServerResultAndThrowExceptionOnError(serverResult: ByteArray?) =
 private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
     println("BOTERHAMZAKJE")
     EmailCenter().invalidateEmail()
-    MessageCenter.pushMessage(Messages.unknownOrUnverifiedEmailMessage)
+    MessageCenter.scheduleMessage(MessageBarMessage.UNKNOWN_OR_UNVERIFIED_EMAIL)
+    //pushMessage(MessagesOld.unknownOrUnverifiedEmailMessage)
     return CloudFunctionResult.SERVER_REFUSED
 }
 
@@ -44,6 +46,6 @@ private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
  */
 private fun handleBadEmailAddress(): CloudFunctionResult {
     EmailCenter().invalidateEmail()
-    MessageCenter.pushMessage(Messages.invalidEmailAddressSentToServer)
+    MessageCenter.scheduleMessage(MessageBarMessage.INVALID_EMAIL_ADDRESS)
     return CloudFunctionResult.SERVER_REFUSED
 }

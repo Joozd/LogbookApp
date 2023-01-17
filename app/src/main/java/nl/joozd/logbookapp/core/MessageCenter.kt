@@ -1,20 +1,49 @@
 package nl.joozd.logbookapp.core
 
+import android.view.View
+import nl.joozd.logbookapp.core.messages.MessagesWaiting
+import nl.joozd.logbookapp.core.messages.PersistantMessage
+import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.core.messages.UserMessage
-import nl.joozd.logbookapp.ui.fragments.makeGenericMessageBarFragment
-import nl.joozd.logbookapp.ui.utils.MessageBarFragment
-import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import java.util.*
-
+/**
+ * MessageCenter keep track of messages to be displayed, and displays them to registered activities
+ */
 object MessageCenter {
+    /**
+     * Register this [activity] as a contyext to display message dialog fragments.
+     */
+    fun registerActivityForDialogDisplay(activity: JoozdlogActivity){
+        with(activity){
+            MessagesWaiting.getDialogMessageToDisplayFlow().launchCollectWhileLifecycleStateStarted{
+                it?.displayDialog(activity)
+            }
+        }
+    }
+
+    /**
+     * Register this [activity] for displaying message bar messages. Needs a [container] to insert messages into.
+     */
+    fun registerActivityForMessageBarDisplay(activity: JoozdlogActivity, container: View){
+        with(activity){
+            MessagesWaiting.getMessageBarMessageToDisplayFlow().launchCollectWhileLifecycleStateStarted{
+                it?.displayMessage(activity, container)
+            }
+        }
+    }
+
+    fun scheduleMessage(message: PersistantMessage){
+        message.messageNeedsToBeDisplayedFlag(true)
+    }
+
+    // Unscheduling a displayed message will change the output of the combined flow in MessagesWaiting. This will either lead to the current message being recreated, or no message being displayed at all.
+    fun unscheduleMessage(message: PersistantMessage){
+        message.messageNeedsToBeDisplayedFlag(false)
+    }
+}
+
+
+
+    /*
     private val messageQueue = LinkedList<UserMessage>()
     private val messageBarFragmentQueue = LinkedList<MessageBarFragment>()
     private var readyToDisplayNextFragment: Boolean = false
@@ -164,4 +193,5 @@ object MessageCenter {
                 || (fragment.messageTag !in messageBarFragmentQueue.map { it.tag }
                 && fragment.messageTag != currentMessageBarFragment?.messageTag)).also { println ( "Returned $it" )}
     }
-}
+
+     */

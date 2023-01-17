@@ -169,7 +169,7 @@ class EmailSetDialog : JoozdlogFragment() {
     private fun askIfSameAddressShouldBeConfirmedAgain(){
         AlertDialog.Builder(activity).apply{
             setTitle(R.string.email_address)
-            setMessage(R.string.same_email_as_saved_do_you_want_to_reconfirm_)
+            setMessage(R.string.same_email_as_saved_do_you_want_to_reconfirm)
             setPositiveButton(android.R.string.ok){ _, _ ->
                 saveEmail()
             }

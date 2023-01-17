@@ -62,18 +62,19 @@
     <string name="instructorString">Instructor</string>
     <string name="dualInstructorString">Dual/Instr</string>
     <string name="username">Username</string>
+    <string name="email">Email</string>
     <string name="email_saved">Email saved</string>
     <string name="email_saved_message">Your email address has been saved and a confirmation mail will be sent. Please check your inbox on this device, and open the provided confirmation link with Joozdlog.</string>
     <string name="email_address">Email address</string>
     <string name="not_an_email_address">Not an email address</string>
     <string name="no_email_address_entered_but_wanted_for_backup">No email address has been found, but one is needed for automatic backup emails. Please enter it in Settings.</string>
     <string name="server_not_an_email_address_please_enter_again">The server did not like the entered email address for a scheduled action that requires one. Please enter it again in Settings.</string>
-    <string name="server_reported_email_not_verified_new_mail_will_be_sent">The server reported that your entered email address is not verified.\nPlease update your email address in Settings to get a new verification mail.</string>
+    <string name="server_reported_email_not_verified">The server reported that your entered email address is not verified.\nPlease update your email address in Settings to get a new verification mail.</string>
     <string name="enter_email">Enter email</string>
     <string name="verified_email">%1$s (verified)</string>
     <string name="not_verified_email">%1$s (not verified)</string>
 
-    <string name="same_email_as_saved_do_you_want_to_reconfirm_">The entered email is the same as the currently saved email. Do you want to re-confirm your email address?</string>
+    <string name="same_email_as_saved_do_you_want_to_reconfirm">The entered email is the same as the currently saved email. Do you want to re-confirm your email address?</string>
     <string name="email_reason">Please enter your email for backup and account recovery purposes.\nYour email address will not be stored outside your phone.</string>
     <string name="autovalue">Auto Values</string>
     <string name="takeoff">Takeoff</string>
@@ -423,14 +424,11 @@
     <string name="ical_link">iCalendar link</string>
 
     <string name="accept_terms">Accept terms</string>
-    <string name="use_cloud_sync">Use Cloud Sync</string>
     <string name="use_wifi_for_large_files">Only use WiFi for larger files</string>
 
-    <string name="cloud_sync_title">Cloud Sync</string>
     <string name="add_chrono_update_remarks">Add remark when Monthly Overview has changes</string>
     <string name="add_names_from_rosters">Add names to flights if found</string>
-    <string name="sync_flights_across_devices">Synchronize flights across multiple devices or easily migrate to a new device</string>
-    <string name="last_synched_at">Last synchronized at: %1$s</string>
+
     <string name="disabled_until">Disabled until %1$s</string>
     <string name="n_days">%1$s days</string>
     <string name="enable_now">Enable now</string>
@@ -459,6 +457,7 @@
     <string name="backup_cloud_description">An email with your logbook will be emailed to you at the same interval as you get reminded to make a backup. You will still be reminded if server cannot be reached.</string>
 
     <string name="cloud_backup">Cloud Backup</string>
+    <string name="disable">Disable</string>
 
 
     <string name="backup_now">Backup now</string>
@@ -514,6 +513,7 @@
     <string name="logged_in">Logged in.</string>
     <string name="login_delayed">No server, will try again</string>
 
+    <string name="test_message">This is a test message!</string>
 
     <string name="submit">Submit</string>
     <string name="submit_feedback_qmk">Submit feedback?</string>

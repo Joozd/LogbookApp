@@ -72,7 +72,7 @@ open class JoozdlogActivity: AppCompatActivity() {
         finish()
     }
 
-    protected fun <T> Flow<T>.launchCollectWhileLifecycleStateStarted(collector: FlowCollector<T>){
+    fun <T> Flow<T>.launchCollectWhileLifecycleStateStarted(collector: FlowCollector<T>){
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 collect(collector)

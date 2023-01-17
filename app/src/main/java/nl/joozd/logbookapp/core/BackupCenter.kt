@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.sharedPrefs.EmailPrefs
 import nl.joozd.logbookapp.core.Constants.ONE_DAY_IN_SECONDS
+import nl.joozd.logbookapp.core.messages.MessageBarMessage
 import nl.joozd.logbookapp.data.export.JoozdlogExport
 import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.toDateStringForFiles
-import nl.joozd.logbookapp.ui.fragments.BackupNotificationFragment
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.workmanager.ScheduleBackupNotificationWorker
 import java.time.Duration
@@ -50,7 +50,7 @@ class BackupCenter private constructor(private val emailCenter: EmailCenter = Em
                                    backupActionFlow will emit either NOTIFY(emailNeeded = false) or SCHEDULE.
                                  */
                                 TaskFlags.sendBackupEmail(true)
-                            } else MessageCenter.pushMessageBarFragment(BackupNotificationFragment())
+                            } else MessageCenter.scheduleMessage(MessageBarMessage.BACKUP_NEEDED)
                         }
                         BackupAction.EMAIL -> emailCenter.scheduleBackupEmail()
                         // SCHEDULE will reschedule in case a successful backup has been made,
@@ -63,7 +63,7 @@ class BackupCenter private constructor(private val emailCenter: EmailCenter = Em
     }
 
     private fun scheduleBackupNotification(delay: Long){
-        MessageCenter.pullMessageBarFragmentByTag(BACKUP_NOTIFICATION_TAG)
+        MessageCenter.unscheduleMessage(MessageBarMessage.BACKUP_NEEDED)
         val task = OneTimeWorkRequestBuilder<ScheduleBackupNotificationWorker>()
             .addTag(BACKUP_NOTIFICATION_TAG)
             .setInitialDelay(Duration.ofSeconds(delay))

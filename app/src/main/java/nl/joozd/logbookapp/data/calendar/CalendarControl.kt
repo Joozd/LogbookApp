@@ -6,7 +6,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.core.MessageCenter
-import nl.joozd.logbookapp.core.messages.UserMessage
+import nl.joozd.logbookapp.core.messages.InstantMessage
 import java.time.Instant
 
 object CalendarControl {
@@ -48,15 +48,6 @@ object CalendarControl {
     }
 
     private fun makeCalendarConflictMessage(time: Long, msg: Int) {
-        MessageCenter.pushMessage(
-            UserMessage.Builder().apply {
-                titleResource = R.string.calendar_sync_conflict
-                descriptionResource = msg
-                setPositiveButton(android.R.string.ok) {
-                    Prefs.calendarDisabledUntil(time + 1)
-                }
-                setNegativeButton(R.string.ignore) { /* intentionally left blank */ }
-            }.build()
-        )
+        MessageCenter.scheduleMessage(InstantMessage.CalendarConflict(time, msg))
     }
 }

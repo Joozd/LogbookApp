@@ -5,7 +5,8 @@ import android.view.animation.AnimationUtils
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 
-fun FragmentManager.removeByTagAnimated(tag: String, animation: Int){
+// Not compatible with backstack (which it doesn't use)
+fun FragmentManager.removeByTagAnimated(tag: String, animation: Int, actionAfter: () -> Unit = {}){
     findFragmentByTag(tag)?.let { fragToRemove ->
         val anim = AnimationUtils.loadAnimation(fragToRemove.context, animation).apply {
             setAnimationListener(object : Animation.AnimationListener {
@@ -15,6 +16,9 @@ fun FragmentManager.removeByTagAnimated(tag: String, animation: Int){
                 override fun onAnimationEnd(animation: Animation?) {
                     commit {
                         remove(fragToRemove)
+                        runOnCommit {
+                            actionAfter()
+                        }
                     }
                 }
             })

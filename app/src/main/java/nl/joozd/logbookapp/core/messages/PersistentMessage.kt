@@ -2,7 +2,7 @@ package nl.joozd.logbookapp.core.messages
 
 import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
 
-sealed interface PersistantMessage {
+sealed interface PersistentMessage: Message {
     /**
      * The flag to track this Dialog by
      */

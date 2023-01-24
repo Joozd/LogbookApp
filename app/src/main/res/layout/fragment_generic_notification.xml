@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".ui.fragments.BackupNotificationFragment">
+    tools:context=".core.messages.MessageBarMessageFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -14,7 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:context=".ui.fragments.BackupNotificationFragment">
+        tools:context=".core.messages.MessageBarMessageFragment">
 
         <TextView
             android:id="@+id/generic_notification_message"

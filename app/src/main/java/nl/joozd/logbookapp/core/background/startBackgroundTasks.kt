@@ -10,6 +10,5 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 fun JoozdlogActivity.startBackgroundTasks() {
     SyncCenter().syncDataFiles()
     TaskDispatcher.instance.start(this)
-    PersistentMessagesDispatcher.instance.start(this)
     BackupCenter.instance.makeOrScheduleBackupNotification(this)
 }

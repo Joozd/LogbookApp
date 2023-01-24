@@ -2,9 +2,9 @@ package nl.joozd.logbookapp.utils
 
 import android.content.Intent
 import android.net.Uri
-import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.MessageCenter
 import nl.joozd.logbookapp.core.EmailCenter
+import nl.joozd.logbookapp.core.messages.MessageBarMessage
 import nl.joozd.logbookapp.core.messages.MessagesWaiting
 
 class IntentHandler(intent: Intent) {
@@ -36,11 +36,7 @@ class IntentHandler(intent: Intent) {
         uri?.lastPathSegment
 
     private fun showEmailConfirmationSheduledMessage(){
-        MessageCenter.commitMessage {
-            titleResource = R.string.email_verification_scheduled_title
-            descriptionResource = R.string.email_verification_scheduled_message
-            setPositiveButton(android.R.string.ok){ }
-        }
+        MessageCenter.scheduleMessage(MessageBarMessage.EMAIL_CONFIRMATION_SCHEDULED)
     }
 
     private enum class IntentType {

@@ -141,6 +141,7 @@
     <string name="error_dialog_message">An error %1$d has occurred. Please let Joozd know though the "Feedback" menu option.\n\nError description:\n%2$s</string>
     <string name="never">Never</string>
     <string name="always">Always</string>
+    <string name="once">Once</string>
     <string name="warning">Warning</string>
     <string name="ignore_for_one_day">Ignore for 1 day</string>
     <string name="verify">Verify</string>

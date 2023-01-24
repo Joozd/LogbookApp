@@ -25,6 +25,7 @@ import nl.joozd.logbookapp.core.messages.UserMessage
  * Used to communicate a user choice to UI.
  * choice 1 should map to positive, choice 2 to negative
  */
+//TODO Replace this with MessageCenter messages. Works for now though, so no rush.
 class UserChoice(
     titleResource: Int,
     descriptionResource: Int,

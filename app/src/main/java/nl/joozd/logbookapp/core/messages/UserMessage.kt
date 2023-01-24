@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import androidx.activity.ComponentActivity
 import nl.joozd.logbookapp.R
 
+//TODO Replace this with MessageCenter messages. Works for now though, so no rush.
 open class UserMessage(
     private val titleResource: Int,
     private val descriptionResource: Int,

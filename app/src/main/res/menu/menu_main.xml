@@ -74,7 +74,7 @@
 <!--
     <item
             android:id="@+id/menu_do_something"
-            android:title="DO SOMETHING" />
+            android:title="@string/do_something" />
 -->
 
 </menu>

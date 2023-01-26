@@ -137,6 +137,8 @@
     <string name="arrowRight">➔</string>
     <string name="settings">Settings</string>
     <string name="transfer_data">Transfer Data</string>
+    <string name="do_something">Do Something</string>
+
     <string name="error">Error</string>
     <string name="error_dialog_message">An error %1$d has occurred. Please let Joozd know though the "Feedback" menu option.\n\nError description:\n%2$s</string>
     <string name="never">Never</string>

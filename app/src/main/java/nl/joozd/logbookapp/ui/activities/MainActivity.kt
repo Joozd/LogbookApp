@@ -63,7 +63,8 @@ import nl.joozd.logbookapp.extensions.showFragment
 import nl.joozd.logbookapp.ui.dialogs.UpdateMessageDialog
 import nl.joozd.logbookapp.utils.IntentHandler
 
-//TODO: Handle Scheduled Errors from ScheduledErrors
+//TODO: Handle Scheduled Errors from ScheduledErrors (use MessageCenter) -- is this still so?
+
 class MainActivity : JoozdlogActivity() {
     private val viewModel: MainActivityViewModelNew by viewModels()
 
@@ -80,6 +81,7 @@ class MainActivity : JoozdlogActivity() {
             R.id.menu_about -> showAboutDialog()
             R.id.menu_transfer -> showTransferActivity()
             R.id.menu_export_pdf -> startMakePdfActivity()
+            // R.id.menu_do_something -> performBonusMenuAction()
             else -> return false
         }
         return true

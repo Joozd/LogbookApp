@@ -249,7 +249,7 @@
     <string name="ignore">Ignore</string>
 
     <string name="calendar_sync_conflict">Calendar Sync conflict</string>
-    <string name="calendar_sync_edited_flight">You are editing a planned flight while calendar sync is enabled. This means some changes will be gone by next calendar sync.\nDo you want to disable calendar syncing until after this flight?</string>
+    <string name="calendar_sync_edited_flight">You are editing a planned flight while calendar sync is enabled. This means some changes will be gone by next calendar sync.\nCalendar sync will be disabled until after this flight. You can re-enable it in the Setting menu.</string>
     <string name="delete_completed_flight">You are trying to delete a COMPLETED flight. This might be illegal. Delete anyway?</string>
     <string name="delete_calendar_flight">You are deleting a a flight from your calendar. Do you want to disable calendar import?</string>
     <string name="delete_calendar_flight_until_end">Until end of flight</string>

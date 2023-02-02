@@ -1,50 +1,30 @@
-/*
- *  JoozdLog Pilot's Logbook
- *  Copyright (c) 2020-2022 Joost Welle
- *
- *      This program is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU Affero General Public License as
- *      published by the Free Software Foundation, either version 3 of the
- *      License, or (at your option) any later version.
- *
- *      This program is distributed in the hope that it will be useful,
- *      but WITHOUT ANY WARRANTY; without even the implied warranty of
- *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *      GNU Affero General Public License for more details.
- *
- *      You should have received a copy of the GNU Affero General Public License
- *      along with this program.  If not, see https://www.gnu.org/licenses
- *
- */
-
 package nl.joozd.logbookapp.data.repository.flightRepository
 
-import android.util.Log
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.joozd.logbookapp.data.room.JoozdlogDatabase
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
-import nl.joozd.logbookapp.utils.InsertedUndoableCommand
-import nl.joozd.logbookapp.utils.UndoableCommand
 import java.util.*
 
+// TODO: Save and delete can be optimized, using singleUndoableOperation gets all flights twice while we only need the changed flights.
 class FlightRepositoryWithUndoImpl(
     mockDataBase: JoozdlogDatabase?
 ): FlightRepositoryWithUndo {
     private constructor(): this (null)
 
-    private val repositoryWithDirectAccess =
-        if (mockDataBase == null)FlightRepositoryWithDirectAccess.instance
-        else FlightRepositoryWithDirectAccess.mock(mockDataBase)
+    private val repository =
+        if (mockDataBase == null)FlightRepository.instance
+        else FlightRepository.mock(mockDataBase)
 
-    private val undoStack = Stack<UndoableCommand>()
-    private val redoStack = Stack<UndoableCommand>()
+    // We need to perform actions in order or undo/redo will become a mess.
+    private val keepOrder = Mutex()
+
+    private val undoStack = Stack<Map<Int, FlightState>>()
+    private val redoStack = Stack<Map<Int, FlightState>>()
 
     override val undoAvailableFlow: StateFlow<Boolean> = MutableStateFlow(false)
     override val redoAvailableFlow: StateFlow<Boolean> = MutableStateFlow(false)
@@ -55,188 +35,137 @@ class FlightRepositoryWithUndoImpl(
     override var redoAvailable: Boolean by CastFlowToMutableFlowShortcut(redoAvailableFlow)
         private set
 
-
-    //override val undoAvailableFlow: Flow<Boolean> = _undoAvailable
-    //override val redoAvailableFlow: Flow<Boolean> = _redoAvailable
-
-    private val undoRedoMutex = Mutex()
-    /**
-     * Undo last operation
-     */
-    override suspend fun undo() {
-        undoRedoMutex.withLock {
-            val command = undoStack.pop()
-            undoAvailable = !undoStack.empty()
-
-            command.undo()
-            redoStack.push(command)
-            redoAvailable = true
-        }
+    private fun popUndo(): Map<Int, FlightState> = undoStack.pop().also{
+        undoAvailable = undoStack.isNotEmpty()
     }
 
+    private fun pushUndo(state: Map<Int, FlightState>){
+        undoStack.push(state)
+        undoAvailable = true
+    }
 
-    /**
-     * Redo last operation
-     */
-    override suspend fun redo() {
-        undoRedoMutex.withLock {
-            if (redoStack.empty())
-                Log.e(this::class.simpleName, "Trying to redo but redo stack is empty")
-            else {
-                val command = redoStack.pop()
-                redoAvailable = !redoStack.empty()
+    private fun popRedo(): Map<Int, FlightState> = redoStack.pop().also{
+        redoAvailable = redoStack.isNotEmpty()
+    }
 
-                command()
-                undoStack.push(command)
-                undoAvailable = true
+    private fun pushRedo(state: Map<Int, FlightState>){
+        redoStack.push(state)
+        redoAvailable = true
+    }
+
+    override suspend fun undo() {
+        keepOrder.withLock {
+            if (undoStack.isNotEmpty()) { // this could happen if user spams undo
+                // Throws EmptyStackException if nothing on stack.
+                // This should not be possible since we are doing this in a mutex and just checked it wasn't empty.
+                val state = popUndo()
+                val redoState = recoverState(state)
+                pushRedo(redoState)
             }
         }
     }
 
-    override fun insertUndoAction(undoableCommand: InsertedUndoableCommand) {
-        undoStack.push(undoableCommand)
-        undoAvailable = true
+    override suspend fun redo() {
+        keepOrder.withLock {
+            if (redoStack.isNotEmpty()) { // this could happen if user spams undo
+                println("REDO STACK: ${redoStack.size} // $redoStack")
+                // Throws EmptyStackException if nothing on stack.
+                // This should not be possible since we are doing this in a mutex and just checked it wasn't empty.
+                val state = popRedo()
+                val undoState = recoverState(state)
+                pushUndo(undoState)
+            }
+        }
     }
 
-    override fun invalidateInsertedUndoCommands() {
-        undoStack.removeAll { it is InsertedUndoableCommand }
-        undoAvailable = undoStack.isNotEmpty()
-        redoStack.removeAll { it is InsertedUndoableCommand }
-        redoAvailable = redoStack.isNotEmpty()
+    // this returns the state with the before and after values reversed, so that it can be undone by just feeding the resulting state to this function again.
+    private suspend fun recoverState(state: Map<Int, FlightState>): Map<Int, FlightState> {
+        val idsToRemove = state.keys.filter { state[it]!!.before == null }
+        val flightsToSave = state.values.filter { it.before != null }.map { it.before!! }
+        repository.deleteById(idsToRemove)
+        repository.save(flightsToSave)
+        return state.mapValues{
+            it.value.revert()
+        }
     }
 
-
-
-    /**
-     * Get a single flight by it's ID
-     */
     override suspend fun getFlightByID(flightID: Int): Flight? =
-        repositoryWithDirectAccess.getFlightByID(flightID)
+        repository.getFlightByID(flightID)
+
 
     override suspend fun getFlightsByID(ids: Collection<Int>): List<Flight> =
-        repositoryWithDirectAccess.getFlightsByID(ids)
+        repository.getFlightsByID(ids)
 
-    override suspend fun getFlightsStartingInEpochSecondRange(range: ClosedRange<Long>) {
-        repositoryWithDirectAccess.getFlightsStartingInEpochSecondRange(range)
-    }
+    override suspend fun getFlightsStartingInEpochSecondRange(range: ClosedRange<Long>) =
+        repository.getFlightsStartingInEpochSecondRange(range)
 
     override fun allFlightsFlow(): Flow<List<Flight>> =
-        repositoryWithDirectAccess.allFlightsFlow()
+        repository.allFlightsFlow()
 
     override suspend fun getAllFlights(): List<Flight> =
-        repositoryWithDirectAccess.getAllFlights()
+        repository.getAllFlights()
 
-    /**
-     * Get a flow of updated FlightDataCaches
-     */
     override fun flightDataCacheFlow(): Flow<FlightDataCache> =
-        repositoryWithDirectAccess.flightDataCacheFlow()
+        repository.flightDataCacheFlow()
 
-    /**
-     * Save a flight to DB.
-     */
-    override suspend fun save(flight: Flight) {
-        save(listOf(flight))
-    }
+    override suspend fun save(flight: Flight) =
+        singleUndoableOperation {
+            save(flight)
+        }
 
-    /**
-     * Save a collection of Flights to DB.
-     */
-    override suspend fun save(flights: Collection<Flight>) {
-        saveWithUndo(flights)
-        redoAvailable = false // new save means any previous redo can no longer be done
-    }
+    override suspend fun save(flights: Collection<Flight>) =
+        singleUndoableOperation {
+            save(flights)
+        }
 
-    /**
-     * Delete a flight.
-     */
-    override suspend fun delete(flight: Flight) {
-        delete(listOf(flight))
-    }
+    override suspend fun delete(flight: Flight)  =
+        singleUndoableOperation {
+            delete(flight)
+        }
 
-    override suspend fun delete(flights: Collection<Flight>) {
-        deleteWithUndo(flights)
-        redoAvailable = false // new delete means any previous redo can no longer be done
-    }
+    override suspend fun delete(flights: Collection<Flight>) =
+        singleUndoableOperation {
+            delete(flights)
+        }
+
+    override suspend fun deleteById(ids: Collection<Int>) =
+        singleUndoableOperation {
+            deleteById(ids)
+        }
+
+    override suspend fun deleteById(id: Int) =
+        singleUndoableOperation {
+            deleteById(id)
+        }
+
+    override suspend fun clear() =
+        singleUndoableOperation {
+            clear()
+        }
 
     override suspend fun generateAndReserveNewFlightID(highestTakenID: Int): Int =
-        repositoryWithDirectAccess.generateAndReserveNewFlightID(highestTakenID)
-
-    override fun registerOnDataChangedListener(listener: FlightRepository.OnDataChangedListener) {
-        repositoryWithDirectAccess.registerOnDataChangedListener(listener)
-    }
-
-    override fun unregisterOnDataChangedListener(listener: FlightRepository.OnDataChangedListener): Boolean =
-        repositoryWithDirectAccess.unregisterOnDataChangedListener(listener)
+        repository.generateAndReserveNewFlightID(highestTakenID)
 
 
-    private suspend fun saveWithUndo(flightsToSave: Collection<Flight>){
-        val flightsWithIDs = updateFlightIDs(flightsToSave)
-        val saveAction = generateSaveFlightsAction(flightsWithIDs)
-
-        val ids = flightsToSave.map { it.flightID }
-        val overwrittenFlights: List<Flight> = getFlightsByID(ids)
-        val undoAction = generateUndoSaveFlightsAction(flightsWithIDs, overwrittenFlights)
-
-        val command = UndoableCommand(saveAction, undoAction)
-        executeUndoableCommand(command)
-    }
-
-    private suspend fun deleteWithUndo(flightsToDelete: Collection<Flight>){
-        val deleteAction = generateDeleteFlightsAction(flightsToDelete)
-
-        // get flights from DB so we will restore original flights,
-        // as delete will only look at flightID
-        val ids = flightsToDelete.map { it.flightID }
-        val originalFlights = getFlightsByID(ids)
-        val undoAction = generateSaveFlightsAction(originalFlights)
-
-        val command = UndoableCommand(deleteAction, undoAction)
-        executeUndoableCommand(command)
-    }
-
-    private suspend fun updateFlightIDs(
-        flightsToSave: Collection<Flight>
-    ): List<Flight> {
-        val highestIdInCollection = flightsToSave.maxOfOrNull { it.flightID } ?: 0
-        return flightsToSave.map {
-            if (it.flightID == Flight.FLIGHT_ID_NOT_INITIALIZED)
-                it.copy(flightID = generateAndReserveNewFlightID(highestIdInCollection))
-            else it
+    //This can get a bit expensive, O(n2) on all flights twice.
+    override suspend fun <T> singleUndoableOperation(operation: suspend FlightRepository.() -> T): T {
+        val before = repository.getAllFlights()
+        return repository.operation().also {
+            //also block adds differences between before and after to undo stack
+            //If this proves too expensive a method I could optimize but I think we should be OK
+            val after = repository.getAllFlights()
+            val changesBefore = before.filter { it !in after }
+            val changesAfter = after.filter { it !in before }
+            val changedIDs = changesBefore.map { it.flightID } + changesAfter.map { it.flightID }.distinct()
+            val state = changedIDs.associateWith { id ->
+                FlightState(changesBefore.firstOrNull { it.flightID == id }, changesAfter.firstOrNull { it.flightID == id })
+            }
+            pushUndo(state)
         }
     }
 
-    private suspend fun generateSaveFlightsAction(flightsToSave: Collection<Flight>) = suspend {
-        repositoryWithDirectAccess.save(flightsToSave)
-    }
-
-    private fun generateDeleteFlightsAction(flightsToSave: Collection<Flight>) = suspend {
-        repositoryWithDirectAccess.delete(flightsToSave)
-    }
-
-    /*
-     * The idea is that if a flight was overwritten, it can overwrite back.
-     * If there was no flight overwritten (so "null" result), no flight will be saved on undo
-     */
-    private fun generateUndoSaveFlightsAction(
-        newFlights: Collection<Flight>,
-        overwrittenFlights: Collection<Flight>
-    ): () -> Unit = {
-        MainScope().launch {
-            repositoryWithDirectAccess.deleteHard(newFlights)
-            // bypasses new ID generation;
-            // timestamp is updated so syncing will not place back [newFlights] if they had been synced already.
-            //  - [overwrittenFlights] are sent to the server again instead.
-            repositoryWithDirectAccess.saveDirectToDB(overwrittenFlights)
-        }
-    }
-
-
-    private suspend fun executeUndoableCommand(command: UndoableCommand){
-        undoStack.push(command)
-        redoStack.clear()
-        undoAvailable = true
-        command()
+    private data class FlightState(val before: Flight?, val after: Flight?){
+        fun revert() = FlightState(after, before)
     }
 
     companion object{

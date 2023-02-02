@@ -28,7 +28,6 @@ import nl.joozd.logbookapp.data.importing.results.SavePlannedFlightsResult
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 
 interface ImportedFlightsSaver {
@@ -45,7 +44,7 @@ interface ImportedFlightsSaver {
 
         fun make(
             flightsRepo: FlightRepositoryWithUndo = FlightRepositoryWithUndo.instance,
-            flightRepositoryWithDirectAccess: FlightRepositoryWithDirectAccess = FlightRepositoryWithDirectAccess.instance,
+            flightRepositoryWithDirectAccess: FlightRepository = FlightRepository.instance,
             airportsRepo: AirportRepository = AirportRepository.instance,
             aircraftRepo: AircraftRepository = AircraftRepository.instance
         ): ImportedFlightsSaver{

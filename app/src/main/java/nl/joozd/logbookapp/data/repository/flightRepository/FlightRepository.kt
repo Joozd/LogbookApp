@@ -82,6 +82,21 @@ interface FlightRepository {
     suspend fun delete(flights: Collection<Flight>)
 
     /**
+     * Delete a collection of flights. This will remove them from DB.
+     */
+    suspend fun deleteById(ids: Collection<Int>)
+
+    /**
+     * Delete a collection of flights. This will remove them from DB.
+     */
+    suspend fun deleteById(id: Int)
+
+    /**
+     * Delete entire Flights DB
+     */
+    suspend fun clear()
+
+    /**
      * Generate a flight ID that can safely be used to save a new flight to DB at a later point.
      * @param highestTakenID: Lowest ID that can be accepted for any new flight.
      *      - Any generated new ID can be equal or higher than this, but not lower.
@@ -90,21 +105,6 @@ interface FlightRepository {
      */
     suspend fun generateAndReserveNewFlightID(highestTakenID: Int = 1): Int
 
-    /**
-     * Register a listener that triggers whenever the Flights database gets changed.
-     * This should trigger on [save] and [delete].
-     * Functions that circumvent these functions to save data (e.g. in [FlightRepositoryWithDirectAccess]) will not trigger it.
-     * When no longer needed, unregister the listeners with [unregisterOnDataChangedListener]
-     * Registering the same listener multiple times should have no effect. (i.e. they are stored in a HashSet)
-     */
-    fun registerOnDataChangedListener(listener: OnDataChangedListener)
-
-    /**
-     * Unregister a listener registered by [registerOnDataChangedListener]
-     * @return true if successfully unregistered, false if listener was not found in registered listeners.
-     */
-    fun unregisterOnDataChangedListener(listener: OnDataChangedListener): Boolean
-
     fun interface OnDataChangedListener{
         fun onFlightRepositoryChanged(changedFlightIDs: List<Int>)
     }
@@ -112,9 +112,9 @@ interface FlightRepository {
 
     companion object{
         //If changing concrete class, change it in mock() as well!
-        val instance: FlightRepository get() = FlightRepositoryWithDirectAccess.instance
+        val instance: FlightRepository get() = FlightRepositoryImpl.instance
 
         fun mock(mockDataBase: JoozdlogDatabase): FlightRepository =
-            FlightRepositoryWithDirectAccess.mock(mockDataBase)
+            FlightRepositoryImpl(mockDataBase)
     }
 }

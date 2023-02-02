@@ -60,6 +60,9 @@ interface FlightDao {
     @Delete
     suspend fun delete(flightData: Collection<FlightData>)
 
+    @Query("DELETE FROM FlightData WHERE flightID IN (:ids)")
+    suspend fun deleteById(ids: Collection<Int>)
+
     @Query("DELETE FROM FlightData")
     suspend fun clear()
 }

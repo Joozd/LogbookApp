@@ -9,20 +9,22 @@ import androidx.lifecycle.lifecycleScope
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
 import com.journeyapps.barcodescanner.ScanOptions
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.comm.Cloud
+import nl.joozd.logbookapp.core.App
+import nl.joozd.logbookapp.data.importing.merging.mergeFlightsLists
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
+import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.databinding.ActivitySharingBinding
 import nl.joozd.logbookapp.exceptions.CloudException
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.sharing.P2PSessionMetaData
 import nl.joozd.logbookapp.sharing.makeQRCodeFromStringAndPutInImageView
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
-import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import nl.joozd.logbookapp.utils.QR.QRFunctions
 import nl.joozd.serializing.packSerializable
@@ -107,28 +109,31 @@ class SharingActivity : JoozdlogActivity() {
             Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
         } else {
             Toast.makeText(this, "Scanned: " + result.contents, Toast.LENGTH_LONG).show()
-            lifecycleScope.launch {
-                handleResult(result.contents)
+            MainScope().launch { // this scope can live longer than activity, needs to keep working in background if activity left
+                val amount = handleResult(result.contents)
+                Toast.makeText(App.instance, "KLAAR IS KEES ($amount) ", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    private suspend fun handleResult(result: String){
+    private suspend fun handleResult(result: String): Int{
         println("HandleResult")
         val p2pData = P2PSessionMetaData.ofJsonString(result)
         println("HandleResult - ${p2pData.sessionID}")
         val receivedData = Cloud().receiveP2PData(p2pData.sessionID)
 
-        if (replace == true) {
-            FlightRepositoryWithDirectAccess.instance.apply {
-                println("Replacing all flights!!!!! zOMG")
+        val receivedFlights = unpackFlights(receivedData)
+        FlightRepositoryWithUndo.instance.singleUndoableOperation {
+            if (replace == true) {
                 clear()
-                save(unpackFlights(receivedData))
+                save(receivedFlights)
+            } else {
+                val allFlights = getAllFlights()
+                clear()
+                save(mergeFlightsLists(allFlights, receivedFlights))
             }
         }
-        else {
-            toast("Not supported yet")
-        }
+        return receivedFlights.size
     }
 
     private suspend fun unpackFlights(receivedData: ByteArray) =

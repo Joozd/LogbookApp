@@ -36,7 +36,7 @@ import nl.joozd.logbookapp.utils.delegates.dispatchersProviderMainScope
 
 class FlightRepositoryImpl(
     injectedDatabase: JoozdlogDatabase?
-) : FlightRepositoryWithDirectAccess, FlightRepositoryWithSpecializedFunctions, CoroutineScope by dispatchersProviderMainScope() {
+) : FlightRepositoryWithSpecializedFunctions, CoroutineScope by dispatchersProviderMainScope() {
     private constructor(): this (null)
 
     private val database = injectedDatabase ?: JoozdlogDatabase.getInstance() // this way we can detect if a DB is injected
@@ -58,9 +58,6 @@ class FlightRepositoryImpl(
     override suspend fun getFlightsStartingInEpochSecondRange(range: ClosedRange<Long>) {
         flightDao.getFlightsStartingBetween(range.start, range.endInclusive).map{ it.toFlight() }
     }
-
-    override suspend fun getAllFlightsInDB(): List<Flight> =
-        flightDao.getAllFlights().map { it.toFlight() }
 
     override fun allFlightsFlow(): Flow<List<Flight>> =
         flightDao.validFlightsFlow().map { it.toFlights() }
@@ -86,63 +83,31 @@ class FlightRepositoryImpl(
         }
     }
 
-    override suspend fun <T> doLocked(block: suspend FlightRepositoryWithDirectAccess.() -> T): T =
-        noParallelAccessMutex.withLock {
-            this.block()
-        }
-
-    //not locked, lock this with [doLocked]
-    override suspend fun saveDirectToDB(flight: Flight) {
-        saveDirectToDB(listOf(flight))
-    }
-
-    //not locked, lock this with [doLocked]
-    override suspend fun saveDirectToDB(flights: Collection<Flight>) {
-            //If size too big, it will chunk and retry.
-            if (flights.size > MAX_SQL_BATCH_SIZE)
-                flights.chunked(MAX_SQL_BATCH_SIZE).forEach { withContext(DispatcherProvider.io()) { saveDirectToDB(it) } }
-
-            else withContext(DispatcherProvider.io()) {
-                withContext(DispatcherProvider.io()) { flightDao.save(flights.map { it.toData() }) }
-            }
-    }
-
     override suspend fun delete(flight: Flight) {
         delete(listOf(flight))
     }
 
     override suspend fun delete(flights: Collection<Flight>) {
         noParallelAccessMutex.withLock {
-            deleteHard(flights)
-            registeredDataChangedListeners.forEach { listener ->
-                listener.onFlightRepositoryChanged(flights.map { it.flightID })
-            }
+            flights.chunked(MAX_SQL_BATCH_SIZE).forEach { flights -> flightDao.delete(flights.map { it.toData() }) }
         }
     }
+
+    override suspend fun deleteById(ids: Collection<Int>) {
+        ids.chunked(MAX_SQL_BATCH_SIZE).forEach { chunkedIDs ->flightDao.deleteById(chunkedIDs) }
+    }
+
+    override suspend fun deleteById(id: Int) = deleteById(listOf(id))
 
     override suspend fun generateAndReserveNewFlightID(highestTakenID: Int): Int =
         idGenerator.generateID(highestTakenID)
 
-    //not locked, lock this with [doLocked]
-    override suspend fun deleteHard(flight: Flight) {
-        deleteHard(listOf(flight))
-    }
 
-    //not locked, lock this with [doLocked]
-    override suspend fun deleteHard(flights: Collection<Flight>) {
-        //If size too big, it will chunk and retry.
-        if (flights.size > MAX_SQL_BATCH_SIZE)
-            flights.chunked(MAX_SQL_BATCH_SIZE).forEach { deleteHard(it)}
-
-        else withContext(DispatcherProvider.io()) {
-            flightDao.delete(flights.map { it.toData() })
-        }
-    }
-
-    //not locked, lock this with [doLocked]
     override suspend fun clear() {
+        noParallelAccessMutex.withLock {
             flightDao.clear()
             println("Cleared FlightRepository DB: ${getAllFlights().size} flights now in DB")
+        }
     }
 
     override suspend fun getMostRecentCompletedFlight(): Flight? =
@@ -153,17 +118,9 @@ class FlightRepositoryImpl(
     override suspend fun removeDuplicates(): Int {
         val ff = getAllFlights().map { it.toBasicFlight() }
         val duplicates = withContext (DispatcherProvider.default()) { checkForDuplicates(ff) }
-        deleteHard(duplicates.map { Flight(it) })
+        delete(duplicates.map { Flight(it) })
         return duplicates.size
     }
-
-    override fun registerOnDataChangedListener(listener: FlightRepository.OnDataChangedListener) {
-        registeredDataChangedListeners.add(listener)
-    }
-
-    override fun unregisterOnDataChangedListener(listener: FlightRepository.OnDataChangedListener): Boolean =
-        registeredDataChangedListeners.remove(listener)
-
 
     private fun List<FlightData>.toFlights() =
         this.map { it.toFlight() }
@@ -174,7 +131,14 @@ class FlightRepositoryImpl(
      * - This will also set TaskFlags.syncFlights as saving something with an updated timestamp will always warrant a sync.
      */
     private suspend fun saveWithIDAndTimestamp(flights: Collection<Flight>) =
-        saveDirectToDB(flights.updateIDsIfNeeded())
+        flights.chunked(MAX_SQL_BATCH_SIZE).forEach { chunkOfFlights ->
+            withContext(DispatcherProvider.io()) {
+                flightDao.save(chunkOfFlights.updateIDsIfNeeded().map {
+                    it.toData()
+                })
+            }
+        }
+
 
     private suspend fun Collection<Flight>.updateIDsIfNeeded(): List<Flight> {
         //make sure generated fLightIDs are incremented far enough

@@ -32,12 +32,10 @@ import nl.joozd.logbookapp.data.importing.results.SavePlannedFlightsResult
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithDirectAccess
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.data.repository.helpers.iataToIcaoAirports
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.InsertedUndoableCommand
 
 
 /**
@@ -46,15 +44,16 @@ import nl.joozd.logbookapp.utils.InsertedUndoableCommand
  */
 class ImportedFlightsSaverImpl(
     private val flightsRepoWithUndo: FlightRepositoryWithUndo,
-    private val flightsRepoWithDirectAccess: FlightRepositoryWithDirectAccess,
+    private val flightsRepoWithDirectAccess: FlightRepository,
     private val airportRepository: AirportRepository,
     private val aircraftRepository: AircraftRepository
 ): ImportedFlightsSaver {
     override suspend fun replace(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult {
         val flights = makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(completeLogbook)?: emptyList()
-        val command = makeReplaceDBCommand(flights)
-        command()
-        flightsRepoWithUndo.insertUndoAction(command)
+        flightsRepoWithUndo.singleUndoableOperation {
+            clear()
+            save(flights)
+        }
         return SaveCompleteLogbookResult(true)
     }
 
@@ -69,9 +68,10 @@ class ImportedFlightsSaverImpl(
         val flightsOnDevice = flightsRepoWithUndo.getAllFlights()
         val mergedFlights = mergeFlightsLists(flightsOnDevice, flights)
 
-        val command = makeReplaceDBCommand(mergedFlights)
-        command()
-        flightsRepoWithUndo.insertUndoAction(command)
+        flightsRepoWithUndo.singleUndoableOperation {
+            clear()
+            save(mergedFlights)
+        }
         return SaveCompleteLogbookResult(true)
     }
 
@@ -127,19 +127,6 @@ class ImportedFlightsSaverImpl(
         repo.save(mergedFlights + newFlights)
 
         return SavePlannedFlightsResult(true)
-    }
-
-    private suspend fun makeReplaceDBCommand(mergedFlights: List<Flight>): InsertedUndoableCommand {
-        val currentFlightsInDB = flightsRepoWithDirectAccess.getAllFlightsInDB()
-        val action = suspend {
-            flightsRepoWithDirectAccess.clear()
-            flightsRepoWithDirectAccess.save(mergedFlights)
-        }
-        val undoAction = suspend {
-            flightsRepoWithDirectAccess.clear()
-            flightsRepoWithDirectAccess.save(currentFlightsInDB)
-        }
-        return InsertedUndoableCommand(action = action, undoAction = undoAction)
     }
 
     /*

@@ -50,12 +50,6 @@ class ImportedFlightsSaverImpl(
     private val airportRepository: AirportRepository,
     private val aircraftRepository: AircraftRepository
 ): ImportedFlightsSaver {
-    /**
-     * Merge a complete logbook into current logbook.
-     * Only checks for exact time, orig and dest matches, otherwise will allow overlapping flights.
-     * Imported flights will be merged onto flights already in logbook
-     * @see mergeFlights
-     */
     override suspend fun replace(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult {
         val flights = makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(completeLogbook)?: emptyList()
         val command = makeReplaceDBCommand(flights)
@@ -64,6 +58,12 @@ class ImportedFlightsSaverImpl(
         return SaveCompleteLogbookResult(true)
     }
 
+    /**
+     * Merge a complete logbook into current logbook.
+     * Only checks for exact time, orig and dest matches, otherwise will allow overlapping flights.
+     * Imported flights will be merged onto flights already in logbook
+     * @see mergeFlights
+     */
     override suspend fun merge(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult {
         val flights = makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(completeLogbook)?: emptyList()
         val flightsOnDevice = flightsRepoWithUndo.getAllFlights()
@@ -130,11 +130,11 @@ class ImportedFlightsSaverImpl(
     }
 
     private suspend fun makeReplaceDBCommand(mergedFlights: List<Flight>): InsertedUndoableCommand {
+        val currentFlightsInDB = flightsRepoWithDirectAccess.getAllFlightsInDB()
         val action = suspend {
             flightsRepoWithDirectAccess.clear()
             flightsRepoWithDirectAccess.save(mergedFlights)
         }
-        val currentFlightsInDB = flightsRepoWithDirectAccess.getAllFlightsInDB()
         val undoAction = suspend {
             flightsRepoWithDirectAccess.clear()
             flightsRepoWithDirectAccess.save(currentFlightsInDB)

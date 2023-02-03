@@ -17,7 +17,6 @@ abstract class BackgroundTasksDispatcher {
     protected fun Flow<Boolean>.doIfTrueEmitted(activity: JoozdlogActivity, block: () -> Unit) = activity.lifecycleScope.launch {
         activity.repeatOnLifecycle(Lifecycle.State.STARTED) {
             collect {
-                println("collected $it")
                 if (it)
                     block()
             }

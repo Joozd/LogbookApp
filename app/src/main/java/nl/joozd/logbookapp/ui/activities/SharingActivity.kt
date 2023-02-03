@@ -53,7 +53,6 @@ class SharingActivity : JoozdlogActivity() {
     private fun ActivitySharingBinding.initializeSendButton() {
         sendButton.setOnClickListener {
             sendButtonClicked()
-            hideButtons()
         }
     }
 
@@ -74,6 +73,8 @@ class SharingActivity : JoozdlogActivity() {
     }
 
     private fun ActivitySharingBinding.sendButtonClicked() {
+        hideButtons()
+        loadingCircle.visibility = View.VISIBLE
         lifecycleScope.launch {
             val data = withContext(DispatcherProvider.default()) { packSerializable(FlightRepository.instance.getAllFlights().map { it.toBasicFlight() }) }
             val key = "NO KEY".toByteArray()
@@ -86,6 +87,7 @@ class SharingActivity : JoozdlogActivity() {
                 return@launch
             }
             val p2pData = P2PSessionMetaData(id, key)
+            loadingCircle.visibility = View.GONE
             makeQRCodeFromStringAndPutInImageView(
                 qrCodeImageView,
                 QRFunctions.makeJsonStringWithAction(ACTION_IDENTIFIER_XFER, *p2pData.keyDataPairs)

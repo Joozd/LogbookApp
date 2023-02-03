@@ -89,7 +89,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
         val extractedLogbookAsync = withContext (Dispatchers.Default) { async { file.extractCompletedFlights() } }
 
         //This will continue the process
-        askIfDataShouldBeSanitized(extractedLogbookAsync)
+        askIfDataShouldBeSanitizedAndContinue(extractedLogbookAsync)
     }
 
     private suspend fun parseCompletedFlights(file: CompletedFlightsFile){
@@ -116,7 +116,8 @@ class SingleUseImportIntentHandler: CoroutineScope {
     private suspend fun extractAndAutocomplete(file: PlannedFlightsFile) =
         ImportedLogbookAutoCompleter().autocomplete(file.extractPlannedFlights())
 
-    private fun askIfDataShouldBeSanitized(extractedLogbookAsync: Deferred<ExtractedCompleteLogbook>){
+    // This will start a sequence of questions (ask if data should be sanitized, then ask if user wants to merge or replace)
+    private fun askIfDataShouldBeSanitizedAndContinue(extractedLogbookAsync: Deferred<ExtractedCompleteLogbook>){
         // Will give user a choice to run [sanitizeLogbook] before running [askIfReplaceOrMerge]
         status = buildAutoValuesCompleteLogbookChoice(extractedLogbookAsync)
     }

@@ -19,4 +19,4 @@
 
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
-class UnsupportedCsvFile(csvData: List<String>): UnsupportedFile(csvData)
+class UnsupportedCsvFile(): UnsupportedFile()

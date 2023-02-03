@@ -75,15 +75,13 @@ class MccPilotLogExtractor: CompleteLogbookExtractor {
                     landingNight = landingNight(index)
                         ?: throw IllegalArgumentException("failed at 22"),
                     autoLand = autoLand(index) ?: throw IllegalArgumentException("failed at 23"),
-                    remarks = getRemarks(index) ?: throw IllegalArgumentException("failed at 24")
-
+                    remarks = getRemarks(index) ?: throw IllegalArgumentException("failed at 24"),
+                    isPlanned = false
                 )
             }
         }catch (iae: IllegalArgumentException){
-            println("Bad data in $line: ${iae.message}")
             null
         } catch (e: Exception){
-            println("Bad data in $line")
             null
         }
 
@@ -97,10 +95,8 @@ class MccPilotLogExtractor: CompleteLogbookExtractor {
                 else LocalDate.of(dmy[2], dmy[1], dmy[0])
             }
     } catch (e: DateTimeException){
-        println("Bad data received: ${index[DATE]?.let{ getOrNull(it) }} does not make a correct date.")
         null
     } catch (e: NumberFormatException){
-        println("Bad data received: ${index[DATE]?.let{ getOrNull(it) }} is not a valid date string.")
         null
     }
 
@@ -111,8 +107,8 @@ class MccPilotLogExtractor: CompleteLogbookExtractor {
         index[DEST]?.let{ getOrNull(it) }
 
     private fun List<String>.makeTimeOut(index: Map<String, Int>): Long? {
-        val s = index[TIME_OUT]?.let{ getOrNull(it) } ?: return null.also { println("error 2")}
-        val date = makeDate(index) ?: return null.also { println("error 3")}
+        val s = index[TIME_OUT]?.let{ getOrNull(it) } ?: return null
+        val date = makeDate(index) ?: return null
         return makeTime(s, date)
     }
 

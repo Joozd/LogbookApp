@@ -22,12 +22,12 @@ package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
-import android.os.Build.VERSION.SDK_INT
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import nl.joozd.joozdlogimporter.CsvImporter
 import nl.joozd.joozdlogimporter.PdfImporter
+import nl.joozd.joozdlogimporter.TxtImporter
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
@@ -69,9 +69,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
 
     private suspend fun getFileAndStartAppropriateParser(intent: Intent, contentResolver: ContentResolver){
         status = HandlerStatus.READING_URI
-        val file = getFileFromIntent(intent, contentResolver) ?: return
-
-        when(file){
+        when(val file = getFileFromIntent(intent, contentResolver)){
             is CompleteLogbookFile -> parseCompleteLogbook(file)
             is CompletedFlightsFile -> parseCompletedFlights(file)
             is PlannedFlightsFile -> parsePlannedFlights(file)
@@ -219,15 +217,9 @@ class SingleUseImportIntentHandler: CoroutineScope {
 
     private suspend fun getFileFromIntent(intent: Intent, contentResolver: ContentResolver) =
         withContext(DispatcherProvider.io()) {
-            getTypeDetector(intent.getUri(), contentResolver)
-                ?.getFile()
+            getTypeDetector(intent.data, contentResolver)
+                ?.getFile() ?: UnsupportedFile()
         }
-
-    private fun Intent.getUri() = when {
-        SDK_INT >= 33 -> getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-        else -> @Suppress("DEPRECATION") getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
-    }
-
 
     private suspend fun getTypeDetector(
         uri: Uri?,
@@ -236,13 +228,15 @@ class SingleUseImportIntentHandler: CoroutineScope {
         uri?.getInputStream(contentResolver)?.use { inputStream ->
             val mimeType = contentResolver.getType(uri) ?: "NONE"
 
-            @Suppress("BlockingMethodInNonBlockingContext") // unblocked with Dispatchers.IO
             val detector = when {
                 mimeType.isPdfMimeType() -> withContext(DispatcherProvider.io()) {
                     PdfImporter.ofInputStream(inputStream)
                 }
                 mimeType.isCsvMimeType() -> withContext(DispatcherProvider.io()) {
                     CsvImporter.ofInputStream(inputStream)
+                }
+                mimeType.isTxtMimeType() -> withContext(DispatcherProvider.io()) {
+                    TxtImporter.ofInputStream(inputStream)
                 }
                 else -> {
                     status = HandlerError(R.string.unknown_file_message)
@@ -273,5 +267,6 @@ class SingleUseImportIntentHandler: CoroutineScope {
     private fun String.isPdfMimeType() =
         "application/pdf" in this
 
-
+    private fun String.isTxtMimeType() =
+        "text/plain" in this
 }

@@ -92,7 +92,8 @@ class LogtenProExtractor: CompleteLogbookExtractor {
             isDual = isDual,
             isInstructor = isInstructor,
             isSim = isSim,
-            isPF = isPF
+            isPF = isPF,
+            isPlanned = false
         )
     }
 

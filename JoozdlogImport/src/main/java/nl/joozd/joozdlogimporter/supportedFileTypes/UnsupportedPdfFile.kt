@@ -19,4 +19,4 @@
 
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
-class UnsupportedPdfFile(rawPdfData: List<String>): UnsupportedFile(rawPdfData)
+class UnsupportedPdfFile: UnsupportedFile()

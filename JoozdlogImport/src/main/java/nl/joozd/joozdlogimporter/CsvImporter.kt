@@ -39,7 +39,7 @@ class CsvImporter(private val lines: List<String>): FileImporter() {
         ?: MccPilotLogFile.buildIfMatches(lines)
         ?: LogTenProFile.buildIfMatches(lines)
 
-        ?: UnsupportedCsvFile(lines)
+        ?: UnsupportedCsvFile()
 
     companion object{
         @Throws(IOException::class)

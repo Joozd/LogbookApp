@@ -42,7 +42,7 @@ class PdfImporter(private val lines: List<String>): FileImporter() {
             ?: KlcMonthlyFile.buildIfMatches(lines)
             ?: KlmIcaRosterFile.buildIfMatches(lines)
             ?: KlmIcaMonthlyFile.buildIfMatches(lines)
-            ?: UnsupportedPdfFile(lines)
+            ?: UnsupportedPdfFile()
 
     companion object{
         @Throws(IOException::class)

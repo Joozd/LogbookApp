@@ -17,6 +17,7 @@
 ##### fixed issues
 - \#1: Many logins to server when creating new user
 - \#2: Augmented crew times standard value not used
+- \#3: On a new install, enabling calendar sync requires clicking "calendar on this device" twice
 - \#5: Submitting feedback should close feedback activity
 - \#6: Saving a "simulator" flight saves PIC name which is not in the dialog
 - \#8: Clarify that augmented takeoff/landing should include taxi time 

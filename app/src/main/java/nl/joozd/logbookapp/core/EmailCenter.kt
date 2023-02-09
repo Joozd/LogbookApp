@@ -28,7 +28,6 @@ package nl.joozd.logbookapp.core
 
 import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import nl.joozd.joozdlogcommon.EmailData
 import nl.joozd.logbookapp.comm.migrateEmail
@@ -68,13 +67,7 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags, private val pref
 
     //requesting a verification email is done by just re-submitting current email address.
     fun requestEmailVerificationMail(){
-        println(taskFlags.updateEmailWithServer.valueBlocking)
-        println("KOEDOE")
         taskFlags.updateEmailWithServer(true)
-        MainScope().launch{
-            delay(500)
-            println("And now it is ${taskFlags.updateEmailWithServer.valueBlocking}")
-        }
     }
 
     /**

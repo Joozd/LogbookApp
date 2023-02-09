@@ -30,7 +30,6 @@ class Cloud(
      * Throws CloudException on failure.
      */
     suspend fun sendNewEmailAddress(emailAddress: String): Long {
-        println("BOTERHAMZAKJE sending new email address")
         val data = EmailData(EmailData.EMAIL_ID_NOT_SET, emailAddress, ByteArray(0))
         val result = responseForRequestOrException(JoozdlogCommsRequests.SET_EMAIL, data)
         return unwrapLong(result)
@@ -73,17 +72,12 @@ class Cloud(
     }
 
     suspend fun sendP2PData(data: ByteArray): Long {
-        println("SendP2PData (${data.size})")
         return unwrapLong(responseForRequestOrException(JoozdlogCommsRequests.SENDING_P2P_DATA, data))
     }
 
     suspend fun receiveP2PData(sessionID: Long): ByteArray {
-        println("receiveP2PData")
         val payload = wrap(sessionID)
-        println("wrapped session ID")
-        return responseForRequestOrException(JoozdlogCommsRequests.REQUEST_P2P_DATA, payload).also{
-            println("receiveP2PData returns ${it.size} bytes")
-        }
+        return responseForRequestOrException(JoozdlogCommsRequests.REQUEST_P2P_DATA, payload)
     }
 
     private suspend fun client() = Client.getInstance(server, port)
@@ -122,11 +116,6 @@ class Cloud(
     fun interface ProgressListener{
         fun progress(progress: Int)
     }
-
-    // Pass this to functions giving a result to get returned data.
-    // The return of the function will only be a CloudFunctionResult, so if you want anything else you can drop it in here.
-    data class Result<T>(var value: T? = null)
-
 
     companion object {
         private val clientMutex = Mutex() // Only one client connection at a time. More can cause problems when changing password or stuff like that.

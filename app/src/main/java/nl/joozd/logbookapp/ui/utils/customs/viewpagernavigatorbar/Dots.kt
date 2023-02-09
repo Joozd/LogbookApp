@@ -219,7 +219,6 @@ class Dots(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRe
      */
     private fun updateView(){
         val totalWidth = if (amountOfDots == 0) 0 else (amountOfDots-1) * spacing + maxDotSize
-        println("TOTALWIDTH: $totalWidth, amountOFDots: $amountOfDots, spacing: $spacing, maxDotSize: $maxDotSize")
         removeAllViews()
         layoutParams = LayoutParams(totalWidth, maxDotSize)
         ConstraintSet().apply{

@@ -21,15 +21,11 @@ package nl.joozd.logbookapp.ui.activities
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityMakePdfBinding
@@ -87,7 +83,6 @@ class MakePdfActivity : JoozdlogActivity() {
 
     private fun ActivityMakePdfBinding.startCollectors(){
         viewModel.progressFlow.launchCollectWhileLifecycleStateStarted{
-            println("Progress is $it")
             writingProgressBar.progress = (it * PROGRESS_BAR_RESOLUTION).toInt()
         }
         collectStatus()

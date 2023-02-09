@@ -122,9 +122,7 @@ class MainActivity : JoozdlogActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        println("HANDLE_INTENT()")
         intent?.let {
-            println("GOT INTENT $intent with data ${intent.data}")
             lifecycleScope.launch {
                 IntentHandler(it).handle()
             }

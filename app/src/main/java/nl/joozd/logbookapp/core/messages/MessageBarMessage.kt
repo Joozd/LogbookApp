@@ -46,7 +46,6 @@ abstract class MessageBarMessage: PersistentMessage {
 
     fun clearMessage(activity: JoozdlogActivity) {
         with(activity) {
-            println("clearMessage in MessageBarMessage ${this@MessageBarMessage::class.simpleName}")
             lifecycleScope.launch {
                 supportFragmentManager.removeByTagAnimated(MESSAGE_BAR_FRAGMENT_TAG, R.anim.slide_out_to_top){
                     messageNeedsToBeDisplayedFlag(false)

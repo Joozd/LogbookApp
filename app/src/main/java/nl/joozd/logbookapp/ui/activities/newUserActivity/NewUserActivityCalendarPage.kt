@@ -40,12 +40,9 @@ class NewUserActivityCalendarPage: NewUseractivityPage() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = ActivityNewUserPageCalendarBinding.bind(layoutInflater.inflate(R.layout.activity_new_user_page_calendar, container, false)).apply {
-            println("at onCreateView: ${Prefs.useCalendarSync.valueBlocking}")
             useCalendarImportSwitch.bindToFlow(Prefs.useCalendarSync.flow)
             collectCalendarSyncFlow()
             useCalendarImportSwitch.setOnClickListener {
-                println("Clicked useCalendarImportSwitch")
-                println("before action: ${Prefs.useCalendarSync.valueBlocking}")
                 disableCalendarSyncOrShowDialog()
 
             }

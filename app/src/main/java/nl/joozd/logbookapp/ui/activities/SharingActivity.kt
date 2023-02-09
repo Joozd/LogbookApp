@@ -119,9 +119,7 @@ class SharingActivity : JoozdlogActivity() {
     }
 
     private suspend fun handleResult(result: String): Int{
-        println("HandleResult")
         val p2pData = P2PSessionMetaData.ofJsonString(result)
-        println("HandleResult - ${p2pData.sessionID}")
         val receivedData = Cloud().receiveP2PData(p2pData.sessionID)
 
         val receivedFlights = unpackFlights(receivedData)

@@ -464,7 +464,6 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
      * Set all data for page at [position]
      */
     private fun loadPage(position: Int){
-        println("Loading page $position")
         dots?.activateDot(position)
         adapter?.let { a ->
             a.previousButtonEnabled(position)?.let { previousEnabled = it }

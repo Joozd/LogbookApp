@@ -37,12 +37,10 @@ class PdfLogbookBuilder(
             val originalListSize = allFlights.size
             val flightsPerPage = PdfLogbookDrawing.maxLines
             val amountOfPagesWithFlights = getAmountOfPages(originalListSize, flightsPerPage)
-            println("amountOfPagesWithFlights = $amountOfPagesWithFlights")
 
             currentPage += insertLeadingPages()
             // plus one because page numbering starts with 1; works nice because some work is also already done by this point
             progressKeeper.numberOfLastPage = currentPage + amountOfPagesWithFlights
-            println("progressKeeper.numberOfLastPage = currentPage + amountOfPagesWithFlights - ${progressKeeper.numberOfLastPage} = ${currentPage + amountOfPagesWithFlights}")
 
 
             //fill Totals Forward with balance forward totals
@@ -66,7 +64,6 @@ class PdfLogbookBuilder(
              */
             while (allFlights.isNotEmpty() && isActive) {
                 val currentFlights = allFlights.popFirstNElements(flightsPerPage)
-                println("Currently on page $currentPage")
 
                 addPage(++currentPage) {
                     PdfLogbookDrawing(canvas)
@@ -85,7 +82,6 @@ class PdfLogbookBuilder(
     }
 
     fun registerProgressListener(listener: ProgressListener){
-        println("Registered $listener")
         progressListeners.add(listener)
     }
 
@@ -123,9 +119,7 @@ class PdfLogbookBuilder(
         var currentProgress = 0
         set(it){
             field = it
-            println("New progress is $it (out of $numberOfLastPage)")
             val p = currentProgress.toDouble() / numberOfLastPage
-            println("Dus p is $p")
             progressListeners.forEach { l ->
                 l.onProgressChanged(p)
             }

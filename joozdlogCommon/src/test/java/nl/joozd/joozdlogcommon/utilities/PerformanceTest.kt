@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import kotlin.system.measureNanoTime
 
-class Performance {
+class PerformanceTest {
     private val testDataFile1 = "C:\\joozdlog\\wip\\meelworm.csv"
     private val testDataFile2 = "C:\\joozdlog\\wip\\joozd.csv"
 

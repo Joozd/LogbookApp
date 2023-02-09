@@ -51,7 +51,6 @@ abstract class DialogMessage: Message {
     }
 
     fun clearMessage(activity: JoozdlogActivity) {
-        println("QQQQQQQQQQQQQ clearMessage called")
         activity.supportFragmentManager.findFragmentByTag(messageTag)?.let {
             activity.supportFragmentManager.commit { remove(it) }
         }

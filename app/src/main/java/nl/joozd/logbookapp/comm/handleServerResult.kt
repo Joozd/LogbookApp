@@ -34,7 +34,6 @@ fun handleServerResultAndThrowExceptionOnError(serverResult: ByteArray?) =
     handleServerResultAndThrowExceptionOnError(serverResult?.toString(Charsets.UTF_8))
 
 private fun handleUnknownOrUnverifiedEmail(): CloudFunctionResult {
-    println("BOTERHAMZAKJE")
     EmailCenter().invalidateEmail()
     MessageCenter.scheduleMessage(MessageBarMessage.UNKNOWN_OR_UNVERIFIED_EMAIL)
     //pushMessage(MessagesOld.unknownOrUnverifiedEmailMessage)

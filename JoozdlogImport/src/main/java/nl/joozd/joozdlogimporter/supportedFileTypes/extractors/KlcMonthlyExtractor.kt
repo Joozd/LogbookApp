@@ -44,7 +44,6 @@ class KlcMonthlyExtractor: CompletedFlightsExtractor {
         return try{
             matchesToBasicFlights(matches, monthStart)
         } catch (e: IllegalStateException){
-            println("Error while parsing: ${e.message}")
             null
         }
     }
@@ -129,7 +128,6 @@ class KlcMonthlyExtractor: CompletedFlightsExtractor {
         const val DEST = 5
         const val REGISTRATION = 6
         const val TIME_IN = 7
-        const val TOTAL_TIME = 8
 
         const val ONE_DAY_IN_SECONDS = 86400L
     }

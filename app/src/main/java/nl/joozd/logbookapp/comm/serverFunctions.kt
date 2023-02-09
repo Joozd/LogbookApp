@@ -34,7 +34,6 @@ suspend fun updateEmailAddressOnServer(cloud: Cloud = Cloud(), emailPrefs: Email
         TaskFlags.updateEmailWithServer(true)
         return
     }
-    println("setting updateEmailWithServer to false")
     TaskFlags.updateEmailWithServer(false)
 }
 

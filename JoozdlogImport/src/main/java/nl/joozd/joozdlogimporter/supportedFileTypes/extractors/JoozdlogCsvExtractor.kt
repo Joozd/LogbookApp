@@ -44,5 +44,5 @@ class JoozdlogCsvExtractor: CompleteLogbookExtractor {
     }
 
     private fun csvFlightToBasicFlightv5(csvFlight: String): BasicFlight =
-        BasicFlight.ofCsv(csvFlight.also{ println("making flight of $it ")})
+        BasicFlight.ofCsv(csvFlight)
 }

@@ -106,7 +106,6 @@ class FlightRepositoryImpl(
     override suspend fun clear() {
         noParallelAccessMutex.withLock {
             flightDao.clear()
-            println("Cleared FlightRepository DB: ${getAllFlights().size} flights now in DB")
         }
     }
 

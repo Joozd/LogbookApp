@@ -21,10 +21,8 @@ inline fun <reified  T: Fragment> FragmentActivity.showFragment(
     addToBackStack: Boolean = true)
 {
     supportFragmentManager.commit{
-        println("COMMITTING")
         setReorderingAllowed(true)
         add<T>(containerViewId, tag = tag, args = args)
-        println("containrs: ${findViewById<View>(containerViewId)}")
         if (addToBackStack) addToBackStack(tag)
     }
 }

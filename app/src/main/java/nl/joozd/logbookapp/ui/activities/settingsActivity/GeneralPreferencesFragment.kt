@@ -24,7 +24,6 @@ class GeneralPreferencesFragment: JoozdlogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivitySettingsGeneralBinding.bind(inflater.inflate(R.layout.activity_settings_general, container, false)).apply {
-            println("LAUNCHGIN ADSIKGFSADFIGHSDGH")
             launchFlowCollectors()
             setOnClickListeners()
             initializeDarkModeSpinner()

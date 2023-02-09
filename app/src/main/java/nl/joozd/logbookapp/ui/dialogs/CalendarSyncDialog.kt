@@ -32,13 +32,13 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import nl.joozd.joozdcalendarapi.CalendarDescriptor
 import nl.joozd.joozdcalendarapi.getCalendars
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
@@ -68,6 +68,12 @@ class CalendarSyncDialog: JoozdlogFragment() {
                 showIcalLinkFoundDialog()
             }
 
+            if(ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED){
+                lifecycleScope.launch {
+                    fillCalendarsList()
+                }
+            }
+
             initializeCalendarPickerSpinner()
             launchFlowCollectors()
             setOnClickListeners()
@@ -80,8 +86,9 @@ class CalendarSyncDialog: JoozdlogFragment() {
             viewModel.calendarSyncType == CalendarSyncType.CALENDAR_SYNC_DEVICE
         calendarScraperRadioButton.setOnClickListener {
             lifecycleScope.launch {
-                fillCalendarsList()
-                viewModel.calendarScraperRadioButtonClicked()
+                //button only registers as clicked if permission given
+                if(!calendarScraperRadioButtonClicked())
+                    calendarScraperRadioButton.isChecked = false
             }
         }
 
@@ -95,14 +102,23 @@ class CalendarSyncDialog: JoozdlogFragment() {
         }
     }
 
-
-    private suspend fun fillCalendarsList(){
-        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
-            return
-        }
-        viewModel.fillCalendarsList( withContext(Dispatchers.IO) { requireActivity().getCalendars() })
+    // Returns true if click successfully sent to viewModel, false if not because no permission.
+    private fun calendarScraperRadioButtonClicked(): Boolean =
+        (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED).also{
+            if(it) {
+                lifecycleScope.launch {
+                    fillCalendarsList()
+                    viewModel.calendarScraperRadioButtonClicked()
+                }
+            }
+            else {
+                requestPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+            }
     }
+
+    @RequiresPermission(Manifest.permission.READ_CALENDAR)
+    private suspend fun fillCalendarsList() =
+        viewModel.fillCalendarsList( withContext(Dispatchers.IO) { requireActivity().getCalendars() })
 
     private fun DialogCalendarSyncBinding.initializeCalendarPickerSpinner(){
         calendarPickerSpinner.adapter = ArrayAdapter(
@@ -130,7 +146,6 @@ class CalendarSyncDialog: JoozdlogFragment() {
                 getAdapter().apply {
                     clear()
                     addAll(list.map { c -> c.displayName })
-                    selectSelectedCalendar(list)
                 }
             }
         }
@@ -169,9 +184,6 @@ class CalendarSyncDialog: JoozdlogFragment() {
             CalendarSyncType.CALENDAR_SYNC_DEVICE -> {
                 icalAddressLayout.visibility = View.INVISIBLE
                 calendarPickerSpinnerLayout.visibility = View.VISIBLE
-                lifecycleScope.launch {
-                    fillCalendarsList()
-                }
             }
             CalendarSyncType.CALENDAR_SYNC_ICAL -> {
                 icalAddressLayout.visibility = View.VISIBLE
@@ -185,19 +197,11 @@ class CalendarSyncDialog: JoozdlogFragment() {
         }
     }
 
-
-    private fun DialogCalendarSyncBinding.selectSelectedCalendar(list: List<CalendarDescriptor>) {
-        viewModel.selectedCalendar?.let { c ->
-            calendarPickerSpinner.setSelection(list.indexOf(c))
-        }
-    }
-
-
     private val requestPermissionLauncher =
         registerForActivityResult(RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
                 lifecycleScope.launch {
-                    fillCalendarsList()
+                    calendarScraperRadioButtonClicked() // this is only launched as a result of that button being clicked. It unclicks itslef when no permission received, so we reclick it here
                 }
             } else {
                 showNeedPermissionDialog()

@@ -35,15 +35,12 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
 
     private var status: CalendarDialogStatus? by CastFlowToMutableFlowShortcut(statusFlow)
 
-    val foundCalendarsFlow: StateFlow<List<CalendarDescriptor>?> = MutableStateFlow(null) // null until initialized with [fillCalendarsList]
-    val selectedCalendarFlow: StateFlow<CalendarDescriptor?> = MutableStateFlow(null) // null until initialized with [fillCalendarsList]
+    val foundCalendarsFlow: StateFlow<List<CalendarDescriptor>?> = MutableStateFlow(null)  // null until initialized with [fillCalendarsList]
+    val selectedCalendarFlow = makeSelectedCalendarFlow()                                       // null until foundCalendars is initialized
     val calendarSyncTypeFlow: StateFlow<CalendarSyncType?> = MutableStateFlow(null)
     private val calendarSyncIcalAddressFlow: StateFlow<String?> = MutableStateFlow(null) // will never be null because initialized here
 
     private var foundCalendars: List<CalendarDescriptor>? by CastFlowToMutableFlowShortcut(foundCalendarsFlow)
-
-    var selectedCalendar: CalendarDescriptor? by CastFlowToMutableFlowShortcut(selectedCalendarFlow)
-        private set
 
     var calendarSyncType: CalendarSyncType? by CastFlowToMutableFlowShortcut(calendarSyncTypeFlow)
 
@@ -54,14 +51,17 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
     var foundLink: String? = calendarSyncIcalAddress?.nullIfBlank()
         private set
 
+
+    private fun makeSelectedCalendarFlow() = combine(Prefs.selectedCalendar.flow, foundCalendarsFlow){ selected, found ->
+        found?.firstOrNull{ it.displayName == selected }
+    }
+
     /*******************************************
      * Functions to be ran on (re)creation
      *******************************************/
 
-    suspend fun fillCalendarsList(calendars: List<CalendarDescriptor>){
+    fun fillCalendarsList(calendars: List<CalendarDescriptor>){
         foundCalendars = calendars
-        selectedCalendar = calendars.firstOrNull { c -> c.displayName == Prefs.selectedCalendar()}
-            ?: calendars.firstOrNull()
     }
 
     private fun makeOkButtonEnabledFlow() = combine(
@@ -109,7 +109,7 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
 
     fun calendarPicked(index: Int){
         foundCalendars?.get(index)?.let{
-            selectedCalendar = it
+            Prefs.selectedCalendar(it.displayName)
         } ?: run { calendarSyncType=CalendarSyncType.CALENDAR_SYNC_NONE }
     }
 
@@ -118,7 +118,6 @@ class CalendarSyncDialogViewModel : JoozdlogDialogViewModel() {
      */
     fun okClicked(){
         calendarSyncType?.let { Prefs.calendarSyncType(it) } // OK button should be disabled if calendarSyncType == null
-        Prefs.selectedCalendar(selectedCalendar?.displayName ?: "")
         calendarSyncIcalAddress?.let { Prefs.calendarSyncIcalAddress(it) }
         Prefs.useCalendarSync((calendarSyncType != CalendarSyncType.CALENDAR_SYNC_NONE).also{
             if (it) {

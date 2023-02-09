@@ -1,6 +1,6 @@
 <H1>What's new in Joozdlog 1.2: Beaver<br><br></H1>
 <p>I got rid of Cloud. It added very little extra value, but did add a LOT of extra complexity and therefore a lot of potential for bugs and undesired behavior.<br>
-The useful parts, auto-backup and transferring to another device are still here, thouugh the menu -> settings or menu -> transfer.<br>
+The useful parts, auto-backup and transferring to another device are still here, through the menu -> settings or menu -> transfer.<br>
 Transfer is still experimental, meaning it will probably change in a future update in some way, but can be used to reliably transfer your flights to another device like a new phone.<br><br></p>
 <p>What this means for you: You can throw away your login link. It doesn't work anymore. There is no more login.<br><br></p>
 

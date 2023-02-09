@@ -402,10 +402,10 @@ class MainActivity : JoozdlogActivity() {
     }
 
     /*
-      intentionally blocking. Could collect flow but then mainActivity would load before newUserActivity.
-      Normally this is frowned upon, but as this ONLY happens when loading the app it just makes the load time a few millis longer
-      and doesn't make the app unresponsive.
+     * intentionally blocking. Could collect flow but then mainActivity would load before newUserActivity.
+     * As this ONLY happens when loading the app it just makes the load time a few millis longer and doesn't make the app unresponsive.
      */
+    // sets version to ALPACA if no configured version saved but newUserActivity has been finished.
     private fun updateLegacyVersionTrackingIfNeeded(){
         if (Prefs.configuredVersion.valueBlocking == Version.NEW_INSTALL)
             if (Prefs.newUserActivityFinished.valueBlocking)

@@ -19,11 +19,10 @@
 
 
 plugins {
-    id 'com.google.devtools.ksp' version "$kotlin_version-1.0.6"
+    id 'com.google.devtools.ksp' version "$kotlin_version-1.0.9"
 }
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-// apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 33
@@ -93,13 +92,10 @@ dependencies {
     implementation files("C:\\Users\\joozd\\IdeaProjects\\libs\\comms\\comms-jvm.jar")
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    //coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.6' // 1.2.0 gives an error on 2022/07/08
-
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    // implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     //androidX
-    implementation 'androidx.appcompat:appcompat:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.core:core-ktx:1.9.0'
 
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'

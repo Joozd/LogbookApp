@@ -10,6 +10,7 @@ import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.util.*
 
+// For design choices, see Logbookapp/docs/design_choices/FlightRepositoryWithUndo.md
 // TODO: Save and delete can be optimized, using singleUndoableOperation gets all flights twice while we only need the changed flights.
 class FlightRepositoryWithUndoImpl(
     mockDataBase: JoozdlogDatabase?
@@ -39,9 +40,16 @@ class FlightRepositoryWithUndoImpl(
         undoAvailable = undoStack.isNotEmpty()
     }
 
-    private fun pushUndo(state: Map<Int, FlightState>){
+    /*
+     * Normally, if something gats added to the undo stack, redo stack is invalidated.
+     * This is not the case when an undo gets added because a redo action was performed.
+     */
+
+    private fun pushUndo(state: Map<Int, FlightState>, invalidateRedo: Boolean = true){
         undoStack.push(state)
         undoAvailable = true
+        if (invalidateRedo)
+            invalidateRedo()
     }
 
     private fun popRedo(): Map<Int, FlightState> = redoStack.pop().also{
@@ -53,11 +61,19 @@ class FlightRepositoryWithUndoImpl(
         redoAvailable = true
     }
 
+    // Clears the redo stack. This should happen when a new action has been performed after something has been undone.
+    private fun invalidateRedo(){
+        redoStack.clear()
+        redoAvailable = false
+    }
+
     override suspend fun undo() {
         keepOrder.withLock {
             if (undoStack.isNotEmpty()) { // this could happen if user spams undo
-                // Throws EmptyStackException if nothing on stack.
-                // This should not be possible since we are doing this in a mutex and just checked it wasn't empty.
+                /*
+                 * Throws EmptyStackException if nothing on stack,
+                 * which should not be possible since we are doing this in a mutex and just checked it wasn't empty.
+                 */
                 val state = popUndo()
                 val redoState = recoverState(state)
                 pushRedo(redoState)
@@ -68,12 +84,13 @@ class FlightRepositoryWithUndoImpl(
     override suspend fun redo() {
         keepOrder.withLock {
             if (redoStack.isNotEmpty()) { // this could happen if user spams undo
-                println("REDO STACK: ${redoStack.size} // $redoStack")
-                // Throws EmptyStackException if nothing on stack.
-                // This should not be possible since we are doing this in a mutex and just checked it wasn't empty.
+                /*
+                 * Throws EmptyStackException if nothing on stack,
+                 * which should not be possible since we are doing this in a mutex and just checked it wasn't empty.
+                 */
                 val state = popRedo()
                 val undoState = recoverState(state)
-                pushUndo(undoState)
+                pushUndo(undoState, invalidateRedo = false)
             }
         }
     }

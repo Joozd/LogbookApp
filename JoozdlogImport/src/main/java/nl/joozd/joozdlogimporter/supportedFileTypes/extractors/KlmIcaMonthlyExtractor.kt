@@ -22,7 +22,9 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
 
     override fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight>? {
         val startDate = getStartDateFromLines(lines) ?: return null // a monthly is only one month, so all dates are this date withDayOfMonth(day)
-        val flightLines = lines.filter { it matches flightLineMatcher }
+
+        val fixedLines = fixLines(lines) // sometimes notes can break a line in multiple lines. this is fixed here.
+        val flightLines = fixedLines.filter { it matches flightLineMatcher }
         return flightLines.mapNotNull { makeFlight(it, startDate) }
     }
 
@@ -43,6 +45,7 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         makeFlightOrThrowException(line.trim(), startDateOfMonth)
     } catch (e: Throwable){
         Log.w("KlmIcaMonthlyExtractor", "parsing bad line: $line")
+        Log.d("KlmIcaMonthlyExtractor", e.toString())
         null
     }
 
@@ -56,15 +59,11 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
             10 KL 868 PHBHF   14:20 15:29 ICN +9 FO AMS +1 05:15 +1 05:45 +1 13:46 15:25 23:32 15:25 14:55
          */
         val dayOfMonth = line.take(2).toInt()
-        val (flightNumber, registration) = getFlightNumberAndRegistration(line)
-        val (ltOut, ltIn) = getTimeOutAndTimeIn(line)
-        val (orig, dest) = getOrigAndDest(line)
-
         val dateOut = startDateOfMonth.withDayOfMonth(dayOfMonth)
-        val tOut = ltOut.atDate(dateOut).toEpochSecond(ZoneOffset.UTC)
 
-        val dateIn = if (ltIn > ltOut) dateOut else dateOut.plusDays(1)
-        val tIn = ltIn.atDate(dateIn).toEpochSecond(ZoneOffset.UTC)
+        val (flightNumber, registration) = getFlightNumberAndRegistration(line)
+        val (tOut, tIn) = getTimeOutAndTimeIn(line, dateOut)
+        val (orig, dest) = getOrigAndDest(line)
 
         return BasicFlight.PROTOTYPE.copy(
             flightNumber = flightNumber,
@@ -88,7 +87,7 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
 
         //add flightnumber digits to flightnumber:
         while(l[pointer].isDigit()) // not checking because this expects a valid flightline.
-            flightNumberBuilder.append(pointer++)
+            flightNumberBuilder.append(l[pointer++])
 
         // skip spaces after flightnumber.
         while(l[pointer] == ' ') pointer++
@@ -101,7 +100,7 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
     }
 
     //this one also gets two times, as the result of timeOut is needed to get timeIn.
-    private fun getTimeOutAndTimeIn(line: String): Pair<LocalTime, LocalTime> { // tOut to tIn
+    private fun getTimeOutAndTimeIn(line: String, reportingDate: LocalDate): Pair<Long, Long> { // tOut to tIn; epochSeconds
         val formatter = DateTimeFormatter.ofPattern("HH:mm")
 
         val tOutMatchResult = tOutRegex.find(line) ?: throw(IllegalArgumentException("No tOut found in $line"))
@@ -112,18 +111,50 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         val tOut = LocalTime.parse(tOutMatchResult.groupValues[1], formatter)
         val tIn = LocalTime.parse(tInMatchResult.value, formatter)
 
-        return tOut to tIn
+        // If departure date is after reporting date (e.g. reporting just before midnight UTC), there is a "+1" in tOutMatchResult
+        val dateOut = if ("+1" in tOutMatchResult.value) reportingDate.plusDays(1) else reportingDate
+
+        // Flight time is always 0..24 hours. If timeIn is before timeOut, we add a day.
+        // There is data in the chrono about that, but this is easier to parse.
+        val dateIn = if(tIn > tOut) dateOut else dateOut.plusDays(1)
+
+        val epochSecondOut = tOut.atDate(dateOut).toEpochSecond(ZoneOffset.UTC)
+        val epochSecondIn = tIn.atDate(dateIn).toEpochSecond(ZoneOffset.UTC)
+
+        return epochSecondOut to epochSecondIn
     }
 
     private fun getOrigAndDest(line: String) =
         airportRegex.findAll(line).map { it.value.trim() }.toList()
 
+    /*
+     * Sometimes a line can get broken in two, for instance on my initial linecheck:
+     * 31 KL 714 PHBVS 18:30 20:15 PBM -3 SO AMS LCI,
+     * LC
+     * +1 04:50 +1 05:20 +1 8:35 10:50 21:12 10:50 10:20
+     * This function adds all lines that do not start with two digits and a space (ie. a day-of-month) to the previous line, fixing that.
+     */
+    private fun fixLines(lines: List<String>): List<String> = buildList{
+        var currentLine = ""
+        lines.forEach{ line ->
+            if (line matches dayLine) {
+                add(currentLine)
+                currentLine = line
+            }
+            else{
+                currentLine += line
+            }
+        }
+        add(currentLine)
+    }
+
+    private val dayLine = """^\d{2}\s+.*""".toRegex()
 
     private val periodRegex = """Periode: ($DATE) t/m ($DATE)""".toRegex()
     private val flightLineMatcher = """^\d{2}\s+$FLIGHT_NUMBER\s+$REGISTRATION\s+$TIME.*""".toRegex() // only to check if line is a flight
 
 
-    private val tOutRegex = """($TIME)\s*$AIRPORT""".toRegex()
+    private val tOutRegex = """($TIME)\s*(?:\+1)?\s*$AIRPORT""".toRegex()
     private val timeRegex = TIME.toRegex()
 
     private val airportRegex = AIRPORT.toRegex()

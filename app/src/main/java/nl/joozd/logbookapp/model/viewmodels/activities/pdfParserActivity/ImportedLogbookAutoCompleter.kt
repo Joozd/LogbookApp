@@ -100,9 +100,9 @@ class ImportedLogbookAutoCompleter(
         when {
             registration.isBlank() -> this
             aircraft.isNotBlank() -> this
-            else -> rtMap[registration]?.let { this.copy(aircraft = it) }
+            else -> (rtMap[registration]?.let { this.copy(aircraft = it) }
                 ?: adc.getAircraftFromRegistration(registration)?.type?.let { this.copy(aircraft = it.shortName) }
-                ?: this
+                ?: this)
         }
 
     private fun BasicFlight.autoValues( airportDC: AirportDataCache, aircraftDC: AircraftDataCache): BasicFlight =

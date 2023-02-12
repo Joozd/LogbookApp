@@ -19,16 +19,14 @@
 
 package nl.joozd.logbookapp.data.importing
 
-import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompleteLogbook
-import nl.joozd.joozdlogimporter.dataclasses.ExtractedCompletedFlights
-import nl.joozd.joozdlogimporter.dataclasses.ExtractedFlights
-import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
+import nl.joozd.joozdlogimporter.dataclasses.*
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
 import nl.joozd.logbookapp.data.importing.merging.mergeFlights
 import nl.joozd.logbookapp.data.importing.merging.mergeFlightsLists
 import nl.joozd.logbookapp.data.importing.results.SaveCompleteLogbookResult
 import nl.joozd.logbookapp.data.importing.results.SaveCompletedFlightsResult
 import nl.joozd.logbookapp.data.importing.results.SavePlannedFlightsResult
+import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftDataCache
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
@@ -49,7 +47,7 @@ class ImportedFlightsSaverImpl(
     private val aircraftRepository: AircraftRepository
 ): ImportedFlightsSaver {
     override suspend fun replace(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult {
-        val flights = makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(completeLogbook)?: emptyList()
+        val flights = makeFlightsWithIcaoAirports(completeLogbook)?: emptyList()
         flightsRepoWithUndo.singleUndoableOperation {
             clear()
             save(flights)
@@ -64,7 +62,7 @@ class ImportedFlightsSaverImpl(
      * @see mergeFlights
      */
     override suspend fun merge(completeLogbook: ExtractedCompleteLogbook): SaveCompleteLogbookResult {
-        val flights = makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(completeLogbook)?: emptyList()
+        val flights = makeFlightsWithIcaoAirports(completeLogbook)?: emptyList()
         val flightsOnDevice = flightsRepoWithUndo.getAllFlights()
         val mergedFlights = mergeFlightsLists(flightsOnDevice, flights)
 
@@ -136,24 +134,20 @@ class ImportedFlightsSaverImpl(
      * - only flights in its period
      */
     private suspend fun prepareFlightsForSaving(
-        completedFlights: ExtractedCompletedFlights
+        flightsToPrepare: ExtractedFlightsWithPeriod
     ): List<Flight>? =
-        makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(completedFlights)?.filter {
-            it.timeOut in (completedFlights.period ?: return null)
-        }
-
-    private suspend fun prepareFlightsForSaving(
-        plannedFlights: ExtractedPlannedFlights
-    ): List<Flight>? =
-        makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(plannedFlights)?.filter {
-            it.timeOut in (plannedFlights.period!!)
+        makeFlightsWithIcaoAirports(flightsToPrepare)
+            ?.removeNamesIfNeeded()
+            ?.checkAircraftTypes()
+            ?.filter {
+            it.timeOut in (flightsToPrepare.period ?: return null)
         }
 
     private suspend fun getPlannedFlightsOnDevice(period: ClosedRange<Long>): List<Flight> =
         flightsRepoWithUndo.getAllFlights().filter { it.isPlanned }.filter { it.timeOut in (period) }
 
 
-    private suspend fun makeFlightsWithIcaoAirportsAndRemoveNamesIfNeeded(flightsToPrepare: ExtractedFlights): List<Flight>?{
+    private suspend fun makeFlightsWithIcaoAirports(flightsToPrepare: ExtractedFlights): List<Flight>?{
         val flights = flightsToPrepare.flights?.map { Flight(it) }?.removeNamesIfNeeded()
         return if (flightsToPrepare.identFormat == AirportIdentFormat.ICAO) flights
         else {
@@ -165,4 +159,17 @@ class ImportedFlightsSaverImpl(
     private suspend fun List<Flight>.removeNamesIfNeeded(): List<Flight> =
         if (Prefs.getNamesFromRosters()) this
         else this.map { it.copy(name = "", name2 = "") }
+
+    private suspend fun List<Flight>.checkAircraftTypes(): List<Flight>{
+        val adc = AircraftRepository.instance.getAircraftDataCache()
+        return this.map{ it.checkAircraftType(adc) }
+    }
+
+    private fun Flight.checkAircraftType(adc: AircraftDataCache): Flight =
+        when {
+            registration.isBlank() -> this
+            aircraftType.isNotBlank() -> this
+            else -> adc.getAircraftFromRegistration(registration)?.let { this.copy(aircraftType = it.type?.shortName ?: "", registration = it.registration) }
+                ?: this
+        }
 }

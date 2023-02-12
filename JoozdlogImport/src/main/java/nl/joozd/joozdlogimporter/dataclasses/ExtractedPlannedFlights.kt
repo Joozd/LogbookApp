@@ -21,11 +21,10 @@ package nl.joozd.joozdlogimporter.dataclasses
 
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.enumclasses.AirportIdentFormat
-import java.time.Instant
 
 open class ExtractedPlannedFlights(
-    val period: ClosedRange<Long>?,
+    period: ClosedRange<Long>?,
     flights: Collection<BasicFlight>?,
     val picIsSet: Boolean,
     identFormat: AirportIdentFormat
-): ExtractedFlights(flights, identFormat)
+): ExtractedFlightsWithPeriod(period, flights, identFormat)

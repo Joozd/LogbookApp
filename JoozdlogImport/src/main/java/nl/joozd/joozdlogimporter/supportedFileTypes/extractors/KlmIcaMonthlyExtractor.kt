@@ -116,7 +116,7 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
     }
 
     private fun getOrigAndDest(line: String) =
-        airportRegex.findAll(line).map { it.value }.toList()
+        airportRegex.findAll(line).map { it.value.trim() }.toList()
 
 
     private val periodRegex = """Periode: ($DATE) t/m ($DATE)""".toRegex()

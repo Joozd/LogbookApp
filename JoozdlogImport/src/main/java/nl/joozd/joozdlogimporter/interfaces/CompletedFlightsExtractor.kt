@@ -20,6 +20,8 @@
 package nl.joozd.joozdlogimporter.interfaces
 
 interface CompletedFlightsExtractor: FlightsExtractor {
-    //range of epochSeconds
+    /**
+     * range of epochSeconds
+     */
     fun getPeriodFromLines(lines: List<String>): ClosedRange<Long>?
 }

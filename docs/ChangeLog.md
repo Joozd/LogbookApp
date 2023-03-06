@@ -35,4 +35,7 @@ If you really want to know, look at all the github commits...
 ##### miscellaneous things like removing dead code and cleaning up
 
 ### 1.2.1:
-- Added support for KLM ICA monthly overviews 
+- Added support for KLM ICA monthly overviews
+
+### 1.2.2:
+- Improved "other names" dialog

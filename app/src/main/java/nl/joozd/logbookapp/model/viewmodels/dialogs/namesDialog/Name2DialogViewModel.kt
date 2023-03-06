@@ -29,7 +29,7 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
 class Name2DialogViewModel: JoozdlogDialogViewModel() {
-    private val undoNames = flightEditor.name2
+    private val undoNames = flightEditor.name2 // this gets saved on first creation of the dialog. CANCEL will revert the names to this.
     private val repo = FlightRepository.instance
     private val pickedNewNameFlow = MutableStateFlow<String?>(null)
     private var pickedNewName: String? by CastFlowToMutableFlowShortcut(pickedNewNameFlow)
@@ -61,22 +61,15 @@ class Name2DialogViewModel: JoozdlogDialogViewModel() {
         pickedSelectedName = name
     }
 
-    fun addSelectedName(){
-        pickedNewName?.let { name ->
-            pickedNewName = null
-            flightEditor.name2 = (flightEditor.name2 + name).filter {n -> n.isNotBlank() }
-        }
-    }
-
-    fun removeSelectedName(){
+    fun removeCurrentNameFromSelectedNames(){
         pickedSelectedName?.let{ n ->
             pickedSelectedName = null
             flightEditor.name2 = flightEditor.name2.filter { it != n}
         }
     }
 
-    fun addQueryAsName(){
-        if (query.isNotBlank()) flightEditor.name2 += query
+    fun addName(name: String){
+        flightEditor.name2 += name
     }
 
     fun updateQuery(q: String?){

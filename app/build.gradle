@@ -31,8 +31,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 26
         targetSdkVersion 33
-        versionCode 133 // my version, increment this every build
-        versionName "JoozdLog BEAVER | 1.2.1" // Deploy build!
+        versionCode 134 // my version, increment this every build
+        versionName "JoozdLog BEAVER | 1.2.2" // Deploy build!
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

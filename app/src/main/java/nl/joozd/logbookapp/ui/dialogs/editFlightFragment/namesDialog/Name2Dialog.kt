@@ -35,69 +35,108 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
 class Name2Dialog: JoozdlogFragment() {
     private val viewModel: Name2DialogViewModel by viewModels()
 
+    private var nameIsSetFromList = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogNamesBinding.bind(inflater.inflate(R.layout.dialog_names, container, false)).apply{
-            val namesPickerAdapter = makeNamesPickerAdapterAndAddToList()
-            val selectedNamesAdapter = makeSelectedNamesAdapterAndAddToList()
-
-            launchFlowCollectors(namesPickerAdapter, selectedNamesAdapter)
-            setOnTextChangedListeners()
-            setOnClickListeners()
+            initializeRecyclerViews()
+            initializeButtons()
+            initializeTextViews()
+            initializeUIComponents()
         }.root
 
-    private fun DialogNamesBinding.makeNamesPickerAdapterAndAddToList() =
-        makeNamesPickerAdapter().also{
-            namesPickerList.layoutManager = LinearLayoutManager(context)
-            namesPickerList.adapter = it
-        }
+    private fun DialogNamesBinding.initializeRecyclerViews(){
+        initializeNamesPickerRecyclerView()
+        initizlizeSelectedNamesRecyclerView()
+    }
 
-    private fun DialogNamesBinding.makeSelectedNamesAdapterAndAddToList() =
-        makeSelectedNamesAdapter().also{
-            pickedNamesList.layoutManager = LinearLayoutManager(context)
-            pickedNamesList.adapter = it
-        }
+    /**
+     * Initialize the buttons in this dialog
+     */
+    private fun DialogNamesBinding.initializeButtons(){
+        initializeRemoveNameButton()
+        initializeAddNameButton()
+    }
 
-    private fun makeNamesPickerAdapter() = SelectableStringAdapter{ name ->
+    /**
+     * Initialize the TextViews and EditTexts in this dialog
+     */
+    private fun DialogNamesBinding.initializeTextViews(){
+        initializeNameField()
+    }
+
+    /**
+     * Initialize UI components (eg SAVE and CANCEL buttons) in this dialog
+     */
+    private fun DialogNamesBinding.initializeUIComponents(){
+        initializeSaveButton()
+        initializeCancelButton()
+    }
+
+
+    private fun DialogNamesBinding.initializeNamesPickerRecyclerView(){
+        val adapter = makeNamesPickerAdapter()
+        namesPickerList.layoutManager = LinearLayoutManager(context)
+        namesPickerList.adapter = adapter
+        collectPickableNamesFlow(adapter)
+    }
+
+    private fun DialogNamesBinding.makeNamesPickerAdapter() = SelectableStringAdapter { name ->
+        // Set [namesSearchField] to selected name. Set flag so query that updates the list of pickable names is not changed.
+        nameIsSetFromList = true
+        namesSearchField.setText(name)
+        namesSearchField.selectAll()
         viewModel.pickNewName(name)
     }
 
-    private fun makeSelectedNamesAdapter() = SelectableStringAdapter{ name ->
-        viewModel.pickSelectedName(name)
+    private fun DialogNamesBinding.initizlizeSelectedNamesRecyclerView(){
+        val adapter = SelectableStringAdapter{ name -> viewModel.pickSelectedName(name) }
+        pickedNamesList.layoutManager = LinearLayoutManager(context)
+        pickedNamesList.adapter = adapter
+        collectSelectedNamesFlow(adapter)
     }
 
-    @Suppress("unused") // it is here because it is here in all dialogs (for uniformity)
-    private fun DialogNamesBinding.launchFlowCollectors(
-        namesPickerAdapter: SelectableStringAdapter,
-        selectedNamesAdapter: SelectableStringAdapter
-    ){
-        collectPickableNamesFlow(namesPickerAdapter)
-        collectSelectedNamesFlow(selectedNamesAdapter)
-    }
 
-    private fun DialogNamesBinding.setOnClickListeners(){
+    private fun DialogNamesBinding.initializeAddNameButton() {
         addNameButton.setOnClickListener {
-            viewModel.addSelectedName()
+            // add namesSearchField's contents to picked names list if anything not blank is present
+            namesSearchField.text.toString().takeIf { it.isNotBlank() }?.let {
+                viewModel.addName(it)
+            }
+            namesSearchField.setText("") // this
         }
+    }
+
+    private fun DialogNamesBinding.initializeRemoveNameButton() {
         removeNameButton.setOnClickListener {
-            viewModel.removeSelectedName()
+            viewModel.removeCurrentNameFromSelectedNames()
         }
-        addSearchFieldNameButton.setOnClickListener {
-            viewModel.addQueryAsName()
-            namesSearchField.setText("")
+    }
+
+    /**
+     * The Name Field is the field that shows what gets added to the selected names when the button with the up arrow is pressed.
+     */
+    private fun DialogNamesBinding.initializeNameField() {
+        namesSearchField.onTextChanged {
+            // This makes sure the names list query is not changed when a name is selected from the list,
+            // but does change when anything is typed into this field.
+            if (nameIsSetFromList)
+                nameIsSetFromList = false
+            else
+                viewModel.updateQuery(it)
         }
-        saveNamesDialogTextview.setOnClickListener {
-            closeFragment()
-        }
+    }
+
+    private fun DialogNamesBinding.initializeCancelButton() {
         cancelNamesDialogTextview.setOnClickListener {
             viewModel.undo()
             closeFragment()
         }
-
     }
 
-    private fun DialogNamesBinding.setOnTextChangedListeners(){
-        namesSearchField.onTextChanged {
-            viewModel.updateQuery(it)
+    private fun DialogNamesBinding.initializeSaveButton() {
+        saveNamesDialogTextview.setOnClickListener {
+            closeFragment()
         }
     }
 

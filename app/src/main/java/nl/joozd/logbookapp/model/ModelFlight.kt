@@ -243,7 +243,7 @@ data class ModelFlight(
                 simTime,
                 aircraft,
                 name,
-                name2.split(";"),
+                name2.split(";").filter{ it.isNotBlank() },
                 takeoffLandings,
                 flightNumber,
                 remarks,

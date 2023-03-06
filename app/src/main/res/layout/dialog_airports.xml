@@ -68,7 +68,7 @@
             app:layout_constraintTop_toBottomOf="@+id/headerLayout">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/names_search_field_text_input_layout"
+                android:id="@+id/airports_search_field_text_input_layout"
                 style="@style/EditFlightInputLayout.HorizontalSpacing"
                 app:layout_constraintEnd_toStartOf="@+id/setCurrentTextButton"
                 app:layout_constraintStart_toStartOf="parent"
@@ -87,9 +87,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="@string/setThis"
-                app:layout_constraintBottom_toBottomOf="@+id/names_search_field_text_input_layout"
+                app:layout_constraintBottom_toBottomOf="@+id/airports_search_field_text_input_layout"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/names_search_field_text_input_layout" />
+                app:layout_constraintTop_toTopOf="@+id/airports_search_field_text_input_layout" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/airportsPickerList"
@@ -97,8 +97,8 @@
                 android:layout_height="200dp"
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="@+id/setCurrentTextButton"
-                app:layout_constraintStart_toStartOf="@+id/names_search_field_text_input_layout"
-                app:layout_constraintTop_toBottomOf="@+id/names_search_field_text_input_layout" />
+                app:layout_constraintStart_toStartOf="@+id/airports_search_field_text_input_layout"
+                app:layout_constraintTop_toBottomOf="@+id/airports_search_field_text_input_layout" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout"

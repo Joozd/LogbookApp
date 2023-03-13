@@ -21,17 +21,16 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android{
-    compileSdkVersion 32
+    compileSdkVersion 33
     defaultConfig {
         minSdkVersion 26
-        targetSdkVersion 32
+        targetSdkVersion 33
     }
     namespace 'nl.joozd.joozdlogimporter'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.itextpdf:itextg:5.5.10"
 
     implementation project(":joozdlogCommon")

@@ -104,8 +104,8 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
              */
 
             // update currentCrew
-            if (line.getNumbers().isNotEmpty()){
-                currentCrew = line.getNumbers().map{psn -> crewPsnToNameMap[psn] ?: "ERROR"}
+            if (line.getNumberStrings().isNotEmpty()){
+                currentCrew = line.getNumberStrings().map{ psn -> crewPsnToNameMap[psn] ?: "ERROR"}
             }
             val name = currentCrew.firstOrNull() ?: ""
             val name2 = if (currentCrew.size > 1) currentCrew.drop(1).joinToString(";") else ""
@@ -124,20 +124,20 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
         return newFlights
     }
 
-    private fun makeCrewPsnToNameMap(crewLines: List<String>?, myName: String): Map<Int, String> =
-        HashMap<Int,String>().apply {
+    private fun makeCrewPsnToNameMap(crewLines: List<String>?, myName: String): Map<String, String> =
+        HashMap<String,String>().apply {
             crewLines?.forEach { line ->
                 putNames(line, myName)
             }
         }
 
-    private fun MutableMap<Int, String>.putNames(line: String, myName: String) {
-        val numbers = line.getNumbers()
+    private fun MutableMap<String, String>.putNames(line: String, myName: String) {
+        val numbers = line.getNumberStrings()
         if (numbers.isEmpty()) return
         numbers.indices.forEach { i ->
-            val n = numbers[i].toString()
+            val n = numbers[i]
             val raw = if (i != numbers.indices.last) {
-                val next = numbers[i + 1].toString()
+                val next = numbers[i + 1]
                 //raw is all text between this number and the next
                 line.substring(line.indexOf(n) + n.length until line.indexOf(next)).trim()
             }
@@ -160,9 +160,8 @@ class KlcBriefingSheetExtractor: PlannedFlightsExtractor {
         }
 
     // Gets all words that are only numbers, "hallo ab123 456 7" will return [456, 7]
-    private fun String.getNumbers(): List<Int> = split(' ')
+    private fun String.getNumberStrings(): List<String> = split(' ')
         .filter{ s -> s.all { it.isDigit() } }
-        .map{it.toInt()}
 
     private fun lineToFlight(line: String): BasicFlight{
         val aircraftRegex = "/([A-Z]{5})".toRegex()

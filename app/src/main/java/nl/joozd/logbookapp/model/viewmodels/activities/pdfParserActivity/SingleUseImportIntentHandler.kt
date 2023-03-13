@@ -69,7 +69,13 @@ class SingleUseImportIntentHandler: CoroutineScope {
 
     private suspend fun getFileAndStartAppropriateParser(intent: Intent, contentResolver: ContentResolver){
         status = HandlerStatus.READING_URI
-        when(val file = getFileFromIntent(intent, contentResolver)){
+        val file = try { getFileFromIntent(intent, contentResolver) }
+        catch (e: Throwable){
+            status = HandlerError(R.string.fatal_error_when_parsing_file)
+            return
+        }
+
+        when(file){
             is CompleteLogbookFile -> parseCompleteLogbook(file)
             is CompletedFlightsFile -> parseCompletedFlights(file)
             is PlannedFlightsFile -> parsePlannedFlights(file)

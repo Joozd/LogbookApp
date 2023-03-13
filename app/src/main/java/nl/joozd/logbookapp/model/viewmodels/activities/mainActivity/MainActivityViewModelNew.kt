@@ -42,7 +42,6 @@ import nl.joozd.logbookapp.model.workingFlight.FlightEditor
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.logbookapp.utils.DispatcherProvider
 
-//TODO this is still WIP
 class MainActivityViewModelNew: JoozdlogViewModel() {
     private val flightRepository = FlightRepositoryWithUndo.instance
     private val aircraftRepository = AircraftRepository.instance

@@ -20,10 +20,7 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity
 
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.data.repository.BalanceForwardRepositoryImpl
@@ -32,12 +29,12 @@ import nl.joozd.logbookapp.extensions.replaceValueAt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders.*
 
-
+//TODO switch from LiveData to Flow
 class TotalTimesViewModel: JoozdlogActivityViewModel() {
     private val _allLists = MutableLiveData(List<TotalTimesItem?>(NUMBER_OF_LISTS) { null })
 
 
-    val allLists: LiveData<List<TotalTimesItem>> = Transformations.map(_allLists) { it.filterNotNull() }
+    val allLists: LiveData<List<TotalTimesItem>> = _allLists.map { it.filterNotNull() }
 
 
     /**

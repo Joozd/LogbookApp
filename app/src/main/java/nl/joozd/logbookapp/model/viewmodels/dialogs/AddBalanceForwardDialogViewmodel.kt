@@ -22,7 +22,7 @@ package nl.joozd.logbookapp.model.viewmodels.dialogs
 import android.text.Editable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -39,8 +39,8 @@ import java.lang.NumberFormatException
 /**
  * Viewmodel for AddBalanceForwardDialog Fragment
  * As this is only for inputting data, and not for retrieving, only limited feedback is required
- * TODO toch wel met livedata :/
  */
+//TODO switch from LiveData to Flow
 class AddBalanceForwardDialogViewmodel: JoozdlogDialogViewModel() {
 
     /**********************************************************************************************
@@ -67,39 +67,39 @@ class AddBalanceForwardDialogViewmodel: JoozdlogDialogViewModel() {
      */
 
     val name: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.logbookName }
+        get() = _balanceForward.map { it.logbookName }
 
     val multiPilot: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.multiPilotTime.minutesToHoursAndMinutesString()}
+        get() = _balanceForward.map { it.multiPilotTime.minutesToHoursAndMinutesString()}
 
     val totalTimeOfFlight: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.aircraftTime.minutesToHoursAndMinutesString()}
+        get() = _balanceForward.map { it.aircraftTime.minutesToHoursAndMinutesString()}
 
     val landingDay: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.landingDay.toString()}
+        get() = _balanceForward.map { it.landingDay.toString()}
     val landingNight: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.landingNight.toString()}
+        get() = _balanceForward.map { it.landingNight.toString()}
 
     val nightTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.nightTime.minutesToHoursAndMinutesString()}
+        get() = _balanceForward.map { it.nightTime.minutesToHoursAndMinutesString()}
 
     val ifrTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.ifrTime.minutesToHoursAndMinutesString()}
+        get() = _balanceForward.map { it.ifrTime.minutesToHoursAndMinutesString()}
 
     val picTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.picTime.minutesToHoursAndMinutesString()}
+        get() = _balanceForward.map { it.picTime.minutesToHoursAndMinutesString()}
 
     val copilotTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.copilotTime.minutesToHoursAndMinutesString()}
+        get() = _balanceForward.map { it.copilotTime.minutesToHoursAndMinutesString()}
 
     val dualTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.dualTime.minutesToHoursAndMinutesString()}
+        get() = _balanceForward.map { it.dualTime.minutesToHoursAndMinutesString()}
 
     val instructorTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.instructortime.minutesToHoursAndMinutesString()}
+        get() = _balanceForward.map { it.instructortime.minutesToHoursAndMinutesString()}
 
     val simTime: LiveData<String>
-        get() = Transformations.map(_balanceForward) { it.simTime.minutesToHoursAndMinutesString()}
+        get() = _balanceForward.map { it.simTime.minutesToHoursAndMinutesString()}
 
 
 

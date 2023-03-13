@@ -40,4 +40,8 @@ data class BalanceForward (
 ){
     val grandTotal: Int
         get() = aircraftTime + simTime
+
+    companion object{
+        val EMPTY get() = BalanceForward(-1, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    }
 }

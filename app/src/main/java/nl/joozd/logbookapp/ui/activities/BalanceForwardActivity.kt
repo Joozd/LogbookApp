@@ -24,10 +24,12 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.databinding.ActivityBalanceForwardBinding
 import nl.joozd.logbookapp.extensions.showFragment
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 import nl.joozd.logbookapp.model.viewmodels.activities.BalanceForwardActivityViewmodel
 import nl.joozd.logbookapp.ui.adapters.BalanceForwardAdapter
 
@@ -35,10 +37,9 @@ import nl.joozd.logbookapp.ui.dialogs.AddBalanceForwardDialog
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.toast
 
-
+// TODO get confirmation on delete or make undo SnackBar
 class BalanceForwardActivity : JoozdlogActivity() {
     private val viewModel: BalanceForwardActivityViewmodel by viewModels()
-    var binding: ActivityBalanceForwardBinding? = null
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_balance_forward, menu)
@@ -53,51 +54,52 @@ class BalanceForwardActivity : JoozdlogActivity() {
         else -> false
     }
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
-//        TODO("get confirmation on delete and undo SnackBar")
-
         super.onCreate(savedInstanceState)
-        with (ActivityBalanceForwardBinding.inflate(layoutInflater)){
 
-            setSupportActionBarWithReturn(balanceForwardToolbar)?.apply {
-                setDisplayHomeAsUpEnabled(true)
-                title = resources.getString(R.string.balanceForward)
+        val binding = ActivityBalanceForwardBinding.inflate(layoutInflater).apply {
+            initializeToolBar()
+            initializeBalanceForwardExpandableListView()
+        }
+
+        setContentView(binding.root)
+    }
 
 
-                addBalanceButton.setOnClickListener {
+
+    private fun ActivityBalanceForwardBinding.initializeBalanceForwardExpandableListView() {
+        val adapter = BalanceForwardAdapter(activity).apply {
+            onDeleteClicked = { bf -> deleteBalanceForward(bf) }
+            onListItemClicked = { bf, item -> balanceForwardItemClicked(bf, item) }
+        }
+
+        balanceForwardExpandableListView.setAdapter(adapter)
+        viewModel.balancesForward.launchCollectWhileLifecycleStateStarted {
+            adapter.updateList(it)
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER") // this is a stub
+    private fun balanceForwardItemClicked(bf: BalanceForward, item: Int) {
+        toast("Not implemented!")
+    }
+
+    private fun deleteBalanceForward(bf: BalanceForward) {
+        lifecycleScope.launch {
+            viewModel.delete(bf)
+            toast("Deleted!") // TODO make this undoable or ask for confirmation
+        }
+    }
+
+    private fun ActivityBalanceForwardBinding.initializeToolBar() {
+        setSupportActionBarWithReturn(balanceForwardToolbar)?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            title = resources.getString(R.string.balanceForward)
+
+            addBalanceButton.setOnClickListener {
                 showFragment<AddBalanceForwardDialog>()
             }
-
-            val adapter = BalanceForwardAdapter(this@BalanceForwardActivity).apply{
-                onDeleteClicked = {bf -> viewModel.delete(bf)}
-                onListItemClicked = {bf, item -> viewModel.itemClicked(bf, item)}
-            }
-            balanceForwardExListView.setAdapter(adapter)
-            viewModel.balancesForward.observe(this@BalanceForwardActivity) {
-                adapter.updateList(it)
-            }
-
-            setContentView(root)
         }
-
-}
-
-
-        /**
-         * Feedback observers:
-         */
-
-        viewModel.feedbackEvent.observe(this) {
-            when (it.getEvent()){
-                FeedbackEvents.BalanceForwardActivityEvents.NOT_IMPLEMENTED -> toast("Not implemented!")
-                FeedbackEvents.BalanceForwardActivityEvents.DELETED -> toast("Deleted! (needs a snackbar)") // TODO needs a snackbar
-                FeedbackEvents.BalanceForwardActivityEvents.UNDELETE_OK -> toast("Undeleted!")
-                FeedbackEvents.BalanceForwardActivityEvents.UNDELETE_FAILED -> toast("Unable to undelete!")
-            }
-        }
-
     }
 }
 

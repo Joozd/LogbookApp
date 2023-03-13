@@ -42,7 +42,7 @@
         app:layout_constraintTop_toBottomOf="@+id/balance_forward_toolbar">
 
         <ExpandableListView
-            android:id="@+id/balanceForwardExListView"
+            android:id="@+id/balance_forward_expandable_list_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:groupIndicator="@null"

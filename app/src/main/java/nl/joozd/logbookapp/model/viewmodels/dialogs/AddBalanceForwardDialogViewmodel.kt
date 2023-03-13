@@ -19,21 +19,17 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
-import android.text.Editable
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.data.repository.BalanceForwardRepositoryImpl
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardDialogEvents
-import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
-import java.lang.NumberFormatException
+import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
 
 /**
@@ -42,171 +38,110 @@ import java.lang.NumberFormatException
  */
 //TODO switch from LiveData to Flow
 class AddBalanceForwardDialogViewmodel: JoozdlogDialogViewModel() {
+    private val balanceForwardFlow: Flow<BalanceForward> = MutableStateFlow(BalanceForward.EMPTY)
+    var balanceForward: BalanceForward by CastFlowToMutableFlowShortcut(balanceForwardFlow)
+
+
+    val logbookNameFlow = balanceForwardFlow.map { it.logbookName }
+
+    val multiPilotFlow = balanceForwardFlow.map { it.multiPilotTime.minutesToHoursAndMinutesString()}
+
+    val totalTimeOfFlightFlow = balanceForwardFlow.map { it.aircraftTime.minutesToHoursAndMinutesString()}
+
+    val landingDayFlow = balanceForwardFlow.map { it.landingDay.toString()}
+
+    val landingNightFlow = balanceForwardFlow.map { it.landingNight.toString()}
+
+    val nightTimeFlow = balanceForwardFlow.map { it.nightTime.minutesToHoursAndMinutesString()}
+
+    val ifrTimeFlow = balanceForwardFlow.map { it.ifrTime.minutesToHoursAndMinutesString()}
+
+    val picTimeFlow = balanceForwardFlow.map { it.picTime.minutesToHoursAndMinutesString()}
+
+    val copilotTimeFlow = balanceForwardFlow.map { it.copilotTime.minutesToHoursAndMinutesString()}
+
+    val dualTimeFlow = balanceForwardFlow.map { it.dualTime.minutesToHoursAndMinutesString()}
+
+    val instructorTimeFlow = balanceForwardFlow.map { it.instructortime.minutesToHoursAndMinutesString()}
+
+    val simTimeFlow = balanceForwardFlow.map { it.simTime.minutesToHoursAndMinutesString()}
 
     /**********************************************************************************************
      * Private parts
      **********************************************************************************************/
 
-    private val _balanceForward = MutableLiveData(emptyBalanceForward())
-    private var balanceForwardSetter: BalanceForward
-        get() = _balanceForward.value!! // cannot be null as it is initialized with a non-null value and not touched directly
-        set(it) { _balanceForward.value = it}
-
-    /**
-     * Update _balanceForward with given functions
-     */
-    private fun emptyBalanceForward(): BalanceForward = BalanceForward(-1, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-
-    /**********************************************************************************************
-     * Public parts
-     **********************************************************************************************/
-
-
-    /**
-     * Observable values
-     */
-
-    val name: LiveData<String>
-        get() = _balanceForward.map { it.logbookName }
-
-    val multiPilot: LiveData<String>
-        get() = _balanceForward.map { it.multiPilotTime.minutesToHoursAndMinutesString()}
-
-    val totalTimeOfFlight: LiveData<String>
-        get() = _balanceForward.map { it.aircraftTime.minutesToHoursAndMinutesString()}
-
-    val landingDay: LiveData<String>
-        get() = _balanceForward.map { it.landingDay.toString()}
-    val landingNight: LiveData<String>
-        get() = _balanceForward.map { it.landingNight.toString()}
-
-    val nightTime: LiveData<String>
-        get() = _balanceForward.map { it.nightTime.minutesToHoursAndMinutesString()}
-
-    val ifrTime: LiveData<String>
-        get() = _balanceForward.map { it.ifrTime.minutesToHoursAndMinutesString()}
-
-    val picTime: LiveData<String>
-        get() = _balanceForward.map { it.picTime.minutesToHoursAndMinutesString()}
-
-    val copilotTime: LiveData<String>
-        get() = _balanceForward.map { it.copilotTime.minutesToHoursAndMinutesString()}
-
-    val dualTime: LiveData<String>
-        get() = _balanceForward.map { it.dualTime.minutesToHoursAndMinutesString()}
-
-    val instructorTime: LiveData<String>
-        get() = _balanceForward.map { it.instructortime.minutesToHoursAndMinutesString()}
-
-    val simTime: LiveData<String>
-        get() = _balanceForward.map { it.simTime.minutesToHoursAndMinutesString()}
-
-
-
-
-    val workingBalanceForward: BalanceForward
-        get() = balanceForwardSetter
-
-    /**
-     * Force all values to a specific BalanceForward, for instance when preloading values or editing
-     * an existing BalanceForward.
-     */
-    fun setWorkingBalanceForward(it: BalanceForward){
-        balanceForwardSetter = it
-        feedback(BalanceForwardDialogEvents.UPDATE_FIELDS)
-    }
-
-    fun setName(name: Editable?){
-        name?.toString()?.let {
-            balanceForwardSetter = balanceForwardSetter.copy(logbookName = it)
-        } ?: feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
-    }
-
-    fun setMultipilotTime(it: Editable?){
-        hoursAndMinutesStringToInt(it?.toString())?.let{
-            balanceForwardSetter = balanceForwardSetter.copy(multiPilotTime = it)
-        } ?: feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
-    }
-    fun setTotalTime(it: Editable?){
-        hoursAndMinutesStringToInt(it?.toString())?.let{
-            balanceForwardSetter = balanceForwardSetter.copy(aircraftTime = it)
-        } ?: feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
-    }
-
-    fun setLandingsDay(it: Editable?){
-        try{
-            val landings = it?.toString()!!.toInt()
-            balanceForwardSetter = balanceForwardSetter.copy(landingDay = landings)
+    var logbookName: String
+        get() = balanceForward.logbookName
+        set(it) {
+            balanceForward = balanceForward.copy(logbookName = it)
         }
-        catch (nfe: NumberFormatException) {
-            feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
+
+    var multipilotTime: Int
+        get() = balanceForward.multiPilotTime
+        set(it){
+            balanceForward = balanceForward.copy(multiPilotTime = it)
         }
-        catch (npe: NullPointerException){
-            feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
+    var aircraftTime: Int
+        get() = balanceForward.aircraftTime
+        set(it){
+            balanceForward = balanceForward.copy(aircraftTime = it)
         }
-    }
-    fun setLandingsNight(it: Editable?){
-        try{
-            val landings = it?.toString()!!.toInt()
-            balanceForwardSetter = balanceForwardSetter.copy(landingNight = landings)
+
+    var landingDay: Int
+        get() = balanceForward.landingDay
+        set(it){
+            balanceForward = balanceForward.copy(landingDay = it)
         }
-        catch (nfe: NumberFormatException) {
-            feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
+
+    var landingNight: Int
+        get() = balanceForward.landingNight
+        set(it){
+            balanceForward = balanceForward.copy(landingNight = it)
         }
-        catch (npe: NullPointerException){
-            feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
+
+    var nightTime: Int
+        get() = balanceForward.nightTime
+        set(it){
+            balanceForward = balanceForward.copy(nightTime = it)
         }
-    }
 
-    fun setNightTime(it: Editable?){
-        hoursAndMinutesStringToInt(it?.toString())?.let{
-            balanceForwardSetter = balanceForwardSetter.copy(nightTime = it)
-        } ?: feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
-    }
-
-    fun setIfrTime(it: Editable?){
-        hoursAndMinutesStringToInt(it?.toString())?.let{
-            balanceForwardSetter = balanceForwardSetter.copy(ifrTime = it)
-        } ?: feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
-    }
-
-    fun setPicTime(it: Editable?){
-        hoursAndMinutesStringToInt(it?.toString())?.let{
-            balanceForwardSetter = balanceForwardSetter.copy(picTime = it)
-        } ?: feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
-    }
-
-    fun setCopilotTime(it: Editable?){
-        hoursAndMinutesStringToInt(it?.toString())?.let{
-            balanceForwardSetter = balanceForwardSetter.copy(copilotTime = it)
-        } ?: feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
-    }
-
-    fun setDualTime(it: Editable?){
-        hoursAndMinutesStringToInt(it?.toString())?.let{
-            balanceForwardSetter = balanceForwardSetter.copy(dualTime = it)
-        } ?: feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
-    }
-
-    fun setInstructorTime(it: Editable?){
-        hoursAndMinutesStringToInt(it?.toString())?.let{
-            balanceForwardSetter = balanceForwardSetter.copy(instructortime = it)
-        } ?: feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
-    }
-
-    fun setSimTime(it: Editable?){
-        hoursAndMinutesStringToInt(it?.toString())?.let{
-            balanceForwardSetter = balanceForwardSetter.copy(simTime = it)
-        } ?: feedback(BalanceForwardDialogEvents.NUMBER_PARSE_ERROR)
-    }
-
-    fun saveBalanceForward(){
-        viewModelScope.launch(Dispatchers.IO + NonCancellable) {
-            BalanceForwardRepositoryImpl.instance.save(balanceForwardSetter)
-            feedback(BalanceForwardDialogEvents.CLOSE_DIALOG)
+    var ifrTime: Int
+        get() = balanceForward.ifrTime
+        set(it){
+            balanceForward = balanceForward.copy(ifrTime = it)
         }
+
+    var picTime: Int
+        get() = balanceForward.picTime
+        set(it){
+            balanceForward = balanceForward.copy(picTime = it)
+        }
+
+    var copilotTime: Int
+        get() = balanceForward.copilotTime
+        set(it){
+            balanceForward = balanceForward.copy(copilotTime = it)
+        }
+
+    var dualTime: Int
+        get() = balanceForward.dualTime
+        set(it){
+            balanceForward = balanceForward.copy(dualTime = it)
+        }
+
+    var instructortime: Int
+        get() = balanceForward.instructortime
+        set(it){
+            balanceForward = balanceForward.copy(instructortime = it)
+        }
+
+    var simTime: Int
+        get() = balanceForward.simTime
+        set(it){
+            balanceForward = balanceForward.copy(simTime = it)
+        }
+
+    suspend fun saveBalanceForward() = withContext(Dispatchers.IO + NonCancellable){
+        BalanceForwardRepositoryImpl.instance.save(balanceForward)
     }
-
-
-
 }

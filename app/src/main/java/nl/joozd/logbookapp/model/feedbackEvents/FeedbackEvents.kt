@@ -37,24 +37,4 @@ object FeedbackEvents {
         UNDELETE_OK,
         UNDELETE_FAILED
     }
-
-    enum class LoginActivityEvents:
-        Event {
-        NOT_IMPLEMENTED,
-        SHOW_NEW_USER_DIALOG,
-        USERNAME_EMPTY,
-        PASSWORD_EMPTY,
-        USERNAME_OR_PASSWORD_INCORRECT,
-        SERVER_NOT_FOUND,
-        SAVED_WITHOUT_CHECKING_BECAUSE_NO_INTERNET,
-        SAVED_WITHOUT_CHECKING_BECAUSE_NO_SERVER,
-        FINISHED
-    }
-
-    enum class BalanceForwardDialogEvents:
-        Event {
-        UPDATE_FIELDS,
-        NUMBER_PARSE_ERROR,
-        CLOSE_DIALOG
-    }
 }

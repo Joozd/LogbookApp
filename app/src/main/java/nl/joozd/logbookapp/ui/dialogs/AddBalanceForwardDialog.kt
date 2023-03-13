@@ -25,185 +25,239 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.viewModels
-import nl.joozd.logbookapp.data.dataclasses.BalanceForward
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.DialogAddBalanceForwardBinding
-import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents.BalanceForwardDialogEvents
-import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
+import nl.joozd.logbookapp.extensions.showFragment
+import nl.joozd.logbookapp.model.helpers.FlightDataEntryFunctions.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.viewmodels.dialogs.AddBalanceForwardDialogViewmodel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
-import nl.joozd.logbookapp.ui.utils.toast
 
-
+//NOTE:
+//try { hoursAndMinutesStringToInt(it?.toString())?.let { something = it } }
 class AddBalanceForwardDialog: JoozdlogFragment() {
     val viewModel: AddBalanceForwardDialogViewmodel by viewModels()
-    private val bf: BalanceForward
-        get() = viewModel.workingBalanceForward
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogAddBalanceForwardBinding.bind(layoutInflater.inflate(R.layout.dialog_add_balance_forward, container, false)).apply{
+            initializeTextViews()
 
-            /**
-             * FIll fields opon (re)-creation of Fragment:
-             */
-            fillFields()
-            logbookNameText.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setName(logbookNameText.text)
-            }
-            multiPilotTimeEditText.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setMultipilotTime(multiPilotTimeEditText.text)
-            }
-            totalTimeOfFlightEditText.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setTotalTime(
-                        totalTimeOfFlightEditText.text)
-            }
-            landingDayText.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setLandingsDay(landingDayText.text)
-            }
-            landingNightText.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setLandingsNight(landingNightText.text)
-            }
-            nightTimeTextview.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setNightTime(nightTimeTextview.text)
-            }
-            ifrTimeTextview.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setIfrTime(ifrTimeTextview.text)
-            }
-            picText.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setPicTime(picText.text)
-            }
-            copilotText.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setCopilotTime(copilotText.text)
-            }
-            dualText.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setDualTime(dualText.text)
-            }
-            instructorText.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setInstructorTime(instructorText.text)
-            }
-            simulatorTimeEditText.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus)
-                    viewModel.setSimTime(simulatorTimeEditText.text)
-            }
-            simulatorTimeEditText.setOnEditorActionListener { _, actionId, _ ->
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    //Clear focus here from edittext
-                    viewModel.setSimTime(simulatorTimeEditText.text)
-                    root.clearFocus()
-                }
-                false
-            }
-
-            viewModel.feedbackEvent.observe(viewLifecycleOwner) {
-                when (it.getEvent()){
-                    BalanceForwardDialogEvents.NUMBER_PARSE_ERROR -> toast ( "ERROR")
-                    BalanceForwardDialogEvents.UPDATE_FIELDS -> fillFields()
-                    BalanceForwardDialogEvents.CLOSE_DIALOG -> {
-                        closeFragment()
-                    }
-                }
-            }
-
-            cancelBalanceForwardDialogButton.setOnClickListener {
-                activity?.currentFocus?.clearFocus()
-                closeFragment()
-            }
-
-            saveBalanceForwardDialogButton.setOnClickListener {
-                activity?.currentFocus?.clearFocus()
-                viewModel.saveBalanceForward()
-            }
-
-            addBalanceForwardDialogBackground.setOnClickListener {
-                // Do nothing
-            }
-
-            /*************************************************************************************
-             * Observers
-             *************************************************************************************/
-
-            viewModel.name.observe(viewLifecycleOwner){
-                logbookNameText.setText(it)
-            }
-
-            viewModel.multiPilot.observe(viewLifecycleOwner) {
-                multiPilotTimeEditText.setText(it)
-            }
-
-            viewModel.totalTimeOfFlight.observe(viewLifecycleOwner) {
-                totalTimeOfFlightEditText.setText(it)
-            }
-
-            viewModel.landingDay.observe(viewLifecycleOwner) {
-                landingDayText.setText(it)
-            }
-
-            viewModel.landingNight.observe(viewLifecycleOwner) {
-                landingNightText.setText(it)
-            }
-
-            viewModel.nightTime.observe(viewLifecycleOwner) {
-                nightTimeTextview.setText(it)
-            }
-
-            viewModel.ifrTime.observe(viewLifecycleOwner) {
-                ifrTimeTextview.setText(it)
-            }
-
-            viewModel.picTime.observe(viewLifecycleOwner) {
-                picText.setText(it)
-            }
-
-            viewModel.copilotTime.observe(viewLifecycleOwner) {
-                copilotText.setText(it)
-            }
-
-            viewModel.dualTime.observe(viewLifecycleOwner) {
-                dualText.setText(it)
-            }
-
-            viewModel.instructorTime.observe(viewLifecycleOwner) {
-                instructorText.setText(it)
-            }
-
-            viewModel.simTime.observe(viewLifecycleOwner) {
-                simulatorTimeEditText.setText(it)
-            }
+            initializeUIButtons()
 
         }.root
 
+    private fun DialogAddBalanceForwardBinding.initializeUIButtons() {
+        cancelBalanceForwardDialogButton.setOnClickListener {
+            activity?.currentFocus?.clearFocus()
+            closeFragment()
+        }
 
+        saveBalanceForwardDialogButton.setOnClickListener {
+            activity?.currentFocus?.clearFocus()
+            saveBalanceForwardAndCloseFragment()
+        }
 
-    /*********************************************************************************************
-     * Private helper functions
-     *********************************************************************************************/
+        addBalanceForwardDialogBackground.setOnClickListener {
+            activity?.currentFocus?.clearFocus()
+        }
+    }
 
-    /**
-     * Sets EditText fields to value as in ViewModel
-     */
-    private fun DialogAddBalanceForwardBinding.fillFields(){
-        logbookNameText.setText(bf.logbookName)
-        multiPilotTimeEditText.setText(bf.multiPilotTime.minutesToHoursAndMinutesString())
-        totalTimeOfFlightEditText.setText(bf.aircraftTime.minutesToHoursAndMinutesString())
-        landingDayText.setText(bf.landingDay.toString())
-        landingNightText.setText(bf.landingNight.toString())
-        nightTimeTextview.setText(bf.nightTime.minutesToHoursAndMinutesString())
-        ifrTimeTextview.setText(bf.ifrTime.minutesToHoursAndMinutesString())
-        picText.setText(bf.picTime.minutesToHoursAndMinutesString())
-        copilotText.setText(bf.copilotTime.minutesToHoursAndMinutesString())
-        dualText.setText(bf.dualTime.minutesToHoursAndMinutesString())
-        instructorText.setText(bf.instructortime.minutesToHoursAndMinutesString())
-        simulatorTimeEditText.setText(bf.simTime.minutesToHoursAndMinutesString())
+    private fun DialogAddBalanceForwardBinding.initializeTextViews(){
+        initializeLogbookNameTextView()
+        initializeLandingsDayTextView()
+        initializeLandingsNightTextView()
+        initializeFlightTime()
+        initializeMultiPilotTime()
+        initializeNightTime()
+        initializeIFRTime()
+        initializePICTime()
+        initializeCopilotTime()
+        initializeDualTime()
+        initializeInstructorTime()
+        initializeSimulatorTime()
+    }
+
+    private fun DialogAddBalanceForwardBinding.initializeLogbookNameTextView() {
+        viewModel.logbookNameFlow.launchCollectWhileLifecycleStateStarted {
+            logbookNameText.setText(it)
+        }
+        logbookNameText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                logbookNameText.text?.let { viewModel.logbookName = it.toString() }
+        }
+    }
+    private fun DialogAddBalanceForwardBinding.initializeLandingsDayTextView() {
+        viewModel.landingDayFlow.launchCollectWhileLifecycleStateStarted {
+            landingDayText.setText(it)
+        }
+        landingDayText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                landingDayText.text?.let {
+                    try { viewModel.landingDay = it.toString().toInt() }
+                    catch(e: NumberFormatException){
+                        showBadInputDataError()
+                    }
+                }
+        }
+    }
+    private fun DialogAddBalanceForwardBinding.initializeLandingsNightTextView() {
+        viewModel.landingNightFlow.launchCollectWhileLifecycleStateStarted {
+            landingNightText.setText(it)
+        }
+        landingNightText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                landingNightText.text?.let {
+                    try { viewModel.landingNight = it.toString().toInt() }
+                    catch(e: NumberFormatException){
+                        showBadInputDataError()
+                    }
+                }
+        }
+    }
+    private fun DialogAddBalanceForwardBinding.initializeFlightTime() {
+        viewModel.totalTimeOfFlightFlow.launchCollectWhileLifecycleStateStarted {
+            totalTimeOfFlightEditText.setText(it)
+        }
+        totalTimeOfFlightEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                totalTimeOfFlightEditText.text?.let {
+                    try { viewModel.aircraftTime = hoursAndMinutesStringToInt(it.toString())!! }
+                    catch(e: Throwable){
+                        showBadInputDataError()
+                    }
+                }
+        }
+    }
+    private fun DialogAddBalanceForwardBinding.initializeMultiPilotTime() {
+        viewModel.multiPilotFlow.launchCollectWhileLifecycleStateStarted {
+            multiPilotTimeEditText.setText(it)
+        }
+        multiPilotTimeEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                multiPilotTimeEditText.text?.let {
+                    try { viewModel.multipilotTime = hoursAndMinutesStringToInt(it.toString())!! }
+                    catch(e: Throwable){
+                        showBadInputDataError()
+                    }
+                }
+        }
+    }
+    private fun DialogAddBalanceForwardBinding.initializeNightTime() {
+        viewModel.nightTimeFlow.launchCollectWhileLifecycleStateStarted {
+            nightTimeTextview.setText(it)
+        }
+        nightTimeTextview.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                nightTimeTextview.text?.let {
+                    try { viewModel.nightTime = hoursAndMinutesStringToInt(it.toString())!! }
+                    catch(e: Throwable){
+                        showBadInputDataError()
+                    }
+                }
+        }
+    }
+    private fun DialogAddBalanceForwardBinding.initializeIFRTime() {
+        viewModel.ifrTimeFlow.launchCollectWhileLifecycleStateStarted {
+            ifrTimeTextview.setText(it)
+        }
+        ifrTimeTextview.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                ifrTimeTextview.text?.let {
+                    try { viewModel.ifrTime = hoursAndMinutesStringToInt(it.toString())!! }
+                    catch(e: Throwable){
+                        showBadInputDataError()
+                    }
+                }
+        }
+    }
+    private fun DialogAddBalanceForwardBinding.initializePICTime() {
+        viewModel.picTimeFlow.launchCollectWhileLifecycleStateStarted {
+            picText.setText(it)
+        }
+        picText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                picText.text?.let {
+                    try { viewModel.picTime = hoursAndMinutesStringToInt(it.toString())!! }
+                    catch(e: Throwable){
+                        showBadInputDataError()
+                    }
+                }
+        }
+    }
+    private fun DialogAddBalanceForwardBinding.initializeCopilotTime() {
+        viewModel.copilotTimeFlow.launchCollectWhileLifecycleStateStarted {
+            copilotText.setText(it)
+        }
+        copilotText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                copilotText.text?.let {
+                    try { viewModel.copilotTime = hoursAndMinutesStringToInt(it.toString())!! }
+                    catch(e: Throwable){
+                        showBadInputDataError()
+                    }
+                }
+        }
+    }
+    private fun DialogAddBalanceForwardBinding.initializeDualTime() {
+        viewModel.dualTimeFlow.launchCollectWhileLifecycleStateStarted {
+            dualText.setText(it)
+        }
+        dualText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                dualText.text?.let {
+                    try { viewModel.dualTime = hoursAndMinutesStringToInt(it.toString())!! }
+                    catch(e: Throwable){
+                        showBadInputDataError()
+                    }
+                }
+        }
+    }
+    private fun DialogAddBalanceForwardBinding.initializeInstructorTime() {
+        viewModel.instructorTimeFlow.launchCollectWhileLifecycleStateStarted {
+            instructorText.setText(it)
+        }
+        instructorText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                instructorText.text?.let {
+                    try { viewModel.instructortime = hoursAndMinutesStringToInt(it.toString())!! }
+                    catch(e: Throwable){
+                        showBadInputDataError()
+                    }
+                }
+        }
+    }
+    private fun DialogAddBalanceForwardBinding.initializeSimulatorTime() {
+        viewModel.simTimeFlow.launchCollectWhileLifecycleStateStarted {
+            simulatorTimeEditText.setText(it)
+        }
+
+        simulatorTimeEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                simulatorTimeEditText.text?.let {
+                    try { viewModel.simTime = hoursAndMinutesStringToInt(it.toString())!! }
+                    catch(e: Throwable){
+                        showBadInputDataError()
+                    }
+                }
+        }
+
+        simulatorTimeEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                root.clearFocus()
+            }
+            false
+        }
+    }
+
+    private fun showBadInputDataError() {
+        requireActivity().showFragment(MessageDialog.make("Bad input data"))
+    }
+
+    private fun saveBalanceForwardAndCloseFragment(){
+        lifecycleScope.launch {
+            viewModel.saveBalanceForward()
+            closeFragment()
+        }
     }
 }

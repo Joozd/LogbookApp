@@ -31,8 +31,8 @@ android {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 26
         targetSdkVersion 33
-        versionCode 134 // my version, increment this every build
-        versionName "JoozdLog BEAVER | 1.2.2" // Deploy build!
+        versionCode 135 // my version, increment this every build
+        versionName "JoozdLog BEAVER | 1.2.3" // Deploy build!
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -99,7 +99,7 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.9.0'
 
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.recyclerview:recyclerview:1.3.0'
     implementation 'androidx.annotation:annotation:1.6.0'
 
     implementation 'com.google.android.material:material:1.8.0'

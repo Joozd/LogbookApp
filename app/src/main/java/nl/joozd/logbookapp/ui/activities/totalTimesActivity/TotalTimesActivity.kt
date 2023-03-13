@@ -37,29 +37,32 @@ class TotalTimesActivity : JoozdlogActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        /**
-         * UI related stuff goes in this block
-         */
-        with (ActivityTotalTimesBinding.inflate(layoutInflater)){
+        val binding = ActivityTotalTimesBinding.inflate(layoutInflater).apply {
+            initializeToolbar()
+            initializeTotalsListsExpandableListView()
+        }
 
-            setSupportActionBarWithReturn(totalTimesToolbar)?.apply {
-                setDisplayShowHomeEnabled(true)
-                setDisplayHomeAsUpEnabled(true)
-                title = getString(R.string.totalTimes)
-            }
+        setContentView(binding.root)
+    }
 
-            /**
-             * Adding extra Totals lists to this is done in [TotalTimesViewModel.allLists]
-             */
-            val totalTimesExpandableListAdapter = TotalTimesExpandableListAdapter()
-            totalTimesExListView.adapter = totalTimesExpandableListAdapter
-            totalTimesExListView.layoutManager = LinearLayoutManager(activity)
+    /*
+     * Adding extra Totals lists to this is done in [TotalTimesViewModel.allLists]
+     */
+    private fun ActivityTotalTimesBinding.initializeTotalsListsExpandableListView() {
+        val totalTimesExpandableListAdapter = TotalTimesExpandableListAdapter()
+        totalTimesExListView.adapter = totalTimesExpandableListAdapter
+        totalTimesExListView.layoutManager = LinearLayoutManager(activity)
 
-            viewModel.allLists.observe(activity){ lists ->
-                    totalTimesExpandableListAdapter.submitList(lists)
+        viewModel.allLists.launchCollectWhileLifecycleStateStarted { lists ->
+            totalTimesExpandableListAdapter.submitList(lists)
+        }
+    }
 
-            }
-            setContentView(root)
+    private fun ActivityTotalTimesBinding.initializeToolbar() {
+        setSupportActionBarWithReturn(totalTimesToolbar)?.apply {
+            setDisplayShowHomeEnabled(true)
+            setDisplayHomeAsUpEnabled(true)
+            title = getString(R.string.totalTimes)
         }
     }
 }

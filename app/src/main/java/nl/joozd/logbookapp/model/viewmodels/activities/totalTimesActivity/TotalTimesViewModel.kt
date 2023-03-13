@@ -19,58 +19,57 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity
 
-
-import androidx.lifecycle.*
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 import nl.joozd.logbookapp.data.repository.BalanceForwardRepositoryImpl
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.extensions.replaceValueAt
+import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.listBuilders.*
 
 //TODO switch from LiveData to Flow
 class TotalTimesViewModel: JoozdlogActivityViewModel() {
-    private val _allLists = MutableLiveData(List<TotalTimesItem?>(NUMBER_OF_LISTS) { null })
+    val allLists = combine(
+        totalTimesFlow(),
+        timesPerYearFlow(),
+        timesPerTypeFlow(),
+        timesPerRegFlow(),
+        visitsPerDestFlow()
+    ){ totalTimes, timesPerYear, timesPerType, timesPerRegistration, airportsArrived ->
+        listOfNotNull(totalTimes, timesPerYear, timesPerType, timesPerRegistration, airportsArrived)
+    }
 
 
-    val allLists: LiveData<List<TotalTimesItem>> = _allLists.map { it.filterNotNull() }
-
-
-    /**
-     * In here, add all the listBuilders. Don't forget to update NUMBER_OF_LISTS as well
-     */
-
-    init{
-        viewModelScope.launch{
-            //Get all flights and balances forward
-            val allFlights = async { FlightRepository.instance.getAllFlights().filter{ !it.isPlanned} }
-            val allBalancesForward = async { BalanceForwardRepositoryImpl.instance.getBalancesForward() }
-
-            // build lists
-            val totalTimes = async { TotalTimes.of(allFlights.await(), allBalancesForward.await()) }
-            val timesPerYear = async { TimesPerYear.of(allFlights.await()) }
-            val timesPerType = async { TimesPerType.of(allFlights.await()) }
-            val timesPerReg = async{ TimesPerRegistration.of(allFlights.await())}
-            val visitsPerDest = async { AirportsArrived.of(allFlights.await())}
-
-            //Add totals lists as they become available
-            _allLists.value = _allLists.value!!.replaceValueAt(POSITION_TOTALS, totalTimes.await())
-            _allLists.value = _allLists.value!!.replaceValueAt(POSITION_YEARS, timesPerYear.await())
-            _allLists.value = _allLists.value!!.replaceValueAt(POSITION_TYPES, timesPerType.await())
-            _allLists.value = _allLists.value!!.replaceValueAt(POSITION_REGS, timesPerReg.await())
-            _allLists.value = _allLists.value!!.replaceValueAt(POSITION_DESTS, visitsPerDest.await())
+    private var allFlightsCache: List<Flight>? = null
+    private val allFlightsMutex = Mutex()
+    private suspend fun allFlightsCached() = allFlightsMutex.withLock {
+        allFlightsCache ?: FlightRepository.instance.getAllFlights().filter{ !it.isPlanned}.also{
+            allFlightsCache = it
         }
     }
 
-    companion object{
-        //These values are used to make sure totals lists will appear in the same order every time.
-        const val NUMBER_OF_LISTS = 5 // amount of expandable lists we will show
-        const val POSITION_TOTALS = 0
-        const val POSITION_YEARS = 1
-        const val POSITION_TYPES = 2
-        const val POSITION_REGS = 3
-        const val POSITION_DESTS = 4
+    private var balancesForwardCache: List<BalanceForward>? = null
+    private val balancesForwardMutex = Mutex()
+    private suspend fun balancesForwardCached() = balancesForwardMutex.withLock {
+        balancesForwardCache ?: BalanceForwardRepositoryImpl.instance.getBalancesForward().also{
+            balancesForwardCache = it
+        }
+    }
+
+    private fun totalTimesFlow() = flowStartingWithNull {TotalTimes.of(allFlightsCached(), balancesForwardCached()) }
+    private fun timesPerYearFlow() = flowStartingWithNull { TimesPerYear.of(allFlightsCached()) }
+    private fun timesPerTypeFlow() = flowStartingWithNull { TimesPerType.of(allFlightsCached()) }
+    private fun timesPerRegFlow() = flowStartingWithNull{ TimesPerRegistration.of(allFlightsCached())}
+    private fun visitsPerDestFlow() = flowStartingWithNull { AirportsArrived.of(allFlightsCached())}
+
+    private fun <T> flowStartingWithNull(block: suspend FlowCollector<T>.() -> T): Flow<T?> = flow{
+        emit(null)
+        emit(block())
     }
 }
 

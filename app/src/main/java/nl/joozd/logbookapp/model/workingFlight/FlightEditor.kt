@@ -193,14 +193,14 @@ interface FlightEditor {
     fun snapshot(): ModelFlight
 
     /**
-     * Toggle between Dual, Instructor or neither.
-     * if isDual && isInstructor, will togle to isDual.
+     * Cycle between Dual, Instructor or neither.
+     * if isDual && isInstructor, will set isDual.
      */
     fun toggleDualInstructorNeither()
 
     /**
      * Toggle between PICUS, PIC or neither.
-     * if isPICUS && isPIC, will togle to isDual.
+     * if isPICUS && isPIC, will set isPICUS.
      */
     fun togglePicusPicNeither()
 

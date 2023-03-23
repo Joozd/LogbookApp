@@ -44,3 +44,5 @@ If you really want to know, look at all the github commits...
 - Fix: KLC roster no longer crashes when a PSN starts with zero's
 ### 1.2.4:
 - General improvements
+- ### 1.2.5:
+- Fix for "Being PF but not doing takeoff/landing causes issues in takeoff/landing dialog"

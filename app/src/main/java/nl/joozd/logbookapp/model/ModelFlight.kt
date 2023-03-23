@@ -122,10 +122,21 @@ data class ModelFlight(
             correctedTotalTime = 0,
             ifrTime = calculateIfrTime(),
             nightTime = calculateNightTime(),
-            takeoffLandings = makeTakeoffLandings().updateTakeoffLandingsForNightTime(),
+            takeoffLandings = takeoffLandings.updateTakeoffLandingsForNightTime(), // This only checks for night time. If toggling isPF should toggle takeoff and landing, call [setTakeoffLandingsIfIsPFChanged]
             multiPilotTime = calculateMultiPilotTime(),
             isCoPilot = isCopilot()
         )
+
+    /**
+     * Call this after isPF gets changed.
+     * Calling this will update takeoff/landing when:
+     * - isPF == true AND to/ldg was 0/0: 1/1
+     * - isPF == false AND to/ldg was 1/1: 0/0
+     * - else: do not change to/ldg
+     */
+    fun setTakeoffLandingsForIsPF(): ModelFlight =
+        this.copy(takeoffLandings = makeTakeoffLandings())
+
 
     fun date(): LocalDate = timeOut.toLocalDate()
 
@@ -136,6 +147,8 @@ data class ModelFlight(
 
 
     private fun isCopilot() = multiPilotTime != 0 && !isPIC
+
+
 
     private fun makeTakeoffLandings(): TakeoffLandings =
         when{

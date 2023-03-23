@@ -217,10 +217,13 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
             flight = flight.copy(isCoPilot = isCoPilot, autoFill = false)
         }
 
+
     override var isPF: Boolean
         get() = flight.isPF
         set(isPF) {
-            flight = flight.copy (isPF = isPF).autoValues()
+            flight = flight.copy (isPF = isPF)
+                .setTakeoffLandingsForIsPF() // this will set to/ldg to 1/1 or 0/0 if appropriate.
+                .autoValues()
         }
 
     override var autoFill: Boolean

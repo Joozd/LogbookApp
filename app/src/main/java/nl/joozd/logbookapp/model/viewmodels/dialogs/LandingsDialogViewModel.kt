@@ -26,7 +26,7 @@ import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
 class LandingsDialogViewModel: JoozdlogDialogViewModel() {
     private val undoLandings = flightEditor.takeoffLandings
     val takeoffLandingsFlow = flightEditor.flightFlow.map { it.takeoffLandings }
-    var t: TakeoffLandings
+    var takeoffLandings: TakeoffLandings
         get() = flightEditor.takeoffLandings
         set(it){ flightEditor.takeoffLandings = it }
 
@@ -36,35 +36,35 @@ class LandingsDialogViewModel: JoozdlogDialogViewModel() {
      * workingFlight will take care of not becoming negative.
      */
     fun toDayUpButtonClick() {
-        t = t.copy(takeoffDay = t.takeoffDay + 1)
+        takeoffLandings = takeoffLandings.copy(takeoffDay = takeoffLandings.takeoffDay + 1)
     }
     fun toNightUpButtonClick() {
-        t = t.copy(takeoffNight = t.takeoffNight + 1)
+        takeoffLandings = takeoffLandings.copy(takeoffNight = takeoffLandings.takeoffNight + 1)
     }
     fun ldgDayUpButtonClick() {
-        t = t.copy(landingDay = t.landingDay + 1)
+        takeoffLandings = takeoffLandings.copy(landingDay = takeoffLandings.landingDay + 1)
     }
     fun ldgNightUpButtonClick() {
-        t = t.copy(landingNight = t.landingNight + 1)
+        takeoffLandings = takeoffLandings.copy(landingNight = takeoffLandings.landingNight + 1)
     }
     fun autolandUpButtonClick() {
-        t = t.copy(autoLand = t.autoLand + 1)
+        takeoffLandings = takeoffLandings.copy(autoLand = takeoffLandings.autoLand + 1)
     }
 
     fun toDayDownButtonClick() {
-        t = t.copy(takeoffDay = maxOf(0, t.takeoffDay - 1))
+        takeoffLandings = takeoffLandings.copy(takeoffDay = maxOf(0, takeoffLandings.takeoffDay - 1))
     }
     fun toNightDownButtonClick() {
-        t = t.copy(takeoffNight = maxOf(0, t.takeoffNight - 1))
+        takeoffLandings = takeoffLandings.copy(takeoffNight = maxOf(0, takeoffLandings.takeoffNight - 1))
     }
     fun ldgDayDownButtonClick() {
-        t = t.copy(landingDay = maxOf(0, t.landingDay - 1))
+        takeoffLandings = takeoffLandings.copy(landingDay = maxOf(0, takeoffLandings.landingDay - 1))
     }
     fun ldgNightDownButtonClick() {
-        t = t.copy(landingNight = maxOf(0, t.landingNight - 1))
+        takeoffLandings = takeoffLandings.copy(landingNight = maxOf(0, takeoffLandings.landingNight - 1))
     }
     fun autolandDownButtonClick() {
-        t = t.copy(autoLand = maxOf(0, t.autoLand - 1))
+        takeoffLandings = takeoffLandings.copy(autoLand = maxOf(0, takeoffLandings.autoLand - 1))
     }
 
     fun undo(){

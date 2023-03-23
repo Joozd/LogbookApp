@@ -42,3 +42,5 @@ If you really want to know, look at all the github commits...
 ### 1.2.3:
 - Errors when parsing imported files now no longer crash the app but give an error message.
 - Fix: KLC roster no longer crashes when a PSN starts with zero's
+### 1.2.4:
+- General improvements

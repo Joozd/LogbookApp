@@ -21,7 +21,6 @@ package nl.joozd.logbookapp.data.room.dao
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 
@@ -31,13 +30,13 @@ class MockFlightDao: FlightDao {
     private var _flow by CastFlowToMutableFlowShortcut(simulatedFlow)
 
     override fun validFlightsFlow(): Flow<List<FlightData>> =
-        simulatedFlow.map { it.filter { f -> !f.DELETEFLAG }}
+        simulatedFlow
 
     override suspend fun getFlightById(id: Int): FlightData? =
-        simulatedDatabase[id]?.takeIf { !it.DELETEFLAG }
+        simulatedDatabase[id]
 
     override suspend fun getFlightsByID(ids: Collection<Int>): List<FlightData> =
-        ids.mapNotNull { simulatedDatabase[it] }.filter { !it.DELETEFLAG }
+        ids.mapNotNull { simulatedDatabase[it] }
 
     override suspend fun getFlightsStartingBetween(
         startEpochSecond: Long,
@@ -50,7 +49,7 @@ class MockFlightDao: FlightDao {
         simulatedDatabase.values.toList()
 
     override suspend fun getValidFlights(): List<FlightData> =
-        getAllFlights().filter { !it.DELETEFLAG }
+        getAllFlights()
 
     override suspend fun highestUsedID(): Int? =
         simulatedDatabase.keys.maxOrNull()
@@ -58,11 +57,6 @@ class MockFlightDao: FlightDao {
     override suspend fun getMostRecentCompleted(): FlightData? =
         getCompletedFlights()
             .maxByOrNull { it.timeIn }
-
-    override suspend fun getMostRecentTimestampOfACompletedFlight(): Long? =
-        getCompletedFlights()
-            .maxOfOrNull { it.timeStamp }
-
 
     override suspend fun save(flightData: Collection<FlightData>) {
         flightData.forEach {
@@ -75,6 +69,14 @@ class MockFlightDao: FlightDao {
         flightData.forEach {
             simulatedDatabase.remove(it.flightID)
         }
+    }
+
+    override suspend fun deleteById(ids: Collection<Int>) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun clear() {
+        TODO("Not yet implemented")
     }
 
     private fun emit(){

@@ -19,15 +19,11 @@
 
 package nl.joozd.logbookapp.data.room.dao
 
-import androidx.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import nl.joozd.logbookapp.data.dataclasses.BalanceForward
 
 class MockBalanceForwardDao: BalanceForwardDao {
-    override suspend fun requestAll(): List<BalanceForward> {
-        TODO("Not yet implemented")
-    }
-
-    override fun requestLiveBalancesForward(): LiveData<List<BalanceForward>> {
+    override fun balanceForwardFlow(): Flow<List<BalanceForward>> {
         TODO("Not yet implemented")
     }
 
@@ -35,7 +31,7 @@ class MockBalanceForwardDao: BalanceForwardDao {
         TODO("Not yet implemented")
     }
 
-    override suspend fun delete(bf: BalanceForward) {
+    override suspend fun delete(vararg bf: BalanceForward) {
         TODO("Not yet implemented")
     }
 }

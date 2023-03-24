@@ -48,8 +48,6 @@ class ModelFlightTest: CoroutineTestingClass() {
             dest = AirportsTestData.ebbr.ident,
             registration = AircraftTestData.arwt1.registration,
             aircraftType = AircraftTestData.arwt1.type.shortName,
-            timeStamp = 1000,
-            unknownToServer = false
         )
 
     @Before

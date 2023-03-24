@@ -26,7 +26,6 @@ import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.model.ModelFlight
 
@@ -53,7 +52,7 @@ abstract class FlightsListItemViewHolder(containerView: View): RecyclerView.View
     }
 
     protected fun ModelFlight.isAugmented() =
-        AugmentedCrew.of(augmentedCrew).size > 2
+        AugmentedCrew.fromInt(augmentedCrew).size > 2
 
     protected fun ModelFlight.isIfr() =
         ifrTime > 0

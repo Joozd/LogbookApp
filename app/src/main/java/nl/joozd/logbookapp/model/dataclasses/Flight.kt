@@ -134,11 +134,6 @@ data class Flight(
         signature
     )
 
-
-
-
-    fun landings() = "${landingDay + landingNight}"
-    fun takeoffs() = "${takeOffDay + takeOffNight}"
     fun tOut(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeOut), ZoneId.of("UTC"))
     fun tIn(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(timeIn), ZoneId.of("UTC"))
 
@@ -154,7 +149,7 @@ data class Flight(
 
     //duration in minutes
     val calculatedDuration: Int
-        get() = AugmentedCrew.of(augmentedCrew).getLogTime(Duration.between(this.tOut(), this.tIn()).toMinutes().toInt(), this.isPIC)
+        get() = AugmentedCrew.fromInt(augmentedCrew).getLogTime(Duration.between(this.tOut(), this.tIn()).toMinutes().toInt(), this.isPIC)
 
     /**
      * Get the logged duration of a flight in minutes (corrected for augmented crew and [correctedTotalTime])
@@ -169,6 +164,5 @@ data class Flight(
     companion object{
         const val FLIGHT_ID_NOT_INITIALIZED = -1
         const val FLIGHT_IS_VFR = -1
-        const val NO_TIMESTAMP = 0L
     }
 }

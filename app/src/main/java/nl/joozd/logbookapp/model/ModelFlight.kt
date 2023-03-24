@@ -199,7 +199,7 @@ data class ModelFlight(
 
     fun calculateTotalTime(): Int =
         if (isSim) 0
-        else AugmentedCrew.of(augmentedCrew).getLogTime(getDurationOfFlight(), isPIC)
+        else AugmentedCrew.fromInt(augmentedCrew).getLogTime(getDurationOfFlight(), isPIC)
 
     private fun getDurationOfFlight(): Duration =
         Duration.between(timeOut, timeIn)

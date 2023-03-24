@@ -27,9 +27,9 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
     private val undoCrew = flightEditor.augmentedCrew
 
-    private var crew = AugmentedCrew.of(flightEditor.augmentedCrew)
+    private var crew = AugmentedCrew.fromInt(flightEditor.augmentedCrew)
 
-    private val crewFlow = flightEditor.flightFlow.map { AugmentedCrew.of(it.augmentedCrew) }
+    private val crewFlow = flightEditor.flightFlow.map { AugmentedCrew.fromInt(it.augmentedCrew) }
 
     fun crewSizeFlow() = crewFlow.map { it.size }
     fun didTakeoffFlow() = crewFlow.map { it.takeoff }

@@ -38,12 +38,10 @@ class TimePickerViewModel: JoozdlogDialogViewModel() {
 
     private val f get() = flightEditor.flightFlow
 
-    val debugF get() = f
-
     fun totalTimeFlow() = f.map { it.calculateTotalTime() } // this shows calculated time even when correctedTotalTime is zero.
     fun nightTimeFlow() = f.map { it.nightTime }
     fun ifrTimeFlow() = f.map { it.ifrTime }
-    fun augmentedCrewFlow() = f.map { AugmentedCrew.of(it.augmentedCrew) }
+    fun augmentedCrewFlow() = f.map { AugmentedCrew.fromInt(it.augmentedCrew) }
     fun picPicusFlow() = f.map { when {
         it.isPIC -> PicPicusFlag.PIC
         it.isPICUS -> PicPicusFlag.PICUS

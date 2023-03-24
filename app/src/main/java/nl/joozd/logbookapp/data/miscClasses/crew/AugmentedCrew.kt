@@ -23,26 +23,40 @@ import nl.joozd.logbookapp.extensions.getBit
 import nl.joozd.logbookapp.extensions.setBit
 import java.time.Duration
 
-/************************************************************************************
- * CrewValue will store info on augmented crews:                                    *
- * bits 0-3: amount of crew (no crews >15 ppl :) )                                  *
- * bit 4: in seat on takeoff                                                        *
- * bit 5: in seat on landing                                                        *
- * bit 6-31: amount of time reserved for takeoff/landing (standard in settings)     *
- ************************************************************************************/
-data class AugmentedCrew(val size: Int = 2,
-                         val takeoff: Boolean = true,
-                         val landing: Boolean = true,
-                         val times: Int = 0)
+/**
+ * CrewValue will store info on augmented crews: *
+ * - bits 0-2: amount of crew (no crews >7 )
+ * - bit 3: if 1, this is a fixed time. If 0, time is calculated.
+ * This reverse order from what makes sense is for backwards compatibility and easier migration.
+ * - bit 4: in seat on takeoff
+ * - bit 5: in seat on landing
+ * - bit 6-31: amount of time reserved for takeoff/landing (standard in settings)
+ */
+// right bit is [0]
+data class AugmentedCrew(
+    val isFixedTime: Boolean = false,
+    val size: Int = 2,
+    val takeoff: Boolean = true,
+    val landing: Boolean = true,
+    val times: Int = 0)
 {
     fun toInt():Int {
-        var value = if (size > 15) 15 else size
+        var value = if (size > MAX_CREW_SIZE) MAX_CREW_SIZE else size
+        value = value.setBit(3, isFixedTime)
         value = value.setBit(4, takeoff).setBit(5, landing)
         value += times.shl(6)
         return value
     }
 
-    fun isAugmented() = size > 2
+    /**
+     * A crew is augmented if it is done by more than 2 pilots, or if a fixed rest time is entered.
+     */
+    fun isAugmented() = size > 2 || (isFixedTime && times != 0)
+
+    /**
+     * Returns a [AugmentedCrew] object with [isFixedTime] set to [fixedTime]
+     */
+    fun withFixedRestTime(fixedTime: Boolean): AugmentedCrew = this.copy(isFixedTime = fixedTime)
 
     /**
      * Returns a [AugmentedCrew] object with [size] set to [crewSize]
@@ -69,7 +83,10 @@ data class AugmentedCrew(val size: Int = 2,
      * Return amount of time to log. Cannot be negative, so 3 man ops for a 20 min flight with 30 mins to/landing is 0 minutes to log.
      */
     fun getLogTime(totalTime: Int, pic: Boolean): Int{
-        if (pic || size <=2) return totalTime
+        if (pic) return totalTime // PIC logs all time
+        if(isFixedTime) return totalTime - times // fixed rest time gets subtracted from
+        if (size <=2) return totalTime // less than 2 crew logs all time
+
         val divideableTime = (totalTime - 2*times).toFloat()
         val timePerShare = divideableTime / size
         val minutesInSeat = (timePerShare*2).toInt()
@@ -78,10 +95,8 @@ data class AugmentedCrew(val size: Int = 2,
 
     fun getLogTime(totalTime: Long, pic: Boolean): Long = getLogTime(totalTime.toInt(), pic).toLong()
 
-    fun getLogTime(totalTime: Duration, pic: Boolean): Int{
-        if (pic || size <=2) return totalTime.toMinutes().toInt()
-        return getLogTime(totalTime.toMinutes(), pic).toInt()
-    }
+    fun getLogTime(totalTime: Duration, pic: Boolean): Int =
+        getLogTime(totalTime.toMinutes(), pic).toInt()
 
     operator fun inc(): AugmentedCrew = this.copy (size = (size + 1).putInRange(MIN_CREW_SIZE..MAX_CREW_SIZE))
 
@@ -97,30 +112,20 @@ data class AugmentedCrew(val size: Int = 2,
         }
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other !is AugmentedCrew) return false
-        return this.toInt() == other.toInt()
-    }
-
-    override fun hashCode(): Int = toInt()
-
-    override fun toString(): String = "Crew(size = $size, takeoff = $takeoff, landing = $landing, toLdgTime = $times)"
-
     companion object {
         const val MIN_CREW_SIZE = 1
-        const val MAX_CREW_SIZE = 15
+        const val MAX_CREW_SIZE = 7
 
-        fun coco(takeoffLandingTimes: Int): AugmentedCrew = AugmentedCrew(3, takeoff = false, landing = false, times = takeoffLandingTimes)
+        fun coco(takeoffLandingTimes: Int): AugmentedCrew = AugmentedCrew(isFixedTime = false, size = 3, takeoff = false, landing = false, times = takeoffLandingTimes)
 
-        fun of(value: Int) =
+        fun fromInt(value: Int) =
             if (value == 0) AugmentedCrew(times = 0) // 0 is not augmented so times don't matter
             else AugmentedCrew(
-                size = 15.and(value),
+                size = 7.and(value),
+                isFixedTime = value.getBit(3),
                 takeoff = value.getBit(4),
                 landing = value.getBit(5),
                 times = value.ushr(6)
             )
-        fun of(crewSize: Int, didTakeoff: Boolean, didLanding: Boolean, nonStandardTimes: Int) = AugmentedCrew(crewSize,didTakeoff,didLanding,nonStandardTimes)
-
     }
 }

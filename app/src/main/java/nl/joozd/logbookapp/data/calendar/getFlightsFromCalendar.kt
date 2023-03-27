@@ -30,6 +30,8 @@ import nl.joozd.joozdcalendarapi.getCalendars
 import nl.joozd.joozdlogimporter.dataclasses.ExtractedPlannedFlights
 import nl.joozd.logbookapp.data.calendar.parsers.calendarEventsToExtractedPlannedFlights
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.extensions.toEpochMilliRange
+import nl.joozd.logbookapp.extensions.toEpochSecondRange
 import nl.joozd.logbookapp.utils.DispatcherProvider
 import java.time.Duration
 import java.time.Instant
@@ -65,8 +67,3 @@ private fun buildEventsStartingInPeriodExtractor(calendar: CalendarDescriptor, p
         startInEpochMilliRange(period.toEpochMilliRange())
     }.build()
 
-private fun ClosedRange<Instant>.toEpochMilliRange(): ClosedRange<Long> =
-    this.start.toEpochMilli()..this.endInclusive.toEpochMilli()
-
-private fun ClosedRange<Instant>.toEpochSecondRange(): ClosedRange<Long> =
-    this.start.epochSecond..this.endInclusive.epochSecond

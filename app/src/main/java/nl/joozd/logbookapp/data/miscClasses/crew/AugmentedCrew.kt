@@ -24,13 +24,7 @@ import nl.joozd.logbookapp.extensions.setBit
 import java.time.Duration
 
 /**
- * CrewValue will store info on augmented crews: *
- * - bits 0-2: amount of crew (no crews >7 )
- * - bit 3: if 1, this is a fixed time. If 0, time is calculated.
- * This reverse order from what makes sense is for backwards compatibility and easier migration.
- * - bit 4: in seat on takeoff
- * - bit 5: in seat on landing
- * - bit 6-31: amount of time reserved for takeoff/landing (standard in settings)
+ * CrewValue stores info on augmented crews: *
  */
 // right bit is [0]
 data class AugmentedCrew(
@@ -38,8 +32,12 @@ data class AugmentedCrew(
     val size: Int = 2,
     val takeoff: Boolean = true,
     val landing: Boolean = true,
-    val times: Int = 0)
+    val times: Int = 0,
+    val undefined: Boolean = false)
 {
+    /**
+     * @See [fromInt] for format
+     */
     fun toInt():Int {
         var value = if (size > MAX_CREW_SIZE) MAX_CREW_SIZE else size
         value = value.setBit(3, isFixedTime)
@@ -118,8 +116,17 @@ data class AugmentedCrew(
 
         fun coco(takeoffLandingTimes: Int): AugmentedCrew = AugmentedCrew(isFixedTime = false, size = 3, takeoff = false, landing = false, times = takeoffLandingTimes)
 
+        /**
+         * A value of 0 means "undefined"
+         * - bits 0-2: amount of crew (no crews >7 )
+         * - bit 3: if 1, this is a fixed time. If 0, time is calculated.
+         * This reverse order from what makes sense is for backwards compatibility and easier migration.
+         * - bit 4: in seat on takeoff
+         * - bit 5: in seat on landing
+         * - bit 6-31: amount of time reserved for takeoff/landing (standard in settings)
+         */
         fun fromInt(value: Int) =
-            if (value == 0) AugmentedCrew(times = 0) // 0 is not augmented so times don't matter
+            if (value == 0) AugmentedCrew(times = 0, undefined = true) // 0 is not augmented.
             else AugmentedCrew(
                 size = 7.and(value),
                 isFixedTime = value.getBit(3),

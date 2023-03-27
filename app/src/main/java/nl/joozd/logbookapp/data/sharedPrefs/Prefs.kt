@@ -35,16 +35,16 @@ object Prefs: JoozdLogPreferences() {
     private const val SELECTED_CALENDAR = "SELECTED_CALENDAR"
 
 
-    //This will be replaced by emailID, just here so we can migrate when upgrading. one month after 1.2 update, this can go out.
+    //TODO remove this after 01-05-2023
     private const val USERNAME_RESOURCE = "USERNAME_RESOURCE"
     private var usernameResource: String by JoozdLogSharedPreferenceNotNull(USERNAME_RESOURCE, USERNAME_NOT_SET)
-
     private val usernameResourceFlow by PrefsFlow(USERNAME_RESOURCE, USERNAME_NOT_SET)
 
     suspend fun username() = usernameIfSet(usernameResourceFlow.first())   // usernameFlow gives null if USERNAME_NOT_SET
     fun username(newName: String?) = post(USERNAME_RESOURCE, newName ?: USERNAME_NOT_SET)
 
     private fun usernameIfSet(name: String) = name.takeIf { usernameResource != USERNAME_NOT_SET }
+    //TODO remove until here
 
 
     /**
@@ -80,6 +80,7 @@ object Prefs: JoozdLogPreferences() {
     private const val CAL_SYNC_ICAL_ADDR = "CAL_SYNC_ICAL_ADDR"
     private const val NEXT_CAL_CHECK_TIME = "NEXT_CAL_CHECK_TIME"
     private const val CAL_DISABLED_UNTIL = "CAL_DISABLED_UNTIL"
+    private const val DEFAULT_MULTICREW_MODE_IS_FIXED_REST = "DEFAULT_MULTICREW_MODE_IS_FIXED_REST"
 
     val darkMode by JoozdlogSharedPreferenceDelegate(DARK_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
@@ -100,6 +101,7 @@ object Prefs: JoozdLogPreferences() {
     val calendarSyncIcalAddress by JoozdlogSharedPreferenceDelegate(CAL_SYNC_ICAL_ADDR,"")
     val nextCalendarCheckTime by JoozdlogSharedPreferenceDelegate(NEXT_CAL_CHECK_TIME,-1)
     val calendarDisabledUntil by JoozdlogSharedPreferenceDelegate(CAL_DISABLED_UNTIL,0L) // in epochSeconds
+    val defaultMultiCrewModeIsFixedRest by JoozdlogSharedPreferenceDelegate(DEFAULT_MULTICREW_MODE_IS_FIXED_REST, false)
 
 
     /**

@@ -33,7 +33,7 @@ data class AugmentedCrew(
     val takeoff: Boolean = true,
     val landing: Boolean = true,
     val times: Int = 0,
-    val undefined: Boolean = false)
+    val isUndefined: Boolean = false)
 {
     /**
      * @See [fromInt] for format
@@ -126,7 +126,7 @@ data class AugmentedCrew(
          * - bit 6-31: amount of time reserved for takeoff/landing (standard in settings)
          */
         fun fromInt(value: Int) =
-            if (value == 0) AugmentedCrew(times = 0, undefined = true) // 0 is not augmented.
+            if (value == 0) AugmentedCrew(times = 0, isUndefined = true) // 0 is not augmented.
             else AugmentedCrew(
                 size = 7.and(value),
                 isFixedTime = value.getBit(3),

@@ -107,7 +107,7 @@ class EmailCenter(private val taskFlags: TaskFlags = TaskFlags, private val pref
         TaskPayloads.emailConfirmationStringWaiting("")
     }
 
-    //TODO schedule this instead of running it strauight away. Also this needs to be in serverFunctions.
+    //TODO remove this after 01-05-2023, including it's resources. People who haven't updated by then are probably not interested in correct-working email.
     suspend fun migrateEmailDataIfNeeded(){
         val userName = prefs.username()
         val emailAddress = emailPrefs.emailAddress()

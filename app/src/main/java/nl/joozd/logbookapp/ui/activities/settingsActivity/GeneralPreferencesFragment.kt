@@ -93,7 +93,7 @@ class GeneralPreferencesFragment: JoozdlogFragment() {
 
     private fun showAugmentedTimesNumberPicker(){
         AugmentedTakeoffLandingTimesPicker().apply {
-            title= App.instance.getString(R.string.timeForTakeoffLanding)
+            title= App.instance.getString(R.string.time_for_to_ldg)
             wrapSelectorWheel = false
             maxValue = AugmentedTakeoffLandingTimesPicker.EIGHT_HOURS
         }.show(supportFragmentManager, null)

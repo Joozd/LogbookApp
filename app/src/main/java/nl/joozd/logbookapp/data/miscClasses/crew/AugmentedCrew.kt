@@ -29,7 +29,7 @@ import java.time.Duration
 // right bit is [0]
 data class AugmentedCrew(
     val isFixedTime: Boolean = false,
-    val size: Int = 2,
+    val size: Int = 2, // this gets ignored for calculations if isFixedTime is true
     val takeoff: Boolean = true,
     val landing: Boolean = true,
     val times: Int = 0,

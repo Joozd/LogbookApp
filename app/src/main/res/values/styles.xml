@@ -424,6 +424,7 @@
         <item name="android:textColor">@color/edit_flight_textbox_colors</item>
         <item name="android:paddingStart">2dp</item>
         <item name="android:paddingEnd">2dp</item>
+        <item name="android:layout_marginStart">16dp</item>
         <item name="android:textSize">12sp</item>
     </style>
 

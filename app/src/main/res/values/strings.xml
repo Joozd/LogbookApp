@@ -109,8 +109,8 @@
     <string name="reduce_crew">Reduce crew</string>
     <string name="increase_crew">Reduce crew</string>
     <string name="landingInSeat">Landing in seat</string>
-    <string name="takeoff_landing_in_seat">Takeoff or landing in seat</string>
-    <string name="timeForTakeoffLanding">Time for takeoff or landing</string>
+    <string name="in_seat">In seat</string>
+    <string name="time_for_to_ldg">Time for TO/LDG</string>
     <string name="dual">DUAL</string>
     <string name="augmented">Augmented</string>
     <string name="savedFlight">Saved flight</string>
@@ -541,6 +541,8 @@
     <string name="receive">Receive</string>
     <string name="qr_code">QR code</string>
     <string name="sharing_activity_placeholder_text">WORK IN PROGRESS\nThis is still work in progress, as you can see by the \"minimalistic\" design.\nIt is working, but needs an internet connection to send the data.</string>
+    <string name="use_fixed_rest_time">Use fixed rest time</string>
+    <string name="rest_time">Rest time</string>
 </resources>
 
 

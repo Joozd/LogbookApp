@@ -32,7 +32,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 33
         versionCode 136 // my version, increment this every build
-        versionName "JoozdLog BEAVER | 1.2.5"
+        versionName "JoozdLog BEAVER | 1.2.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

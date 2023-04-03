@@ -47,5 +47,5 @@ If you really want to know, look at all the github commits...
 ### 1.2.5:
 - Fix for "Being PF but not doing takeoff/landing causes issues in takeoff/landing dialog"
 - library updates
-### WIP:
-- AugmentedCrew now supports fixed rest time
+### 1.2.6:
+- AugmentedCrew dialog upgraded

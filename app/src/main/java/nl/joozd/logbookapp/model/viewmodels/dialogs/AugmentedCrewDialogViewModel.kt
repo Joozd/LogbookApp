@@ -23,8 +23,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
+import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.helpers.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
+import java.time.Duration
 
 class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
     private val undoCrew = flightEditor.augmentedCrew
@@ -34,15 +36,19 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
 
     private val crewFlow = flightEditor.flightFlow.map { AugmentedCrew.fromInt(it.augmentedCrew) }
 
-    fun crewSizeFlow() = crewFlow.map { it.size }
-    fun didTakeoffFlow() = crewFlow.map { it.takeoff }
-    fun didLandingFlow() = crewFlow.map { it.landing }
-    fun takeoffLandingTimeFlow() = crewFlow.map { it.times }
+    val crewSizeFlow = crewFlow.map { it.size }
+    val didTakeoffFlow = crewFlow.map { it.takeoff }
+    val didLandingFlow = crewFlow.map { it.landing }
+    val takeoffLandingTimeFlow = crewFlow.map { it.times }
+
+    val restTimeFlow = flightEditor.flightFlow.map{
+        calculateRestTimeFromFlight(it)
+    }
 
     /**
-     * This will emit[FIXED_REST] or [CALCULATE_REST]
+     * This will emit true if [crew] is Fixed Time, or if undefined and [Prefs.defaultMultiCrewModeIsFixedRest]
      */
-    fun multiCrewModeFlow() = combine(crewFlow, Prefs.defaultMultiCrewModeIsFixedRest.flow){
+    val isFixedTimeFlow = combine(crewFlow, Prefs.defaultMultiCrewModeIsFixedRest.flow){
         crew, defaultModeIsFixed ->
         // defaultModeIsFixed == true means FIXED_REST, false means CALCULATE_REST.
         // Same goes for crew.isFixedTime.
@@ -51,18 +57,22 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
 
     fun crewDown() {
         crew--
+        updateFixedRestTime()
     }
 
     fun crewUp() {
         crew++
+        updateFixedRestTime()
     }
 
     fun toggleTakeoff() {
         crew = crew.withTakeoff(!crew.takeoff)
+        updateFixedRestTime()
     }
 
     fun toggleLanding() {
         crew = crew.withLanding(!crew.landing)
+        updateFixedRestTime()
     }
 
     /**
@@ -70,12 +80,13 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
      * Else, will set it to whatever is entered.
      * Needs to be able to do Editable.toInt() or will throw exception.
      */
-    fun setTakeoffLandingTime(time: String?) {
+    fun setTime(time: String?, updateFixedRestTime: Boolean = true) {
         if (time == null){
             return
         }
         time.hoursAndMinutesStringToInt()?.let { t ->
-            setTakeoffLandingTime(t)
+            setTime(t)
+            if(updateFixedRestTime) updateFixedRestTime()
         }
     }
 
@@ -83,22 +94,36 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
         flightEditor.augmentedCrew = undoCrew
     }
 
-    fun setTakeoffLandingTime(time: Int) {
+    fun setTime(time: Int) {
         crew = crew.withTimes(time)
     }
 
-    private var crewSizeWhenFixedTimesUsed: Int = crew.size
+    private var takeoffLandingTimeNotInUse: Int = 0 // setting this to 0 (undefined) will cause the fragment to load it from Prefs
+
+    private var fixedRestTimeNotInUse: Int = calculateRestTimeFromFlight(flightEditor.snapshot())
+
     fun toggleUseFixedTime(){
-        if(crew.isFixedTime)
-             crew = crew.copy(size = crewSizeWhenFixedTimesUsed, isFixedTime = false)
+        if(crew.isFixedTime) {
+            fixedRestTimeNotInUse = crew.times
+            crew = crew.copy(times = takeoffLandingTimeNotInUse, isFixedTime = false)
+        }
         else {
-            crewSizeWhenFixedTimesUsed = crew.size
+            takeoffLandingTimeNotInUse = crew.times
+            crew = crew.copy(times = fixedRestTimeNotInUse, isFixedTime = true)
         }
     }
 
-    companion object{
-        const val FIXED_REST = true
-        const val CALCULATE_REST = false
+    private fun calculateRestTimeFromFlight(it: ModelFlight): Int {
+        val totalFlightTime = Duration.between(it.timeOut, it.timeIn).toMinutes()
+        val loggableFlightTime = it.calculateTotalTime()
+        return (totalFlightTime - loggableFlightTime).toInt()
+    }
+
+    /**
+     * Call this whenever a value gets changed from calculated times, so fixed time gets recalculated in the background but only whenever any input changed.
+     */
+    private fun updateFixedRestTime() {
+        fixedRestTimeNotInUse = calculateRestTimeFromFlight(flightEditor.snapshot())
     }
 }
 

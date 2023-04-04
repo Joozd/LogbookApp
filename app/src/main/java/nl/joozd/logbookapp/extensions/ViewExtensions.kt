@@ -46,7 +46,7 @@ fun EditText.onTextChanged(text: (String) -> Unit) {
         }
 
         override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            text(p0.toString())
+            p0?.let { text(it.toString()) }
         }
 
         override fun afterTextChanged(editable: Editable?) {

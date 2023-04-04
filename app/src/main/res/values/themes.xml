@@ -34,9 +34,9 @@
         <item name="textColorWarning">#80BB0000</item>
         <item name="android:textColor">#DD000000</item>
         <item name="android:textColorPrimary">#CC000000</item>
-        <item name="android:textColorSecondary">#CC000000</item> <!-- #CC3F51B5 -->
-        <item name="android:actionBarStyle">@style/ToolBar</item>
+        <item name="android:textColorSecondary">@color/text_color_secondary_light</item>
         <item name="android:textColorTertiary">#80000000</item>
+        <item name="android:actionBarStyle">@style/ToolBar</item>
         <item name="android:textColorHighlight">#CC3F51B5</item>
         <item name="android:textColorPrimaryInverse">@color/white</item>
         <item name="android:textColorSecondaryInverse">#D0000000</item>

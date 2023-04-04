@@ -319,7 +319,7 @@
 
     <style name="EditFlightInputLayout" parent="InputLayout">
         <item name="boxStrokeColor">@color/edit_flight_textbox_colors</item>
-        <item name="android:textColorHint">?attr/colorPrimaryDark</item>
+        <item name="android:textColorHint">@color/edit_flight_textbox_colors</item>
     </style>
 
 

@@ -208,10 +208,6 @@ class EditFlightFragment: JoozdlogFragment() {
         simNamesSelectorRight.setOnClickListener { launchName2Dialog() }
     }
 
-    private fun clearFocus() {
-        activity?.currentFocus?.clearFocus()
-    }
-
     private fun toastNotImplementedYet() {
         clearFocus()
         toast("Not implemented yet!")

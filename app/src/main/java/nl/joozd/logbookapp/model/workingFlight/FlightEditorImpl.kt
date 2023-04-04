@@ -232,6 +232,10 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
             flight = flight.copy (autoFill = isAutoValues).autoValues()
         }
 
+    override fun setToFLight(flight: ModelFlight) {
+        this.flight = flight
+    }
+
     override fun snapshot(): ModelFlight = flight.copy()
 
     override fun toggleDualInstructorNeither() {

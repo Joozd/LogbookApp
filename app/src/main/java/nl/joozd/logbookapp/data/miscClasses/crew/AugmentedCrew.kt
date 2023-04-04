@@ -54,11 +54,13 @@ data class AugmentedCrew(
     /**
      * Returns a [AugmentedCrew] object with [isFixedTime] set to [fixedTime]
      */
+    @Suppress("unused")
     fun withFixedRestTime(fixedTime: Boolean): AugmentedCrew = this.copy(isFixedTime = fixedTime)
 
     /**
      * Returns a [AugmentedCrew] object with [size] set to [crewSize]
      */
+    @Suppress("unused")
     fun withCrewSize(crewSize: Int): AugmentedCrew = this.copy (size = crewSize)
 
     /**
@@ -81,9 +83,9 @@ data class AugmentedCrew(
      * Return amount of time to log. Cannot be negative, so 3 man ops for a 20 min flight with 30 mins to/landing is 0 minutes to log.
      */
     fun getLogTime(totalTime: Int, pic: Boolean): Int{
-        if (pic) return totalTime // PIC logs all time
-        if(isFixedTime) return totalTime - times // fixed rest time gets subtracted from
-        if (size <=2) return totalTime // less than 2 crew logs all time
+        if (pic) return maxOf (0, totalTime) // PIC logs all time
+        if (isFixedTime) return maxOf (0, totalTime - times) // fixed rest time gets subtracted from
+        if (size <=2) return maxOf (0, totalTime) // 2 or less crew logs all time
 
         val divideableTime = (totalTime - 2*times).toFloat()
         val timePerShare = divideableTime / size
@@ -91,10 +93,8 @@ data class AugmentedCrew(
         return maxOf (minutesInSeat + (if(takeoff) times else 0) + (if (landing) times else 0), 0)
     }
 
-    fun getLogTime(totalTime: Long, pic: Boolean): Long = getLogTime(totalTime.toInt(), pic).toLong()
-
     fun getLogTime(totalTime: Duration, pic: Boolean): Int =
-        getLogTime(totalTime.toMinutes(), pic).toInt()
+        getLogTime(totalTime.toMinutes().toInt(), pic)
 
     operator fun inc(): AugmentedCrew = this.copy (size = (size + 1).putInRange(MIN_CREW_SIZE..MAX_CREW_SIZE))
 
@@ -115,6 +115,7 @@ data class AugmentedCrew(
         const val MAX_CREW_SIZE = 7
 
         fun coco(takeoffLandingTimes: Int): AugmentedCrew = AugmentedCrew(isFixedTime = false, size = 3, takeoff = false, landing = false, times = takeoffLandingTimes)
+        fun fixedRest(fixedRestTime: Int): AugmentedCrew = AugmentedCrew(isFixedTime = true, times = fixedRestTime)
 
         /**
          * A value of 0 means "undefined"

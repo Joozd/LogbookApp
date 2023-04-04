@@ -26,7 +26,6 @@ import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.helpers.hoursAndMinutesStringToInt
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
-import java.time.Duration
 
 class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
     private val undoCrew = flightEditor.augmentedCrew
@@ -113,11 +112,7 @@ class AugmentedCrewDialogViewModel: JoozdlogDialogViewModel() {
         }
     }
 
-    private fun calculateRestTimeFromFlight(it: ModelFlight): Int {
-        val totalFlightTime = Duration.between(it.timeOut, it.timeIn).toMinutes()
-        val loggableFlightTime = it.calculateTotalTime()
-        return (totalFlightTime - loggableFlightTime).toInt()
-    }
+    private fun calculateRestTimeFromFlight(it: ModelFlight): Int = it.restTime().toInt()
 
     /**
      * Call this whenever a value gets changed from calculated times, so fixed time gets recalculated in the background but only whenever any input changed.

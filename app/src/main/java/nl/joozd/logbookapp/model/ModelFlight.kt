@@ -145,6 +145,11 @@ data class ModelFlight(
         return date().format(dateFormatter)
     }
 
+    /**
+     * Calculates rest time (difference between [getDurationOfFlight] and [calculateTotalTime]
+     */
+    fun restTime() = getDurationOfFlight().toMinutes() - calculateTotalTime()
+
 
     private fun isCopilot() = multiPilotTime != 0 && !isPIC
 
@@ -197,6 +202,9 @@ data class ModelFlight(
         if (aircraft.type?.multiPilot == true) calculateTotalTime()
         else 0
 
+    /**
+     * Total loggable time, in minutes. Rest time (for augmented crews) is removed.
+     */
     fun calculateTotalTime(): Int =
         if (isSim) 0
         else AugmentedCrew.fromInt(augmentedCrew).getLogTime(getDurationOfFlight(), isPIC)

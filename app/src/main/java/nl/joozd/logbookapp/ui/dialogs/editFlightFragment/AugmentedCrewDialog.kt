@@ -199,9 +199,5 @@ class AugmentedCrewDialog: JoozdlogFragment(){
             this.visibility = if (isFixedTime) View.GONE else View.VISIBLE
         }
     }
-
-    private fun clearFocus(){
-        activity?.currentFocus?.clearFocus()
-    }
 }
 

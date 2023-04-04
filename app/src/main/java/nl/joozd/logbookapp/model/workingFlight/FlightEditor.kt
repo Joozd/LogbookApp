@@ -188,6 +188,11 @@ interface FlightEditor {
     var autoFill: Boolean
 
     /**
+     * Overwrite all values with values in [flight]
+     */
+    fun setToFLight(flight: ModelFlight)
+
+    /**
      * Get a snapshot for this flight. No guarantees that pending changes have been resolved.
      */
     fun snapshot(): ModelFlight

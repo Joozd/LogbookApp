@@ -24,6 +24,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
@@ -40,6 +41,7 @@ fun View.setBackgroundColor(c: Long) = this.setBackgroundColor(c.toInt())
 fun TextInputEditText.onTextChanged(text: (String) -> Unit) = (this as EditText).onTextChanged(text)
 
 fun EditText.onTextChanged(text: (String) -> Unit) {
+    val v = this // for logging. Can't reference this@onTextChanged because override function also has that name.
     addTextChangedListener(object : TextWatcher {
         override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             //intentionally left blank
@@ -47,6 +49,7 @@ fun EditText.onTextChanged(text: (String) -> Unit) {
 
         override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             p0?.let { text(it.toString()) }
+                ?: run { Log.w("onTextChanged", "text changed to null for $v")}
         }
 
         override fun afterTextChanged(editable: Editable?) {

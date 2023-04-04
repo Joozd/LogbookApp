@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs
 
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
 import nl.joozd.logbookapp.model.enumclasses.DualInstructorFlag
@@ -30,25 +31,25 @@ import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
  * Does not support changing orig or dest during this dialog open
  */
 class TimePickerViewModel: JoozdlogDialogViewModel() {
-    private val undoCorrectedTotalTime = flightEditor.correctedTotalTime
-    private val undoNightTime = flightEditor.nightTime
-    private val undoIfrTime = flightEditor.ifrTime
-    private val undoAugmentedCrew = flightEditor.augmentedCrew
-    private val undoAutoFill = flightEditor.autoFill
+    private val undoFlight = flightEditor.snapshot()
 
-    private val f get() = flightEditor.flightFlow
+    private val flightFlow get() = flightEditor.flightFlow
 
-    fun totalTimeFlow() = f.map { it.calculateTotalTime() } // this shows calculated time even when correctedTotalTime is zero.
-    fun nightTimeFlow() = f.map { it.nightTime }
-    fun ifrTimeFlow() = f.map { it.ifrTime }
-    fun augmentedCrewFlow() = f.map { AugmentedCrew.fromInt(it.augmentedCrew) }
-    fun picPicusFlow() = f.map { when {
+    fun totalTimeFlow() = flightFlow.map { it.calculateTotalTime() } // this shows calculated time even when correctedTotalTime is zero.
+    fun nightTimeFlow() = flightFlow.map { it.nightTime }
+    fun ifrTimeFlow() = flightFlow.map { it.ifrTime }
+
+    fun restTimeIfNotPIC() = flightFlow.map { f -> f.restTime().takeIf { !f.isPIC }}.filterNotNull()
+
+    fun augmentedCrewFlow() = flightFlow.map { AugmentedCrew.fromInt(it.augmentedCrew) }
+    fun picPicusFlow() = flightFlow.map { when {
         it.isPIC -> PicPicusFlag.PIC
         it.isPICUS -> PicPicusFlag.PICUS
         else -> PicPicusFlag.NONE
     }    }
-    fun copilotFlow() = f.map { it.isCoPilot }
-    fun dualInstructorFlow() = f.map { when {
+
+    fun copilotFlow() = flightFlow.map { it.isCoPilot }
+    fun dualInstructorFlow() = flightFlow.map { when {
         it.isDual -> DualInstructorFlag.DUAL
         it.isInstructor -> DualInstructorFlag.INSTRUCTOR
         else -> DualInstructorFlag.NONE
@@ -56,34 +57,31 @@ class TimePickerViewModel: JoozdlogDialogViewModel() {
 
     fun undo(){
         flightEditor.apply {
-
-            // set to avoid unnecessary autoValues calculations
-            // It is reset to undoAutoFill at the end which will do all the autoValues if needed.
-            autoFill = false
-
-            correctedTotalTime = undoCorrectedTotalTime
-            nightTime = undoNightTime
-            ifrTime = undoIfrTime
-            augmentedCrew = undoAugmentedCrew
-            autoFill = undoAutoFill
+            setToFLight(undoFlight)
         }
     }
 
-    fun setIfrTime(enteredTime: String?) {
-        enteredTime?.hoursAndMinutesStringToInt()?.let{
+    fun setIfrTime(enteredTime: String) {
+        enteredTime.hoursAndMinutesStringToInt()?.let{
             flightEditor.ifrTime = it.maxedAtTotalTime()
         }
     }
 
-    fun setNightTime(enteredTime: String?) {
-        enteredTime?.hoursAndMinutesStringToInt()?.let{
+    fun setNightTime(enteredTime: String) {
+        enteredTime.hoursAndMinutesStringToInt()?.let{
             flightEditor.nightTime = it.maxedAtTotalTime()
         }
     }
 
-    fun setTotalTimeOfFlight(enteredTime: String?) {
-        enteredTime?.hoursAndMinutesStringToInt()?.let{
+    fun setTotalTimeOfFlight(enteredTime: String) {
+        enteredTime.hoursAndMinutesStringToInt()?.let{
             flightEditor.totalFlightTime = it
+        }
+    }
+
+    fun setRestTime(restTime: String){
+        restTime.hoursAndMinutesStringToInt()?.let {
+            flightEditor.augmentedCrew = AugmentedCrew.fixedRest(it).toInt()
         }
     }
 
@@ -97,6 +95,30 @@ class TimePickerViewModel: JoozdlogDialogViewModel() {
 
     fun toggleDualInstructorNone() {
         flightEditor.toggleDualInstructorNeither()
+    }
+
+    private var oldAugmented: Int = 0 // not augmented
+    /**
+     * Returns true if toggled, false if not.
+     */
+    fun toggleAugmented(): Boolean{
+        val currentCrewInt = flightEditor.snapshot().augmentedCrew
+        val currentCrew = AugmentedCrew.fromInt(currentCrewInt)
+        val savedCrew = AugmentedCrew.fromInt(oldAugmented)
+        if(currentCrew.isAugmented()){
+            //if current is augmented, we set it to 0 and save current crew
+            oldAugmented = currentCrewInt
+            flightEditor.augmentedCrew = 0
+            return true
+        }
+        if(savedCrew.isAugmented()){
+            //If we get here, currentCrew is NOT augmented, but savedCrew IS
+            flightEditor.augmentedCrew = savedCrew.toInt()
+            oldAugmented = 0
+            return true
+        }
+        // if we get here, bot current and old crew are not augmented.
+            return false
     }
 
     private fun Int.maxedAtTotalTime() = minOf(this, flightEditor.totalFlightTime)

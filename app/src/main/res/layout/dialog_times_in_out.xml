@@ -33,7 +33,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:padding="8dp"
+            android:id="@+id/times_dialog_box"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -41,6 +41,8 @@
                 android:id="@+id/headerLayout"
                 style="@style/DialogHeaderLayout"
                 android:layout_width="0dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 app:layout_constraintBottom_toTopOf="@+id/bodyLayout"
                 app:layout_constraintEnd_toEndOf="@+id/bodyLayout"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -48,32 +50,47 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_chainStyle="packed">
 
-            <TextView
-                android:id="@+id/textView"
-                style="@style/DialogHeaderText"
-                android:text="@string/timesFunctions"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/textView"
+                    style="@style/DialogHeaderText"
+                    android:text="@string/timesFunctions"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/bodyLayout"
-                style="@style/DialogBodyLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/headerLayout">
 
+                <View
+                    android:id="@+id/editFlightBottomBackground"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/bottom_corners"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/ttofTextInputLayout"
+                    android:id="@+id/total_time_layout"
                     style="@style/EditFlightInputLayout.HorizontalSpacing"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
                     android:layout_marginEnd="4dp"
                     app:layout_constraintEnd_toStartOf="@+id/nightTimeLayout"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/editFlightBottomBackground"
                     app:layout_constraintTop_toTopOf="parent">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -88,11 +105,10 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/nightTimeLayout"
                     style="@style/EditFlightInputLayout.HorizontalSpacing"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="4dp"
-                    app:layout_constraintEnd_toStartOf="@+id/ifrTimeLayout"
-                    app:layout_constraintStart_toEndOf="@+id/ttofTextInputLayout"
-                    app:layout_constraintTop_toTopOf="@+id/ttofTextInputLayout">
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="@+id/editFlightBottomBackground"
+                    app:layout_constraintStart_toEndOf="@+id/total_time_layout"
+                    app:layout_constraintTop_toTopOf="@+id/total_time_layout">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/night_time_textview"
@@ -104,32 +120,62 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/ifrTimeLayout"
+                    android:id="@+id/ifr_time_layout"
                     style="@style/EditFlightInputLayout.HorizontalSpacing"
-                    android:layout_marginStart="4dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/nightTimeLayout"
-                    app:layout_constraintTop_toTopOf="@+id/ttofTextInputLayout">
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toStartOf="@+id/editFlightBottomBackground"
+                    app:layout_constraintEnd_toStartOf="@+id/rest_time_layout"
+                    app:layout_constraintTop_toBottomOf="@+id/total_time_layout">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/ifr_time_textview"
                         style="@style/EditFlightEditText"
                         android:hint="@string/ifrTime"
                         android:inputType="time"
-                        android:imeOptions="actionDone"
+                        android:nextFocusForward="@id/rest_time_textview"
                         android:selectAllOnFocus="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/rest_time_layout"
+                    style="@style/EditFlightInputLayout.HorizontalSpacing"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="@+id/editFlightBottomBackground"
+                    app:layout_constraintStart_toEndOf="@+id/ifr_time_layout"
+                    app:layout_constraintTop_toTopOf="@+id/ifr_time_layout">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/rest_time_textview"
+                        style="@style/EditFlightEditText"
+                        android:hint="@string/rest_time"
+                        android:imeOptions="actionDone"
+                        android:inputType="time"
+                        android:selectAllOnFocus="true" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/rest_time_selector"
+                    style="@style/LSK"
+                    app:layout_constraintBottom_toBottomOf="@+id/ifr_time_layout"
+
+                    app:layout_constraintStart_toEndOf="@+id/rest_time_layout"
+                    app:layout_constraintTop_toTopOf="@+id/ifr_time_layout"
+                    app:srcCompat="@drawable/lsk_button"
+                    android:contentDescription="@string/augmented" />
+
                 <TextView
                     android:id="@+id/augmentedTextView"
                     style="@style/SelectorStyleInactive"
+                    android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:text="@string/augmented"
                     app:layout_constraintEnd_toStartOf="@+id/times_dialog_pic_picus_textview"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/ttofTextInputLayout" />
+                    app:layout_constraintStart_toStartOf="@+id/editFlightBottomBackground"
+                    app:layout_constraintTop_toBottomOf="@+id/ifr_time_layout" />
 
                 <TextView
                     android:id="@+id/times_dialog_pic_picus_textview"
@@ -151,8 +197,9 @@
                 <TextView
                     android:id="@+id/times_dialog_dual_instructor_textview"
                     style="@style/SelectorStyleInactive"
+                    android:layout_marginEnd="16dp"
                     android:text="@string/dualInstructorString"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/editFlightBottomBackground"
                     app:layout_constraintStart_toEndOf="@+id/coPilotTextView"
                     app:layout_constraintTop_toTopOf="@+id/augmentedTextView" />
 
@@ -161,21 +208,27 @@
                     style="@style/DialogButtonText"
                     android:layout_marginTop="24dp"
                     android:layout_marginEnd="24dp"
+                    android:layout_marginBottom="16dp"
                     android:text="@android:string/ok"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/editFlightBottomBackground"
                     app:layout_constraintTop_toBottomOf="@+id/times_dialog_dual_instructor_textview" />
 
                 <TextView
                     android:id="@+id/times_dialog_cancel_textview"
                     style="@style/DialogButtonText"
+                    android:layout_marginStart="24dp"
                     android:layout_marginTop="24dp"
-                    android:layout_marginEnd="24dp"
+                    android:layout_marginBottom="16dp"
                     android:text="@android:string/cancel"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/editFlightBottomBackground"
                     app:layout_constraintTop_toBottomOf="@+id/times_dialog_dual_instructor_textview" />
+
+
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

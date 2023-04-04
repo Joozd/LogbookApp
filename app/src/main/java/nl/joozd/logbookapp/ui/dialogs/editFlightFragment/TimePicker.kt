@@ -27,12 +27,14 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.viewModels
+import kotlinx.coroutines.flow.map
 import nl.joozd.logbookapp.R
 
 import nl.joozd.logbookapp.databinding.DialogTimesInOutBinding
-import nl.joozd.logbookapp.extensions.nullIfBlank
 import nl.joozd.logbookapp.extensions.showAsActiveIf
 import nl.joozd.logbookapp.extensions.showFragment
+import nl.joozd.logbookapp.extensions.textInputLayout
+import nl.joozd.logbookapp.model.enumclasses.PicPicusFlag
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.model.viewmodels.dialogs.TimePickerViewModel
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
@@ -46,80 +48,138 @@ open class TimePicker: JoozdlogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogTimesInOutBinding.bind(inflater.inflate(R.layout.dialog_times_in_out, container, false)).apply{
-            launchFlowCollectors()
-            setOnClickListeners()
-            setOnFocusChangedListeners()
+            initializeEditTexts()
+            initializeLSKs()
+            initializeToggleButtons()
+            setUIOnClickListeners()
             hideKeyboardWhenPressingEnterInLastField()
             catchStrayClicks()
         }.root
 
-    private fun DialogTimesInOutBinding.launchFlowCollectors(){
-        collectTotalTimeFlowToTotalTimeView()
-        collectNightTimeFlowToNightTimeView()
-        collectIfrTimeFlowToIfrTimeView()
-        collectAugmentedCrewFlowToToggle()
-        collectPicPicusFlowToToggle()
-        collectCopilotFlowToToggle()
-        collectDualInstructorFlowToToggle()
+    private fun DialogTimesInOutBinding.initializeEditTexts(){
+        initializeTotalTimeOfFlightTextview()
+        initializeNightTimeTextview()
+        initializeIfrTimeTextview()
+        initializeRestimeTextview()
     }
 
-    private fun DialogTimesInOutBinding.collectTotalTimeFlowToTotalTimeView() {
-        viewModel.totalTimeFlow().launchCollectWhileLifecycleStateStarted {
-            totalTimeOfFlightTextview.setText(it.minutesToHoursAndMinutesString())
-        }
-    }
-    private fun DialogTimesInOutBinding.collectNightTimeFlowToNightTimeView() {
-        viewModel.nightTimeFlow().launchCollectWhileLifecycleStateStarted {
-            nightTimeTextview.setText(it.minutesToHoursAndMinutesString())
-        }
-    }
-    private fun DialogTimesInOutBinding.collectIfrTimeFlowToIfrTimeView() {
-        viewModel.ifrTimeFlow().launchCollectWhileLifecycleStateStarted {
-            ifrTimeTextview.setText(it.minutesToHoursAndMinutesString())
-        }
+    private fun DialogTimesInOutBinding.initializeLSKs(){
+        initializeRestTimeLSK()
     }
 
-    private fun DialogTimesInOutBinding.collectAugmentedCrewFlowToToggle(){
-        viewModel.augmentedCrewFlow().launchCollectWhileLifecycleStateStarted{
-            augmentedTextView.showAsActiveIf(it.isAugmented())
+    private fun DialogTimesInOutBinding.initializeToggleButtons(){
+        initializeAugmented()
+        initializePicusPic()
+        initializeCopilot()
+        initializeDualInstructor()
+    }
+
+    private fun DialogTimesInOutBinding.initializeTotalTimeOfFlightTextview(){
+        totalTimeOfFlightTextview.apply {
+            val flow = viewModel.totalTimeFlow().map { it.minutesToHoursAndMinutesString() }
+            bindToFlowAndInputHandler(flow){
+                if (it.isNotBlank()) viewModel.setTotalTimeOfFlight(it) // I assume nobody wants to a log a flight with 0 times. If so, they can type "0"
+            }
         }
     }
 
-    private fun DialogTimesInOutBinding.collectPicPicusFlowToToggle(){
-        viewModel.picPicusFlow().launchCollectWhileLifecycleStateStarted{
-            timesDialogPicPicusTextview.setPicPicusField(it)
+    private fun DialogTimesInOutBinding.initializeNightTimeTextview(){
+        nightTimeTextview.apply {
+            val flow = viewModel.nightTimeFlow().map { it.minutesToHoursAndMinutesString() }
+            bindToFlowAndInputHandler(flow){
+                viewModel.setNightTime(it)
+            }
         }
     }
 
-    private fun DialogTimesInOutBinding.collectCopilotFlowToToggle(){
-        viewModel.copilotFlow().launchCollectWhileLifecycleStateStarted{
-            coPilotTextView.showAsActiveIf(it)
+    private fun DialogTimesInOutBinding.initializeIfrTimeTextview(){
+        ifrTimeTextview.apply {
+            val flow = viewModel.ifrTimeFlow().map { it.minutesToHoursAndMinutesString() }
+            bindToFlowAndInputHandler(flow){
+                viewModel.setIfrTime(it)
+            }
         }
     }
 
-    private fun DialogTimesInOutBinding.collectDualInstructorFlowToToggle(){
-        viewModel.dualInstructorFlow().launchCollectWhileLifecycleStateStarted{
-            timesDialogDualInstructorTextview.setDualInstructorField(it)
+    private fun DialogTimesInOutBinding.initializeRestimeTextview(){
+        restTimeTextview.apply {
+            val flow = viewModel.restTimeIfNotPIC().map { it.minutesToHoursAndMinutesString() }
+            bindToFlowAndInputHandler(flow){
+                viewModel.setRestTime(it)
+            }
+
+            viewModel.picPicusFlow().launchCollectWhileLifecycleStateStarted{
+                // PIC always logs entire flight and cannot log rest time.
+                val enabled = it != PicPicusFlag.PIC
+                textInputLayout?.isEnabled = enabled
+            }
         }
     }
 
-    private fun DialogTimesInOutBinding.setOnClickListeners(){
-        augmentedTextView.setOnClickListener {
-            requireActivity().showFragment<AugmentedCrewDialog>()
+    private fun DialogTimesInOutBinding.initializeRestTimeLSK(){
+        restTimeSelector.apply{
+            setOnClickListener {
+                requireActivity().showFragment<AugmentedCrewDialog>()
+            }
+        }
+    }
+
+    private fun DialogTimesInOutBinding.initializeAugmented(){
+        augmentedTextView.apply {
+            viewModel.augmentedCrewFlow().launchCollectWhileLifecycleStateStarted {
+                showAsActiveIf(it.isAugmented())
+            }
+
+            /**
+             * OnCLick will disable augmented if enabled, re-enable it if it was disabled in this way, and opens dialog if neither.
+             */
+            setOnClickListener {
+                clearFocus() // to get focus from any textbox if that was active. For some reason this doesn't work.
+                if(!viewModel.toggleAugmented())
+                    requireActivity().showFragment<AugmentedCrewDialog>()
+            }
+        }
+    }
+
+    private fun DialogTimesInOutBinding.initializePicusPic() {
+        timesDialogPicPicusTextview.apply {
+            viewModel.picPicusFlow().launchCollectWhileLifecycleStateStarted {
+                setPicPicusField(it)
+            }
+
+            setOnClickListener {
+                viewModel.togglePicusPicNone()
+            }
         }
 
-        timesDialogPicPicusTextview.setOnClickListener {
-            viewModel.togglePicusPicNone()
-        }
+    }
 
-        coPilotTextView.setOnClickListener {
-            viewModel.toggleCopilot()
-        }
 
-        timesDialogDualInstructorTextview.setOnClickListener {
-            viewModel.toggleDualInstructorNone()
-        }
+    private fun DialogTimesInOutBinding.initializeCopilot(){
+        coPilotTextView.apply {
+            viewModel.copilotFlow().launchCollectWhileLifecycleStateStarted {
+                showAsActiveIf(it)
+            }
 
+            setOnClickListener {
+                viewModel.toggleCopilot()
+            }
+        }
+    }
+
+    private fun DialogTimesInOutBinding.initializeDualInstructor(){
+        timesDialogDualInstructorTextview.apply {
+            viewModel.dualInstructorFlow().launchCollectWhileLifecycleStateStarted {
+                setDualInstructorField(it)
+            }
+
+            setOnClickListener {
+                viewModel.toggleDualInstructorNone()
+            }
+        }
+    }
+
+    private fun DialogTimesInOutBinding.setUIOnClickListeners(){
         timesDialogSaveTextview.setOnClickListener {
             closeFragment()
         }
@@ -129,31 +189,6 @@ open class TimePicker: JoozdlogFragment() {
             closeFragment()
         }
     }
-
-    private fun DialogTimesInOutBinding.setOnFocusChangedListeners(){
-        settTotalTimeOfFLightTextViewOnFocusChangedListener()
-        setNightTimeTextViewOnFocusChangedListener()
-        setIfrTimeTextViewOnFocusChangedListener()
-    }
-
-    private fun DialogTimesInOutBinding.settTotalTimeOfFLightTextViewOnFocusChangedListener() {
-        totalTimeOfFlightTextview.separateDataDisplayAndEntry{
-            viewModel.setTotalTimeOfFlight(it?.toString()?.nullIfBlank())
-        }
-    }
-
-    private fun DialogTimesInOutBinding.setNightTimeTextViewOnFocusChangedListener() {
-        nightTimeTextview.separateDataDisplayAndEntry {
-            viewModel.setNightTime(it?.toString())
-        }
-    }
-
-    private fun DialogTimesInOutBinding.setIfrTimeTextViewOnFocusChangedListener() {
-        ifrTimeTextview.separateDataDisplayAndEntry{
-            viewModel.setIfrTime(it?.toString())
-        }
-    }
-
 
     private fun DialogTimesInOutBinding.hideKeyboardWhenPressingEnterInLastField() {
         ifrTimeTextview.setOnEditorActionListener { v, actionId, _ ->

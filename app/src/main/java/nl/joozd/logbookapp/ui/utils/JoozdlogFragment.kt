@@ -34,6 +34,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.first
+import nl.joozd.logbookapp.extensions.onTextChanged
+import nl.joozd.logbookapp.extensions.setOnFocusLostListener
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -133,6 +135,36 @@ abstract class JoozdlogFragment: Fragment() {
         }
     }
 
+    /**
+     * Binds an editText to a flow for display, and performs an [action] on any entered data as soon as it is entered.
+     * Will display most recently collected text from [flow]
+     * If no text to display is collected, keeps entered text. Otherwise,
+     */
+    protected fun EditText.bindToFlowAndInputHandler(flow: Flow<CharSequence>, action: (String) -> Unit){
+        var textToSetWhenFocusLost: CharSequence? = null
+        var beingFilledByFlow = false // this makes it so that the text changing due to flow filling it doesn't run [action]
+        setOnFocusLostListener{
+            textToSetWhenFocusLost?.let {
+                beingFilledByFlow = true
+                setText(it)
+            }
+        }
+        flow.launchCollectWhileLifecycleStateStarted { charSequence ->
+            if (hasFocus())
+                textToSetWhenFocusLost = charSequence
+            else {
+                beingFilledByFlow = true
+                setText(charSequence)
+            }
+        }
+        onTextChanged {
+            if(beingFilledByFlow)
+                beingFilledByFlow = false
+            else
+                action(it)
+        }
+    }
+
 
     /**
      * Bind a CompoundButton (e.g. a Switch) to a Flow<Boolean>.
@@ -160,4 +192,7 @@ abstract class JoozdlogFragment: Fragment() {
             }
         }
 
+    protected fun clearFocus(){
+        requireActivity().currentFocus?.clearFocus()
+    }
 }

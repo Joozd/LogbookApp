@@ -49,3 +49,5 @@ If you really want to know, look at all the github commits...
 - library updates
 ### 1.2.6:
 - AugmentedCrew dialog upgraded
+- ### 1.2.7:
+- Times dialog upgraded

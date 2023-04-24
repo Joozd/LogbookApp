@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels.activities.makePdfActivity
 
+import android.content.Context
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
@@ -47,13 +48,17 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
 
     var targetUri: Uri? = null
 
-    init{
-        viewModelScope.launch {
-            makeLogbook(BalanceForwardRepository.instance.getBalancesForward(), FlightRepository.instance.getAllFlights())
+    private var initializing = false
+    fun init(context: Context) {
+        if(!initializing) {
+            initializing = true
+            viewModelScope.launch {
+                makeLogbook(BalanceForwardRepository.instance.getBalancesForward(), FlightRepository.instance.getAllFlights(), context)
+            }
         }
     }
 
-    suspend fun makeLogbook(balancesForward: List<BalanceForward>, flights: List<Flight>)=
+    private suspend fun makeLogbook(balancesForward: List<BalanceForward>, flights: List<Flight>, context: Context)=
         with(PdfLogbookBuilder(balancesForward, flights)){
             status = MakePdfActivityEvents.BUILDING_LOGBOOK
             val listener = PdfLogbookBuilder.ProgressListener {
@@ -61,7 +66,7 @@ class MakePdfActivityViewModel: JoozdlogActivityViewModel() {
             }
             registerProgressListener(listener)
             try{
-                createdLogbook = buildLogbook()
+                createdLogbook = buildLogbook(context)
                 status = MakePdfActivityEvents.LOGBOOK_READY
             }
             finally {

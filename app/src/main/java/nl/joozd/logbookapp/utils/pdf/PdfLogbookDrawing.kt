@@ -19,16 +19,21 @@
 
 package nl.joozd.logbookapp.utils.pdf
 
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.RectF
 import com.caverock.androidsvg.PreserveAspectRatio
 import com.caverock.androidsvg.SVG
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.LogbookAddressInfo
 import nl.joozd.logbookapp.data.dataclasses.LogbookNameInfo
 import nl.joozd.logbookapp.data.miscClasses.TotalsForward
 import nl.joozd.logbookapp.extensions.toLogbookDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.ui.utils.toast
+
+//TODO WIP:
+// - Change hardcoded strings to string refs
+// - clean up
 
 /**
  * This will take a [Canvas] as parameter and provides functions to draw on that canvas IN PLACE.
@@ -40,11 +45,12 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
     /**
      * Fill the canvas with a front page for a logbook
      * TODO make this nicer. Maybe a logo or something.
+     * TODO Allow users to enter name/address info
      */
-    fun drawFrontPage() {
+    fun drawFrontPage(context: Context) {
         //((textPaint.descent() + textPaint.ascent()) / 2) is the distance from the baseline to the center.
         canvas.drawText(
-            "Joozdlog Pilot's Logbook",
+            context.getString(R.string.app_name_full),
             width / 2,
             height / 2 - (Paints.titlePageText.descent() + Paints.titlePageText.ascent()) / 2,
             Paints.titlePageText
@@ -57,61 +63,68 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
      * - "Holder's name(s)"
      * - "Holder's licence number"
      */
-    fun drawNamePage(): PdfLogbookDrawing {
+    fun drawNamePage(context: Context): PdfLogbookDrawing {
+        drawNamePageText(context)
+        drawNamePageLines(context)
+        return this
+    }
+
+    private fun drawNamePageText(context: Context) {
         canvas.drawText(
-            "PILOT LOGBOOK",
+            context.getString(R.string.pilot_logbook),
             width / 2,
             PdfLogbookMakerValues.NAME_PAGE_TITLE_HEIGHT,
             Paints.largeTextCentered
         )
         canvas.drawText(
-            NAME_PAGE_NAME_TEXT,
+            context.getString(R.string.holders_name),
             PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN,
             PdfLogbookMakerValues.NAME_PAGE_NAME_HEIGHT,
             Paints.largeText
         )
         canvas.drawText(
-            NAME_PAGE_LICENSE_TEXT,
+            context.getString(R.string.holders_licence_number),
             PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN,
             PdfLogbookMakerValues.NAME_PAGE_LICENSE_HEIGHT,
             Paints.largeText
         )
+    }
 
-        // draw lines from text to NAME_PAGE_HORIZONTAL_MARGIN before page end
+    private fun drawNamePageLines(context: Context) {
         canvas.drawLine(
-            PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN + Paints.largeTextCentered.measureText(NAME_PAGE_NAME_TEXT),
+            PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN + Paints.largeTextCentered.measureText(context.getString(R.string.holders_name)),
             PdfLogbookMakerValues.NAME_PAGE_NAME_HEIGHT,
             width - PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN,
             PdfLogbookMakerValues.NAME_PAGE_NAME_HEIGHT,
             Paints.thinLine
         )
         canvas.drawLine(
-            PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN + Paints.largeTextCentered.measureText(NAME_PAGE_LICENSE_TEXT),
+            PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN + Paints.largeTextCentered.measureText(context.getString(R.string.holders_licence_number)),
             PdfLogbookMakerValues.NAME_PAGE_LICENSE_HEIGHT,
             width - PdfLogbookMakerValues.NAME_PAGE_HORIZONTAL_MARGIN,
             PdfLogbookMakerValues.NAME_PAGE_LICENSE_HEIGHT,
             Paints.thinLine
         )
-        return this
     }
 
     /**
      * Draw name/licence data on Name page
      */
-    fun fillNamePage(nameInfo: LogbookNameInfo){
+    @Suppress("unused")
+    fun fillNamePage(@Suppress("UNUSED_PARAMETER") nameInfo: LogbookNameInfo){
         TODO("Not Implemented")
     }
 
     /**
      * Draw address page
      * Should hold:
-     * - "HOLDER’S ADDRESS:"
+     * - HOLDER’S ADDRESS:
      * - 4 empty lines
      * Intentionally no space for address changes.
      */
-    fun drawAddressPage() {
+    fun drawAddressPage(context: Context) {
         canvas.drawText(
-            "HOLDER’S ADDRESS:",
+            context.getString(R.string.holders_address),
             width / 2,
             PdfLogbookMakerValues.ADDRESS_PAGE_TITLE_HEIGHT,
             Paints.largeTextCentered
@@ -142,7 +155,8 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
     /**
      * Draw name/licence data on Name page
      */
-    fun fillAddressPage(addressInfo: LogbookAddressInfo){
+    @Suppress("unused")
+    fun fillAddressPage(@Suppress("UNUSED_PARAMETER") addressInfo: LogbookAddressInfo){
         TODO("Not Implemented")
     }
 
@@ -365,6 +379,7 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
         )
 
         //Draw first lines of titles in columns
+        // TODO change hardcoded strings to string refs
         lineNumber = 2
         canvas.drawText(
             "DATE",
@@ -395,19 +410,19 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
             (PdfLogbookMakerValues.SP_TIME_SE_OFFSET + PdfLogbookMakerValues.MP_HOURS_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
             Paints.largeTextCentered
-        ) // will needmoar lines
+        ) // will need more lines
         canvas.drawText(
             "MULTI",
             (PdfLogbookMakerValues.MP_HOURS_OFFSET + PdfLogbookMakerValues.TOTAL_HOURS_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
             Paints.largeTextCentered
-        ) // will need moar lines
+        ) // will need more lines
         canvas.drawText(
             "TOTAL",
             (PdfLogbookMakerValues.TOTAL_HOURS_OFFSET + PdfLogbookMakerValues.NAME_OFFSET) / 2,
             PdfLogbookMakerValues.ENTRY_HEIGHT * lineNumber - 4,
             Paints.largeTextCentered
-        )// will need moar lines
+        )// will need more lines
         canvas.drawText(
             "NAME PIC",
             (PdfLogbookMakerValues.NAME_OFFSET + PdfLogbookMakerValues.LDG_DAY_OFFSET) / 2,
@@ -1441,9 +1456,6 @@ class PdfLogbookDrawing(private val canvas: Canvas) {
          * If we do that, it will no longer be a const val of course
          */
         const val maxLines: Int = ((PdfLogbookMakerValues.A4_WIDTH - PdfLogbookMakerValues.TOP_SECTION_HEIGHT - PdfLogbookMakerValues.BOTTOM_SECTION_HEIGHT)/PdfLogbookMakerValues.ENTRY_HEIGHT).toInt()
-
-        private const val NAME_PAGE_NAME_TEXT = "Holder’s name(s) "
-        private const val NAME_PAGE_LICENSE_TEXT = "Holder’s licence number "
     }
 }
 

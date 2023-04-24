@@ -25,6 +25,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
@@ -35,7 +36,7 @@ import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.toast
 
 class MakePdfActivity : JoozdlogActivity() {
-    private val viewModel = MakePdfActivityViewModel()
+    private val viewModel: MakePdfActivityViewModel by viewModels()
 
     private val createFileResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -55,6 +56,8 @@ class MakePdfActivity : JoozdlogActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel.init(this)
 
         ActivityMakePdfBinding.inflate(layoutInflater).apply{
             setSupportActionBarWithReturn(pdfMakeActivityToolbar)?.apply {

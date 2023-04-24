@@ -1,5 +1,6 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.makePdfActivity
 
+import android.content.Context
 import android.graphics.pdf.PdfDocument
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -30,7 +31,8 @@ class PdfLogbookBuilder(
         cancelled = true
     }
 
-    suspend fun buildLogbook(): PdfDocument = withContext (DispatcherProvider.default()) {
+    //Needs context to get strings from resources
+    suspend fun buildLogbook(context: Context): PdfDocument = withContext (DispatcherProvider.default()) {
         PdfDocument().apply {
             //get all aircraft:
             val allFlights = LinkedList(flights.filter { !it.isPlanned }.sortedBy { it.timeOut })
@@ -38,7 +40,7 @@ class PdfLogbookBuilder(
             val flightsPerPage = PdfLogbookDrawing.maxLines
             val amountOfPagesWithFlights = getAmountOfPages(originalListSize, flightsPerPage)
 
-            currentPage += insertLeadingPages()
+            currentPage += insertLeadingPages(context)
             // plus one because page numbering starts with 1; works nice because some work is also already done by this point
             progressKeeper.numberOfLastPage = currentPage + amountOfPagesWithFlights
 
@@ -90,22 +92,23 @@ class PdfLogbookBuilder(
     }
 
     // returns number of inserted pages at the start of this (presumed empty) document
-    private fun PdfDocument.insertLeadingPages(): Int {
+    private fun PdfDocument.insertLeadingPages(context: Context): Int {
         var insertedPages = 0
         addPage(++insertedPages) {
-            PdfLogbookDrawing(canvas).drawFrontPage()
+            PdfLogbookDrawing(canvas).drawFrontPage(context)
         }
 
         addPage(++insertedPages) {
-            PdfLogbookDrawing(canvas).drawNamePage()
+            PdfLogbookDrawing(canvas).drawNamePage(context)
         }
 
         addPage(++insertedPages) {
-            PdfLogbookDrawing(canvas).drawAddressPage()
+            PdfLogbookDrawing(canvas).drawAddressPage(context)
         }
         return insertedPages
     }
 
+    @Suppress("SameParameterValue")
     private fun getAmountOfPages(originalListSize: Int, flightsPerPage: Int) = ceil(originalListSize.toDouble() / flightsPerPage).toInt()
 
     private fun PdfDocument.addPage(pageNumber: Int, f: PdfDocument.Page.() -> Unit){

@@ -19,6 +19,17 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">JoozdLog</string>
+    <string name="app_name_full">Joozdlog Pilot\'s Logbook</string>
+
+
+    <string name="pilot_logbook">PILOT LOGBOOK</string>
+    <string name="holders_name">Holder\'s name(s)</string>
+    <string name="holders_licence_number">Holder\'s licence number</string>
+    <string name="holders_address">HOLDER\'S ADDRESS:</string>
+
+
+
+
     <string name="yes">Yes</string>
     <string name="no">No</string>
 

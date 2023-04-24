@@ -49,7 +49,7 @@ data class AugmentedCrew(
     /**
      * A crew is augmented if it is done by more than 2 pilots, or if a fixed rest time is entered.
      */
-    fun isAugmented() = size > 2 || (isFixedTime && times != 0)
+    val isAugmented get() = size > 2 || (isFixedTime && times != 0)
 
     /**
      * Returns a [AugmentedCrew] object with [isFixedTime] set to [fixedTime]

@@ -105,13 +105,13 @@ class TimePickerViewModel: JoozdlogDialogViewModel() {
         val currentCrewInt = flightEditor.snapshot().augmentedCrew
         val currentCrew = AugmentedCrew.fromInt(currentCrewInt)
         val savedCrew = AugmentedCrew.fromInt(oldAugmented)
-        if(currentCrew.isAugmented()){
+        if(currentCrew.isAugmented){
             //if current is augmented, we set it to 0 and save current crew
             oldAugmented = currentCrewInt
             flightEditor.augmentedCrew = 0
             return true
         }
-        if(savedCrew.isAugmented()){
+        if(savedCrew.isAugmented){
             //If we get here, currentCrew is NOT augmented, but savedCrew IS
             flightEditor.augmentedCrew = savedCrew.toInt()
             oldAugmented = 0

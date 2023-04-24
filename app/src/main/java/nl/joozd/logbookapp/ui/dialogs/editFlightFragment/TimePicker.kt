@@ -127,7 +127,7 @@ open class TimePicker: JoozdlogFragment() {
     private fun DialogTimesInOutBinding.initializeAugmented(){
         augmentedTextView.apply {
             viewModel.augmentedCrewFlow().launchCollectWhileLifecycleStateStarted {
-                showAsActiveIf(it.isAugmented())
+                showAsActiveIf(it.isAugmented)
             }
 
             /**

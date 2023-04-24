@@ -52,7 +52,7 @@ abstract class FlightsListItemViewHolder(containerView: View): RecyclerView.View
     }
 
     protected fun ModelFlight.isAugmented() =
-        AugmentedCrew.fromInt(augmentedCrew).size > 2
+        AugmentedCrew.fromInt(augmentedCrew).isAugmented
 
     protected fun ModelFlight.isIfr() =
         ifrTime > 0

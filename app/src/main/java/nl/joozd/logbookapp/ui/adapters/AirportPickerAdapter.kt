@@ -49,12 +49,8 @@ class AirportPickerAdapter(private val itemClick: (Airport) -> Unit)
             backgroundLayout.findActivity()?.let {
                 if (picked) {
                     backgroundLayout.setBackgroundColor(it.getColorFromAttr(android.R.attr.colorPrimaryDark))
-                    identifier.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
-                    cityName.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondaryInverse))
                 } else {
-                    backgroundLayout.setBackgroundColor(0x00000000)
-                    identifier.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondary))
-                    cityName.setTextColor(it.getColorFromAttr(android.R.attr.textColorSecondary))
+                    backgroundLayout.setBackgroundColor(0x00000000) // full transparent
                 }
             }
         }

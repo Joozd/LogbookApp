@@ -51,5 +51,5 @@ If you really want to know, look at all the github commits...
 - AugmentedCrew dialog upgraded
 ### 1.2.7:
 - Times dialog upgraded
-### 1.2.8.dev:
-- Bugfix
+### 1.2.8:
+- Bugfixes, code improvements

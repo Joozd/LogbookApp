@@ -117,6 +117,7 @@ class ImportedFlightsSaverImpl(
 
         val newFlights = getNonMatchingFlightsExactTimes(plannedFlightsOnDevice, flights)
         val flightsToDelete = getNonMatchingFlightsExactTimes(flights, plannedFlightsOnDevice)
+            .filter { !it.isSim } // leave sim flights alone. Fix for issue #19
 
         val repo = if (canUndo) flightsRepoWithUndo else flightsRepoWithDirectAccess
 

@@ -53,3 +53,5 @@ If you really want to know, look at all the github commits...
 - Times dialog upgraded
 ### 1.2.8:
 - Bugfixes, code improvements
+### 1.2.9.dev
+- Fix for #19 "Sim duty disappeared after saving."

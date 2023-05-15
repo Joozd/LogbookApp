@@ -224,7 +224,6 @@ class SingleUseImportIntentHandler: CoroutineScope {
 
     private suspend fun getFileFromUri(uri: Uri?, contentResolver: ContentResolver) =
         withContext(DispatcherProvider.io()) {
-            println("uri: $uri")
             getTypeDetector(uri, contentResolver)
                 ?.getFile() ?: UnsupportedFile()
         }

@@ -51,14 +51,16 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
         }
     }
 
+    /**
+     * This collects the viewModel flow that states if the repositories are ready or not.
+     * As soon as that emits true, it will ask viewModel to run handleIntent.
+     * viewModel.handleIntent only runs once.
+     */
     private fun ActivityPdfParserBinding.launchIntentHandler() {
-        @Suppress("RedundantExplicitType")  // it is not redundant; lifecycleScope.launch needs a Job instead of a CompleteableJob
-        var collectJob: Job = Job()
-        collectJob = lifecycleScope.launch {
+        lifecycleScope.launch {
             viewModel.repositoriesReadyFlow.collect{
                 if (it) {
                     viewModel.handleIntent(intent, contentResolver)
-                    collectJob.cancel()
                 }
                 else pdfParserStatusTextView.setText(R.string.loading_aircraft_and_airports_database)
             }

@@ -36,8 +36,13 @@ class PdfParserActivityViewModel(
     private val handler = SingleUseImportIntentHandler()
     val handlerStatus get() = handler.statusFlow
 
+    // This gets called from
+    private var alreadyHandlingIntent = false
     fun handleIntent(intent: Intent, contentResolver: ContentResolver){
-        handler.handleIntent(intent, contentResolver)
+        if (!alreadyHandlingIntent) {
+            alreadyHandlingIntent = true
+            handler.handleIntent(intent, contentResolver)
+        }
     }
 
 

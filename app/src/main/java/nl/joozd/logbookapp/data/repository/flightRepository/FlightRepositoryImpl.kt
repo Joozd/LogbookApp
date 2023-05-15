@@ -148,8 +148,8 @@ class FlightRepositoryImpl(
         }
     }
 
-    private fun forceLowestFreeIdToBeHigherThanHighestIdIn(flights: Collection<Flight>) {
-        flights.maxOfOrNull { it.flightID }?.let { idGenerator.setMostRecentHighestIdToAtLeast(it) }
+    private suspend fun forceLowestFreeIdToBeHigherThanHighestIdIn(flights: Collection<Flight>) {
+        flights.maxOfOrNull { it.flightID }?.let { idGenerator.setMostRecentHighestIdToAtLeast(it + 1) }
     }
 
     private suspend fun makeNewIDIfCurrentNotInitialized(flight: Flight): Int =
@@ -172,15 +172,20 @@ class FlightRepositoryImpl(
 
         suspend fun generateID(highestTakenID: Int): Int{
             mutex.withLock {
-                if (mostRecentHighestID == Flight.FLIGHT_ID_NOT_INITIALIZED)
-                    mostRecentHighestID = flightDao.highestUsedID() ?: 0
+                checkLowestFreeID()
                 mostRecentHighestID = maxOf(mostRecentHighestID, highestTakenID)
                 return (++mostRecentHighestID)
             }
         }
 
-        fun setMostRecentHighestIdToAtLeast(minimumHigestID: Int){
-            mostRecentHighestID = maxOf(mostRecentHighestID, minimumHigestID)
+        suspend fun setMostRecentHighestIdToAtLeast(minimumHighestID: Int){
+            checkLowestFreeID()
+            mostRecentHighestID = maxOf(mostRecentHighestID, minimumHighestID)
+        }
+
+        private suspend fun checkLowestFreeID() {
+            if (mostRecentHighestID == Flight.FLIGHT_ID_NOT_INITIALIZED)
+                mostRecentHighestID = flightDao.highestUsedID() ?: 0
         }
     }
 

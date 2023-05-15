@@ -20,8 +20,8 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
 import android.content.ContentResolver
-import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,18 +58,18 @@ class SingleUseImportIntentHandler: CoroutineScope {
     val statusFlow: StateFlow<HandlerStatus> = MutableStateFlow(HandlerStatus.WAITING_FOR_INTENT)
     private var status: HandlerStatus by CastFlowToMutableFlowShortcut(statusFlow)
 
-    fun handleIntent(intent: Intent, contentResolver: ContentResolver){
+    fun handleUri(uri: Uri?, contentResolver: ContentResolver){
         if (unused){
             unused = false
             launch{
-                getFileAndStartAppropriateParser(intent, contentResolver)
+                getFileAndStartAppropriateParser(uri, contentResolver)
             }
         }
     }
 
-    private suspend fun getFileAndStartAppropriateParser(intent: Intent, contentResolver: ContentResolver){
+    private suspend fun getFileAndStartAppropriateParser(uri: Uri?, contentResolver: ContentResolver){
         status = HandlerStatus.READING_URI
-        val file = try { getFileFromIntent(intent, contentResolver) }
+        val file = try { getFileFromUri(uri, contentResolver) }
         catch (e: Throwable){
             status = HandlerError(R.string.fatal_error_when_parsing_file)
             return
@@ -81,6 +81,7 @@ class SingleUseImportIntentHandler: CoroutineScope {
             is PlannedFlightsFile -> parsePlannedFlights(file)
             is UnsupportedFile -> {
                 status = HandlerError(R.string.unknown_file_message)
+                Log.w("getFileAndStartAppropriateParser", "File $file is ${file::class.simpleName}")
                 return
             }
         }
@@ -221,9 +222,10 @@ class SingleUseImportIntentHandler: CoroutineScope {
         ImportedFlightsSaver.instance.save(extractedFlights)
     }
 
-    private suspend fun getFileFromIntent(intent: Intent, contentResolver: ContentResolver) =
+    private suspend fun getFileFromUri(uri: Uri?, contentResolver: ContentResolver) =
         withContext(DispatcherProvider.io()) {
-            getTypeDetector(intent.data, contentResolver)
+            println("uri: $uri")
+            getTypeDetector(uri, contentResolver)
                 ?.getFile() ?: UnsupportedFile()
         }
 

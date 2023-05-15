@@ -20,6 +20,10 @@
 package nl.joozd.logbookapp.ui.activities.pdfParserActivity
 
 import android.app.AlertDialog
+import android.content.Intent
+import android.content.Intent.ACTION_SEND
+import android.content.Intent.ACTION_VIEW
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
@@ -27,6 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ActivityPdfParserBinding
+import nl.joozd.logbookapp.extensions.parcelable
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.PdfParserActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.DoneCompletedFlightsWithResult
 import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.status.HandlerError
@@ -60,7 +65,8 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
         lifecycleScope.launch {
             viewModel.repositoriesReadyFlow.collect{
                 if (it) {
-                    viewModel.handleIntent(intent, contentResolver)
+                    val uri = getUri(intent)
+                    viewModel.handleUri(uri, contentResolver)
                 }
                 else pdfParserStatusTextView.setText(R.string.loading_aircraft_and_airports_database)
             }
@@ -82,6 +88,15 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
                 is DoneCompletedFlightsWithResult -> showCompletedFlightsResult(it)
             }
         }
+    }
+
+    /**
+     * Gets Uri from ACTION_SEND or ACTION_VIEW intent
+     */
+    private fun getUri(intent: Intent): Uri?= when(intent.action){
+        ACTION_SEND -> intent.parcelable(Intent.EXTRA_STREAM)
+        ACTION_VIEW -> intent.data
+        else -> null
     }
 
     private fun showUserChoiceDialog(choice: UserChoice) =

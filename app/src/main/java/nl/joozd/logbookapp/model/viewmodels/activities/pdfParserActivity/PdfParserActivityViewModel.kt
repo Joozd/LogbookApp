@@ -20,7 +20,7 @@
 package nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity
 
 import android.content.ContentResolver
-import android.content.Intent
+import android.net.Uri
 import kotlinx.coroutines.flow.combine
 import nl.joozd.logbookapp.data.repository.aircraftrepository.AircraftRepository
 import nl.joozd.logbookapp.data.repository.airportrepository.AirportRepository
@@ -38,10 +38,10 @@ class PdfParserActivityViewModel(
 
     // This gets called from
     private var alreadyHandlingIntent = false
-    fun handleIntent(intent: Intent, contentResolver: ContentResolver){
+    fun handleUri(uri: Uri?, contentResolver: ContentResolver){
         if (!alreadyHandlingIntent) {
             alreadyHandlingIntent = true
-            handler.handleIntent(intent, contentResolver)
+            handler.handleUri(uri, contentResolver)
         }
     }
 

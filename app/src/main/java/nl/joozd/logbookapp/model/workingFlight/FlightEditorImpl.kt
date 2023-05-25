@@ -107,7 +107,7 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
     override var name2: List<String>
         get() = flight.name2
         set(name2) {
-            flight = flight.copy (name2 = name2).autoValues()
+            flight = flight.copy (name2 = name2.filter { it.isNotBlank() }).autoValues()
         }
 
     override var remarks: String

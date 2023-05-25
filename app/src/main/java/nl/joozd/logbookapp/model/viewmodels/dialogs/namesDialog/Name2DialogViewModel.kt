@@ -44,8 +44,14 @@ class Name2DialogViewModel: JoozdlogDialogViewModel() {
         it.makeNamesList()
     }
     private val currentNamesFlow: Flow<List<String>> = flightEditor.flightFlow.map { it.name2 }
-    fun pickableNamesListFlow() = combine(allAvailableNamesFlow, currentNamesFlow, queryFlow, pickedNewNameFlow) { all, current, query, picked ->
-        all.filter{ it !in current && query in it}.map {
+
+    // This gives a list of names mapped to whether that name is currently picked or not. Only one name is picked, and that will be highlighted in GUI.
+    fun pickableNamesListFlow(): Flow<List<Pair<String, Boolean>>> = combine(allAvailableNamesFlow, currentNamesFlow, queryFlow, pickedNewNameFlow, flightEditor.flightFlow ) { all, current, query, picked, currentFlight->
+        all.filter{
+            it !in current                          // only pick names that aren't picked yet
+                    && query in it                  // only pick names that match current search text
+                    && it != currentFlight.name     // Only pick names that aren't currently set as PIC.
+        }.map {
             it to (it == picked)
         }
     }

@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -36,11 +37,14 @@ class PicNameDialogViewModel: JoozdlogDialogViewModel() {
     }
     private val pickedNameFlow = flightEditor.flightFlow.map { it.name }
 
-
-    fun namesListFlow() = combine(namesFlow, queryFlow, pickedNameFlow){ n, q, p->
-        (if (p in n) n else listOf(p) + n)
-            .filter { q in it}
-            .map { it to (it == p) }
+    // This gives a list of names mapped to whether that name is currently picked or not. Only one name is picked, and that will be highlighted in GUI.
+    fun namesListFlow(): Flow<List<Pair<String, Boolean>>> = combine(namesFlow, queryFlow, pickedNameFlow, flightEditor.flightFlow ){ names, query, currentPickedName, currentFlight ->
+        (if (currentPickedName in names) names else listOf(currentPickedName) + names)
+            .filter {
+                query in it
+                        && it !in currentFlight.name2     // Only pick names that aren't currently set as "other names".
+            }
+            .map { it to (it == currentPickedName) }
     }
 
     fun setName(name: String?){

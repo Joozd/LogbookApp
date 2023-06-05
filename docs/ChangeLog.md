@@ -55,3 +55,5 @@ If you really want to know, look at all the github commits...
 - Bugfixes, code improvements
 ### 1.2.9
 - Bugfixes, code improvements.
+### 1.2.10
+- Bugfixes, code improvements.

@@ -203,11 +203,14 @@ data class ModelFlight(
         else 0
 
     /**
-     * Total loggable time, in minutes. Rest time (for augmented crews) is removed.
+     * Total loggable time, in minutes.
+     * Zero if sim, a fixed value if [correctedTotalTime] != 0, else calculated (with rest time for augmented crews removed).
      */
-    fun calculateTotalTime(): Int =
-        if (isSim) 0
-        else AugmentedCrew.fromInt(augmentedCrew).getLogTime(getDurationOfFlight(), isPIC)
+    fun calculateTotalTime(): Int = when {
+        isSim -> 0
+        correctedTotalTime != 0 -> correctedTotalTime
+        else -> AugmentedCrew.fromInt(augmentedCrew).getLogTime(getDurationOfFlight(), isPIC)
+    }
 
     private fun getDurationOfFlight(): Duration =
         Duration.between(timeOut, timeIn)

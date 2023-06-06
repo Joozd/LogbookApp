@@ -19,7 +19,7 @@
 
 
 plugins {
-    id 'com.google.devtools.ksp' version "$kotlin_version-1.0.9"
+    id 'com.google.devtools.ksp' version "$kotlin_version-1.0.11"
 }
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
@@ -63,13 +63,12 @@ android {
 
 
     compileOptions {
-        // Sets Java compatibility to Java 8
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        // Sets Java compatibility to Java 17
+        sourceCompatibility 17
+        targetCompatibility 17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
         freeCompilerArgs += ['-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi'] // for Flow.flatmapLatest in AirportPickerViewModel
     }
 

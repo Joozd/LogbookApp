@@ -434,6 +434,7 @@
     <string name="calendar_import_description_line3">Apart from these entries, none of your calendar contents are being saved or transmitted.</string>
     <string name="do_you_want_to_enable_this">Do you want to enable this?</string>
     <string name="use_calendar_import">Use Calendar Import</string>
+    <string name="source_with_placeholder"><![CDATA[<b>Source:</b> %1$s]]></string>
     <string name="calendar_this_device">Calendar on this device</string>
     <string name="disabled">Disabled</string>
     <string name="ical_link">iCalendar link</string>
@@ -457,8 +458,6 @@
     <string name="mark_incomplete_without_pic">PIC name required</string>
     <string name="mark_incomplete_without_pic_description">If no PIC name is set on a completed flight, flight will be marked as incomplete</string>
     <string name="signed_in_as"><![CDATA[<b>Joozdlog Cloud ID</b><br><small>%1$s</small>&nbsp;]]></string>
-    <string name="email_button_text_verified"><![CDATA[<b>Email address</b><br><small>%1$s</small>&nbsp;]]></string>
-    <string name="email_button_text_not_verified"><![CDATA[<b>Email address</b><br><small>%1$s (not verified)</small>&nbsp;]]></string>
     <string name="not_signed_in_bug_please_tell_joozd">Server replied you are not signed in during an operation that requires you to sign in. This most probably means you encountered a bug. Please tell Joozd what you were trying to do via the Feedback menu.</string>
     <string name="standard_augmented_time"><![CDATA[<b>Augmented Crew takeoff/landing time</b><br><small>%1$s minutes</small>&nbsp;]]></string>
     <string name="fix_flights_db">Remove duplicate flights from DB</string>

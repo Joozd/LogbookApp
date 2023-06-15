@@ -602,6 +602,10 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="SettingsActivityButton.not_bold">
+        <item name="android:textStyle">normal</item>
+    </style>
+
     <style name="SettingsActivityLine" parent="SeparatorLine">
         <item name="android:layout_marginTop">8dp</item>
     </style>

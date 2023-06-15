@@ -27,8 +27,10 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.commit
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.CalendarSyncType
+import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivitySettingsBinding
 import nl.joozd.logbookapp.errors.errorDialog
+import nl.joozd.logbookapp.extensions.getStringWithMakeup
 import nl.joozd.logbookapp.extensions.showFragment
 import nl.joozd.logbookapp.model.viewmodels.activities.settingsActivity.SettingsActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
@@ -110,13 +112,21 @@ class SettingsActivity : JoozdlogActivity() {
     }
 
     private fun ActivitySettingsBinding.setCalendarSyncTypeButtonText(it: CalendarSyncType) {
-        calendarSyncTypeButton.text = getString(
-            when (it) {
-                CalendarSyncType.CALENDAR_SYNC_NONE -> R.string.disabled
-                CalendarSyncType.CALENDAR_SYNC_DEVICE -> R.string.calendar_this_device
-                CalendarSyncType.CALENDAR_SYNC_ICAL -> R.string.ical_link
+        calendarSyncTypeButton.text = when (it) {
+            CalendarSyncType.CALENDAR_SYNC_NONE -> getString(R.string.disabled)
+            CalendarSyncType.CALENDAR_SYNC_DEVICE -> getStringWithMakeup(R.string.source_with_placeholder, getString(R.string.calendar_this_device)) // placeholder while loading
+                .also{// actual text, loaded async but probably instant
+                    Prefs.selectedCalendar.flow.launchCollectWhileLifecycleStateStarted{calendarName ->
+                        calendarSyncTypeButton.text = getStringWithMakeup(R.string.source_with_placeholder, calendarName)
+                    }
             }
-        )
+            CalendarSyncType.CALENDAR_SYNC_ICAL -> getStringWithMakeup(R.string.source_with_placeholder, getString(R.string.calendar_this_device)) // placeholder while loading
+                .also{// actual text, loaded async but probably instant
+                    Prefs.calendarSyncIcalAddress.flow.launchCollectWhileLifecycleStateStarted{calendarName ->
+                        calendarSyncTypeButton.text = getStringWithMakeup(R.string.source_with_placeholder, calendarName)
+                    }
+                }
+        }
     }
 
     private fun ActivitySettingsBinding.setItemOnClickedListeners() {

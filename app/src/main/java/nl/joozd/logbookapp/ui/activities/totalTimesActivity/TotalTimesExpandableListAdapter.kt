@@ -26,7 +26,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.recyclerview.widget.RecyclerView
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ListElementTotalsBinding
 import nl.joozd.logbookapp.databinding.ListGroupTotalsBinding
@@ -52,7 +51,26 @@ class TotalTimesExpandableListAdapter:
         ListGroupTotalsBinding.bind(holder.itemView).apply{
             listTitleTextView.text = item
             val totalTimesItem = list.first { it.parent == item } as TotalTimesItem
+            if (!totalTimesItem.isExpanded) sortSpinner.visibility = View.GONE
             initializeSortSpinner(totalTimesItem)
+        }
+    }
+
+    //Make sure sorting spinner is in view when not collapsed
+    override fun onItemExpanded(itemViewHolder: ItemViewHolder?) {
+        super.onItemExpanded(itemViewHolder)
+        if (itemViewHolder == null) return
+        ListGroupTotalsBinding.bind(itemViewHolder.itemView).apply {
+            sortSpinner.visibility = View.VISIBLE
+        }
+    }
+
+    // Remove sorting spinner from view when collapsed
+    override fun onItemCollapsed(itemViewHolder: ItemViewHolder?) {
+        super.onItemCollapsed(itemViewHolder)
+        if (itemViewHolder == null) return
+        ListGroupTotalsBinding.bind(itemViewHolder.itemView).apply {
+            sortSpinner.visibility = View.GONE
         }
     }
 
@@ -76,11 +94,11 @@ class TotalTimesExpandableListAdapter:
             }
         }
 
-    override fun onCreateChildViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
+    override fun onCreateChildViewHolder(parent: ViewGroup): ChildViewHolder =
         ChildViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_element_totals, parent, false))
 
 
-    override fun onCreateItemViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
+    override fun onCreateItemViewHolder(parent: ViewGroup): ItemViewHolder =
         ItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_group_totals, parent, false))
 
 

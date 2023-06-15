@@ -21,11 +21,6 @@
 
     <!-- Base application theme. -->
 
-    <style name="DatePicker" parent="@style/ThemeOverlay.AppCompat.Dialog">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="colorAccent">?attr/colorPrimaryDark</item>
-    </style>
-
 
     <!-- Dialog Styles -->
 
@@ -61,10 +56,6 @@
         <item name="android:textColor">?attr/colorOnPrimary</item>
     </style>
 
-
-    <style name="TestText" parent="HeaderText.Bold">
-        <item name="android:textColor">?attr/colorPrimary</item>
-    </style>
 
     <style name="DialogHeaderSubText" parent="HeaderSubText">
         <item name="android:textColor">?attr/colorOnPrimary</item>
@@ -123,40 +114,6 @@
         <item name="android:elevation">2dp</item>
     </style>item
 
-    <style name="MenuItemStyle" parent="AppTheme">
-        <item name="android:textAppearance">@style/SecondaryText</item>
-        <item name="background">?attr/colorTextViewBackground</item>
-    </style>
-
-    <style name="appearance_aircraft_local" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/green</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-    <style name="appearance_aircraft_from_flights" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/green</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-    <style name="appearance_aircraft_from_flights_conflicting" parent="@android:style/TextAppearance">
-            <item name="android:textColor">@color/orange</item>
-            <item name="android:textSize">12sp</item>
-    </style>
-    <style name="appearance_aircraft_forced_type" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/yellow</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-    <style name="appearance_aircraft_other_user" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/orange</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-    <style name="appearance_aircraft_not_found" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/red</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style parent="@android:style/Widget.Spinner" name="SpinnerAsEditText">
-        <item name="android:background">@android:drawable/edit_text</item>
-    </style>
-
 
     <!-- App-wide styles -->
 
@@ -204,10 +161,6 @@
         <item name="android:layout_height">wrap_content</item>
     </style>
 
-    <style name="SecondaryText.Bold">
-        <item name="android:textStyle">bold</item>
-    </style>
-
     <style name="TertiaryText" parent="AppTheme">
         <item name="android:textColor">?android:attr/textColorTertiary</item>
         <item name="android:layout_width">0dp</item>
@@ -236,11 +189,6 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="TextCentered" parent="Text">
-        <item name="android:textAlignment">center</item>
-        <item name="android:padding">8dp</item>
-    </style>
-
     <style name="SecondaryTextCentered" parent="SecondaryText">
         <item name="android:textAlignment">center</item>
         <item name="android:padding">8dp</item>
@@ -259,18 +207,6 @@
         <item name="android:textAllCaps">true</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
         <item name="android:gravity">center</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="DialogButtonTextDisabled" parent="AppTheme">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:padding">8dp</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:textColor">@color/grey</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
     </style>
@@ -476,17 +412,6 @@
         <item name="android:textStyle">normal</item>
         <item name="android:alpha">0.5</item>
         <item name="android:background">@android:color/transparent</item>
-    </style>
-
-    <style name="SelectorStyleActive" parent="SelectorStyle">
-        <item name="android:textStyle">bold</item>
-        <item name="android:alpha">1.0</item>
-        <item name="android:background">@drawable/rounded_corners_primarybackground</item>
-    </style>
-
-
-    <style name="NotBoldCaption" parent="TextAppearance.MaterialComponents.Caption">
-        <item name="android:textStyle">normal</item>
     </style>
 
 

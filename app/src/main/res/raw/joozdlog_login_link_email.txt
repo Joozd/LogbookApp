@@ -1,7 +1,0 @@
-This is my login link for JoozdLog Pilot's logbook:
-
-[INSERT_LINK_HERE]
-
-All i have to do to log into Joozdlog Cloud is click this link on any device that has JoozdLog installed!
-
-I should keep it safe somewhere where I can find it in case I lose my device.

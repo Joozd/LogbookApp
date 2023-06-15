@@ -28,15 +28,5 @@
 
     <color name="white">#FFFFFF</color>
     <color name="light_grey">#FFC0C0C0</color>
-    <color name="grey">#FF808080</color>
-    <color name="dark_grey">#FF202020</color>
-    <color name="red">#CC0000</color>
-    <color name="orange">#CC7700</color>
-    <color name="yellow">#CCCC00</color>
-    <color name="green_yellow">#99CC00</color>
-    <color name="green">#00CC00</color>
-    <color name="black">#FF000000</color>
-    <color name="none">#00000000</color>
 
-    <color name="black_overlay">#66000000</color>
 </resources>

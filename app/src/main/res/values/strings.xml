@@ -17,7 +17,7 @@
   ~
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="app_name">JoozdLog</string>
     <string name="app_name_full">Joozdlog Pilot\'s Logbook</string>
 
@@ -33,13 +33,9 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
-    <string name="app_link_intent_filter">App Link intent Filter</string>
-
     <string name="flightNumberHint">FlightNumber</string>
     <string name="date">Date</string>
 
-    <string name="airField">Airport</string>
-    <string name="name">Name</string>
     <string name="aircraft">Aircraft</string>
     <string name="search">Search</string>
     <string name="search_n_flights">Search(%1$d Flights)</string>
@@ -47,10 +43,6 @@
     <string name="search_type">Search Type</string>
     <string name="_continue">Continue</string>
     <string name="back">Back</string>
-    <string name="skip">Skip</string>
-    <string name="retry">Retry</string>
-
-    <string name="hint">Hint</string>
 
     <string name="clear">Clear</string>
     <string name="add_flight">Add Flight</string>
@@ -72,7 +64,6 @@
     <string name="dualString">Dual</string>
     <string name="instructorString">Instructor</string>
     <string name="dualInstructorString">Dual/Instr</string>
-    <string name="username">Username</string>
     <string name="email">Email</string>
     <string name="email_saved">Email saved</string>
     <string name="email_saved_message">Your email address has been saved and a confirmation mail will be sent. Please check your inbox on this device, and open the provided confirmation link with Joozdlog.</string>
@@ -86,80 +77,55 @@
     <string name="not_verified_email">%1$s (not verified)</string>
 
     <string name="same_email_as_saved_do_you_want_to_reconfirm">The entered email is the same as the currently saved email. Do you want to re-confirm your email address?</string>
-    <string name="email_reason">Please enter your email for backup and account recovery purposes.\nYour email address will not be stored outside your phone.</string>
     <string name="autovalue">Auto Values</string>
     <string name="takeoff">Takeoff</string>
     <string name="day">day</string>
     <string name="night">night</string>
 
-    <string name="departure">departure</string>
-    <string name="arrival">arrival</string>
-    <string name="alt_with_placeholder">alt: %1$s\'</string>
-
     <string name="landing">Landing</string>
     <string name="autoland">Autoland</string>
     <string name="totalTimes">Total Times</string>
 
-    <string name="editAircraft">Edit Aircraft</string>
     <string name="unknown">Unknown</string>
-    <string name="unknown_airport">Unknown Airport</string>
 
     <string name="copilot">Co-pilot</string>
     <string name="paperLogbook">Paper Logbook</string>
-    <string name="pickNames">Search Names</string>
     <string name="anyName">Name</string>
     <string name="addThis">Add This</string>
     <string name="remove">Remove last</string>
-    <string name="select">Select</string>
     <string name="pickAirports">Search Airports</string>
     <string name="setThis">Set This</string>
-    <string name="flightTimes">Times</string>
     <string name="timesFunctions">Times / Functions</string>
     <string name="augmentedCrew">Augmented crew</string>
     <string name="crewSize">Crew Size</string>
     <string name="reduce_crew">Reduce crew</string>
     <string name="increase_crew">Reduce crew</string>
-    <string name="landingInSeat">Landing in seat</string>
     <string name="in_seat">In seat</string>
     <string name="time_for_to_ldg">Time for TO/LDG</string>
     <string name="dual">DUAL</string>
     <string name="augmented">Augmented</string>
-    <string name="savedFlight">Saved flight</string>
-    <string name="deletedFlight">Deleted flight</string>
     <string name="undo">Undo</string>
     <string name="redo">Redo</string>
     <string name="newFlight">New Flight</string>
     <string name="registration">Registration</string>
-    <string name="registrations">Registrations</string>
     <string name="signature">Signature</string>
     <string name="pf">PF</string>
     <string name="sim">Sim</string>
     <string name="sign">Sign</string>
-    <string name="savePdf">Save to PDF</string>>
-    <string name="flights_synced">Joozdlog Flights Synchronized with Cloud</string>
+    <string name="savePdf">Save to PDF</string><![CDATA[>
+    ]]>
     <string name="searchAircraft">SearchAircraft</string>
     <string name="loading_aircraft_and_airports_database">Loading Aircraft and Airports Database</string>
-    <string name="title_activity_login">Sign in</string>
-    <string name="prompt_password">Password</string>
-    <string name="hidden_password">"••••••••"</string>
-    <string name="newUser">New User</string>
     <string name="landings">Landings</string>
     <string name="takeoffs_landings">Takeoffs/Landings</string>
     <string name="arrowRight">➔</string>
     <string name="settings">Settings</string>
     <string name="transfer_data">Transfer Data</string>
-    <string name="do_something">Do Something</string>
 
     <string name="error">Error</string>
     <string name="error_dialog_message">An error %1$d has occurred. Please let Joozd know though the "Feedback" menu option.\n\nError description:\n%2$s</string>
     <string name="never">Never</string>
-    <string name="always">Always</string>
-    <string name="once">Once</string>
-    <string name="warning">Warning</string>
     <string name="ignore_for_one_day">Ignore for 1 day</string>
-    <string name="verify">Verify</string>
-
-    <string name="tbd">TBD</string>
 
 
     <string name="times_per_year">Times per year</string>
@@ -168,15 +134,10 @@
     <string name="times_per_reg">Times per registration</string>
     <string name="arrivals_per_airport">Arrivals per airport</string>
 
-    <string name="login">Log In</string>
-
     <string name="instructor">INSTRUCTOR</string>
     <string name="done">Done!</string>
 
-    <string name="newUserActivityHeader">Create cloud sync account</string>
     <string name="almost_done">Almost done!</string>
-
-    <string name="working_ellipsis">Working…</string>
 
 
     <!--
@@ -184,88 +145,24 @@
     -->
 
 
-    <string name="custom_airport_caution_text">You are entering a custom airport. If you do not enter lat/long coordinates (TODO: NOT IMPLEMENTED IN THIS VERSION), automatic night time errors might occur.\n(You are reminded in Edit Flight screen by (!) next to airport identifier)</string>
-
     <string name="airport_not_found_no_night_time">Airport location unknown, no night time logged.</string>
 
-    <string name="file_not_found_title">File not found</string>
     <string name="file_not_found_message">An error occurred while retreiving the file you are trying to import.</string>
 
-    <string name="unknown_file_title">Unknown File</string>
     <string name="unknown_file_message">The file you are trying to import into Joozdlog is not supported. If you want it to be, please mail it (or preferably a few) to joozdlog@joozd.nl and I might support it in a future version.</string>
     <string name="fatal_error_when_parsing_file">Fatal error when parsing file. This is a bug. Please send the file to joozdlog@joozd.nl so it can be fixed.</string>
     <string name="bad_intent_error">Error importing file: bad_intent_error</string>
     <string name="error_saving_flights">Error saving flights, could not get flights to save from file.</string>
 
-    <string name="unknown_link_title">Unknown Link</string>
-    <string name="unknown_link_message">This link is unknown or contains bad data. Please check the link and try again.</string>
 
-
-    <string name="total_time_too_large">Total time cannot be more than off blocks to on blocks</string>
-    <string name="invalid_total_time">Could not parse total time</string>
-
-    <string name="new_user_error_0001">Error creating new user: error 0001. This error is not expected to occur. Please inform Joozd though the "feedback" menu.</string>
-
-    <string name="no_internet">Cannot connect to server</string>
-    <string name="need_internet">You need an internet connection for this.</string>
-    <string name="server_problem">Cannot connect to server</string>
-    <string name="server_problem_message">The server cannot be reached. It may be down, or your internet may have problems. Please try again later.</string>
-    <string name="server_error">The server returned bad data. Please try again later and consider sending a bug report through the "feedback" menu, describing what you were trying to do.</string>
-    <string name="login_error">Login Error</string>
-    <string name="changed_login_link">Changed login link</string>
-    <string name="changed_login_link_message">Your login link has changed. Please send your login link to yourself to make sure it is saved.</string>
-    <string name="key_recently_changed">Your password was just changed.</string>
-    <string name="key_recently_changed_message">Your password was just changed. Do you really mean to change it again?</string>
-    <string name="mail_to_myself">Send it to myself</string>
-    <string name="send_using">Pick an app:</string>
-    <string name="email_verification_scheduled_title">Verifying email</string>
     <string name="email_verification_scheduled_message">Your email verification has been scheduled. If you are connected to the internet this should happen pretty fast, otherwise it will be the next time your device connects to the internet.</string>
 
-    <string name="data_has_been_merged">Data has been merged.</string>
-    <string name="server_merge_performed">You logged in to an existing Cloud account while some flights were present on the device. The data has been merged with the stored data on the server, and saved both locally and on the server.</string>
-    <string name="login_data_rejected_cloud_disabled">The server rejected your login data. Cloud functions have been disabled. Use a valid login link or create a new Cloud account in Settings to enable it again.</string>
-    <string name="no_login_data_cloud_disabled">No login data was found when trying to perform a scheduled Cloud function. Cloud functions have been disabled. Use a valid login link or create a new Cloud account in Settings to enable it again.</string>
-    <string name="waiting_for_server">Waiting for server</string>
-    <string name="created_account">Created account %1$s.</string>
-    <string name="create_login_link_hint">A login link has been placed on your clipboard. Paste it into an email or text message to send it to yourself!\nYou can also create a login link from the settings menu. I strongly suggest you do as it\'s your only way in if you lose your phone!</string>
-
-
-    <string name="no_internet_create_account">No internet connection available. You can create and account in the settings screen when you have one, or you can connect to the internet now and retry.</string>
-    <string name="no_server_create_account">Server seems to be unavailable. Please retry to create an account at a later time via the settings menu.</string>
-    <string name="no_internet_login">Your login data has been stored!</string>
-    <string name="password_cannot_be_empty">Password cannot be empty</string>
-    <string name="username_cannot_be_empty">Username cannot be empty</string>
-    <string name="does_not_match">Does not match</string>
-    <string name="wrong_username_password">The server has rejected your login data. Please create a new cloud account or find your working login link.</string>
-    <string name="email_data_rejected">The server has rejected your email confirmation data. Please check you clicked the correct confirmation link.</string>
-    <string name="email_address_rejected">The server has rejected your email address. You might have clicked an old confirmation message. Do you want to request a new confirmation mail, or delete your current email settings?</string>
-
-
-    <string name="pass_requirements">Password requirements</string>
-    <string name="password_requirements">At least 6 characters, two of which are not the same.</string>
-
-    <string name="password_does_not_meet_standards">Password does not meet standards. It needs a length of at least 6 and at least 2 different characters.</string>
-    <string name="password_does_not_meet_standards_short">Password does not meet standards.</string>
-    <string name="username_already_taken">This username is already taken. If this is you, use your login link if you have it, or create a new account.</string>
-    <string name="change_email">Change email</string>
-    <string name="no_email">No email</string>
-    <string name="no_email_text">No working email address was entered, but a request for something needing an email address was scheduled. Please enter your email address in Settings.</string>
-    <string name="no_email_entered_no_email_will_be_sent">No working email address was entered, so no login link will be emailed to you.</string>
-    <string name="sample_email">Your.Address@example.com</string>
-
-    <string name="i_dont_care">I don\'t care</string>
-    <string name="i_understand">I understand</string>
-    <string name="user_exists_password_correct">This username exists, and you have entered the correct password for it. If this is not you, please pick another username and a more secure password.</string>
-    <string name="what_to_do_forgot_password">If your login is still working on this device, you can change it to something you catually can remember via the settings screen, or you can generate a login link.</string>
-    <string name="use_this">Use this</string>
-    <string name="ignore">Ignore</string>
 
     <string name="calendar_sync_conflict">Calendar Sync conflict</string>
     <string name="calendar_sync_edited_flight">You are editing a planned flight while calendar sync is enabled. This means some changes will be gone by next calendar sync.\nCalendar sync will be disabled until after this flight. You can re-enable it in the Setting menu.</string>
     <string name="delete_completed_flight">You are trying to delete a COMPLETED flight. This might be illegal. Delete anyway?</string>
     <string name="delete_calendar_flight">You are deleting a a flight from your calendar.\nCalendar sync will be disabled until after this flight. You can re-enable it in the Setting menu.</string>
 
-    <string name="you_can_start_calendar_sync_again">You can start calendar synchronizing again by re-enabling it in the Settings menu</string>
     <string name="always_postpone_calendar_sync">Always postpone on manual import</string>
     <string name="postpone_sync">Postpone sync</string>
 
@@ -286,11 +183,6 @@
     <string name="welcome_message_header">Welcome to Joozdlog 1.1</string>
     <string name="welcome_message">The next few screens will allow you to set some preferences and make a Cloud account if you want to.\n\nAll this will take under a minute, and after that you are all set to start logging (or importing) your flights!\n\nIf you have any feedback or bugreports, the main menu has a Feedback function. Feedback is appreciated!</string>
     <string name="welcome_message_upgrade">If you are upgrading from version 1.0: You see this dialog because the whole settings system has been vastly upgraded and all old preferences are deleted in the process.</string>
-
-    <string name="cloud_explanation" tools:ignore="Typos">Sync your data to the cloud!\nThis is not a backup, read terms&amp;conditions.\nInactive accounts can be removed.</string>
-    <string name="read_terms_conditions">Read Terms&amp;Conditions</string>
-    <string name="accept_terms_conditions">Accept Terms&amp;Conditions</string>
-    <string name="already_have_account">If you already have a cloud account, you can leave this unchecked and use your login link after all settings are done!</string>
 
     <string name="you_can_set_settings_in_settings">If you want to adjust any more settings (switching on automatic backup emails for example), take a look at the Settings menu after you click \"done\"!</string>
 
@@ -328,9 +220,7 @@
     <string name="edit_flight_remarks_help">Remarks. Will end up in PDF logbook.</string>
     <string name="edit_flight_sim_help">Select if this is a simulator session.</string>
     <string name="edit_flight_sign_help">Select if you want a signature in your pdf logbook.</string>
-    <string name="edit_flight_dual_help">Select if this is a dual instruction flight.</string>
     <string name="edit_flight_dual_instructor_help">Select if you want to log this flight as DUAL or INSTRUCTOR.</string>
-    <string name="edit_flight_instructor_help">Select if this you want to log this flight as instructor.</string>
     <string name="edit_flight_multipilot_help">Select if this was a multi-pilot flight.\nAuto-set from aircraft type if AutoValues is on.</string>
     <string name="edit_flight_ifr_help">Select if this flight was conducted under IFR.</string>
     <string name="edit_flight_pic_help">Select if you are pilot in command or PICUS on this flight. There is no distinction between those in an EASA-FCL logbook.</string>
@@ -351,7 +241,6 @@
     <string name="nightTime">Night time</string>
     <string name="ifrTime">IFR time</string>
     <string name="picIncludingPicus">PIC (+ PICUS)</string>
-    <string name="copilotTime">Co-pilot time</string>
     <string name="dualTime">Dual time</string>
     <string name="instructorTime">Instructor time</string>
     <string name="balanceForward">Balance Forward</string>
@@ -367,10 +256,8 @@
 
 
     <string name="calendar_update_active">You are loading a roster file, but calendar sync is enabled. Do you want to disable calendar sync until end of this roster?</string>
-    <string name="backup_only_on_new_install">Due to reasons, a backup can only be loaded onto a fresh install (or at least an install with no unplanned flights in it). This is on the list to be fixed in a future update. Please remove and reinstall app and try again.</string>
 
     <string name="waiting_for_data">Waiting for data…</string>
-    <string name="receivedIntent">Receiving data</string>
     <string name="reading_file">Reading file</string>
     <string name="extracting_flights">Extracting flights</string>
     <string name="cleaning_logbook">Cleaning logbook</string>
@@ -381,19 +268,10 @@
     <string name="imported_complete_flights">Imported Complete Flights</string>
     <string name="imported_complete_flights_results">Imported %1$d flights.\n%2$d flights were updated.\n%3$d imported flights did not match any in current logbook.\n%4$d flights in current logbook did not match any imported flights.</string>
 
-    <string name="chrono_conflict_found_long">Your overview was imported, but %1$d conflicting flights were already in your logbook. Please check the period for which you just imported an overview for correct data!</string>
-
-    <string name="planned_flights_found">Planned flights found</string>
-    <string name="planned_flights_found_long">Your overview was imported, but %1$d planned flights are still in your logbook. Please check the period for which you just imported an overview for correct data!</string>
-
-    <string name="planned_flights_and_conflict_found">Conflicts found</string>
-    <string name="planned_flights_and_conflict_found_long">Your overview was imported, but %1$d conflicting flights and %2$d planned flights are still in your logbook. Please check the period for which you just imported an overview for correct data!</string>
-
     <string name="importing_complete_logbook">Importing complete logbook</string>
     <string name="importing_complete_logbook_long">Do you want to delete and replace your current logbook, or merge it?</string>
     <string name="are_you_sure_qmk">Are you sure?</string>
     <string name="this_will_replace_your_entire_logbook">This will replace your entire logbook. Please make sure you really want this, and always have a backup of your current data!</string>
-    <string name="this_will_enter_all_flights_into_logbook">This will place all imported flights into your logbook, and might not be undoable. Please make sure you really want this, and always have a backup of your current data!</string>
     <string name="replace_or_merge">Replace or merge?</string>
     <string name="replace_or_merge_long">Do you want to replace all flights by incoming flights, or merge them?</string>
     <string name="replace">Replace</string>
@@ -401,29 +279,6 @@
     <string name="import_complete_logbook_sanitize">You are importing a complete logbook. Do you want to automatically calculate missing values such as night- or multi-pilot times?</string>
 
 
-    <string name="no_airport_db_for_importing">No airport DB was downloaded, and none could be found. Please check if your device is connected to the internet and try again.</string>
-    <string name="downloading_airports">Downloading airports DB…</string>
-
-
-    <string name="XXXXXXXXXXXXXXX">XXXXXXXXXXXXXXX</string>
-    <string name="repeatPassword">Repeat password</string>
-    <string name="alreadyHaveAnAccountQuestion">Already have an account?</string>
-    <string name="signIn">Sign in</string>
-    <string name="signOut">Sign out</string>
-    <string name="youCannotResetPassword">Don\'t forget to save your new login link!</string>
-    <string name="make_new_account">Make a new account</string>
-    <string name="make_new_account_question">You do not have valid login data. Do you want to create a new account?\nIf you have a valid login link, click \"NO\" and use your login link to log in.</string>
-    <string name="skipThisStep">Skip this step</string>
-    <string name="dontWantCloudSync">Don\'t want to use cloud sync?</string>
-    <string name="create_account">Create new account</string>
-    <string name="you_are_signed_in_as">You are signed in as <![CDATA[<b>%1$s</b>]]>.</string>
-    <string name="you_are_not_signed_in">Your login credentials arer no longer valid. You can use your login link, or make a new account in the Settings menu.</string>
-    <string name="no_email_provided">No email address provided</string>
-    <string name="you_need_to_be_signed_in">You need to be signed in before you can perform this action.</string>
-    <string name="i_accept_terms">I accept the terms and conditions</string>
-    <string name="must_accept_terms">You must accept the terms and conditions to use Cloud Sync</string>
-    <string name="cannot_restore_password">Don\'t lose your password. You cannot restore it.</string>
-    <string name="cloud_sync_terms">Cloud Sync terms</string>
     <string name="about">About Joozdlog</string>
     <string name="whats_new">What\'s New</string>
     <string name="dont_use">Don\'t use</string>
@@ -432,17 +287,12 @@
     <string name="calendar_import_description_line1">You can import flights from your device\'s calendar.</string>
     <string name="calendar_import_description_line2">This will look for entries like \"KL1234 AMS-LCY\" in whatever calendar you pick.</string>
     <string name="calendar_import_description_line3">Apart from these entries, none of your calendar contents are being saved or transmitted.</string>
-    <string name="do_you_want_to_enable_this">Do you want to enable this?</string>
     <string name="use_calendar_import">Use Calendar Import</string>
     <string name="source_with_placeholder"><![CDATA[<b>Source:</b> %1$s]]></string>
     <string name="calendar_this_device">Calendar on this device</string>
     <string name="disabled">Disabled</string>
     <string name="ical_link">iCalendar link</string>
 
-    <string name="accept_terms">Accept terms</string>
-    <string name="use_wifi_for_large_files">Only use WiFi for larger files</string>
-
-    <string name="add_chrono_update_remarks">Add remark when Monthly Overview has changes</string>
     <string name="add_names_from_rosters">Add names to flights if found</string>
 
     <string name="disabled_until">Disabled until %1$s</string>
@@ -451,26 +301,19 @@
     <string name="import_settings">Import settings</string>
     <string name="monthly_overview_explanation">Monthly Overviews, rosters and check-in sheets import supported for selected carriers (currently only KLC/KLM) only. Just share your PDF/CSV/TXT with Joozdlog.</string>
     <string name="loggings_prefs_description">General preferences pertaining to (automatic) logging and times.</string>
-    <string name="use_consensus_data">Use Aircraft Consensus Data</string>
-    <string name="consensus_description">JoozdLog Cloud collects (anonymous) Aircraft Registration and type data so you don\'t have to enter aircraft types that somebody else already entered. Typical collected data would be \"4 users said PH-XXX is a Cessna 172\". Switching this off will stop sending and receiving this data.</string>
     <string name="icao_iata_description">Do you want to display airports in ICAO (4 letter) or as IATA (3 letter) format?</string>
 
     <string name="mark_incomplete_without_pic">PIC name required</string>
     <string name="mark_incomplete_without_pic_description">If no PIC name is set on a completed flight, flight will be marked as incomplete</string>
-    <string name="signed_in_as"><![CDATA[<b>Joozdlog Cloud ID</b><br><small>%1$s</small>&nbsp;]]></string>
-    <string name="not_signed_in_bug_please_tell_joozd">Server replied you are not signed in during an operation that requires you to sign in. This most probably means you encountered a bug. Please tell Joozd what you were trying to do via the Feedback menu.</string>
     <string name="standard_augmented_time"><![CDATA[<b>Augmented Crew takeoff/landing time</b><br><small>%1$s minutes</small>&nbsp;]]></string>
     <string name="fix_flights_db">Remove duplicate flights from DB</string>
     <string name="no_duplicate_flights_found">No duplicate flights found.</string>
-    <string name="n_duplicates_have_been_removed">%1$d duplicate flights have been removed.</string>
     <string name="n_duplicates_have_been_removed_long_message">%1$d duplicate flights have been removed.\nThey will also be removed from Cloud.\nHowever, to prevent them re-appearing again, remove duplicates or disable cloud syncing on any other devices you use Joozdlog on as well, or they will come back.</string>
 
     <string name="backup_interval_time"><![CDATA[<b>Remind me to make a backup every</b><br><small>%1$s</small>&nbsp;]]></string>
     <string name="backup_via_email">Auto-send backup emails</string>
-    <string name="mail_will_be_sent_to"><![CDATA[Your new login link will be sent to<br><b>%1$s&nbsp;</b>]]></string>
     <string name="backup_cloud_description">An email with your logbook will be emailed to you at the same interval as you get reminded to make a backup. You will still be reminded if server cannot be reached.</string>
 
-    <string name="cloud_backup">Cloud Backup</string>
     <string name="disable">Disable</string>
 
 
@@ -480,15 +323,8 @@
     <string name="pick_backup_interval">Pick backup interval</string>
     <string name="augmented_crew_time_explanation">In case of an augmented crew (3 or more pilots), Joozdlog calculates the time that can be logged for copilots by subtracting this amount of time for each takeoff and landing, allocating the remaining time evenly over the pilots, then adds this time again for every takeoff/landing performed in the pilot\'s seat. Default value is 30 (10 minutes taxi, 20 minutes after takeoff/before landing)</string>
 
-    <string name="change_password">Change Login Link</string>
-    <string name="create_login_link">Copy login link</string>
-    <string name="login_link_created">Login link copied to clipboard!</string>
-    <string name="login_link_title">Joozdlog Login Link</string>
     <string name="create_login_link_explanation">This will create a login link that you can paste in your favorite app (email, sms, notepad, anywhere). If you click that link, it will try to log you in with the username/password currently set on this device.</string>
-    <string name="change_password_explanation">You can use this screen to change your password when you think your login link might have been compromised. A new login link will be created for you to save in your favorite app.</string>
-    <string name="change_pass_error_1">ChangePass error 1: No login stored while changing login link. This should not happen. Sorry. Best make a new cloud account and pretend this never happened.</string>
 
-    <string name="new_password">New Password</string>
     <string name="loggings_preferences">General Preferences</string>
     <string name="backup_preferences">Backup Preferences</string>
     <string name="backup_prefs_description">You should periodically backup your logbook.</string>
@@ -498,47 +334,31 @@
     <string name="not_implemented_body">This operation is not implemented yet. Nothing will happen now.</string>
 
 
-    <string name="new_cloud_account_made">New Cloud account made</string>
-    <string name="new_cloud_account_made_message_please_send_link_to_yourself">A new Cloud account has been created. If and email address was saved, an email with a login link will be mailed to you. In any case, I recommend you send a login link to yourself now.</string>
-    <string name="share_link">Share link</string>
-    <string name="fake_hidden_password">••••••••••</string>
     <string name="you_have_never_backed_up">No backup of logbook has been remembered.</string>
     <string name="you_have_not_backed_up_n_days">You have not backed up your logbook for %1$d days.</string>
-    <string name="cloud_backup_explanation">Send a periodic email to yourself from the cloud. Your email address is not saved on the server, so backups will be initiated from this device (and stop if you uninstall or kill the app, they should run with the app in the background).</string>
-    <string name="new_user_email_reason">Please enter your email address here. It is only used to help you keep access to your data.\nYour email address will not be saved outside your device.</string>
     <string name="feedback_explanation">You can give any feedback you have to Joozdlog here. I would especially be happy to read things that nag you when using the app, feature requests or compliments.</string>
     <string name="check_current_issues">Check known issues/plans</string>
     <string name="here">here</string>
     <string name="feedback">Feedback</string>
     <string name="contact_info_text">Optional contact info (phone/email/etc)</string>
-    <string name="submitting_feedback">Submitting Feedback</string>
     <string name="your_feedback_will_be_submitted">Your feedback will be submitted. Thank you for helping me make this app even better!</string>
     <string name="contact_info_explanation">All feedback will be read, and I will do my best to answer but I might be too busy/lazy.</string>
     <string name="privacy">Privacy</string>
     <string name="privacy_text">All text entered in this screen will end up in an email to me and may be stored in my inbox until I delete it manually. It will not be saved anywehere else, and nothing will be used for any other purpose than processing/answering your feedback.</string>
     <string name="you_can_also_send_an_email">You can also send an email</string>
-    <string name="email_deleted">Email deleted</string>
-    <string name="email_deleted_long">Your email address has been deleted from this device.</string>
     <string name="email_verified">Email address verified!</string>
-    <string name="verification_mail">Verification Mail</string>
-    <string name="email_verification_requested_long">A verification email will be requested from the Joozdlog Server. Please verify the mail on this device!</string>
     <string name="email_verification_invalid_data">The email verification data received is not valid. Do you want to request new email verification data?</string>
     <string name="email_verification_code_not_saved_bug">An email verification was scheduled but no code was saved. Please report this through the Feedback option in the menu and tell me what you did, so I can fix this bug.</string>
-    <string name="logged_in">Logged in.</string>
-    <string name="login_delayed">No server, will try again</string>
 
     <string name="test_message">This is a test message!</string>
 
     <string name="submit">Submit</string>
     <string name="submit_feedback_qmk">Submit feedback?</string>
-    <string name="empty_feedback">Feedback is empty</string>
-    <string name="empty_feedback_message">You cannot submit empty feedback.</string>
     <string name="joozdlog_todo_title">Issues / TODO</string>
     <string name="use_dark_mode">Use Dark mode</string>
     <string name="print_hint">When printing logbook, make sure you make the printer fit it to printable area as the PDF does not have margins.</string>
     <string name="help">Help</string>
     <string name="joozdlog_importer">Joozdlog Importer</string>
-    <string name="confirm">confirm</string>
     <string name="delete">delete</string>
     <string name="share">share</string>
 

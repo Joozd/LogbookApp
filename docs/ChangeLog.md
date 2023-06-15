@@ -57,3 +57,6 @@ If you really want to know, look at all the github commits...
 - Bugfixes, code improvements.
 ### 1.2.10
 - Bugfixes, code improvements.
+### 1.2.11
+- Removed unused resources
+- Clearer indication of source for calendar sync

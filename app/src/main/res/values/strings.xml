@@ -263,8 +263,8 @@
     <string name="calendar_sync_conflict">Calendar Sync conflict</string>
     <string name="calendar_sync_edited_flight">You are editing a planned flight while calendar sync is enabled. This means some changes will be gone by next calendar sync.\nCalendar sync will be disabled until after this flight. You can re-enable it in the Setting menu.</string>
     <string name="delete_completed_flight">You are trying to delete a COMPLETED flight. This might be illegal. Delete anyway?</string>
-    <string name="delete_calendar_flight">You are deleting a a flight from your calendar. Do you want to disable calendar import?</string>
-    <string name="delete_calendar_flight_until_end">Until end of flight</string>
+    <string name="delete_calendar_flight">You are deleting a a flight from your calendar.\nCalendar sync will be disabled until after this flight. You can re-enable it in the Setting menu.</string>
+
     <string name="you_can_start_calendar_sync_again">You can start calendar synchronizing again by re-enabling it in the Settings menu</string>
     <string name="always_postpone_calendar_sync">Always postpone on manual import</string>
     <string name="postpone_sync">Postpone sync</string>

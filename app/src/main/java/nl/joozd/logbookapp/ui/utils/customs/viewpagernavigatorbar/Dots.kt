@@ -78,7 +78,7 @@ class Dots(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRe
     /**
      * Color of an active dot, default is ?attr/colorAccent
      */
-    var activeColor: Int = getAttribute(R.attr.colorAccent)
+    var activeColor: Int = getAttribute(androidx.appcompat.R.attr.colorAccent)
         set(it){
             field = it
             if (initialized) generateDots()

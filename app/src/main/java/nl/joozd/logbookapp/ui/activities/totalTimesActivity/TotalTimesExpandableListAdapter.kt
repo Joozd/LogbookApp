@@ -26,6 +26,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.recyclerview.widget.RecyclerView
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ListElementTotalsBinding
 import nl.joozd.logbookapp.databinding.ListGroupTotalsBinding
@@ -75,12 +76,12 @@ class TotalTimesExpandableListAdapter:
             }
         }
 
-    override fun onCreateChildViewHolder(parent: ViewGroup): View =
-        LayoutInflater.from(parent.context).inflate(R.layout.list_element_totals, parent, false)
+    override fun onCreateChildViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
+        ChildViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_element_totals, parent, false))
 
 
-    override fun onCreateItemViewHolder(parent: ViewGroup): View =
-        LayoutInflater.from(parent.context).inflate(R.layout.list_group_totals, parent, false)
+    override fun onCreateItemViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
+        ItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_group_totals, parent, false))
 
 
     private fun makeSpinnerAdapter(context: Context, totalTimesItem: TotalTimesItem): ArrayAdapter<SortingStrategy> =

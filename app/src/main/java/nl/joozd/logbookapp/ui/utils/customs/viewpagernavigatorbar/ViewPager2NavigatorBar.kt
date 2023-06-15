@@ -67,7 +67,7 @@ class ViewPager2NavigatorBar(context: Context, attrs: AttributeSet? = null, defS
 
     var dotsSpacing: Int  by DotsProperty(dpToPixels(Dots.DEFAULT_SPACING_DP))
 
-    var dotsActiveColor: Int  by DotsProperty(getAttribute(R.attr.colorAccent))
+    var dotsActiveColor: Int  by DotsProperty(getAttribute(androidx.appcompat.R.attr.colorAccent))
 
     var dotsInactiveColor: Int  by DotsProperty(getAttribute(android.R.attr.textColorSecondary))
 

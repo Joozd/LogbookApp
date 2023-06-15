@@ -96,7 +96,7 @@ abstract class LocalDatePickerFragment: JoozdlogFragment() {
     }
 
     private val colorAccent
-        get() = requireActivity().getColorFromAttr(R.attr.colorAccent)
+        get() = requireActivity().getColorFromAttr(androidx.appcompat.R.attr.colorAccent)
     private val textColor
         get() = requireActivity().getColorFromAttr(android.R.attr.textColorSecondary)
     private val colorOnAccent

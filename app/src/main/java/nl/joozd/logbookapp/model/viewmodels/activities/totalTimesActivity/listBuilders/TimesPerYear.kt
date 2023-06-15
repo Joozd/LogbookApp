@@ -55,6 +55,11 @@ class TimesPerYear(title: String, items: List<TotalTimesListItem>
             }
         }
 
-        private val sortableBy = listOf(SortValueDownStrategy, SortNameDownStrategy, SortNameUpStrategy, SortValueUpStrategy)
+        private val sortableBy = listOf(
+            SortNameDownStrategy(R.string.sorter_year_down),
+            SortNameUpStrategy(R.string.sorter_year_up),
+            SortValueDownStrategy(R.string.sorter_time_down),
+            SortValueUpStrategy(R.string.sorter_time_up)
+        )
     }
 }

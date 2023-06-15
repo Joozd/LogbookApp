@@ -33,14 +33,30 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Group" />
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/sortButton"
-        android:layout_width="wrap_content"
+    <Spinner
+        android:id="@+id/sortSpinner"
+        style="@style/ExpandableListTitleText"
+
+        android:layout_width="48dp"
         android:layout_height="0dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:drawable/ic_menu_sort_by_size"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintTop_toTopOf="parent" />
+
+<!--
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/sortButton"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+-->
+    </androidx.constraintlayout.widget.ConstraintLayout>

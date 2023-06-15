@@ -51,6 +51,11 @@ class TimesPerRegistration(title: String, items: List<TotalTimesListItem>
             }
         }
 
-        private val sortableBy = listOf(SortValueDownStrategy, SortNameDownStrategy, SortNameUpStrategy, SortValueUpStrategy)
+        private val sortableBy = listOf(
+            SortNameUpStrategy(R.string.registration),
+            SortNameDownStrategy(R.string.sorter_registration_down),
+            SortValueDownStrategy(R.string.sorter_time_up),
+            SortValueUpStrategy(R.string.sorter_time_down)
+        )
     }
 }

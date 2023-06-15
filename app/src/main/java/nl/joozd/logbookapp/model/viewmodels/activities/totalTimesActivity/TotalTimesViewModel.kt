@@ -48,9 +48,9 @@ class TotalTimesViewModel: JoozdlogActivityViewModel() {
     private var allFlightsCache: List<Flight>? = null
     private val allFlightsMutex = Mutex()
     private suspend fun allFlightsCached() = allFlightsMutex.withLock {
-        allFlightsCache ?: FlightRepository.instance.getAllFlights().filter{ !it.isPlanned}.also{
-            allFlightsCache = it
-        }
+        allFlightsCache ?: FlightRepository.instance.getAllFlights()
+            .filter{ !it.isPlanned }
+            .also{ allFlightsCache = it }
     }
 
     private var balancesForwardCache: List<BalanceForward>? = null
@@ -61,7 +61,7 @@ class TotalTimesViewModel: JoozdlogActivityViewModel() {
         }
     }
 
-    private fun totalTimesFlow() = flowStartingWithNull {TotalTimes.of(allFlightsCached(), balancesForwardCached()) }
+    private fun totalTimesFlow() = flowStartingWithNull { TotalTimes.of(allFlightsCached(), balancesForwardCached()) }
     private fun timesPerYearFlow() = flowStartingWithNull { TimesPerYear.of(allFlightsCached()) }
     private fun timesPerTypeFlow() = flowStartingWithNull { TimesPerType.of(allFlightsCached()) }
     private fun timesPerRegFlow() = flowStartingWithNull{ TimesPerRegistration.of(allFlightsCached())}

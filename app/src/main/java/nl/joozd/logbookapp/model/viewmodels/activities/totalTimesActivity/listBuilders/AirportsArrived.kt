@@ -55,6 +55,10 @@ class AirportsArrived(title: String, items: List<TotalTimesListItem>
             }
         }
 
-        private val sortableBy = listOf(SortValueDownStrategy, SortNameDownStrategy, SortNameUpStrategy, SortValueUpStrategy)
+        private val sortableBy = listOf(
+            SortValueDownStrategy(R.string.sorter_airports_up),
+            SortNameDownStrategy(R.string.sorter_airports_down),
+            SortNameUpStrategy(R.string.sorter_visits_up),
+            SortValueUpStrategy(R.string.sorter_visits_down))
     }
 }

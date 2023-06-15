@@ -85,6 +85,11 @@
         <item name="android:textSize">20sp</item>
     </style>
 
+    <style name="ExpandableListSorterText" parent="DialogHeaderText">
+        <item name="android:padding">8dp</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
     <style name="ExpandableListItemText" parent="SecondaryText">
         <item name="android:textSize">16sp</item>
     </style>

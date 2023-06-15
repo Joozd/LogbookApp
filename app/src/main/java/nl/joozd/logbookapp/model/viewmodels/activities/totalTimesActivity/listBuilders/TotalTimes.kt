@@ -250,7 +250,11 @@ class TotalTimes(title: String, items: List<TotalTimesListItem>
                 )
             }
 
-        private val sortableBy = listOf(UnsortedStrategy, SortValueDownStrategy, SortValueUpStrategy)
+        private val sortableBy = listOf(
+            UnsortedStrategy(),
+            SortValueDownStrategy(R.string.sorter_time_down),
+            SortValueUpStrategy(R.string.sorter_time_up)
+        )
 
 
 

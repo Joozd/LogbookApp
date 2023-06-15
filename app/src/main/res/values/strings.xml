@@ -373,6 +373,30 @@
     <string name="sharing_activity_placeholder_text">WORK IN PROGRESS\nThis is still work in progress, as you can see by the \"minimalistic\" design.\nIt is working, but needs an internet connection to send the data.</string>
     <string name="use_fixed_rest_time">Use fixed rest time</string>
     <string name="rest_time">Rest time</string>
+
+
+    <!-- Sorter names -->
+    <string name="sorter_default">Default</string>
+    <string name="sorter_name_down">Name reversed</string>
+    <string name="sorter_name_up">Name</string>
+    <string name="sorter_value_down">Value reversed</string>
+    <string name="sorter_value_up">Value</string>
+    <string name="sorter_airports_up">ICAO code</string>
+    <string name="sorter_airports_down">ICAO code descending</string>
+    <string name="sorter_visits_up">Visits</string>
+    <string name="sorter_visits_down">Visits descending</string>
+    <!-- "Registration" is already defined -->
+    <string name="sorter_registration_down">Registration Descending</string>
+    <string name="sorter_time_up">Time</string>
+    <string name="sorter_time_down">Time descending</string>
+    <string name="sorter_type_up">Type</string>
+    <string name="sorter_type_down">Type descending</string>
+    <string name="sorter_year_up">Year</string>
+    <string name="sorter_year_down">Year descending</string>
+
+
+
+
 </resources>
 
 

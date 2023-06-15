@@ -20,13 +20,18 @@
 package nl.joozd.logbookapp.ui.activities.totalTimesActivity
 
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ListElementTotalsBinding
 import nl.joozd.logbookapp.databinding.ListGroupTotalsBinding
 import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.TotalTimesItem
+import nl.joozd.logbookapp.model.viewmodels.activities.totalTimesActivity.sortingStrategy.SortingStrategy
+import nl.joozd.logbookapp.ui.adapters.TotalTimesSortingAdapter
 import nl.joozd.recyclerviewexpandablelistadapter.DiffFunctions
 import nl.joozd.recyclerviewexpandablelistadapter.RecyclerViewExpandableListAdapter
 
@@ -41,16 +46,34 @@ class TotalTimesExpandableListAdapter:
         }
     }
 
+    // Cannot have two lists with the same name, as it looks up the list by name. Not sure why I did it like that but I'll leave it alone for now.
     override fun onBindItemViewHolder(holder: ItemViewHolder, item: String) {
         ListGroupTotalsBinding.bind(holder.itemView).apply{
             listTitleTextView.text = item
-            sortButton.setOnClickListener {
-                list.firstOrNull { it.parent == item }.let{
-                    (it as TotalTimesItem).nextSorter()
-                }
-            }
+            val totalTimesItem = list.first { it.parent == item } as TotalTimesItem
+            initializeSortSpinner(totalTimesItem)
         }
     }
+
+    private fun ListGroupTotalsBinding.initializeSortSpinner(totalTimesItem: TotalTimesItem) {
+        sortSpinner.apply {
+            adapter = makeSpinnerAdapter(listTitleTextView.context, totalTimesItem)
+            onItemSelectedListener = makeOnItemSelectedListener(totalTimesItem)
+        }
+    }
+
+    private fun makeOnItemSelectedListener(totalTimesItem: TotalTimesItem) =
+        object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                (parent?.getItemAtPosition(position) as? SortingStrategy)?.let { sortingStrategy ->
+                    totalTimesItem.sortBy(sortingStrategy)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // do nothing
+            }
+        }
 
     override fun onCreateChildViewHolder(parent: ViewGroup): View =
         LayoutInflater.from(parent.context).inflate(R.layout.list_element_totals, parent, false)
@@ -58,6 +81,14 @@ class TotalTimesExpandableListAdapter:
 
     override fun onCreateItemViewHolder(parent: ViewGroup): View =
         LayoutInflater.from(parent.context).inflate(R.layout.list_group_totals, parent, false)
+
+
+    private fun makeSpinnerAdapter(context: Context, totalTimesItem: TotalTimesItem): ArrayAdapter<SortingStrategy> =
+        TotalTimesSortingAdapter(context, totalTimesItem).apply{
+            setDropDownViewResource(R.layout.spinner_sorter_item_view)
+        }
+
+
 
     object DIFF: DiffFunctions<String, TotalTimesListItem>{
         override fun isSameChild(c1: TotalTimesListItem, c2: TotalTimesListItem): Boolean =

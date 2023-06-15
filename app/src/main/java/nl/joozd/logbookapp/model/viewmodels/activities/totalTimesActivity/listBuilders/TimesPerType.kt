@@ -55,6 +55,11 @@ class TimesPerType(title: String, items: List<TotalTimesListItem>
             }
         }
 
-        private val sortableBy = listOf(SortValueDownStrategy, SortNameDownStrategy, SortNameUpStrategy, SortValueUpStrategy)
+        private val sortableBy = listOf(
+            SortNameUpStrategy(R.string.sorter_type_up),
+            SortNameDownStrategy(R.string.sorter_type_down),
+            SortValueDownStrategy(R.string.sorter_time_down),
+            SortValueUpStrategy(R.string.sorter_time_up)
+        )
     }
 }

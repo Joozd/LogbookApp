@@ -58,5 +58,6 @@ If you really want to know, look at all the github commits...
 ### 1.2.10
 - Bugfixes, code improvements.
 ### 1.2.11
+- Added OCR text scanner for crew names KLM FlightDeck app
 - Removed unused resources
 - Clearer indication of source for calendar sync

@@ -27,6 +27,8 @@ import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
 import nl.joozd.logbookapp.model.helpers.makeNamesList
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
+import nl.joozd.textscanner.analyzer.CrewNamesCollector
+import java.util.LinkedHashMap
 
 class Name2DialogViewModel: JoozdlogDialogViewModel() {
     private val undoNames = flightEditor.name2 // this gets saved on first creation of the dialog. CANCEL will revert the names to this.
@@ -57,6 +59,23 @@ class Name2DialogViewModel: JoozdlogDialogViewModel() {
     }
     fun currentNamesListFlow() = combine (currentNamesFlow, pickedSelectedNameFlow) { current, picked ->
         current.map { name -> name to (name == picked) }
+    }
+
+    /** This takes two lists of strings which are matched by their indices.
+     * Then, it builds a map of thise, and adds [CrewNamesCollector.functionOrder].first() as PIC name and the rest in that order to name2
+     */
+    fun handleScanActivityResult(namesList: List<String>, ranksList: List<String>){
+        val namesToRanksMap: MutableMap<String, Int> = LinkedHashMap<String, Int>()
+        namesList.indices.forEach { i ->
+            namesToRanksMap[namesList[i]] = CrewNamesCollector.functionOrder[ranksList[i]] ?: 999
+        }
+        val picName = namesList.first { name ->
+            namesToRanksMap[name] == 0
+        }
+
+        val otherNames = namesList.sortedBy{ namesToRanksMap[it] }. filter { it != picName }
+        flightEditor.name = picName
+        flightEditor.name2 = otherNames
     }
 
     fun pickNewName(name: String){

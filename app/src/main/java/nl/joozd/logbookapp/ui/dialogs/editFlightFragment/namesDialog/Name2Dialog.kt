@@ -19,10 +19,13 @@
 
 package nl.joozd.logbookapp.ui.dialogs.editFlightFragment.namesDialog
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import nl.joozd.logbookapp.R
@@ -31,11 +34,22 @@ import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog.Name2DialogViewModel
 import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
+import nl.joozd.textscanner.TextScannerActivity
 
 class Name2Dialog: JoozdlogFragment() {
     private val viewModel: Name2DialogViewModel by viewModels()
 
     private var nameIsSetFromList = false
+
+    private val startScanActivityForResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.let{ data ->
+                val names = data.getStringArrayListExtra(NAMES_LIST) ?: emptyList()
+                val ranks = data.getStringArrayListExtra(RANKS_LIST) ?: emptyList()
+                viewModel.handleScanActivityResult(names, ranks)
+            }
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         DialogNamesBinding.bind(inflater.inflate(R.layout.dialog_names, container, false)).apply{
@@ -54,6 +68,7 @@ class Name2Dialog: JoozdlogFragment() {
      * Initialize the buttons in this dialog
      */
     private fun DialogNamesBinding.initializeButtons(){
+        initializeCameraButton()
         initializeRemoveNameButton()
         initializeAddNameButton()
     }
@@ -107,6 +122,15 @@ class Name2Dialog: JoozdlogFragment() {
         }
     }
 
+    private fun DialogNamesBinding.initializeCameraButton(){
+        cameraButton.setOnClickListener {
+            startScanActivityForResultLauncher.launch(
+                TextScannerActivity.createLaunchIntent(requireContext(), TextScannerActivity.CREW_NAMES_FROM_KLM_FLIGHTDECK, listOf(NAMES_LIST, RANKS_LIST))
+            )
+        }
+
+    }
+
     private fun DialogNamesBinding.initializeRemoveNameButton() {
         removeNameButton.setOnClickListener {
             viewModel.removeCurrentNameFromSelectedNames()
@@ -150,6 +174,11 @@ class Name2Dialog: JoozdlogFragment() {
         viewModel.pickableNamesListFlow().launchCollectWhileLifecycleStateStarted {
             namesPickerAdapter.submitList(it)
         }
+    }
+
+    companion object{
+        private const val NAMES_LIST = "NAMES_LIST"
+        private const val RANKS_LIST = "RANKS_LIST"
     }
 
 

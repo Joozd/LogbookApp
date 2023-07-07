@@ -34,6 +34,7 @@ import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog.Name2DialogViewModel
 import nl.joozd.logbookapp.ui.adapters.SelectableStringAdapter
 import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
+import nl.joozd.logbookapp.ui.utils.toast
 import nl.joozd.textscanner.TextScannerActivity
 
 class Name2Dialog: JoozdlogFragment() {
@@ -46,6 +47,12 @@ class Name2Dialog: JoozdlogFragment() {
             result.data?.let{ data ->
                 val names = data.getStringArrayListExtra(NAMES_LIST) ?: emptyList()
                 val ranks = data.getStringArrayListExtra(RANKS_LIST) ?: emptyList()
+
+                // create toast with amount of found names
+                val message = if(names.isEmpty()) getString(R.string.no_names_found_in_scan)
+                    else getString(R.string.n_names_found_in_scan, names.size)
+                activity?.toast(message)
+
                 viewModel.handleScanActivityResult(names, ranks)
             }
         }

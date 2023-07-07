@@ -69,12 +69,12 @@ class Name2DialogViewModel: JoozdlogDialogViewModel() {
         namesList.indices.forEach { i ->
             namesToRanksMap[namesList[i]] = CrewNamesCollector.functionOrder[ranksList[i]] ?: 999
         }
-        val picName = namesList.first { name ->
+        val picName = namesList.firstOrNull { name ->
             namesToRanksMap[name] == 0
         }
 
         val otherNames = namesList.sortedBy{ namesToRanksMap[it] }. filter { it != picName }
-        flightEditor.name = picName
+        picName?.let { flightEditor.name = it }
         flightEditor.name2 = otherNames
     }
 

@@ -28,7 +28,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.App
-import nl.joozd.logbookapp.data.repository.*
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvents
 
@@ -58,4 +57,5 @@ open class JoozdlogViewModel: ViewModel(){
         }
 
     protected fun getString(resID: Int) = context.getString(resID)
+    protected fun getString(resID: Int, vararg formatArgs: Any) = context.getString(resID, formatArgs)
 }

@@ -166,7 +166,11 @@
     <string name="always_postpone_calendar_sync">Always postpone on manual import</string>
     <string name="postpone_sync">Postpone sync</string>
 
-
+    <!--
+    - Toasts
+    -->
+    <string name="n_names_found_in_scan">%1$d names found in scan.</string>
+    <string name="no_names_found_in_scan">No names found in scan.</string>
     <!--
     - Strings for SettingsActivity
     -->

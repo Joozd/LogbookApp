@@ -107,7 +107,7 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
     override var name2: List<String>
         get() = flight.name2
         set(name2) {
-            flight = flight.copy (name2 = name2.filter { it.isNotBlank() }).autoValues()
+            flight = flight.copy (name2 = name2).autoValues()
         }
 
     override var remarks: String
@@ -253,6 +253,7 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
     }
 
     override suspend fun save(): Flight {
+        removeEmptyNames() // Name dialog adds empty names at the end for editing. These should not be saved.
         val f = flight.prepareForSaving()
         FlightRepositoryWithUndo.instance.save(f)
         return f
@@ -268,6 +269,10 @@ class FlightEditorImpl(flight: ModelFlight): FlightEditor {
      */
     private fun checkAutoValuesStillOK(updatedFlight: ModelFlight): Boolean =
         updatedFlight == flight
+
+    private fun removeEmptyNames(){
+        name2 = name2.filter { it.isNotBlank() }
+    }
 
     // A flight is planned when it is edited to start in the future (or less than 5 minutes before now)
     private fun ModelFlight.isPlanned(): Boolean =

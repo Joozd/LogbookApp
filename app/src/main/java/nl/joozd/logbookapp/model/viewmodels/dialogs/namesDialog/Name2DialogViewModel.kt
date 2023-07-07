@@ -20,46 +20,17 @@
 package nl.joozd.logbookapp.model.viewmodels.dialogs.namesDialog
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepository
-import nl.joozd.logbookapp.model.helpers.makeNamesList
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogDialogViewModel
-import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import nl.joozd.textscanner.analyzer.CrewNamesCollector
 import java.util.LinkedHashMap
 
 class Name2DialogViewModel: JoozdlogDialogViewModel() {
     private val undoNames = flightEditor.name2 // this gets saved on first creation of the dialog. CANCEL will revert the names to this.
-    private val repo = FlightRepository.instance
-    private val pickedNewNameFlow = MutableStateFlow<String?>(null)
-    private var pickedNewName: String? by CastFlowToMutableFlowShortcut(pickedNewNameFlow)
 
-    private val pickedSelectedNameFlow = MutableStateFlow<String?>(null)
-    private var pickedSelectedName: String? by CastFlowToMutableFlowShortcut(pickedSelectedNameFlow)
-
-    private val queryFlow = MutableStateFlow("")
-    private var query: String by CastFlowToMutableFlowShortcut(queryFlow)
-
-    private val allAvailableNamesFlow: Flow<List<String>> = repo.allFlightsFlow().map{
-        it.makeNamesList()
-    }
-    private val currentNamesFlow: Flow<List<String>> = flightEditor.flightFlow.map { it.name2 }
-
-    // This gives a list of names mapped to whether that name is currently picked or not. Only one name is picked, and that will be highlighted in GUI.
-    fun pickableNamesListFlow(): Flow<List<Pair<String, Boolean>>> = combine(allAvailableNamesFlow, currentNamesFlow, queryFlow, pickedNewNameFlow, flightEditor.flightFlow ) { all, current, query, picked, currentFlight->
-        all.filter{
-            it !in current                          // only pick names that aren't picked yet
-                    && query in it                  // only pick names that match current search text
-                    && it != currentFlight.name     // Only pick names that aren't currently set as PIC.
-        }.map {
-            it to (it == picked)
-        }
-    }
-    fun currentNamesListFlow() = combine (currentNamesFlow, pickedSelectedNameFlow) { current, picked ->
-        current.map { name -> name to (name == picked) }
-    }
+    // This provides a list that is at least an empty string so users don't have to add the first name but can just start typing.
+    // Empty names are filtered out by flightEditor when saving.
+    val currentNamesFlow: Flow<List<String>> = flightEditor.flightFlow.map { f -> f.name2.takeIf{ it.isNotEmpty()} ?: listOf("") }
 
     /** This takes two lists of strings which are matched by their indices.
      * Then, it builds a map of thise, and adds [CrewNamesCollector.functionOrder].first() as PIC name and the rest in that order to name2
@@ -78,27 +49,18 @@ class Name2DialogViewModel: JoozdlogDialogViewModel() {
         flightEditor.name2 = otherNames
     }
 
-    fun pickNewName(name: String){
-        pickedNewName = name
+    fun updateLastName(name: String){
+        val unchangedNames = flightEditor.name2.dropLast(1) // all names except the last one. Empty list is still an empty list.
+        flightEditor.name2 = unchangedNames + name
     }
 
-    fun pickSelectedName(name: String){
-        pickedSelectedName = name
+    fun addNewEmptyName(){
+        if(!flightEditor.name2.lastOrNull().isNullOrBlank())
+            flightEditor.name2 += ""
     }
 
-    fun removeCurrentNameFromSelectedNames(){
-        pickedSelectedName?.let{ n ->
-            pickedSelectedName = null
-            flightEditor.name2 = flightEditor.name2.filter { it != n}
-        }
-    }
-
-    fun addName(name: String){
-        flightEditor.name2 += name
-    }
-
-    fun updateQuery(q: String?){
-        query = q ?: ""
+    fun removeName(nameToRemove: String){
+        flightEditor.name2 = flightEditor.name2.filter { it != nameToRemove }
     }
 
     fun undo(){

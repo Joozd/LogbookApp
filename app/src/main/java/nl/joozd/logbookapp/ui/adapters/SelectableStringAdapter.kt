@@ -36,7 +36,6 @@ import nl.joozd.logbookapp.extensions.getColorFromAttr
  * @param color: the color of 'item_background' will be set to this value for entries marked as "true"
  * @param itemLayout: Layout to be used for an item. MUST have a view named 'item_background'
  * @param itemClick: Action to be performed onClick on an item
-
  */
 class SelectableStringAdapter(
     private val color: Int? = null,

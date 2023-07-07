@@ -397,8 +397,8 @@
     <string name="sorter_type_down">Type descending</string>
     <string name="sorter_year_up">Year</string>
     <string name="sorter_year_down">Year descending</string>
-
-
+    <string name="pick_known_names">Pick known names</string>
+    <string name="plus">+</string>
 
 
 </resources>

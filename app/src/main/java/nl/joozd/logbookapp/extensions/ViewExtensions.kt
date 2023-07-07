@@ -26,8 +26,10 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
+import androidx.core.view.children
 import com.google.android.material.textfield.TextInputEditText
 
 var TextView.textColor: Long
@@ -67,6 +69,18 @@ fun View.findActivity(): Activity? {
         }
         ctx = ctx.baseContext
     }
+    return null
+}
+
+
+/**
+ * Finds a TextView in a view that is either a TextView itself, or a (nested) ViewGroup with at least one textview in it.
+ * Null if none found.
+ */
+fun View.findTextView(): TextView?{
+    if (this is TextView) return this
+    if (this is ViewGroup)
+        return children.firstNotNullOfOrNull { child -> child.findTextView() }
     return null
 }
 

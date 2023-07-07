@@ -48,14 +48,24 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_chainStyle="packed">
 
-            <TextView
-                android:id="@+id/airportPickerTitle"
-                style="@style/DialogHeaderText"
-                android:text="@string/namePilot2"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/airportPickerTitle"
+                    style="@style/DialogHeaderText"
+                    android:text="@string/namePilot2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/camera_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/scan"
+                    app:layout_constraintBottom_toBottomOf="@+id/airportPickerTitle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/airportPickerTitle"
+                    app:srcCompat="@drawable/photo_camera_color_primary_48" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -120,10 +130,9 @@
                     android:id="@+id/pickedNamesList"
                     style="@style/DataBox"
                     android:layout_height="100dp"
-                    android:layout_marginTop="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/camera_button" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/cancel_names_dialog_textview"
@@ -143,14 +152,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/namesPickerList" />
 
-                <ImageButton
-                    android:id="@+id/camera_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@string/scan"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/photo_camera_fill0_wght400_grad0_opsz48" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

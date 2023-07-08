@@ -72,6 +72,10 @@ class Name2Dialog: JoozdlogFragment() {
         pickedNamesList.apply{
             val swipableStringAdapter = SwipableStringAdapter(requireContext(), R.layout.item_name_dialog){ swipedNameString ->
                 viewModel.removeName(swipedNameString)
+            }.apply{
+                setOnLongClickListener{
+                    toast("WIP: long-clicked $it")
+                }
             }
 
             layoutManager = LinearLayoutManager(context)

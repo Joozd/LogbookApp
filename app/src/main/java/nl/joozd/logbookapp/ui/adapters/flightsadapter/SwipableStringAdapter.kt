@@ -37,10 +37,23 @@ class SwipableStringAdapter(
         onSwipe: OnSwipeListener
     ): this(itemLayout, SwipeToDeleteCallback(context, onSwipe))
 
+
+    private var onCLickListener: OnClickListener? = null
+    private var onLongClickListener: OnClickListener? = null
+
+    fun setOnClickListener(onClickListener: OnClickListener){
+        this.onCLickListener = onClickListener
+    }
+
+    fun setOnLongClickListener(onLongClickListener: OnClickListener){
+        this.onLongClickListener = onLongClickListener
+    }
+
     class StringViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         private val textView = itemView.findTextView()
         var text: String? get() = textView?.text?.toString()
             set(t) { textView?.text = t }
+        val view = itemView
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StringViewHolder {
@@ -50,6 +63,21 @@ class SwipableStringAdapter(
 
     override fun onBindViewHolder(holder: StringViewHolder, position: Int) {
         holder.text = getItem(position)
+        onCLickListener?.let{ listener ->
+            holder.view.setOnClickListener {
+                holder.text?.let{ t ->
+                    listener(t)
+                }
+            }
+        }
+        onLongClickListener?.let{ listener ->
+            holder.view.setOnLongClickListener{
+                holder.text?.let{ t ->
+                    listener(t)
+                }
+                true
+            }
+        }
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -131,6 +159,10 @@ class SwipableStringAdapter(
 
     fun interface OnSwipeListener{
         operator fun invoke(swipedString: String)
+    }
+
+    fun interface OnClickListener{
+        operator fun invoke(clickedString: String)
     }
 
     companion object{

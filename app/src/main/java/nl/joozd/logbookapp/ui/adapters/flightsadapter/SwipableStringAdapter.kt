@@ -38,15 +38,10 @@ class SwipableStringAdapter(
     ): this(itemLayout, SwipeToDeleteCallback(context, onSwipe))
 
 
-    private var onCLickListener: OnClickListener? = null
-    private var onLongClickListener: OnClickListener? = null
+    private var _viewActions: (View.(String?)-> Unit)? = null
 
-    fun setOnClickListener(onClickListener: OnClickListener){
-        this.onCLickListener = onClickListener
-    }
-
-    fun setOnLongClickListener(onLongClickListener: OnClickListener){
-        this.onLongClickListener = onLongClickListener
+    fun viewActions(actions: View.(String?)-> Unit){
+        this._viewActions = actions
     }
 
     class StringViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
@@ -54,6 +49,7 @@ class SwipableStringAdapter(
         var text: String? get() = textView?.text?.toString()
             set(t) { textView?.text = t }
         val view = itemView
+        var index: Int = -1
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StringViewHolder {
@@ -62,26 +58,21 @@ class SwipableStringAdapter(
     }
 
     override fun onBindViewHolder(holder: StringViewHolder, position: Int) {
-        holder.text = getItem(position)
-        onCLickListener?.let{ listener ->
-            holder.view.setOnClickListener {
-                holder.text?.let{ t ->
-                    listener(t)
+        holder.apply {
+            text = getItem(position)
+            index = position
+            _viewActions?.let { actions ->
+                view.apply {
+                    actions(holder.text)
                 }
-            }
-        }
-        onLongClickListener?.let{ listener ->
-            holder.view.setOnLongClickListener{
-                holder.text?.let{ t ->
-                    listener(t)
-                }
-                true
             }
         }
     }
 
+
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
+        if(callBack is SwipeToDeleteCallback) callBack.adapter = this
         ItemTouchHelper(callBack).attachToRecyclerView(recyclerView)
     }
 
@@ -92,6 +83,8 @@ class SwipableStringAdapter(
         private val deleteDrawable = ContextCompat.getDrawable(context, android.R.drawable.ic_delete) ?: emptyDrawable()
         private val intrinsicWidth = deleteDrawable.intrinsicWidth
         private val intrinsicHeight = deleteDrawable.intrinsicHeight
+
+        var adapter: SwipableStringAdapter? = null
 
         override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
             //only allow swipe left
@@ -144,6 +137,8 @@ class SwipableStringAdapter(
         }
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            viewHolder.itemView.translationX = 0f
+            adapter?.notifyItemChanged(viewHolder.absoluteAdapterPosition)
             onSwipe(viewHolder.findText())
         }
 
@@ -159,10 +154,6 @@ class SwipableStringAdapter(
 
     fun interface OnSwipeListener{
         operator fun invoke(swipedString: String)
-    }
-
-    fun interface OnClickListener{
-        operator fun invoke(clickedString: String)
     }
 
     companion object{

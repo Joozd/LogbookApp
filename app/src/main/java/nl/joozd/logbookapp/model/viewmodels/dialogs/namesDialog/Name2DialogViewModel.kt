@@ -28,6 +28,9 @@ import java.util.LinkedHashMap
 class Name2DialogViewModel: JoozdlogDialogViewModel() {
     private val undoNames = flightEditor.name2 // this gets saved on first creation of the dialog. CANCEL will revert the names to this.
 
+    // The name being edited.
+    private var indexOfNameBeingEdited = 0
+
     // This provides a list that is at least an empty string so users don't have to add the first name but can just start typing.
     // Empty names are filtered out by flightEditor when saving.
     val currentNamesFlow: Flow<List<String>> = flightEditor.flightFlow.map { f -> f.name2.takeIf{ it.isNotEmpty()} ?: listOf("") }
@@ -49,21 +52,44 @@ class Name2DialogViewModel: JoozdlogDialogViewModel() {
         flightEditor.name2 = otherNames
     }
 
-    fun updateLastName(name: String){
-        val unchangedNames = flightEditor.name2.dropLast(1) // all names except the last one. Empty list is still an empty list.
-        flightEditor.name2 = unchangedNames + name
+    fun updateNameBeingEdited(name: String){
+        val unchangedNamesBefore = flightEditor.name2.take(indexOfNameBeingEdited) // all names before name being edited
+        val unchangedNamesAfter = flightEditor.name2.drop(indexOfNameBeingEdited + 1) // all names after name being edited
+        flightEditor.name2 = unchangedNamesBefore + name + unchangedNamesAfter
     }
 
     fun addNewEmptyName(){
-        if(!flightEditor.name2.lastOrNull().isNullOrBlank())
+        val lastName = flightEditor.name2.lastOrNull()
+        if((lastName ?: "EMPTY_LIST").isNotBlank()) // Add a new name if the list is empty or the last name in the list is not blank.
             flightEditor.name2 += ""
+        indexOfNameBeingEdited = flightEditor.name2.lastIndex
     }
 
+    // removes the first occurrence of found name
     fun removeName(nameToRemove: String){
-        flightEditor.name2 = flightEditor.name2.filter { it != nameToRemove }
+        updateIndexOfNameBeingEditedIfNeeded(nameToRemove)
+        val firstOccurrenceFound = flightEditor.name2.indexOf(nameToRemove).takeIf { it != -1 }
+        firstOccurrenceFound?.let{ index ->
+            flightEditor.name2 = flightEditor.name2.take(index) + flightEditor.name2.drop(index + 1)
+        }
+    }
+
+    // Removing a name should change the index of the name being edited if it means that gets changed. This takes care of that
+    private fun updateIndexOfNameBeingEditedIfNeeded(nameToRemove: String) {
+        val indexOfNameToRemove = flightEditor.name2.indexOf(nameToRemove).takeIf { it != -1 } ?: Int.MAX_VALUE
+        when {
+            indexOfNameToRemove < indexOfNameBeingEdited -> indexOfNameBeingEdited--
+            indexOfNameToRemove == indexOfNameBeingEdited -> indexOfNameBeingEdited = flightEditor.name2.lastIndex
+        }
     }
 
     fun undo(){
         flightEditor.name2 = undoNames
+    }
+
+    fun notifyNowEditing(name: String){
+        flightEditor.name2.indexOf(name).takeIf{ it != -1 }?.let{
+            indexOfNameBeingEdited = it
+        }
     }
 }

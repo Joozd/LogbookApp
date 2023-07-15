@@ -73,8 +73,19 @@ class Name2Dialog: JoozdlogFragment() {
             val swipableStringAdapter = SwipableStringAdapter(requireContext(), R.layout.item_name_dialog){ swipedNameString ->
                 viewModel.removeName(swipedNameString)
             }.apply{
-                setOnLongClickListener{
-                    toast("WIP: long-clicked $it")
+                viewActions {text ->
+                    setOnLongClickListener {
+                        toast("WIP: long-clicked $text")
+                        true
+                    }
+
+                    setOnClickListener{
+                        text?.let {
+                            // This needs to happen in this order because changing the text in editNameTextView will trigger its onTextChanged
+                            viewModel.notifyNowEditing(it)
+                            editNameTextView.setText(it)
+                        }
+                    }
                 }
             }
 
@@ -143,7 +154,7 @@ class Name2Dialog: JoozdlogFragment() {
     private fun DialogNamesBinding.initializeNameField() {
         editNameTextView.apply {
             viewModel.addNewEmptyName() // Make sure names list ends with an empty name so text in this Textview matches actual value for last name
-            onTextChanged { viewModel.updateLastName(it) }
+            onTextChanged { viewModel.updateNameBeingEdited(it) }
             setOnEditorActionListener { _, _, event ->
                 if(event != null)
                     addNewRecordAndResetTextView()

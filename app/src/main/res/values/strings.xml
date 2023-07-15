@@ -399,6 +399,8 @@
     <string name="sorter_year_down">Year descending</string>
     <string name="pick_known_names">Pick known names</string>
     <string name="plus">+</string>
+    <string name="replace_own_name_with_self">Replace my name with SELF</string>
+    <string name="my_name">My Name</string>
 
 
 </resources>

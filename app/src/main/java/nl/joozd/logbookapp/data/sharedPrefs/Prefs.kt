@@ -75,6 +75,10 @@ object Prefs: JoozdLogPreferences() {
     private const val DARK_MODE = "DARK_MODE"
     private const val USE_IATA = "USE_IATA"
     private const val PIC_NAME_NEEDED = "PIC_NAME_NEEDED"
+
+    private const val REPLACE_OWN_NAME_WITH_SELF = "REPLACE_OWN_NAME_WITH_SELF"
+    private const val OWN_NAME = "OWN_NAME"
+
     private const val USE_CAL_SYNC = "USE_CAL_SYNC"
     private const val CALENDAR_SYNC_TYPE = "_CALENDAR_SYNC_TYPE"
     private const val CAL_SYNC_ICAL_ADDR = "CAL_SYNC_ICAL_ADDR"
@@ -86,6 +90,8 @@ object Prefs: JoozdLogPreferences() {
 
     val useIataAirports by JoozdlogSharedPreferenceDelegate(USE_IATA, false)
     val picNameNeedsToBeSet by JoozdlogSharedPreferenceDelegate(PIC_NAME_NEEDED,true)
+    val replaceOwnNameWithSelf by JoozdlogSharedPreferenceDelegate(REPLACE_OWN_NAME_WITH_SELF,true)
+    val ownName by JoozdlogSharedPreferenceDelegate(OWN_NAME,"")
 
     val useCalendarSync by JoozdlogSharedPreferenceDelegate(USE_CAL_SYNC, false)
 

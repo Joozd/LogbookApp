@@ -17,6 +17,8 @@
  *
  */
 
+@file:OptIn(DelicateCoroutinesApi::class)
+
 package nl.joozd.logbookapp.model.viewmodels
 
 import android.content.Context
@@ -25,7 +27,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.App
 import nl.joozd.logbookapp.model.feedbackEvents.FeedbackEvent
@@ -58,4 +63,14 @@ open class JoozdlogViewModel: ViewModel(){
 
     protected fun getString(resID: Int) = context.getString(resID)
     protected fun getString(resID: Int, vararg formatArgs: Any) = context.getString(resID, formatArgs)
+
+    /**
+     * Launch a job that needs to complete no matter what.
+     * NOTE: Do not use this for permanent running tasks as it will keep running until device is rebooted or app is killed.
+     */
+    protected fun launchNonCancelable(block: suspend CoroutineScope.() -> Unit){
+        viewModelScope.launch(NonCancellable) {
+            block()
+        }
+    }
 }

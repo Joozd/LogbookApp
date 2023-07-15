@@ -24,10 +24,63 @@ class GeneralPreferencesFragment: JoozdlogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         ActivitySettingsGeneralBinding.bind(inflater.inflate(R.layout.activity_settings_general, container, false)).apply {
+            initializeViews()
             launchFlowCollectors()
             setOnClickListeners()
             initializeDarkModeSpinner()
         }.root
+
+    private fun ActivitySettingsGeneralBinding.initializeViews(){
+        //TODO migrate all views here. Every view should live in its own function so we can easily see everything that happens to it.
+        initializeReplaceOwnNameWithSelfSwitch()
+        initializeOwnName()
+    }
+
+    private fun ActivitySettingsGeneralBinding.initializeReplaceOwnNameWithSelfSwitch() =
+        settingsReplaceOwnNameWithSelf.apply {
+            /*
+            Tell viewModel to set Prefs.replaceOwnNameWithSelf to the setting of this switch when its state gets changed.
+            This will probably run the first time it gets set from [viewModel.replaceOwnNameWithSelfFlow] but that is not a problem.
+             */
+            setOnCheckedChangeListener { _, isChecked ->
+                viewModel.toggleReplaceOwnNameWithSelfTo(isChecked)
+            }
+            /*
+            Toggle switch when [viewModel.replaceOwnNameWithSelfFlow], which tracks [Prefs.replaceOwnNameWithSelf] toggles.
+            Prefs flows are distinct until changed so the onCheckChangedListener will not get into an endless loop.
+            Also onCheckChanged should not trigger when setting the already set value.
+             */
+            viewModel.replaceOwnNameWithSelfFlow.launchCollectWhileLifecycleStateStarted{
+                isChecked = it
+            }
+        }
+
+    private fun ActivitySettingsGeneralBinding.initializeOwnName(){
+        initializeOwnNameTextInputLayout()
+        initializeOwnNameEditText()
+    }
+
+    private fun ActivitySettingsGeneralBinding.initializeOwnNameTextInputLayout() = ownNameTextInputLayout.apply{
+        viewModel.replaceOwnNameWithSelfFlow.launchCollectWhileLifecycleStateStarted{
+            // Show "Own Name" entry field if [Prefs.replaceOwnNameWithSelf] is true, or hide it when false.
+            visibility = if (it) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun ActivitySettingsGeneralBinding.initializeOwnNameEditText() =
+        ownNameEditText.apply{
+            // display name, send entered name to viewModel to be saved.
+            separateDataDisplayAndEntry {
+                it?.let{name ->
+                    viewModel.updateOwnName(name.toString())
+                }
+            }
+            // Keep text synced with Prefs.ownName
+            viewModel.ownNameFlow.launchCollectWhileLifecycleStateStarted{
+                setText(it)
+            }
+        }
+
 
     private fun ActivitySettingsGeneralBinding.launchFlowCollectors(){
         viewModel.useIataFlow.launchCollectWhileLifecycleStateStarted {

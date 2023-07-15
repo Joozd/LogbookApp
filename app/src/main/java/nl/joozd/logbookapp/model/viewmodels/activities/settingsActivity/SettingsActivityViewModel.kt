@@ -37,15 +37,20 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-class SettingsActivityViewModel: JoozdlogActivityViewModel(){
+class SettingsActivityViewModel: JoozdlogActivityViewModel() {
     val statusFlow: StateFlow<SettingsActivityStatus?> = MutableStateFlow(null)
     private var status by CastFlowToMutableFlowShortcut(statusFlow)
 
     val showHintFlow: StateFlow<Int?> = MutableStateFlow(null) // holds a ResID
     private var showHint by CastFlowToMutableFlowShortcut(showHintFlow)
 
+    // Links to flows from SharedPrefs
     val useIataFlow get() = Prefs.useIataAirports.flow
     val picNameRequiredFlow get() = Prefs.picNameNeedsToBeSet.flow
+
+    val replaceOwnNameWithSelfFlow = Prefs.replaceOwnNameWithSelf.flow
+    val ownNameFlow = Prefs.ownName.flow
+
     val augmentedTakeoffLandingTimesFlow get() = Prefs.augmentedTakeoffLandingTimes.flow
 
     val backupIntervalFlow = Prefs.backupInterval.flow
@@ -66,20 +71,19 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
 
 
     suspend fun calendarDisabledUntilString(): String {
-            val time = LocalDateTime.ofInstant(Instant.ofEpochSecond(Prefs.calendarDisabledUntil()), ZoneOffset.UTC)
-            return "${time.toDateStringLocalized()} ${time.toTimeStringLocalized()} Z"
-        }
-
+        val time = LocalDateTime.ofInstant(Instant.ofEpochSecond(Prefs.calendarDisabledUntil()), ZoneOffset.UTC)
+        return "${time.toDateStringLocalized()} ${time.toTimeStringLocalized()} Z"
+    }
 
 
     val defaultNightMode
-        get() = AppCompatDelegate.getDefaultNightMode().takeIf{ it in (1..2)} ?: 0
+        get() = AppCompatDelegate.getDefaultNightMode().takeIf { it in (1..2) } ?: 0
 
 
     suspend fun emailEntered() =
         EmailPrefs.emailAddress().isNotBlank()
 
-    fun toggleEmailBackupEnabled(){
+    fun toggleEmailBackupEnabled() {
         Prefs.sendBackupEmails.toggle()
     }
 
@@ -88,21 +92,34 @@ class SettingsActivityViewModel: JoozdlogActivityViewModel(){
      * Callable functions
      *********************************************************************************************/
 
-    fun resetStatus(){
+    fun resetStatus() {
         status = null
     }
 
-    fun darkmodePicked(darkMode: Int){
+    fun darkmodePicked(darkMode: Int) {
         DarkModeCenter.setDarkMode(darkMode)
     }
 
-    fun toggleUseIataAirports() = viewModelScope.launch {
+    fun toggleUseIataAirports() = launchNonCancelable {
         Prefs.useIataAirports(!Prefs.useIataAirports())
     }
 
-    fun toggleRequirePicName() = viewModelScope.launch {
+    fun toggleRequirePicName() = launchNonCancelable {
         Prefs.picNameNeedsToBeSet(!Prefs.picNameNeedsToBeSet())
     }
+
+    // set (in Prefs) the setting of whether user wants to replace their own name with SELF in logbook entries.
+    fun toggleReplaceOwnNameWithSelfTo(isChecked: Boolean) = launchNonCancelable {
+        Prefs.replaceOwnNameWithSelf.setValue(isChecked)
+    }
+
+    // update user's own name, eg "Joost Welle" in Prefs
+    fun updateOwnName(name: String) {
+        launchNonCancelable {
+            Prefs.ownName.setValue(name)
+        }
+    }
+
 
     /**
      * If [Prefs.useCalendarSync] is true, (switch is on) set it to off

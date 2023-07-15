@@ -63,6 +63,12 @@ class SettingsActivity : JoozdlogActivity() {
         }
     }
 
+    override fun onStop() {
+        // Clear focus from anything focussed, so any editTexts that are still open will trigger their onFocusChangedListeners
+        currentFocus?.clearFocus()
+        super.onStop()
+    }
+
 
     private fun observeControlFlows() {
         viewModel.statusFlow.launchCollectWhileLifecycleStateStarted{
@@ -79,8 +85,6 @@ class SettingsActivity : JoozdlogActivity() {
         viewModel.showHintFlow.launchCollectWhileLifecycleStateStarted{
             it?.let { showHintDialog(it) }
         }
-
-
     }
 
     private fun ActivitySettingsBinding.observeSettingsFlows(){

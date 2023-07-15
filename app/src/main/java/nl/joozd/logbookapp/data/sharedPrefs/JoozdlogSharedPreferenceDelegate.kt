@@ -37,6 +37,9 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(
     }
 
     interface ReadOnlyPref<T>{
+        /**
+         * [flow] should only emit when changed
+         */
         val flow: Flow<T>
         suspend operator fun invoke(): T
         fun <R> map(transform: (T) -> R): ReadOnlyPref<R> =

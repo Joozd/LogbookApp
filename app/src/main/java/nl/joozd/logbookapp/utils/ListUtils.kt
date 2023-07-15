@@ -19,4 +19,23 @@
 
 package nl.joozd.logbookapp.utils
 
-fun <T> emptyMutableList() = emptyList<T>().toMutableList()
+fun <T> List<T>.replaceFirstInstanceOf(original: T, replaceWith: T): List<T> {
+    val newList = ArrayList<T>(size)
+    var foundMatch = false
+    val iterator = iterator()
+    // Copy values to new list and check if they are the instance to be replaced
+    while(!foundMatch && iterator.hasNext()){
+        val currentItem = iterator.next()
+        if (currentItem == original){
+            foundMatch = true
+            newList.add(replaceWith)
+        }
+        else newList.add(currentItem)
+    }
+    // Once an instance has been found, just copy all remaining items to new list
+    if(iterator.hasNext()){
+        newList.addAll(iterator.asSequence().toList())
+    }
+
+    return newList
+}

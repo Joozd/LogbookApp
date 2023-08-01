@@ -54,7 +54,8 @@ fun mergeFlights(flights: Collection<MatchingFlights>): List<Flight> =
  * - nightTime,
  * - isPIC
  * - isPICUS
- * - isCoPilot,
+ * - isCoPilot
+ * - isPlanned (will only be true if both flights are planned)
  * Other things will stay as they were in [flightOnDevice]
  */
 fun Flight.mergeOnto(flightOnDevice: Flight, keepIdOfFlightOnDevice: Boolean = true): Flight =
@@ -73,7 +74,8 @@ fun Flight.mergeOnto(flightOnDevice: Flight, keepIdOfFlightOnDevice: Boolean = t
         nightTime = chooseNightTime(this, flightOnDevice),
         isPIC = decideIsPic(this, flightOnDevice),
         isPICUS = decideIsPicus(this, flightOnDevice),
-        isCoPilot = decideIfCopilot(this, flightOnDevice)
+        isCoPilot = decideIfCopilot(this, flightOnDevice),
+        isPlanned = isPlanned && flightOnDevice.isPlanned // mark as planned only if both saved and new flight are planned.
     )
 
 fun mergeFlightsLists(

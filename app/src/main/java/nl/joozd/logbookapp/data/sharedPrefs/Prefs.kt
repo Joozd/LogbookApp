@@ -62,13 +62,11 @@ object Prefs: JoozdLogPreferences() {
 
     private const val NEW_USER_ACTIVITY_FINISHED = "NEW_USER_ACT_FINISHED"
     private const val PREVIOUS_VERSION = "PREVIOUS_VERSION"
-    private const val EDIT_FLIGHT_FRAGMENT_FIRST_USE = "EFF_FIRST_USE"
 
     //Replaced by
     val newUserActivityFinished by JoozdlogSharedPreferenceDelegate(NEW_USER_ACTIVITY_FINISHED,false)
 
     val configuredVersion by JoozdlogSharedPreferenceDelegate(PREVIOUS_VERSION, Version.NEW_INSTALL)
-    val editFlightFragmentWelcomeMessageShouldBeDisplayed by JoozdlogSharedPreferenceDelegate(EDIT_FLIGHT_FRAGMENT_FIRST_USE,true)
 
     /***********************
      *   UI preferences:   *

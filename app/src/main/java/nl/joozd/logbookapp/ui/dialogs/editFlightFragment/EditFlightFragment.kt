@@ -30,7 +30,6 @@ import androidx.fragment.app.viewModels
 import com.google.android.material.textfield.TextInputEditText
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
-import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.LayoutEditFlightFragmentBinding
 import nl.joozd.logbookapp.extensions.*
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
@@ -346,18 +345,11 @@ class EditFlightFragment: JoozdlogFragment() {
 
 
     private fun LayoutEditFlightFragmentBinding.startFlowCollectors(){
-        showWelcomeMessageIfNeeded()
         collectNamesForAutoCompleteTextViews()
         collectRegistrationsForAutoCompleteTextView()
         collectFlightPropertyFlows()
     }
 
-    private fun showWelcomeMessageIfNeeded() {
-        Prefs.editFlightFragmentWelcomeMessageShouldBeDisplayed.flow.launchCollectWhileLifecycleStateStarted {
-            if (it)
-                showWelcomeMessage()
-        }
-    }
 
     private fun LayoutEditFlightFragmentBinding.collectNamesForAutoCompleteTextViews() {
         viewModel.namesFlow.launchCollectWhileLifecycleStateStarted {
@@ -586,14 +578,6 @@ class EditFlightFragment: JoozdlogFragment() {
     }
     private fun cancelAndClose() {
         viewModel.closeWithoutSaving()
-    }
-
-    private fun showWelcomeMessage() = JoozdlogAlertDialog().show(requireActivity()){
-        titleResource = R.string.edit_flight_welcome_title
-        messageResource = R.string.edit_flight_welcome_message
-        setPositiveButton(android.R.string.ok){
-            Prefs.editFlightFragmentWelcomeMessageShouldBeDisplayed(false)
-        }
     }
 
     private fun LayoutEditFlightFragmentBinding.catchAndIgnoreClicksOnEmptyPartOfDialog() {

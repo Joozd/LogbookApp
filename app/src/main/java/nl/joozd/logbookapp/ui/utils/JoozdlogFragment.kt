@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.first
 import nl.joozd.logbookapp.extensions.onTextChanged
 import nl.joozd.logbookapp.extensions.setOnFocusLostListener
+import nl.joozd.logbookapp.ui.messages.welcomeMessages.WelcomeMessages
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -49,6 +50,11 @@ abstract class JoozdlogFragment: Fragment() {
     protected val supportFragmentManager: FragmentManager get() = requireActivity().supportFragmentManager
     protected val fragment: JoozdlogFragment
         get() = this
+
+    override fun onResume() {
+        super.onResume()
+        WelcomeMessages.showWelcomeMessageForFragmentIfNeeded(this)
+    }
 
     /**
      * dp to pixels and reverse

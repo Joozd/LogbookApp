@@ -166,6 +166,9 @@
     <string name="always_postpone_calendar_sync">Always postpone on manual import</string>
     <string name="postpone_sync">Postpone sync</string>
 
+    <string name="name2_dialog_0_to_1_title">Names dialog has been updated.</string>
+    <string name="name2_dialog_0_to_1_content">You can use the camera icon in the top right to scan names. This is an experimental function that was made with the KLM FlightDeck app "crew" page in mind.</string>
+
     <!--
     - Toasts
     -->
@@ -184,14 +187,14 @@
     <!--
     - Strings for new user experience
     -->
-    <string name="welcome_message_header">Welcome to Joozdlog 1.1</string>
+    <string name="welcome_message_header">Welcome to Joozdlog 1.2</string>
     <string name="welcome_message">The next few screens will allow you to set some preferences and make a Cloud account if you want to.\n\nAll this will take under a minute, and after that you are all set to start logging (or importing) your flights!\n\nIf you have any feedback or bugreports, the main menu has a Feedback function. Feedback is appreciated!</string>
     <string name="welcome_message_upgrade">If you are upgrading from version 1.0: You see this dialog because the whole settings system has been vastly upgraded and all old preferences are deleted in the process.</string>
 
     <string name="you_can_set_settings_in_settings">If you want to adjust any more settings (switching on automatic backup emails for example), take a look at the Settings menu after you click \"done\"!</string>
 
     <string name="edit_flight_welcome_title">Edit Flight</string>
-    <string name="edit_flight_welcome_message">You can edit your flights here. The triangles are buttons, click them to see what they do!\nYou can long-press any field to see if it offers any help.</string>
+    <string name="edit_flight_welcome_message">You can edit your flights here.\nThe Line Select Keys are buttons, click them to see what they do!\nYou can long-press any field to see if there is a help message available for it.</string>
 
     <string name="need_permission">Permission needed.</string>
     <string name="need_permission_calendar">Joozdlog needs permission to access calendars if you want it to access your calendars.</string>
@@ -211,7 +214,7 @@
     <string name="edit_flight_flight_number_help">The flightnumber of this flight. Not required, will not end up in pdf logbook.</string>
     <string name="edit_flight_orig_help">The place of departure. You can enter ICAO and IATA identifiers such as EHGG, GRQ or E25</string>
     <string name="edit_flight_dest_help">The place of arrival. You can enter ICAO and IATA identifiers such as EHGG, GRQ or E25</string>
-    <string name="edit_flight_time_out_help">The time of departure, in UTC. You can enter times like 0103, 22:33 or 12 which wil become 00:12Z</string>
+    <string name="edit_flight_time_out_help">The time of departure, in UTC. You can enter times like 0103, 22:33, or 12 which wil become 00:12Z</string>
     <string name="edit_flight_time_in_help">The time of arrival, in UTC. If earlier than Time Out, it will be read on the next day.</string>
     <string name="edit_flight_sim_time_help">The duration of this simulator session. You can enter times like 0130, 01:30 or 90. Times longer than 99 minutes must be in hours+minutes, eg. 330 or 3:30.</string>
     <string name="edit_flight_aircraft_help">The aircraft used on this flight. You can enter partial registrations such as XO if you mean PH-EXO. It will take the top hit in the drop-down list that will appear after entering 2 letters.\nIf the registration is not known by you or the server, you will get to a dialog where you can assign a type to this registration.</string>

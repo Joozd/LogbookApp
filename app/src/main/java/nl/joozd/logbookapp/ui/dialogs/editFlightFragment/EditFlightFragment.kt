@@ -76,38 +76,38 @@ class EditFlightFragment: JoozdlogFragment() {
     }
 
     private fun LayoutEditFlightFragmentBinding.setLongPressListenersForHelpDialogs() {
-        flightDateField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_date_help) }
-        flightFlightNumberField     .setOnLongClickListener { showHelpMessage(R.string.edit_flight_flight_number_help) }
-        flightOrigEditText          .setOnLongClickListener { showHelpMessage(R.string.edit_flight_orig_help) }
-        flightDestEditText          .setOnLongClickListener { showHelpMessage(R.string.edit_flight_dest_help) }
-        flightTimeOutEditText       .setOnLongClickListener { showHelpMessage(R.string.edit_flight_time_out_help) }
-        flightTimeInEditText        .setOnLongClickListener { showHelpMessage(R.string.edit_flight_time_in_help) }
-        flightAircraftField         .setOnLongClickListener { showHelpMessage(R.string.edit_flight_aircraft_help) }
-        flightTakeoffLandingField   .setOnLongClickListener { showHelpMessage(R.string.edit_flight_takeoff_landing_help) }
-        flightNameField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_name_help) }
-        flightName2Field            .setOnLongClickListener { showHelpMessage(R.string.edit_flight_name2_help) }
-        flightRemarksField          .setOnLongClickListener { showHelpMessage(R.string.edit_flight_remarks_help) }
+        flightDateField             .setOnLongClickListener { showHelpMessage(R.string.date, R.string.edit_flight_date_help) }
+        flightFlightNumberField     .setOnLongClickListener { showHelpMessage(R.string.flightNumberHint, R.string.edit_flight_flight_number_help) }
+        flightOrigEditText          .setOnLongClickListener { showHelpMessage(R.string.origin, R.string.edit_flight_orig_help) }
+        flightDestEditText          .setOnLongClickListener { showHelpMessage(R.string.destination, R.string.edit_flight_dest_help) }
+        flightTimeOutEditText       .setOnLongClickListener { showHelpMessage(R.string.timeOut, R.string.edit_flight_time_out_help) }
+        flightTimeInEditText        .setOnLongClickListener { showHelpMessage(R.string.timeIn, R.string.edit_flight_time_in_help) }
+        flightAircraftField         .setOnLongClickListener { showHelpMessage(R.string.aircraft, R.string.edit_flight_aircraft_help) }
+        flightTakeoffLandingField   .setOnLongClickListener { showHelpMessage(R.string.takeoffs_landings, R.string.edit_flight_takeoff_landing_help) }
+        flightNameField             .setOnLongClickListener { showHelpMessage(R.string.namePic, R.string.edit_flight_name_help) }
+        flightName2Field            .setOnLongClickListener { showHelpMessage(R.string.namePilot2, R.string.edit_flight_name2_help) }
+        flightRemarksField          .setOnLongClickListener { showHelpMessage(R.string.remarks, R.string.edit_flight_remarks_help) }
 
-        simSelector                 .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_help) }
-        signSelector                .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sign_help) }
-        dualInstructorSelector      .setOnLongClickListener { showHelpMessage(R.string.edit_flight_dual_instructor_help) }
-        multiPilotSelector          .setOnLongClickListener { showHelpMessage(R.string.edit_flight_multipilot_help) }
-        ifrSelector                 .setOnLongClickListener { showHelpMessage(R.string.edit_flight_ifr_help) }
-        picPicusSelector            .setOnLongClickListener { showHelpMessage(R.string.edit_flight_pic_help) }
-        pfSelector                  .setOnLongClickListener { showHelpMessage(R.string.edit_flight_pf_help) }
-        autoFillCheckBox            .setOnLongClickListener { showHelpMessage(R.string.edit_flight_autovalues_help) }
+        simSelector                 .setOnLongClickListener { showHelpMessage(R.string.sim, R.string.edit_flight_sim_help) }
+        signSelector                .setOnLongClickListener { showHelpMessage(R.string.sign, R.string.edit_flight_sign_help) }
+        dualInstructorSelector      .setOnLongClickListener { showHelpMessage(R.string.dualInstructorString, R.string.edit_flight_dual_instructor_help) }
+        multiPilotSelector          .setOnLongClickListener { showHelpMessage(R.string.mpString, R.string.edit_flight_multipilot_help) }
+        ifrSelector                 .setOnLongClickListener { showHelpMessage(R.string.ifrString, R.string.edit_flight_ifr_help) }
+        picPicusSelector            .setOnLongClickListener { showHelpMessage(R.string.pic, R.string.edit_flight_pic_help) }
+        pfSelector                  .setOnLongClickListener { showHelpMessage(R.string.pf, R.string.edit_flight_pf_help) }
+        autoFillCheckBox            .setOnLongClickListener { showHelpMessage(R.string.autovalue, R.string.edit_flight_autovalues_help) }
 
-        simDateField                .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_date_help) }
-        simTimeField                .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_time_help) }
-        simAircraftField            .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_aircraft_help) }
-        simTakeoffLandingsField     .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_takeoff_landing_help) }
-        simNamesField               .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_names_help) }
-        simRemarksField             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_remarks_help) }
-        simSimSelector              .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sim_help) }
-        simSignSelector             .setOnLongClickListener { showHelpMessage(R.string.edit_flight_sign_help) }
+        simDateField                .setOnLongClickListener { showHelpMessage(R.string.date, R.string.edit_flight_sim_date_help) }
+        simTimeField                .setOnLongClickListener { showHelpMessage(R.string.simTime, R.string.edit_flight_sim_time_help) }
+        simAircraftField            .setOnLongClickListener { showHelpMessage(R.string.aircraft, R.string.edit_flight_sim_aircraft_help) }
+        simTakeoffLandingsField     .setOnLongClickListener { showHelpMessage(R.string.takeoffs_landings, R.string.edit_flight_sim_takeoff_landing_help) }
+        simNamesField               .setOnLongClickListener { showHelpMessage(R.string.namePilot2, R.string.edit_flight_sim_names_help) }
+        simRemarksField             .setOnLongClickListener { showHelpMessage(R.string.remarks, R.string.edit_flight_remarks_help) }
+        simSimSelector              .setOnLongClickListener { showHelpMessage(R.string.sim, R.string.edit_flight_sim_help) }
+        simSignSelector             .setOnLongClickListener { showHelpMessage(R.string.sign, R.string.edit_flight_sign_help) }
     }
-    private fun showHelpMessage(message: Int): Boolean{
-        requireActivity().showFragment(MessageDialog.make(message))
+    private fun showHelpMessage(title: Int, message: Int): Boolean{
+        MessageDialog.make(title, message).show(supportFragmentManager, null)
         return true
     }
 

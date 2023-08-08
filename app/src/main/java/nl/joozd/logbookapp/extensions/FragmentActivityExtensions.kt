@@ -32,8 +32,8 @@ inline fun <reified  T: Fragment> FragmentActivity.showFragment(
  * This version takes an instantiated Fragment, in case it needs constructor parameters or an apply block or anything like that:
  * showFragment()
  */
-fun <T: Fragment>FragmentActivity.showFragment(
-    fragment: T,
+fun FragmentActivity.showFragment(
+    fragment: Fragment,
     @IdRes containerViewId: Int = android.R.id.content,
     tag: String? = null,
     addToBackStack: Boolean = true)

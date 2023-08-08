@@ -19,34 +19,50 @@
 
 package nl.joozd.logbookapp.ui.dialogs
 
+import android.app.AlertDialog
+import android.app.Dialog
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.databinding.DialogMessageBinding
-import nl.joozd.logbookapp.ui.utils.JoozdlogFragment
+import androidx.fragment.app.DialogFragment
 
 
 /**
  * Use this to show some text. Clicking anywhere or rotating screen will close this fragment
  */
-class MessageDialog: JoozdlogFragment() {
+class MessageDialog: DialogFragment() {
+    var title: String? = null
+    var titleRes: Int? = null
+
     var message: String? = null
+    var messageRes: Int? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        DialogMessageBinding.bind(inflater.inflate(R.layout.dialog_message, container, false)).apply {
-            if (message == null) closeFragment() // just kill the fragment if no message set.
-            messageView.text = message?: "NO TEXT"
-            messageDialogBackground.setOnClickListener { closeFragment() }
-        }.root
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = AlertDialog.Builder(activity).apply{
+        message?.let{ setMessage(it) }
+        messageRes?.let { setMessage(it) }
 
+        title?.let{ setTitle(it) }
+        titleRes?.let{ setTitle(it) }
+
+        setPositiveButton(android.R.string.ok){ _, _ ->
+            // close the dialog, do nothing
+        }
+    }.create()
     companion object{
-        fun make(msg: String) = MessageDialog().apply{
+        fun make(title: String, msg: String) = MessageDialog().apply{
+            this.title = title
             message = msg
         }
+
+        fun make(titleResource: Int, msgResource: Int) = MessageDialog().apply {
+            titleRes = titleResource
+            messageRes = msgResource
+        }
+
         fun make(msgResource: Int) = MessageDialog().apply {
-            message = requireActivity().getString(msgResource)
+            messageRes = msgResource
+        }
+
+        fun make(msg: String) = MessageDialog().apply{
+            message = msg
         }
     }
 }

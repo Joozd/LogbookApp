@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.data.sharedPrefs
+package nl.joozd.logbookapp.data.sharedPrefs.utils
 
 import androidx.datastore.preferences.core.*
 import kotlinx.coroutines.MainScope
@@ -31,7 +31,7 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(
      * This is the standard Pref you get. I can be read (see [ReadOnlyPref]) and written to (see [WriteablePref])
      * It can also be mapped, see [DualMappedPref]. A mapped pref will still be a [Pref] for the outside world.
      */
-    interface Pref<T: Any>: ReadOnlyPref<T>, WriteablePref<T>{
+    interface Pref<T: Any>: ReadOnlyPref<T>, WriteablePref<T> {
         fun <R: Any> mapBothWays(transformer: PrefTransformer<T, R>) =
             DualMappedPref(this, transformer)
     }
@@ -52,7 +52,7 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(
         operator fun invoke(newValue: T)
     }
 
-    class PrefImpl<T: Any>(thisRef: JoozdLogPreferences, key: String, private val defaultValue: T): Pref<T>{
+    class PrefImpl<T: Any>(thisRef: JoozdLogPreferences, key: String, private val defaultValue: T): Pref<T> {
         @Suppress("UNCHECKED_CAST")
         private val prefsKey = generatePreferencesKey(key, defaultValue) as Preferences.Key<T>
         private val dataStore = thisRef.dataStore
@@ -88,7 +88,7 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(
             }
     }
 
-    class MappedPref<T, R>(private val source: ReadOnlyPref<T>, private val transform: (T) -> R): ReadOnlyPref<R>{
+    class MappedPref<T, R>(private val source: ReadOnlyPref<T>, private val transform: (T) -> R): ReadOnlyPref<R> {
         override val flow: Flow<R>
             get() = source.flow.map{ transform(it) }
 
@@ -104,7 +104,7 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(
     class DualMappedPref<T: Any, R: Any>(
         private val source: Pref<T>,
         private val transformer: PrefTransformer<T, R>
-    ): Pref<R>{
+    ): Pref<R> {
         override val flow: Flow<R>
             get() = source.flow.map{ transformer.map(it) }
 

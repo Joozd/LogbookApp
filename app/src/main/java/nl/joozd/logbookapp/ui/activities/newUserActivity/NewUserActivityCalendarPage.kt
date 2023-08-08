@@ -27,7 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.data.sharedPrefs.toggle
+import nl.joozd.logbookapp.data.sharedPrefs.functions.toggle
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageCalendarBinding
 import nl.joozd.logbookapp.extensions.showFragment
 import nl.joozd.logbookapp.ui.dialogs.CalendarSyncDialog

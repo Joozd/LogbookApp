@@ -29,7 +29,7 @@ import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.core.metadata.Version
 import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
-import nl.joozd.logbookapp.data.sharedPrefs.toggle
+import nl.joozd.logbookapp.data.sharedPrefs.functions.toggle
 import nl.joozd.logbookapp.databinding.ActivityNewUserPageFinalBinding
 import java.time.Instant
 

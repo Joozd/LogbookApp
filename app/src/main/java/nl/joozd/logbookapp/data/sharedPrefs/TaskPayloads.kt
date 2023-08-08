@@ -1,7 +1,11 @@
 package nl.joozd.logbookapp.data.sharedPrefs
 
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdLogPreferences
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdlogSharedPreferenceDelegate
+
 /**
- * Payloads needed for tasks
+ * Payloads needed for tasks.
+ * Not really preferences but an easy way to keep track of some flags
  */
 object TaskPayloads: JoozdLogPreferences() {
     override val preferencesFileKey = "TASK_PAYLOADS_KEY"

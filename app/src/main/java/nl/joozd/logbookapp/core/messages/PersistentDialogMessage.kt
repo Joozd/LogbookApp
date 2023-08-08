@@ -2,7 +2,7 @@ package nl.joozd.logbookapp.core.messages
 
 import androidx.annotation.CallSuper
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdlogSharedPreferenceDelegate
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.toast

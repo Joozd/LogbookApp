@@ -1,5 +1,8 @@
 package nl.joozd.logbookapp.data.sharedPrefs
 
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdLogPreferences
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdlogSharedPreferenceDelegate
+
 object DataVersions: JoozdLogPreferences() {
     override val preferencesFileKey: String = "nl.joozd.logbookapp.DATA_VERSIONS_PREFS_KEY"
 

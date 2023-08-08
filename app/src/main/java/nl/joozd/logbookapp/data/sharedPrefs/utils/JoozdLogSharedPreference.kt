@@ -17,7 +17,7 @@
  *
  */
 
-package nl.joozd.logbookapp.data.sharedPrefs
+package nl.joozd.logbookapp.data.sharedPrefs.utils
 
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit

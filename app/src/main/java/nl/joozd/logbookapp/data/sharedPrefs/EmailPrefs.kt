@@ -1,6 +1,8 @@
 package nl.joozd.logbookapp.data.sharedPrefs
 
 import nl.joozd.joozdlogcommon.EmailData
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdLogPreferences
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdlogSharedPreferenceDelegate
 
 object EmailPrefs: JoozdLogPreferences() {
     override val preferencesFileKey = "nl.joozd.logbookapp.SERVER_PREFS_KEY"

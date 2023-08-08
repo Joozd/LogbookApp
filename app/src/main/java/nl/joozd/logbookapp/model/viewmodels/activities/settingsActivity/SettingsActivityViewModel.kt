@@ -31,7 +31,7 @@ import nl.joozd.logbookapp.extensions.toTimeStringLocalized
 import nl.joozd.logbookapp.model.viewmodels.JoozdlogActivityViewModel
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.core.DarkModeCenter
-import nl.joozd.logbookapp.data.sharedPrefs.toggle
+import nl.joozd.logbookapp.data.sharedPrefs.functions.toggle
 import nl.joozd.logbookapp.utils.CastFlowToMutableFlowShortcut
 import java.time.Instant
 import java.time.LocalDateTime

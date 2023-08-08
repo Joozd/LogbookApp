@@ -2,6 +2,8 @@ package nl.joozd.logbookapp.data.sharedPrefs
 
 import kotlinx.coroutines.flow.combine
 import nl.joozd.logbookapp.core.Constants.ONE_DAY_IN_SECONDS
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdLogPreferences
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdlogSharedPreferenceDelegate
 
 object BackupPrefs: JoozdLogPreferences() {
     override val preferencesFileKey = "nl.joozd.logbookapp.BACKUP_PREFS_FILE"

@@ -9,7 +9,7 @@ import nl.joozd.logbookapp.core.BackupCenter
 import nl.joozd.logbookapp.core.Constants
 import nl.joozd.logbookapp.core.EmailCenter
 import nl.joozd.logbookapp.data.sharedPrefs.BackupPrefs
-import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdlogSharedPreferenceDelegate
 import nl.joozd.logbookapp.extensions.atStartOfDay
 import nl.joozd.logbookapp.extensions.makeCsvSharingIntent
 import nl.joozd.logbookapp.extensions.removeByTagAnimated

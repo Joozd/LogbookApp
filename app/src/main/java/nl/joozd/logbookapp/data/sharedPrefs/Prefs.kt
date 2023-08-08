@@ -22,6 +22,8 @@ package nl.joozd.logbookapp.data.sharedPrefs
 import androidx.appcompat.app.AppCompatDelegate
 import kotlinx.coroutines.flow.first
 import nl.joozd.logbookapp.core.metadata.Version
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdLogPreferences
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdlogSharedPreferenceDelegate
 
 
 object Prefs: JoozdLogPreferences() {

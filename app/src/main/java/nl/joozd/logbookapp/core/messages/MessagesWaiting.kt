@@ -3,8 +3,8 @@ package nl.joozd.logbookapp.core.messages
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import nl.joozd.logbookapp.data.sharedPrefs.JoozdLogPreferences
-import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdLogPreferences
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdlogSharedPreferenceDelegate
 
 object MessagesWaiting: JoozdLogPreferences() {
     override val preferencesFileKey = "nl.joozd.logbookapp.MESSAGES_WAITING_KEY"

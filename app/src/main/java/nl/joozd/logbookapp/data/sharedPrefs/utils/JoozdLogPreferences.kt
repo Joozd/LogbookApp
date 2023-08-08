@@ -1,4 +1,4 @@
-package nl.joozd.logbookapp.data.sharedPrefs
+package nl.joozd.logbookapp.data.sharedPrefs.utils
 
 import android.content.Context
 import androidx.datastore.preferences.core.*

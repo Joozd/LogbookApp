@@ -1,7 +1,7 @@
 package nl.joozd.logbookapp.core
 
-import nl.joozd.logbookapp.data.sharedPrefs.JoozdLogPreferences
-import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdLogPreferences
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdlogSharedPreferenceDelegate
 
 /**
  * Every task represents something that needs to be done.

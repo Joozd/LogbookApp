@@ -1,6 +1,6 @@
 package nl.joozd.logbookapp.core.messages
 
-import nl.joozd.logbookapp.data.sharedPrefs.JoozdlogSharedPreferenceDelegate
+import nl.joozd.logbookapp.data.sharedPrefs.utils.JoozdlogSharedPreferenceDelegate
 
 sealed interface PersistentMessage: Message {
     /**

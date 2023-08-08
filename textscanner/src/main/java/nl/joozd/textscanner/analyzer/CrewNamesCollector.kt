@@ -26,8 +26,8 @@ class CrewNamesCollector: ScannedTextProcessor {
         }
 
 
-    /**
-     * This runs for [TOTAL_SCANS_TO_DO] times and puts every found [Name] in [foundNamesWithFrequencies]
+    /*
+     * This puts every found [Name] in [foundNamesWithFrequencies]
      */
     override fun addScan(scannedText: Text) {
         scansDone++
@@ -60,12 +60,24 @@ class CrewNamesCollector: ScannedTextProcessor {
     }
 
     companion object{
-        // determines how many scans the app does to determine names. Higher number takes longer but will probably achieve more accurate results.
+        /*
+         * determines how many scans the app does to determine names. Higher number takes longer but will probably achieve more accurate results.
+         * 10 takes about 1.5 seconds on my own device and produces accurate enough results.
+         * Need more user data to see if this is the same on other devices.
+         */
         const val TOTAL_SCANS_TO_DO = 10
-        const val MINIMUM_RATIO_FOR_VALID_RESULT = 3 // 1/this, so 3 means more than 1/3 of all results must have a name for it to appear in results. 3 Worked in my single RL test.
+
+        /*
+         * 1/this, so 3 means more than 1/3 of all results must have a name for it to appear in results.
+         * The number 3 is arbitrary, but seems to result in no false positives and not many missed names.
+         */
+        const val MINIMUM_RATIO_FOR_VALID_RESULT = 3
+
         private const val CA = "CA"
 
-        // These functions are in order of rank.
+        /**
+         * Supported functions in order of rank
+         */
         val validFunctions = listOf(
             "Captain",
             "First officer",
@@ -75,7 +87,10 @@ class CrewNamesCollector: ScannedTextProcessor {
             "$CA.?"
         ).map { it.toRegex() }
 
-        // Map of rank index to it's string value that will be reported in [results], eg "First Officer" is [1]
+        /**
+         * Map of rank index to it's string value that will be reported in [results], eg "First Officer" is [1].
+         * Follows [validFunctions]
+         */
         val functionOrder: Map<String, Int> = validFunctions.indices.map {i ->
             validFunctions[i].toStringWithoutControlCharacters() to i
         }.toMap()

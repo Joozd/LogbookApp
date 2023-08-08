@@ -43,29 +43,33 @@ class Name2DialogViewModel: JoozdlogDialogViewModel() {
      * Then, it builds a map of thise, and adds [CrewNamesCollector.functionOrder].first() as PIC name and the rest in that order to name2
      */
     fun handleScanActivityResult(namesList: List<String>, ranksList: List<String>) {
-        // async because we need to get stuff from Prefs. Fast enough to nod need loading screen.
+        // async because we need to get [ownName] and [replaceOwnNameWithSelf] from Prefs. Fast enough to not need loading screen.
         viewModelScope.launch {
-            val ownName = Prefs.ownName()
-            val replaceOwnNameWithSelf = Prefs.replaceOwnNameWithSelf()
+            //replace own name with "SELF" if needed
+            val namesWithSelf =
+                if(Prefs.replaceOwnNameWithSelf())
+                    namesList.replaceFirstInstanceOf(Prefs.ownName(), "SELF")
+                else
+                    namesList
 
-            val namesToRanksMap: MutableMap<String, Int> = LinkedHashMap<String, Int>()
-            namesList.indices.forEach { i ->
-                namesToRanksMap[namesList[i]] = CrewNamesCollector.functionOrder[ranksList[i]] ?: 999
+            /**
+             * will be something like "Captain" to 0, "Purser" to 3, "First Officer" to 1, etc.
+             * Follows [CrewNamesCollector.validFunctions]
+             */
+            val namesToRanksMap: MutableMap<String, Int> = LinkedHashMap<String, Int>().apply {
+                namesWithSelf.indices.forEach { i ->
+                    // [this] refers to the LinkedHashMap we are building
+                    this[namesWithSelf[i]] = CrewNamesCollector.functionOrder[ranksList[i]] ?: 999
+                }
             }
-            val picName = namesList.firstOrNull { name ->
-                namesToRanksMap[name] == 0
-            }
-            val picNameOrSelf = if (picName == ownName && replaceOwnNameWithSelf) "SELF" else picName
 
+            val sortedNames = namesWithSelf.sortedBy { namesToRanksMap[it] }
 
-            val otherNames = namesList.sortedBy { namesToRanksMap[it] }.filter { it != picName }
-            val otherNamesOrSelf =
-                if (replaceOwnNameWithSelf)
-                    namesList.replaceFirstInstanceOf(ownName, "SELF")
-                else otherNames
+            val picName = sortedNames.firstOrNull().takeIf { namesToRanksMap[it] == 0 } // first name in sortedNames, but only if it has rank 0 (Captain)
+            val nonPicNames = sortedNames.filter { it != picName }
 
-            picNameOrSelf?.let { flightEditor.name = it }
-            flightEditor.name2 = otherNamesOrSelf
+            picName?.let { flightEditor.name = it } // there might not be anybody labeled Captain in results, in this case nothing will be done here.
+            flightEditor.name2 = nonPicNames
         }
     }
 

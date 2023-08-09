@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      - Strings for BalanceForward activity & dialog
+      -->
+
+    <string name="addBalanceForward">Add Balance Forward</string>
+    <string name="logbookName">Name of old logbook</string>
+    <string name="multipilotTime">Multipilot time</string>
+    <string name="totalTime">Total time</string>
+    <string name="totalTimeOfFlight">Total time of flight</string>
+    <string name="landingDay">Day ldg</string>
+    <string name="landingNight">Night ldg</string>
+    <string name="nightTime">Night time</string>
+    <string name="ifrTime">IFR time</string>
+    <string name="picIncludingPicus">PIC (+ PICUS)</string>
+    <string name="dualTime">Dual time</string>
+    <string name="instructorTime">Instructor time</string>
+    <string name="balanceForward">Balance Forward</string>
+    <string name="building_pdf">Building PDF…</string>
+    <string name="ready_to_save_pdf">Ready to save PDF</string>
+    <string name="saving_pdf">Saving PDF…</string>
+    <string name="pdf_saved">PDF Saved</string>
+</resources>

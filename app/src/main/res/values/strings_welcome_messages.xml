@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcome_message">The next few screens will allow you to set some preferences and make a Cloud account if you want to.\n\nAll this will take under a minute, and after that you are all set to start logging (or importing) your flights!\n\nIf you have any feedback or bugreports, the main menu has a Feedback function. Feedback is appreciated!</string>
+    <string name="welcome_message_upgrade">If you are upgrading from version 1.0: You see this dialog because the whole settings system has been vastly upgraded and all old preferences are deleted in the process.</string>
+
+    <string name="edit_flight_welcome_title">Add/Edit Flight</string>
+    <string name="edit_flight_welcome_message">Welcome to the \"Add/Edit Flight\" Dialog.\nYou can edit your flights here.\nThe Line Select Keys are buttons, click them to see what they do!\nYou can long-press any field to see if there is a help message available for it.</string>
+
+    <string name="name2_dialog_0_to_1_title">Other Names.</string>
+    <string name="name2_dialog_0_to_1_content">Welcome to the \"Other Names\" Dialog.\nYou can use this dialog to edit, add or swipe to remove names for any crew you want to remember but that aren\'t PIC.\nYou can use the camera icon in the top right to scan names.\nScanning names is an experimental function that was made with the KLM FlightDeck app "crew" page in mind.</string>
+</resources>

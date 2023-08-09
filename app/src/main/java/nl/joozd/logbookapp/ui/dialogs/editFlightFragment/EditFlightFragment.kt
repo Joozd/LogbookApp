@@ -77,7 +77,7 @@ class EditFlightFragment: JoozdlogFragment() {
 
     private fun LayoutEditFlightFragmentBinding.setLongPressListenersForHelpDialogs() {
         flightDateField             .setOnLongClickListener { showHelpMessage(R.string.date, R.string.edit_flight_date_help) }
-        flightFlightNumberField     .setOnLongClickListener { showHelpMessage(R.string.flightNumberHint, R.string.edit_flight_flight_number_help) }
+        flightFlightNumberField     .setOnLongClickListener { showHelpMessage(R.string.flightNumber, R.string.edit_flight_flight_number_help) }
         flightOrigEditText          .setOnLongClickListener { showHelpMessage(R.string.origin, R.string.edit_flight_orig_help) }
         flightDestEditText          .setOnLongClickListener { showHelpMessage(R.string.destination, R.string.edit_flight_dest_help) }
         flightTimeOutEditText       .setOnLongClickListener { showHelpMessage(R.string.timeOut, R.string.edit_flight_time_out_help) }

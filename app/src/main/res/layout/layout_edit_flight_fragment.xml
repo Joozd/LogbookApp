@@ -116,7 +116,7 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/flightFlightNumberField"
                         style="@style/EditFlightEditText"
-                        android:hint="@string/flightNumberHint"
+                        android:hint="@string/flightNumber"
                         android:inputType="textVisiblePassword|textNoSuggestions|textCapCharacters"
                         android:nextFocusForward="@id/flight_orig_edit_text"
                         tools:text="KL1234" />

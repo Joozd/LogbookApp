@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      - Strings for help when long-pressing things
+      -->
+
+    <string name="edit_flight_date_help">The date of this flight, in UTC. If your flight spans across multiple days, enter the date of departure, in UTC.</string>
+    <string name="edit_flight_sim_date_help">The date of this simulator flight, in UTC. If your simulator flight spans across multiple days, enter the date at which the simulator flight starts.</string>
+    <string name="edit_flight_flight_number_help">The flightnumber of this flight. Not required, will not end up in pdf logbook.</string>
+    <string name="edit_flight_orig_help">The place of departure. You can enter ICAO and IATA identifiers such as EHGG, GRQ or E25</string>
+    <string name="edit_flight_dest_help">The place of arrival. You can enter ICAO and IATA identifiers such as EHGG, GRQ or E25</string>
+    <string name="edit_flight_time_out_help">The time of departure, in UTC. You can enter times like 0103, 22:33, or 12 which wil become 00:12Z</string>
+    <string name="edit_flight_time_in_help">The time of arrival, in UTC. If earlier than Time Out, it will be on the next day.</string>
+    <string name="edit_flight_sim_time_help">The duration of this simulator session. You can enter times like 0130, 01:30 or 90. Times longer than 99 minutes must be in hours+minutes, eg. 330 or 3:30.</string>
+    <string name="edit_flight_aircraft_help">The aircraft used on this flight. You can enter partial registrations such as XO if you mean PH-EXO. It will take the top hit in the drop-down list that will appear after entering 2 letters.\nIf the registration is not known by you or the preloaded aircraft data, you will get a dialog where you can assign a type to this registration.</string>
+    <string name="edit_flight_sim_aircraft_help">The type of aircraft of this simulator. For example B733 or FNPT2. This will not be checked against Aircraft Database.</string>
+    <string name="edit_flight_takeoff_landing_help">Takeoffs and landings. Enter for example 1 for 1 takeoff/landing, or 2/0 if you did 2 takeoffs and 0 landings.</string>
+    <string name="edit_flight_sim_takeoff_landing_help">This field can be used to keep track of things like autolands or landings, if needed for recency. Will not show up in PDF logbook.</string>
+    <string name="edit_flight_name_help">Name of the PIC, required by EASA-FCL.</string>
+    <string name="edit_flight_name2_help">Names of other crew members. Not required.\nYou can enter multiple names, separated by semicolons.</string>
+    <string name="edit_flight_sim_names_help">Names of people. Not required, will not end up in PDF logbook.</string>
+    <string name="edit_flight_remarks_help">Remarks. Will end up in PDF logbook.</string>
+    <string name="edit_flight_sim_help">Select if this is a simulator session.</string>
+    <string name="edit_flight_sign_help">Select if you want a signature in your pdf logbook.</string>
+    <string name="edit_flight_dual_instructor_help">Select if you want to log this flight as DUAL or INSTRUCTOR.</string>
+    <string name="edit_flight_multipilot_help">Select if this was a multi-pilot flight.\nAuto-set from aircraft type if AutoValues is on.</string>
+    <string name="edit_flight_ifr_help">Select if this flight was conducted under IFR.</string>
+    <string name="edit_flight_pic_help">Select if you are pilot in command or PICUS on this flight. There is no distinction between those in an EASA-FCL logbook.</string>
+    <string name="edit_flight_pf_help">Select if you were pilot flying on this flight.</string>
+    <string name="edit_flight_autovalues_help">If this box is ticked, takeoff/landings, IFR, night and MultiPilot times and whether this flight is logged as copilot will be automatically calculated from other inserted data.</string>
+</resources>

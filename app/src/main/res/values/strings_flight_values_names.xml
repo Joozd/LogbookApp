@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="flightNumber">FlightNumber</string>
+    <string name="date">Date</string>
+    <string name="origin">Origin</string>
+    <string name="destination">Destination</string>
+    <string name="timeOut">Time Out</string>
+    <string name="timeIn">Time In</string>
+    <string name="aircraft">Aircraft</string>
+    <string name="day">day</string>
+    <string name="night">night</string>
+    <string name="takeoff">Takeoff</string>
+    <string name="landing">Landing</string>
+    <string name="landings">Landings</string>
+    <string name="takeoffs_landings">Takeoffs/Landings</string>
+    <string name="autoland">Autoland</string>
+    <string name="namePic">Name PIC</string>
+    <string name="namePilot2">Other names</string>
+    <string name="remarks">Remarks</string>
+    <string name="simTime">Simulator Time</string>
+    <string name="simluator">Simulator</string>
+    <string name="mpString">MP</string>
+    <string name="ifrString">IFR</string>
+    <string name="dualString">Dual</string>
+    <string name="instructorString">Instructor</string>
+    <string name="dualInstructorString">Dual/Instr</string>
+    <string name="pic">PIC</string>
+    <string name="picus">PICUS</string>
+    <string name="autovalue">Auto Values</string>
+    <string name="totalTimes">Total Times</string>
+    <string name="augmentedCrew">Augmented crew</string>
+    <string name="dual">DUAL</string>
+    <string name="augmented">Augmented</string>
+</resources>

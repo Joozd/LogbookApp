@@ -124,6 +124,17 @@ class MainActivityViewModelNew: JoozdlogViewModel() {
         searchQuery = query
     }
 
+    /**
+     * Under some circumstances (not sure which, but I have seen it happen after app was in the background for a while),
+     * search field in MainActivity can be closed while [searchQuery] is not empty, resulting in only partial data being shown
+     * in MainActivity without it being obvious that that is the result of a search action that has been done in a previous session.
+     * This checks is searchQuery is empty, and if not, sets [searchFieldOpen] to true to make that more clear.
+     */
+    fun checkIfSearchFieldShouldBeOpen(){
+        if(searchQuery.isNotEmpty() && !searchFieldOpen)
+            searchFieldOpen = true
+    }
+
     private fun makeFlightsFlowCombiner() = combine(
         allFlightsFlow,
         aircraftRepository.aircraftDataCacheFlow(),

@@ -116,6 +116,12 @@ class MainActivity : JoozdlogActivity() {
         setContentView(binding.root)
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.checkIfSearchFieldShouldBeOpen()
+    }
+
+    @SuppressLint("MissingSuperCall") // False lint error
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         handleIntent(intent)
@@ -144,7 +150,7 @@ class MainActivity : JoozdlogActivity() {
 
     private fun ActivityMainNewBinding.startCollectors() {
         collectWorkingFlightAndLaunchEditFlightFragmentWhenNeeded()
-        collectSearchFieldOpenAndOpenSearchFieldIfNeeded()
+        collectSearchFieldOpen()
         collectFlightsListFlow()
         collectUndoRedoChangedFlow()
         collectAmountOfFlightsFlow()
@@ -163,7 +169,7 @@ class MainActivity : JoozdlogActivity() {
         }
     }
 
-    private fun ActivityMainNewBinding.collectSearchFieldOpenAndOpenSearchFieldIfNeeded(){
+    private fun ActivityMainNewBinding.collectSearchFieldOpen(){
         viewModel.searchFieldOpenFlow.launchCollectWhileLifecycleStateStarted{ open ->
             if (open)
                 openSearchField()

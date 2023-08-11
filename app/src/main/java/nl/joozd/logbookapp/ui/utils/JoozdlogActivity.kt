@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.background.startBackgroundTasks
 
 abstract class JoozdlogActivity: AppCompatActivity() {
-    // make this true to not start background tasks in activity
+    // make this false to not start background tasks in activity
     open val runBackgroundTasks = true
 
     override fun onSupportNavigateUp(): Boolean {

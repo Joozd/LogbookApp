@@ -20,7 +20,6 @@
 package nl.joozd.logbookapp.ui.utils
 
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import androidx.appcompat.app.ActionBar
@@ -35,8 +34,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.background.startBackgroundTasks
 
-@SuppressLint("Registered")
-open class JoozdlogActivity: AppCompatActivity() {
+abstract class JoozdlogActivity: AppCompatActivity() {
     // make this true to not start background tasks in activity
     open val runBackgroundTasks = true
 

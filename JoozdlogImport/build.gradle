@@ -17,20 +17,12 @@
  *
  */
 
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
 
-android{
-    compileOptions {
-        sourceCompatibility = 17
-        targetCompatibility = 17
-    }
-    compileSdkVersion 33
-    defaultConfig {
-        minSdkVersion 26
-        targetSdkVersion 33
-    }
-    namespace 'nl.joozd.joozdlogimporter'
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 dependencies {
@@ -41,7 +33,4 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    sourceCompatibility = JavaVersion.VERSION_17
-}
+

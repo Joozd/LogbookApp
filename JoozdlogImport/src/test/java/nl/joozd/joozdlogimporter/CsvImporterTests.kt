@@ -6,7 +6,6 @@ import org.junit.Test
 import java.io.File
 
 class CsvImporterTests {
-    private val joozdLogV4FileName = "C:\\joozdlog\\test\\importables\\joozdlog_joozd_v4.csv"
     private val joozdLogV5BadFileName = "C:\\joozdlog\\test\\importables\\joozdlog_joozd_v5_bad.csv"
     private val joozdLogV5FileName = "C:\\joozdlog\\test\\importables\\joozdlog_joozd_v5.csv"
 
@@ -15,16 +14,6 @@ class CsvImporterTests {
 
     private val logtenPro1File = "C:\\joozdlog\\test\\importables\\logten_pro_1.txt"
     private val logtenProJoozdFile = "C:\\joozdlog\\test\\importables\\logten_pro_joozd_fixed.txt"
-
-    @Test
-    fun testJoozdlogV4(){
-        val lines = File(joozdLogV4FileName).readLines()
-        val file = CsvImporter(lines).getFile()
-        assert(file is JoozdLogV4File)
-        val flights = getFlightsFromFile(file)
-        assertEquals(lines.size - 1, flights!!.size)
-        println("JOOZDLOG V4 PARSED OK - tested with ${lines.size -1} flights.")
-    }
 
     @Test
     fun testJoozdlogV5Bad(){

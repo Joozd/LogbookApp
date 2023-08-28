@@ -1,6 +1,5 @@
 package nl.joozd.joozdlogimporter.supportedFileTypes.extractors
 
-import android.util.Log
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.interfaces.CompletedFlightsExtractor
 import java.time.LocalDate
@@ -44,8 +43,6 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         //Input data should be checked before being passed to this function. Invalid data will return null.
         makeFlightOrThrowException(line.trim(), startDateOfMonth)
     } catch (e: Throwable){
-        Log.w("KlmIcaMonthlyExtractor", "parsing bad line: $line")
-        Log.d("KlmIcaMonthlyExtractor", e.toString())
         null
     }
 

@@ -34,7 +34,6 @@ class CsvImporter(private val lines: List<String>): FileImporter() {
     private fun findTypeOfFile(lines: List<String>): ImportedFile =
     CurrentJoozdlogCsvFile.buildIfMatches(lines)
         ?: JoozdLogV5File.buildIfMatches(lines)
-        ?: JoozdLogV4File.buildIfMatches(lines)
 
         ?: MccPilotLogFile.buildIfMatches(lines)
         ?: LogTenProFile.buildIfMatches(lines)

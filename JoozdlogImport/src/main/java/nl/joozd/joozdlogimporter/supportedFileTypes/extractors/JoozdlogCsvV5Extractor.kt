@@ -29,10 +29,6 @@ class JoozdlogCsvV5Extractor: CompleteLogbookExtractor {
     override fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight> =
         when {
             lines.size <= 1 -> emptyList()
-            lines[1].count { it == ';' } == 30 ->
-                lines.drop(1).map {
-                    JoozdlogCsvV4Extractor.csvFlightToBasicFlightv4(it)
-                }
             else ->
                 lines.drop(1).map {
                     csvFlightToBasicFlightv5(it)

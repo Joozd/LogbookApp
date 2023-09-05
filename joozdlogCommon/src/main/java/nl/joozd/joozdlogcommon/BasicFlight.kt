@@ -225,8 +225,7 @@ data class BasicFlight(
             )
         }
 
-        val PROTOTYPE by lazy{
-            BasicFlight(
+        val PROTOTYPE = BasicFlight(
                 flightID = -1,
                 orig = "",
                 dest = "",
@@ -260,7 +259,7 @@ data class BasicFlight(
                 augmentedCrew = 0,
                 signature = ""
             )
-        }
+
 
         const val CSV_IDENTIFIER_STRING = "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signatureSVG"
     }

@@ -1,6 +1,7 @@
 package nl.joozd.logbookapp.data.miscClasses.crew
 
 import junit.framework.TestCase.assertEquals
+import nl.joozd.joozdlogcommon.AugmentedCrew
 import org.junit.Test
 
 class AugmentedCrewTest {

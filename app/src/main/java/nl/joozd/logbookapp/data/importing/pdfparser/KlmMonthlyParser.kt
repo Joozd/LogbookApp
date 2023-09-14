@@ -22,7 +22,7 @@ package nl.joozd.logbookapp.data.importing.pdfparser
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
-import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
+import nl.joozd.joozdlogcommon.AugmentedCrew
 import nl.joozd.logbookapp.data.importing.interfaces.CompletedFlights
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.toInstantAtStartOfDay

@@ -21,7 +21,7 @@ package nl.joozd.logbookapp.model.viewmodels.dialogs
 
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
+import nl.joozd.joozdlogcommon.AugmentedCrew
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.helpers.hoursAndMinutesStringToInt

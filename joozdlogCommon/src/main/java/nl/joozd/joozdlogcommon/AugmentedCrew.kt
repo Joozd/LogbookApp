@@ -17,10 +17,8 @@
  *
  */
 
-package nl.joozd.logbookapp.data.miscClasses.crew
+package nl.joozd.joozdlogcommon
 
-import nl.joozd.logbookapp.extensions.getBit
-import nl.joozd.logbookapp.extensions.setBit
 import java.time.Duration
 
 /**
@@ -110,6 +108,8 @@ data class AugmentedCrew(
         }
     }
 
+
+
     companion object {
         const val MIN_CREW_SIZE = 1
         const val MAX_CREW_SIZE = 7
@@ -135,5 +135,24 @@ data class AugmentedCrew(
                 landing = value.getBit(5),
                 times = value.ushr(6)
             )
+
+        private fun Int.getBit(n: Int): Boolean {
+            require(n < Int.SIZE_BITS-1) { "$n out of range (0 - ${Int.SIZE_BITS-2}" }
+            return this.and(1.shl(n)) > 0 // its more than 0 so the set bit is 1, whatever bit it is
+        }
+
+        /**
+         *  Set a bit in an Integer.
+         *  Use value.setBit([0-31], [true/false])
+         *  throws an IllegalArgumentException if requested bit doesn't exist
+         *  @return the Integer with the bit set
+         */
+        private fun Int.setBit(n: Int, value: Boolean): Int{
+            require(n < Int.SIZE_BITS) { "$n out of range (0 - ${Int.SIZE_BITS-1}" }
+            return if (value)
+                this.or(1.shl(n))
+            else
+                this.inv().or(1.shl(n)).inv()
+        }
     }
 }

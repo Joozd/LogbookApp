@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import nl.joozd.logbookapp.data.dataclasses.Aircraft
 import nl.joozd.logbookapp.data.dataclasses.Airport
-import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
+import nl.joozd.joozdlogcommon.AugmentedCrew
 import nl.joozd.logbookapp.data.repository.flightRepository.FlightRepositoryWithUndo
 import nl.joozd.logbookapp.extensions.atDate
 import nl.joozd.logbookapp.extensions.plusDays

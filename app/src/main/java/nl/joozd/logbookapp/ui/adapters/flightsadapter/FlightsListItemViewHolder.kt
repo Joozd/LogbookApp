@@ -25,7 +25,7 @@ import android.widget.TextView
 import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
 import nl.joozd.logbookapp.R
-import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
+import nl.joozd.joozdlogcommon.AugmentedCrew
 import nl.joozd.logbookapp.extensions.getColorFromAttr
 import nl.joozd.logbookapp.model.ModelFlight
 

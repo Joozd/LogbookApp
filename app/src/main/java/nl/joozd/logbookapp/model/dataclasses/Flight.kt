@@ -20,7 +20,7 @@
 package nl.joozd.logbookapp.model.dataclasses
 
 
-import nl.joozd.logbookapp.data.miscClasses.crew.AugmentedCrew
+import nl.joozd.joozdlogcommon.AugmentedCrew
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.logbookapp.data.dataclasses.FlightData
 import java.time.*

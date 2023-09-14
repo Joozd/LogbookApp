@@ -24,7 +24,6 @@ abstract class Page {
         val rowsPerPage = 5 + 27 + 6
 
         val pageHeight = PageSize.A4.width - 2*36f // page is rotated when we use it so height = width
-        println("Page height is $pageHeight")
         return rows * (pageHeight - margin) / rowsPerPage
     }
 }

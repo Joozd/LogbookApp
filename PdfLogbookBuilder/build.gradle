@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+dependencies {
+    implementation 'com.itextpdf:itextpdf:5.5.13.3'               // building PDF
+    implementation 'org.apache.xmlgraphics:batik-transcoder:1.17' // for SVG to PDF
+    implementation project(":joozdlogCommon")                     // for BasicFlight
+}

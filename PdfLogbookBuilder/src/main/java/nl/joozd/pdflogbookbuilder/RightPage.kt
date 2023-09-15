@@ -194,7 +194,7 @@ internal class RightPage(private val flights: List<BasicFlight>, private val tot
         private const val IFR = "IFR"
         private const val PIC = "PIC"
         private const val COPILOT = "CO-PILOT"
-        private const val DUAL = "NIGHT"
+        private const val DUAL = "DUAL"
         private const val INSTRUCTOR = "INSTRUC-\nTOR" // needs 2 lines
         private const val DATE = "DATE\n(dd/mm/yy)" // 2 lines is needed for alignment with left page
         private const val TYPE = "TYPE"

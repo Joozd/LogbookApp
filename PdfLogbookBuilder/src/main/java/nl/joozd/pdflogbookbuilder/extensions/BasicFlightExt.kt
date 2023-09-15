@@ -28,7 +28,8 @@ fun BasicFlight.timeIn(): String {
     return LocalTime.ofInstant(instant, ZoneOffset.UTC).format(timeFormatter)
 }
 
-fun BasicFlight.totalTime() = correctedTotalTime.takeIf { it != 0 }
+fun BasicFlight.totalTime() = if (isSim) 0 else
+    correctedTotalTime.takeIf { it != 0 }
     ?: AugmentedCrew.fromInt(augmentedCrew).getLogTime(((timeIn - timeOut) / 60).toInt(), isPIC)
 
 fun BasicFlight.signatureAsPng(): Image =

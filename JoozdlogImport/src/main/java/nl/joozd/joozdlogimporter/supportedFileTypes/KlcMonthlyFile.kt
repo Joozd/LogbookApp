@@ -34,7 +34,7 @@ class KlcMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
         private const val TEXT_TO_SEARCH_FOR = "MONTHLY OVERVIEW"
 
         fun buildIfMatches(lines: List<String>): KlcMonthlyFile? =
-            if (lines[LINE_TO_LOOK_AT].startsWith(TEXT_TO_SEARCH_FOR))
+            if (LINE_TO_LOOK_AT in lines.indices && lines[LINE_TO_LOOK_AT].startsWith(TEXT_TO_SEARCH_FOR))
                 KlcMonthlyFile(lines)
             else null
     }

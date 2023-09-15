@@ -19,4 +19,18 @@
 
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
-sealed class ImportedFile(protected val data: List<String>)
+import nl.joozd.joozdlogcommon.BasicFlight
+
+sealed class ImportedFile(protected val data: List<String>){
+    /**
+     * Get flights. This function does not do any post-processing like calculating night time.
+     * Unsupported files will return null
+     */
+    fun getFlights(): Collection<BasicFlight>? =
+        when(this){
+            is CompleteLogbookFile -> extractCompletedFlights().flights
+            is CompletedFlightsFile -> extractCompletedFlights().flights
+            is PlannedFlightsFile -> extractPlannedFlights().flights
+            else -> null
+    }
+}

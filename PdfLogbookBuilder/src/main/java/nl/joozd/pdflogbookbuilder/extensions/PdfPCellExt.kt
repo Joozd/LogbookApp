@@ -14,7 +14,7 @@ import com.itextpdf.text.pdf.PdfPTable
 /**
  * Font size for headers
  */
-private const val FONT_SIZE_HEADER = 12f
+private const val FONT_SIZE_HEADER = 11f
 private const val FONT_SIZE_ENTRY = 10f
 
 

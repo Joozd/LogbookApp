@@ -36,7 +36,7 @@ class KlmIcaRosterFile(lines: List<String>): PlannedFlightsFile(lines) {
 
         //OK for now, but I can imagine this will need a bit more specific matching
         fun buildIfMatches(lines: List<String>): KlmIcaRosterFile? =
-            if (lines[LINE_TO_LOOK_AT].startsWith(TEXT_TO_SEARCH_FOR))
+            if (LINE_TO_LOOK_AT in lines.indices && lines[LINE_TO_LOOK_AT].startsWith(TEXT_TO_SEARCH_FOR))
                 KlmIcaRosterFile(lines)
             else null
     }

@@ -34,7 +34,7 @@ class KlcBriefingSheetFile(lines: List<String>): PlannedFlightsFile(lines) {
         private const val TEXT_TO_SEARCH_FOR = "Cockpit Briefing for"
 
         fun buildIfMatches(lines: List<String>): KlcBriefingSheetFile? =
-            if (lines[LINE_TO_LOOK_AT].startsWith(TEXT_TO_SEARCH_FOR))
+            if (LINE_TO_LOOK_AT in lines.indices && lines[LINE_TO_LOOK_AT].startsWith(TEXT_TO_SEARCH_FOR))
                 KlcBriefingSheetFile(lines)
             else null
     }

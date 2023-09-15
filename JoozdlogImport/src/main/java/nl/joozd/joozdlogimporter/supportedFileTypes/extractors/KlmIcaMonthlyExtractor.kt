@@ -22,9 +22,14 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
     override fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight>? {
         val startDate = getStartDateFromLines(lines) ?: return null // a monthly is only one month, so all dates are this date withDayOfMonth(day)
 
+        val isPic = checkIfIsPic(lines)
+
         val fixedLines = fixLines(lines) // sometimes notes can break a line in multiple lines. this is fixed here.
         val flightLines = fixedLines.filter { it matches flightLineMatcher }
-        return flightLines.mapNotNull { makeFlight(it, startDate) }
+        val simLines = fixedLines.filter { simLineMatcher.containsMatchIn(it) }
+        val flights = flightLines.mapNotNull { makeFlight(it, startDate, isPic) }
+        val sims = simLines.mapNotNull { makeSim(it, startDate) }
+        return flights + sims
     }
 
     private fun getStartDateFromLines(lines: List<String>): LocalDate? =
@@ -39,21 +44,30 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         return startInstant..endInstant
     }
 
-    private fun makeFlight(line: String, startDateOfMonth: LocalDate): BasicFlight? = try {
+    private fun makeFlight(line: String, startDateOfMonth: LocalDate, isPic: Boolean): BasicFlight? = try {
         //Input data should be checked before being passed to this function. Invalid data will return null.
-        makeFlightOrThrowException(line.trim(), startDateOfMonth)
+        makeFlightOrThrowException(line.trim(), startDateOfMonth, isPic)
+    } catch (e: Throwable){
+        null
+    }
+
+    // Aircraft type is not known in roster so it will be empty.
+    private fun makeSim(line: String, startDateOfMonth: LocalDate): BasicFlight? = try {
+        //Input data should be checked before being passed to this function. Invalid data will return null.
+        makeSimOrThrowException(line.trim(), startDateOfMonth)
     } catch (e: Throwable){
         null
     }
 
 
-    private fun makeFlightOrThrowException(line: String, startDateOfMonth: LocalDate): BasicFlight{
+    private fun makeFlightOrThrowException(line: String, startDateOfMonth: LocalDate, isPic: Boolean): BasicFlight{
     //this function expects a trimmed line
         /*
             examples:
             09 KL 831 PHBHO   05:30 06:31 ICN +9 FO HGH +8 08:55 2:24 46:47
             09 KL 832 PHBHO   12:21 HGH +8 FO ICN +9 14:18 14:48 1:57 9:18 9:18 8:48
             10 KL 868 PHBHF   14:20 15:29 ICN +9 FO AMS +1 05:15 +1 05:45 +1 13:46 15:25 23:32 15:25 14:55
+            16 KL 714D PHBVV 17:40 19:11 PBM -3 FO AMS LCI +2 03:36 +1 04:06 +1 8:25 10:26 19:25 10:26 9:56
          */
         val dayOfMonth = line.take(2).toInt()
         val dateOut = startDateOfMonth.withDayOfMonth(dayOfMonth)
@@ -69,15 +83,43 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
             registration = registration,
             orig = orig,
             dest = dest,
+            isPIC = isPic,
             isPlanned = false
+        )
+    }
+
+    private fun makeSimOrThrowException(line: String, startDateOfMonth: LocalDate): BasicFlight{
+        val dayOfMonth = line.take(2).toInt() // first two characters in a line are the day of month
+        val dateOut = startDateOfMonth.withDayOfMonth(dayOfMonth)
+        val tOut = dateOut.atStartOfDay().toInstant(ZoneOffset.UTC).epochSecond
+        val duration = 3*60 + 30
+        val description = when{
+            SIM_TQ_MATCH in line -> "Type Qualification"
+            SIM_TQ_EXAM_MATCH in line -> "Skill Test"
+            SIM_787_RECURRENT_MATCH in line -> "787 Recurrent"
+            SIM_LOE_MATCH in line -> "LOE"
+            SIM_TR_MATCH.toRegex().containsMatchIn(line) -> "Type Recurrent" // this one does regex-y things (\d) so needs to be like this
+            SIM_LPC_MATCH in line -> "LPC/OPC"
+            else -> ""
+        }
+        val type = if(SIM_787_RECURRENT_MATCH in line) "B789" else ""
+
+        return BasicFlight.PROTOTYPE.copy(
+            isSim = true,
+            timeOut = tOut,
+            simTime = duration,
+            remarks = description,
+            aircraft = type
         )
     }
 
 
     //Can throw an exception or produce undefined result when invalid data provided.
     //This function does two things which is meh, but they are closely related (2 strings right next to each other) so I'll be a bad boy and do it like this.
-    private fun getFlightNumberAndRegistration(line: String): Pair<String, String> { // flightNumber to reg
-        val flightNumberBuilder = StringBuilder().apply{ append("KL") }
+    private fun getFlightNumberAndRegistration(line: String): Pair<String, String> = // flightNumber to reg
+        line.words().let { it[1] + it[2] to it[3] }
+
+/*        val flightNumberBuilder = StringBuilder().apply{ append("KL") }
         val registrationBuilder = StringBuilder()
         val l = line.drop(6).trim() // get rid of date, KL and any whitespaces after KL
         var pointer = 0
@@ -93,8 +135,8 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         while(l[pointer] != ' ')
             registrationBuilder.append(l[pointer++])
 
-        return flightNumberBuilder.toString() to registrationBuilder.toString()
-    }
+        return flightNumberBuilder.toString() to registrationBuilder.toString()*/
+
 
     //this one also gets two times, as the result of timeOut is needed to get timeIn.
     private fun getTimeOutAndTimeIn(line: String, reportingDate: LocalDate): Pair<Long, Long> { // tOut to tIn; epochSeconds
@@ -124,6 +166,12 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
     private fun getOrigAndDest(line: String) =
         airportRegex.findAll(line).map { it.value.trim() }.toList()
 
+    private fun checkIfIsPic(lines: List<String>): Boolean {
+        val postingLine = lines.firstOrNull{ it.startsWith("Posting") } ?: return false // find line that is like `Posting: FO - 778 Crew Type: Cockpit`
+        val posting = postingLine.split(' ').takeIf { it.size > 1 } ?: return false // split line in words. If not at least 2 words in line, return false
+        return posting[1] == "CP" // if the second word in this line is "CP", return true, if it is anything else return false
+    }
+
     /*
      * Sometimes a line can get broken in two, for instance on my initial linecheck:
      * 31 KL 714 PHBVS 18:30 20:15 PBM -3 SO AMS LCI,
@@ -145,10 +193,19 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         add(currentLine)
     }
 
+    /**
+     * Parses sa string into words. Ignores double whitespaces.
+     */
+    private fun String.words() = split(' ').filter { it.isNotBlank() }.map { it.trim() }
+
     private val dayLine = """^\d{2}\s+.*""".toRegex()
 
     private val periodRegex = """Periode: ($DATE) t/m ($DATE)""".toRegex()
     private val flightLineMatcher = """^\d{2}\s+$FLIGHT_NUMBER\s+$REGISTRATION\s+$TIME.*""".toRegex() // only to check if line is a flight
+
+    // create the matcher for simulator duties
+    private val simMatches = arrayOf(SIM_TQ_MATCH, SIM_TQ_EXAM_MATCH, SIM_787_RECURRENT_MATCH, SIM_LOE_MATCH, SIM_TR_MATCH, SIM_LPC_MATCH)
+    private val simLineMatcher = simMatches.joinToString(separator = "|").toRegex()
 
 
     private val tOutRegex = """($TIME)\s*(?:\+1)?\s*$AIRPORT""".toRegex()
@@ -162,5 +219,13 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         private const val REGISTRATION = """[A-Z]{5}"""
         private const val FLIGHT_NUMBER = """KL\s+\d{3,4}[dD]?"""
         private const val AIRPORT = """\s[A-Z]{3}\s"""
+
+        private const val SIM_TQ_MATCH = "VK - Type Kwalificatie sim"
+        private const val SIM_TQ_EXAM_MATCH = "VXN - Type Kwalificatie"
+        private const val SIM_787_RECURRENT_MATCH = "VT8 - 787 RECURRENT"
+        private const val SIM_LOE_MATCH = "VA - LOE"
+        private const val SIM_TR_MATCH = "VT\\d - Type recurrent \\d"
+        private const val SIM_LPC_MATCH = "VC - OPC / LPC"
+
     }
 }

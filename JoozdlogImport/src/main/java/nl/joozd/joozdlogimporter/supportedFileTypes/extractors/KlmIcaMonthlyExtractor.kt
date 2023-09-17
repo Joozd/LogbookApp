@@ -94,15 +94,15 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         val tOut = dateOut.atStartOfDay().toInstant(ZoneOffset.UTC).epochSecond
         val duration = 3*60 + 30
         val description = when{
-            SIM_TQ_MATCH in line -> "Type Qualification"
-            SIM_TQ_EXAM_MATCH in line -> "Skill Test"
-            SIM_787_RECURRENT_MATCH in line -> "787 Recurrent"
-            SIM_LOE_MATCH in line -> "LOE"
-            SIM_TR_MATCH.toRegex().containsMatchIn(line) -> "Type Recurrent" // this one does regex-y things (\d) so needs to be like this
-            SIM_LPC_MATCH in line -> "LPC/OPC"
+            SIM_TQ_MATCH.containsMatchIn(line) -> "Type Qualification"
+            SIM_TQ_EXAM_MATCH.containsMatchIn(line) -> "Skill Test"
+            SIM_787_RECURRENT_MATCH.containsMatchIn(line) -> "787 Recurrent"
+            SIM_LOE_MATCH.containsMatchIn(line) -> "LOE"
+            SIM_TR_MATCH.containsMatchIn(line) -> "Type Recurrent"
+            SIM_LPC_MATCH.containsMatchIn(line) -> "LPC/OPC"
             else -> ""
         }
-        val type = if(SIM_787_RECURRENT_MATCH in line) "B789" else ""
+        val type = if(SIM_787_RECURRENT_MATCH.containsMatchIn(line)) "B789" else ""
 
         return BasicFlight.PROTOTYPE.copy(
             isSim = true,
@@ -118,25 +118,6 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
     //This function does two things which is meh, but they are closely related (2 strings right next to each other) so I'll be a bad boy and do it like this.
     private fun getFlightNumberAndRegistration(line: String): Pair<String, String> = // flightNumber to reg
         line.words().let { it[1] + it[2] to it[3] }
-
-/*        val flightNumberBuilder = StringBuilder().apply{ append("KL") }
-        val registrationBuilder = StringBuilder()
-        val l = line.drop(6).trim() // get rid of date, KL and any whitespaces after KL
-        var pointer = 0
-
-        //add flightnumber digits to flightnumber:
-        while(l[pointer].isDigit()) // not checking because this expects a valid flightline.
-            flightNumberBuilder.append(l[pointer++])
-
-        // skip spaces after flightnumber.
-        while(l[pointer] == ' ') pointer++
-
-        // registration comes after flightnumber, get all characters until next whitespace:
-        while(l[pointer] != ' ')
-            registrationBuilder.append(l[pointer++])
-
-        return flightNumberBuilder.toString() to registrationBuilder.toString()*/
-
 
     //this one also gets two times, as the result of timeOut is needed to get timeIn.
     private fun getTimeOutAndTimeIn(line: String, reportingDate: LocalDate): Pair<Long, Long> { // tOut to tIn; epochSeconds
@@ -220,12 +201,13 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         private const val FLIGHT_NUMBER = """KL\s+\d{3,4}[dD]?"""
         private const val AIRPORT = """\s[A-Z]{3}\s"""
 
-        private const val SIM_TQ_MATCH = "VK - Type Kwalificatie sim"
-        private const val SIM_TQ_EXAM_MATCH = "VXN - Type Kwalificatie"
-        private const val SIM_787_RECURRENT_MATCH = "VT8 - 787 RECURRENT"
-        private const val SIM_LOE_MATCH = "VA - LOE"
-        private const val SIM_TR_MATCH = "VT\\d - Type recurrent \\d"
-        private const val SIM_LPC_MATCH = "VC - OPC / LPC"
+        // sim identifiers are all regexes. The check for a digit after 0 or more whitespaces it to filter out instruction.
+        private val SIM_TQ_MATCH = """VK - Type Kwalificatie sim\s*\d""".toRegex()
+        private val SIM_TQ_EXAM_MATCH = """VXN - Type Kwalificatie\s*\d""".toRegex()
+        private val SIM_787_RECURRENT_MATCH = """VT8 - 787 RECURRENT\s*\d""".toRegex()
+        private val SIM_LOE_MATCH = """VS?A - LOE\s*\d""".toRegex()
+        private val SIM_TR_MATCH = """VT\d - Type recurrent \d\s*\d""".toRegex()
+        private val SIM_LPC_MATCH = """VC - OPC / LPC\s*\d""".toRegex()
 
     }
 }

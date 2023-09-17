@@ -30,7 +30,7 @@ import java.io.InputStream
 /**
  * WORK IN PROGRESS
  */
-class PdfImporter(private val lines: List<String>): FileImporter() {
+class PdfImporter(val lines: List<String>): FileImporter() {
     override fun getFile() = getType(lines)
 
     /**

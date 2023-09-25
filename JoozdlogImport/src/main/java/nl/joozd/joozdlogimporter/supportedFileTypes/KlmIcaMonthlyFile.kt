@@ -24,6 +24,7 @@ import nl.joozd.joozdlogimporter.interfaces.CompletedFlightsExtractor
 import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.KlmIcaMonthlyExtractor
 
 class KlmIcaMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
+    override val supportedData = RANK
     override val extractor: CompletedFlightsExtractor
         get() = KlmIcaMonthlyExtractor()
 

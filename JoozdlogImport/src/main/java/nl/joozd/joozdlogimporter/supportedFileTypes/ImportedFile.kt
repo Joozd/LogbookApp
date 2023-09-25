@@ -23,6 +23,15 @@ import nl.joozd.joozdlogcommon.BasicFlight
 
 sealed class ImportedFile(protected val data: List<String>){
     /**
+     * Bitwise list of supported data, like RANK (isPIC) or anything else I think of.
+     * Useful to know for postprocessing.
+     * Default supports nothing.
+     */
+    open val supportedData: Int = 0
+
+    fun supports(data: Int) = supportedData and data != 0
+
+    /**
      * Get flights. This function does not do any post-processing like calculating night time.
      * Unsupported files will return null
      */
@@ -31,6 +40,11 @@ sealed class ImportedFile(protected val data: List<String>){
             is CompleteLogbookFile -> extractCompletedFlights().flights
             is CompletedFlightsFile -> extractCompletedFlights().flights
             is PlannedFlightsFile -> extractPlannedFlights().flights
-            else -> null
+            is UnsupportedFile -> null
+    }
+
+    companion object{
+        //supoprted functions
+        const val RANK = 0b1
     }
 }

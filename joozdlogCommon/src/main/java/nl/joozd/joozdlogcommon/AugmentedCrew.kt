@@ -79,6 +79,8 @@ data class AugmentedCrew(
 
     /**
      * Return amount of time to log. Cannot be negative, so 3 man ops for a 20 min flight with 30 mins to/landing is 0 minutes to log.
+     * @param totalTime time in minutes
+     * @param pic: this flight is done as PIC
      */
     fun getLogTime(totalTime: Int, pic: Boolean): Int{
         if (pic) return maxOf (0, totalTime) // PIC logs all time

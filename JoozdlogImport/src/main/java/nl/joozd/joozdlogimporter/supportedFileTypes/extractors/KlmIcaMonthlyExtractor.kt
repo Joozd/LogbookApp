@@ -1,5 +1,6 @@
 package nl.joozd.joozdlogimporter.supportedFileTypes.extractors
 
+import nl.joozd.joozdlogcommon.AugmentedCrew
 import nl.joozd.joozdlogcommon.BasicFlight
 import nl.joozd.joozdlogimporter.interfaces.CompletedFlightsExtractor
 import java.time.LocalDate
@@ -22,12 +23,12 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
     override fun extractFlightsFromLines(lines: List<String>): Collection<BasicFlight>? {
         val startDate = getStartDateFromLines(lines) ?: return null // a monthly is only one month, so all dates are this date withDayOfMonth(day)
 
-        val isPic = checkIfIsPic(lines)
+        val rank = getRank(lines)
 
         val fixedLines = fixLines(lines) // sometimes notes can break a line in multiple lines. this is fixed here.
         val flightLines = fixedLines.filter { it matches flightLineMatcher }
         val simLines = fixedLines.filter { simLineMatcher.containsMatchIn(it) }
-        val flights = flightLines.mapNotNull { makeFlight(it, startDate, isPic) }
+        val flights = flightLines.mapNotNull { makeFlight(it, startDate, rank) }
         val sims = simLines.mapNotNull { makeSim(it, startDate) }
         return flights + sims
     }
@@ -44,9 +45,9 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         return startInstant..endInstant
     }
 
-    private fun makeFlight(line: String, startDateOfMonth: LocalDate, isPic: Boolean): BasicFlight? = try {
+    private fun makeFlight(line: String, startDateOfMonth: LocalDate, rank: Int): BasicFlight? = try {
         //Input data should be checked before being passed to this function. Invalid data will return null.
-        makeFlightOrThrowException(line.trim(), startDateOfMonth, isPic)
+        makeFlightOrThrowException(line.trim(), startDateOfMonth, rank)
     } catch (e: Throwable){
         null
     }
@@ -60,7 +61,10 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
     }
 
 
-    private fun makeFlightOrThrowException(line: String, startDateOfMonth: LocalDate, isPic: Boolean): BasicFlight{
+    /**
+     * rank UNDEFINED will mean FO in practice.
+     */
+    private fun makeFlightOrThrowException(line: String, startDateOfMonth: LocalDate, rank: Int): BasicFlight{
     //this function expects a trimmed line
         /*
             examples:
@@ -76,6 +80,9 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         val (tOut, tIn) = getTimeOutAndTimeIn(line, dateOut)
         val (orig, dest) = getOrigAndDest(line)
 
+        val isPic = rank == CAPTAIN
+        val augmentedCrew = if(rank == SO) AugmentedCrew.coco(0) else AugmentedCrew()
+
         return BasicFlight.PROTOTYPE.copy(
             flightNumber = flightNumber,
             timeOut = tOut,
@@ -84,6 +91,7 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
             orig = orig,
             dest = dest,
             isPIC = isPic,
+            augmentedCrew = augmentedCrew.toInt(),
             isPlanned = false
         )
     }
@@ -147,10 +155,16 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
     private fun getOrigAndDest(line: String) =
         airportRegex.findAll(line).map { it.value.trim() }.toList()
 
-    private fun checkIfIsPic(lines: List<String>): Boolean {
-        val postingLine = lines.firstOrNull{ it.startsWith("Posting") } ?: return false // find line that is like `Posting: FO - 778 Crew Type: Cockpit`
-        val posting = postingLine.split(' ').takeIf { it.size > 1 } ?: return false // split line in words. If not at least 2 words in line, return false
-        return posting[1] == "CP" // if the second word in this line is "CP", return true, if it is anything else return false
+    private fun getRank(lines: List<String>): Int {
+        val postingLine = lines.firstOrNull{ it.startsWith("Posting") } ?: return UNDEFINED // find line that is like `Posting: FO - 778 Crew Type: Cockpit`
+        val posting = postingLine.split(' ').takeIf { it.size > 1 } ?: return UNDEFINED // split line in words. If not at least 2 words in line, return false
+        return when(posting[1]){
+            "CP" -> CAPTAIN
+            "FO" -> FO
+            "SO" -> SO
+            else -> UNDEFINED
+
+        }  // if the second word in this line is "CP", return true, if it is anything else return false
     }
 
     /*
@@ -208,6 +222,12 @@ class KlmIcaMonthlyExtractor: CompletedFlightsExtractor {
         private val SIM_LOE_MATCH = """VS?A - LOE\s*\d""".toRegex()
         private val SIM_TR_MATCH = """VT\d - Type recurrent \d\s*\d""".toRegex()
         private val SIM_LPC_MATCH = """VC - OPC / LPC\s*\d""".toRegex()
+
+        // values for ranks
+        private const val CAPTAIN = 1
+        private const val FO = 2
+        private const val SO = 3
+        private const val UNDEFINED = -1
 
     }
 }

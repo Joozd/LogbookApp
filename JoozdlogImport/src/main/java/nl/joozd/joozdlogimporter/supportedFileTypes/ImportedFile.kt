@@ -45,6 +45,7 @@ sealed class ImportedFile(protected val data: List<String>){
 
     companion object{
         //supoprted functions
-        const val RANK = 0b1
+        const val PIC = 0b1                             // Extractor sets isPic
+        const val AUGMENTED = 0b10                      // extractor sets augmentedCrew
     }
 }

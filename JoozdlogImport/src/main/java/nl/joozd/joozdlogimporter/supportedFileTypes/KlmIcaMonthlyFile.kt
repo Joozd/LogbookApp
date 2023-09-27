@@ -24,7 +24,7 @@ import nl.joozd.joozdlogimporter.interfaces.CompletedFlightsExtractor
 import nl.joozd.joozdlogimporter.supportedFileTypes.extractors.KlmIcaMonthlyExtractor
 
 class KlmIcaMonthlyFile(lines: List<String>): CompletedFlightsFile(lines) {
-    override val supportedData = PIC + AUGMENTED
+    override val supportedData = PIC + AUGMENTED // this is actually a bitwise OR but i think that looks stupic. Beware of combined flags though, any doubles there will give unexpected results!
     override val extractor: CompletedFlightsExtractor
         get() = KlmIcaMonthlyExtractor()
 

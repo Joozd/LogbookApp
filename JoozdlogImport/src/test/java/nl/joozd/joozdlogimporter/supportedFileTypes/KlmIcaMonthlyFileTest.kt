@@ -1,6 +1,7 @@
 package nl.joozd.joozdlogimporter.supportedFileTypes
 
 import junit.framework.TestCase.assertEquals
+import nl.joozd.joozdlogcommon.AugmentedCrew
 import org.junit.Test
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -14,17 +15,16 @@ class KlmIcaMonthlyFileTest {
 
     @Test
     fun monthSixFlightsEast(){
-        val file = KlmIcaMonthlyFile.buildIfMatches(sixFlightsEast)
+        val file = KlmIcaMonthlyFile.buildIfMatches(sixFlightsEastFO)
         assert(file is KlmIcaMonthlyFile)
         assertEquals(6, (file as KlmIcaMonthlyFile).extractCompletedFlights().flights?.size)
     }
 
     @Test
     fun flightsWithInstructionAndDepartNextDayTest(){
-        val file = KlmIcaMonthlyFile.buildIfMatches(eightFlightsWithTraining)
+        val file = KlmIcaMonthlyFile.buildIfMatches(eightFlightsCaptainWithTraining)
         assert(file is KlmIcaMonthlyFile)
         val flights = (file as KlmIcaMonthlyFile).extractCompletedFlights().flights!!
-        println(flights.joinToString("\n"))
         assertEquals(8, flights.size)
         assert(with(flights.last()){
             orig == "PBM" && dest == "AMS"
@@ -33,13 +33,55 @@ class KlmIcaMonthlyFileTest {
         val dateOfFLightAfterMidnight = LocalDateTime.ofEpochSecond(flightAfterMidnight.timeOut, 0, ZoneOffset.UTC).dayOfMonth
         assertEquals(25, dateOfFLightAfterMidnight)
     }
+
+    @Test
+    fun detectRankCaptainTest(){
+        val file = KlmIcaMonthlyFile.buildIfMatches(eightFlightsCaptainWithTraining)
+        val flights = (file as KlmIcaMonthlyFile).extractCompletedFlights().flights!!
+        assert(with(flights.last()){
+            // should be PIC
+            isPIC
+        })
+        assert(with(flights.last()){
+            // should not be augmented
+            !AugmentedCrew.fromInt(augmentedCrew).isAugmented
+        })
+    }
+
+    @Test
+    fun detectRankFoTest(){
+        val file = KlmIcaMonthlyFile.buildIfMatches(sixFlightsEastFO)
+        val flights = (file as KlmIcaMonthlyFile).extractCompletedFlights().flights!!
+        assert(with(flights.last()){
+            // should not be PIC
+            !isPIC
+        })
+        assert(with(flights.last()){
+            // should not be augmented
+            !AugmentedCrew.fromInt(augmentedCrew).isAugmented
+        })
+    }
+
+    @Test
+    fun detectRankSOTest(){
+        val file = KlmIcaMonthlyFile.buildIfMatches(eightFlightsSOWithTraining)
+        val flights = (file as KlmIcaMonthlyFile).extractCompletedFlights().flights!!
+        assert(with(flights.last()){
+            // should not be PIC
+            !isPIC
+        })
+        assert(with(flights.last()){
+            // should be augmented
+            AugmentedCrew.fromInt(augmentedCrew).isAugmented
+        })
+    }
 }
 
 private val badData = """1-4-2007;;;;LEY;12:00;00:00;EHHV;12:35;00:00;C172;PH-CBN;;SELF;;;;;;;;;;;;;;;35;35;0;0;0;0;0;0;0;0;35;0;35;True;1;0;1;0;0;0;0;;Uitgechecked Ben Air;;;;0;False;0;0;0;;00:00;00:00;0
 19-4-2007;;sim;; ;00:00;00:00; ;00:00;00:00;MD11;SIM-MD11;;SELF;;;;;;;;;;;;;;;210;0;0;0;0;0;0;0;0;0;210;0;210;True;0;0;0;0;0;0;0;;TQ 1;;;;0;False;0;0;0;;00:00;00:00;0
 20-4-2007;;sim;; ;00:00;00:00; ;00:00;00:00;MD11;SIM-MD11;;SELF;;;;;;;;;;;;;;;210;0;0;0;0;0;0;0;0;0;210;0;210;True;0;0;0;0;0;0;0;;TQ 2;;;;0;False;0;0;0;;00:00;00:00;0""".lines()
 
-private val sixFlightsEast = """KLM ID: 00044692
+private val sixFlightsEastFO = """KLM ID: 00044692
 DG LIJNNR ACREG
 AANM
 TIJD
@@ -109,7 +151,7 @@ Posting: FO - 778 Crew Type: Cockpit
 Periode: 01-01-2023 t/m 31-01-2023
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ENDROSTER - F_00044692 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<""".lines()
 
-private val eightFlightsWithTraining = """KLM ID: 00044692
+private val eightFlightsCaptainWithTraining = """KLM ID: 00044692
 
 DG LIJNNR ACREG
 AANM
@@ -185,7 +227,93 @@ Datum: 07-11-22 08:56 Chronologisch overzicht Vlieguren
 Base: AMS
 
 Naam: WELLE, J
-Posting: FO - 778 Crew Type: Cockpit
+Posting: CP - 778 Crew Type: Cockpit
+Periode: 01-10-2022 t/m 31-10-2022
+
+STRALINGSDOSIS: SEP/2022/12 MND 0.19/1.05/1.33 mSv VLIEGUREN IN PERIODE* 74:08
+VOOR VRAGEN OVER VLIEGUREN: FLIGHTCREWSUPPORT@KLM.COM VLIEGUREN IN JAAR: 277:39
+VOOR INFORMATIE OVER STRALING ZIE KLM4U.COM > HEALTH & WELL-BEING > KLIMAAT AAN BOORD EN STRALING. VLIEGUREN TOTAAL: 8,457:15
+REACTIES OUDER DAN 3 MAANDEN WORDEN NIET MEER IN BEHANDELING GENOMEN. * Vlieguren in periode beginnende op de 1e dag van de maand 00:00
+en eindigend op laatste dag van de maand 24:00 (Local time Homebase)
+** Totaal uren van de omloop startende in deze maand""".lines()
+
+private val eightFlightsSOWithTraining = """KLM ID: 00044692
+
+DG LIJNNR ACREG
+AANM
+TIJD
+VERT
+TIJD VST
+TIJD
+V F
+CMC
+AST SDC
+TIJD
+V
+AANK
+TIJD
+AFML
+TIJD
+WC
+VLGU
+NW
+VLGU VDT
+AC
+RUST DP FDP RECALC
+
+01 RV - Reisverlof
+02 RVF - Reisverlof
+Inneembaar
+03 NI - Niet Indeelbaar
+04 KL 677 PHBHH 09:20 11:24 AMS +2 FO YYC RIQ -6 19:53 20:23 8:29 11:03 11:03 10:33 -0.497
+05 KL 678 PHBHN 20:10 21:19 YYC -6 FO AMS RIQ +2 05:49 +1 06:19 +1 8:30 10:09 23:47 10:09 9:39
+06 AMS
+
+Totalen:** 16:59 21:12
+
+07 RV - Reisverlof
+08 RV - Reisverlof
+09 RV - Reisverlof
+10 RV - Reisverlof
+11 RVF - Reisverlof
+Inneembaar
+12 NI - Niet Indeelbaar
+13 KL 597 PHBQK 07:35 08:55 AMS +2 SO CPT RIQ +2 20:05 20:35 11:10 13:00 13:00 12:30 0.441
+14 CPT
+15 KL 598 PHBQN 20:45 21:41 CPT +2 SO AMS RIQ +2 09:19 +1 09:49 +1 11:38 13:04 48:10 13:04 12:34
+16 AMS 0.018 H
+
+Totalen:** 22:48 26:04
+
+17 RV - Reisverlof
+18 RV - Reisverlof
+19 RV - Reisverlof
+20 RVF - Reisverlof
+Inneembaar
+21 NI - Niet Indeelbaar
+22 KL 705 PHBHG 09:45 11:37 AMS +2 SO GIG RIQ -3 22:56 23:26 11:19 13:41 13:41 13:11 -0.409
+23 GIG
+24 KL 706 PHBHC 23:40 00:52 +1 GIG -3 SO AMS RIQ +2 11:55 +1 12:25 +1 11:03 12:45 48:14 12:45 12:15
+25 AMS
+
+Totalen:** 22:22 26:26
+
+26 RV - Reisverlof
+27 RV - Reisverlof
+28 RV - Reisverlof
+29 RV - Reisverlof
+30 KL 713 PHBVU 09:00 11:34 AMS +1 SO PBM -3 20:48 21:18 9:14 12:18 12:18 11:48 -0.258
+31 KL 714 PHBVS 18:30 20:15 PBM -3 SO AMS LCI,
+LC
++1 04:50 +1 05:20 +1 8:35 10:50 21:12 10:50 10:20
+
+Totalen:** 17:49 23:08
+
+Datum: 07-11-22 08:56 Chronologisch overzicht Vlieguren
+Base: AMS
+
+Naam: WELLE, J
+Posting: SO - 778 Crew Type: Cockpit
 Periode: 01-10-2022 t/m 31-10-2022
 
 STRALINGSDOSIS: SEP/2022/12 MND 0.19/1.05/1.33 mSv VLIEGUREN IN PERIODE* 74:08

@@ -26,7 +26,7 @@ dependencies {
     api files("C:\\Users\\joozd\\IdeaProjects\\libs\\joozdserializing-jvm-0.1.1.jar")
     implementation files("C:\\Users\\joozd\\IdeaProjects\\libs\\comms\\comms-jvm.jar")
 
-    api 'org.json:json:20220320'
+    api 'org.json:json:20230618'
 
     testImplementation 'junit:junit:4.13.2'
 }

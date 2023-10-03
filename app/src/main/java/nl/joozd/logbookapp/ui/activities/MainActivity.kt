@@ -60,8 +60,10 @@ import nl.joozd.logbookapp.core.Migrations
 import nl.joozd.logbookapp.core.metadata.Version
 import nl.joozd.logbookapp.errors.errorDialog
 import nl.joozd.logbookapp.extensions.showFragment
+import nl.joozd.logbookapp.ui.dialogs.ListDisplayDialog
 import nl.joozd.logbookapp.ui.dialogs.UpdateMessageDialog
 import nl.joozd.logbookapp.utils.IntentHandler
+import nl.joozd.twilightcalculator.TwilightCalculator
 
 //TODO: Handle Scheduled Errors from ScheduledErrors (use MessageCenter) -- is this still so?
 
@@ -251,7 +253,8 @@ class MainActivity : JoozdlogActivity() {
     private fun makeFlightsListAdapter() =
         FlightsAdapter(
             onDelete = { flight -> attemptToDelete(flight) },
-            itemClick = { flight -> viewModel.showEditFlightDialog(flight) }
+            itemClick = { flight -> viewModel.showEditFlightDialog(flight) },
+            onLongCLick = { flight -> showFlightInfo(flight) }
         )
 
     private fun ActivityMainNewBinding.closeSearchField() {
@@ -336,6 +339,33 @@ class MainActivity : JoozdlogActivity() {
         if (flight.isPlanned)
             viewModel.deleteFlight(flight)
         else (showDeletingCompletedFlightDialog(flight))
+    }
+
+    private fun showFlightInfo(flight: ModelFlight){
+        val dialog = makeFlightInfoDialog(flight)
+        showFragment(dialog)
+    }
+
+    private fun makeFlightInfoDialog(flight: ModelFlight): ListDisplayDialog {
+        val sunriseSunset = TwilightCalculator().sunrisesSunsets(
+            flight.orig.latitude_deg,
+            flight.orig.longitude_deg,
+            flight.dest.latitude_deg,
+            flight.dest.longitude_deg,
+            flight.timeOut,
+            flight.timeIn)
+        val sunrises = sunriseSunset.sunrises.map { "Sunrise" to it } // TODO string value with placeholder
+        val sunsets = sunriseSunset.sunsets.map { "SunSet" to it } // TODO string value with placeholder
+
+        val combined = (sunrises + sunsets)
+            .sortedBy { it.second }
+            .map { "${it.first} ${it.second}" }
+            .takeIf { it.isNotEmpty() } ?: listOf ("No sunrise/sunset during this flight") // TODO make string resource
+
+        return ListDisplayDialog().apply {
+            title = this@MainActivity.getString(R.string.placeholder)
+            valuesToDisplay = combined
+        }
     }
 
 

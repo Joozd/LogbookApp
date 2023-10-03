@@ -20,15 +20,24 @@
 package nl.joozd.logbookapp.ui.adapters.flightsadapter
 
 import android.view.View
+import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.databinding.ItemSimBinding
 import nl.joozd.logbookapp.extensions.toMonthYear
 import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.helpers.minutesToHoursAndMinutesString
 import nl.joozd.logbookapp.ui.utils.customs.Swiper
+import nl.joozd.logbookapp.ui.utils.toast
 
 class SimViewHolder(containerView: View) : FlightsListItemViewHolder(containerView) {
     val binding = ItemSimBinding.bind(containerView)
-    override fun bindItem(flight: ModelFlight, useIata: Boolean, picNameMustBeSet: Boolean, onClick: (ModelFlight) -> Unit, onDelete: (ModelFlight) -> Unit) {
+    override fun bindItem(
+        flight: ModelFlight,
+        useIata: Boolean,
+        picNameMustBeSet: Boolean,
+        onClick: (ModelFlight) -> Unit,
+        onLongClick: (ModelFlight) -> Unit,
+        onDelete: (ModelFlight) -> Unit
+    ) {
         with(binding) {
             with(flight) {
                 Swiper(binding.simDeleteLayer).apply {
@@ -51,6 +60,7 @@ class SimViewHolder(containerView: View) : FlightsListItemViewHolder(containerVi
                 simLayout.translationZ = 10f
 
                 simLayout.setOnClickListener { onClick(flight) }
+                simLayout.setOnLongClickListener { toast(R.string.placeholder); true } // sim does not support long click
             }
         }
     }

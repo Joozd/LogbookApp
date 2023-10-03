@@ -35,6 +35,7 @@ abstract class FlightsListItemViewHolder(containerView: View): RecyclerView.View
         useIata: Boolean = false,
         picNameMustBeSet: Boolean = false,
         onClick: (ModelFlight) -> Unit,
+        onLongClick: (ModelFlight) -> Unit,
         onDelete: (ModelFlight) -> Unit
     )
 

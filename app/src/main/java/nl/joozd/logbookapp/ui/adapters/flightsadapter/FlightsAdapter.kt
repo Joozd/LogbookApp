@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.ui.adapters.flightsadapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -36,12 +37,14 @@ import nl.joozd.logbookapp.model.ModelFlight
 
 class FlightsAdapter(
     val onDelete: (ModelFlight) -> Unit,
-    val itemClick: (ModelFlight) -> Unit
+    val itemClick: (ModelFlight) -> Unit,
+    val onLongCLick: (ModelFlight) -> Unit
 ): RecyclerViewFastScroller.OnPopupTextUpdate, ListAdapter<ModelFlight, RecyclerView.ViewHolder>(
     FlightDiffCallback()) {
     private val listListeners = ArrayList<ListListener> ()
 
     var useIata: Boolean = false
+        @SuppressLint("NotifyDataSetChanged") // all items will change, so we can change all items.
         set(it){
             if (it != field) notifyDataSetChanged()
             field = it
@@ -72,7 +75,7 @@ class FlightsAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as FlightsListItemViewHolder).bindItem(getItem(position), useIata, picNameMustBeSet, itemClick, onDelete)
+        (holder as FlightsListItemViewHolder).bindItem(getItem(position), useIata, picNameMustBeSet, itemClick, onLongCLick, onDelete)
     }
 
     override fun onCurrentListChanged(

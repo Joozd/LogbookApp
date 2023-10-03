@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~  JoozdLog Pilot's Logbook
+  ~  Copyright (c) 2020-2022 Joost Welle
+  ~
+  ~      This program is free software: you can redistribute it and/or modify
+  ~      it under the terms of the GNU Affero General Public License as
+  ~      published by the Free Software Foundation, either version 3 of the
+  ~      License, or (at your option) any later version.
+  ~
+  ~      This program is distributed in the hope that it will be useful,
+  ~      but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~      GNU Affero General Public License for more details.
+  ~
+  ~      You should have received a copy of the GNU Affero General Public License
+  ~      along with this program.  If not, see https://www.gnu.org/licenses
+  ~
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/DialogBackground"
+    android:id="@+id/list_display_dialog_background"
+    tools:theme="@style/AppTheme">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:padding="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/headerLayout"
+                style="@style/DialogHeaderLayout"
+                android:layout_width="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/bodyLayout"
+                app:layout_constraintEnd_toEndOf="@+id/bodyLayout"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/bodyLayout"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed">
+
+                <TextView
+                    android:id="@+id/title_dialog_list_display"
+                    style="@style/DialogHeaderText"
+                    tools:text="Title"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/bodyLayout"
+                style="@style/DialogBodyLayout"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/headerLayout">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerview_dialog_list_display"
+                    style="@style/DataBox"
+                    android:layout_height="150dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/close_dialog_list_display"
+                    style="@style/DialogButtonText"
+                    android:layout_marginTop="24dp"
+                    android:text="@android:string/ok"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/recyclerview_dialog_list_display" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

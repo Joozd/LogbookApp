@@ -111,8 +111,6 @@ dependencies {
 
     //room
     implementation "androidx.room:room-runtime:$room_version"
-    implementation project(path: ':textscanner')
-    implementation project(path: ':textscanner')
     ksp "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
@@ -150,6 +148,8 @@ dependencies {
     implementation project(":joozdlogCommon")
     implementation project(":listmerger")
     implementation project(":JoozdlogImport")
+    implementation project(":textscanner")
+    implementation project(":TwilightCalculator")
 
     //test libraries
     testImplementation "junit:junit:4.13.2"

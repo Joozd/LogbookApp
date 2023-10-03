@@ -19,11 +19,9 @@
 
 package nl.joozd.logbookapp.utils
 
-import android.util.Log
 import nl.joozd.logbookapp.data.dataclasses.Airport
 import nl.joozd.logbookapp.extensions.roundToMinutes
 import nl.joozd.logbookapp.extensions.toDegrees
-import nl.joozd.logbookapp.extensions.toLocalTime
 import nl.joozd.logbookapp.extensions.toRadians
 import java.time.*
 import kotlin.math.*
@@ -33,9 +31,8 @@ import kotlin.math.*
  * constructor:
  * @param calculateDate: Date for which day/night is calculated
  */
-class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the daylight an night data on calculateDate!
-    constructor (epochSecond: Long): this(LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSecond), ZoneOffset.UTC))
-    constructor (instant: Instant): this(LocalDateTime.ofInstant(instant, ZoneOffset.UTC))
+@Deprecated("Use TwilightCalculator from new module")
+class TwilightCalculatorOld(calculateDate: LocalDateTime) { // will know ALL the daylight an night data on calculateDate!
 
     private val day = Duration.between(solstice2000, calculateDate).toDays()
     private val date= calculateDate.toLocalDate()
@@ -52,29 +49,10 @@ class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the da
         return (sunriseInZ..sunsetInZ)
     }
 
-    /**
-     * Checks if it is day at [airport].
-     */
-    fun itIsDayAt(airport: Airport, time: Instant): Boolean{
-        return (dayTime(airport.latitude_deg, airport.longitude_deg).contains(LocalDateTime.of(date,time.toLocalTime())))
-    }
-
-    /**
-     * Checks if it is day at [airport].
-     * @param time: Time in Z as local time
-     */
-    fun itIsDayAt(airport: Airport, time: LocalTime): Boolean{
-        return (dayTime(airport.latitude_deg, airport.longitude_deg).contains(LocalDateTime.of(date,time)))
-    }
     fun itIsDayAt(lat: Double, lon: Double, time: LocalDateTime): Boolean{
         return (dayTime(lat, lon).contains(LocalDateTime.of(date,time.toLocalTime())))
     }
 
-    fun minutesOfNight(orig: Airport?, dest: Airport?, departureTime: Long, arrivalTime: Long): Int {
-        val dep = LocalDateTime.ofInstant(Instant.ofEpochSecond(departureTime), ZoneOffset.UTC)
-        val arr = LocalDateTime.ofInstant(Instant.ofEpochSecond(arrivalTime), ZoneOffset.UTC)
-        return minutesOfNight(orig, dest, dep, arr)
-    }
 
 
     /****************************************************************************************
@@ -177,18 +155,6 @@ class TwilightCalculator(calculateDate: LocalDateTime) { // will know ALL the da
 
         return darkMinutes
 
-    }
-
-    /**
-     * minutesOfNight but with times in [Instant]
-     */
-    fun minutesOfNight(orig: Airport?, dest: Airport?, departureTime: Instant?, arrivalTime: Instant?): Int {
-        if (departureTime == null || arrivalTime == null) return 0.also{
-            Log.w("TwilightCalculator", "null value on Departure or Arrival time")
-        }
-        val dt = LocalDateTime.ofInstant(departureTime, ZoneOffset.UTC)
-        val at = LocalDateTime.ofInstant(arrivalTime, ZoneOffset.UTC)
-        return minutesOfNight(orig, dest, dt, at)
     }
 
     companion object{

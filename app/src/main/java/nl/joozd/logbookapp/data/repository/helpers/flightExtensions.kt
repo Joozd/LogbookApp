@@ -24,7 +24,7 @@ import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.extensions.nullIfEmpty
 import nl.joozd.logbookapp.extensions.nullIfZero
 import nl.joozd.logbookapp.model.dataclasses.Flight
-import nl.joozd.logbookapp.utils.TwilightCalculator
+import nl.joozd.logbookapp.utils.TwilightCalculatorOld
 import java.time.*
 import java.util.*
 
@@ -68,7 +68,7 @@ fun Flight.mergeInto(other: Flight) = other.copy(
 fun Flight.setNightTime(airportDataCache: AirportDataCache): Flight {
     val origAirport = airportDataCache.getAirportByIcaoIdentOrNull(orig)
     val destAirport = airportDataCache.getAirportByIcaoIdentOrNull(dest)
-    val nightTime = TwilightCalculator(tOut()).minutesOfNight(origAirport, destAirport, tOut(), tIn())
+    val nightTime = TwilightCalculatorOld(tOut()).minutesOfNight(origAirport, destAirport, tOut(), tIn())
     return this.copy(nightTime = nightTime)
 }
 

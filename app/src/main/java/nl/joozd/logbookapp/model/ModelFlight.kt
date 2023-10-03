@@ -30,7 +30,7 @@ import nl.joozd.logbookapp.extensions.checkIfValidCoordinates
 import nl.joozd.logbookapp.extensions.toLocalDate
 import nl.joozd.logbookapp.model.dataclasses.Flight
 import nl.joozd.logbookapp.model.workingFlight.TakeoffLandings
-import nl.joozd.logbookapp.utils.TwilightCalculator
+import nl.joozd.twilightcalculator.TwilightCalculator
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -169,8 +169,8 @@ data class ModelFlight(
      */
     private fun TakeoffLandings.updateTakeoffLandingsForNightTime(): TakeoffLandings =
         if (oneTakeoffOneLanding()){
-            val takeoffDuringDay = TwilightCalculator(timeOut).itIsDayAt(orig, timeOut)
-            val landingDuringDay = TwilightCalculator(timeIn).itIsDayAt(dest, timeIn)
+            val takeoffDuringDay = TwilightCalculator().itIsDayAt(timeOut, orig.latitude_deg, orig.longitude_deg)
+            val landingDuringDay = TwilightCalculator().itIsDayAt(timeIn, dest.latitude_deg, dest.longitude_deg)
             val toDay = if (takeoffDuringDay) 1 else 0
             val toNight = 1 - toDay
             val ldgDay = if (landingDuringDay) 1 else 0
@@ -190,7 +190,7 @@ data class ModelFlight(
         val outToInMinutes = getDurationOfFlight().toMinutes().toInt()
         if (outToInMinutes == 0) return 0
         val totalNightMinutes =
-            TwilightCalculator(timeOut).minutesOfNight(orig, dest, timeOut, timeIn)
+            TwilightCalculator().minutesOfNightOnTrip(orig.latitude_deg, orig.longitude_deg, dest.latitude_deg, dest.longitude_deg, timeOut, timeIn)
         return totalNightMinutes * calculateTotalTime() / outToInMinutes
     }
 

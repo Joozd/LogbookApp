@@ -355,7 +355,7 @@ class MainActivity : JoozdlogActivity() {
             flight.timeOut,
             flight.timeIn)
         val sunrises = sunriseSunset.sunrises.map { "Sunrise" to it } // TODO string value with placeholder
-        val sunsets = sunriseSunset.sunsets.map { "SunSet" to it } // TODO string value with placeholder
+        val sunsets = sunriseSunset.sunsets.map { "Sunset" to it } // TODO string value with placeholder
 
         val combined = (sunrises + sunsets)
             .sortedBy { it.second }

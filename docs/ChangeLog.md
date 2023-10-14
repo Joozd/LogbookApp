@@ -62,3 +62,5 @@ If you really want to know, look at all the github commits...
 - Removed unused resources
 - Clearer indication of source for calendar sync
 - System to keep track of "first time" messages, with versions so we can show a different message for people going from 0 to 2 or 1 to 2.
+### 1.2.12
+- Long-press on a flight now gives information about that flight (currently sunrise/sunset estimates only) 

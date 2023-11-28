@@ -109,7 +109,9 @@ class Swiper(private val backgroundLayout: ConstraintLayout) {
         makeSwipeable()
     }
     set(sv){
-        if (sv == null || sv as View in backgroundLayout.children) field = sv
+        if (sv == null || sv as View in backgroundLayout.children) field = sv?.apply{
+            makeSwipeable()
+        }
         else {
             field = sv
             sv.addTo(backgroundLayout)

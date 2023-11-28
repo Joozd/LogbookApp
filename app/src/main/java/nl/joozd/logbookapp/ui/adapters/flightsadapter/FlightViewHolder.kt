@@ -30,15 +30,11 @@ import nl.joozd.logbookapp.ui.utils.customs.Swiper
 
 class FlightViewHolder(containerView: View) : FlightsListItemViewHolder(containerView) {
     val binding = ItemFlightCardBinding.bind(containerView)
-    private var isLongClicked = false
-    private var isClicked = false
-
     override fun bindItem(
         flight: ModelFlight,
         useIata: Boolean,
         picNameMustBeSet: Boolean,
         onClick: (ModelFlight) -> Unit,
-        onLongClick: (ModelFlight) -> Unit,
         onDelete: (ModelFlight) -> Unit
     ) {
         binding.apply {
@@ -74,22 +70,7 @@ class FlightViewHolder(containerView: View) : FlightsListItemViewHolder(containe
                 isPFText.shouldBeVisible(isPF)
                 remarksText.shouldBeVisible(remarks.isNotEmpty())
                 flightLayout.translationZ = 10f
-                flightLayout.setOnClickListener {
-                // make sure onClick doesn't interfere with onLongClick
-                    if(isLongClicked) isLongClicked = false
-                    else {
-                        isClicked = true
-                        onClick(flight)
-                    }
-                }
-                flightLayout.setOnLongClickListener {
-                    if(isClicked) isClicked = false
-                    else {
-                        isLongClicked = true
-                        onLongClick(flight)
-                    }
-                    true
-                }
+                flightLayout.setOnClickListener { onClick(flight) }
             }
         }
     }

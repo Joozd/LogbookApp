@@ -60,10 +60,8 @@ import nl.joozd.logbookapp.core.Migrations
 import nl.joozd.logbookapp.core.metadata.Version
 import nl.joozd.logbookapp.errors.errorDialog
 import nl.joozd.logbookapp.extensions.showFragment
-import nl.joozd.logbookapp.ui.dialogs.ListDisplayDialog
 import nl.joozd.logbookapp.ui.dialogs.UpdateMessageDialog
 import nl.joozd.logbookapp.utils.IntentHandler
-import nl.joozd.twilightcalculator.TwilightCalculator
 
 //TODO: Handle Scheduled Errors from ScheduledErrors (use MessageCenter) -- is this still so?
 
@@ -253,8 +251,7 @@ class MainActivity : JoozdlogActivity() {
     private fun makeFlightsListAdapter() =
         FlightsAdapter(
             onDelete = { flight -> attemptToDelete(flight) },
-            itemClick = { flight -> viewModel.showEditFlightDialog(flight) },
-            onLongCLick = { flight -> showFlightInfo(flight) }
+            itemClick = { flight -> viewModel.showEditFlightDialog(flight) }
         )
 
     private fun ActivityMainNewBinding.closeSearchField() {
@@ -341,12 +338,7 @@ class MainActivity : JoozdlogActivity() {
         else (showDeletingCompletedFlightDialog(flight))
     }
 
-    private fun showFlightInfo(flight: ModelFlight){
-        val dialog = makeFlightInfoDialog(flight)
-        showFragment(dialog)
-    }
-
-    private fun makeFlightInfoDialog(flight: ModelFlight): ListDisplayDialog {
+/*    private fun makeFlightInfoDialog(flight: ModelFlight): ListDisplayDialog {
         val sunriseSunset = TwilightCalculator().sunrisesSunsets(
             flight.orig.latitude_deg,
             flight.orig.longitude_deg,
@@ -366,7 +358,7 @@ class MainActivity : JoozdlogActivity() {
             title = this@MainActivity.getString(R.string.placeholder)
             valuesToDisplay = combined
         }
-    }
+    }*/
 
 
     private fun View.showKeyboard(){

@@ -22,6 +22,7 @@ class TestBackupEmailData {
         val data = EmailData(username, email, csv)
         val serializedData = data.serialize()
         assertEquals(data, EmailData.deserialize(serializedData))
+        println(data.attachment.toString(Charsets.UTF_8))
         val grabbedflights = flightsFromCsv(EmailData.deserialize(serializedData).attachment.toString(Charsets.UTF_8))
         assertEquals(flights, grabbedflights)
         println(grabbedflights[1].signature)
@@ -37,5 +38,5 @@ class TestBackupEmailData {
     }
 
     private fun flightsFromCsv(csv: String): List<BasicFlight> =
-        csv.split("\n").drop(1).map {BasicFlight.ofCsv (it) }
+        csv.lines().drop(1).map {BasicFlight.ofCsv (it) }
 }

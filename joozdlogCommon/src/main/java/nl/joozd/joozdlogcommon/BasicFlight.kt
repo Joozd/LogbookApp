@@ -21,6 +21,9 @@ package nl.joozd.joozdlogcommon
 
 import nl.joozd.serializing.*
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 /**
  * BasicFLight holds all data of a Flight, and has options for serialization (both to byteArray and to Csv)
@@ -144,7 +147,40 @@ data class BasicFlight(
             isPlanned.toString(),
             autoFill.toString(),
             augmentedCrew.toString(),
-            signature
+            signature.lines().joinToString("\\n")
+        ).joinToString(";") { it.replace(';', '|') }
+    }
+
+    //"Origin;dest;date;timeOut;timeIn;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;namePIC;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF"
+
+    fun toCsvForExport(): String {
+        return listOf(
+            orig,
+            dest,
+            LocalDateTime.ofInstant(Instant.ofEpochSecond(timeOut), ZoneOffset.UTC).toLocalDate().toString(),
+            LocalDateTime.ofInstant(Instant.ofEpochSecond(timeOut), ZoneOffset.UTC).toLocalTime().toString(),
+            LocalDateTime.ofInstant(Instant.ofEpochSecond(timeIn), ZoneOffset.UTC).toLocalTime().toString(),
+            multiPilotTime.toString(),
+            nightTime.toString(),
+            ifrTime.toString(),
+            simTime.toString(),
+            aircraft,
+            registration,
+            name,
+            takeOffDay.toString(),
+            takeOffNight.toString(),
+            landingDay.toString(),
+            landingNight.toString(),
+            autoLand.toString(),
+            flightNumber,
+            remarks,
+            isPIC.toString(),
+            isPICUS.toString(),
+            isCoPilot.toString(),
+            isDual.toString(),
+            isInstructor.toString(),
+            isSim.toString(),
+            isPF.toString()
         ).joinToString(";") { it.replace(';', '|') }
     }
 
@@ -221,7 +257,7 @@ data class BasicFlight(
                 isPlanned = v[28] == true.toString(),
                 autoFill = v[29] == true.toString(),
                 augmentedCrew = v[30].toInt(),
-                signature = v[31].filter { it !in "\r\n" }
+                signature = v[31].replace("\\n", "\n")
             )
         }
 
@@ -262,5 +298,6 @@ data class BasicFlight(
 
 
         const val CSV_IDENTIFIER_STRING = "flightID;Origin;dest;timeOut;timeIn;correctedTotalTime;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;name;name2;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF;isPlanned;autoFill;augmentedCrew;signatureSVG"
+        const val CSV_EXPORT_STRING = "Origin;dest;date;timeOut;timeIn;multiPilotTime;nightTime;ifrTime;simTime;aircraftType;registration;namePIC;takeOffDay;takeOffNight;landingDay;landingNight;autoLand;flightNumber;remarks;isPIC;isPICUS;isCoPilot;isDual;isInstructor;isSim;isPF"
     }
 }

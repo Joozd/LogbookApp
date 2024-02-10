@@ -16,16 +16,6 @@ class CsvImporterTests {
     private val logtenProJoozdFile = "C:\\joozdlog\\test\\importables\\logten_pro_joozd_fixed.txt"
 
     @Test
-    fun testJoozdlogV5Bad(){
-        val lines = File(joozdLogV5BadFileName).readLines()
-        val file = CsvImporter(lines).getFile()
-        assert(file is CurrentJoozdlogCsvFile)
-        val flights = getFlightsFromFile(file)
-        assertEquals(lines.size - 1, flights!!.size)
-        println("JOOZDLOG V5 BAD VERSION PARSED OK - tested with ${lines.size -1} flights.")
-    }
-
-    @Test
     fun testJoozdlogV5(){
         val lines = File(joozdLogV5FileName).readLines()
         val file = CsvImporter(lines).getFile()

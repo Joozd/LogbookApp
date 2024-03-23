@@ -65,4 +65,6 @@ If you really want to know, look at all the github commits...
 ### 1.2.12
 - Long-press on a flight now gives information about that flight (currently sunrise/sunset estimates only) 
 - No it doesn't. The data is calculated but long-press was not working as intended. Still thinking about it
-- Library updates etc.
+- Library updates etc
+### 1.2.13
+- Library updates

@@ -121,8 +121,7 @@ class MainActivity : JoozdlogActivity() {
         viewModel.checkIfSearchFieldShouldBeOpen()
     }
 
-    @SuppressLint("MissingSuperCall") // False lint error
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntent(intent)
     }

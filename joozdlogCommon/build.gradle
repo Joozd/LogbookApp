@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 /*
  *  JoozdLog Pilot's Logbook
  *  Copyright (c) 2020-2022 Joost Welle
@@ -29,6 +31,14 @@ dependencies {
     api 'org.json:json:20230618'
 
     testImplementation 'junit:junit:4.13.2'
+}
+
+kotlin {
+    jvmToolchain(17) // match your java { ... } config
+}
+
+tasks.withType(KotlinCompile).configureEach {
+    kotlinOptions.jvmTarget = "17"
 }
 
 java {

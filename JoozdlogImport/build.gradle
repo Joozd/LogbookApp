@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 /*
  *  JoozdLog Pilot's Logbook
  *  Copyright (c) 2020-2022 Joost Welle
@@ -23,6 +25,14 @@ apply plugin: 'kotlin'
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin {
+    jvmToolchain(17) // match your java { ... } config
+}
+
+tasks.withType(KotlinCompile).configureEach {
+    kotlinOptions.jvmTarget = "17"
 }
 
 dependencies {

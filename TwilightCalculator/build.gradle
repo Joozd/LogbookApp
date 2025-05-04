@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id 'java-library'
     id 'org.jetbrains.kotlin.jvm'
@@ -8,8 +10,16 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+kotlin {
+    jvmToolchain(17) // match your java { ... } config
+}
+
+tasks.withType(KotlinCompile).configureEach {
+    kotlinOptions.jvmTarget = "17"
+}
+
 dependencies {
-    implementation('org.shredzone.commons:commons-suncalc:3.7')
+    implementation('org.shredzone.commons:commons-suncalc:3.11')
 
     testImplementation 'junit:junit:4.13.2'
 }

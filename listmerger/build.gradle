@@ -1,6 +1,16 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id 'java-library'
     id 'org.jetbrains.kotlin.jvm'
+}
+
+kotlin {
+    jvmToolchain(17) // match your java { ... } config
+}
+
+tasks.withType(KotlinCompile).configureEach {
+    kotlinOptions.jvmTarget = "17"
 }
 
 java {

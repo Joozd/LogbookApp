@@ -29,7 +29,7 @@ abstract class JoozdLogPreferences {
         @Suppress("UNCHECKED_CAST")
         val prefsKey = generatePreferencesKey(key, newValue) as Preferences.Key<T>
         MainScope().launch{ // doing this on MainScope is OK as Datastore will give it Dispatchers.IO
-            dataStore.edit { p ->
+            dataStore.edit { p: MutablePreferences ->
                 p[prefsKey] = newValue
             }
         }

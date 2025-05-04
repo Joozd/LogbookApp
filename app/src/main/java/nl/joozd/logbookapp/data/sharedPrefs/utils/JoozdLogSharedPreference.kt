@@ -19,6 +19,7 @@
 
 package nl.joozd.logbookapp.data.sharedPrefs.utils
 
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.flow.first
@@ -57,7 +58,7 @@ class JoozdLogSharedPreference<T : Any>(private val joozdlogSharedPreferences: J
 
     private fun writeBlocking(prefsKey: Preferences.Key<T>, value: T) =
         runBlocking {
-            joozdlogSharedPreferences.dataStore.edit { p ->
+            joozdlogSharedPreferences.dataStore.edit { p: MutablePreferences ->
                 p[prefsKey] = value
             }
         }

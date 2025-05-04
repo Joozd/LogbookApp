@@ -68,7 +68,7 @@ class JoozdlogSharedPreferenceDelegate<T : Any>(
         private suspend fun value() = flow.first()
 
         override suspend fun setValue(value: T) { // doing this on MainScope is OK as Datastore will give it Dispatchers.IO
-            dataStore.edit { p ->
+            dataStore.edit { p: MutablePreferences ->
                 p[prefsKey] = value
             }
         }

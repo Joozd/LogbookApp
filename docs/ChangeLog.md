@@ -68,3 +68,5 @@ If you really want to know, look at all the github commits...
 - Library updates etc
 ### 1.2.13
 - Library updates
+### 1.2.15
+- fixed crash when opening names scanner

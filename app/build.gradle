@@ -27,14 +27,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdk 36
+    compileSdk = 36
 
     defaultConfig {
         applicationId "nl.joozd.logbookapp"
         minSdkVersion 26
         targetSdkVersion 36
-        versionCode 154 // my version, increment this every build
-        versionName "JoozdLog BEAVER | 1.2.15"
+        versionCode 155 // my version, increment this every build
+        versionName "JoozdLog BEAVER | 1.2.16"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

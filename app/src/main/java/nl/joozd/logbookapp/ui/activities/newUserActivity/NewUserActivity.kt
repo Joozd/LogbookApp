@@ -33,7 +33,7 @@ import nl.joozd.logbookapp.ui.utils.viewPagerTransformers.DepthPageTransformer
 class NewUserActivity : JoozdlogActivity() {
     private lateinit var mViewPager: ViewPager2
 
-    private var removeDuplicatesStarted = false
+    private var removeDuplicatesstarted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,11 +67,11 @@ class NewUserActivity : JoozdlogActivity() {
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
         outState.putInt(SAVED_INSTANCE_STATE_PAGE_KEY, mViewPager.currentItem)
-        outState.putBoolean(SAVED_INSTANCE_STATE_REMOVE_DUPLICATES_STARTED_KEY, removeDuplicatesStarted)
+        outState.putBoolean(SAVED_INSTANCE_STATE_REMOVE_DUPLICATES_STARTED_KEY, removeDuplicatesstarted)
     }
 
     private fun getRemoveDuplicatesStartedFromSavedInstanceState(savedInstanceState: Bundle?) {
-        savedInstanceState?.getBoolean(SAVED_INSTANCE_STATE_REMOVE_DUPLICATES_STARTED_KEY)?.let { removeDuplicatesStarted = it }
+        savedInstanceState?.getBoolean(SAVED_INSTANCE_STATE_REMOVE_DUPLICATES_STARTED_KEY)?.let { removeDuplicatesstarted = it }
     }
 
     private fun getPageFromSavedInstanceState(savedInstanceState: Bundle?) = savedInstanceState?.getInt(SAVED_INSTANCE_STATE_PAGE_KEY) ?: 0

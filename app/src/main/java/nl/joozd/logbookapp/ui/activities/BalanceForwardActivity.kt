@@ -32,7 +32,6 @@ import nl.joozd.logbookapp.databinding.ActivityBalanceForwardBinding
 import nl.joozd.logbookapp.extensions.showFragment
 import nl.joozd.logbookapp.model.viewmodels.activities.BalanceForwardActivityViewmodel
 import nl.joozd.logbookapp.ui.adapters.BalanceForwardAdapter
-
 import nl.joozd.logbookapp.ui.dialogs.AddBalanceForwardDialog
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
 import nl.joozd.logbookapp.ui.utils.toast
@@ -61,6 +60,8 @@ class BalanceForwardActivity : JoozdlogActivity() {
             initializeToolBar()
             initializeBalanceForwardExpandableListView()
         }
+
+        hideStatusBar()
 
         setContentView(binding.root)
     }

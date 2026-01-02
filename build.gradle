@@ -21,10 +21,10 @@
 
 buildscript {
     ext.kotlin_version = "2.1.20"
-    ext.coroutines_version = '1.8.0'
-    ext.androidx_lifecycle_version = '2.8.7'
-    ext.room_version = "2.7.1"
-    ext.work_version = "2.10.1"
+    ext.coroutines_version = '1.10.2'
+    ext.androidx_lifecycle_version = '2.10.0'
+    ext.room_version = "2.8.4"
+    ext.work_version = "2.11.0"
 
     repositories {
         google()
@@ -33,7 +33,7 @@ buildscript {
         
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.10.1'
+        classpath 'com.android.tools.build:gradle:8.13.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong

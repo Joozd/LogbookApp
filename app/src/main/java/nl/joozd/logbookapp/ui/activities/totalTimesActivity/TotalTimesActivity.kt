@@ -42,6 +42,7 @@ class TotalTimesActivity : JoozdlogActivity() {
             initializeTotalsListsExpandableListView()
         }
 
+        hideStatusBar()
         setContentView(binding.root)
     }
 

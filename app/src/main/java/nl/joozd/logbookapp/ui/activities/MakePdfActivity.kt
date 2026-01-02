@@ -19,7 +19,6 @@
 
 package nl.joozd.logbookapp.ui.activities
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -39,7 +38,7 @@ class MakePdfActivity : JoozdlogActivity() {
     private val viewModel: MakePdfActivityViewModel by viewModels()
 
     private val createFileResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             Log.d("MakePdfActivity", "RESULT_OK received")
             // There are no request codes
             // The result data contains a URI for the document or directory that
@@ -80,6 +79,8 @@ class MakePdfActivity : JoozdlogActivity() {
             writingProgressBar.max = PROGRESS_BAR_RESOLUTION
 
             startCollectors()
+            hideStatusBar()
+
             setContentView(root)
         }
     }

@@ -22,15 +22,20 @@ package nl.joozd.logbookapp.ui.utils
 
 import android.content.Context
 import android.content.res.Configuration
+import android.os.Build
+import android.view.View
+import android.view.WindowInsets
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.core.background.startBackgroundTasks
 
@@ -63,6 +68,17 @@ abstract class JoozdlogActivity: AppCompatActivity() {
     protected fun setSupportActionBarWithReturn(toolbar: Toolbar?): ActionBar? {
         super.setSupportActionBar(toolbar)
         return supportActionBar
+    }
+
+    protected fun hideStatusBar(){
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.hide(WindowInsets.Type.statusBars())
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+        }
     }
 
     protected fun closeAndStartMainActivity(){

@@ -40,27 +40,27 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import nl.joozd.logbookapp.R
+import nl.joozd.logbookapp.core.MessageCenter
+import nl.joozd.logbookapp.core.Migrations
+import nl.joozd.logbookapp.core.metadata.Version
 import nl.joozd.logbookapp.data.calendar.getFlightsFromCalendar
 import nl.joozd.logbookapp.data.importing.ImportedFlightsSaver
 import nl.joozd.logbookapp.data.sharedPrefs.Prefs
 import nl.joozd.logbookapp.databinding.ActivityMainNewBinding
+import nl.joozd.logbookapp.errors.errorDialog
 import nl.joozd.logbookapp.extensions.onTextChanged
+import nl.joozd.logbookapp.extensions.showFragment
+import nl.joozd.logbookapp.model.ModelFlight
 import nl.joozd.logbookapp.model.viewmodels.activities.mainActivity.MainActivityViewModelNew
+import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.ImportedLogbookAutoCompleter
 import nl.joozd.logbookapp.ui.activities.newUserActivity.NewUserActivity
+import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
 import nl.joozd.logbookapp.ui.activities.totalTimesActivity.TotalTimesActivity
 import nl.joozd.logbookapp.ui.adapters.flightsadapter.FlightsAdapter
 import nl.joozd.logbookapp.ui.dialogs.AboutDialog
+import nl.joozd.logbookapp.ui.dialogs.UpdateMessageDialog
 import nl.joozd.logbookapp.ui.dialogs.editFlightFragment.EditFlightFragment
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
-import nl.joozd.logbookapp.model.ModelFlight
-import nl.joozd.logbookapp.model.viewmodels.activities.pdfParserActivity.ImportedLogbookAutoCompleter
-import nl.joozd.logbookapp.ui.activities.settingsActivity.SettingsActivity
-import nl.joozd.logbookapp.core.MessageCenter
-import nl.joozd.logbookapp.core.Migrations
-import nl.joozd.logbookapp.core.metadata.Version
-import nl.joozd.logbookapp.errors.errorDialog
-import nl.joozd.logbookapp.extensions.showFragment
-import nl.joozd.logbookapp.ui.dialogs.UpdateMessageDialog
 import nl.joozd.logbookapp.utils.IntentHandler
 
 //TODO: Handle Scheduled Errors from ScheduledErrors (use MessageCenter) -- is this still so?
@@ -113,6 +113,9 @@ class MainActivity : JoozdlogActivity() {
             setOnClickListeners()
             collectMessageCenter()
         }
+
+        hideStatusBar()
+
         setContentView(binding.root)
     }
 

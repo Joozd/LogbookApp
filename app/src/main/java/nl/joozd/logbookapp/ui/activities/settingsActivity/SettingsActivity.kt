@@ -36,6 +36,7 @@ import nl.joozd.logbookapp.model.viewmodels.activities.settingsActivity.Settings
 import nl.joozd.logbookapp.model.viewmodels.status.SettingsActivityStatus
 import nl.joozd.logbookapp.ui.dialogs.*
 import nl.joozd.logbookapp.ui.utils.JoozdlogActivity
+import androidx.core.view.isVisible
 
 class SettingsActivity : JoozdlogActivity() {
     private lateinit var mBinding: ActivitySettingsBinding
@@ -58,6 +59,7 @@ class SettingsActivity : JoozdlogActivity() {
             observeControlFlows()
             observeSettingsFlows()
 
+            hideStatusBar()
             // Set content view
             setContentView(root)
         }
@@ -226,7 +228,7 @@ class SettingsActivity : JoozdlogActivity() {
      * show or hide a group of Views
      */
     private fun ConstraintLayout.toggleVisibility() {
-        visibility = if (this.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        visibility = if (this.isVisible) View.GONE else View.VISIBLE
     }
 
     /**

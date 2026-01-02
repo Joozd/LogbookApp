@@ -39,7 +39,8 @@ class SharingActivity : JoozdlogActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(ActivitySharingBinding.inflate(layoutInflater).apply{
+
+        ActivitySharingBinding.inflate(layoutInflater).apply{
             setSupportActionBarWithReturn(sharingToolbar)?.apply {
                 setDisplayShowHomeEnabled(true)
                 setDisplayHomeAsUpEnabled(true)
@@ -47,7 +48,10 @@ class SharingActivity : JoozdlogActivity() {
             }
             initializeSendButton()
             initializeReceiveButton()
-        }.root)
+
+            hideStatusBar()
+            setContentView(root)
+        }
     }
 
     private fun ActivitySharingBinding.initializeSendButton() {

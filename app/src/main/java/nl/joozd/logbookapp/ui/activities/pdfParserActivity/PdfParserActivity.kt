@@ -52,6 +52,7 @@ class PdfParserActivity : JoozdlogActivity(), CoroutineScope by MainScope() {
         ActivityPdfParserBinding.inflate(layoutInflater).apply {
             collectHandlerStatus()
             launchIntentHandler()
+            hideStatusBar()
             setContentView(root)
         }
     }

@@ -20,10 +20,10 @@
 package nl.joozd.logbookapp.ui.activities
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.core.net.toUri
 import nl.joozd.logbookapp.R
 import nl.joozd.logbookapp.data.sharedPrefs.TaskPayloads
 import nl.joozd.logbookapp.databinding.ActivityFeedbackBinding
@@ -50,6 +50,8 @@ class FeedbackActivity : JoozdlogActivity() {
             setOnTextChangedListeners()
             setOnClickListeners()
 
+            hideStatusBar()
+
             setContentView(root)
         }
     }
@@ -70,7 +72,7 @@ class FeedbackActivity : JoozdlogActivity() {
 
     private fun launchSendEmailIntent() {
         val intent = Intent(Intent.ACTION_SENDTO).apply {
-            setDataAndType(Uri.parse("mailto:"), "*/*")
+            setDataAndType("mailto:".toUri(), "*/*")
             putExtra(Intent.EXTRA_EMAIL, arrayOf("joozdlog@joozd.nl"))
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback))
         }

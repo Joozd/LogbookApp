@@ -73,7 +73,7 @@ class CrewNamesCollector: ScannedTextProcessor {
          */
         const val MINIMUM_RATIO_FOR_VALID_RESULT = 3
 
-        private const val CA = "CA"
+        private const val CA = "Cabin Attendant"
 
         /**
          * Supported functions in order of rank
@@ -83,12 +83,13 @@ class CrewNamesCollector: ScannedTextProcessor {
             "First officer",
             "Second officer",
             "Senior purser.?",
+            "WBC Specialist.?",
             "Purser.?",
             "$CA.?"
         ).map { it.toRegex() }
 
         /**
-         * Map of rank index to it's string value that will be reported in [results], eg "First Officer" is [1].
+         * Map of rank index to its string value that will be reported in [results], eg "First Officer" is [1].
          * Follows [validFunctions]
          */
         val functionOrder: Map<String, Int> = validFunctions.indices.map {i ->

@@ -16,11 +16,9 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/joozdlogCommon" />
             <option value="$PROJECT_DIR$/listmerger" />
-            <option value="$PROJECT_DIR$/messagecenter" />
             <option value="$PROJECT_DIR$/textscanner" />
           </set>
         </option>
-        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

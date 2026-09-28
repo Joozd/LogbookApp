@@ -21,22 +21,29 @@ package nl.joozd.logbookapp.ui.dialogs
 
 import androidx.core.text.HtmlCompat
 import kotlinx.coroutines.flow.map
-import nl.joozd.logbookapp.BuildConfig
 import nl.joozd.logbookapp.R
 
-class AboutDialog: LongTextDialog() {
+/**
+ * Displays information about the application, including its installed version and build number.
+ */
+class AboutDialog : LongTextDialog() {
 
     override val titleRes = R.string.about
-    override val textFlow = createFlowFromRaw(R.raw.about_joozdlog).map{ s ->
-        HtmlCompat.fromHtml(insertVersionAndBuildCodeIntoString(s), HtmlCompat.FROM_HTML_MODE_COMPACT)
+
+    override val textFlow = createFlowFromRaw(R.raw.about_joozdlog).map { text ->
+        val context = requireContext()
+        val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+
+        HtmlCompat.fromHtml(
+            text
+                .replace(VERSION_STRING, packageInfo.versionName.orEmpty())
+                .replace(BUILD_STRING, packageInfo.longVersionCode.toString()),
+            HtmlCompat.FROM_HTML_MODE_COMPACT,
+        )
     }
 
-    private fun insertVersionAndBuildCodeIntoString(s: String) =
-        s.replace(VERSION_STRING, BuildConfig.VERSION_NAME)
-            .replace(BUILD_STRING, BuildConfig.VERSION_CODE.toString())
-
-    companion object{
-        const val VERSION_STRING = "\$VERSION\$"
-        const val BUILD_STRING = "\$BUILD\$"
+    companion object {
+        private const val VERSION_STRING = $$"$VERSION$"
+        private const val BUILD_STRING = $$"$BUILD$"
     }
 }
